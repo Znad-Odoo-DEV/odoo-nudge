@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, useState } from "@odoo/owl";
+import { Component, useEffect, useRef, useState } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
 
@@ -46,6 +46,12 @@ export class NudgeMessage extends Component {
 
     setup() {
         this.feedback = useState({ asking: false, note: "" });
+        // A no asks why: the cursor waits in the box
+        const note = useRef("note");
+        useEffect(
+            (el) => el?.focus(),
+            () => [note.el]
+        );
     }
 
     get canRate() {

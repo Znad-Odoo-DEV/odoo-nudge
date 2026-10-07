@@ -48,7 +48,7 @@ class NudgeDocPage(models.Model):
     description = fields.Text(readonly=True)
     version = fields.Char(readonly=True)
     passage_ids = fields.One2many("nudge.doc.passage", "page_id", string="Passages")
-    passage_count = fields.Integer(string="Passages", compute="_compute_passage_count")
+    passage_count = fields.Integer(string="Number of Passages", compute="_compute_passage_count")
 
     _sql_constraints = [("path_unique", "unique(path)", "A page of the documentation is loaded once.")]
 
@@ -235,13 +235,16 @@ class NudgeDocPassage(models.Model):
         params = [query]
         app_filter = ""
         if app:
-            app_filter = "AND p.app = %s"
-            params.append(app)
+            # The pages of an app folder carry its name as their category;
+            # the pages right under it carry their own name as app
+            app_filter = "AND (p.app = %s OR g.category = %s)"
+            params += [app, app]
         # A wide pool, so that a passage about the app on the screen can come forward
         params.append(limit * 10)
         self.env.cr.execute(f"""
             SELECT p.id, ts_rank_cd(p.search_vector, q) AS rank, p.modules
-            FROM nudge_doc_passage p, websearch_to_tsquery('english', %s) q
+            FROM nudge_doc_passage p
+            JOIN nudge_doc_page g ON g.id = p.page_id, websearch_to_tsquery('english', %s) q
             WHERE p.search_vector @@ q {app_filter}
             ORDER BY rank DESC, p.id
             LIMIT %s

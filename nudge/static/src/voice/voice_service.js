@@ -89,6 +89,8 @@ export const nudgeVoiceService = {
             target: null,
         });
         let current = null;
+        // A language switched to by hand is kept, whatever is written next
+        let isLanguageSwitched = false;
 
         function pickEngine() {
             return chooseEngine({
@@ -213,6 +215,24 @@ export const nudgeVoiceService = {
             state.language = resolveLanguage(state.languageSetting, user.lang);
         }
 
+        /**
+         * Who writes Arabic is listened to in Arabic, even with an interface in
+         * another language; a language they chose stays theirs.
+         *
+         * @param {string} text what the person last wrote or said
+         */
+        function followText(text) {
+            if (
+                state.languageSetting !== LANGUAGE_AUTO ||
+                isLanguageSwitched ||
+                !/\p{L}/u.test(text || "")
+            ) {
+                return;
+            }
+            state.language =
+                detectLanguage(text) === "ar" ? "ar" : resolveLanguage(LANGUAGE_AUTO, user.lang);
+        }
+
         function setLanguage(setting) {
             state.languageSetting = setting || LANGUAGE_AUTO;
             applyLanguage();
@@ -226,6 +246,7 @@ export const nudgeVoiceService = {
         function switchLanguage() {
             const language = nextLanguage(state.language, user.lang);
             const listening = current;
+            isLanguageSwitched = true;
             const isAuto = language === languageOf(user.lang);
             setLanguage(isAuto ? LANGUAGE_AUTO : language);
             if (listening && !listening.isDropped) {
@@ -345,6 +366,7 @@ export const nudgeVoiceService = {
             dictate,
             setLanguage,
             switchLanguage,
+            followText,
             setSpeakAnswers,
             speak,
             stopSpeaking,

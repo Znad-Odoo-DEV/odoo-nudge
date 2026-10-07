@@ -57,6 +57,10 @@
                                  help="Let administrators read and change the setup of Odoo through the agent: users, groups and privileges, companies, menus, views, actions, scheduled actions, system parameters, as Settings and Technical show them. Only the group Settings. As the person, one confirmation per change, never a deletion; passwords, keys and tokens stay hidden, and SQL keeps away from those tables. Off by default.">
                             <field name="nudge_admin"/>
                         </setting>
+                        <setting invisible="not nudge_agent"
+                                 help="Let administrators build through Nudge, in Developer mode: automation rules, server actions, emails sent on an event, buttons, fields and changes to the screens. Only the group Settings. Nudge explains first and shows everything on the card, the code included; nothing is made before a yes; deletion only when asked for by name. Every step is in What Nudge Did. Off by default.">
+                            <field name="nudge_developer"/>
+                        </setting>
                     </block>
                     <block title="What Nudge Knows" name="nudge_knowledge_container">
                         <setting string="Odoo Documentation"

@@ -107,7 +107,7 @@ class TestActivity(NudgeCase, TransactionCase):
         conversation = self.env["nudge.conversation"].with_user(self.user_contacts)._chat_open(None)
         job = conversation._chat_prepare("How many contacts do we have?")
         self.assertIn("## Where the work is", "\n".join(job["system"]))
-        self.assertEqual(job["system"][-1], prompt.TALK_MODE, "The rules stay last")
+        self.assertTrue(job["system"][-1].startswith(prompt.TALK_MODE), "The rules stay last")
 
     def test_arabic_is_read_however_it_is_written(self):
         self.assertIn("رواتب", retrieval._words("الرواتب"))

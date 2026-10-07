@@ -159,11 +159,59 @@
                             t-on-click="openProviders">
                         Set up a provider
                     </button>
+                    <form class="o_nudge_quick" t-on-submit.prevent="quickSearch">
+                        <p class="o_nudge_empty_text">Meanwhile, search the screens, the settings and the Odoo documentation:</p>
+                        <div class="input-group">
+                            <input type="search" class="form-control o_nudge_quick_input" maxlength="80"
+                                   placeholder="Words to look for" t-model="quick.words"/>
+                            <button type="submit" class="btn btn-secondary o_nudge_quick_go" title="Search"
+                                    aria-label="Search" t-att-disabled="quick.words.trim().length &lt; 2">
+                                <i class="fa fa-search"/>
+                            </button>
+                        </div>
+                    </form>
+                    <div t-if="quick.isSearching" class="o_nudge_quick_busy">
+                        <i class="fa fa-circle-o-notch fa-spin"/>
+                    </div>
+                    <div t-elif="quick.results" class="o_nudge_quick_results">
+                        <t t-if="quick.results.menus.length">
+                            <p class="o_nudge_quick_head">Screens</p>
+                            <button t-foreach="quick.results.menus" t-as="menu" t-key="menu.id" type="button"
+                                    class="o_nudge_suggestion o_nudge_quick_menu" title="Show me the way"
+                                    t-on-click="() => this.quickMenu(menu)">
+                                <i class="fa fa-location-arrow"/> <t t-esc="menu.path"/>
+                            </button>
+                        </t>
+                        <t t-if="quick.results.settings.length">
+                            <p class="o_nudge_quick_head">Settings</p>
+                            <button t-foreach="quick.results.settings" t-as="setting" t-key="setting.app + setting.field"
+                                    type="button" class="o_nudge_suggestion o_nudge_quick_setting" title="Show me the way"
+                                    t-on-click="() => this.quickSetting(setting)">
+                                <i class="fa fa-cog"/> <strong t-esc="setting.label"/>
+                                <span class="o_nudge_quick_app" t-esc="' · ' + setting.app_label"/>
+                                <span t-if="setting.help" class="o_nudge_quick_text" t-esc="setting.help"/>
+                            </button>
+                        </t>
+                        <t t-if="quick.results.pages.length">
+                            <p class="o_nudge_quick_head">Odoo documentation</p>
+                            <a t-foreach="quick.results.pages" t-as="page" t-key="page.url" t-att-href="page.url"
+                               target="_blank" rel="noopener noreferrer" class="o_nudge_suggestion o_nudge_quick_page">
+                                <i class="fa fa-book"/> <strong t-esc="page.title"/>
+                                <span class="o_nudge_quick_text" t-esc="page.snippet"/>
+                            </a>
+                        </t>
+                        <p t-if="quickIsEmpty" class="o_nudge_empty_text o_nudge_quick_none">
+                            Nothing found. Try other words; the documentation is written in English.
+                        </p>
+                    </div>
                 </div>
                 <div t-elif="!state.messages.length" class="o_nudge_empty">
                     <NudgeFace/>
                     <p class="o_nudge_empty_title" t-esc="greeting"/>
-                    <p t-if="isAgent" class="o_nudge_empty_text o_nudge_agent_text">
+                    <p t-if="isDev" class="o_nudge_empty_text o_nudge_dev_text">
+                        Tell me what to build. I explain first; nothing is made before you say yes.
+                    </p>
+                    <p t-elif="isAgent" class="o_nudge_empty_text o_nudge_agent_text">
                         Tell me what to do. I ask you before I change anything.
                     </p>
                     <p t-if="isAgent and workingCount" class="o_nudge_empty_text o_nudge_working">
@@ -231,7 +279,7 @@
                                         t-on-click="() => this.nudge.chooseExplain('text')">
                                     <i class="fa fa-align-left"/> In writing
                                 </button>
-                                <button t-if="state.mode === 'agent'" type="button"
+                                <button t-if="state.mode !== 'talk'" type="button"
                                         class="btn btn-sm btn-light o_nudge_explain_do"
                                         t-on-click="() => this.nudge.chooseExplain('do')">
                                     <i class="fa fa-bolt"/> Do it for me
@@ -276,6 +324,13 @@
                             t-on-click="() => this.nudge.setMode('agent')">
                         Agent
                     </button>
+                    <button t-if="state.canDevelop" type="button" class="o_nudge_mode o_nudge_mode_dev"
+                            t-att-class="{ o_nudge_mode_on: state.mode === 'dev' }"
+                            t-att-aria-pressed="state.mode === 'dev' ? 'true' : 'false'"
+                            title="Nudge builds: automations, server actions, emails. It explains first; you confirm"
+                            t-on-click="() => this.nudge.setMode('dev')">
+                        Dev
+                    </button>
                 </div>
             </div>
 
@@ -302,7 +357,7 @@
             <form t-if="state.isConfigured and state.view === 'chat'" class="o_nudge_composer"
                   t-on-submit.prevent="onSubmit">
                 <input type="file" class="d-none" t-ref="file"
-                       accept=".pdf,.txt,.csv,.md,.json,.xml,image/png,image/jpeg,image/webp,image/gif"
+                       accept=".pdf,.txt,.csv,.xlsx,.md,.json,.xml,image/png,image/jpeg,image/webp,image/gif"
                        t-on-change="onFileChosen"/>
                 <button t-if="!state.isStreaming" type="button" class="o_nudge_attach"
                         title="Send a file with the question: a PDF, a text, an image"

@@ -386,6 +386,73 @@ function texts(selector, limit = LIMITS.notices) {
 }
 
 const DESCRIBERS = { form: describeForm, list: describeList, kanban: describeKanban };
+const MAX_IMPORT_COLUMNS = 40;
+const STUDIO_TABS = { o_web_studio_new: "new", o_web_studio_view: "view", o_web_studio_properties: "properties" };
+
+/**
+ * Studio's editor, when the person is inside it: which view they edit and
+ * which tab of the sidebar is open.
+ */
+function describeStudio() {
+    const editor = document.querySelector(".o_web_studio_editor, .o_web_studio_editor_manager");
+    if (!editor || !isShown(editor)) {
+        return null;
+    }
+    const result = { editing: true };
+    const renderer = document.querySelector(".o_web_studio_view_renderer");
+    const kind = renderer && [...renderer.classList].find((cls) => /^o_web_studio_(\w+)_view_editor$/.test(cls));
+    if (kind) {
+        result.view_type = kind.replace(/^o_web_studio_(\w+)_view_editor$/, "$1");
+    }
+    for (const [cls, tab] of Object.entries(STUDIO_TABS)) {
+        const element = document.querySelector(`.o_web_studio_sidebar .${cls}`);
+        if (element && (element.classList.contains("active") || element.getAttribute("aria-selected") === "true")) {
+            result.tab = tab;
+        }
+    }
+    return result;
+}
+
+/**
+ * The Import screen: what is imported into which model, how its columns are
+ * matched, and the errors it shows.
+ */
+function describeImport(current) {
+    const params = current.action?.params || {};
+    const result = { model: params.model || params.active_model || null };
+    const file = document.querySelector(".o_import_data_sidepanel .fst-italic.truncate");
+    if (file) {
+        const extension = file.nextElementSibling?.classList.contains("fst-italic")
+            ? file.nextElementSibling.textContent.trim()
+            : "";
+        result.file = truncate(file.textContent.trim() + extension, 120);
+    }
+    const columns = [];
+    for (const column of document.querySelectorAll(".o_import_grid_col")) {
+        if (columns.length >= MAX_IMPORT_COLUMNS) {
+            break;
+        }
+        const header =
+            column.querySelector(".o_import_grid_header, .fw-bold, strong, th")?.textContent?.trim() ||
+            column.firstElementChild?.textContent?.trim() ||
+            "";
+        const select = column.querySelector("select");
+        const field = select
+            ? select.selectedOptions[0]?.textContent?.trim() || ""
+            : column.querySelector("input")?.value || "";
+        if (header) {
+            columns.push({ header: truncate(header, 60), field: truncate(field, 80) });
+        }
+    }
+    if (columns.length) {
+        result.columns = columns;
+    }
+    const errors = texts(".o_import_report, .o_import_action .alert, .o_import_data_sidepanel .alert", 20);
+    if (errors.length) {
+        result.errors = errors;
+    }
+    return result;
+}
 
 function describeView(entry) {
     const { controller, type } = entry;
@@ -449,6 +516,16 @@ export function takeSnapshot({ action, views }) {
         if (current.view?.type) {
             snapshot.view_type = current.view.type;
         }
+        if (definition.tag === "import") {
+            snapshot.import = describeImport(current);
+            if (snapshot.import.model) {
+                snapshot.model = snapshot.import.model;
+            }
+        }
+    }
+    const studio = describeStudio();
+    if (studio) {
+        snapshot.studio = studio;
     }
 
     const mounted = views.filter(isMounted);
@@ -491,7 +568,11 @@ export function takeSnapshot({ action, views }) {
 export function summarize(snapshot) {
     const parts = [];
     const last = snapshot.breadcrumbs?.at(-1);
-    if (snapshot.record?.name) {
+    if (snapshot.import) {
+        parts.push(snapshot.import.file ? `Import: ${snapshot.import.file}` : "Import");
+    } else if (snapshot.studio) {
+        parts.push(snapshot.studio.view_type ? `Studio: ${snapshot.studio.view_type} view` : "Studio");
+    } else if (snapshot.record?.name) {
         parts.push(snapshot.record.name);
     } else if (last) {
         parts.push(last);

@@ -57,7 +57,7 @@ export async function streamRequest(url, fields, { signal, onEvent }) {
  * @param {Object|null} [params.snapshot] description of the screen, when shared
  * @param {boolean} [params.spoken] the message was said, not typed
  * @param {boolean} [params.readAloud] the answer will be read to the person
- * @param {string} [params.mode] "agent" when Nudge is asked to do the work
+ * @param {string} [params.mode] "agent" when Nudge is asked to do the work, "dev" to build
  * @param {boolean} [params.background] the work is done while the person
  *   does something else
  * @param {AbortSignal} [params.signal]
@@ -85,7 +85,7 @@ export function streamChat({
             snapshot: snapshot ? JSON.stringify(snapshot) : null,
             spoken: Boolean(spoken),
             read_aloud: Boolean(readAloud),
-            mode: mode === "agent" ? "agent" : null,
+            mode: ["agent", "dev"].includes(mode) ? mode : null,
             background: Boolean(background),
             explain: explain || null,
             file: file || null,

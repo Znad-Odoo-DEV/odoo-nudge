@@ -1,3 +1,5 @@
+import base64
+import base64
 import time
 from datetime import timedelta
 
@@ -13,7 +15,7 @@ from ..llm import attachments
 from ..llm import snapshot as screen
 from ..profile import retrieval
 from .ir_http import nudge_version
-from ..tools.base import MODE_AGENT, MODE_TALK
+from ..tools.base import MODE_AGENT, MODE_DEV, MODE_TALK
 
 # How the person wants the answer, as the model reads it
 REPORT_WORDS = {"sheet": "spreadsheet", "chat": "in the chat"}
@@ -48,6 +50,7 @@ SQL_PARAM = "nudge.sql"
 # Users, groups, companies, menus, views, actions, crons, parameters: for
 # administrators, when the administrator says so
 ADMIN_PARAM = "nudge.admin"
+DEVELOPER_PARAM = "nudge.developer"
 AGENT_GROUP = "nudge.group_nudge_agent"
 
 STATE_BY_STOP_REASON = {
@@ -247,6 +250,18 @@ class NudgeConversation(models.Model):
         return self._is_admin_allowed() and self.env.user.has_group("base.group_system")
 
     @api.model
+    def _is_developer_allowed(self):
+        """:return: whether administrators may build through Nudge: automation
+        rules, server actions, emails, buttons, fields"""
+        return self.env["ir.config_parameter"].sudo().get_param(DEVELOPER_PARAM) == "yes"
+
+    @api.model
+    def _can_develop(self):
+        """:return: whether the current user may use Developer mode"""
+        return (self._is_developer_allowed() and self._can_use_agent()
+                and self.env.user.has_group("base.group_system"))
+
+    @api.model
     def _is_sql_allowed(self):
         """:return: whether administrators may read the database with SQL"""
         return self.env["ir.config_parameter"].sudo().get_param(SQL_PARAM) == "yes"
@@ -259,7 +274,10 @@ class NudgeConversation(models.Model):
     def _chat_mode(self):
         """:return: the mode of the request being answered"""
         self.ensure_one()
-        return MODE_AGENT if self.sudo().run_id else MODE_TALK
+        run = self.sudo().run_id
+        if not run:
+            return MODE_TALK
+        return MODE_DEV if run.is_developer else MODE_AGENT
 
     def _chat_screen(self, raw):
         """:param raw: snapshot as sent by the browser, untrusted
@@ -303,7 +321,7 @@ class NudgeConversation(models.Model):
         :raise UserError: when the person may not spend more"""
         self.ensure_one()
         self.env["nudge.usage"]._check_budget()
-        job = self._chat_job(self._chat_provider(), MODE_AGENT, AGENT_MAX_ROUNDS)
+        job = self._chat_job(self._chat_provider(), self._chat_mode(), AGENT_MAX_ROUNDS)
         job["seconds"] = self.env["nudge.run"]._get_piece_seconds()
         return job
 
@@ -321,6 +339,8 @@ class NudgeConversation(models.Model):
             "adapter": provider._get_adapter(),
             "system": prompt.build_system_blocks(
                 self._chat_overview(), mode=mode, can_use_agent=self._can_use_agent(),
+                can_develop=self._can_develop(),
+                is_administrator=self.env.user.has_group("base.group_system"),
                 work="\n\n".join(block for block in (
                     self._chat_where_the_work_is(), self.env["nudge.source"]._get_text()) if block)),
             "tools": [tool.definition() for tool in tools.base.available(self.env, mode)],
@@ -360,10 +380,12 @@ class NudgeConversation(models.Model):
         if len(text) > MAX_MESSAGE_CHARS:
             raise UserError(_(
                 "This message is too long. The limit is %s characters.", MAX_MESSAGE_CHARS))
+        if mode == MODE_DEV and not self._can_develop():
+            raise UserError(_("Developer mode is not open to you. Ask your administrator."))
         if mode == MODE_AGENT and not self._can_use_agent():
             raise UserError(_("Agent mode is not open to you. Ask your administrator."))
-        mode = MODE_AGENT if mode == MODE_AGENT else MODE_TALK
-        background = bool(background) and mode == MODE_AGENT
+        mode = mode if mode in (MODE_AGENT, MODE_DEV) else MODE_TALK
+        background = bool(background) and mode != MODE_TALK
         self._chat_check_not_busy()
         self._chat_check_not_at_work()
         self.env["nudge.usage"]._check_budget()
@@ -416,7 +438,17 @@ class NudgeConversation(models.Model):
                 "res_model": "nudge.message",
                 "res_id": message.id,
             })
-        if mode == MODE_AGENT:
+        elif found and found["kind"] in ("sheet", "text"):
+            # A file to import is tried later, as it was sent
+            _name, raw, mimetype = attachment
+            message.attachment_id = self.env["ir.attachment"].sudo().create({
+                "name": found["name"],
+                "datas": base64.b64encode(raw),
+                "mimetype": mimetype or ("text/csv" if found["name"].lower().endswith(".csv") else "application/octet-stream"),
+                "res_model": "nudge.message",
+                "res_id": message.id,
+            })
+        if mode != MODE_TALK:
             conversation.run_id = self.env["nudge.run"].sudo().create({
                 "name": text[:TITLE_CHARS * 2].strip(),
                 "conversation_id": self.id,
@@ -425,6 +457,7 @@ class NudgeConversation(models.Model):
                 "company_id": self.env.company.id,
                 "model_name": provider.model_name,
                 "is_background": background,
+                "is_developer": mode == MODE_DEV,
             })
         if background:
             run = conversation.run_id
@@ -436,7 +469,7 @@ class NudgeConversation(models.Model):
                 "mode": mode,
                 "queued": run.id,
             }
-        rounds = AGENT_MAX_ROUNDS if mode == MODE_AGENT else MAX_ROUNDS
+        rounds = AGENT_MAX_ROUNDS if mode != MODE_TALK else MAX_ROUNDS
         return dict(
             self._chat_job(provider, mode, rounds),
             user_message_id=message.id,
@@ -478,7 +511,7 @@ class NudgeConversation(models.Model):
     def _chat_images_of(message):
         """:return: the image sent with ``message``, for the model to look at"""
         attachment = message.sudo().attachment_id if message.role == "user" else None
-        if not attachment or not attachment.datas:
+        if not attachment or not attachment.datas or not (attachment.mimetype or "").startswith("image/"):
             return []
         return [{"media_type": attachment.mimetype, "data": attachment.datas.decode("ascii")}]
 
@@ -539,8 +572,13 @@ class NudgeConversation(models.Model):
             "open_screen": _("Opened a screen"),
             "show_on_screen": _("Pointed at the screen"),
             "write_in_field": _("Typed in a field"),
+            "read_automations": _("Read what runs by itself"),
+            "check_python_code": _("Checked code"),
+            "try_automation": _("Tried it on a dummy record"),
+            "test_import": _("Tried the import"),
+            "read_view": _("Read a screen's definition"),
         }
-        text = words.get(call["name"], call["name"])
+        text = words.get(call["name"]) or (tool and tool.summary and _(tool.summary)) or call["name"]
         if "%s" in text:
             return text % (label or model or "?")
         return text
@@ -606,8 +644,9 @@ class NudgeConversation(models.Model):
             elif waiting and is_action:
                 result = tools.base.ToolResult(ONE_AT_A_TIME, is_error=True)
             else:
-                # A tool may tie what it makes to this conversation
-                env = self.with_context(nudge_conversation_id=self.id).env
+                # A tool may tie what it makes to this conversation, and
+                # what it may reach depends on the mode
+                env = self.with_context(nudge_conversation_id=self.id, nudge_mode=mode).env
                 result = tools.base.call(env, call["name"], call["input"], snapshot, mode)
             duration_ms = int((time.monotonic() - started) * 1000)
             entry = {"id": call["id"], "name": call["name"]}
@@ -891,12 +930,13 @@ class NudgeConversation(models.Model):
             state, result = "declined", tools.base.ToolResult(DECLINED)
         else:
             tool = tools.base.TOOLS.get(step.tool)
-            if not isinstance(tool, tools.base.Action) or not tool.is_available(self.env, MODE_AGENT):
+            mode = self._chat_mode()
+            if not isinstance(tool, tools.base.Action) or not tool.is_available(self.env, mode):
                 result = tools.base.ToolResult("This can no longer be done.", is_error=True)
             else:
                 # In the environment of the person, never in sudo
-                result = tools.base.guarded(
-                    self.env, step.tool, lambda: tool.execute(self.env, step))
+                env = self.with_context(nudge_conversation_id=self.id, nudge_mode=mode).env
+                result = tools.base.guarded(env, step.tool, lambda: tool.execute(env, step))
             state = "failed" if result.is_error else "done"
             if result.event:
                 events.append(result.event)
@@ -916,7 +956,7 @@ class NudgeConversation(models.Model):
                 "conversation_id": self.id,
                 "user_message_id": False,
                 "title": conversation.name,
-                "mode": MODE_AGENT,
+                "mode": self._chat_mode(),
                 "queued": run.id,
                 "first_events": first_events,
             }
@@ -924,6 +964,6 @@ class NudgeConversation(models.Model):
         conversation.write({"stream_started_at": fields.Datetime.now(), "run_id": run.id})
 
         # What bounds a run is the number of things done for it
-        job = self._chat_job(provider, MODE_AGENT, AGENT_MAX_ROUNDS)
+        job = self._chat_job(provider, self._chat_mode(), AGENT_MAX_ROUNDS)
         job["first_events"] = first_events
         return job

@@ -19,6 +19,41 @@ import { speechApi } from "./speech_api";
 export const MAX_SECONDS = 60;
 // A dictation goes on through silences: the browser is asked again
 const MAX_RESTARTS = 30;
+// A question ends by itself this long after the person stopped speaking
+export const END_OF_SPEECH_MS = 1500;
+// and is dropped, nothing sent, when nobody spoke for this long
+export const NO_SPEECH_MS = 8000;
+// Some browsers open the microphone and never say a word back: they are told
+// to stop when nothing came this long, and left when they do not stop either
+export const NOTHING_HEARD_MS = 10000;
+const STOP_GRACE_MS = 2000;
+// Speech is this much louder than the room, and never quieter than this
+const SPEECH_OVER_ROOM = 2.5;
+const MIN_SPEECH_LEVEL = 0.015;
+
+/**
+ * Tells, from how loud the microphone is, when a question is over.
+ *
+ * @returns {(level: number, now: number) => ""|"done"|"nobody"} "done" once
+ *   the person spoke and went quiet, "nobody" when no one spoke at all
+ */
+export function endOfSpeech() {
+    let startedAt = null;
+    let room = null;
+    let lastSpokenAt = null;
+    return (level, now) => {
+        startedAt ??= now;
+        // The room is the quietest it was, rising slowly with a noisier one
+        room = room === null ? level : Math.min(level, room + 0.0005);
+        if (level > Math.max(MIN_SPEECH_LEVEL, room * SPEECH_OVER_ROOM)) {
+            lastSpokenAt = now;
+        }
+        if (lastSpokenAt !== null) {
+            return now - lastSpokenAt >= END_OF_SPEECH_MS ? "done" : "";
+        }
+        return now - startedAt >= NO_SPEECH_MS ? "nobody" : "";
+    };
+}
 
 const BROWSER_ERRORS = {
     "no-speech": "silence",
@@ -64,11 +99,18 @@ export class BrowserEngine {
         const Recognition = speechApi.getRecognition();
         const recognition = new Recognition();
         let error = "";
+        // Words shown as heard, that the browser has not settled yet
+        let pending = "";
         recognition.lang = language.tag;
         recognition.interimResults = true;
         recognition.continuous = Boolean(continuous);
         recognition.maxAlternatives = 1;
+        browser.clearTimeout(this.watchdog);
+        if (!continuous) {
+            this.watchdog = browser.setTimeout(() => this.giveUp(recognition), NOTHING_HEARD_MS);
+        }
         recognition.onresult = (event) => {
+            browser.clearTimeout(this.watchdog);
             let interim = "";
             for (let index = event.resultIndex; index < event.results.length; index++) {
                 const result = event.results[index];
@@ -80,6 +122,7 @@ export class BrowserEngine {
                     onFinal(text);
                 }
             }
+            pending = interim;
             onInterim(interim);
         };
         recognition.onerror = (event) => {
@@ -89,7 +132,16 @@ export class BrowserEngine {
             if (recognition !== this.recognition) {
                 return;
             }
+            browser.clearTimeout(this.watchdog);
             this.recognition = null;
+            // Browsers sometimes end without settling the last words they
+            // showed: what the person saw is what they said
+            if (pending) {
+                this.heard = true;
+                onFinal(pending);
+                onInterim("");
+                pending = "";
+            }
             // Silence ends what the browser listens to, not a dictation
             const goesOn =
                 continuous &&
@@ -99,8 +151,11 @@ export class BrowserEngine {
             if (goesOn) {
                 this.restarts++;
                 this.listen();
-            } else {
+            } else if (continuous) {
                 this.finish(this.heard && error === "silence" ? "" : error);
+            } else {
+                // A question that ends with no word is told, never dropped quietly
+                this.finish(this.heard ? "" : error || "silence");
             }
         };
         this.recognition = recognition;
@@ -112,7 +167,24 @@ export class BrowserEngine {
         }
     }
 
+    /** Nothing came: the browser is told to stop, and left if it does not */
+    giveUp(recognition) {
+        if (recognition !== this.recognition) {
+            return;
+        }
+        this.isStopping = true;
+        recognition.stop();
+        this.watchdog = browser.setTimeout(() => {
+            if (recognition === this.recognition) {
+                this.recognition = null;
+                recognition.abort();
+                this.finish(this.heard ? "" : "silence");
+            }
+        }, STOP_GRACE_MS);
+    }
+
     finish(error) {
+        browser.clearTimeout(this.watchdog);
         if (!this.isOver) {
             this.isOver = true;
             this.options.onEnd(error);
@@ -182,6 +254,7 @@ export class ServerEngine {
         this.isOver = false;
         this.isAborted = false;
         this.isStopping = false;
+        this.isNobody = false;
         let stream;
         try {
             stream = await speechApi.openMicrophone();
@@ -212,6 +285,8 @@ export class ServerEngine {
         };
         recorder.onstop = () => {
             browser.clearTimeout(this.timer);
+            this.unwatch?.();
+            this.unwatch = null;
             release();
             this.recorder = null;
             this.send(new Blob(chunks, { type: recorder.mimeType || chunks[0]?.type || "" }));
@@ -219,6 +294,18 @@ export class ServerEngine {
         this.recorder = recorder;
         recorder.start();
         this.timer = browser.setTimeout(() => this.stop(), MAX_SECONDS * 1000);
+        if (!options.continuous) {
+            // A question is over when the person goes quiet, as with the
+            // recognition of a browser
+            const decide = endOfSpeech();
+            this.unwatch = speechApi.watchLevel(stream, (level) => {
+                const verdict = decide(level, Date.now());
+                if (verdict) {
+                    this.isNobody = verdict === "nobody";
+                    this.stop();
+                }
+            });
+        }
         options.onPhase("listening");
     }
 
@@ -228,7 +315,7 @@ export class ServerEngine {
             this.finish("");
             return;
         }
-        if (!recording.size) {
+        if (!recording.size || this.isNobody) {
             this.finish("silence");
             return;
         }
