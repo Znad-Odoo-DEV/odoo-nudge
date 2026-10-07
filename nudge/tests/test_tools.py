@@ -326,6 +326,38 @@ class TestLoop(NudgeCase, TransactionCase):
         job = conversation._chat_prepare(text, snapshot=snapshot)
         return conversation, list(loop.run(job, conversation._chat_record))
 
+    def test_a_round_needs_the_time_for_it(self):
+        now = 1000.0
+        self.assertTrue(loop.time_for_a_round(None, 500.0, now), "No deadline, no limit")
+        self.assertTrue(loop.time_for_a_round(now + 100, 40.0, now), "32 seconds needed, 100 left")
+        self.assertFalse(loop.time_for_a_round(now + 30, 40.0, now), "32 seconds needed, 30 left")
+        self.assertTrue(loop.time_for_a_round(now + 20, 0.0, now), "15 seconds at least, 20 left")
+        self.assertFalse(loop.time_for_a_round(now + 10, 0.0, now), "15 seconds at least, 10 left")
+
+    def test_out_of_time_is_said_and_the_work_goes_on(self):
+        # The first round reads something; the second never starts: the
+        # time left would not see it through
+        self.patch(loop, "MIN_ROUND_SECONDS", 10 ** 6)
+        adapter = self.use_adapter(script=[
+            answer_with(call("search_odoo_documentation", {"query": "discounts"}), text="Let me read."),
+            answer_with(text="Discounts are set on the pricelist."),
+        ])
+        conversation, events = self.converse(adapter, text="How do discounts work?")
+        self.assertEqual(len(adapter.calls), 1, "No second call with no time for it")
+        self.assertEqual(events[-1]["type"], "done")
+        self.assertEqual(events[-1]["state"], "truncated")
+        self.assertIn("ran out of time", events[-1]["message"])
+        self.assertEqual(conversation.message_ids[-1].state, "truncated")
+        self.assertFalse(conversation.stream_started_at)
+
+        # Asked to go on, the model is given what was read
+        self.patch(loop, "MIN_ROUND_SECONDS", 15)
+        conversation, events = self.converse(adapter, text="Go on", conversation_id=conversation.id)
+        self.assertEqual(events[-1]["state"], "complete")
+        turns = adapter.calls[1]["turns"]
+        self.assertTrue(any(turn["role"] == "tool" for turn in turns), "The result read before is there")
+        self.assertEqual(turns[-1]["text"], "Go on")
+
     def test_pointing_ends_the_answer(self):
         adapter = self.use_adapter(script=[
             answer_with(guide(("field", "email", "Type the address here.")), text="Look: "),

@@ -22,6 +22,9 @@ CONNECT_TIMEOUT = 10
 # answer "overloaded" many times a day.
 RETRY_STATUSES = frozenset({500, 502, 503, 504, 529})
 RETRY_DELAYS = (1.0, 3.0)
+# What the provider is asked to spend on reasoning, in the words of the
+# OpenAI API, which Gemini and OpenAI read
+REASONING_EFFORT = {"low": "low", "medium": "medium", "high": "high", "xhigh": "high", "max": "high"}
 
 FINISH_REASONS = {
     "stop": base.STOP_END,
@@ -184,6 +187,8 @@ class OpenAICompatAdapter(base.BaseAdapter):
                 payload["tool_choice"] = "required"
         if self.config.max_output_tokens > 0:
             payload["max_tokens"] = self.config.max_output_tokens
+        if self.config.effort in REASONING_EFFORT:
+            payload["reasoning_effort"] = REASONING_EFFORT[self.config.effort]
         return payload
 
     # ------------------------------------------------------------------
@@ -213,7 +218,14 @@ class OpenAICompatAdapter(base.BaseAdapter):
         request again cannot produce an answer twice."""
         def send():
             read_timeout = base.remaining(deadline, self.config.timeout)
+            self._read_timeout = read_timeout
             response = self._post(payload, stream=True, read_timeout=read_timeout)
+            if response.status_code == 400 and "reasoning_effort" in payload:
+                # A model without reasoning, or a server that does not
+                # know the word: once more without it
+                response.close()
+                payload.pop("reasoning_effort")
+                return send()
             if response.status_code == 400 and "tool_choice" in payload:
                 # Not every server knows ``tool_choice``: once more without,
                 # the model is then only asked
@@ -238,6 +250,12 @@ class OpenAICompatAdapter(base.BaseAdapter):
                 yield base.error_event(_error_code(response.status_code), _error_detail(response))
                 return
             yield from self._consume(response, deadline)
+        except requests.exceptions.ReadTimeout as exc:
+            # Reached, and silent: the time given was not enough
+            waited = int(getattr(self, "_read_timeout", 0) or 0)
+            _logger.info(
+                "Nudge: request to %s failed: %s", self.config.base_url, self._redact(exc))
+            yield base.error_event(base.ERROR_TIMEOUT, f"no answer within {waited}s" if waited else "ReadTimeout")
         except requests.exceptions.RequestException as exc:
             _logger.info(
                 "Nudge: request to %s failed: %s", self.config.base_url, self._redact(exc))

@@ -47,7 +47,7 @@
                         <group string="Model" name="model">
                             <field name="model_name" placeholder="Pick one with Fetch Models"/>
                             <field name="max_output_tokens"/>
-                            <field name="effort" invisible="kind != 'anthropic'"/>
+                            <field name="effort"/>
                             <field name="refusal_fallback" invisible="kind != 'anthropic'"/>
                             <field name="is_configured"/>
                         </group>

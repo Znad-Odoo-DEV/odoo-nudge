@@ -54,8 +54,11 @@ class NudgeProvider(models.Model):
             ("xhigh", "Extra high"),
             ("max", "Maximum"),
         ],
-        help="How much reasoning the model spends on an answer. Lower is faster and cheaper. "
-             "Only sent to models that support it.",
+        help="How much reasoning the model spends on an answer. Lower is faster and cheaper: a "
+             "free tier that takes long per call answers in time with Low. Sent to Anthropic "
+             "Claude as its effort, and to OpenAI-compatible providers (Google Gemini, OpenAI) "
+             "as reasoning_effort, low, medium or high; a provider that refuses it is asked "
+             "again without it.",
     )
     refusal_fallback = fields.Boolean(
         string="Fallback on Refusal", default=True,

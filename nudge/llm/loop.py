@@ -18,6 +18,18 @@ _logger = logging.getLogger(__name__)
 # this many rounds, or until something is shown on the screen
 FORCED_ROUNDS = 2
 SHOWN_EVENTS = ("guidance", "navigate")
+# A round is not started when the time left would not see it through: this
+# long at least, or most of what the round before took
+MIN_ROUND_SECONDS = 15
+
+
+def time_for_a_round(deadline, last_duration, now=None):
+    """:param last_duration: seconds the round before took
+    :return: whether a round may be started before the deadline"""
+    if deadline is None:
+        return True
+    needed = max(MIN_ROUND_SECONDS, 0.8 * last_duration)
+    return (time.monotonic() if now is None else now) + needed < deadline
 
 
 def run(job, record):
@@ -45,7 +57,18 @@ def run(job, record):
     turns = job["turns"]
     said = False
     forced = job.get("tool_choice") if job["tools"] else None
+    last_duration = 0.0
     for round_number in range(1, job["rounds"] + 1):
+        if round_number > 1 and not time_for_a_round(deadline, last_duration):
+            # Out of time: what was read is kept, and the person is told
+            # rather than left waiting for a call that would be cut
+            step = record({
+                "text": "", "tool_calls": [], "said_before": said, "duration_ms": 0,
+                "stop": base.stop_event(base.STOP_DEADLINE), "last_round": True,
+            })
+            yield from step.get("screen_events") or []
+            yield step["event"]
+            return
         round_started = time.monotonic()
         outcome = {"text": "", "tool_calls": [], "said_before": said}
         # The last round is always free: the model must be able to answer
@@ -76,7 +99,8 @@ def run(job, record):
             outcome["error"] = base.error_event(base.ERROR_UNKNOWN)
         if "stop" not in outcome and "error" not in outcome:
             outcome["error"] = base.error_event(base.ERROR_UNKNOWN, "stream ended without a result")
-        outcome["duration_ms"] = int((time.monotonic() - round_started) * 1000)
+        last_duration = time.monotonic() - round_started
+        outcome["duration_ms"] = int(last_duration * 1000)
         outcome["last_round"] = round_number == job["rounds"] or base.expired(deadline)
         said = said or bool(outcome["text"])
 

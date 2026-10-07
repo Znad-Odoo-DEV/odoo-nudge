@@ -412,6 +412,11 @@ class TestDeveloper(NudgeCase, TransactionCase):
         self.assertIn("Job Position: None → 'Tried'", result.content)
         self.assertEqual(self.counts(), before)
         self.assertTrue(self.run_tool("try_automation", {}).is_error)
+        # A rule is checked as prepare_automation would check it
+        invalid = self.run_tool("try_automation", {"rule": {"name": "Half a rule", "model": "res.partner"}})
+        self.assertTrue(invalid.is_error)
+        self.assertIn("Invalid rule", invalid.content)
+        self.assertIn("trigger", invalid.content)
         self.assertTrue(self.run_tool("try_automation", {"action_id": action.id, "cron_id": 1}).is_error)
 
     # ------------------------------------------------------------- scheduled actions

@@ -15,7 +15,7 @@ from odoo.tools.safe_eval import test_python_expr
 
 from odoo import fields as odoo_fields
 
-from . import base
+from . import base, schema
 from .records import has_field_access  # noqa: E402
 from .actions import VALUES_SCHEMA, read_moment, read_value, read_values, to_write
 from .records import (
@@ -1125,7 +1125,10 @@ class TryAutomation(Building):
         "type": "object",
         "additionalProperties": False,
         "properties": {
-            "rule": PrepareAutomation.input_schema,
+            "rule": {
+                "type": "object",
+                "description": "A rule not made yet: exactly what prepare_automation takes.",
+            },
             "rule_id": {"type": "integer", "minimum": 1},
             "action_id": {"type": "integer", "minimum": 1},
             "cron_id": {"type": "integer", "minimum": 1},
@@ -1139,6 +1142,13 @@ class TryAutomation(Building):
         given = [key for key in ("rule", "rule_id", "action_id", "cron_id") if arguments.get(key)]
         if len(given) != 1:
             raise Refused("Give one of rule, rule_id, action_id or cron_id.")
+        if given[0] == "rule":
+            # Checked here rather than by the schema of this tool, which
+            # would carry the whole of prepare_automation's a second time
+            try:
+                schema.validate(arguments["rule"], PrepareAutomation.input_schema, "rule")
+            except schema.SchemaError as error:
+                raise Refused(f"Invalid rule. {error}") from None
         return given[0]
 
     @staticmethod
