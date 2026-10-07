@@ -24,6 +24,14 @@ MAX_COLUMNS = 10
 MAX_TEMPLATE_CHARS = 8000
 MAX_PREVIEW_CHARS = 900
 FORBIDDEN_TAGS = ("script", "iframe", "object", "embed")
+# What an expression of a template made here may not reach: the environment,
+# other rights, writing, the secrets of the database
+FORBIDDEN_EXPRESSION = re.compile(
+    r"\benv\b|\bsudo\b|with_user|with_context|with_company|__|\brequest\b|\beval\b|\bexec\b"
+    r"|\.(write|unlink|create|copy|search|search_read|read_group|browse|execute|_[a-z])\b"
+    r"|ir\.config_parameter|password|secret|token|api_key",
+    re.IGNORECASE,
+)
 FIELD_SCHEMA = {"type": "string", "pattern": PATH_PATTERN}
 
 
@@ -95,6 +103,11 @@ def check_template(key, arch):
     for element in root.iter():
         if isinstance(element.tag, str) and element.tag.lower() in FORBIDDEN_TAGS:
             raise Refused(f"<{element.tag}> has no place in a report.")
+        for name, value in element.attrib.items():
+            if name.startswith("t-") and name not in ("t-name", "t-call", "t-as") and FORBIDDEN_EXPRESSION.search(value):
+                raise Refused(
+                    f"The expression {value!r} reaches beyond the records printed: a report made here "
+                    "reads the fields of o and of its lines, nothing else.")
     if root.tag != "t":
         wrapper = etree.Element("t")
         wrapper.append(root)

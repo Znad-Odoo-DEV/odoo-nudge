@@ -120,3 +120,20 @@ class TestReports(NudgeCase, TransactionCase):
         found = tools.base.call(self.env(user=self.user_a), "search_odoo_documentation", {"query": "approval step", "app": "studio"}, None, "talk")
         self.assertFalse(found.is_error, found.content)
         self.assertIn("approval_rules", found.content)
+
+    def test_a_template_reads_its_records_only(self):
+        for reach in (
+            "o.env['ir.config_parameter'].sudo().get_param('database.secret')",
+            "o.sudo().name",
+            "o.write({'name': 'x'})",
+            "o.__class__",
+            "o.with_user(1).name",
+            "o.search([])",
+            "request.session",
+        ):
+            template = (
+                '<t t-call="web.html_container"><t t-foreach="docs" t-as="o">'
+                f'<div class="page"><span t-out="{reach}"/></div></t></t>')
+            refused = self.run_tool("prepare_report", {"model": "res.partner", "name": "Reach", "template": template})
+            self.assertTrue(refused.is_error, reach)
+            self.assertIn("reaches beyond", refused.content)
