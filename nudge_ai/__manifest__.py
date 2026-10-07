@@ -1,6 +1,6 @@
 {
     "name": "Nudge: Odoo AI",
-    "version": "19.0.1.0.3",
+    "version": "19.0.1.0.4",
     "category": "Productivity",
     "summary": "Nudge reads the sources and the agents of the AI app, and uses its keys",
     "description": """
@@ -20,6 +20,7 @@ Installs itself where both Nudge and the AI app are installed.
 """,
     "author": "Ibrahim Elzenad",
     "license": "OPL-1",
+    "images": ["static/description/banner.png"],
     "depends": ["nudge", "ai"],
     "data": [
         "views/nudge_provider_views.xml",
