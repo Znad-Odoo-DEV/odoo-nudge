@@ -30,12 +30,20 @@ const DO_IT = new RegExp(
     "i"
 );
 
+// Or said in a sentence: "make the automation yourself", "اعمل ال automation انت"
+const DO_IT_YOURSELF = new RegExp(
+    "(\\b(you do it|do it yourself|do it for me|make it yourself|build it yourself)\\b" +
+        "|^\\s*(اعمل|نف[ّ]?ذ|سو[ّ]?ي|طب[ّ]?ق|ابني|ضيف|أضف|اضف)(ها|ه|هم)?\\s(.*\\s)?(انت|إنت|أنت|عني|عنّي|بنفسك|الك)\\s*[.!؟?]*\\s*$)",
+    "i"
+);
+
 /**
  * @param {string} text
  * @returns {boolean} whether the message asks Nudge to do the work
  */
 export function asksToDoIt(text) {
-    return DO_IT.test(String(text || ""));
+    const said = String(text || "");
+    return DO_IT.test(said) || DO_IT_YOURSELF.test(said);
 }
 
 // A comparison or a report: the person is asked whether they want it in the
@@ -1123,7 +1131,8 @@ function isReadable(file) {
             } else if (!isSharing()) {
                 // Nothing to point at without the screen: in writing, or the work
                 explain = state.mode !== MODE_TALK ? null : EXPLAIN_TEXT;
-            } else if (explain === EXPLAIN_DO) {
+            } else if (explain === EXPLAIN_DO || (state.mode !== MODE_TALK && asksToDoIt(text))) {
+                // An order is the work, not a question of how
                 explain = null;
             } else if (!EXPLAIN_CHOICES.includes(explain)) {
                 // In Agent mode a preference does not turn an order into an

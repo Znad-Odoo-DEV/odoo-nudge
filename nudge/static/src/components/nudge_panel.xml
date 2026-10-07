@@ -279,7 +279,7 @@
                                         t-on-click="() => this.nudge.chooseExplain('text')">
                                     <i class="fa fa-align-left"/> In writing
                                 </button>
-                                <button t-if="state.mode === 'agent'" type="button"
+                                <button t-if="state.mode !== 'talk'" type="button"
                                         class="btn btn-sm btn-light o_nudge_explain_do"
                                         t-on-click="() => this.nudge.chooseExplain('do')">
                                     <i class="fa fa-bolt"/> Do it for me

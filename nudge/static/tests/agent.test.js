@@ -79,6 +79,9 @@ test("do it is understood, said or written", () => {
         "Nudge، اعملها",
         "سويها",
         "اعمله هلأ",
+        "اعمل ال Automation انت",
+        "طبقها عني",
+        "make the rule yourself, do it for me",
     ]) {
         expect(asksToDoIt(text)).toBe(true, { message: text });
     }
@@ -616,4 +619,24 @@ test("an answer is rated, and a no says why", async () => {
     expect.verifySteps([`rate ${id} down ""`, `rate ${id} down "In our own payroll module"`]);
     expect(".o_nudge_rate_done").toHaveCount(1);
     expect(nudge.state.messages[1].feedback).toBe("down");
+});
+
+test("an order in Developer mode is the work, and the choice offers it", async () => {
+    const { asked, nudge } = await start({
+        config: { can_develop: true },
+        settings: { nudge_explain: "ask" },
+        answer: answered({ type: "delta", text: "Here is the card." }),
+    });
+    nudge.setMode("dev");
+    nudge.open();
+    await animationFrame();
+    await nudge.send("اعمل ال Automation انت");
+    await animationFrame();
+    expect(".o_nudge_ask").toHaveCount(0, { message: "Not asked how: it is the work" });
+    expect(asked.messages.at(-1).mode).toBe("dev", { message: "Developer mode reaches the server" });
+    expect("explain" in asked.messages.at(-1)).toBe(false);
+
+    await nudge.send("How is a rule made here?");
+    await animationFrame();
+    expect(".o_nudge_explain_do").toHaveCount(1, { message: "Do it for me is offered in Developer mode too" });
 });
