@@ -14,6 +14,13 @@ dictate, and, if your administrator allows it, does the work for you.
 - Nudge answers in the language you write in, whatever the language of your screen.
 - **+** starts a new conversation; the clock icon shows your earlier ones.
 
+## Before a provider is set up
+
+Nudge is useful from the first minute. Until an administrator sets an AI provider up, the panel
+offers a search: type a few words and it lists the screens you can open, the settings of your
+apps (if you are an administrator) and the pages of the official Odoo documentation. Click a
+screen or a setting and the pointer takes you there. Nothing is sent anywhere.
+
 ## Ask about what you see
 
 When the eye above the message box is open, Nudge sees the screen you are on: the record, its
@@ -83,6 +90,19 @@ company?" (or trading, shipping, manufacturing, retail, services, real estate) a
 such a business runs in Odoo against what is installed, in use and custom here, and proposes what is
 missing with the page of the official documentation for each. What it has no reference for, it
 says it does not know.
+
+## Set Odoo up for your business
+
+Ask how to set something up, for any app and any business: "I have a store on every project:
+how do I move materials between them, issue them to the project, and receive them?", "What is
+the best setup of payroll and attendance for us?". Nudge first asks what it needs to know about
+your business, then reads how this database is set: the settings of the app (their values, for
+an administrator), what its Configuration menu holds (warehouses, routes, operation types,
+journals...) and your custom modules (their code too, for an administrator). It answers with a
+setup for this database, built on what you already have, with the pages of the official
+documentation. It only suggests: ask it to **apply** it and it changes the settings, one
+confirmation at a time (an administrator, with the setup open to administrators); ask it to
+**show** you and its pointer takes you to each setting on the screen.
 
 ## Nudge learns from your corrections
 

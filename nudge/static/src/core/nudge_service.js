@@ -20,6 +20,7 @@ const HINT_SOURCES = ["buttons", "tabs", "fields", "columns"];
 
 export const MODE_TALK = "talk";
 export const MODE_AGENT = "agent";
+export const MODE_DEV = "dev";
 
 // Said or written to Nudge, it means: do the work
 const DO_IT = new RegExp(
@@ -91,6 +92,14 @@ export const nudgeService = {
         const config = session.nudge;
         const settings = user.settings || {};
         const canUseAgent = Boolean(config?.can_use_agent);
+        const canDevelop = canUseAgent && Boolean(config?.can_develop);
+        // The mode asked for, among those open to this person
+        const allowedMode = (mode) => {
+            if (mode === MODE_DEV && canDevelop) {
+                return MODE_DEV;
+            }
+            return canUseAgent && [MODE_AGENT, MODE_DEV].includes(mode) ? MODE_AGENT : MODE_TALK;
+        };
         const state = reactive({
             isEnabled: Boolean(config),
             // The server was updated after this page was loaded
@@ -118,7 +127,9 @@ export const nudgeService = {
             screenHasView: false,
             // Talk: Nudge explains and shows. Agent: Nudge does the work.
             canUseAgent,
-            mode: canUseAgent && settings.nudge_mode === MODE_AGENT ? MODE_AGENT : MODE_TALK,
+            // Developer: Nudge builds, for an administrator the switch is on for
+            canDevelop,
+            mode: allowedMode(settings.nudge_mode),
             // How the person wants the answer to a question asked with their
             // screen: asked each time, on the screen, or in writing
             explain: ["ask", "screen", "text"].includes(settings.nudge_explain)
@@ -235,7 +246,7 @@ function isReadable(file) {
         }
 
         function setMode(mode) {
-            state.mode = state.canUseAgent && mode === MODE_AGENT ? MODE_AGENT : MODE_TALK;
+            state.mode = allowedMode(mode);
             state.focusRequest++;
             return saveSetting("nudge_mode", state.mode);
         }
@@ -276,6 +287,9 @@ function isReadable(file) {
                 return false;
             }
             const typed = state.draft.trim();
+            voice.followText(
+                typed || state.messages.findLast((message) => message.role === "user")?.content
+            );
             let heard = "";
             const show = (interim) => {
                 state.draft = [typed, heard, interim].filter(Boolean).join(" ");
@@ -675,6 +689,39 @@ function isReadable(file) {
          * Point at the screen. The panel gets out of the way: it would hide
          * what is pointed at.
          */
+        /**
+         * Before a provider is set up: what the menus, the settings and the
+         * documentation hold for the words typed. No AI is asked.
+         *
+         * @param {string} words
+         * @returns {Promise<{ menus: Object[], settings: Object[], pages: Object[] }>}
+         */
+        async function quickFind(words) {
+            try {
+                return await orm.call("nudge.quick", "find", [words]);
+            } catch {
+                return { menus: [], settings: [], pages: [] };
+            }
+        }
+
+        /**
+         * The pointer shows the way to a menu or a setting found by quickFind.
+         *
+         * @param {"menu"|"setting"} kind
+         * @param {number|{ app: string, field: string }} ref
+         * @returns {Promise<boolean>} whether there is a way to show
+         */
+        async function quickGuide(kind, ref) {
+            let steps = [];
+            try {
+                steps = await orm.call("nudge.quick", "guide", [kind, ref]);
+            } catch {
+                steps = [];
+            }
+            showGuidance(steps);
+            return Boolean(steps?.length);
+        }
+
         function showGuidance(steps) {
             if (steps?.length) {
                 close();
@@ -1027,7 +1074,7 @@ function isReadable(file) {
             voice.stopSpeaking();
             // A question still waiting for its how is replaced by this one
             cancelExplain({ keep: false });
-            if (state.canUseAgent && state.mode !== MODE_AGENT && asksToDoIt(text)) {
+            if (state.canUseAgent && state.mode === MODE_TALK && asksToDoIt(text)) {
                 setMode(MODE_AGENT);
             }
             // What waited for a yes or a no is left: the person moved on
@@ -1075,14 +1122,14 @@ function isReadable(file) {
                 explain = null;
             } else if (!isSharing()) {
                 // Nothing to point at without the screen: in writing, or the work
-                explain = state.mode === MODE_AGENT ? null : EXPLAIN_TEXT;
+                explain = state.mode !== MODE_TALK ? null : EXPLAIN_TEXT;
             } else if (explain === EXPLAIN_DO) {
                 explain = null;
             } else if (!EXPLAIN_CHOICES.includes(explain)) {
                 // In Agent mode a preference does not turn an order into an
                 // explanation: either they are asked, or it is the work
                 explain =
-                    state.mode === MODE_AGENT && state.explain !== EXPLAIN_ASK ? null : state.explain;
+                    state.mode !== MODE_TALK && state.explain !== EXPLAIN_ASK ? null : state.explain;
             }
             if (explain === EXPLAIN_ASK) {
                 // Theirs to say first: on the screen, or in writing
@@ -1112,7 +1159,7 @@ function isReadable(file) {
                     spoken,
                     readAloud: voice.state.isAllowed && voice.state.speakAnswers,
                     mode: state.mode,
-                    background: background && state.mode === MODE_AGENT,
+                    background: background && state.mode !== MODE_TALK,
                     explain: explain || null,
                     file,
                     report,
@@ -1163,7 +1210,7 @@ function isReadable(file) {
             }
             state.asking = null;
             state.messages = state.messages.filter((message) => message.id !== asking.messageId);
-            if (how === "sheet" && state.mode !== MODE_AGENT) {
+            if (how === "sheet" && state.mode === MODE_TALK) {
                 // The figures are read and the spreadsheet made by the agent
                 setMode(MODE_AGENT);
             }
@@ -1255,6 +1302,8 @@ function isReadable(file) {
             setHotkey,
             setDictationHotkey,
             showGuidance,
+            quickFind,
+            quickGuide,
             chooseGuidance,
             setExplain,
             chooseExplain,

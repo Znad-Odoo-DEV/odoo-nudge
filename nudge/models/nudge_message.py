@@ -22,7 +22,7 @@ class NudgeMessage(models.Model):
     is_spoken = fields.Boolean(
         string="Spoken", help="The message was said, and turned into text by a machine.")
     mode = fields.Selection(
-        [("talk", "Talk"), ("agent", "Agent")],
+        [("talk", "Talk"), ("agent", "Agent"), ("dev", "Developer")],
         help="Talk: Nudge explains and shows. Agent: Nudge does the work.")
     context_text = fields.Text(
         groups="base.group_system",

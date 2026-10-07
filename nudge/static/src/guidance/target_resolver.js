@@ -166,6 +166,11 @@ const RESOLVERS = {
     menu(name, view, root, target) {
         return resolveMenu(target);
     },
+    // An app in the side list of the Settings screen
+    settings_app(name) {
+        const element = firstShown(document, `.settings_tab .tab[data-key="${CSS.escape(name)}"]`);
+        return element ? { element } : null;
+    },
     control(name) {
         const selector = CONTROLS[name];
         const element = selector && firstShown(document, selector);

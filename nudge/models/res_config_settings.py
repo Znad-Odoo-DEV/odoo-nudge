@@ -1,7 +1,7 @@
 from odoo import fields, models
 
 from .nudge_conversation import (
-    ADMIN_PARAM, AGENT_PARAM, PYTHON_PARAM, SCREEN_SHARING_PARAM, SQL_PARAM,
+    ADMIN_PARAM, AGENT_PARAM, DEVELOPER_PARAM, PYTHON_PARAM, SCREEN_SHARING_PARAM, SQL_PARAM,
 )
 from .nudge_provider import DEFAULT_PROVIDER_PARAM
 from .nudge_voice import ENGINE_AUTO, ENGINE_BROWSER, ENGINE_PROVIDER, VOICE_ENGINE_PARAM, VOICE_PARAM
@@ -77,6 +77,14 @@ class ResConfigSettings(models.TransientModel):
              "per change, never a deletion; passwords, keys and tokens stay hidden. Off by "
              "default.",
     )
+    nudge_developer = fields.Boolean(
+        string="Nudge for Developers",
+        help="Let administrators (the group Settings) build through Nudge, in Developer mode: "
+             "automation rules, server actions, emails sent on an event, buttons, fields and "
+             "changes to the screens. Nudge explains first and shows everything on the card, "
+             "the code included; nothing is made before a yes; deletion only when asked for by "
+             "name. Every step is in What Nudge Did. Off by default.",
+    )
     # 0 is no limit
     nudge_budget_user_tokens = fields.Integer(
         string="Tokens per Person and per Day", config_parameter="nudge.budget_user_tokens")
@@ -99,6 +107,7 @@ class ResConfigSettings(models.TransientModel):
             nudge_python=Conversation._is_python_allowed(),
             nudge_sql=Conversation._is_sql_allowed(),
             nudge_admin=Conversation._is_admin_allowed(),
+            nudge_developer=Conversation._is_developer_allowed(),
             nudge_voice=Voice._is_allowed(),
             nudge_voice_engine=Voice._get_engine(),
         )
@@ -112,5 +121,6 @@ class ResConfigSettings(models.TransientModel):
         Parameter.set_param(PYTHON_PARAM, "yes" if self.nudge_python else "no")
         Parameter.set_param(SQL_PARAM, "yes" if self.nudge_sql else "no")
         Parameter.set_param(ADMIN_PARAM, "yes" if self.nudge_admin else "no")
+        Parameter.set_param(DEVELOPER_PARAM, "yes" if self.nudge_developer else "no")
         Parameter.set_param(VOICE_PARAM, "yes" if self.nudge_voice else "no")
         Parameter.set_param(VOICE_ENGINE_PARAM, self.nudge_voice_engine or ENGINE_AUTO)

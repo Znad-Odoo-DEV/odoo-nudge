@@ -15,7 +15,13 @@ goes to the AI provider the administrator chose, over HTTPS:
   Odoo documentation, the profile of the database (names of models and modules, how much
   each is used, never the content of records);
 - a file the person attached: the text of a PDF or a text file, or the image;
-- a recording, when speech is turned into text by the provider rather than by the browser.
+- a recording, when speech is turned into text by the provider rather than by the browser;
+- to advise on the setup: the settings of the apps (their values for an administrator), what
+  their Configuration menus hold, what a module registered and, for an administrator only, the
+  code of a module, with the secrets written in it replaced by `***`.
+
+The search offered before a provider is set up asks no provider: it reads the menus, the
+settings and the documentation held in this database, and nothing leaves it.
 
 ## What is never sent
 

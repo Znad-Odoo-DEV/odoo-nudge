@@ -23,6 +23,7 @@ import {
 } from "@nudge/voice/languages";
 import { chooseEngine, toSpokenText } from "@nudge/voice/voice_service";
 import { encodeWav } from "@nudge/voice/wav";
+import { endOfSpeech } from "@nudge/voice/engines";
 
 import { answered, FakeRecognition, FakeRecorder, setupVoice } from "./voice_helpers";
 
@@ -561,4 +562,177 @@ test("without voice, nothing of it is shown", async () => {
     expect(".o_nudge_voice_note").toHaveText("Your administrator turned voice off.");
     expect(".o_nudge_speak").toHaveCount(0);
     expect(".o_nudge_dictation_hotkey").toHaveCount(0);
+});
+
+test("a question is over once the person went quiet", () => {
+    const decide = endOfSpeech();
+    expect(decide(0.004, 0)).toBe("");
+    expect(decide(0.2, 1000)).toBe("");
+    expect(decide(0.15, 1500)).toBe("");
+    // Quiet, but not for long yet
+    expect(decide(0.006, 2000)).toBe("");
+    expect(decide(0.006, 2999)).toBe("");
+    expect(decide(0.006, 3000)).toBe("done");
+
+    const nobody = endOfSpeech();
+    expect(nobody(0.01, 0)).toBe("");
+    expect(nobody(0.012, 7999)).toBe("");
+    expect(nobody(0.011, 8000)).toBe("nobody");
+
+    // The hum of a noisy room is not speech
+    const noisy = endOfSpeech();
+    expect(noisy(0.05, 0)).toBe("");
+    expect(noisy(0.06, 4000)).toBe("");
+    expect(noisy(0.06, 8000)).toBe("nobody");
+});
+
+test("the provider's listening ends by itself when the person goes quiet", async () => {
+    const asked = setupVoice({ recognition: false, config: { can_transcribe: true } });
+    const { nudge, voice } = await openForm();
+    nudge.open();
+    await animationFrame();
+
+    await click(".o_nudge_mic");
+    await animationFrame();
+    const recorder = FakeRecorder.made[0];
+    expect(recorder.state).toBe("recording");
+    asked.hearLevel(0.004);
+    asked.hearLevel(0.2);
+    await advanceTime(1000);
+    asked.hearLevel(0.004);
+    expect(recorder.state).toBe("recording", { message: "A pause is not the end" });
+    await advanceTime(600);
+    asked.hearLevel(0.004);
+    await animationFrame();
+    await tick();
+    await animationFrame();
+    expect(recorder.state).toBe("inactive");
+    expect(asked.unwatched).toBe(1);
+    expect(asked.recordings).toHaveLength(1);
+    await tick();
+    expect(asked.messages.map((message) => message.message)).toEqual(["What the provider heard"]);
+    expect(voice.state.mode).toBe(null);
+});
+
+test("nothing is sent to the provider when nobody spoke", async () => {
+    const asked = setupVoice({ recognition: false, config: { can_transcribe: true } });
+    const { nudge, voice } = await openForm();
+    nudge.open();
+    await animationFrame();
+
+    await click(".o_nudge_mic");
+    await animationFrame();
+    asked.hearLevel(0.004);
+    await advanceTime(8000);
+    asked.hearLevel(0.005);
+    await animationFrame();
+    await tick();
+    await animationFrame();
+    expect(FakeRecorder.made[0].state).toBe("inactive");
+    expect(asked.recordings).toHaveLength(0);
+    expect(voice.state.error).toBe("I did not hear anything.");
+    expect(voice.state.mode).toBe(null);
+});
+
+test("a dictation is not ended by a silence", async () => {
+    const asked = setupVoice({ recognition: false, config: { can_transcribe: true } });
+    const { voice } = await openForm();
+    voice.listen({ mode: "dictation", continuous: true, onFinal: () => {} });
+    await animationFrame();
+    expect(asked.hearLevel).toBe(null, { message: "Nobody watches how loud it is" });
+    expect(FakeRecorder.made[0].state).toBe("recording");
+    voice.cancel();
+});
+
+test("a browser that never answers is not waited for", async () => {
+    const asked = setupVoice();
+    const { nudge, voice } = await openForm();
+    nudge.open();
+    await animationFrame();
+
+    // Words that come keep it listening
+    await click(".o_nudge_mic");
+    await animationFrame();
+    FakeRecognition.last.hear("how do");
+    await advanceTime(10000);
+    expect(FakeRecognition.last.calls).toEqual(["start"]);
+    await click(".o_nudge_mic");
+    await animationFrame();
+    await tick();
+    await animationFrame();
+
+    // This one hears nothing, and does not even end when told to stop
+    await click(".o_nudge_mic");
+    await animationFrame();
+    const recognition = FakeRecognition.last;
+    recognition.stop = function () {
+        this.calls.push("stop");
+    };
+    await advanceTime(10000);
+    expect(recognition.calls).toEqual(["start", "stop"]);
+    expect(voice.state.mode).toBe("question");
+    await advanceTime(2000);
+    await animationFrame();
+    expect(recognition.calls).toEqual(["start", "stop", "abort"]);
+    expect(voice.state.mode).toBe(null);
+    expect(voice.state.error).toBe("I did not hear anything.");
+    expect(asked.messages.map((message) => message.message)).toEqual(["how do"]);
+});
+
+test("who writes Arabic is listened to in Arabic", async () => {
+    setupVoice();
+    const { nudge, voice } = await openForm();
+    nudge.open();
+    await animationFrame();
+    expect(voice.state.language).toBe("en");
+
+    nudge.state.draft = "كيف أؤكد هذا الطلب؟";
+    await click(".o_nudge_mic");
+    await animationFrame();
+    expect(FakeRecognition.last.lang).toBe("ar-PS");
+    expect(".o_nudge_language").toHaveText("ع");
+    voice.cancel();
+
+    voice.followText("And in English?");
+    expect(voice.state.language).toBe("en");
+
+    // A language chosen by hand stays
+    voice.switchLanguage();
+    const chosen = voice.state.language;
+    voice.followText("كيف أؤكد هذا الطلب؟");
+    expect(voice.state.language).toBe(chosen);
+});
+
+test("words shown while speaking are kept when the browser ends without settling them", async () => {
+    const asked = setupVoice();
+    const { nudge, voice } = await openForm();
+    nudge.open();
+    await animationFrame();
+
+    await click(".o_nudge_mic");
+    await animationFrame();
+    FakeRecognition.last.hear("كيف أؤكد هذا الطلب", false);
+    await animationFrame();
+    expect(".o_nudge_input").toHaveValue("كيف أؤكد هذا الطلب");
+    FakeRecognition.last.end();
+    await animationFrame();
+    await tick();
+    expect(asked.messages.map((message) => message.message)).toEqual(["كيف أؤكد هذا الطلب"]);
+    expect(voice.state.error).toBe("");
+});
+
+test("a question that ends with no word says so", async () => {
+    const asked = setupVoice();
+    const { nudge, voice } = await openForm();
+    nudge.open();
+    await animationFrame();
+
+    await click(".o_nudge_mic");
+    await animationFrame();
+    // The browser ends with no word and no reason
+    FakeRecognition.last.end();
+    await animationFrame();
+    expect(voice.state.error).toBe("I did not hear anything.");
+    expect(".o_nudge_voice_text").toHaveText("I did not hear anything.");
+    expect(asked.messages).toHaveLength(0);
 });

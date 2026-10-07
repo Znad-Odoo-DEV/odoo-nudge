@@ -706,11 +706,20 @@ class TestActing(AgentCase, TransactionCase):
         self.assertFalse(actions.is_sensitive("res.partner", "create_company"))
         self.assertFalse(actions.is_sensitive("sale.order"))
 
-    def test_nudge_never_deletes(self):
+    def test_nudge_never_deletes_records_of_the_business(self):
+        from odoo.addons.nudge.tools.developer import DELETABLE
+
         names = set(tools.base.TOOLS)
-        self.assertFalse({name for name in names if "delete" in name or "unlink" in name})
+        deleting = {name for name in names if "delete" in name or "unlink" in name}
+        self.assertEqual(deleting, {"prepare_delete"}, "Deleting is Developer mode's, for what Nudge builds")
+        agent = {tool.name for tool in tools.base.available(self.env(user=self.agent), "agent")}
+        self.assertFalse(deleting & agent, "Never in Agent mode")
+        allowed = tools.base.TOOLS["prepare_delete"].input_schema["properties"]["model"]["enum"]
+        self.assertEqual(set(allowed), set(DELETABLE))
+        self.assertFalse({name for name in allowed if not name.startswith(("base.", "ir.", "mail."))})
         for tool in tools.base.TOOLS.values():
-            self.assertNotIn("unlink", json.dumps(tool.input_schema))
+            # on_unlink is a trigger of a rule: Odoo's word for a deletion done by someone else
+            self.assertNotIn("unlink", json.dumps(tool.input_schema).replace("on_unlink", ""))
 
 
 @tagged("post_install", "-at_install")

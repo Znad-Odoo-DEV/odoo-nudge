@@ -74,6 +74,31 @@ in about a second.
 Other providers are already listed under AI Providers: Groq, OpenRouter (models ending in
 `:free`), Ollama, Anthropic Claude. Set the key, press **Fetch Models**, pick a model.
 
+### Ollama: a model on your own server
+
+For data that must not leave the company, run the model yourself:
+
+1. Install [Ollama](https://ollama.com) on a server with a GPU that Odoo can reach. Odoo.sh
+   cannot host it: use a separate server on the same network, or over a VPN.
+2. Pull a model: `ollama pull qwen3:14b` (good in Arabic), or `llama3.3`, `gemma3`, `mistral`.
+   A model of 14–32B parameters on a card with 16–24 GB of memory answers well; 7–8B models
+   fit 8 GB but are weaker at planning and at using the tools; a server without a GPU works,
+   slowly.
+3. **Nudge ‣ Configuration ‣ AI Providers ‣ Ollama (local)**: set the address of the server
+   in **Base URL** (`http://your-server:11434/v1`; `localhost` only when Ollama runs on the Odoo
+   server itself), leave **Requires an API Key** unticked, press **Fetch Models**, pick one with
+   **Use**, then **Test Connection**.
+
+Nothing goes out: questions, screens, files and what the agent reads stay on that server.
+Speech stays with the browser, as Ollama does not turn speech into text.
+
+### Before any provider
+
+Without a provider, the panel offers a search instead of a conversation: the screens the
+person can open, the settings of the apps (for administrators) and the official documentation,
+by a few words; the pointer shows the way to a screen or a setting found. No AI is asked, and
+nothing leaves the database. The conversation takes over the moment a provider is ready.
+
 ### Voice and providers
 
 Chrome, Edge and Safari turn speech into text themselves. For the other browsers, and when the

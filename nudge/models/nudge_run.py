@@ -26,6 +26,7 @@ STEP_KINDS = [
     ("write", "Change"),
     ("method", "Button"),
     ("code", "Code"),
+    ("delete", "Delete"),
 ]
 
 STEP_STATES = [
@@ -37,7 +38,7 @@ STEP_STATES = [
 ]
 
 # Kinds of steps that change what the database holds
-CHANGES = ("create", "write", "method")
+CHANGES = ("create", "write", "method", "delete")
 
 # States of a run that is not over
 OPEN_STATES = ("queued", "running", "waiting")
@@ -93,7 +94,7 @@ class NudgeRun(models.Model):
     company_id = fields.Many2one("res.company", string="Company")
     state = fields.Selection(RUN_STATES, required=True, default="running", index=True)
     step_ids = fields.One2many("nudge.step", "run_id", string="Steps")
-    step_count = fields.Integer(string="Steps", compute="_compute_counts", store=True)
+    step_count = fields.Integer(string="Number of Steps", compute="_compute_counts", store=True)
     change_count = fields.Integer(string="Changes", compute="_compute_counts", store=True)
     rounds = fields.Integer(string="Calls to the Model")
     model_name = fields.Char(string="Model")
@@ -101,6 +102,8 @@ class NudgeRun(models.Model):
     output_tokens = fields.Integer()
     cost = fields.Float(digits=(12, 6))
     ended_at = fields.Datetime(string="Ended On")
+    is_developer = fields.Boolean(
+        string="Developer Mode", help="Asked in Developer mode: Nudge built rather than did.")
     is_background = fields.Boolean(
         string="In the Background",
         help="Worked on while the person does something else. They are told when it is "

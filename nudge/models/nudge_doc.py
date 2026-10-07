@@ -48,7 +48,7 @@ class NudgeDocPage(models.Model):
     description = fields.Text(readonly=True)
     version = fields.Char(readonly=True)
     passage_ids = fields.One2many("nudge.doc.passage", "page_id", string="Passages")
-    passage_count = fields.Integer(string="Passages", compute="_compute_passage_count")
+    passage_count = fields.Integer(string="Number of Passages", compute="_compute_passage_count")
 
     _path_unique = models.Constraint("unique(path)", "A page of the documentation is loaded once.")
 

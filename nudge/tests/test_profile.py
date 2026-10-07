@@ -350,7 +350,8 @@ class TestProfileTools(NudgeCase, TransactionCase):
         self.assertIn("custom module by Odoo S.A.", result["content"])
         self.assertEqual(
             [tool["name"] for tool in adapter.calls[0]["tools"]],
-            ["assess_database", "describe_model", "find_screen", "locate_data", "open_screen",
+            ["assess_database", "describe_model", "describe_module", "find_screen", "locate_data",
+             "open_screen", "read_configuration", "read_settings",
              "remember_lesson", "search_company_files", "search_database_profile",
              "search_odoo_documentation",
              "show_menu_path", "show_on_screen", "write_in_field"],

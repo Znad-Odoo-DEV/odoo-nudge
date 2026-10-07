@@ -73,7 +73,7 @@
                                 t-on-click="() => this.rate('down')"><i class="fa fa-thumbs-o-down"/></button>
                     </t>
                     <t t-elif="props.feedback === 'down' and feedback.asking">
-                        <input type="text" class="o_nudge_rate_note" maxlength="400"
+                        <input type="text" class="o_nudge_rate_note" maxlength="400" t-ref="note"
                                placeholder="What was wrong? It becomes a lesson for a manager to approve"
                                t-model="feedback.note" t-on-keydown="onNoteKeydown"/>
                         <button type="button" class="o_nudge_rate_send" t-on-click="sendNote">Send</button>
@@ -139,7 +139,8 @@
                         <del class="o_nudge_card_before" t-esc="show(line.before)"/>
                         <i class="fa fa-long-arrow-right o_nudge_card_arrow"/>
                     </t>
-                    <span class="o_nudge_card_value" t-esc="show(line.value)"/>
+                    <pre t-if="line.code" class="o_nudge_card_code" t-esc="show(line.value)"/>
+                    <span t-else="" class="o_nudge_card_value" t-esc="show(line.value)"/>
                 </dd>
             </t>
         </dl>

@@ -146,7 +146,7 @@ test("a name is never read as a selector", async () => {
         "../../etc",
     ];
     for (const name of hostile) {
-        for (const type of ["field", "button", "tab", "control"]) {
+        for (const type of ["field", "button", "tab", "control", "settings_app"]) {
             expect(resolveTarget({ type, name }, view)).toBe(null, { message: `${type} ${name}` });
         }
     }
@@ -443,4 +443,16 @@ test("someone already in the app goes straight to its menus", async () => {
     await animationFrame();
     expect(guidance.state.steps).toHaveLength(2, { message: "From another app, the app comes first" });
     guidance.stop();
+});
+
+test("an app of the Settings screen is found in its side list", async () => {
+    const { view } = await start();
+    const list = document.createElement("div");
+    list.className = "settings_tab";
+    list.innerHTML = '<a class="tab" data-key="stock" href="#stock">Inventory</a>';
+    getFixture().append(list);
+    expect(resolveTarget({ type: "settings_app", name: "stock" }, view).element).toBe(
+        queryOne(".settings_tab .tab[data-key=stock]")
+    );
+    expect(resolveTarget({ type: "settings_app", name: "account" }, view)).toBe(null);
 });
