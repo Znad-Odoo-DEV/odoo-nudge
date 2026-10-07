@@ -57,7 +57,7 @@ def files(*patterns):
 
 # ---------------------------------------------------------------- modules
 # The spreadsheet editor of 17 is Enterprise only: the reports stay in the chat on 17
-for module in ("nudge_spreadsheet", "nudge_documents"):
+for module in ("nudge_spreadsheet", "nudge_documents", "nudge_studio"):
     if os.path.isdir(ROOT + module):
         shutil.rmtree(ROOT + module)
         print("dropped", module)
@@ -171,6 +171,15 @@ edit("nudge/tests/test_admin.py", [
 ])
 
 # ---------------------------------------------------------------- list views are tree views in 17
+# The tools that read and change screens name the list view as 17 does
+if os.path.exists(ROOT + "nudge/tools/building.py"):
+    sub("nudge/tools/building.py", r'VIEW_TYPES = \("form", "list", "kanban", "search"\)', 'VIEW_TYPES = ("form", "tree", "kanban", "search")')
+if os.path.exists(ROOT + "nudge/tools/configuration.py"):
+    sub("nudge/tools/configuration.py", r'get_view\(view_type="list"\)', 'get_view(view_type="tree")')
+if os.path.exists(ROOT + "nudge/tests/test_building.py"):
+    sub("nudge/tests/test_building.py", r'"view_type": "list"', '"view_type": "tree"')
+    sub("nudge/tests/test_building.py", r'assertIn\("\(list\)"', 'assertIn("(tree)"')
+
 for name in files("nudge/**/*.xml"):
     n = sub(name, r"<list(?=[\s>])", "<tree")
     n += sub(name, r"</list>", "</tree>")

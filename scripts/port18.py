@@ -53,7 +53,7 @@ def sub(name, pattern, replacement, flags=0):
 if os.path.isdir(ROOT + "nudge_ai"):
     shutil.rmtree(ROOT + "nudge_ai")  # the AI app is Odoo 19 only
     print("dropped nudge_ai")
-for module in ("nudge", "nudge_spreadsheet", "nudge_documents"):
+for module in ("nudge", "nudge_spreadsheet", "nudge_documents", "nudge_studio"):
     sub(f"{module}/__manifest__.py", r'"version": "19\.0\.', '"version": "18.0.')
 
 # ---------------------------------------------------------------- SQL constraints (models.Constraint is 19)
@@ -105,8 +105,18 @@ edit("nudge/tools/records.py", [
      "\n\n"
      "def get_fields(model, names, operation=\"read\"):\n"),
 ])
-for name in ("nudge/tools/records.py", "nudge/tools/actions.py", "nudge/tools/finding.py"):
-    sub(name, r"model\._has_field_access\(", "has_field_access(model, ")
+for name in ("nudge/tools/records.py", "nudge/tools/actions.py", "nudge/tools/finding.py", "nudge/tools/developer.py",
+             "nudge/tools/building.py", "nudge/tools/configuration.py", "nudge/tools/reports.py", "nudge/tools/importing.py"):
+    if os.path.exists(ROOT + name):
+        sub(name, r"model\._has_field_access\(", "has_field_access(model, ")
+# The tools of Developer mode take the shim from records, like the others
+for name in ("nudge/tools/developer.py", "nudge/tools/building.py", "nudge/tools/configuration.py",
+             "nudge/tools/reports.py", "nudge/tools/importing.py"):
+    if not os.path.exists(ROOT + name):
+        continue
+    s = read(name)
+    if "has_field_access(model, " in s and "has_field_access" not in s.split("from . import base")[0] and "import has_field_access" not in s:
+        write(name, s.replace("from . import base\n", "from . import base\nfrom .records import has_field_access  # noqa: E402\n", 1))
 edit("nudge/tools/actions.py", [
     ("from odoo.service.model import call_kw, get_public_method\n",
      "from odoo.api import call_kw\nfrom odoo.service.model import get_public_method\n"),
@@ -255,6 +265,18 @@ edit("nudge_spreadsheet/tests/test_spreadsheet.py", [
     ('        self.assertEqual(figure["col"], 5)\n', '        self.assertEqual(figure["x"], 5 * workbook.COLUMN_WIDTH)\n'),
     ('        self.assertEqual(data.get("version"), empty.get("version"), "What the empty workbook carries is kept")\n',
      '        self.assertEqual(data["version"], 21)\n'),
+])
+
+# ---------------------------------------------------------------- Odoo 18 checks that no model keeps a patch after a test
+edit("nudge/tests/test_developer.py", [
+    ("    def switch(self, on):\n        self.Parameter.set_param(DEVELOPER_PARAM, \"yes\" if on else \"no\")\n",
+     "    def setUp(self):\n"
+     "        super().setUp()\n"
+     "        if self.has_rules:\n"
+     "            # A rule made in a test patches the model; Odoo 18 wants it clean afterwards\n"
+     "            self.addCleanup(self.env[\"base.automation\"]._unregister_hook)\n"
+     "\n"
+     "    def switch(self, on):\n        self.Parameter.set_param(DEVELOPER_PARAM, \"yes\" if on else \"no\")\n"),
 ])
 
 # ---------------------------------------------------------------- the words "Odoo 19"
