@@ -279,6 +279,10 @@ edit("nudge/tests/test_developer.py", [
      "    def switch(self, on):\n        self.Parameter.set_param(DEVELOPER_PARAM, \"yes\" if on else \"no\")\n"),
 ])
 
+# ---------------------------------------------------------------- no AI app in 18: the store page says nothing of it
+sub("nudge/static/description/index.html",
+    r"^[ \t]*<li>[^\n]*Nudge: Odoo AI[^\n]*</li>\n", "", flags=re.M)
+
 # ---------------------------------------------------------------- the words "Odoo 19"
 for name in ("nudge/llm/prompt.py", "nudge/README.md", "nudge/README.ar.md", "nudge/static/description/index.html",
              "nudge/doc/user-guide.md", "nudge/doc/user-guide.ar.md", "nudge/doc/security.md", "nudge/__manifest__.py"):
