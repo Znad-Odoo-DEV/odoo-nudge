@@ -465,4 +465,10 @@ class TestDeveloper(NudgeCase, TransactionCase):
         talk = "\n".join(prompt.build_system_blocks(mode="talk", can_use_agent=True, can_develop=True))
         self.assertIn("Developer mode, the third button", talk)
         plain = "\n".join(prompt.build_system_blocks(mode="talk", can_use_agent=True))
-        self.assertNotIn("Developer mode", plain)
+        self.assertNotIn("Developer mode, the third button", plain)
+        self.assertIn("by an administrator in Nudge's Developer mode", plain)
+        # An administrator with the switch off is told how to open it, never an excuse
+        off = "\n".join(prompt.build_system_blocks(mode="agent", is_administrator=True))
+        self.assertIn("Settings ‣ Nudge ‣ Nudge for Developers", off)
+        self.assertIn("Never give another reason", off)
+        self.assertIn("approval rule on that button", dev)

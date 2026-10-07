@@ -747,7 +747,7 @@ class TestAgent(AgentCase, TransactionCase):
         self.ask(self.user_a, "Explain it")
         self.assertNotIn("Agent mode", adapter.calls[2]["system"][-1])
         self.assertEqual(adapter.calls[2]["system"][:2], adapter.calls[0]["system"][:2])
-        self.assertEqual(prompt.build_system_blocks("", "agent"), [prompt.SYSTEM_PERSONA, prompt.AGENT_MODE])
+        self.assertEqual(prompt.build_system_blocks("", "agent"), [prompt.SYSTEM_PERSONA, prompt.AGENT_MODE + prompt.DEV_NOT_FOR_THEM])
 
     def test_for_those_who_may(self):
         self.use_adapter()

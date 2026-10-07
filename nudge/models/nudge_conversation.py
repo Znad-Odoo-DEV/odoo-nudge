@@ -338,6 +338,7 @@ class NudgeConversation(models.Model):
             "system": prompt.build_system_blocks(
                 self._chat_overview(), mode=mode, can_use_agent=self._can_use_agent(),
                 can_develop=self._can_develop(),
+                is_administrator=self.env.user.has_group("base.group_system"),
                 work="\n\n".join(block for block in (
                     self._chat_where_the_work_is(), self.env["nudge.source"]._get_text()) if block)),
             "tools": [tool.definition() for tool in tools.base.available(self.env, mode)],

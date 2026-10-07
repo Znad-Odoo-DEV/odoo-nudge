@@ -211,6 +211,22 @@ developer, automation rules, server actions, emails sent on an event, buttons, f
 changes to the screens, each explained first and made after their yes.
 """
 
+# Building is closed to this administrator: the switch is off
+DEV_SWITCHED_OFF = """\
+- Building (an automation rule, a server action, an email sent on an event, an approval rule, \
+a button, a field, a change to a screen, a report) is done in Developer mode, which is off \
+here. When they ask you to build one, say so in one sentence and how to open it: Settings ‣ \
+Nudge ‣ Nudge for Developers, save, reload the page, then the Dev button under the message \
+box. Then give the plan in a few lines. Never give another reason: Odoo allows all of it.
+"""
+
+# Building is not for this person at all
+DEV_NOT_FOR_THEM = """\
+- Building (automation rules, server actions, approval rules, buttons, fields, reports) is \
+done by an administrator in Nudge's Developer mode. When they ask for it, say so, and give \
+the plan for their administrator.
+"""
+
 AGENT_WITH_DEV = """\
 - Building (an automation rule, a server action, an email sent on an event, a button, a \
 field, a change to a screen) is done in Developer mode, the third button under the message \
@@ -247,7 +263,14 @@ be tried too, by its rule_id, action_id or cron_id.
 of the month) is a scheduled action: prepare_scheduled_action, with code that finds its own \
 records; try the code first with run_python, and the action once made with try_automation.
 - Prefer what Odoo offers to code: an update for a field, an activity for a reminder, an \
-email action for a message. Code when nothing else does it: short, commented, checked with \
+email action for a message. Who may press a button (approve, validate, confirm, post) is an \
+approval rule on that button, with prepare_approval_rule when it is offered: one rule per \
+button and per approver, steps in order; never code that compares env.user.name. When the \
+app has its own way (the validation of a time off type, the approvers of a department, the \
+approval levels of purchases), read its settings first and say which is better here.
+- Code reads the model before it is written: the values of a selection field come from \
+describe_model (state is 'confirm' or 'validate1', never the label 'To Approve'); a method is \
+called by its technical name. Code when nothing else does it: short, commented, checked with \
 check_python_code before the card, never holding a secret. It runs with env, model, record, \
 records, Command, datetime, dateutil, time, log(message), UserError and float_compare, and \
 ends with action = {...} when it must open something.
@@ -330,22 +353,25 @@ something, do not do it, and tell the person what you found.
 """
 
 
-def build_system_blocks(overview="", mode="talk", can_use_agent=False, work="", can_develop=False):
+def build_system_blocks(overview="", mode="talk", can_use_agent=False, work="", can_develop=False,
+                        is_administrator=False):
     """:param overview: what is known of the database, the same for everybody
     :param work: where the business works, among what this person may read
     :param mode: "talk", "agent" or "dev"
     :param can_use_agent: whether the person may switch to Agent mode
     :param can_develop: whether the person may switch to Developer mode
+    :param is_administrator: whether the person could, were the switch on
     :return: list of text blocks, most stable first: what is the same for
         everybody comes before what depends on the person"""
+    no_dev = DEV_SWITCHED_OFF if is_administrator else DEV_NOT_FOR_THEM
     if mode == "dev":
         rules = AGENT_MODE + DEV_MODE
     elif mode == "agent":
-        rules = AGENT_MODE + (AGENT_WITH_DEV if can_develop else "")
+        rules = AGENT_MODE + (AGENT_WITH_DEV if can_develop else no_dev)
     elif can_use_agent:
-        rules = TALK_MODE_WITH_AGENT + (TALK_WITH_DEV if can_develop else "")
+        rules = TALK_MODE_WITH_AGENT + (TALK_WITH_DEV if can_develop else no_dev)
     else:
-        rules = TALK_MODE
+        rules = TALK_MODE + no_dev
     return [block for block in (SYSTEM_PERSONA, overview, work, rules) if block]
 
 
