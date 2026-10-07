@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="nudge.Root">
+        <!-- The layout uses logical properties and follows this attribute, so it
+             mirrors in right-to-left languages on its own -->
+        <div class="o_nudge" t-att-dir="direction" t-att-data-theme="state.theme"
+             t-att-class="{ o_nudge_open: state.isOpen, o_nudge_moved: placement }"
+             t-att-style="placement ? placement.style : undefined"
+             t-att-data-flip="placement ? placement.flip : undefined"
+             t-att-data-align="placement ? placement.align : undefined">
+            <NudgeGuide/>
+            <NudgeDictation/>
+            <NudgePanel t-if="state.isOpen"/>
+            <button type="button" class="o_nudge_avatar" title="Nudge" aria-label="Nudge"
+                    t-ref="avatar"
+                    t-att-class="{ o_nudge_avatar_listening: isListening, o_nudge_avatar_dragging: drag.position }"
+                    t-att-aria-expanded="state.isOpen ? 'true' : 'false'"
+                    t-on-click="() => this.nudge.toggle()">
+                <NudgeFace isThinking="state.isStreaming"/>
+                <span t-if="unseenCount" class="o_nudge_badge" t-esc="unseenCount"/>
+            </button>
+        </div>
+    </t>
+
+</templates>

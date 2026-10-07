@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_step_view_list" model="ir.ui.view">
+        <field name="name">nudge.step.view.list</field>
+        <field name="model">nudge.step</field>
+        <field name="arch" type="xml">
+            <list string="Steps" create="0" edit="0" delete="0">
+                <field name="create_date" string="Date"/>
+                <field name="user_id" widget="many2one_avatar"/>
+                <field name="kind"/>
+                <field name="summary"/>
+                <field name="res_model" optional="show"/>
+                <field name="record_names" optional="show"/>
+                <field name="is_sensitive" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'done'"
+                       decoration-info="state == 'pending'"
+                       decoration-warning="state in ('declined', 'cancelled')"
+                       decoration-danger="state == 'failed'"/>
+                <field name="decided_at" optional="hide"/>
+                <field name="run_id" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_step_view_form" model="ir.ui.view">
+        <field name="name">nudge.step.view.form</field>
+        <field name="model">nudge.step</field>
+        <field name="arch" type="xml">
+            <form string="Step" create="0" edit="0" delete="0">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="summary"/></h1>
+                    </div>
+                    <group>
+                        <group string="What">
+                            <field name="kind"/>
+                            <field name="tool"/>
+                            <field name="res_model"/>
+                            <field name="record_names"/>
+                            <field name="res_ids_text"/>
+                            <field name="method" invisible="not method"/>
+                            <field name="is_sensitive"/>
+                        </group>
+                        <group string="Who and When">
+                            <field name="user_id" widget="many2one_avatar"/>
+                            <field name="run_id"/>
+                            <field name="create_date" string="Asked On"/>
+                            <field name="decided_at"/>
+                            <field name="duration_ms"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Outcome" name="outcome">
+                            <field name="error" invisible="not error" class="text-danger"/>
+                            <field name="result"/>
+                        </page>
+                        <page string="Shown to the Person" name="preview" invisible="not preview_text">
+                            <field name="preview_text"/>
+                        </page>
+                        <page string="Written in the Records" name="values" invisible="not values_text">
+                            <field name="values_text"/>
+                        </page>
+                        <page string="Asked by the Model" name="arguments">
+                            <field name="arguments_text"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_step_view_search" model="ir.ui.view">
+        <field name="name">nudge.step.view.search</field>
+        <field name="model">nudge.step</field>
+        <field name="arch" type="xml">
+            <search string="Steps">
+                <field name="summary"/>
+                <field name="res_model"/>
+                <field name="record_names"/>
+                <field name="user_id"/>
+                <filter name="changes" string="Changes" domain="[('kind', 'in', ('create', 'write', 'method'))]"/>
+                <filter name="done" string="Done" domain="[('state', '=', 'done')]"/>
+                <filter name="refused" string="Declined or Failed" domain="[('state', 'in', ('declined', 'failed', 'cancelled'))]"/>
+                <filter name="sensitive" string="Sensitive" domain="[('is_sensitive', '=', True)]"/>
+                <separator/>
+                <filter name="date" string="Date" date="create_date"/>
+                <group>
+                    <filter name="group_user" string="Person" context="{'group_by': 'user_id'}"/>
+                    <filter name="group_model" string="Records Of" context="{'group_by': 'res_model'}"/>
+                    <filter name="group_kind" string="Kind" context="{'group_by': 'kind'}"/>
+                    <filter name="group_state" string="Outcome" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_step_action" model="ir.actions.act_window">
+        <field name="name">Changes</field>
+        <field name="res_model">nudge.step</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_changes': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Nudge has changed nothing yet</p>
+            <p>Every record Nudge creates or changes, and every button it presses, is written here:
+               for whom, on which records, and what they answered when asked.</p>
+        </field>
+    </record>
+
+    <record id="nudge_run_view_list" model="ir.ui.view">
+        <field name="name">nudge.run.view.list</field>
+        <field name="model">nudge.run</field>
+        <field name="arch" type="xml">
+            <list string="Runs" create="0" edit="0" delete="0">
+                <field name="create_date" string="Date"/>
+                <field name="user_id" widget="many2one_avatar"/>
+                <field name="name"/>
+                <field name="is_background" optional="show"/>
+                <field name="progress" optional="hide"/>
+                <field name="step_count"/>
+                <field name="change_count"/>
+                <field name="model_name" optional="show"/>
+                <field name="input_tokens" sum="Input Tokens" optional="hide"/>
+                <field name="output_tokens" sum="Output Tokens" optional="hide"/>
+                <field name="cost" sum="Cost" optional="show"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'done'"
+                       decoration-info="state in ('queued', 'running', 'waiting')"
+                       decoration-warning="state == 'stopped'"
+                       decoration-danger="state == 'failed'"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_run_view_form" model="ir.ui.view">
+        <field name="name">nudge.run.view.form</field>
+        <field name="model">nudge.run</field>
+        <field name="arch" type="xml">
+            <form string="Run" create="0" edit="0" delete="0">
+                <header>
+                    <button name="action_stop" type="object" string="Stop"
+                            invisible="state not in ('queued', 'running', 'waiting')"
+                            confirm="What was done stays done. Nothing more is done for this request."/>
+                    <field name="state" widget="statusbar" statusbar_visible="queued,running,waiting,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="user_id" widget="many2one_avatar"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="conversation_id"/>
+                            <field name="create_date" string="Asked On"/>
+                            <field name="ended_at"/>
+                        </group>
+                        <group>
+                            <field name="is_background"/>
+                            <field name="progress" invisible="not progress"/>
+                            <field name="pieces" invisible="not is_background"/>
+                            <field name="model_name"/>
+                            <field name="rounds"/>
+                            <field name="input_tokens"/>
+                            <field name="output_tokens"/>
+                            <field name="cost"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Steps" name="steps">
+                            <field name="step_ids">
+                                <list>
+                                    <field name="create_date" string="Date"/>
+                                    <field name="kind"/>
+                                    <field name="summary"/>
+                                    <field name="res_model"/>
+                                    <field name="record_names"/>
+                                    <field name="state" widget="badge"
+                                           decoration-success="state == 'done'"
+                                           decoration-info="state == 'pending'"
+                                           decoration-warning="state in ('declined', 'cancelled')"
+                                           decoration-danger="state == 'failed'"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_run_view_search" model="ir.ui.view">
+        <field name="name">nudge.run.view.search</field>
+        <field name="model">nudge.run</field>
+        <field name="arch" type="xml">
+            <search string="Runs">
+                <field name="name"/>
+                <field name="user_id"/>
+                <filter name="with_changes" string="With Changes" domain="[('change_count', '>', 0)]"/>
+                <filter name="background" string="In the Background" domain="[('is_background', '=', True)]"/>
+                <filter name="open" string="Not Over" domain="[('state', 'in', ('queued', 'running', 'waiting'))]"/>
+                <filter name="waiting" string="Waiting" domain="[('state', '=', 'waiting')]"/>
+                <filter name="failed" string="Failed" domain="[('state', '=', 'failed')]"/>
+                <separator/>
+                <filter name="date" string="Date" date="create_date"/>
+                <group>
+                    <filter name="group_user" string="Person" context="{'group_by': 'user_id'}"/>
+                    <filter name="group_state" string="State" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_run_action" model="ir.actions.act_window">
+        <field name="name">Requests</field>
+        <field name="res_model">nudge.run</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Nobody asked Nudge to do anything yet</p>
+            <p>What people ask Nudge to do in Agent mode is listed here, with every step it took.</p>
+        </field>
+    </record>
+</odoo>

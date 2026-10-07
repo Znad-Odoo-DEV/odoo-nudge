@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="nudge.Face">
+        <svg class="o_nudge_face" t-att-class="{ o_nudge_face_thinking: props.isThinking }"
+             viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+            <path class="o_nudge_face_bubble"
+                  d="M14 8h20a8 8 0 0 1 8 8v12a8 8 0 0 1-8 8H22l-8 7v-7a8 8 0 0 1-8-8V16a8 8 0 0 1 8-8z"/>
+            <ellipse class="o_nudge_face_eye" cx="18.5" cy="20" rx="2.4" ry="3"/>
+            <ellipse class="o_nudge_face_eye" cx="29.5" cy="20" rx="2.4" ry="3"/>
+            <path class="o_nudge_face_mouth" d="M18 26.5c1.6 2.4 3.7 3.5 6 3.5s4.4-1.1 6-3.5"/>
+        </svg>
+    </t>
+
+</templates>

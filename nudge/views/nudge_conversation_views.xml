@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_conversation_view_list" model="ir.ui.view">
+        <field name="name">nudge.conversation.view.list</field>
+        <field name="model">nudge.conversation</field>
+        <field name="arch" type="xml">
+            <list string="Conversations" create="0" edit="0">
+                <field name="write_date" string="Last Activity"/>
+                <field name="name"/>
+                <field name="user_id" widget="many2one_avatar"/>
+                <field name="model_name"/>
+                <field name="message_count" string="Messages" sum="Messages"/>
+                <field name="input_tokens" sum="Input Tokens" optional="show"/>
+                <field name="output_tokens" sum="Output Tokens" optional="show"/>
+                <field name="cost" sum="Cost" optional="show"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_conversation_view_form" model="ir.ui.view">
+        <field name="name">nudge.conversation.view.form</field>
+        <field name="model">nudge.conversation</field>
+        <field name="arch" type="xml">
+            <form string="Conversation" create="0" edit="0">
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="user_id" widget="many2one_avatar"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="provider_id"/>
+                            <field name="model_name"/>
+                        </group>
+                        <group>
+                            <field name="message_count" string="Messages"/>
+                            <field name="input_tokens"/>
+                            <field name="output_tokens"/>
+                            <field name="cost"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Messages" name="messages">
+                            <field name="message_ids">
+                                <list>
+                                    <field name="create_date" string="Date"/>
+                                    <field name="role"/>
+                                    <field name="content"/>
+                                    <field name="is_spoken" optional="hide"/>
+                                    <field name="state" widget="badge"
+                                           decoration-success="state == 'complete'"
+                                           decoration-warning="state in ('truncated', 'aborted', 'refused')"
+                                           decoration-danger="state == 'error'"/>
+                                    <field name="error_detail" optional="hide"/>
+                                    <field name="input_tokens" optional="show"/>
+                                    <field name="output_tokens" optional="show"/>
+                                    <field name="cache_read_tokens" optional="hide"/>
+                                    <field name="cache_write_tokens" optional="hide"/>
+                                    <field name="duration_ms" optional="hide"/>
+                                    <field name="cost" optional="show"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_conversation_view_search" model="ir.ui.view">
+        <field name="name">nudge.conversation.view.search</field>
+        <field name="model">nudge.conversation</field>
+        <field name="arch" type="xml">
+            <search string="Conversations">
+                <field name="name"/>
+                <field name="user_id"/>
+                <field name="model_name"/>
+                <filter name="my_conversations" string="My Conversations" domain="[('user_id', '=', uid)]"/>
+                <separator/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_user" string="User" context="{'group_by': 'user_id'}"/>
+                    <filter name="group_model" string="Model" context="{'group_by': 'model_name'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_message_view_feedback" model="ir.ui.view">
+        <field name="name">nudge.message.view.feedback</field>
+        <field name="model">nudge.message</field>
+        <field name="arch" type="xml">
+            <list string="Feedback" create="0" edit="0" default_order="create_date desc"
+                  decoration-danger="feedback == 'down'" decoration-success="feedback == 'up'">
+                <field name="create_date"/>
+                <field name="user_id" widget="many2one_avatar"/>
+                <field name="conversation_id"/>
+                <field name="feedback" widget="badge"/>
+                <field name="feedback_note"/>
+                <field name="content" string="Answer"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_feedback_action" model="ir.actions.act_window">
+        <field name="name">Feedback</field>
+        <field name="res_model">nudge.message</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="nudge_message_view_feedback"/>
+        <field name="domain">[("feedback", "!=", False)]</field>
+        <field name="context">{"search_default_group_feedback": 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No feedback yet</p>
+            <p>Under every answer people say whether it helped. A "no" with a reason becomes a lesson to approve under Business Notes.</p>
+        </field>
+    </record>
+
+    <record id="nudge_conversation_action" model="ir.actions.act_window">
+        <field name="name">Conversations</field>
+        <field name="res_model">nudge.conversation</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No conversation yet</p>
+            <p>Conversations appear here once people start talking to Nudge.</p>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,3657 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* nudge
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-01 11:58+0000\n"
+"PO-Revision-Date: 2026-10-01 11:58+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_doc.py:0
+msgid "%(count)s pages of the official documentation of Odoo %(version)s."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_provider.py:0
+msgid "%s models found."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_doc.py:0
+msgid "%s pages of the documentation loaded."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+msgid "%s requests are worked on in the background."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_provider.py:0
+msgid "A Python library is missing on the server."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "A Python library is missing on the server. Ask your administrator."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_provider__stt_mode__chat
+msgid "A model that listens"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.constraint,message:nudge.constraint_nudge_doc_page_path_unique
+msgid "A page of the documentation is loaded once."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid "AI Provider"
+msgstr ""
+
+#. module: nudge
+#: model:ir.actions.act_window,name:nudge.nudge_provider_action
+#: model:ir.ui.menu,name:nudge.nudge_menu_providers
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_list
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_search
+msgid "AI Providers"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__api_key
+msgid "API Key"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__has_api_key
+msgid "API Key Set"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid "Access"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__active
+#: model:ir.model.fields,field_description:nudge.field_nudge_note__active
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__active
+msgid "Active"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_provider_action
+msgid "Add an AI provider"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Add an API key to one of the providers, then open Nudge again."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_profile.py:0
+msgid "Added"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_provider__base_url
+msgid ""
+"Address of the API, without the final /chat/completions. Leave empty for "
+"Anthropic to use the official endpoint."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_message__mode__agent
+#: model:ir.model.fields.selection,name:nudge.selection__res_users_settings__nudge_mode__agent
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid "Agent"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_agent
+msgid "Agent Mode"
+msgstr ""
+
+#. module: nudge
+#: model:res.groups,name:nudge.group_nudge_agent
+msgid "Agent User"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Agent mode is not open to you. Ask your administrator."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+#: model:ir.model.fields.selection,name:nudge.selection__res_users_settings__nudge_theme__amber
+msgid "Amber"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_passage__anchor
+msgid "Anchor"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__message_id
+msgid "Answer"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_message__content_blocks
+msgid "Answer as returned by the provider, replayed unchanged."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_step__message_id
+msgid "Answer of the model that asked for this step."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__stream_started_at
+msgid "Answering Since"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_provider__kind__anthropic
+#: model:nudge.provider,name:nudge.provider_anthropic
+msgid "Anthropic Claude"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__app
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_passage__app
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_doc_page_view_search
+msgid "App"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+#: model:ir.model.fields.selection,name:nudge.selection__res_users_settings__nudge_voice_language__ar
+msgid "Arabic"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_conversation_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_conversation_view_search
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_search
+msgid "Archived"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__arguments
+msgid "Arguments"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+msgid "Ask Nudge…"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Ask me about what is on your screen."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Ask me anything about Odoo."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+#: model:ir.model.fields.selection,name:nudge.selection__res_users_settings__nudge_explain__ask
+msgid "Ask me each time"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Ask your administrator to set it up."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__user_id
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__user_id
+msgid "Asked By"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_form
+msgid "Asked On"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__arguments_text
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_form
+msgid "Asked by the Model"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_profile_slice__kind__automation
+msgid "Automation"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__model_ids
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
+msgid "Available Models"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/guidance/nudge_guide.xml:0
+msgid "Back"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Back to chat"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__base_url
+msgid "Base URL"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_passage__body
+msgid "Body"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid "Browse the Pages"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid "Budgets"
+msgstr ""
+
+#. module: nudge
+#: model:ir.actions.act_window,name:nudge.nudge_note_action
+#: model:ir.ui.menu,name:nudge.nudge_menu_notes
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_note_view_list
+msgid "Business Notes"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__method
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_step__kind__method
+msgid "Button"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__price_cache_read
+msgid "Cache Read Price"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__cache_read_tokens
+#: model:ir.model.fields,field_description:nudge.field_nudge_usage__cache_read_tokens
+msgid "Cache Read Tokens"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__price_cache_write
+msgid "Cache Write Price"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__cache_write_tokens
+#: model:ir.model.fields,field_description:nudge.field_nudge_usage__cache_write_tokens
+msgid "Cache Write Tokens"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__call_id
+msgid "Call"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__rounds
+msgid "Calls to the Model"
+msgstr ""
+
+#. module: nudge
+#: model:res.groups,comment:nudge.group_nudge_agent
+msgid "Can also let Nudge perform actions on their behalf."
+msgstr ""
+
+#. module: nudge
+#: model:res.groups,comment:nudge.group_nudge_user
+msgid "Can chat with Nudge and follow its guidance."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Cancel"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__capabilities
+msgid "Capabilities"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__category
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_doc_page_view_search
+msgid "Category"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_step__kind__write
+msgid "Change"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_profile__trigger__modules
+msgid "Change of the installed modules"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/actions.py:0
+msgid "Change: %s"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_profile.py:0
+msgid "Changed"
+msgstr ""
+
+#. module: nudge
+#: model:ir.actions.act_window,name:nudge.nudge_step_action
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__change_count
+#: model:ir.ui.menu,name:nudge.nudge_menu_steps
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_search
+msgid "Changes"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile__changes
+msgid "Changes Since the Previous Version"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_profile__fingerprint
+msgid "Changes when the installed modules change."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid "Check it twice: this is not taken back with a click"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid ""
+"Chrome, Edge and Safari send the sound to the servers of their maker.\n"
+"                                    The AI provider receives it where it receives the questions."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_voice_engine
+msgid ""
+"Chrome, Edge and Safari turn speech into text themselves, by sending the "
+"sound to the servers of their maker. Firefox cannot. The AI provider "
+"receives the sound where it receives the questions."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Click in a field, press the shortcut, talk, press it again."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/voice/voice_service.js:0
+msgid "Click in a text field first, then start the dictation."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Close"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_step__kind__code
+msgid "Code"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Colour"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__company_id
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__company_id
+#: model:ir.model.fields,field_description:nudge.field_nudge_usage__company_id
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_search
+msgid "Company"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_message__state__complete
+msgid "Complete"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_res_config_settings
+msgid "Config Settings"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_profile_slice__kind__configuration
+#: model:ir.ui.menu,name:nudge.nudge_menu_configuration
+msgid "Configuration"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid "Configure Providers"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
+msgid "Connection"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_provider.py:0
+msgid "Connection successful."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__content
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile__slice_ids
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_slice_view_list
+msgid "Content"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__content_hash
+msgid "Content Hash"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__context_text
+msgid "Context"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__conversation_id
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__conversation_id
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__conversation_id
+#: model:ir.model.fields,field_description:nudge.field_nudge_usage__conversation_id
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_usage__kind__chat
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_conversation_view_form
+msgid "Conversation"
+msgstr ""
+
+#. module: nudge
+#: model:ir.actions.act_window,name:nudge.nudge_conversation_action
+#: model:ir.ui.menu,name:nudge.nudge_menu_conversations
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_conversation_view_list
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_conversation_view_search
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_search
+msgid "Conversations"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_conversation_action
+msgid "Conversations appear here once people start talking to Nudge."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__override_summary
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_slice_view_form
+msgid "Correction"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__cost
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__cost
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__cost
+#: model:ir.model.fields,field_description:nudge.field_nudge_usage__cost
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_conversation_view_list
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_list
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_list
+msgid "Cost"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_budget_company_cost
+msgid "Cost per Company and per Month"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_budget_user_cost
+msgid "Cost per Person and per Day"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_step__kind__create
+msgid "Create"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+msgid "Create a contact"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/actions.py:0
+msgid "Create: %s"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__create_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__create_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_passage__create_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__create_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_note__create_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile__create_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__create_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__create_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider_model__create_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__create_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__create_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_usage__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__create_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__create_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_passage__create_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__create_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_note__create_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile__create_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__create_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__create_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider_model__create_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__create_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__create_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_usage__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__res_users_settings__nudge_dictation_hotkey__alt+control+d
+msgid "Ctrl + Alt + D"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__res_users_settings__nudge_hotkey__alt+control+n
+msgid "Ctrl + Alt + N"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__res_users_settings__nudge_hotkey__alt+control+space
+msgid "Ctrl + Alt + Space"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__res_users_settings__nudge_dictation_hotkey__control+shift+d
+msgid "Ctrl + Shift + D"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__res_users_settings__nudge_hotkey__control+shift+space
+msgid "Ctrl + Shift + Space"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile__is_current
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_view_form
+msgid "Current"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__run_id
+msgid "Current Run"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_profile_slice__kind__module
+msgid "Custom Module"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__data
+msgid "Data"
+msgstr ""
+
+#. module: nudge
+#: model:ir.actions.act_window,name:nudge.nudge_profile_action
+#: model:ir.ui.menu,name:nudge.nudge_menu_profile
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_view_list
+msgid "Database Profile"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_usage__date
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_conversation_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_list
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_search
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_list
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_search
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_search
+msgid "Date"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_search
+msgid "Day"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__decided_at
+msgid "Decided On"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_step__state__declined
+msgid "Declined"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_search
+msgid "Declined or Failed"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_provider_id
+msgid "Default AI Provider"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid "Default Provider"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__description
+msgid "Description"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_ir_http__display_name
+#: model:ir.model.fields,field_description:nudge.field_ir_module_module__display_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__display_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__display_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_passage__display_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_log__display_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__display_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_note__display_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile__display_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__display_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__display_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider_model__display_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__display_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__display_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_usage__display_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_voice__display_name
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:nudge.field_res_users_settings__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Do it for me"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Do it in the background"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Do it in the background: I'll tell you when it is done"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.js:0
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+#: code:addons/nudge/static/src/guidance/nudge_guide.xml:0
+#: code:addons/nudge/static/src/voice/nudge_dictation.xml:0
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_run__state__done
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_step__state__done
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_search
+msgid "Done"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Drag the avatar to put Nudge where you want it."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__duration_ms
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile__duration_ms
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__duration_ms
+msgid "Duration (ms)"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__effort
+msgid "Effort"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__ended_at
+msgid "Ended On"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+#: model:ir.model.fields.selection,name:nudge.selection__res_users_settings__nudge_voice_language__en
+msgid "English"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__error
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_message__state__error
+msgid "Error"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__error_code
+msgid "Error Code"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__error_detail
+msgid "Error Detail"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__error_message
+msgid "Error Message"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_usage_action
+msgid ""
+"Every call to an AI provider is written here, with its tokens and its cost:\n"
+"               what the budgets of Settings are checked against."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_view_form
+msgid "Every conversation starts with this text and with the business notes."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_step_action
+msgid ""
+"Every record Nudge creates or changes, and every button it presses, is written here:\n"
+"               for whom, on which records, and what they answered when asked."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_provider__effort__xhigh
+msgid "Extra high"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_message__context_text
+msgid "Facts added by Odoo in front of the user's message."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_run__state__failed
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_step__state__failed
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_search
+msgid "Failed"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__refusal_fallback
+msgid "Fallback on Refusal"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
+msgid "Fetch Models"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+msgid "Find the last orders of this customer"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile__fingerprint
+msgid "Fingerprint"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_users_settings__nudge_explain
+msgid ""
+"For a question asked with the screen shared: whether Nudge asks each time, "
+"points on the screen, or writes the steps in the conversation."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_note__body
+msgid ""
+"For instance: We call quotations \"offers\". Orders above 10,000 need the "
+"approval of the sales manager before confirmation."
+msgstr ""
+
+#. module: nudge
+#: model:nudge.provider,notes:nudge.provider_gemini
+msgid ""
+"Get a key at https://aistudio.google.com/apikey\n"
+"On the free tier, Google uses the content you send to improve its products. Use it to try Nudge with demo data, not with real customer data."
+msgstr ""
+
+#. module: nudge
+#: model:nudge.provider,notes:nudge.provider_groq
+msgid ""
+"Get a key from the Groq console (console.groq.com).\n"
+"Set the key, then use \"Fetch Models\" to pick a model."
+msgstr ""
+
+#. module: nudge
+#: model:nudge.provider,notes:nudge.provider_openrouter
+msgid ""
+"Get a key from your OpenRouter account (openrouter.ai).\n"
+"Set the key, then use \"Fetch Models\" and pick a model whose name ends with \":free\". Free models are limited to 20 requests per minute and 50 per day."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid ""
+"Give Nudge to every internal user. Otherwise, add people to the Nudge groups"
+" one by one."
+msgstr ""
+
+#. module: nudge
+#: model:nudge.provider,name:nudge.provider_gemini
+msgid "Google Gemini (free tier)"
+msgstr ""
+
+#. module: nudge
+#: model:nudge.provider,name:nudge.provider_groq
+msgid "Groq (free tier)"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_ir_http
+msgid "HTTP Routing"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_passage__heading
+msgid "Heading"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+msgid "Hi %s, I'm Nudge"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+msgid "Hi, I'm Nudge"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_provider__effort__high
+msgid "High"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "History"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Hold it to talk to me"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid ""
+"Hold the shortcut that calls Nudge and talk; let go when you are done.\n"
+"                            Or press the microphone."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_users_settings__nudge_explain
+msgid "How Nudge Explains"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+msgid "How do I create a quotation?"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_provider__effort
+msgid ""
+"How much reasoning the model spends on an answer. Lower is faster and "
+"cheaper. Only sent to models that support it."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_provider__stt_mode
+msgid ""
+"How this provider turns what people say into text, for the browsers that cannot do it themselves.\n"
+"A model that listens: the recording is given to a chat model, as Google Gemini accepts.\n"
+"Transcription service: the recording is sent to /audio/transcriptions, as OpenAI and Groq offer."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "How would you like it?"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid "I can explain it in writing here, or show you on the screen."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/guidance/nudge_guide.xml:0
+msgid "I can't find this on the screen."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "I could not write in “%s”. Here is the text:"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/voice/voice_service.js:0
+msgid "I did not hear anything."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "I speak"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "I wrote here what you asked. Read it, then save."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+#: code:addons/nudge/static/src/voice/nudge_dictation.xml:0
+msgid "I'm listening…"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid ""
+"I'm on it in the background. I'll tell you when it is done, or when I need "
+"your answer."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_ir_http__id
+#: model:ir.model.fields,field_description:nudge.field_ir_module_module__id
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__id
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__id
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_passage__id
+#: model:ir.model.fields,field_description:nudge.field_nudge_log__id
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__id
+#: model:ir.model.fields,field_description:nudge.field_nudge_note__id
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile__id
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__id
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__id
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider_model__id
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__id
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__id
+#: model:ir.model.fields,field_description:nudge.field_nudge_usage__id
+#: model:ir.model.fields,field_description:nudge.field_nudge_voice__id
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__id
+#: model:ir.model.fields,field_description:nudge.field_res_users_settings__id
+msgid "ID"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__res_ids_text
+msgid "Ids"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider_model__is_selected
+msgid "In Use"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__is_background
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_search
+msgid "In the Background"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "In writing"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+#: model:ir.model.fields.selection,name:nudge.selection__res_users_settings__nudge_explain__text
+msgid "In writing, in the conversation"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_list
+msgid "Input"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__price_input
+msgid "Input Price"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__input_tokens
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__input_tokens
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__input_tokens
+#: model:ir.model.fields,field_description:nudge.field_nudge_usage__input_tokens
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_conversation_view_list
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_list
+msgid "Input Tokens"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_profile__trigger__install
+msgid "Installation of Nudge"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_doc_passage_view_form
+msgid "Introduction"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+msgid "Is anything missing on this screen?"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.js:0
+msgid "It did not work"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_profile_action
+msgid ""
+"It is read a moment after the installation, then each time its modules "
+"change."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__key
+msgid "Key"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__kind
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__kind
+#: model:ir.model.fields,field_description:nudge.field_nudge_usage__kind
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_search
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_search
+msgid "Kind"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+#: code:addons/nudge/static/src/voice/nudge_dictation.xml:0
+msgid "Language I speak"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_users_settings__nudge_voice_language
+msgid "Language Spoken to Nudge"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+#: model:ir.model.fields.selection,name:nudge.selection__res_users_settings__nudge_voice_language__auto
+msgid "Language of the interface"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_conversation_view_list
+msgid "Last Activity"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__write_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__write_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_passage__write_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__write_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_note__write_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile__write_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__write_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__write_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider_model__write_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__write_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__write_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_usage__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__write_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__write_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_passage__write_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__write_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_note__write_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile__write_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__write_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__write_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider_model__write_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__write_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__write_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_usage__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_slice_view_form
+msgid "Leave empty to keep what was read from the database."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_step__state__cancelled
+msgid "Left Undecided"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.js:0
+msgid "Left undecided"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Let Nudge see my screen"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_sql
+msgid ""
+"Let administrators (the group Settings, allowed in every company) read the "
+"database with one SELECT through the agent: no change, no lock, the tables "
+"of Odoo they may read, 50 rows, 10 seconds. Off by default."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid ""
+"Let administrators read the database with one SELECT through the agent, for "
+"a join or a report no other tool gives. Only the group Settings, and only "
+"those allowed in every company: a query knows no company rule. No change, no"
+" lock, no comment; the tables of Odoo they may read, never those of users, "
+"parameters or providers; 50 rows, 10 seconds. Every query is in What Nudge "
+"Did. Off by default."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_screen_sharing
+msgid ""
+"Let people share the screen they are on with Nudge: the record, its fields "
+"and their values are then sent to the AI provider with the question."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_voice
+msgid ""
+"Let people talk to Nudge and dictate in the fields of Odoo. The microphone "
+"is open only while they hold the shortcut or after they pressed the button."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_python
+msgid ""
+"Let the agent compute with Python when counting and searching are not "
+"enough. The code runs in the sandbox of Odoo, as the person, and reads only:"
+" what it writes is discarded. Off by default."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid ""
+"Let the agent compute with Python when counting and searching are not "
+"enough: a loop over records, a calculation per record. The code runs in the "
+"sandbox of Odoo, as the person, and reads only: what it writes is discarded,"
+" and changes still go through the yes of the person. Every run is in What "
+"Nudge Did. Off by default."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_agent
+msgid ""
+"Let the people of the group Agent User ask Nudge to do the work: look up "
+"records, create and change them, press buttons. Nudge acts with the rights "
+"of the person, and asks them before each change."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid "Load Again"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Looked at the fields of: %s"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Looked for a screen"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Looked up how this database works"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Looked up: %s"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_provider__effort__low
+msgid "Low"
+msgstr ""
+
+#. module: nudge
+#: model:res.groups,name:nudge.group_nudge_manager
+msgid "Manager"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__restricted
+msgid "Managers Only"
+msgstr ""
+
+#. module: nudge
+#: model:res.groups,comment:nudge.group_nudge_manager
+msgid "Manages Nudge settings and sees every conversation."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_provider__effort__max
+msgid "Maximum"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__max_output_tokens
+msgid "Maximum Output Tokens"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_provider__effort__medium
+msgid "Medium"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+#: model:ir.model.fields,field_description:nudge.field_nudge_usage__message_id
+msgid "Message"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__message_count
+msgid "Message Count"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__message_ids
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_conversation_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_conversation_view_list
+msgid "Messages"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__mode
+msgid "Mode"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__model_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__model_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__model_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__model_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__model_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_usage__model_name
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_conversation_view_search
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
+msgid "Model"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_provider__model_name
+msgid "Model identifier sent to the provider."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_provider__stt_model
+msgid ""
+"Model that turns speech into text. For a model that listens, empty uses the "
+"model of the conversations."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_ir_module_module
+msgid "Module"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__modules
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_passage__modules
+msgid "Modules"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_search
+msgid "Month"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_conversation_view_search
+msgid "My Conversations"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__name
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider_model__name
+msgid "Name"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__record_names
+msgid "Names"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+msgid "Needs you"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "New chat"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__is_unseen
+msgid "News for the Person"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/guidance/nudge_guide.xml:0
+msgid "Next"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.js:0
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid "No"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_voice.py:0
+msgid "No AI provider is set up to turn speech into text."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_conversation_action
+msgid "No conversation yet"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "No conversation yet."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_doc_page_view_form
+msgid "No description"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/voice/voice_service.js:0
+msgid "No microphone was found."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+#: model:ir.model.fields.selection,name:nudge.selection__res_users_settings__nudge_dictation_hotkey__none
+#: model:ir.model.fields.selection,name:nudge.selection__res_users_settings__nudge_hotkey__none
+msgid "No shortcut"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_run_action
+msgid "Nobody asked Nudge to do anything yet"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_search
+msgid "Not Over"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_provider__stt_mode__none
+msgid "Not available"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_note__body
+msgid "Note"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__notes
+msgid "Notes"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_profile.py:0
+msgid "Nothing changed."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_voice.py:0
+msgid "Nothing was recorded."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_usage_action
+msgid "Nothing was spent yet"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+#: code:addons/nudge/static/src/components/nudge_root.xml:0
+#: code:addons/nudge/static/src/components/nudge_systray.xml:0
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_message__role__assistant
+#: model:ir.module.category,name:nudge.module_category_nudge
+#: model:ir.ui.menu,name:nudge.nudge_menu_root
+#: model:res.groups.privilege,name:nudge.res_groups_privilege_nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid "Nudge"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_provider
+msgid "Nudge AI Provider"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_provider_model
+msgid "Nudge AI Provider Model"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_run
+msgid "Nudge Agent Run"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_step
+msgid "Nudge Agent Step"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_note
+msgid "Nudge Business Note"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_users_settings__nudge_theme
+msgid "Nudge Colour"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_conversation
+msgid "Nudge Conversation"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_profile
+msgid "Nudge Database Profile"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_profile_slice
+msgid "Nudge Database Profile Piece"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_users_settings__nudge_dictation_hotkey
+msgid "Nudge Dictation Shortcut"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_log
+msgid "Nudge Log"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_message
+msgid "Nudge Message"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_users_settings__nudge_mode
+msgid "Nudge Mode"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_users_settings__nudge_position
+msgid "Nudge Position"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_users_settings__nudge_speak_answers
+msgid "Nudge Reads Its Answers Aloud"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_users_settings__nudge_hotkey
+msgid "Nudge Shortcut"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_usage
+msgid "Nudge Usage"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_voice
+msgid "Nudge Voice"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_provider_action
+msgid "Nudge answers through the first provider that has a model and a key."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Nudge cannot help with this request."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "Nudge could not be reached. Check your connection and try again."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Nudge could not find how to show this on your screen."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "Nudge could not finish"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Nudge does the work, and asks you before each change"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Nudge explains and shows; you do the work"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__group_nudge_all_users
+msgid "Nudge for All Internal Users"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Nudge had to stop before it was done. Ask it to go on."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_step_action
+msgid "Nudge has changed nothing yet"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "Nudge is done"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid ""
+"Nudge is not set up yet. Ask your administrator to configure an AI provider."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Nudge is still answering your previous message."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid "Nudge is thinking"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid ""
+"Nudge is working on this in the background. Wait for it, or stop it first."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_doc_page_action
+msgid ""
+"Nudge loads the official documentation of Odoo when it is installed or updated.\n"
+"               A manager can load it again from Settings ‣ Nudge."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid ""
+"Nudge looks at your screen only when you send it a message. Nothing is "
+"watched in the background."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Nudge needs an AI provider"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "Nudge needs your answer"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "Nudge stopped"
+msgstr ""
+
+#. module: nudge
+#: model:ir.actions.server,name:nudge.cron_profile_refresh_ir_actions_server
+msgid "Nudge: read the database profile again"
+msgstr ""
+
+#. module: nudge
+#: model:ir.actions.server,name:nudge.cron_agent_runs_ir_actions_server
+msgid "Nudge: work on what was asked in the background"
+msgstr ""
+
+#. module: nudge
+#: model:ir.actions.act_window,name:nudge.nudge_doc_page_action
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_docs_summary
+#: model:ir.ui.menu,name:nudge.nudge_menu_docs
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_doc_page_view_list
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_doc_page_view_search
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid "Odoo Documentation"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_doc_page
+msgid "Odoo Documentation Page"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_doc_passage
+msgid "Odoo Documentation Passage"
+msgstr ""
+
+#. module: nudge
+#: model:nudge.provider,name:nudge.provider_ollama
+msgid "Ollama (local)"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid "On the screen"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+#: model:ir.model.fields.selection,name:nudge.selection__res_users_settings__nudge_explain__screen
+msgid "On the screen, with the pointer"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+msgid "One request is worked on in the background."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_profile_slice__model_name
+msgid "Only people who can read this model are told about this piece."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_profile_slice__restricted
+msgid "Only the managers of Nudge are told about this piece."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Only the title of a conversation can be changed."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/guidance/target_resolver.js:0
+msgid "Open the tab “%s” first."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/guidance/target_resolver.js:0
+msgid "Open this menu first."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_provider__kind__openai_compatible
+msgid "OpenAI-compatible API"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_provider__kind
+msgid ""
+"OpenAI-compatible covers Google Gemini, Groq, OpenRouter, Ollama and OpenAI."
+msgstr ""
+
+#. module: nudge
+#: model:nudge.provider,name:nudge.provider_openrouter
+msgid "OpenRouter (free models)"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Opened a screen"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Opened: %s"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_search
+msgid "Outcome"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_list
+msgid "Output"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__price_output
+msgid "Output Price"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__output_tokens
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__output_tokens
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__output_tokens
+#: model:ir.model.fields,field_description:nudge.field_nudge_usage__output_tokens
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_conversation_view_list
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_list
+msgid "Output Tokens"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile__overview_text
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_profile_slice__kind__overview
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_view_form
+msgid "Overview"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_passage__page_id
+msgid "Page"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_doc_page_view_form
+msgid "Page of the Documentation"
+msgstr ""
+
+#. module: nudge
+#: model:nudge.provider,notes:nudge.provider_anthropic
+msgid ""
+"Paid. Get a key from the Claude console (platform.claude.com).\n"
+"Requires the \"anthropic\" Python package on the server. Prices are in USD per million tokens."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_doc_passage_view_form
+msgid "Passage"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__passage_count
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__passage_ids
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_doc_page_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_doc_passage_view_list
+msgid "Passages"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__path
+msgid "Path"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__pending_results
+msgid "Pending Results"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid ""
+"People can let Nudge see the screen they are on. The record, its fields and "
+"their values are then sent to the AI provider with the question. Nothing is "
+"sent in the background."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid ""
+"People can talk to Nudge and dictate in the fields of Odoo. The microphone "
+"is open only while they hold the shortcut or after they pressed the button. "
+"No recording is kept."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid ""
+"People of the group Agent User can ask Nudge to do the work: look up "
+"records, create and change them, press buttons. Nudge acts with the rights "
+"of the person, shows what it is about to do, and waits for their yes before "
+"each change. It never deletes."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
+msgid "Per Million Tokens"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_provider__price_cache_read
+#: model:ir.model.fields,help:nudge.field_nudge_provider__price_cache_write
+#: model:ir.model.fields,help:nudge.field_nudge_provider__price_input
+#: model:ir.model.fields,help:nudge.field_nudge_provider__price_output
+msgid "Per million tokens."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_search
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_search
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_search
+msgid "Person"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
+msgid "Pick one with Fetch Models"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_slice_view_form
+msgid "Piece of the Profile"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile__slice_count
+msgid "Pieces"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Pointed at the screen"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_step__is_sensitive
+msgid "Posts, validates, cancels, or touches money or stock."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Preferences"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/actions.py:0
+msgid "Press “%(button)s”: %(model)s"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__preview
+msgid "Preview"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
+msgid "Prices"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid "Privacy"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__profile_id
+msgid "Profile"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__progress
+msgid "Progress"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__provider_kind
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__kind
+msgid "Protocol"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__provider_id
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider_model__provider_id
+#: model:ir.model.fields,field_description:nudge.field_nudge_usage__provider_id
+msgid "Provider"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__content_blocks
+msgid "Provider Content"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__request_id
+msgid "Provider Request"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_provider_id
+msgid ""
+"Provider answering new conversations. Empty uses the first configured "
+"provider."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Put it back in the corner"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_python
+msgid "Python for the Agent"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__question_id
+msgid "Question"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_step__kind__read
+msgid "Read"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_view_list
+msgid "Read On"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_doc_page_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_doc_page_view_list
+msgid "Read Online"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_slice_view_form
+msgid "Read from the Database"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_view_form
+msgid "Read the Database Again"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Read the answers to me"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Read: %s"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__is_configured
+msgid "Ready"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__res_ids
+msgid "Records"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__res_model
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_search
+msgid "Records Of"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_profile_slice__kind__model
+msgid "Records and Fields"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_profile__trigger__manual
+msgid "Refresh asked by a manager"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_message__state__refused
+msgid "Refused"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_profile.py:0
+msgid "Removed"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_profile_slice__override_summary
+msgid ""
+"Replaces the summary in what Nudge reads. Kept when the profile is "
+"refreshed."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__name
+msgid "Request"
+msgstr ""
+
+#. module: nudge
+#: model:ir.actions.act_window,name:nudge.nudge_run_action
+#: model:ir.ui.menu,name:nudge.nudge_menu_runs
+msgid "Requests"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__requires_api_key
+msgid "Requires an API Key"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__result
+msgid "Result"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_message__pending_results
+msgid "Results of the calls of an answer that waits for the person to decide."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__role
+msgid "Role"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+#: model:ir.model.fields.selection,name:nudge.selection__res_users_settings__nudge_theme__rose
+msgid "Rose"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__run_id
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_form
+msgid "Run"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__run_ids
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_list
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_search
+msgid "Runs"
+msgstr ""
+
+#. module: nudge
+#: model:nudge.provider,notes:nudge.provider_ollama
+msgid ""
+"Runs on the Odoo server itself: nothing leaves your network.\n"
+"Install Ollama, pull a model, then use \"Fetch Models\" to pick it."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_sql
+msgid "SQL for Administrators"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid "Said"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Say yes or no."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_profile__trigger__scheduled
+msgid "Scheduled refresh"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__snapshot
+msgid "Screen"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__snapshot_hash
+msgid "Screen Fingerprint"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_screen_sharing
+msgid "Screen Sharing"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Screen not shared"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Send"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__is_sensitive
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_search
+msgid "Sensitive"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_passage__sequence
+#: model:ir.model.fields,field_description:nudge.field_nudge_note__sequence
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__sequence
+msgid "Sequence"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_provider.py:0
+msgid "Set a model first."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_provider.py:0
+msgid "Set an API key first."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Set up a provider"
+msgstr ""
+
+#. module: nudge
+#: model:ir.actions.act_window,name:nudge.nudge_config_settings_action
+#: model:ir.ui.menu,name:nudge.nudge_menu_settings
+msgid "Settings"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_users_settings__nudge_share_screen
+msgid "Share Screen with Nudge"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Shortcut to call Nudge"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Shortcut to dictate in a field"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "Show me"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid "Show me on the screen"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__screen_events
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_step__kind__show
+msgid "Shown on Screen"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__preview_text
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_form
+msgid "Shown to the Person"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+#: model:ir.model.fields.selection,name:nudge.selection__res_users_settings__nudge_theme__slate
+msgid "Slate"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "Something went wrong while answering."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__stt_model
+msgid "Speech Model"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_voice_engine
+msgid "Speech Turned into Text By"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__stt_mode
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_usage__kind__speech
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_search
+msgid "Speech to Text"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__is_spoken
+msgid "Spoken"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__state
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__state
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__state
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_search
+msgid "State"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_form
+msgid "Step"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__step_ids
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__step_count
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__step_ids
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_list
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_search
+msgid "Steps"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+#: code:addons/nudge/static/src/guidance/nudge_guide.xml:0
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_form
+msgid "Stop"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__stop_reason
+msgid "Stop Reason"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Stop reading"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_message__state__aborted
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_run__state__stopped
+msgid "Stopped"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid "Stopped."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_note__name
+msgid "Subject"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__summary
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__summary
+msgid "Summary"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_message__mode__talk
+#: model:ir.model.fields.selection,name:nudge.selection__res_users_settings__nudge_mode__talk
+msgid "Talk"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Talk to Nudge"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_users_settings__nudge_mode
+msgid ""
+"Talk: Nudge explains and shows. Agent: Nudge does the work, and asks before "
+"each change. Agent is for the people of the group Agent User."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_message__mode
+msgid "Talk: Nudge explains and shows. Agent: Nudge does the work."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+#: model:ir.model.fields.selection,name:nudge.selection__res_users_settings__nudge_theme__teal
+msgid "Teal"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_doc_page__modules
+msgid "Technical names of the modules the page is about, between spaces."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_note_action
+msgid "Tell Nudge how your business works"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+msgid "Tell Nudge what to do…"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Tell me what to do. I ask you before I change anything."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
+msgid "Test Connection"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_doc_page_view_search
+msgid "Text"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "The AI provider could not be reached."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "The AI provider does not know the configured model."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "The AI provider is temporarily unavailable."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__res_config_settings__nudge_voice_engine__provider
+msgid "The AI provider only"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid ""
+"The AI provider rejected the API key. Ask your administrator to check it."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "The AI provider returned an empty answer."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "The AI provider's limit is reached. Try again in a minute."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid ""
+"The AI service answering new conversations. Leave empty to use the first "
+"provider that is ready."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid "The answer was cut short. Ask Nudge to continue."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__res_config_settings__nudge_voice_engine__browser
+msgid "The browser only"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__res_config_settings__nudge_voice_engine__auto
+msgid "The browser when it can, the AI provider otherwise"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "The connection was lost before the answer was complete."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_profile_action
+msgid "The database has not been read yet"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_doc_page_action
+msgid "The documentation is not loaded"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_doc.py:0
+msgid "The documentation is not loaded."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_run.py:0
+msgid "The log of Nudge cannot be changed."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_run.py:0
+msgid "The log of Nudge cannot be deleted."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_run.py:0
+msgid "The log of Nudge is written by Nudge only."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.constraint,message:nudge.constraint_nudge_provider_check_max_output_tokens
+msgid "The maximum of output tokens cannot be negative."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_message__is_spoken
+msgid "The message was said, and turned into text by a machine."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/voice/voice_service.js:0
+msgid ""
+"The microphone is blocked. Allow it in the address bar of your browser."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid ""
+"The official documentation of Odoo, every app, which Nudge searches to say "
+"how standard Odoo works. It comes with the module: nothing is fetched from "
+"outside."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_provider.py:0
+msgid "The provider cannot do this."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_provider.py:0
+msgid "The provider could not be reached."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_provider.py:0
+msgid "The provider does not know this model."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_provider.py:0
+msgid "The provider is temporarily unavailable."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_provider.py:0
+msgid "The provider rejected the API key."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_provider.py:0
+msgid "The provider returned an error."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_provider.py:0
+msgid "The provider's rate limit is reached. Try again in a minute."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_run__is_unseen
+msgid ""
+"The request ended, or waits for an answer, and the person has not looked "
+"yet."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.constraint,message:nudge.constraint_nudge_provider_check_timeout
+msgid "The timeout must be strictly positive."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_search
+msgid "This Month"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+msgid ""
+"This browser cannot listen here. Use Chrome or Edge, on a secure address "
+"(https)."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "This conversation is getting long. Start a new one."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "This conversation is not yours."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "This device has no voice to read answers written in:"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "This is being done already."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/controllers/chat.py:0
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "This is no longer waiting for you."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_view_form
+msgid "This is the first reading of the database."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "This message is too long. The limit is %s characters."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_voice.py:0
+msgid "This recording cannot be read."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_voice.py:0
+msgid "This recording is too long. The limit is %s seconds."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_run.py:0
+msgid "This request is not yours."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__timeout
+msgid "Timeout (seconds)"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__pieces
+msgid "Times Taken Up"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__name
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__title
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_passage__title
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__title
+msgid "Title"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_search
+msgid "Today"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_usage__tokens
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_list
+msgid "Tokens"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_budget_company_tokens
+msgid "Tokens per Company and per Month"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_budget_user_tokens
+msgid "Tokens per Person and per Day"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__tool
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_message__role__tool
+msgid "Tool"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__tool_calls
+msgid "Tool Calls"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__tool_results
+msgid "Tool Results"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_provider__stt_mode__endpoint
+msgid "Transcription service"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile__trigger
+msgid "Trigger"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_message__state__truncated
+msgid "Truncated"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__can_transcribe
+msgid "Turns Speech into Text"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Typed in a field"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__url
+msgid "URL"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/guidance/nudge_guide.xml:0
+msgid "Undo"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_provider__requires_api_key
+msgid ""
+"Untick for a local server such as Ollama that accepts requests without a "
+"key."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Untitled"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_provider__max_output_tokens
+msgid ""
+"Upper limit of tokens generated per answer. 0 lets the provider decide."
+msgstr ""
+
+#. module: nudge
+#: model:ir.actions.act_window,name:nudge.nudge_usage_action
+#: model:ir.ui.menu,name:nudge.nudge_menu_usage
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_list
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_search
+msgid "Usage"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
+msgid "Use"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__user_id
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__user_id
+#: model:ir.model.fields,field_description:nudge.field_nudge_usage__user_id
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_message__role__user
+#: model:res.groups,name:nudge.group_nudge_user
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_conversation_view_search
+msgid "User"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_res_users_settings
+msgid "User Settings"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_profile_slice__kind__security
+msgid "Users and Access"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__values
+msgid "Values"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__version
+msgid "Version"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+#: model:ir.model.fields.selection,name:nudge.selection__res_users_settings__nudge_theme__violet
+msgid "Violet"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_voice
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
+msgid "Voice"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_search
+msgid "Waiting"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__waiting_step_id
+msgid "Waiting For"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_run__state__queued
+msgid "Waiting for Its Turn"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_message__state__waiting
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_run__state__waiting
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_step__state__pending
+msgid "Waiting for the Person"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_form
+msgid "What"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_profile__changes_text
+msgid "What Changed"
+msgstr ""
+
+#. module: nudge
+#: model:ir.ui.menu,name:nudge.nudge_menu_agent
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid "What Nudge Did"
+msgstr ""
+
+#. module: nudge
+#: model:ir.ui.menu,name:nudge.nudge_menu_knowledge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid "What Nudge Knows"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_message__tool_calls
+msgid "What Nudge asked Odoo to do, as the model wrote it."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_profile__overview_text
+msgid ""
+"What Nudge is told about this database at the start of every conversation."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid ""
+"What Nudge may spend at the AI provider, counted in tokens and in the prices"
+" set on the provider. 0 is no limit. Past a limit, Nudge answers that it "
+"must wait."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid ""
+"What Nudge reads of the records goes to the AI provider with the question."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_run__progress
+msgid "What Nudge was doing when it was last heard of."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_message__tool_results
+msgid "What Odoo answered to the calls of the previous message."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid "What Was Spent"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+msgid "What am I looking at?"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+msgid "What can you help me with?"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+msgid "What is the difference between a quotation and a sales order?"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+msgid "What is waiting for me today?"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_step__values
+msgid ""
+"What is written in the records, once checked and read as the fields expect "
+"it."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_run_action
+msgid ""
+"What people ask Nudge to do in Agent mode is listed here, with every step it"
+" took."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+msgid "What should I do next here?"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_message__screen_events
+msgid "What the answer did on the person's screen."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_step__arguments
+msgid "What the model asked for, as it wrote it."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_step__summary
+msgid "What the step does, in the words shown to the person."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_message__snapshot
+msgid "What the user was looking at when sending the message."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_form
+msgid "What was done stays done. Nothing more is done for this request."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_profile_slice__summary
+msgid "What was read from the database."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_step__preview
+msgid "What was shown to the person before they decided."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_step__result
+msgid "What was told to the model once the step was over."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_note_action
+msgid ""
+"What you call things, the rules you follow: \"We call quotations offers\",\n"
+"                \"Orders above 10,000 are approved by the sales manager\"."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/voice/voice_service.js:0
+msgid "What you said could not be turned into text."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+msgid ""
+"What you say is sent to the AI provider, which turns it into text. No "
+"recording is kept."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "When I ask with my screen shared"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_provider__refusal_fallback
+msgid ""
+"When the model declines a request for safety reasons, let the provider retry"
+" it on its recommended fallback model."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_users_settings__nudge_position
+msgid ""
+"Where the avatar was put on the screen, as fractions of its width and "
+"height. Empty puts it in the corner."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_slice_view_form
+msgid "Who Is Told"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_form
+msgid "Who and When"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_search
+msgid "With Changes"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_run__is_background
+msgid ""
+"Worked on while the person does something else. They are told when it is "
+"done, and when their answer is needed."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_run__state__running
+msgid "Working"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.js:0
+msgid "Working on it…"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Write a message first."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+#: code:addons/nudge/static/src/voice/nudge_dictation.xml:0
+msgid "Writing what you said…"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_slice_view_form
+msgid ""
+"Written here, it replaces what was read from the database in what Nudge\n"
+"                            is told, and it is kept when the profile is refreshed."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__values_text
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_form
+msgid "Written in the Records"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "Written in “%s”:"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.js:0
+msgid "Yes"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid "Yes, do it"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.js:0
+msgid "You said no"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_usage.py:0
+msgid ""
+"You used all of your Nudge budget for today. Try again tomorrow, or ask your"
+" administrator."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_usage.py:0
+msgid ""
+"You used all of your Nudge tokens for today. Try again tomorrow, or ask your"
+" administrator."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Your administrator turned screen sharing off."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_voice.py:0
+msgid "Your administrator turned this off."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+msgid "Your administrator turned voice off."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/voice/voice_service.js:0
+msgid "Your browser cannot listen to this language."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/voice/voice_service.js:0
+msgid "Your browser could not reach its speech service."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+msgid ""
+"Your browser turns what you say into text. Chrome, Edge and Safari send the "
+"sound to the servers of their maker to do so."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_usage.py:0
+msgid ""
+"Your company used all of its Nudge budget for this month. Ask your "
+"administrator."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_usage.py:0
+msgid ""
+"Your company used all of its Nudge tokens for this month. Ask your "
+"administrator."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Your screen"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "calls me from anywhere"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
+msgid "e.g. Google Gemini"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
+msgid "e.g. whisper-large-v3"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
+msgid "https://api.example.com/v1"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_profile_slice__kind__activity
+msgid "Use of the Data"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "Nudge was updated. Reload the page, then ask again."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "No answer came. Ask again, in other words."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: model_terms:ir.ui.view,arch_db:nudge.NudgePanel
+msgid "Nudge was updated. Reload the page to use the new version."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: model_terms:ir.ui.view,arch_db:nudge.NudgePanel
+msgid "Reload"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_admin
+msgid "Nudge for Administrators"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: model_terms:ir.ui.view,arch_db:nudge.NudgePanel
+msgid "Send a file with the question: a PDF, a text, an image"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: model_terms:ir.ui.view,arch_db:nudge.NudgePanel
+msgid "Send a file"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: model_terms:ir.ui.view,arch_db:nudge.NudgePanel
+msgid "Remove the file"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "The file is too large. The limit is %s MB."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "Only PDF, text, CSV and image files can be read."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__attachment_name
+msgid "File"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__attachment_id
+msgid "Image Sent"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: model_terms:ir.ui.view,arch_db:nudge.NudgePanel
+msgid "A comparison or a report: how would you like it?"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: model_terms:ir.ui.view,arch_db:nudge.NudgePanel
+msgid "As a spreadsheet, with a chart"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: model_terms:ir.ui.view,arch_db:nudge.NudgePanel
+msgid "In the chat"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_note__kind__lesson
+msgid "Lesson"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_note__state__proposed
+msgid "Proposed"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_note__state__approved
+msgid "Approved"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_note__reason
+msgid "Learnt From"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_note__proposed_by
+msgid "Proposed By"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_note__approved_by
+msgid "Approved By"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_note_view_list
+msgid "Approve"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_note_view_list
+msgid "Refuse"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_note_view_search
+msgid "Waiting for Approval"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_note_view_search
+msgid "Lessons"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_source
+msgid "Nudge Company File"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_source_passage
+msgid "Nudge Company File Passage"
+msgstr ""
+
+#. module: nudge
+#: model:ir.actions.act_window,name:nudge.nudge_source_action
+msgid "Company Files"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_source_view_form
+msgid "Company File"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_source__purpose
+msgid "What It Is For"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_source__group_ids
+msgid "For the Groups"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_source__pages
+msgid "Pages"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_source__chars
+msgid "Characters"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_source__state__empty
+msgid "No File"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_source__state__failed
+msgid "Could Not Be Read"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_source_view_form
+msgid "Read Again"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_source_action
+msgid "Give Nudge your company's files"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__feedback
+msgid "Feedback"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__feedback_note
+msgid "Feedback Note"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_message__feedback__up
+msgid "Useful"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_message__feedback__down
+msgid "Not Useful"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_feedback_action
+msgid "No feedback yet"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_message.py:0
+msgid "A rating is up or down."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_message.py:0
+msgid "Only the person who asked may rate an answer."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_message.py:0
+msgid "Said after the answer to: %s"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: model_terms:ir.ui.view,arch_db:nudge.Message
+msgid "Was this helpful?"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: model_terms:ir.ui.view,arch_db:nudge.Message
+msgid "What was wrong? It becomes a lesson for a manager to approve"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: model_terms:ir.ui.view,arch_db:nudge.Message
+msgid "Thanks, noted."
+msgstr ""

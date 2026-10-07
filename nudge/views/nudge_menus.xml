@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="nudge_menu_root" name="Nudge" sequence="250"
+              web_icon="nudge,static/description/icon.png"
+              groups="nudge.group_nudge_manager"/>
+
+    <menuitem id="nudge_menu_conversations" name="Conversations" sequence="10"
+              parent="nudge_menu_root" action="nudge_conversation_action"/>
+
+    <menuitem id="nudge_menu_agent" name="What Nudge Did" sequence="15"
+              parent="nudge_menu_root"/>
+
+    <menuitem id="nudge_menu_runs" name="Requests" sequence="10"
+              parent="nudge_menu_agent" action="nudge_run_action"/>
+
+    <menuitem id="nudge_menu_steps" name="Changes" sequence="20"
+              parent="nudge_menu_agent" action="nudge_step_action"/>
+
+    <menuitem id="nudge_menu_knowledge" name="What Nudge Knows" sequence="20"
+              parent="nudge_menu_root"/>
+
+    <menuitem id="nudge_menu_profile" name="Database Profile" sequence="10"
+              parent="nudge_menu_knowledge" action="nudge_profile_action"/>
+
+    <menuitem id="nudge_menu_notes" name="Business Notes" sequence="20"
+              parent="nudge_menu_knowledge" action="nudge_note_action"/>
+
+    <menuitem id="nudge_menu_sources" name="Company Files" sequence="25"
+              parent="nudge_menu_knowledge" action="nudge_source_action"/>
+
+    <menuitem id="nudge_menu_feedback" name="Feedback" sequence="28"
+              parent="nudge_menu_knowledge" action="nudge_feedback_action"/>
+
+    <menuitem id="nudge_menu_docs" name="Odoo Documentation" sequence="30"
+              parent="nudge_menu_knowledge" action="nudge_doc_page_action"/>
+
+    <menuitem id="nudge_menu_usage" name="Usage" sequence="30"
+              parent="nudge_menu_root" action="nudge_usage_action"/>
+
+    <menuitem id="nudge_menu_configuration" name="Configuration" sequence="100"
+              parent="nudge_menu_root"/>
+
+    <menuitem id="nudge_menu_settings" name="Settings" sequence="10"
+              parent="nudge_menu_configuration" action="nudge_config_settings_action"
+              groups="base.group_system"/>
+
+    <menuitem id="nudge_menu_providers" name="AI Providers" sequence="20"
+              parent="nudge_menu_configuration" action="nudge_provider_action"/>
+</odoo>

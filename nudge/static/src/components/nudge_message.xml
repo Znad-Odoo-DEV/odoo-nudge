@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="nudge.Message">
+        <div class="o_nudge_message"
+             t-att-class="{
+                o_nudge_message_assistant: isAssistant,
+                o_nudge_message_user: !isAssistant,
+                o_nudge_message_error: props.state === 'error',
+             }"
+             t-att-data-state="props.state">
+            <!-- The direction follows the language of the text, not of the interface -->
+            <div class="o_nudge_bubble" dir="auto">
+                <div t-if="isWaiting and !(props.guidance and props.guidance.length)" class="o_nudge_typing" role="status">
+                    <span class="visually-hidden">Nudge is thinking</span>
+                    <i/><i/><i/>
+                </div>
+                <div t-elif="isAssistant and props.content" class="o_nudge_markdown" t-out="html"/>
+                <div t-elif="props.content" class="o_nudge_plain" t-esc="props.content"/>
+                <div t-if="props.attachment" class="o_nudge_seen o_nudge_attached" t-att-title="props.attachment">
+                    <i class="fa fa-paperclip"/> <span t-esc="props.attachment"/>
+                </div>
+                <div t-if="props.spoken" class="o_nudge_seen o_nudge_said">
+                    <i class="fa fa-microphone"/> <span>Said</span>
+                </div>
+                <div t-if="props.screen" class="o_nudge_seen" t-att-title="props.screen">
+                    <i class="fa fa-eye"/> <span t-esc="props.screen"/>
+                </div>
+                <div t-if="props.guidance and props.guidance.length" class="o_nudge_steps">
+                    <!-- Theirs to choose first: the steps in writing here, or shown on the screen -->
+                    <t t-if="props.choice === 'pending'">
+                        <p class="o_nudge_choice_ask">I can explain it in writing here, or show you on the screen.</p>
+                        <div class="o_nudge_choice">
+                            <button type="button" class="btn btn-sm btn-light o_nudge_choice_text"
+                                    t-on-click="() => props.onChoose('text')">
+                                <i class="fa fa-align-left"/> In writing
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary o_nudge_choice_screen"
+                                    t-on-click="() => props.onChoose('screen')">
+                                <i class="fa fa-hand-o-right"/> On the screen
+                            </button>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <ol>
+                            <li t-foreach="props.guidance" t-as="step" t-key="step_index" t-esc="step.text"/>
+                        </ol>
+                        <button type="button" class="btn btn-sm btn-link o_nudge_show_again"
+                                t-on-click="() => props.onShowGuidance(props.guidance)">
+                            <i class="fa fa-hand-o-right"/> Show me on the screen
+                        </button>
+                    </t>
+                </div>
+                <t t-if="props.card" t-call="nudge.Card"/>
+                <div t-if="isInBackground" class="o_nudge_background" role="status">
+                    <div class="o_nudge_background_head">
+                        <i class="fa fa-circle-o-notch fa-spin"/>
+                        <span>I'm on it in the background. I'll tell you when it is done, or when I need your answer.</span>
+                    </div>
+                    <div t-if="props.progress" class="o_nudge_background_progress" dir="auto" t-esc="props.progress"/>
+                    <button t-if="props.onStop and props.runId" type="button"
+                            class="btn btn-sm btn-link o_nudge_background_stop"
+                            t-on-click="() => props.onStop(props.runId)">
+                        <i class="fa fa-stop"/> Stop
+                    </button>
+                </div>
+                <div t-if="canRate" class="o_nudge_rate" dir="auto">
+                    <t t-if="!props.feedback">
+                        <span class="o_nudge_rate_ask">Was this helpful?</span>
+                        <button type="button" class="o_nudge_rate_up" title="Yes" aria-label="Yes"
+                                t-on-click="() => this.rate('up')"><i class="fa fa-thumbs-o-up"/></button>
+                        <button type="button" class="o_nudge_rate_down" title="No" aria-label="No"
+                                t-on-click="() => this.rate('down')"><i class="fa fa-thumbs-o-down"/></button>
+                    </t>
+                    <t t-elif="props.feedback === 'down' and feedback.asking">
+                        <input type="text" class="o_nudge_rate_note" maxlength="400"
+                               placeholder="What was wrong? It becomes a lesson for a manager to approve"
+                               t-model="feedback.note" t-on-keydown="onNoteKeydown"/>
+                        <button type="button" class="o_nudge_rate_send" t-on-click="sendNote">Send</button>
+                    </t>
+                    <span t-else="" class="o_nudge_rate_done">Thanks, noted.</span>
+                </div>
+                <div t-if="props.error" class="o_nudge_notice" t-esc="props.error"/>
+                <div t-elif="props.state === 'truncated'" class="o_nudge_notice">
+                    The answer was cut short. Ask Nudge to continue.
+                </div>
+                <div t-elif="props.state === 'aborted'" class="o_nudge_notice">Stopped.</div>
+            </div>
+        </div>
+    </t>
+
+    <!-- What Nudge is about to do. Nothing is done before the person says yes. -->
+    <t t-name="nudge.Card">
+        <div class="o_nudge_card" t-att-data-state="props.cardState"
+             t-att-class="{ o_nudge_card_sensitive: props.card.sensitive }">
+            <div class="o_nudge_card_title">
+                <i t-if="props.card.sensitive" class="fa fa-exclamation-triangle"
+                   title="Check it twice: this is not taken back with a click"/>
+                <span t-esc="props.card.title"/>
+            </div>
+            <ul t-if="props.card.records.length" class="o_nudge_card_records">
+                <li t-foreach="props.card.records" t-as="record" t-key="record.id" t-esc="record.name"/>
+            </ul>
+            <t t-call="nudge.CardLines">
+                <t t-set="lines" t-value="props.card.lines"/>
+            </t>
+            <div t-if="props.cardState === 'pending'" class="o_nudge_card_actions">
+                <button type="button" class="btn btn-sm btn-primary o_nudge_confirm"
+                        t-on-click="() => this.decide('confirm')">
+                    Yes, do it
+                </button>
+                <button type="button" class="btn btn-sm btn-light o_nudge_decline"
+                        t-on-click="() => this.decide('decline')">
+                    No
+                </button>
+            </div>
+            <div t-else="" class="o_nudge_card_outcome" role="status">
+                <i t-if="props.cardState === 'deciding'" class="fa fa-circle-o-notch fa-spin"/>
+                <i t-elif="props.cardState === 'done'" class="fa fa-check"/>
+                <i t-elif="props.cardState === 'failed'" class="fa fa-times"/>
+                <span t-esc="outcome"/>
+            </div>
+            <div t-if="props.cardError and props.cardState === 'failed'" class="o_nudge_card_error"
+                 t-esc="props.cardError"/>
+        </div>
+    </t>
+
+    <t t-name="nudge.CardLines">
+        <dl t-if="lines.length" class="o_nudge_card_lines">
+            <t t-foreach="lines" t-as="line" t-key="line_index">
+                <dt t-esc="line.label"/>
+                <dd t-if="line.lines" class="o_nudge_card_nested">
+                    <t t-call="nudge.CardLines">
+                        <t t-set="lines" t-value="line.lines"/>
+                    </t>
+                </dd>
+                <dd t-else="" dir="auto">
+                    <t t-if="'before' in line">
+                        <del class="o_nudge_card_before" t-esc="show(line.before)"/>
+                        <i class="fa fa-long-arrow-right o_nudge_card_arrow"/>
+                    </t>
+                    <span class="o_nudge_card_value" t-esc="show(line.value)"/>
+                </dd>
+            </t>
+        </dl>
+    </t>
+
+</templates>

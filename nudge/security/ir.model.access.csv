@@ -1,0 +1,19 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_nudge_conversation_user,nudge.conversation user,model_nudge_conversation,group_nudge_user,1,1,1,0
+access_nudge_conversation_manager,nudge.conversation manager,model_nudge_conversation,group_nudge_manager,1,1,1,1
+access_nudge_message_user,nudge.message user,model_nudge_message,group_nudge_user,1,0,0,0
+access_nudge_provider_manager,nudge.provider manager,model_nudge_provider,group_nudge_manager,1,0,0,0
+access_nudge_provider_system,nudge.provider system,model_nudge_provider,base.group_system,1,1,1,1
+access_nudge_provider_model_manager,nudge.provider.model manager,model_nudge_provider_model,group_nudge_manager,1,0,0,0
+access_nudge_provider_model_system,nudge.provider.model system,model_nudge_provider_model,base.group_system,1,1,1,1
+access_nudge_profile_manager,nudge.profile manager,model_nudge_profile,group_nudge_manager,1,1,0,0
+access_nudge_profile_slice_manager,nudge.profile.slice manager,model_nudge_profile_slice,group_nudge_manager,1,1,0,0
+access_nudge_note_manager,nudge.note manager,model_nudge_note,group_nudge_manager,1,1,1,1
+access_nudge_source_user,nudge.source user,model_nudge_source,group_nudge_user,1,0,0,0
+access_nudge_source_manager,nudge.source manager,model_nudge_source,group_nudge_manager,1,1,1,1
+access_nudge_source_passage_user,nudge.source.passage user,model_nudge_source_passage,group_nudge_user,1,0,0,0
+access_nudge_doc_page_user,nudge.doc.page user,model_nudge_doc_page,group_nudge_user,1,0,0,0
+access_nudge_doc_passage_user,nudge.doc.passage user,model_nudge_doc_passage,group_nudge_user,1,0,0,0
+access_nudge_run_agent,nudge.run agent,model_nudge_run,group_nudge_agent,1,0,0,0
+access_nudge_step_agent,nudge.step agent,model_nudge_step,group_nudge_agent,1,0,0,0
+access_nudge_usage_manager,nudge.usage manager,model_nudge_usage,group_nudge_manager,1,0,0,0

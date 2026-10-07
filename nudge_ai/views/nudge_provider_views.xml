@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_provider_view_form_ai" model="ir.ui.view">
+        <field name="name">nudge.provider.view.form.inherit.nudge_ai</field>
+        <field name="model">nudge.provider</field>
+        <field name="inherit_id" ref="nudge.nudge_provider_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='api_key']" position="before">
+                <field name="key_source" invisible="not requires_api_key"/>
+            </xpath>
+            <xpath expr="//field[@name='api_key']" position="attributes">
+                <attribute name="invisible">not requires_api_key or key_source != 'own'</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

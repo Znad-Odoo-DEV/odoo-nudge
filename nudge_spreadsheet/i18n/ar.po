@@ -1,0 +1,89 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* nudge_spreadsheet
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5);\n"
+
+#. module: nudge_spreadsheet
+#: model:ir.model,name:nudge_spreadsheet.model_nudge_spreadsheet
+msgid "Nudge Spreadsheet"
+msgstr "جدول بيانات Nudge"
+
+#. module: nudge_spreadsheet
+#: model:ir.actions.act_window,name:nudge_spreadsheet.nudge_spreadsheet_action
+#: model:ir.ui.menu,name:nudge_spreadsheet.nudge_menu_spreadsheets
+msgid "Spreadsheets"
+msgstr "جداول البيانات"
+
+#. module: nudge_spreadsheet
+#: model:ir.model.fields,field_description:nudge_spreadsheet.field_nudge_spreadsheet__name
+msgid "Name"
+msgstr "الاسم"
+
+#. module: nudge_spreadsheet
+#: model:ir.model.fields,field_description:nudge_spreadsheet.field_nudge_spreadsheet__user_id
+msgid "For"
+msgstr "لِـ"
+
+#. module: nudge_spreadsheet
+#: model:ir.model.fields,field_description:nudge_spreadsheet.field_nudge_spreadsheet__company_id
+msgid "Company"
+msgstr "الشركة"
+
+#. module: nudge_spreadsheet
+#: model:ir.model.fields,field_description:nudge_spreadsheet.field_nudge_spreadsheet__conversation_id
+msgid "Conversation"
+msgstr "المحادثة"
+
+#. module: nudge_spreadsheet
+#: model_terms:ir.ui.view,arch_db:nudge_spreadsheet.nudge_spreadsheet_view_list
+msgid "Made On"
+msgstr "أُنشئ في"
+
+#. module: nudge_spreadsheet
+#: model_terms:ir.ui.view,arch_db:nudge_spreadsheet.nudge_spreadsheet_view_list
+msgid "Open"
+msgstr "فتح"
+
+#. module: nudge_spreadsheet
+#: model_terms:ir.ui.view,arch_db:nudge_spreadsheet.nudge_spreadsheet_view_form
+msgid "Open the Spreadsheet"
+msgstr "افتح جدول البيانات"
+
+#. module: nudge_spreadsheet
+#: model_terms:ir.actions.act_window,help:nudge_spreadsheet.nudge_spreadsheet_action
+msgid "No spreadsheet yet"
+msgstr "لا جداول بيانات بعد"
+
+#. module: nudge_spreadsheet
+#: model_terms:ir.actions.act_window,help:nudge_spreadsheet.nudge_spreadsheet_action
+msgid "Ask Nudge for a comparison or a report and choose a spreadsheet: it lands here."
+msgstr "اطلب من Nudge مقارنة أو تقريرًا واختر جدول بيانات: يصل إلى هنا."
+
+#. module: nudge_spreadsheet
+#. odoo-javascript
+#: code:addons/nudge_spreadsheet/static/src/assets/spreadsheet_action_loader.js:0
+msgid "Nudge Spreadsheet"
+msgstr "جدول بيانات Nudge"
+
+#. module: nudge_spreadsheet
+#. odoo-javascript
+#: code:addons/nudge_spreadsheet/static/src/bundle/spreadsheet_action.js:0
+msgid "The changes could not be saved."
+msgstr "تعذّر حفظ التغييرات."
+
+#. module: nudge_spreadsheet
+#. odoo-javascript
+#: code:addons/nudge_spreadsheet/static/src/bundle/spreadsheet_action.xml:0
+msgid "Download"
+msgstr "تنزيل"

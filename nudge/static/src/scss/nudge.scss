@@ -1,0 +1,1356 @@
+// Layout is written with logical properties (inline-start, inline-end) and the
+// root carries a dir attribute: it mirrors in right-to-left languages whether
+// or not the bundle went through rtlcss.
+
+$o-nudge-accent: #6c4df6 !default;
+$o-nudge-accent-strong: #4f35c9 !default;
+$o-nudge-on-accent: #ffffff !default;
+$o-nudge-surface: $o-view-background-color !default;
+$o-nudge-surface-muted: $o-gray-100 !default;
+$o-nudge-border: $o-gray-300 !default;
+$o-nudge-text: $o-main-text-color !default;
+$o-nudge-text-muted: $o-gray-600 !default;
+$o-nudge-danger: $danger !default;
+$o-nudge-shadow: 0 12px 40px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08) !default;
+
+$o-nudge-avatar-size: 56px;
+$o-nudge-gap: 16px;
+$o-nudge-radius: 18px;
+
+// The colours of Nudge, as the themes set them
+@mixin o-nudge-theme($accent, $strong) {
+    --nudge-accent: #{$accent};
+    --nudge-accent-strong: #{$strong};
+    --nudge-accent-rgb: #{red($accent)}, #{green($accent)}, #{blue($accent)};
+    --nudge-accent-strong-rgb: #{red($strong)}, #{green($strong)}, #{blue($strong)};
+}
+
+.o_nudge {
+    @include o-nudge-theme($o-nudge-accent, $o-nudge-accent-strong);
+    position: fixed;
+    inset-block-end: $o-nudge-gap;
+    inset-inline-start: $o-nudge-gap;
+    // Above dialogs, so that Nudge can be asked about them; below tooltips
+    z-index: $zindex-modal + 5;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    pointer-events: none;
+
+    > * {
+        pointer-events: auto;
+    }
+
+    &[data-theme="teal"] {
+        @include o-nudge-theme(#0f8b8d, #0a6466);
+    }
+
+    &[data-theme="amber"] {
+        @include o-nudge-theme(#d97706, #a35a03);
+    }
+
+    &[data-theme="rose"] {
+        @include o-nudge-theme(#db2777, #a61c5a);
+    }
+
+    &[data-theme="slate"] {
+        @include o-nudge-theme(#475569, #1e293b);
+    }
+
+    // Moved by the person: the panel opens on the side where there is room
+    &[data-align="end"] {
+        align-items: flex-end;
+    }
+
+    &[data-flip="down"] {
+        flex-direction: column-reverse;
+    }
+}
+
+// ---------------------------------------------------------------------
+// Avatar
+// ---------------------------------------------------------------------
+
+.o_nudge_avatar {
+    width: $o-nudge-avatar-size;
+    height: $o-nudge-avatar-size;
+    padding: 9px;
+    border: 0;
+    border-radius: 50%;
+    // Dragged with the pointer, on touch screens too
+    touch-action: none;
+    user-select: none;
+    background: linear-gradient(160deg, var(--nudge-accent), var(--nudge-accent-strong));
+    box-shadow: 0 6px 18px rgba(var(--nudge-accent-strong-rgb), 0.45);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+        transform: translateY(-2px) scale(1.04);
+        box-shadow: 0 10px 24px rgba(var(--nudge-accent-strong-rgb), 0.5);
+    }
+
+    &:focus-visible {
+        outline: 3px solid rgba(var(--nudge-accent-rgb), 0.4);
+        outline-offset: 3px;
+    }
+
+    &.o_nudge_avatar_dragging {
+        cursor: grabbing;
+        transform: scale(1.08);
+        transition: none;
+    }
+}
+
+.o_nudge_face {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+
+    .o_nudge_face_bubble {
+        fill: $o-nudge-on-accent;
+    }
+
+    .o_nudge_face_eye {
+        fill: var(--nudge-accent-strong);
+        transform-box: fill-box;
+        transform-origin: center;
+        animation: o-nudge-blink 5s infinite;
+    }
+
+    .o_nudge_face_mouth {
+        fill: none;
+        stroke: var(--nudge-accent-strong);
+        stroke-width: 2.2;
+        stroke-linecap: round;
+    }
+
+    &.o_nudge_face_thinking {
+        animation: o-nudge-bob 1.1s ease-in-out infinite;
+    }
+}
+
+@keyframes o-nudge-blink {
+    0%, 92%, 100% { transform: scaleY(1); }
+    96% { transform: scaleY(0.1); }
+}
+
+@keyframes o-nudge-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+}
+
+// ---------------------------------------------------------------------
+// Panel
+// ---------------------------------------------------------------------
+
+.o_nudge_panel {
+    display: flex;
+    flex-direction: column;
+    width: 380px;
+    height: 560px;
+    max-width: calc(100vw - #{2 * $o-nudge-gap});
+    max-height: calc(100vh - #{$o-nudge-avatar-size + 3 * $o-nudge-gap});
+    overflow: hidden;
+    border: 1px solid $o-nudge-border;
+    border-radius: $o-nudge-radius;
+    background: $o-nudge-surface;
+    color: $o-nudge-text;
+    box-shadow: $o-nudge-shadow;
+    animation: o-nudge-rise 0.18s ease-out;
+}
+
+@keyframes o-nudge-rise {
+    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+    to { opacity: 1; transform: none; }
+}
+
+.o_nudge_header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 12px;
+    background: linear-gradient(160deg, var(--nudge-accent), var(--nudge-accent-strong));
+    color: $o-nudge-on-accent;
+
+    .o_nudge_face {
+        flex: 0 0 auto;
+        width: 28px;
+        height: 28px;
+    }
+}
+
+.o_nudge_title {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-inline: 6px;
+    overflow: hidden;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.o_nudge_icon_button {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: inherit;
+    opacity: 0.85;
+
+    &:hover, &:focus-visible {
+        background: rgba($o-nudge-on-accent, 0.18);
+        opacity: 1;
+    }
+}
+
+.o_nudge_body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+    padding: 14px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+// ---------------------------------------------------------------------
+// Empty states
+// ---------------------------------------------------------------------
+
+.o_nudge_empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin: auto 0;
+    text-align: center;
+
+    .o_nudge_face {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 6px;
+
+        .o_nudge_face_bubble {
+            fill: var(--nudge-accent);
+        }
+
+        .o_nudge_face_eye {
+            fill: $o-nudge-on-accent;
+        }
+
+        .o_nudge_face_mouth {
+            stroke: $o-nudge-on-accent;
+        }
+    }
+}
+
+.o_nudge_empty_title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.o_nudge_empty_text {
+    margin: 0;
+    color: $o-nudge-text-muted;
+}
+
+.o_nudge_setup {
+    margin-top: 10px;
+}
+
+.o_nudge_suggestions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    margin-top: 12px;
+}
+
+.o_nudge_suggestion {
+    padding: 8px 12px;
+    border: 1px solid $o-nudge-border;
+    border-radius: 12px;
+    background: $o-nudge-surface;
+    color: inherit;
+    text-align: start;
+
+    &:hover, &:focus-visible {
+        border-color: var(--nudge-accent);
+        background: rgba(var(--nudge-accent-rgb), 0.08);
+    }
+}
+
+// ---------------------------------------------------------------------
+// Messages
+// ---------------------------------------------------------------------
+
+.o_nudge_message {
+    display: flex;
+
+    &.o_nudge_message_user {
+        justify-content: flex-end;
+
+        .o_nudge_bubble {
+            border-end-end-radius: 4px;
+            background: var(--nudge-accent);
+            color: $o-nudge-on-accent;
+        }
+    }
+
+    &.o_nudge_message_assistant .o_nudge_bubble {
+        border-end-start-radius: 4px;
+        background: $o-nudge-surface-muted;
+    }
+
+    &.o_nudge_message_error .o_nudge_notice {
+        color: $o-nudge-danger;
+    }
+}
+
+.o_nudge_bubble {
+    max-width: 88%;
+    padding: 8px 12px;
+    border-radius: 14px;
+    overflow-wrap: anywhere;
+}
+
+.o_nudge_plain {
+    white-space: pre-wrap;
+}
+
+.o_nudge_rate {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    font-size: 0.8em;
+    color: $o-nudge-text-muted;
+
+    button {
+        border: 0;
+        background: none;
+        color: inherit;
+        padding: 0 4px;
+    }
+
+    .o_nudge_rate_note {
+        flex: 1;
+        min-width: 0;
+        font-size: 1em;
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        border-radius: 6px;
+        padding: 2px 6px;
+    }
+}
+
+.o_nudge_attachment {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 12px 4px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    background: rgba(0, 0, 0, 0.06);
+
+    .o_nudge_attachment_name {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .o_nudge_attachment_drop {
+        border: 0;
+        background: none;
+        color: inherit;
+        padding: 0 4px;
+    }
+}
+
+.o_nudge_attach {
+    border: 0;
+    background: none;
+    color: $o-nudge-text-muted;
+    padding: 0 6px;
+}
+
+.o_nudge_outdated {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    font-size: 0.85em;
+    background: rgba(255, 193, 7, 0.15);
+
+    > span {
+        flex: 1;
+    }
+}
+
+.o_nudge_notice {
+    color: $o-nudge-text-muted;
+    font-size: 0.85em;
+    white-space: pre-wrap;
+
+    * + & {
+        margin-top: 6px;
+    }
+}
+
+.o_nudge_markdown {
+    > :first-child {
+        margin-top: 0;
+    }
+
+    > :last-child {
+        margin-bottom: 0;
+    }
+
+    p, ul, ol, blockquote, pre, table {
+        margin: 0 0 8px;
+    }
+
+    h4, h5, h6 {
+        margin: 10px 0 6px;
+        font-size: 1em;
+        font-weight: 700;
+    }
+
+    ul, ol {
+        padding-inline-start: 20px;
+    }
+
+    code {
+        padding: 1px 5px;
+        border-radius: 5px;
+        background: rgba(var(--nudge-accent-rgb), 0.12);
+        color: inherit;
+        font-size: 0.9em;
+    }
+
+    pre {
+        padding: 8px 10px;
+        border-radius: 8px;
+        background: $o-gray-900;
+        color: $o-gray-100;
+        // Code reads left to right in every language
+        direction: ltr;
+        text-align: left;
+        white-space: pre-wrap;
+
+        code {
+            padding: 0;
+            background: none;
+        }
+    }
+
+    blockquote {
+        padding-inline-start: 10px;
+        border-inline-start: 3px solid $o-nudge-border;
+        color: $o-nudge-text-muted;
+    }
+
+    table {
+        display: block;
+        max-width: 100%;
+        overflow-x: auto;
+        border-collapse: collapse;
+        font-size: 0.9em;
+    }
+
+    th, td {
+        padding: 4px 8px;
+        border: 1px solid $o-nudge-border;
+        text-align: start;
+    }
+
+    a {
+        color: var(--nudge-accent-strong);
+        text-decoration: underline;
+    }
+
+    hr {
+        margin: 8px 0;
+    }
+}
+
+.o_nudge_typing {
+    display: flex;
+    gap: 4px;
+    padding: 6px 2px;
+
+    i {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: $o-nudge-text-muted;
+        animation: o-nudge-typing 1.2s infinite ease-in-out;
+
+        &:nth-child(3) { animation-delay: 0.15s; }
+        &:nth-child(4) { animation-delay: 0.3s; }
+    }
+}
+
+@keyframes o-nudge-typing {
+    0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+    30% { opacity: 1; transform: translateY(-3px); }
+}
+
+// ---------------------------------------------------------------------
+// History
+// ---------------------------------------------------------------------
+
+.o_nudge_history_list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.o_nudge_history_item {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: inherit;
+    text-align: start;
+
+    &:hover, &:focus-visible {
+        background: $o-nudge-surface-muted;
+    }
+}
+
+.o_nudge_history_name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.o_nudge_history_date {
+    flex: 0 0 auto;
+    color: $o-nudge-text-muted;
+    font-size: 0.85em;
+}
+
+// ---------------------------------------------------------------------
+// What Nudge sees
+// ---------------------------------------------------------------------
+
+.o_nudge_screen {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px 0;
+    color: var(--nudge-accent-strong);
+    font-size: 0.85em;
+
+    &.o_nudge_screen_off {
+        color: $o-nudge-text-muted;
+    }
+}
+
+.o_nudge_eye {
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: rgba(var(--nudge-accent-rgb), 0.12);
+    color: inherit;
+
+    .o_nudge_screen_off & {
+        background: $o-nudge-surface-muted;
+    }
+
+    &:hover, &:focus-visible {
+        background: rgba(var(--nudge-accent-rgb), 0.22);
+    }
+}
+
+.o_nudge_screen_text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.o_nudge_seen {
+    margin-top: 4px;
+    overflow: hidden;
+    font-size: 0.8em;
+    opacity: 0.8;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.o_nudge_hint {
+    margin: 14px 0 0;
+    color: $o-nudge-text-muted;
+    font-size: 0.85em;
+
+    .o_nudge_hint_line {
+        display: block;
+        margin-top: 4px;
+    }
+
+    kbd {
+        padding: 2px 6px;
+        border: 1px solid $o-nudge-border;
+        border-radius: 6px;
+        background: $o-nudge-surface-muted;
+        color: inherit;
+        font-size: 0.95em;
+    }
+}
+
+// ---------------------------------------------------------------------
+// Pointing at the screen
+// ---------------------------------------------------------------------
+
+.o_nudge_guide {
+    // Nothing of the guide catches the clicks meant for the screen, except
+    // its own box
+    pointer-events: none;
+}
+
+// The rest of the screen behind frosted glass: four shades around the hole
+// over the element. Their geometry is set inline, as it is geometry. They
+// catch no click: the screen stays usable, and the element is clear.
+.o_nudge_shade {
+    position: fixed;
+    z-index: $zindex-modal + 6;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(2.5px);
+    pointer-events: none;
+    transition: top 0.25s ease, left 0.25s ease, width 0.25s ease, height 0.25s ease;
+}
+
+.o_nudge_ring {
+    position: fixed;
+    z-index: $zindex-modal + 6;
+    border: 3px solid var(--nudge-accent);
+    border-radius: 10px;
+    box-shadow: 0 0 0 4px rgba(var(--nudge-accent-rgb), 0.25), 0 0 24px rgba(var(--nudge-accent-rgb), 0.35);
+    pointer-events: none;
+    animation: o-nudge-pulse 1.6s ease-in-out infinite;
+
+    &.o_nudge_ring_detour {
+        border-style: dashed;
+    }
+}
+
+// Nudge's pointer: an arrow with eyes, its tip at the top left corner of its
+// box. Where it is comes inline, from the guide.
+.o_nudge_cursor {
+    position: fixed;
+    z-index: $zindex-modal + 7;
+    width: 32px;
+    height: 32px;
+    pointer-events: none;
+}
+
+.o_nudge_cursor_arrow {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+
+    .o_nudge_cursor_pressing & {
+        animation: o-nudge-press 0.42s ease-out;
+    }
+}
+
+.o_nudge_cursor_body {
+    fill: var(--nudge-accent);
+    stroke: $o-nudge-on-accent;
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+}
+
+.o_nudge_cursor_eye {
+    fill: $o-nudge-on-accent;
+}
+
+.o_nudge_cursor_pupil {
+    fill: #1f1f24;
+}
+
+// The press, seen as a ripple leaving the tip
+.o_nudge_cursor_ripple {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    border: 2px solid var(--nudge-accent);
+    border-radius: 50%;
+    background: rgba(var(--nudge-accent-rgb), 0.3);
+    opacity: 0;
+    transform: scale(0.3);
+
+    .o_nudge_cursor_pressing & {
+        animation: o-nudge-ripple 0.42s ease-out;
+    }
+}
+
+@keyframes o-nudge-press {
+    0% {
+        transform: scale(1);
+    }
+    35% {
+        transform: scale(0.78);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes o-nudge-ripple {
+    0% {
+        opacity: 0.9;
+        transform: scale(0.3);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(2.2);
+    }
+}
+
+@keyframes o-nudge-pop {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes o-nudge-pulse {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(var(--nudge-accent-rgb), 0.25); }
+    50% { box-shadow: 0 0 0 9px rgba(var(--nudge-accent-rgb), 0.12); }
+}
+
+.o_nudge_guide_bubble {
+    z-index: $zindex-modal + 7;
+    width: 300px;
+    max-width: calc(100vw - #{2 * $o-nudge-gap});
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: linear-gradient(160deg, var(--nudge-accent), var(--nudge-accent-strong));
+    color: $o-nudge-on-accent;
+    box-shadow: $o-nudge-shadow;
+    pointer-events: auto;
+    animation: o-nudge-pop 0.2s ease-out;
+
+    &.o_nudge_guide_lost {
+        position: fixed;
+        inset-block-end: $o-nudge-avatar-size + 2 * $o-nudge-gap;
+        inset-inline-start: $o-nudge-gap;
+    }
+
+    .o_nudge_face {
+        flex: 0 0 auto;
+        width: 24px;
+        height: 24px;
+    }
+
+    .btn-link {
+        color: inherit;
+        opacity: 0.85;
+    }
+
+    .btn-primary {
+        border-color: $o-nudge-on-accent;
+        background: $o-nudge-on-accent;
+        color: var(--nudge-accent-strong);
+    }
+}
+
+.o_nudge_guide_head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.o_nudge_guide_count {
+    flex: 1 1 auto;
+    font-size: 0.85em;
+    opacity: 0.85;
+}
+
+.o_nudge_guide_stop {
+    padding: 0 4px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    opacity: 0.85;
+
+    &:hover, &:focus-visible {
+        opacity: 1;
+    }
+}
+
+.o_nudge_guide_text {
+    margin: 8px 0;
+    overflow-wrap: anywhere;
+}
+
+.o_nudge_guide_notice {
+    margin: 0 0 6px;
+    font-size: 0.85em;
+    opacity: 0.85;
+}
+
+.o_nudge_guide_actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.o_nudge_steps {
+    ol {
+        margin: 0;
+        padding-inline-start: 20px;
+    }
+
+    li + li {
+        margin-top: 4px;
+    }
+
+    .o_nudge_show_again {
+        margin-top: 6px;
+        padding: 0;
+        color: var(--nudge-accent-strong);
+    }
+}
+
+// A question for the person: on the screen, or in writing
+.o_nudge_choice_ask {
+    margin: 0 0 6px;
+}
+
+.o_nudge_choice {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+// The question that waits for its how
+.o_nudge_message_user[data-state="choosing"] .o_nudge_bubble {
+    opacity: 0.75;
+}
+
+// ---------------------------------------------------------------------
+// Agent: the mode, and what waits for a yes
+// ---------------------------------------------------------------------
+
+.o_nudge_modes {
+    display: flex;
+    flex: 0 0 auto;
+    margin-inline-start: auto;
+    padding: 2px;
+    border-radius: 999px;
+    background: $o-nudge-surface-muted;
+}
+
+.o_nudge_mode {
+    padding: 2px 10px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: $o-nudge-text-muted;
+    font-size: 0.95em;
+    font-weight: 600;
+
+    &:hover, &:focus-visible {
+        color: var(--nudge-accent-strong);
+    }
+
+    &.o_nudge_mode_on {
+        background: var(--nudge-accent);
+        color: $o-nudge-on-accent;
+    }
+}
+
+.o_nudge_card {
+    min-width: 240px;
+    margin-top: 8px;
+    padding: 10px 12px;
+    border: 1px solid $o-nudge-border;
+    border-inline-start: 4px solid var(--nudge-accent);
+    border-radius: 10px;
+    background: $o-nudge-surface;
+    color: $o-nudge-text;
+
+    &.o_nudge_card_sensitive {
+        border-inline-start-color: $warning;
+
+        .o_nudge_card_title .fa {
+            color: $warning;
+        }
+    }
+
+    &[data-state="done"] {
+        border-inline-start-color: $success;
+    }
+
+    &[data-state="failed"] {
+        border-inline-start-color: $o-nudge-danger;
+    }
+
+    &[data-state="declined"], &[data-state="cancelled"] {
+        border-inline-start-color: $o-nudge-border;
+        opacity: 0.75;
+    }
+}
+
+.o_nudge_card_title {
+    font-weight: 700;
+}
+
+.o_nudge_card_title .fa,
+.o_nudge_card_outcome .fa {
+    margin-inline-end: 6px;
+}
+
+.o_nudge_card_records {
+    margin: 4px 0 0;
+    padding: 0;
+    list-style: none;
+    font-weight: 600;
+}
+
+.o_nudge_card_lines {
+    display: grid;
+    grid-template-columns: minmax(80px, max-content) 1fr;
+    gap: 2px 10px;
+    margin: 8px 0 0;
+
+    dt {
+        color: $o-nudge-text-muted;
+        font-weight: 400;
+    }
+
+    dd {
+        min-width: 0;
+        margin: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .o_nudge_card_nested {
+        grid-column: 1 / -1;
+        padding-inline-start: 10px;
+        border-inline-start: 2px solid $o-nudge-border;
+
+        .o_nudge_card_lines {
+            margin-top: 2px;
+        }
+    }
+}
+
+.o_nudge_card_before {
+    color: $o-nudge-text-muted;
+}
+
+.o_nudge_card_arrow {
+    margin-inline: 6px;
+    color: $o-nudge-text-muted;
+
+    [dir="rtl"] & {
+        transform: scaleX(-1);
+    }
+}
+
+.o_nudge_card_value {
+    font-weight: 600;
+}
+
+.o_nudge_card_actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.o_nudge_card_outcome {
+    margin-top: 8px;
+    color: $o-nudge-text-muted;
+    font-size: 0.9em;
+
+    [data-state="done"] > & {
+        color: $success;
+    }
+
+    [data-state="failed"] > & {
+        color: $o-nudge-danger;
+    }
+}
+
+.o_nudge_card_error {
+    margin-top: 4px;
+    color: $o-nudge-danger;
+    font-size: 0.85em;
+    white-space: pre-wrap;
+}
+
+// ---------------------------------------------------------------------
+// In the background
+// ---------------------------------------------------------------------
+
+.o_nudge_later {
+    flex: 0 0 auto;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border: 1px solid $o-nudge-border;
+    border-radius: 50%;
+    background: $o-nudge-surface;
+    color: var(--nudge-accent-strong);
+
+    &:hover:not(:disabled), &:focus-visible {
+        border-color: var(--nudge-accent);
+        background: rgba(var(--nudge-accent-rgb), 0.08);
+    }
+
+    &:disabled {
+        opacity: 0.4;
+    }
+}
+
+.o_nudge_background {
+    color: $o-nudge-text-muted;
+    font-size: 0.95em;
+}
+
+.o_nudge_background_head {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.o_nudge_background_progress {
+    margin-top: 6px;
+    padding-inline-start: 10px;
+    border-inline-start: 2px solid $o-nudge-border;
+    color: $o-nudge-text;
+}
+
+.o_nudge_background_stop {
+    margin-top: 4px;
+    padding: 0;
+    color: $o-nudge-danger;
+}
+
+.o_nudge_working {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--nudge-accent-strong);
+}
+
+.o_nudge_badge {
+    position: absolute;
+    inset-block-start: -4px;
+    inset-inline-end: -4px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border: 2px solid $o-nudge-surface;
+    border-radius: 999px;
+    background: $o-nudge-danger;
+    color: $o-nudge-on-accent;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+}
+
+.o_nudge_avatar {
+    position: relative;
+}
+
+.o_nudge_history_news {
+    flex: 0 0 auto;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: $o-nudge-surface-muted;
+    color: $o-nudge-text-muted;
+    font-size: 0.75em;
+    font-weight: 600;
+
+    &.o_nudge_history_news_unseen {
+        background: var(--nudge-accent);
+        color: $o-nudge-on-accent;
+    }
+}
+
+// ---------------------------------------------------------------------
+// Preferences
+// ---------------------------------------------------------------------
+
+.o_nudge_settings {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.o_nudge_setting {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+
+    &.o_nudge_setting_inline {
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+    }
+}
+
+.o_nudge_setting_label {
+    font-weight: 600;
+}
+
+.o_nudge_settings_title {
+    margin: 6px 0 0;
+    padding-top: 12px;
+    border-top: 1px solid $o-nudge-border;
+    color: $o-nudge-text-muted;
+    font-size: 0.8em;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+// ---------------------------------------------------------------------
+// Voice
+// ---------------------------------------------------------------------
+
+.o_nudge_mic_dot {
+    display: inline-block;
+    flex: 0 0 auto;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: $o-nudge-danger;
+    animation: o-nudge-listen 1.2s ease-in-out infinite;
+}
+
+@keyframes o-nudge-listen {
+    0%, 100% { box-shadow: 0 0 0 0 rgba($o-nudge-danger, 0.45); }
+    50% { box-shadow: 0 0 0 6px rgba($o-nudge-danger, 0); }
+}
+
+.o_nudge_voice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px 0;
+    color: var(--nudge-accent-strong);
+    font-size: 0.85em;
+
+    &.o_nudge_voice_error {
+        color: $o-nudge-text-muted;
+    }
+}
+
+.o_nudge_voice_text {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.o_nudge_mic,
+.o_nudge_language {
+    flex: 0 0 auto;
+    height: 38px;
+    padding: 0;
+    border: 1px solid $o-nudge-border;
+    background: $o-nudge-surface;
+    color: var(--nudge-accent-strong);
+
+    &:hover, &:focus-visible {
+        border-color: var(--nudge-accent);
+        background: rgba(var(--nudge-accent-rgb), 0.08);
+    }
+}
+
+.o_nudge_mic {
+    width: 38px;
+    border-radius: 50%;
+
+    &.o_nudge_mic_on {
+        border-color: $o-nudge-danger;
+        background: $o-nudge-danger;
+        color: $o-nudge-on-accent;
+        animation: o-nudge-listen 1.2s ease-in-out infinite;
+    }
+}
+
+.o_nudge_language {
+    min-width: 34px;
+    padding: 0 6px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: 700;
+}
+
+.o_nudge_avatar.o_nudge_avatar_listening {
+    box-shadow: 0 0 0 4px rgba($o-nudge-danger, 0.55), 0 6px 18px rgba(var(--nudge-accent-strong-rgb), 0.45);
+}
+
+.o_nudge_dictation {
+    z-index: $zindex-modal + 7;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 420px;
+    padding: 6px 8px 6px 12px;
+    border-radius: 999px;
+    background: linear-gradient(160deg, var(--nudge-accent), var(--nudge-accent-strong));
+    color: $o-nudge-on-accent;
+    box-shadow: $o-nudge-shadow;
+    font-size: 0.9em;
+    pointer-events: auto;
+    user-select: none;
+
+    .o_nudge_mic_dot {
+        background: $o-nudge-on-accent;
+        animation-name: o-nudge-listen-light;
+    }
+
+    .o_nudge_language,
+    .o_nudge_dictation_stop {
+        height: 28px;
+        min-width: 28px;
+        border: 0;
+        border-radius: 999px;
+        background: rgba($o-nudge-on-accent, 0.18);
+        color: inherit;
+
+        &:hover, &:focus-visible {
+            background: rgba($o-nudge-on-accent, 0.32);
+        }
+    }
+}
+
+@keyframes o-nudge-listen-light {
+    0%, 100% { box-shadow: 0 0 0 0 rgba($o-nudge-on-accent, 0.6); }
+    50% { box-shadow: 0 0 0 6px rgba($o-nudge-on-accent, 0); }
+}
+
+.o_nudge_dictation_text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// ---------------------------------------------------------------------
+// Composer
+// ---------------------------------------------------------------------
+
+.o_nudge_composer {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 10px 12px;
+    border-top: 1px solid $o-nudge-border;
+}
+
+.o_nudge_input {
+    flex: 1 1 auto;
+    min-height: 38px;
+    max-height: 120px;
+    padding: 8px 12px;
+    border: 1px solid $o-nudge-border;
+    border-radius: 12px;
+    background: $o-nudge-surface;
+    color: inherit;
+    resize: none;
+    field-sizing: content;
+
+    &:focus {
+        border-color: var(--nudge-accent);
+        outline: 2px solid rgba(var(--nudge-accent-rgb), 0.25);
+    }
+}
+
+.o_nudge_send {
+    flex: 0 0 auto;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--nudge-accent);
+    color: $o-nudge-on-accent;
+
+    &:hover:not(:disabled), &:focus-visible {
+        background: var(--nudge-accent-strong);
+    }
+
+    &:disabled {
+        opacity: 0.4;
+    }
+}
+
+// ---------------------------------------------------------------------
+// Small screens, reduced motion
+// ---------------------------------------------------------------------
+
+@include media-breakpoint-down(sm) {
+    .o_nudge {
+        inset-block-end: 8px;
+        inset-inline-start: 8px;
+    }
+
+    .o_nudge_open {
+        inset-inline-end: 8px;
+    }
+
+    .o_nudge_panel {
+        width: 100%;
+        max-width: none;
+        height: calc(100vh - #{$o-nudge-avatar-size + 36px});
+        height: calc(100dvh - #{$o-nudge-avatar-size + 36px});
+    }
+
+    .o_nudge_dictation {
+        max-width: calc(100vw - 16px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .o_nudge_avatar,
+    .o_nudge_panel,
+    .o_nudge_ring,
+    .o_nudge_shade,
+    .o_nudge_cursor_arrow,
+    .o_nudge_cursor_ripple,
+    .o_nudge_guide_bubble,
+    .o_nudge_face,
+    .o_nudge_face .o_nudge_face_eye,
+    .o_nudge_mic_dot,
+    .o_nudge_mic,
+    .o_nudge_typing i {
+        animation: none;
+        transition: none;
+    }
+}

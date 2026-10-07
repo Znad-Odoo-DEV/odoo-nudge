@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_nudge_spreadsheet_user,nudge.spreadsheet user,model_nudge_spreadsheet,nudge.group_nudge_user,1,1,1,1
+access_nudge_spreadsheet_system,nudge.spreadsheet system,model_nudge_spreadsheet,base.group_system,1,1,1,1

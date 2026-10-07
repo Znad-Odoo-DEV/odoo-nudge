@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="nudge.Panel">
+        <section class="o_nudge_panel" role="dialog" aria-label="Nudge" t-on-keydown="onKeydown">
+            <header class="o_nudge_header">
+                <NudgeFace isThinking="state.isStreaming"/>
+                <span t-if="state.view === 'history'" class="o_nudge_title">History</span>
+                <span t-elif="state.view === 'settings'" class="o_nudge_title">Preferences</span>
+                <span t-elif="state.title" class="o_nudge_title" dir="auto" t-esc="state.title"/>
+                <span t-else="" class="o_nudge_title">Nudge</span>
+                <button t-if="voiceState.isSpeaking" type="button" class="o_nudge_icon_button o_nudge_quiet"
+                        title="Stop reading" aria-label="Stop reading"
+                        t-on-click="() => this.voice.stopSpeaking()">
+                    <i class="fa fa-volume-off"/>
+                </button>
+                <button type="button" class="o_nudge_icon_button o_nudge_new" title="New chat" aria-label="New chat"
+                        t-on-click="() => this.nudge.newConversation()">
+                    <i class="fa fa-plus"/>
+                </button>
+                <button t-if="state.view === 'chat'" type="button" class="o_nudge_icon_button o_nudge_history"
+                        title="History" aria-label="History" t-on-click="() => this.nudge.showHistory()">
+                    <i class="fa fa-history"/>
+                </button>
+                <button t-if="state.view === 'chat'" type="button" class="o_nudge_icon_button o_nudge_preferences"
+                        title="Preferences" aria-label="Preferences" t-on-click="() => this.nudge.showSettings()">
+                    <i class="fa fa-cog"/>
+                </button>
+                <button t-if="state.view !== 'chat'" type="button" class="o_nudge_icon_button o_nudge_back"
+                        title="Back to chat" aria-label="Back to chat" t-on-click="() => this.nudge.showChat()">
+                    <i class="fa fa-comment-o"/>
+                </button>
+                <button type="button" class="o_nudge_icon_button o_nudge_close" title="Close" aria-label="Close"
+                        t-on-click="() => this.nudge.close()">
+                    <i class="fa fa-times"/>
+                </button>
+            </header>
+
+            <div t-if="state.isOutdated" class="o_nudge_outdated" role="alert">
+                <span>Nudge was updated. Reload the page to use the new version.</span>
+                <button type="button" class="btn btn-sm btn-primary" t-on-click="() => this.nudge.reloadPage()">Reload</button>
+            </div>
+            <div class="o_nudge_body" t-ref="body">
+                <t t-if="state.view === 'history'">
+                    <p t-if="!state.conversations.length" class="o_nudge_empty_text">No conversation yet.</p>
+                    <ul t-else="" class="o_nudge_history_list">
+                        <li t-foreach="state.conversations" t-as="conversation" t-key="conversation.id">
+                            <button type="button" class="o_nudge_history_item"
+                                    t-on-click="() => this.nudge.openConversation(conversation.id)">
+                                <span t-if="conversation.name" class="o_nudge_history_name" dir="auto" t-esc="conversation.name"/>
+                                <span t-else="" class="o_nudge_history_name">Untitled</span>
+                                <span t-if="newsBadge(conversation.id)" class="o_nudge_history_news"
+                                      t-att-class="{ o_nudge_history_news_unseen: newsBadge(conversation.id).unseen }"
+                                      t-esc="newsBadge(conversation.id).text"/>
+                                <span class="o_nudge_history_date" t-esc="formatDate(conversation.write_date)"/>
+                            </button>
+                        </li>
+                    </ul>
+                </t>
+                <div t-elif="state.view === 'settings'" class="o_nudge_settings">
+                    <label class="o_nudge_setting">
+                        <span class="o_nudge_setting_label">Shortcut to call Nudge</span>
+                        <select class="o_nudge_hotkey form-select"
+                                t-on-change="(ev) => this.nudge.setHotkey(ev.target.value)">
+                            <option t-foreach="hotkeys" t-as="option" t-key="option.value"
+                                    t-att-value="option.value" t-att-selected="option.value === state.hotkey"
+                                    t-esc="option.label"/>
+                        </select>
+                    </label>
+                    <label class="o_nudge_setting">
+                        <span class="o_nudge_setting_label">Colour</span>
+                        <select class="o_nudge_theme form-select"
+                                t-on-change="(ev) => this.nudge.setTheme(ev.target.value)">
+                            <option t-foreach="themes" t-as="option" t-key="option.value"
+                                    t-att-value="option.value" t-att-selected="option.value === state.theme"
+                                    t-esc="option.label"/>
+                        </select>
+                    </label>
+                    <label class="o_nudge_setting">
+                        <span class="o_nudge_setting_label">When I ask with my screen shared</span>
+                        <select class="o_nudge_explain form-select"
+                                t-on-change="(ev) => this.nudge.setExplain(ev.target.value)">
+                            <option t-foreach="explainOptions" t-as="option" t-key="option.value"
+                                    t-att-value="option.value" t-att-selected="option.value === state.explain"
+                                    t-esc="option.label"/>
+                        </select>
+                    </label>
+                    <p class="o_nudge_empty_text">
+                        <span>Drag the avatar to put Nudge where you want it.</span>
+                        <button t-if="state.position" type="button" class="btn btn-sm btn-link o_nudge_corner"
+                                t-on-click="() => this.nudge.setPosition(null)">
+                            Put it back in the corner
+                        </button>
+                    </p>
+                    <label t-if="state.canShareScreen" class="o_nudge_setting o_nudge_setting_inline">
+                        <input type="checkbox" class="o_nudge_share form-check-input" t-att-checked="state.shareScreen"
+                               t-on-change="(ev) => this.nudge.setShareScreen(ev.target.checked)"/>
+                        <span class="o_nudge_setting_label">Let Nudge see my screen</span>
+                    </label>
+                    <p t-if="state.canShareScreen" class="o_nudge_empty_text">
+                        Nudge looks at your screen only when you send it a message. Nothing is watched in the background.
+                    </p>
+                    <p t-else="" class="o_nudge_empty_text">
+                        Your administrator turned screen sharing off.
+                    </p>
+
+                    <h6 class="o_nudge_settings_title">Voice</h6>
+                    <t t-if="canTalk">
+                        <p class="o_nudge_empty_text">
+                            Hold the shortcut that calls Nudge and talk; let go when you are done.
+                            Or press the microphone.
+                        </p>
+                        <label class="o_nudge_setting">
+                            <span class="o_nudge_setting_label">I speak</span>
+                            <select class="o_nudge_voice_language form-select"
+                                    t-on-change="(ev) => this.voice.setLanguage(ev.target.value)">
+                                <option t-foreach="languages" t-as="option" t-key="option.value"
+                                        t-att-value="option.value"
+                                        t-att-selected="option.value === voiceState.languageSetting"
+                                        t-esc="option.label"/>
+                            </select>
+                        </label>
+                        <label class="o_nudge_setting">
+                            <span class="o_nudge_setting_label">Shortcut to dictate in a field</span>
+                            <select class="o_nudge_dictation_hotkey form-select"
+                                    t-on-change="(ev) => this.nudge.setDictationHotkey(ev.target.value)">
+                                <option t-foreach="dictationHotkeys" t-as="option" t-key="option.value"
+                                        t-att-value="option.value"
+                                        t-att-selected="option.value === state.dictationHotkey"
+                                        t-esc="option.label"/>
+                            </select>
+                        </label>
+                        <p class="o_nudge_empty_text">
+                            Click in a field, press the shortcut, talk, press it again.
+                        </p>
+                    </t>
+                    <p class="o_nudge_empty_text o_nudge_voice_note" t-esc="voiceNote"/>
+                    <t t-if="voiceState.isAllowed">
+                        <label class="o_nudge_setting o_nudge_setting_inline">
+                            <input type="checkbox" class="o_nudge_speak form-check-input"
+                                   t-att-checked="voiceState.speakAnswers"
+                                   t-on-change="(ev) => this.voice.setSpeakAnswers(ev.target.checked)"/>
+                            <span class="o_nudge_setting_label">Read the answers to me</span>
+                        </label>
+                        <p t-if="voiceState.speakAnswers and silentLanguages" class="o_nudge_empty_text o_nudge_silent">
+                            <span>This device has no voice to read answers written in:</span>
+                            <t t-esc="' ' + silentLanguages"/>
+                        </p>
+                    </t>
+                </div>
+                <div t-elif="!state.isConfigured" class="o_nudge_empty">
+                    <NudgeFace/>
+                    <p class="o_nudge_empty_title">Nudge needs an AI provider</p>
+                    <p t-if="state.isManager" class="o_nudge_empty_text">
+                        Add an API key to one of the providers, then open Nudge again.
+                    </p>
+                    <p t-else="" class="o_nudge_empty_text">Ask your administrator to set it up.</p>
+                    <button t-if="state.isManager" type="button" class="btn btn-primary o_nudge_setup"
+                            t-on-click="openProviders">
+                        Set up a provider
+                    </button>
+                </div>
+                <div t-elif="!state.messages.length" class="o_nudge_empty">
+                    <NudgeFace/>
+                    <p class="o_nudge_empty_title" t-esc="greeting"/>
+                    <p t-if="isAgent" class="o_nudge_empty_text o_nudge_agent_text">
+                        Tell me what to do. I ask you before I change anything.
+                    </p>
+                    <p t-if="isAgent and workingCount" class="o_nudge_empty_text o_nudge_working">
+                        <i class="fa fa-circle-o-notch fa-spin"/>
+                        <t t-esc="workingText"/>
+                    </p>
+                    <p t-elif="isSeeing and state.screenHasView" class="o_nudge_empty_text">
+                        Ask me about what is on your screen.
+                    </p>
+                    <p t-else="" class="o_nudge_empty_text">Ask me anything about Odoo.</p>
+                    <div class="o_nudge_suggestions">
+                        <button t-foreach="suggestions" t-as="suggestion" t-key="suggestion_index"
+                                type="button" class="o_nudge_suggestion" dir="auto"
+                                t-on-click="() => this.send(suggestion)" t-esc="suggestion"/>
+                    </div>
+                    <p t-if="hotkeyHint" class="o_nudge_hint">
+                        <kbd t-esc="hotkeyHint"/> calls me from anywhere
+                        <span t-if="canTalk" class="o_nudge_hint_line">Hold it to talk to me</span>
+                    </p>
+                </div>
+                <t t-else="">
+                    <NudgeMessage t-foreach="state.messages" t-as="message" t-key="message.id"
+                                  role="message.role" content="message.content"
+                                  state="message.state" error="message.error" screen="message.screen"
+                                  guidance="message.guidance" spoken="message.spoken"
+                                  attachment="message.attachment"
+                                  feedback="message.feedback" ratable="typeof message.id === 'number'"
+                                  onRate="(value, note) => this.nudge.rate(message.id, value, note)"
+                                  card="message.card"
+                                  cardState="message.card ? message.card.state : ''"
+                                  cardError="message.card ? message.card.error : ''"
+                                  onDecide="(stepId, decision) => this.nudge.decide(stepId, decision)"
+                                  runId="message.runId" progress="message.progress"
+                                  onStop="(runId) => this.nudge.stopRun(runId)"
+                                  onShowGuidance="(steps) => this.nudge.showGuidance(steps)"
+                                  choice="message.choice"
+                                  onChoose="(how) => this.nudge.chooseGuidance(message.id, how)"/>
+                    <!-- Theirs to say first: on the screen, or in writing -->
+                    <div t-if="state.asking" class="o_nudge_message o_nudge_message_assistant o_nudge_ask" role="status">
+                        <div class="o_nudge_bubble">
+                            <t t-if="state.asking.kind === 'report'">
+                                <p class="o_nudge_choice_ask">A comparison or a report: how would you like it?</p>
+                                <div class="o_nudge_choice">
+                                    <button type="button" class="btn btn-sm btn-primary o_nudge_report_sheet"
+                                            t-on-click="() => this.nudge.chooseReport('sheet')">
+                                        <i class="fa fa-table"/> As a spreadsheet, with a chart
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-light o_nudge_report_chat"
+                                            t-on-click="() => this.nudge.chooseReport('chat')">
+                                        <i class="fa fa-comment-o"/> In the chat
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-link o_nudge_explain_cancel"
+                                            t-on-click="() => this.nudge.cancelExplain()">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </t>
+                            <p t-if="state.asking.kind !== 'report'" class="o_nudge_choice_ask">How would you like it?</p>
+                            <div t-if="state.asking.kind !== 'report'" class="o_nudge_choice">
+                                <button type="button" class="btn btn-sm btn-primary o_nudge_explain_screen"
+                                        t-on-click="() => this.nudge.chooseExplain('screen')">
+                                    <i class="fa fa-hand-o-right"/> On the screen, with the pointer
+                                </button>
+                                <button type="button" class="btn btn-sm btn-light o_nudge_explain_text"
+                                        t-on-click="() => this.nudge.chooseExplain('text')">
+                                    <i class="fa fa-align-left"/> In writing
+                                </button>
+                                <button t-if="state.mode === 'agent'" type="button"
+                                        class="btn btn-sm btn-light o_nudge_explain_do"
+                                        t-on-click="() => this.nudge.chooseExplain('do')">
+                                    <i class="fa fa-bolt"/> Do it for me
+                                </button>
+                                <button type="button" class="btn btn-sm btn-link o_nudge_explain_cancel"
+                                        t-on-click="() => this.nudge.cancelExplain()">
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+
+            <div t-if="state.isConfigured and state.view === 'chat' and (state.canShareScreen or state.canUseAgent)"
+                 class="o_nudge_screen" t-att-class="{ o_nudge_screen_off: !state.shareScreen }">
+                <t t-if="state.canShareScreen">
+                    <button type="button" class="o_nudge_eye"
+                            t-att-aria-pressed="state.shareScreen ? 'true' : 'false'"
+                            title="Let Nudge see my screen" aria-label="Let Nudge see my screen"
+                            t-on-click="() => this.nudge.setShareScreen(!state.shareScreen)">
+                        <i class="fa" t-att-class="state.shareScreen ? 'fa-eye' : 'fa-eye-slash'"/>
+                    </button>
+                    <span t-if="!state.shareScreen" class="o_nudge_screen_text">Screen not shared</span>
+                    <span t-elif="state.screenSummary" class="o_nudge_screen_text" dir="auto"
+                          t-att-title="state.screenSummary" t-esc="state.screenSummary"/>
+                    <span t-else="" class="o_nudge_screen_text">Your screen</span>
+                </t>
+                <!-- Talk: Nudge explains and shows. Agent: Nudge does the work. -->
+                <div t-if="state.canUseAgent" class="o_nudge_modes" role="group" aria-label="Mode">
+                    <button type="button" class="o_nudge_mode o_nudge_mode_talk"
+                            t-att-class="{ o_nudge_mode_on: state.mode === 'talk' }"
+                            t-att-aria-pressed="state.mode === 'talk' ? 'true' : 'false'"
+                            title="Nudge explains and shows; you do the work"
+                            t-on-click="() => this.nudge.setMode('talk')">
+                        Talk
+                    </button>
+                    <button type="button" class="o_nudge_mode o_nudge_mode_agent"
+                            t-att-class="{ o_nudge_mode_on: state.mode === 'agent' }"
+                            t-att-aria-pressed="state.mode === 'agent' ? 'true' : 'false'"
+                            title="Nudge does the work, and asks you before each change"
+                            t-on-click="() => this.nudge.setMode('agent')">
+                        Agent
+                    </button>
+                </div>
+            </div>
+
+            <div t-if="state.isConfigured and state.view === 'chat' and canTalk and (isListening or voiceState.error)"
+                 class="o_nudge_voice" role="status"
+                 t-att-class="{ o_nudge_voice_error: !isListening }">
+                <t t-if="isTranscribing">
+                    <i class="fa fa-circle-o-notch fa-spin"/> <span class="o_nudge_voice_text">Writing what you said…</span>
+                </t>
+                <t t-elif="isListening">
+                    <span class="o_nudge_mic_dot"/> <span class="o_nudge_voice_text">I'm listening…</span>
+                </t>
+                <span t-else="" class="o_nudge_voice_text" t-esc="voiceState.error"/>
+            </div>
+
+            <div t-if="state.attachment" class="o_nudge_attachment">
+                <i class="fa fa-paperclip"/>
+                <span class="o_nudge_attachment_name" t-esc="state.attachment.name"/>
+                <button type="button" class="o_nudge_attachment_drop" title="Remove the file"
+                        aria-label="Remove the file" t-on-click="() => this.nudge.setAttachment(null)">
+                    <i class="fa fa-times"/>
+                </button>
+            </div>
+            <form t-if="state.isConfigured and state.view === 'chat'" class="o_nudge_composer"
+                  t-on-submit.prevent="onSubmit">
+                <input type="file" class="d-none" t-ref="file"
+                       accept=".pdf,.txt,.csv,.md,.json,.xml,image/png,image/jpeg,image/webp,image/gif"
+                       t-on-change="onFileChosen"/>
+                <button t-if="!state.isStreaming" type="button" class="o_nudge_attach"
+                        title="Send a file with the question: a PDF, a text, an image"
+                        aria-label="Send a file" t-on-click="pickFile">
+                    <i class="fa fa-paperclip"/>
+                </button>
+                <textarea class="o_nudge_input" rows="1" dir="auto" maxlength="8000"
+                          t-att-placeholder="placeholder" aria-label="Message"
+                          t-ref="input" t-model="state.draft" t-on-keydown="onInputKeydown"
+                          t-att-readonly="isListening"
+                          t-on-focus="() => this.nudge.lookAtScreen()"/>
+                <t t-if="canTalk and !state.isStreaming">
+                    <button type="button" class="o_nudge_language"
+                            title="Language I speak" aria-label="Language I speak"
+                            t-on-click="() => this.voice.switchLanguage()" t-esc="languageName"/>
+                    <button type="button" class="o_nudge_mic"
+                            t-att-class="{ o_nudge_mic_on: isListening }"
+                            t-att-aria-pressed="isListening ? 'true' : 'false'"
+                            title="Talk to Nudge" aria-label="Talk to Nudge"
+                            t-on-click="() => this.nudge.toggleTalk()">
+                        <i class="fa" t-att-class="isListening ? 'fa-stop' : 'fa-microphone'"/>
+                    </button>
+                </t>
+                <button t-if="isAgent and !state.isStreaming" type="button" class="o_nudge_later"
+                        title="Do it in the background: I'll tell you when it is done"
+                        aria-label="Do it in the background"
+                        t-att-disabled="!canSend" t-on-click="onSubmitLater">
+                    <i class="fa fa-clock-o"/>
+                </button>
+                <button t-if="state.isStreaming" type="button" class="o_nudge_send o_nudge_stop"
+                        title="Stop" aria-label="Stop" t-on-click="() => this.nudge.stop()">
+                    <i class="fa fa-stop"/>
+                </button>
+                <button t-else="" type="submit" class="o_nudge_send" title="Send" aria-label="Send"
+                        t-att-disabled="!canSend">
+                    <i class="fa fa-arrow-up"/>
+                </button>
+            </form>
+        </section>
+    </t>
+
+</templates>
