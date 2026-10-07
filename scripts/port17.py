@@ -90,6 +90,11 @@ for name in files("nudge/**/*.py", "nudge_mail/**/*.py"):
     write(name, s2)
     print("ported", name, n, "translations")
 
+# ---------------------------------------------------------------- the email_outgoing sanitize mode is 18
+# An Html field of 17 takes sanitize as a yes or no: the styles of an email are kept with sanitize_style
+for name in files("nudge_mail/**/*.py"):
+    sub(name, r'sanitize="email_outgoing"', "sanitize_style=True")
+
 # ---------------------------------------------------------------- has_access, check_access are 18
 write("nudge/models/compat17.py", '''from odoo import models
 from odoo.exceptions import AccessError
