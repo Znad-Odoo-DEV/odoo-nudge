@@ -133,4 +133,15 @@ steer Nudge was closed:
   `env`, no `sudo`, no other user or company, no write, no search, no secret.
 - Deletion is for what Nudge or Studio made, when asked for by name: a rule, an action, a
   template, a scheduled action, a view or a field that belongs to a module is never deleted.
+- A designed email (Nudge: Emails) prints what the model wrote through `t-out` of a literal,
+  escaped whatever QWeb does with the static text of a mail template; a value of the record is a
+  path of fields the administrator may read, through single records only, printed with
+  `t-field`; there is no expression of the model's own.
+- The window of an email with review renders its template as the system, for a record the
+  person can read and behind the groups of the button it goes with: the email shows what its
+  designer put in it. What the button does runs as the person, before the email leaves; an
+  email that fails takes that work back with it. The method is a public method of the model,
+  on its form, never a write, an unlink or a sudo.
+- A test email goes to the administrator's own address only, after a yes.
+- The preview of an email on a card is drawn in a sandboxed frame without scripts.
 - Every step is in What Nudge Did, with what was asked and what was made.
