@@ -573,6 +573,7 @@ class NudgeConversation(models.Model):
             "check_python_code": self.env._("Checked code"),
             "try_automation": self.env._("Tried it on a dummy record"),
             "test_import": self.env._("Tried the import"),
+            "read_view": self.env._("Read a screen's definition"),
         }
         text = words.get(call["name"], call["name"])
         if "%s" in text:

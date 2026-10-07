@@ -174,6 +174,19 @@ In the preferences (gear icon), tick **Read the answers to me**. The loudspeaker
 of the panel stops the reading. Without a voice for Arabic on your device, Arabic answers are
 written only; Windows offers one under Settings ‣ Time & language ‣ Speech.
 
+## For administrators: build with Nudge (Developer mode)
+
+Off by default. When an administrator switches on **Nudge for Developers** (Settings ‣ Nudge),
+administrators get a third mode, **Dev**, where Nudge builds as a senior Odoo developer would:
+automation rules, server actions, emails sent on an event, scheduled actions, buttons on a form,
+new fields, changes to a screen. It asks what it needs to know, reads what already runs on the
+model, explains what it is about to make, and shows everything on the card: the trigger, the full
+code, the recipients and the text of an email, the difference a change makes to a screen. Nothing
+is made before you say yes. A rule can be tried first on a dummy record that is discarded
+afterwards; a scheduled action can be run once the same way. What Nudge made is switched off with
+a change, and deleted only when you ask for it by name; a view or a field of a module is never
+touched. Every step is in What Nudge Did.
+
 ## For administrators: the setup of Odoo
 
 Off by default. When an administrator switches on **Nudge for Administrators** (Settings ‣

@@ -40,7 +40,9 @@ ACTIVITY_UNITS = ("days", "weeks", "months")
 # The fields an update action writes by itself; anything else is code
 UPDATABLE_TYPES = ("char", "text", "html", "integer", "float", "monetary", "boolean", "date", "datetime")
 # What may be deleted: what Nudge builds, never records of the business
-DELETABLE = ("base.automation", "ir.actions.server", "mail.template", "ir.cron")
+DELETABLE = ("base.automation", "ir.actions.server", "mail.template", "ir.cron", "ir.ui.view", "ir.model.fields")
+# Where what Nudge makes is registered; a view or a field of a module is never deleted
+CUSTOM_MODULES = ("nudge_custom", "studio_customization", "__export__")
 INTERVAL_UNITS = ("minutes", "hours", "days", "weeks", "months")
 # A placeholder of an email names a field of the record, nothing else
 PLACEHOLDER = re.compile(r"\{\{\s*([^{}]*?)\s*\}\}")
@@ -763,10 +765,12 @@ class PrepareDelete(Building):
     name = "prepare_delete"
     kind = "delete"
     description = (
-        "Delete automation rules, server actions or email templates, for good, when the "
-        "person asked to delete them by name; to stop one, switch it off with prepare_write on "
-        "its field active instead. Nothing is deleted by this call: the person is shown what "
-        "is about to go and says yes or no; you read their answer as the result."
+        "Delete automation rules, server actions, email templates, scheduled actions, "
+        "extension views made here or fields made here, for good, when the person asked to "
+        "delete them by name; to stop one, switch it off with prepare_write on its field "
+        "active instead. A view or a field of a module is never deleted; a field goes with "
+        "its column and every value in it. Nothing is deleted by this call: the person is "
+        "shown what is about to go and says yes or no; you read their answer as the result."
     )
     input_schema = {
         "type": "object",
@@ -783,7 +787,15 @@ class PrepareDelete(Building):
         check_developing(env)
         model = get_model(env, arguments["model"], "unlink")
         records = get_records(model.with_context(active_test=False), arguments["ids"], "unlink")
+        self._check_deletable(records)
         names = records.mapped("display_name")
+        lines = [{"label": env._("Kind"), "value": model._description},
+                 {"label": env._("Undo"), "value": env._("Not possible: deleted for good")}]
+        if model._name == "ir.model.fields":
+            lines.append({"label": env._("Data"), "value": env._("The column and every value in it are deleted too")})
+            showing = [view.name for field in records for view in self._views_showing(field)]
+            if showing:
+                lines.append({"label": env._("Views"), "value": env._("Taken off the screens: %s", ", ".join(showing))})
         return base.ToolResult(
             "The person is being shown what is about to be deleted.",
             pending={
@@ -795,11 +807,44 @@ class PrepareDelete(Building):
                 "is_sensitive": True,
                 "preview": {
                     "records": [{"id": record.id, "name": record.display_name} for record in records],
-                    "lines": [{"label": env._("Kind"), "value": model._description},
-                              {"label": env._("Undo"), "value": env._("Not possible: deleted for good")}],
+                    "lines": lines,
                 },
             },
         )
+
+    @staticmethod
+    def _check_deletable(records):
+        """:raise Refused: for what a module owns, which an update would bring back or break"""
+        if records._name == "ir.ui.view":
+            xml_ids = records.get_external_id()
+            for view in records:
+                module = (xml_ids.get(view.id) or "").split(".")[0]
+                if not view.inherit_id or (module and module not in CUSTOM_MODULES):
+                    raise Refused(
+                        f"View #{view.id} {view.name!r} belongs to a module: it is never deleted. "
+                        "Switch it off with prepare_write on active, or change it by extension.")
+        elif records._name == "ir.model.fields":
+            for field in records:
+                if field.state != "manual":
+                    raise Refused(
+                        f"Field {field.name!r} of {field.model} belongs to a module: it is never deleted.")
+                PrepareDelete._views_showing(field)
+
+    @staticmethod
+    def _views_showing(field):
+        """:return: the extension views made here that show ``field``, which
+        go with it
+        :raise Refused: when a view of a module shows it"""
+        Views = field.env["ir.ui.view"].with_context(active_test=False)
+        views = Views.search([("model", "=", field.model), ("arch_db", "like", f'name="{field.name}"')])
+        xml_ids = views.get_external_id()
+        for view in views:
+            module = (xml_ids.get(view.id) or "").split(".")[0]
+            if not view.inherit_id or (module and module not in CUSTOM_MODULES):
+                raise Refused(
+                    f"Field {field.name!r} is shown by view #{view.id} {view.name!r} of a module: "
+                    "take it out of the view first, by extension, or keep the field.")
+        return views
 
     def execute(self, env, step):
         check_developing(env)
@@ -807,8 +852,13 @@ class PrepareDelete(Building):
             return base.ToolResult("This cannot be deleted.", is_error=True)
         model = get_model(env, step.res_model, "unlink")
         records = get_records(model.with_context(active_test=False), step.res_ids or [], "unlink")
+        self._check_deletable(records)
         names = records.mapped("display_name")
+        if model._name == "ir.model.fields":
+            for field in records:
+                self._views_showing(field).unlink()
         records.unlink()
+        env.registry.clear_cache("templates")
         return base.ToolResult(
             f"Deleted: {model._description} {', '.join(repr(cut(name, 60)) for name in names)}.",
             event={"type": "changed", "model": model._name, "ids": []},

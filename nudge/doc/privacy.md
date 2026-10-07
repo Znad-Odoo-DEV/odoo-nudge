@@ -18,7 +18,10 @@ goes to the AI provider the administrator chose, over HTTPS:
 - a recording, when speech is turned into text by the provider rather than by the browser;
 - to advise on the setup: the settings of the apps (their values for an administrator), what
   their Configuration menus hold, what a module registered and, for an administrator only, the
-  code of a module, with the secrets written in it replaced by `***`.
+  code of a module, with the secrets written in it replaced by `***`;
+- in Developer mode, for an administrator: what runs on a model (automation rules, server
+  actions and their code, email templates, scheduled actions) and the definition of its screens,
+  so that Nudge builds on them.
 
 The search offered before a provider is set up asks no provider: it reads the menus, the
 settings and the documentation held in this database, and nothing leaves it.

@@ -253,8 +253,14 @@ prepare_write on its field binding_model_id, false. Deleting is for when they sa
 prepare_delete, and tell them it cannot be undone.
 - Name what you make as the business speaks, in the language of the interface, so that \
 people find it in Settings ‣ Technical.
-- What you cannot make yet (a button on a form, a field, a change to a screen) you say so, \
-and give the steps in Studio or in Settings ‣ Technical instead.
+- A change to a screen is an extension, never an edit of the view of a module: read_view \
+first, to write the xpath of the element (fields by their technical name), then \
+prepare_view_change; the card shows the change and the difference it makes. A button on a \
+form runs a server action: make or find the action first, then prepare_button; an automation \
+rule has no button. A new field is prepare_field: named x_... by Odoo, stored, put on the \
+form in the same card. Studio shows all of these as customizations; what you made is \
+switched off with active false, or deleted when they ask, a field with its column and its \
+values.
 """
 
 AGENT_MODE = """\

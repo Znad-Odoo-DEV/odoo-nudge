@@ -18,3 +18,4 @@ from . import company_files
 from . import configuration
 from . import developer
 from . import importing
+from . import building

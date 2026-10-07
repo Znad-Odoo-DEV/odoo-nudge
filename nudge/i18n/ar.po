@@ -4164,3 +4164,153 @@ msgstr "جرّب الاستيراد"
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__attachment_id
 msgid "File Sent"
 msgstr "الملف المرسل"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Read a screen's definition"
+msgstr "قرأ تعريف شاشة"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "The column and every value in it are deleted too"
+msgstr "يُحذف العمود وكل قيمة فيه أيضًا"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Change by Nudge: %s"
+msgstr "تعديل من Nudge: %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "View"
+msgstr "العرض"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Where"
+msgstr "أين"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "No visible difference"
+msgstr "لا فرق ظاهر"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Change the screen: %s"
+msgstr "تعديل الشاشة: %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Button %(label)s on %(model)s"
+msgstr "زر %(label)s على %(model)s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Shown"
+msgstr "يظهر"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "unless %s"
+msgstr "إلا إذا %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "always"
+msgstr "دائمًا"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Add the button “%s”"
+msgstr "إضافة الزر “%s”"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Field"
+msgstr "الحقل"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Technical name"
+msgstr "الاسم التقني"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Type"
+msgstr "النوع"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Points to"
+msgstr "يشير إلى"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Required"
+msgstr "إلزامي"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Help"
+msgstr "المساعدة"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "after %s"
+msgstr "بعد %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "in the first group of the form"
+msgstr "في المجموعة الأولى من النموذج"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "at the end of the form"
+msgstr "في آخر النموذج"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Field %(field)s on %(model)s"
+msgstr "الحقل %(field)s على %(model)s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "On the form"
+msgstr "على النموذج"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "not added"
+msgstr "غير مضاف"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Add the field “%s”"
+msgstr "إضافة الحقل “%s”"
