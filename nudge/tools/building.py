@@ -164,7 +164,10 @@ def check_snippet(node):
         if element.tag not in ALLOWED_TAGS:
             raise Refused(f"<{element.tag}> is not an element of a view. Use fields, groups, pages, buttons, labels, divs.")
         for name, value in element.attrib.items():
-            if name.startswith("t-") or name.lower().startswith("on") or "javascript:" in value.lower():
+            # Spaces, tabs and control characters inside a scheme still make it one
+            plain = re.sub(r"[\s\x00-\x1f]+", "", value).lower()
+            if (name.startswith("t-") or name.lower().startswith("on")
+                    or any(scheme in plain for scheme in ("javascript:", "vbscript:", "data:text/html"))):
                 raise Refused(f"The attribute {name!r} is not allowed in a view made here.")
 
 

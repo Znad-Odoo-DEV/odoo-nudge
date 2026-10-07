@@ -200,3 +200,10 @@ class TestBuilding(NudgeCase, TransactionCase):
             {"model": "res.partner", "label": "Twice", "type": "selection", "selection": [{"value": "a", "label": "A"}, {"value": "a", "label": "B"}]},
         ):
             self.assertTrue(self.run_tool("prepare_field", bad).is_error, bad["label"])
+
+    def test_a_script_is_refused_however_written(self):
+        for value in ("javascript:alert(1)", "java\tscript:alert(1)", " JaVaScRiPt :alert(1)", "data:text/html,<b>x</b>", "vbscript:x"):
+            refused = self.run_tool("prepare_view_change", {
+                "model": "res.partner", "xpath": "//sheet", "position": "inside",
+                "change": f'<a href="{value}">x</a>'})
+            self.assertTrue(refused.is_error, value)
