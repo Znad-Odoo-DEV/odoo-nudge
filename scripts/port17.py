@@ -305,6 +305,12 @@ edit("nudge/tests/test_ui.py", [
 sub("nudge/tests/test_ui.py", r'f"/odoo/action-\{action\.id\}/\{partner\.id\}"',
     'f"/web#action={action.id}&id={partner.id}&model=res.partner&view_type=form"')
 
+# ---------------------------------------------------------------- no Studio, no spreadsheets in 17: the store page says nothing of them
+sub("nudge/static/description/index.html",
+    r"^[ \t]*<li>[^\n]*(Nudge: Studio|Nudge Spreadsheets|Odoo Studio)[^\n]*</li>\n", "", flags=re.M)
+sub("nudge/static/description/index.html",
+    r"^[ \t]*<div class=\"col-md-6\"[^\n]*<h4>Reports as spreadsheets</h4>[^\n]*</div>\n", "", flags=re.M)
+
 # ---------------------------------------------------------------- the words "Odoo 18"
 for name in ("nudge/llm/prompt.py", "nudge/README.md", "nudge/README.ar.md", "nudge/static/description/index.html",
              "nudge/doc/user-guide.md", "nudge/doc/user-guide.ar.md", "nudge/doc/security.md", "nudge/__manifest__.py"):
