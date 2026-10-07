@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="provider_gemini" model="nudge.provider">
+        <field name="name">Google Gemini (free tier)</field>
+        <field name="sequence">10</field>
+        <field name="kind">openai_compatible</field>
+        <field name="base_url">https://generativelanguage.googleapis.com/v1beta/openai</field>
+        <field name="model_name">gemini-3.5-flash-lite</field>
+        <field name="stt_mode">chat</field>
+        <field name="stt_model">gemini-3.1-flash-lite</field>
+        <field name="notes">Get a key at https://aistudio.google.com/apikey
+On the free tier, Google uses the content you send to improve its products. Use it to try Nudge with demo data, not with real customer data.</field>
+    </record>
+
+    <record id="provider_groq" model="nudge.provider">
+        <field name="name">Groq (free tier)</field>
+        <field name="sequence">20</field>
+        <field name="kind">openai_compatible</field>
+        <field name="base_url">https://api.groq.com/openai/v1</field>
+        <field name="stt_mode">endpoint</field>
+        <field name="stt_model">whisper-large-v3</field>
+        <field name="notes">Get a key from the Groq console (console.groq.com).
+Set the key, then use "Fetch Models" to pick a model.</field>
+    </record>
+
+    <record id="provider_openrouter" model="nudge.provider">
+        <field name="name">OpenRouter (free models)</field>
+        <field name="sequence">30</field>
+        <field name="kind">openai_compatible</field>
+        <field name="base_url">https://openrouter.ai/api/v1</field>
+        <field name="notes">Get a key from your OpenRouter account (openrouter.ai).
+Set the key, then use "Fetch Models" and pick a model whose name ends with ":free". Free models are limited to 20 requests per minute and 50 per day.</field>
+    </record>
+
+    <record id="provider_ollama" model="nudge.provider">
+        <field name="name">Ollama (local)</field>
+        <field name="sequence">40</field>
+        <field name="kind">openai_compatible</field>
+        <field name="base_url">http://localhost:11434/v1</field>
+        <field name="requires_api_key" eval="False"/>
+        <field name="notes">Runs on the Odoo server itself: nothing leaves your network.
+Install Ollama, pull a model, then use "Fetch Models" to pick it.</field>
+    </record>
+
+    <record id="provider_anthropic" model="nudge.provider">
+        <field name="name">Anthropic Claude</field>
+        <field name="sequence">50</field>
+        <field name="kind">anthropic</field>
+        <field name="model_name">claude-opus-5-5</field>
+        <field name="max_output_tokens">16000</field>
+        <field name="effort">low</field>
+        <field name="price_input">4.0</field>
+        <field name="price_output">20.0</field>
+        <field name="price_cache_read">0.2</field>
+        <field name="price_cache_write">5.0</field>
+        <field name="notes">Paid. Get a key from the Claude console (platform.claude.com).
+Requires the "anthropic" Python package on the server. Prices are in USD per million tokens.</field>
+    </record>
+</odoo>

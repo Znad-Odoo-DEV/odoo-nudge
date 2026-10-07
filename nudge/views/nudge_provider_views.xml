@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_provider_view_list" model="ir.ui.view">
+        <field name="name">nudge.provider.view.list</field>
+        <field name="model">nudge.provider</field>
+        <field name="arch" type="xml">
+            <tree string="AI Providers">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="kind"/>
+                <field name="model_name"/>
+                <field name="is_configured"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="nudge_provider_view_form" model="ir.ui.view">
+        <field name="name">nudge.provider.view.form</field>
+        <field name="model">nudge.provider</field>
+        <field name="arch" type="xml">
+            <form string="AI Provider">
+                <header>
+                    <button name="action_test_connection" type="object" string="Test Connection"
+                            class="btn-primary" groups="base.group_system"/>
+                    <button name="action_fetch_models" type="object" string="Fetch Models"
+                            groups="base.group_system"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Google Gemini"/></h1>
+                    </div>
+                    <div class="alert alert-info" role="alert" invisible="not notes">
+                        <field name="notes" readonly="1" class="mb-0"/>
+                    </div>
+                    <group>
+                        <group string="Connection" name="connection">
+                            <field name="kind"/>
+                            <field name="base_url" placeholder="https://api.example.com/v1"
+                                   required="kind == 'openai_compatible'"/>
+                            <field name="requires_api_key" invisible="kind == 'anthropic'"/>
+                            <field name="api_key" password="True" invisible="not requires_api_key"/>
+                            <field name="timeout"/>
+                        </group>
+                        <group string="Model" name="model">
+                            <field name="model_name" placeholder="Pick one with Fetch Models"/>
+                            <field name="max_output_tokens"/>
+                            <field name="effort" invisible="kind != 'anthropic'"/>
+                            <field name="refusal_fallback" invisible="kind != 'anthropic'"/>
+                            <field name="is_configured"/>
+                        </group>
+                        <group string="Voice" name="voice" invisible="kind != 'openai_compatible'">
+                            <field name="stt_mode"/>
+                            <field name="stt_model" invisible="stt_mode == 'none'"
+                                   required="stt_mode == 'endpoint'"
+                                   placeholder="e.g. whisper-large-v3"/>
+                            <field name="can_transcribe"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Available Models" name="models">
+                            <field name="model_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="is_selected"/>
+                                    <button name="action_select" type="object" string="Use"
+                                            invisible="is_selected" groups="base.group_system"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Prices" name="prices">
+                            <group>
+                                <group string="Per Million Tokens">
+                                    <field name="price_input"/>
+                                    <field name="price_output"/>
+                                    <field name="price_cache_read"/>
+                                    <field name="price_cache_write"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_provider_view_search" model="ir.ui.view">
+        <field name="name">nudge.provider.view.search</field>
+        <field name="model">nudge.provider</field>
+        <field name="arch" type="xml">
+            <search string="AI Providers">
+                <field name="name"/>
+                <field name="model_name"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_provider_action" model="ir.actions.act_window">
+        <field name="name">AI Providers</field>
+        <field name="res_model">nudge.provider</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add an AI provider</p>
+            <p>Nudge answers through the first provider that has a model and a key.</p>
+        </field>
+    </record>
+</odoo>

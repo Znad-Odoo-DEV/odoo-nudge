@@ -1,0 +1,22 @@
+// Surfaces and text follow the dark values of the Odoo variables on their
+// own. Only what is specific to Nudge is adjusted here.
+
+.o_nudge_panel {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.o_nudge_markdown {
+    a {
+        color: #b3a4ff;
+    }
+
+    pre {
+        background: #0f1115;
+        color: #e6e6e6;
+    }
+}
+
+// The shades are darker where the screen is dark
+.o_nudge_shade {
+    background: rgba(0, 0, 0, 0.4);
+}

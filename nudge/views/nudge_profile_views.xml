@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_profile_slice_view_list" model="ir.ui.view">
+        <field name="name">nudge.profile.slice.view.list</field>
+        <field name="model">nudge.profile.slice</field>
+        <field name="arch" type="xml">
+            <tree string="Content" create="0" delete="0">
+                <field name="kind"/>
+                <field name="title"/>
+                <field name="key" optional="show"/>
+                <field name="summary"/>
+                <field name="override_summary" optional="show"/>
+                <field name="model_name" optional="hide"/>
+                <field name="restricted" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="nudge_profile_slice_view_form" model="ir.ui.view">
+        <field name="name">nudge.profile.slice.view.form</field>
+        <field name="model">nudge.profile.slice</field>
+        <field name="arch" type="xml">
+            <form string="Piece of the Profile" create="0" delete="0">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="title"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="kind"/>
+                            <field name="key"/>
+                        </group>
+                        <group string="Who Is Told">
+                            <field name="model_name"/>
+                            <field name="restricted"/>
+                        </group>
+                    </group>
+                    <group string="Read from the Database">
+                        <field name="summary" nolabel="1" colspan="2"/>
+                    </group>
+                    <group string="Correction">
+                        <div class="text-muted" colspan="2">
+                            Written here, it replaces what was read from the database in what Nudge
+                            is told, and it is kept when the profile is refreshed.
+                        </div>
+                        <field name="override_summary" nolabel="1" colspan="2"
+                               placeholder="Leave empty to keep what was read from the database."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_profile_view_list" model="ir.ui.view">
+        <field name="name">nudge.profile.view.list</field>
+        <field name="model">nudge.profile</field>
+        <field name="arch" type="xml">
+            <tree string="Database Profile" create="0" edit="0">
+                <field name="create_date" string="Read On"/>
+                <field name="trigger"/>
+                <field name="is_current"/>
+                <field name="slice_count"/>
+                <field name="duration_ms" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="nudge_profile_view_form" model="ir.ui.view">
+        <field name="name">nudge.profile.view.form</field>
+        <field name="model">nudge.profile</field>
+        <field name="arch" type="xml">
+            <form string="Database Profile" create="0">
+                <header>
+                    <button name="action_refresh" type="object" string="Read the Database Again"
+                            class="btn-primary"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Current" invisible="not is_current"/>
+                    <group>
+                        <group>
+                            <field name="create_date" string="Read On"/>
+                            <field name="trigger"/>
+                            <field name="is_current" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="slice_count"/>
+                            <field name="duration_ms"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="What Nudge Knows" name="content">
+                            <field name="slice_ids">
+                                <tree create="0" delete="0">
+                                    <field name="kind"/>
+                                    <field name="title"/>
+                                    <field name="summary"/>
+                                    <field name="override_summary" optional="show"/>
+                                    <field name="restricted" optional="show"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Overview" name="overview">
+                            <div class="text-muted mb-2">
+                                Every conversation starts with this text and with the business notes.
+                            </div>
+                            <field name="overview_text"/>
+                        </page>
+                        <page string="Changes" name="changes">
+                            <field name="changes_text" placeholder="This is the first reading of the database."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_profile_action" model="ir.actions.act_window">
+        <field name="name">Database Profile</field>
+        <field name="res_model">nudge.profile</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">The database has not been read yet</p>
+            <p>It is read a moment after the installation, then each time its modules change.</p>
+        </field>
+    </record>
+
+    <record id="nudge_note_view_list" model="ir.ui.view">
+        <field name="name">nudge.note.view.list</field>
+        <field name="model">nudge.note</field>
+        <field name="arch" type="xml">
+            <tree string="Business Notes" editable="bottom"
+                  decoration-info="state == 'proposed'" decoration-muted="state == 'refused'">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="body"/>
+                <field name="kind"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'approved'" decoration-info="state == 'proposed'"/>
+                <field name="reason" optional="show"/>
+                <field name="proposed_by" optional="hide"/>
+                <field name="approved_by" optional="hide"/>
+                <button name="action_approve" type="object" string="Approve" icon="fa-check"
+                        class="btn-link text-success" invisible="state == 'approved'"/>
+                <button name="action_refuse" type="object" string="Refuse" icon="fa-times"
+                        class="btn-link text-danger" invisible="state == 'refused'"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="nudge_note_view_search" model="ir.ui.view">
+        <field name="name">nudge.note.view.search</field>
+        <field name="model">nudge.note</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="body"/>
+                <filter name="proposed" string="Waiting for Approval" domain="[('state', '=', 'proposed')]"/>
+                <filter name="lessons" string="Lessons" domain="[('kind', '=', 'lesson')]"/>
+                <filter name="notes" string="Notes" domain="[('kind', '=', 'note')]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_note_action" model="ir.actions.act_window">
+        <field name="name">Business Notes</field>
+        <field name="res_model">nudge.note</field>
+        <field name="view_mode">tree</field>
+        <field name="context">{'active_test': False, 'search_default_proposed': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Tell Nudge how your business works</p>
+            <p>
+                What you call things, the rules you follow: "We call quotations offers",
+                "Orders above 10,000 are approved by the sales manager".
+            </p>
+        </field>
+    </record>
+</odoo>

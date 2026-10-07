@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="nudge.Guide">
+        <div class="o_nudge_guide" t-if="state.isActive">
+            <t t-if="state.element">
+                <!-- The rest of the screen, blurred and dimmed: four shades around
+                     the hole over the element. They catch no click. -->
+                <div class="o_nudge_shade o_nudge_shade_top" t-ref="shadeTop"/>
+                <div class="o_nudge_shade o_nudge_shade_bottom" t-ref="shadeBottom"/>
+                <div class="o_nudge_shade o_nudge_shade_left" t-ref="shadeLeft"/>
+                <div class="o_nudge_shade o_nudge_shade_right" t-ref="shadeRight"/>
+                <!-- Drawn around the element, never over it: the element stays clickable -->
+                <div class="o_nudge_ring" t-ref="ring" t-att-class="{ o_nudge_ring_detour: state.isDetour }"/>
+                <!-- Nudge's own pointer: it goes to the element and presses it, for
+                     show. The real press stays with the person. Its geometry is
+                     inline: the same in both directions of writing. -->
+                <div class="o_nudge_cursor" t-ref="cursor" aria-hidden="true"
+                     t-att-class="{ o_nudge_cursor_pressing: phase ==='press', o_nudge_cursor_still: phase ==='shown' }">
+                    <span class="o_nudge_cursor_ripple" style="top: -12px; left: -12px;"/>
+                    <svg class="o_nudge_cursor_arrow" viewBox="0 0 32 32" focusable="false"
+                         style="transform-origin: 2px 2px;">
+                        <path class="o_nudge_cursor_body"
+                              d="M3 2.5 L3 25 L9 19.5 L13.2 29 L18.2 26.8 L14 17.4 L22.5 17.4 Z"/>
+                        <circle class="o_nudge_cursor_eye" cx="8.6" cy="10.2" r="2"/>
+                        <circle class="o_nudge_cursor_eye" cx="13.4" cy="13.6" r="2"/>
+                        <circle class="o_nudge_cursor_pupil" cx="9.1" cy="10.6" r="0.9"/>
+                        <circle class="o_nudge_cursor_pupil" cx="13.9" cy="14" r="0.9"/>
+                    </svg>
+                </div>
+                <!-- The box comes once the pointer has pressed -->
+                <div t-if="phase ==='shown'" class="o_nudge_guide_bubble" t-ref="bubble" role="status">
+                    <t t-call="nudge.GuideContent"/>
+                </div>
+            </t>
+            <div t-elif="state.isMissing" class="o_nudge_guide_bubble o_nudge_guide_lost" role="status">
+                <p class="o_nudge_guide_notice">I can't find this on the screen.</p>
+                <t t-call="nudge.GuideContent"/>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="nudge.GuideContent">
+        <div class="o_nudge_guide_head">
+            <NudgeFace/>
+            <span class="o_nudge_guide_count">
+                <t t-esc="state.index + 1"/> / <t t-esc="state.steps.length"/>
+            </span>
+            <button type="button" class="o_nudge_guide_stop" title="Stop" aria-label="Stop"
+                    t-on-click="() => this.guidance.stop()">
+                <i class="fa fa-times"/>
+            </button>
+        </div>
+        <p class="o_nudge_guide_text" dir="auto" t-esc="text"/>
+        <div class="o_nudge_guide_actions">
+            <button t-if="state.index > 0" type="button" class="btn btn-sm btn-link o_nudge_guide_previous"
+                    t-on-click="() => this.guidance.previous()">
+                Back
+            </button>
+            <button t-if="step and step.undo" type="button" class="btn btn-sm btn-link o_nudge_guide_undo"
+                    t-on-click="() => this.guidance.undo()">
+                Undo
+            </button>
+            <button type="button" class="btn btn-sm btn-primary o_nudge_guide_next"
+                    t-on-click="() => this.guidance.next()">
+                <t t-if="isLast">Done</t>
+                <t t-else="">Next</t>
+            </button>
+        </div>
+    </t>
+
+</templates>

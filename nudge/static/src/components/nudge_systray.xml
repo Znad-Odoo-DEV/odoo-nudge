@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="nudge.Systray">
+        <div class="o_nudge_systray dropdown">
+            <button type="button" class="user-select-none dropdown-toggle o-no-caret o-dropdown--narrow"
+                    title="Nudge" aria-label="Nudge"
+                    t-att-class="{ show: state.isOpen }"
+                    t-on-click="() => this.nudge.toggle()">
+                <i class="fa fa-lg fa-commenting-o" role="img"/>
+            </button>
+        </div>
+    </t>
+
+</templates>
