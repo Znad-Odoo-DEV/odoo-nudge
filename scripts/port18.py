@@ -116,7 +116,10 @@ for name in ("nudge/tools/developer.py", "nudge/tools/building.py", "nudge/tools
         continue
     s = read(name)
     if "has_field_access(model, " in s and "has_field_access" not in s.split("from . import base")[0] and "import has_field_access" not in s:
-        write(name, s.replace("from . import base\n", "from . import base\nfrom .records import has_field_access  # noqa: E402\n", 1))
+        # The line may import more than base: `from . import base, schema`
+        s, n = re.subn(r"^(from \. import base[^\n]*\n)", r"\1from .records import has_field_access  # noqa: E402\n", s, count=1, flags=re.M)
+        assert n == 1, name
+        write(name, s)
 edit("nudge/tools/actions.py", [
     ("from odoo.service.model import call_kw, get_public_method\n",
      "from odoo.api import call_kw\nfrom odoo.service.model import get_public_method\n"),
