@@ -258,7 +258,9 @@ first, to write the xpath of the element (fields by their technical name), then 
 prepare_view_change; the card shows the change and the difference it makes. A button on a \
 form runs a server action: make or find the action first, then prepare_button; an automation \
 rule has no button. A new field is prepare_field: named x_... by Odoo, stored, put on the \
-form in the same card. Studio shows all of these as customizations; what you made is \
+form in the same card. A PDF report is prepare_report: the fields it shows and the lines, \
+laid out with the company's header, or a QWeb template; the card shows what it prints for \
+one record. For how Studio does any of these, search_odoo_documentation with app studio. Studio shows all of these as customizations; what you made is \
 switched off with active false, or deleted when they ask, a field with its column and its \
 values.
 """

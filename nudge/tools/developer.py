@@ -40,7 +40,8 @@ ACTIVITY_UNITS = ("days", "weeks", "months")
 # The fields an update action writes by itself; anything else is code
 UPDATABLE_TYPES = ("char", "text", "html", "integer", "float", "monetary", "boolean", "date", "datetime")
 # What may be deleted: what Nudge builds, never records of the business
-DELETABLE = ("base.automation", "ir.actions.server", "mail.template", "ir.cron", "ir.ui.view", "ir.model.fields")
+DELETABLE = ("base.automation", "ir.actions.server", "mail.template", "ir.cron", "ir.ui.view", "ir.model.fields",
+             "ir.actions.report")
 # Where what Nudge makes is registered; a view or a field of a module is never deleted
 CUSTOM_MODULES = ("nudge_custom", "studio_customization", "__export__")
 INTERVAL_UNITS = ("minutes", "hours", "days", "weeks", "months")
@@ -819,10 +820,18 @@ class PrepareDelete(Building):
             xml_ids = records.get_external_id()
             for view in records:
                 module = (xml_ids.get(view.id) or "").split(".")[0]
-                if not view.inherit_id or (module and module not in CUSTOM_MODULES):
+                if module in CUSTOM_MODULES:
+                    continue
+                if not view.inherit_id or module:
                     raise Refused(
                         f"View #{view.id} {view.name!r} belongs to a module: it is never deleted. "
                         "Switch it off with prepare_write on active, or change it by extension.")
+        elif records._name == "ir.actions.report":
+            xml_ids = records.get_external_id()
+            for report in records:
+                module = (xml_ids.get(report.id) or "").split(".")[0]
+                if module and module not in CUSTOM_MODULES:
+                    raise Refused(f"Report #{report.id} {report.name!r} belongs to a module: it is never deleted.")
         elif records._name == "ir.model.fields":
             for field in records:
                 if field.state != "manual":
@@ -857,7 +866,15 @@ class PrepareDelete(Building):
         if model._name == "ir.model.fields":
             for field in records:
                 self._views_showing(field).unlink()
+        templates = env["ir.ui.view"]
+        if model._name == "ir.actions.report":
+            # The template made with the report goes with it
+            Views = env["ir.ui.view"].with_context(active_test=False)
+            templates = Views.search([("type", "=", "qweb"), ("key", "in", records.mapped("report_name"))])
+            xml_ids = templates.get_external_id()
+            templates = templates.filtered(lambda view: (xml_ids.get(view.id) or "").split(".")[0] in CUSTOM_MODULES)
         records.unlink()
+        templates.unlink()
         env.registry.clear_cache("templates")
         return base.ToolResult(
             f"Deleted: {model._description} {', '.join(repr(cut(name, 60)) for name in names)}.",

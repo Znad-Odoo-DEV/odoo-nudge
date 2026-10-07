@@ -4314,3 +4314,57 @@ msgstr "غير مضاف"
 #: code:addons/nudge/tools/building.py:0
 msgid "Add the field “%s”"
 msgstr "إضافة الحقل “%s”"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/reports.py:0
+msgid "Made of"
+msgstr "مكوّن من"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/reports.py:0
+msgid "a template of its own"
+msgstr "قالب خاص به"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/reports.py:0
+msgid "Shows"
+msgstr "يعرض"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/reports.py:0
+msgid "Lines"
+msgstr "الأسطر"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/reports.py:0
+msgid "the Print menu of %s"
+msgstr "قائمة الطباعة في %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/reports.py:0
+msgid "Report"
+msgstr "التقرير"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/reports.py:0
+msgid "Prints, for one record"
+msgstr "يطبع، لسجل واحد"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/reports.py:0
+msgid "No record to print yet"
+msgstr "لا سجل للطباعة بعد"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/reports.py:0
+msgid "Create: report “%s”"
+msgstr "إنشاء: تقرير “%s”"

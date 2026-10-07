@@ -235,13 +235,16 @@ class NudgeDocPassage(models.Model):
         params = [query]
         app_filter = ""
         if app:
-            app_filter = "AND p.app = %s"
-            params.append(app)
+            # The pages of an app folder carry its name as their category;
+            # the pages right under it carry their own name as app
+            app_filter = "AND (p.app = %s OR g.category = %s)"
+            params += [app, app]
         # A wide pool, so that a passage about the app on the screen can come forward
         params.append(limit * 10)
         self.env.cr.execute(f"""
             SELECT p.id, ts_rank_cd(p.search_vector, q) AS rank, p.modules
-            FROM nudge_doc_passage p, websearch_to_tsquery('english', %s) q
+            FROM nudge_doc_passage p
+            JOIN nudge_doc_page g ON g.id = p.page_id, websearch_to_tsquery('english', %s) q
             WHERE p.search_vector @@ q {app_filter}
             ORDER BY rank DESC, p.id
             LIMIT %s

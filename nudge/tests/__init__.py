@@ -32,3 +32,4 @@ from . import test_quick
 from . import test_developer
 from . import test_import
 from . import test_building
+from . import test_reports
