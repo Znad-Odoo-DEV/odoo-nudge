@@ -4152,3 +4152,15 @@ msgstr "أول تشغيل"
 #: code:addons/nudge/tools/developer.py:0
 msgid "Runs as"
 msgstr "يعمل باسم"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Tried the import"
+msgstr "جرّب الاستيراد"
+
+#. module: nudge
+#. odoo-python
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__attachment_id
+msgid "File Sent"
+msgstr "الملف المرسل"

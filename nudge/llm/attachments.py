@@ -21,6 +21,11 @@ PDF_TYPES = ("application/pdf", "application/x-pdf")
 TEXT_TYPES = ("text/", "application/json", "application/csv", "application/xml")
 IMAGE_TYPES = ("image/png", "image/jpeg", "image/webp", "image/gif")
 TEXT_EXTENSIONS = (".txt", ".csv", ".md", ".json", ".xml", ".tsv", ".log")
+SHEET_TYPES = ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",)
+SHEET_EXTENSIONS = (".xlsx",)
+MAX_SHEETS = 5
+MAX_SHEET_ROWS = 60
+MAX_SHEET_COLUMNS = 30
 
 
 class Unreadable(Exception):
@@ -86,12 +91,54 @@ def pdf_page_texts(data, max_pages=400):
         raise Unreadable("This PDF cannot be read.") from error
 
 
+def sheet_text(data):
+    """:return: ``(text, sheets)``: the sheets of an Excel file, each with
+    its first rows as lines of cells, and how many sheets there are
+    :raise Unreadable: when the file is not an Excel workbook"""
+    try:
+        import openpyxl  # noqa: PLC0415
+    except ImportError:
+        raise Unreadable("Excel files need the Python module openpyxl on the server.") from None
+    try:
+        book = openpyxl.load_workbook(io.BytesIO(data), read_only=True, data_only=True)
+    except Exception:  # noqa: BLE001
+        raise Unreadable("This Excel file could not be opened. Save it as .xlsx and send it again.") from None
+    parts = []
+    for sheet in book.worksheets[:MAX_SHEETS]:
+        rows = []
+        for index, row in enumerate(sheet.iter_rows(values_only=True)):
+            if index >= MAX_SHEET_ROWS:
+                break
+            rows.append(row)
+        count = sheet.max_row or len(rows)
+        columns = sheet.max_column or max((len(row) for row in rows), default=0)
+        head = f"## Sheet {sheet.title!r}: {count} row(s), {columns} column(s)"
+        if count > MAX_SHEET_ROWS:
+            head += f", first {MAX_SHEET_ROWS} shown"
+        lines = [head]
+        for row in rows:
+            cells = []
+            for value in row[:MAX_SHEET_COLUMNS]:
+                if value is None:
+                    cells.append("")
+                elif hasattr(value, "isoformat"):
+                    cells.append(value.isoformat(sep=" ") if hasattr(value, "hour") else value.isoformat())
+                else:
+                    cells.append(" ".join(str(value).split()))
+            cells += [""] * (min(columns, MAX_SHEET_COLUMNS) - len(cells))
+            lines.append(" | ".join(cells))
+        parts.append("\n".join(lines))
+    return "\n\n".join(parts), len(book.worksheets)
+
+
 def kind_of(name, mimetype):
-    """:return: "pdf", "text", "image" or None"""
+    """:return: "pdf", "text", "sheet", "image" or None"""
     lowered = (name or "").lower()
     mimetype = (mimetype or "").lower()
     if mimetype in PDF_TYPES or lowered.endswith(".pdf"):
         return "pdf"
+    if mimetype in SHEET_TYPES or lowered.endswith(SHEET_EXTENSIONS):
+        return "sheet"
     if mimetype in IMAGE_TYPES:
         return "image"
     if mimetype.startswith(TEXT_TYPES) or lowered.endswith(TEXT_EXTENSIONS):
@@ -113,7 +160,7 @@ def read_attachment(name, data, mimetype):
         raise Unreadable("The file is too large. The limit is %s MB." % (MAX_BYTES // (1024 * 1024)))
     kind = kind_of(name, mimetype)
     if kind is None:
-        raise Unreadable("Only PDF, text, CSV and image files can be read.")
+        raise Unreadable("Only PDF, text, CSV, Excel (.xlsx) and image files can be read.")
     found = {"name": name, "kind": kind, "size": len(data), "text": "", "truncated": False,
              "pages": 0, "note": "", "image": None}
     if kind == "pdf":
@@ -129,6 +176,12 @@ def read_attachment(name, data, mimetype):
             found["note"] = f"Only the first {read} of {pages} pages were read."
     elif kind == "text":
         found["text"], found["truncated"] = _cut(data.decode("utf-8", errors="replace"))
+    elif kind == "sheet":
+        text, sheets = sheet_text(data)
+        found["text"], found["truncated"] = _cut(text)
+        found["note"] = (
+            f"An Excel file with {sheets} sheet(s): the first rows of each are given as text. "
+            "For an import into Odoo, test_import tries the whole file.")
     else:
         if len(data) > MAX_IMAGE_BYTES:
             raise Unreadable("The image is too large. The limit is %s MB." % (MAX_IMAGE_BYTES // (1024 * 1024)))

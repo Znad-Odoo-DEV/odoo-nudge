@@ -1,3 +1,5 @@
+import base64
+import base64
 import time
 from datetime import timedelta
 
@@ -433,6 +435,16 @@ class NudgeConversation(models.Model):
                 "res_model": "nudge.message",
                 "res_id": message.id,
             })
+        elif found and found["kind"] in ("sheet", "text"):
+            # A file to import is tried later, as it was sent
+            _name, raw, mimetype = attachment
+            message.attachment_id = self.env["ir.attachment"].sudo().create({
+                "name": found["name"],
+                "datas": base64.b64encode(raw),
+                "mimetype": mimetype or ("text/csv" if found["name"].lower().endswith(".csv") else "application/octet-stream"),
+                "res_model": "nudge.message",
+                "res_id": message.id,
+            })
         if mode != MODE_TALK:
             conversation.run_id = self.env["nudge.run"].sudo().create({
                 "name": text[:TITLE_CHARS * 2].strip(),
@@ -496,7 +508,7 @@ class NudgeConversation(models.Model):
     def _chat_images_of(message):
         """:return: the image sent with ``message``, for the model to look at"""
         attachment = message.sudo().attachment_id if message.role == "user" else None
-        if not attachment or not attachment.datas:
+        if not attachment or not attachment.datas or not (attachment.mimetype or "").startswith("image/"):
             return []
         return [{"media_type": attachment.mimetype, "data": attachment.datas.decode("ascii")}]
 
@@ -560,6 +572,7 @@ class NudgeConversation(models.Model):
             "read_automations": self.env._("Read what runs by itself"),
             "check_python_code": self.env._("Checked code"),
             "try_automation": self.env._("Tried it on a dummy record"),
+            "test_import": self.env._("Tried the import"),
         }
         text = words.get(call["name"], call["name"])
         if "%s" in text:

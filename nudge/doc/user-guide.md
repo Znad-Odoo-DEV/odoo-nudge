@@ -142,6 +142,15 @@ a photo or the numbers.
 
 What a file holds is read as data, never as instructions.
 
+## Check a file before you import it
+
+Importing an Excel or CSV file and getting errors? Attach the file to your question ("why does
+this not import into contacts?") and Nudge tries it the way the Test button of the Import screen
+does, without saving anything: every row is checked, and each problem comes back with its row
+and its column, explained in plain words with the way to fix it in the file. When you are on the
+Import screen itself and share your screen, Nudge sees the errors shown there too. Excel files
+(.xlsx) and CSV files are also read as text, sheet by sheet, for any other question about them.
+
 ## Talk instead of typing
 
 - Hold **Ctrl + Shift + Space**, ask, let go. Or press the microphone in the panel: it stops

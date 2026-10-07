@@ -354,5 +354,5 @@ class TestProfileTools(NudgeCase, TransactionCase):
              "open_screen", "read_configuration", "read_settings",
              "remember_lesson", "search_company_files", "search_database_profile",
              "search_odoo_documentation",
-             "show_menu_path", "show_on_screen", "write_in_field"],
+             "show_menu_path", "show_on_screen", "test_import", "write_in_field"],
         )

@@ -357,7 +357,7 @@
             <form t-if="state.isConfigured and state.view === 'chat'" class="o_nudge_composer"
                   t-on-submit.prevent="onSubmit">
                 <input type="file" class="d-none" t-ref="file"
-                       accept=".pdf,.txt,.csv,.md,.json,.xml,image/png,image/jpeg,image/webp,image/gif"
+                       accept=".pdf,.txt,.csv,.xlsx,.md,.json,.xml,image/png,image/jpeg,image/webp,image/gif"
                        t-on-change="onFileChosen"/>
                 <button t-if="!state.isStreaming" type="button" class="o_nudge_attach"
                         title="Send a file with the question: a PDF, a text, an image"

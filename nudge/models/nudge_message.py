@@ -38,7 +38,7 @@ class NudgeMessage(models.Model):
     feedback = fields.Selection([("up", "Useful"), ("down", "Not Useful")], readonly=True, index=True)
     feedback_note = fields.Char(readonly=True)
     attachment_id = fields.Many2one(
-        "ir.attachment", string="Image Sent", ondelete="set null", groups="base.group_system")
+        "ir.attachment", string="File Sent", ondelete="set null", groups="base.group_system")
     content_blocks = fields.Json(
         groups="base.group_system",
         string="Provider Content", help="Answer as returned by the provider, replayed unchanged.")

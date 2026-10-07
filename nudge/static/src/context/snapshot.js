@@ -384,6 +384,48 @@ function texts(selector, limit = LIMITS.notices) {
 }
 
 const DESCRIBERS = { form: describeForm, list: describeList, kanban: describeKanban };
+const MAX_IMPORT_COLUMNS = 40;
+
+/**
+ * The Import screen: what is imported into which model, how its columns are
+ * matched, and the errors it shows.
+ */
+function describeImport(current) {
+    const params = current.action?.params || {};
+    const result = { model: params.model || params.active_model || null };
+    const file = document.querySelector(".o_import_data_sidepanel .fst-italic.truncate");
+    if (file) {
+        const extension = file.nextElementSibling?.classList.contains("fst-italic")
+            ? file.nextElementSibling.textContent.trim()
+            : "";
+        result.file = truncate(file.textContent.trim() + extension, 120);
+    }
+    const columns = [];
+    for (const column of document.querySelectorAll(".o_import_grid_col")) {
+        if (columns.length >= MAX_IMPORT_COLUMNS) {
+            break;
+        }
+        const header =
+            column.querySelector(".o_import_grid_header, .fw-bold, strong, th")?.textContent?.trim() ||
+            column.firstElementChild?.textContent?.trim() ||
+            "";
+        const select = column.querySelector("select");
+        const field = select
+            ? select.selectedOptions[0]?.textContent?.trim() || ""
+            : column.querySelector("input")?.value || "";
+        if (header) {
+            columns.push({ header: truncate(header, 60), field: truncate(field, 80) });
+        }
+    }
+    if (columns.length) {
+        result.columns = columns;
+    }
+    const errors = texts(".o_import_report, .o_import_action .alert, .o_import_data_sidepanel .alert", 20);
+    if (errors.length) {
+        result.errors = errors;
+    }
+    return result;
+}
 
 function describeView(entry) {
     const { controller, type } = entry;
@@ -447,6 +489,12 @@ export function takeSnapshot({ action, views }) {
         if (current.view?.type) {
             snapshot.view_type = current.view.type;
         }
+        if (definition.tag === "import") {
+            snapshot.import = describeImport(current);
+            if (snapshot.import.model) {
+                snapshot.model = snapshot.import.model;
+            }
+        }
     }
 
     const mounted = views.filter(isMounted);
@@ -489,7 +537,9 @@ export function takeSnapshot({ action, views }) {
 export function summarize(snapshot) {
     const parts = [];
     const last = snapshot.breadcrumbs?.at(-1);
-    if (snapshot.record?.name) {
+    if (snapshot.import) {
+        parts.push(snapshot.import.file ? `Import: ${snapshot.import.file}` : "Import");
+    } else if (snapshot.record?.name) {
         parts.push(snapshot.record.name);
     } else if (last) {
         parts.push(last);
