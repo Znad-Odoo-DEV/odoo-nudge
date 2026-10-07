@@ -678,6 +678,9 @@ class NudgeConversation(models.Model):
             base.ERROR_RATE_LIMIT: self.env._(
                 "The AI provider's limit is reached. Try again in a minute."),
             base.ERROR_NETWORK: self.env._("The AI provider could not be reached."),
+            base.ERROR_TIMEOUT: self.env._(
+                "The AI provider took too long to answer. Ask again; when it happens often, a "
+                "faster model or a lower reasoning effort on the provider helps."),
             base.ERROR_UNAVAILABLE: self.env._("The AI provider is temporarily unavailable."),
             base.ERROR_MISSING_LIBRARY: self.env._(
                 "A Python library is missing on the server. Ask your administrator."),
@@ -734,6 +737,10 @@ class NudgeConversation(models.Model):
             state = "waiting"
         elif later:
             pass
+        elif state == "truncated" and not text and stop.get("reason") == base.STOP_DEADLINE:
+            error_message = self.env._(
+                "Nudge ran out of time before it was done. Say \"go on\" and it continues from "
+                "here; or press the clock to leave the work to it.")
         elif state == "complete" and not again and not text and not screen_events:
             state = "error"
             if run and must_read:

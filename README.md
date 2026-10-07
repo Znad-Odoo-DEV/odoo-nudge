@@ -269,6 +269,10 @@ rewritten into a file path.
 - On Windows, the scheduled actions run in the same server as the pages: a piece of work in the
   background takes a thread while it lasts.
 - A busy provider is asked again twice, after 1 and 3 seconds, before an error is shown.
+- A provider that takes long per call (a free tier, with the many tools of Developer mode)
+  may not finish in 90 seconds: Nudge says it ran out of time and goes on when asked, and no
+  round is started with less time left than it would take. A lower reasoning effort on the
+  provider, or the clock (the background has its own time), helps.
 - A conversation holds 120 messages, 240 when Nudge acted in it; then a new one must be started.
 - Each answer being streamed occupies one Odoo worker until it ends.
 - Free, small models make language mistakes, in Arabic especially, and sometimes point at
