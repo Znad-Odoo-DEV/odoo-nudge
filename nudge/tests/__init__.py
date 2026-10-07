@@ -27,3 +27,9 @@ from . import test_assessment
 from . import test_lessons
 from . import test_sources
 from . import test_feedback
+from . import test_configuration
+from . import test_quick
+from . import test_developer
+from . import test_import
+from . import test_building
+from . import test_reports

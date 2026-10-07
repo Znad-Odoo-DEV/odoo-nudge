@@ -35,7 +35,7 @@ class NudgeChat(http.Controller):
         :param snapshot: JSON description of the screen, when the user shares it
         :param spoken: "1" when the message was said rather than typed
         :param read_aloud: "1" when the answer will be read to the user
-        :param mode: "agent" when Nudge is asked to do the work
+        :param mode: "agent" when Nudge is asked to do the work, "dev" to build
         :param background: "1" when the work is to be done while the user
             does something else
         :param explain: "screen" or "text", how the user wants the answer
@@ -56,7 +56,7 @@ class NudgeChat(http.Controller):
             conversation = env["nudge.conversation"]._chat_open(self._to_id(conversation_id))
             job = conversation._chat_prepare(
                 message, snapshot=snapshot, spoken=spoken == "1", read_aloud=read_aloud == "1",
-                mode="agent" if mode == "agent" else "talk", background=background == "1",
+                mode=mode if mode in ("agent", "dev") else "talk", background=background == "1",
                 explain=explain if explain in ("screen", "text") else None,
                 attachment=self._read_upload(file),
                 report=report if report in ("sheet", "chat") else None)

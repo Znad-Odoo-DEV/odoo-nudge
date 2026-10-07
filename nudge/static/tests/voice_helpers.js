@@ -161,6 +161,9 @@ export function setupVoice({
         synthesis,
         stopped: 0,
         saved: [],
+        // How loud the microphone is, as the test says it
+        hearLevel: null,
+        unwatched: 0,
     };
     patchWithCleanup(session, {
         nudge: {
@@ -185,6 +188,10 @@ export function setupVoice({
             return { getTracks: () => [{ stop: () => asked.stopped++ }] };
         },
         createRecorder: (stream) => new FakeRecorder(stream),
+        watchLevel: (stream, onLevel) => {
+            asked.hearLevel = onLevel;
+            return () => asked.unwatched++;
+        },
         toWav: async (recording) => new Blob([`wav of ${recording.size}`], { type: "audio/wav" }),
         getLanguages: () => ["en-US", "fr-FR", "ar-PS"],
     });

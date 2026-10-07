@@ -26,6 +26,8 @@ export class NudgePanel extends Component {
         this.bodyRef = useRef("body");
         this.inputRef = useRef("input");
         this.fileRef = useRef("file");
+        // The search without AI, before a provider is set up
+        this.quick = useState({ words: "", results: null, isSearching: false });
 
         useEffect(
             () => this.inputRef.el?.focus(),
@@ -52,15 +54,30 @@ export class NudgePanel extends Component {
         return this.state.canShareScreen && this.state.shareScreen;
     }
 
+    /** Nudge acts: Agent mode, or Developer mode which holds everything of it */
     get isAgent() {
-        return this.state.canUseAgent && this.state.mode === "agent";
+        return this.state.canUseAgent && this.state.mode !== "talk";
+    }
+
+    get isDev() {
+        return this.state.canDevelop && this.state.mode === "dev";
     }
 
     get placeholder() {
+        if (this.isDev) {
+            return _t("Tell Nudge what to build…");
+        }
         return this.isAgent ? _t("Tell Nudge what to do…") : _t("Ask Nudge…");
     }
 
     get suggestions() {
+        if (this.isDev) {
+            return [
+                _t("Send an email when a record is confirmed"),
+                _t("What runs by itself on this screen?"),
+                _t("Add a server action to the Actions menu"),
+            ];
+        }
         if (this.isAgent) {
             return [
                 _t("Create a contact"),
@@ -287,6 +304,32 @@ export class NudgePanel extends Component {
 
     formatDate(value) {
         return value ? deserializeDateTime(value).toRelative() : "";
+    }
+
+    async quickSearch() {
+        const words = this.quick.words.trim();
+        if (words.length < 2 || this.quick.isSearching) {
+            return;
+        }
+        this.quick.isSearching = true;
+        try {
+            this.quick.results = await this.nudge.quickFind(words);
+        } finally {
+            this.quick.isSearching = false;
+        }
+    }
+
+    get quickIsEmpty() {
+        const results = this.quick.results;
+        return Boolean(results && !results.menus.length && !results.settings.length && !results.pages.length);
+    }
+
+    quickMenu(menu) {
+        this.nudge.quickGuide("menu", menu.id);
+    }
+
+    quickSetting(setting) {
+        this.nudge.quickGuide("setting", { app: setting.app, field: setting.field });
     }
 
     openProviders() {

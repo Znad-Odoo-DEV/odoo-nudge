@@ -166,12 +166,28 @@ const RESOLVERS = {
     menu(name, view, root, target) {
         return resolveMenu(target);
     },
+    // An app in the side list of the Settings screen
+    settings_app(name) {
+        const element = firstShown(document, `.settings_tab .tab[data-key="${CSS.escape(name)}"]`);
+        return element ? { element } : null;
+    },
     control(name) {
         const selector = CONTROLS[name];
         const element = selector && firstShown(document, selector);
         return element ? { element } : null;
     },
 };
+
+/**
+ * Another module teaches the pointer where its things are: a screen of its
+ * own, named parts of it.
+ *
+ * @param {string} type as the server names the target
+ * @param {(name: string, view: Object|null, root: Element, target: Object) => {element: HTMLElement, isDetour?: boolean, text?: string}|null} resolver
+ */
+export function registerTarget(type, resolver) {
+    RESOLVERS[type] = resolver;
+}
 
 /**
  * @param {{ type: string, name: string }} target

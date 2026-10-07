@@ -36,7 +36,7 @@
                 <field name="title"/>
                 <field name="category"/>
                 <field name="app"/>
-                <field name="passage_count"/>
+                <field name="passage_count" string="Passages"/>
                 <field name="modules" optional="hide"/>
                 <field name="path" optional="hide"/>
                 <button name="action_open" type="object" string="Read Online" icon="fa-external-link"/>

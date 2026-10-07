@@ -33,6 +33,8 @@ class IrHttp(models.AbstractModel):
             "is_configured": bool(self.env["nudge.provider"].sudo()._get_default()),
             "can_share_screen": self.env["nudge.conversation"]._can_share_screen(),
             "can_use_agent": self.env["nudge.conversation"]._can_use_agent(),
+            # Developer mode: an administrator the switch is on for
+            "can_develop": self.env["nudge.conversation"]._can_develop(),
             # A report can be a spreadsheet when the module for it is installed
             "can_make_spreadsheet": self.env["nudge.conversation"]._can_make_spreadsheet(),
             **self.env["nudge.voice"]._get_session_info(),

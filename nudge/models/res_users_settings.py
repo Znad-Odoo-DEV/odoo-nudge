@@ -37,7 +37,7 @@ class ResUsersSettings(models.Model):
     )
     nudge_speak_answers = fields.Boolean(string="Nudge Reads Its Answers Aloud", default=False)
     nudge_mode = fields.Selection(
-        [("talk", "Talk"), ("agent", "Agent")],
+        [("talk", "Talk"), ("agent", "Agent"), ("dev", "Developer")],
         string="Nudge Mode", required=True, default="talk",
         help="Talk: Nudge explains and shows. Agent: Nudge does the work, and asks before "
              "each change. Agent is for the people of the group Agent User.",

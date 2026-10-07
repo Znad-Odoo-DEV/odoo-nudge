@@ -81,6 +81,31 @@ class FindScreen(base.Tool):
         return base.ToolResult(base.dump([_describe(menu) for menu in found[:MAX_MENUS]]))
 
 
+def menu_steps(env, path, texts):
+    """:param path: the menus from the app down, as ``menu_path`` gives them
+    :param texts: what to say at each menu; a menu without one is named
+    :return: the steps of the pointer through them"""
+    texts = [text.strip() for text in texts if text and text.strip()]
+    steps = []
+    for position, item in enumerate(path):
+        text = texts[position] if position < len(texts) else env._("Click “%s”.", item.name)
+        parent = path[position - 1] if position else None
+        steps.append({
+            "target": {
+                "type": "menu",
+                "name": str(item.id),
+                "xmlid": item.get_external_id().get(item.id, ""),
+                "label": item.name,
+                "app": position == 0,
+                "parent": str(parent.id) if parent else "",
+                "parent_label": parent.name if parent else "",
+            },
+            "text": text,
+            "advance": "auto",
+        })
+    return steps
+
+
 @base.register
 class ShowMenuPath(base.Tool):
     name = "show_menu_path"
@@ -128,24 +153,7 @@ class ShowMenuPath(base.Tool):
                 "No menu the person can open was found. Use find_screen with other words.",
                 is_error=True,
             )
-        texts = [text.strip() for text in arguments.get("texts") or [] if text and text.strip()]
-        steps = []
-        for position, item in enumerate(path):
-            text = texts[position] if position < len(texts) else env._("Click “%s”.", item.name)
-            parent = path[position - 1] if position else None
-            steps.append({
-                "target": {
-                    "type": "menu",
-                    "name": str(item.id),
-                    "xmlid": item.get_external_id().get(item.id, ""),
-                    "label": item.name,
-                    "app": position == 0,
-                    "parent": str(parent.id) if parent else "",
-                    "parent_label": parent.name if parent else "",
-                },
-                "text": text,
-                "advance": "auto",
-            })
+        steps = menu_steps(env, path, arguments.get("texts") or [])
         return base.ToolResult(
             f"The way to {path[-1].complete_name!r} is being shown on the person's screen, "
             f"{len(steps)} step(s).",

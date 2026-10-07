@@ -15,7 +15,7 @@ import {
 } from "@web/../tests/web_test_helpers";
 
 import { PRESS_MS, TRAVEL_MS } from "@nudge/guidance/nudge_guide";
-import { findMenu, resolveTarget } from "@nudge/guidance/target_resolver";
+import { findMenu, registerTarget, resolveTarget } from "@nudge/guidance/target_resolver";
 
 class Partner extends models.Model {
     _name = "partner";
@@ -146,7 +146,7 @@ test("a name is never read as a selector", async () => {
         "../../etc",
     ];
     for (const name of hostile) {
-        for (const type of ["field", "button", "tab", "control"]) {
+        for (const type of ["field", "button", "tab", "control", "settings_app"]) {
             expect(resolveTarget({ type, name }, view)).toBe(null, { message: `${type} ${name}` });
         }
     }
@@ -443,4 +443,30 @@ test("someone already in the app goes straight to its menus", async () => {
     await animationFrame();
     expect(guidance.state.steps).toHaveLength(2, { message: "From another app, the app comes first" });
     guidance.stop();
+});
+
+test("an app of the Settings screen is found in its side list", async () => {
+    const { view } = await start();
+    const list = document.createElement("div");
+    list.className = "settings_tab";
+    list.innerHTML = '<a class="tab" data-key="stock" href="#stock">Inventory</a>';
+    getFixture().append(list);
+    expect(resolveTarget({ type: "settings_app", name: "stock" }, view).element).toBe(
+        queryOne(".settings_tab .tab[data-key=stock]")
+    );
+    expect(resolveTarget({ type: "settings_app", name: "account" }, view)).toBe(null);
+});
+
+test("another module teaches the pointer a target of its own", async () => {
+    const { view } = await start();
+    const box = document.createElement("div");
+    box.className = "o_nudge_test_box";
+    box.textContent = "Here";
+    getFixture().append(box);
+    registerTarget("test_box", (name) => {
+        const element = name === "the_box" ? queryOne(".o_nudge_test_box") : null;
+        return element ? { element } : null;
+    });
+    expect(resolveTarget({ type: "test_box", name: "the_box" }, view).element).toBe(box);
+    expect(resolveTarget({ type: "test_box", name: "nowhere" }, view)).toBe(null);
 });

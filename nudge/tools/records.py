@@ -49,6 +49,13 @@ ADMIN_MODELS = re.compile(
     r"|ir\.module\.category|ir\.cron|ir\.config_parameter|ir\.sequence|ir\.mail_server"
     r"|ir\.filters|ir\.default|ir\.attachment|mail\.template|mail\.activity\.type)$"
 )
+# What a developer builds with, open in Developer mode to an administrator the
+# switch is on for
+DEVELOPER_MODELS = re.compile(
+    r"^(base\.automation|ir\.actions\.server|mail\.template|ir\.ui\.view|ir\.model"
+    r"|ir\.model\.fields|ir\.model\.fields\.selection|ir\.actions\.act_window|ir\.ui\.menu"
+    r"|ir\.actions\.report|ir\.cron)$"
+)
 # Parameters whose value is a secret, whatever the administrator may read
 SECRET_KEY = re.compile(r"secret|token|key|password|passwd|credential|oauth", re.IGNORECASE)
 # Read, never changed by Nudge: what a company is made of
@@ -77,11 +84,19 @@ class Refused(Exception):
     """What is asked cannot be done; the message is written for the model."""
 
 
+def is_developing(env):
+    """:return: whether this call is made in Developer mode, by someone it is open to"""
+    return env.context.get("nudge_mode") == base.MODE_DEV and env["nudge.conversation"]._can_develop()
+
+
 def is_closed(env, name):
     """:return: whether ``name`` is how Odoo works rather than the business:
     not for a model, unless the administrator opened the setup to
-    administrators and this person is one"""
+    administrators and this person is one, or this is Developer mode and
+    the model is what a developer builds with"""
     if not CLOSED_MODELS.match(name):
+        return False
+    if DEVELOPER_MODELS.match(name) and is_developing(env):
         return False
     return not (ADMIN_MODELS.match(name) and env["nudge.conversation"]._can_administer())
 
@@ -326,6 +341,19 @@ def build_domain(model, conditions, match="all"):
     except Exception as error:  # noqa: BLE001
         raise Refused(f"These conditions cannot be read: {error}") from None
     return domain
+
+
+# One condition, as the tools that search and the rules that filter take it
+CONDITION_SCHEMA_ITEMS = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["field", "operator", "value"],
+    "properties": {
+        "field": {"type": "string", "pattern": PATH_PATTERN},
+        "operator": {"type": "string", "enum": list(OPERATORS)},
+        "value": {"type": "string", "maxLength": 200},
+    },
+}
 
 
 def refusing(function):

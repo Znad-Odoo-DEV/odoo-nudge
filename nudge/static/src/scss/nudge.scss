@@ -288,6 +288,51 @@ $o-nudge-radius: 18px;
     }
 }
 
+// The search without AI, before a provider is set up
+.o_nudge_quick {
+    width: 100%;
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.o_nudge_quick_busy {
+    margin-top: 12px;
+    color: $o-nudge-text-muted;
+}
+
+.o_nudge_quick_results {
+    width: 100%;
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    text-align: start;
+
+    .o_nudge_suggestion {
+        display: block;
+        text-decoration: none;
+    }
+}
+
+.o_nudge_quick_head {
+    margin: 8px 0 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: $o-nudge-text-muted;
+}
+
+.o_nudge_quick_app {
+    color: $o-nudge-text-muted;
+}
+
+.o_nudge_quick_text {
+    display: block;
+    font-size: 0.85rem;
+    color: $o-nudge-text-muted;
+}
+
 // ---------------------------------------------------------------------
 // Messages
 // ---------------------------------------------------------------------
@@ -981,6 +1026,22 @@ $o-nudge-radius: 18px;
 
 .o_nudge_card_value {
     font-weight: 600;
+}
+
+// Code, or the text of an email, shown as it is
+.o_nudge_card_code {
+    margin: 0;
+    padding: 6px 8px;
+    max-height: 260px;
+    overflow: auto;
+    border-radius: 6px;
+    background: $o-nudge-surface-muted;
+    color: inherit;
+    font-size: 0.8rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    direction: ltr;
+    text-align: start;
 }
 
 .o_nudge_card_actions {

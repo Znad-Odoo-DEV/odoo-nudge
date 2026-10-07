@@ -15,3 +15,8 @@ from . import products
 from . import assessment
 from . import lessons
 from . import company_files
+from . import configuration
+from . import developer
+from . import importing
+from . import building
+from . import reports

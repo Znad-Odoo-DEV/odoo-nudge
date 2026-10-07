@@ -26,6 +26,7 @@ STEP_KINDS = [
     ("write", "Change"),
     ("method", "Button"),
     ("code", "Code"),
+    ("delete", "Delete"),
 ]
 
 STEP_STATES = [
@@ -37,7 +38,7 @@ STEP_STATES = [
 ]
 
 # Kinds of steps that change what the database holds
-CHANGES = ("create", "write", "method")
+CHANGES = ("create", "write", "method", "delete")
 
 # States of a run that is not over
 OPEN_STATES = ("queued", "running", "waiting")
@@ -93,7 +94,7 @@ class NudgeRun(models.Model):
     company_id = fields.Many2one("res.company", string="Company")
     state = fields.Selection(RUN_STATES, required=True, default="running", index=True)
     step_ids = fields.One2many("nudge.step", "run_id", string="Steps")
-    step_count = fields.Integer(string="Steps", compute="_compute_counts", store=True)
+    step_count = fields.Integer(string="Number of Steps", compute="_compute_counts", store=True)
     change_count = fields.Integer(string="Changes", compute="_compute_counts", store=True)
     rounds = fields.Integer(string="Calls to the Model")
     model_name = fields.Char(string="Model")
@@ -101,6 +102,8 @@ class NudgeRun(models.Model):
     output_tokens = fields.Integer()
     cost = fields.Float(digits=(12, 6))
     ended_at = fields.Datetime(string="Ended On")
+    is_developer = fields.Boolean(
+        string="Developer Mode", help="Asked in Developer mode: Nudge built rather than did.")
     is_background = fields.Boolean(
         string="In the Background",
         help="Worked on while the person does something else. They are told when it is "
@@ -278,6 +281,28 @@ class NudgeRun(models.Model):
                 if len(runs) > 1 or run.state == "queued":
                     self.env.ref("nudge.cron_agent_runs").sudo()._trigger()
                 break
+
+    def action_undo_built(self):
+        """Delete what Nudge built for this request in Developer mode, the last
+        made first. Its own requests only, for an administrator."""
+        from ..tools.developer import undo_built
+
+        if not self.env.user.has_group("base.group_system"):
+            raise AccessError(self.env._("Only an administrator undoes what was built."))
+        runs = self.filtered(lambda run: run.is_developer and run.user_id == self.env.user)
+        if not runs:
+            raise UserError(self.env._("Only your own requests in Developer mode can be undone here."))
+        deleted, kept = undo_built(self.env, runs)
+        message = self.env._("Deleted: %s.", ", ".join(deleted)) if deleted else self.env._("Nothing made here still exists.")
+        if kept:
+            message += " " + self.env._("Kept: %s.", "; ".join(kept))
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {"title": self.env._("Undo"), "message": message, "sticky": bool(kept),
+                       "type": "warning" if kept else "success",
+                       "next": {"type": "ir.actions.client", "tag": "reload"}},
+        }
 
     def action_stop(self):
         """Stop what was asked, by the one who asked it or by a manager. What

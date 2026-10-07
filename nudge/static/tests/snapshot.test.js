@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { expect, getFixture, test } from "@odoo/hoot";
 import { click, edit, press } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 
@@ -15,7 +15,7 @@ import {
 } from "@web/../tests/web_test_helpers";
 
 import { hotkeyLabel } from "@nudge/core/hotkeys";
-import { formatValue, summarize } from "@nudge/context/snapshot";
+import { formatValue, summarize, takeSnapshot } from "@nudge/context/snapshot";
 
 class Partner extends models.Model {
     _name = "partner";
@@ -373,4 +373,55 @@ test("the shortcut calls Nudge, which looks at the screen", async () => {
     await press(["alt", "control", "n"]);
     await animationFrame();
     expect(nudge.state.isOpen).toBe(false);
+});
+
+test("the Import screen is described: file, columns and errors", () => {
+    getFixture().innerHTML = `
+        <div class="o_import_action">
+            <div class="o_import_data_sidepanel">
+                <div class="fst-italic truncate">contacts</div><span class="fst-italic">.xlsx</span>
+                <div class="o_import_report alert alert-danger">No matching record found for name 'Nowhere' in field Country</div>
+            </div>
+            <div class="o_import_grid_col"><div class="fw-bold">Email</div><select><option selected="">Email</option></select></div>
+            <div class="o_import_grid_col"><div class="fw-bold">Zzz</div><select><option selected="">To import, select a field…</option></select></div>
+        </div>`;
+    const snapshot = takeSnapshot({
+        action: {
+            currentController: {
+                displayName: "Import a File",
+                action: { type: "ir.actions.client", tag: "import", params: { active_model: "res.partner" } },
+            },
+        },
+        views: [],
+    });
+    expect(snapshot.import).toEqual({
+        model: "res.partner",
+        file: "contacts.xlsx",
+        columns: [
+            { header: "Email", field: "Email" },
+            { header: "Zzz", field: "To import, select a field…" },
+        ],
+        errors: ["No matching record found for name 'Nowhere' in field Country"],
+    });
+    expect(snapshot.model).toBe("res.partner");
+    expect(summarize(snapshot)).toBe("Import: contacts.xlsx");
+});
+
+test("Studio is seen in the snapshot, with the view edited and the tab open", () => {
+    getFixture().innerHTML = `
+        <div class="o_web_studio_editor_manager">
+            <div class="o_web_studio_sidebar">
+                <div class="o_web_studio_new">Add</div>
+                <div class="o_web_studio_properties active">Properties</div>
+            </div>
+            <div class="o_web_studio_view_renderer o_web_studio_form_view_editor"></div>
+        </div>`;
+    const snapshot = takeSnapshot({
+        action: { currentController: { displayName: "Studio", action: { type: "ir.actions.client", tag: "studio" } } },
+        views: [],
+    });
+    expect(snapshot.studio).toEqual({ editing: true, view_type: "form", tab: "properties" });
+    expect(summarize(snapshot)).toBe("Studio: form view");
+    getFixture().innerHTML = "";
+    expect(takeSnapshot({ action: { currentController: null }, views: [] }).studio).toBe(undefined);
 });
