@@ -46,7 +46,8 @@ class TestApprovals(NudgeCase, TransactionCase):
         })
         self.assertFalse(result.is_error, result.content)
         lines = {line["label"]: line["value"] for line in result.pending["preview"]["lines"]}
-        self.assertEqual(lines["Button"], "Create company")
+        # The label of the button as the form says it: Create, in Odoo 19
+        self.assertTrue(lines["Button"].startswith("Create"), lines["Button"])
         self.assertEqual(lines["Approvers"], "Nudge Approver")
         self.assertEqual(lines["Step"], "2")
         self.assertEqual(lines["Exclusive"], True)

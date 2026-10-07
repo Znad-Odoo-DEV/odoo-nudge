@@ -9,7 +9,7 @@ person asks how to do something there. Installed by itself when Nudge and
 Studio are both there.
 """,
     "category": "Productivity",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.0.1",
     "author": "Ibrahim Elzenad",
     "license": "OPL-1",
     "depends": ["nudge", "web_studio"],
