@@ -113,3 +113,24 @@ loop that never ends is stopped by the limits of the worker.
 
 Write to the author named in the manifest. Say what you did, what you saw, and what you
 expected; a database with demo data is enough to show most things.
+
+## Developer mode
+
+Off by default, for the group Settings only, behind its own switch (Nudge for Developers), on
+top of the Agent switch. What it builds runs later as code, so every way a text in a record could
+steer Nudge was closed:
+
+- Nothing is made before a yes: rules, server actions, scheduled actions, email templates,
+  approval rules, views, fields and reports each go through a card that shows them in full, the
+  code, the recipients and the text of an email, the difference a view change makes.
+- A trial on a dummy record runs in a savepoint that is rolled back. A trial that runs code asks
+  first, the code on the card: code runs for real inside it, and an email it sends by itself is
+  not rolled back.
+- Emails take values of the record only: `{{ object.field }}`, nothing else between braces.
+- A view made here is an extension; its elements are allow-listed, and attributes that run
+  script (`t-*`, `on*`, `javascript:`, `vbscript:`, `data:text/html`, however spaced) are refused.
+- A report template made here reads the fields of the records printed and nothing else: no
+  `env`, no `sudo`, no other user or company, no write, no search, no secret.
+- Deletion is for what Nudge or Studio made, when asked for by name: a rule, an action, a
+  template, a scheduled action, a view or a field that belongs to a module is never deleted.
+- Every step is in What Nudge Did, with what was asked and what was made.
