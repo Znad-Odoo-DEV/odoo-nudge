@@ -716,7 +716,10 @@ class TestActing(AgentCase, TransactionCase):
         self.assertFalse(deleting & agent, "Never in Agent mode")
         allowed = tools.base.TOOLS["prepare_delete"].input_schema["properties"]["model"]["enum"]
         self.assertEqual(set(allowed), set(DELETABLE))
-        self.assertFalse({name for name in allowed if not name.startswith(("base.", "ir.", "mail."))})
+        # What Nudge builds: rules, actions, templates, views, fields, reports, and
+        # with its companions approval rules and emails with review
+        built = ("base.", "ir.", "mail.", "studio.approval.", "nudge.email.")
+        self.assertFalse({name for name in allowed if not name.startswith(built)})
         for tool in tools.base.TOOLS.values():
             # on_unlink is a trigger of a rule: Odoo's word for a deletion done by someone else
             self.assertNotIn("unlink", json.dumps(tool.input_schema).replace("on_unlink", ""))
