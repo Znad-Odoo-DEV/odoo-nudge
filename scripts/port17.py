@@ -61,7 +61,8 @@ for module in ("nudge_spreadsheet", "nudge_documents", "nudge_studio"):
     if os.path.isdir(ROOT + module):
         shutil.rmtree(ROOT + module)
         print("dropped", module)
-sub("nudge/__manifest__.py", r'"version": "18\.0\.', '"version": "17.0.')
+for module in ("nudge", "nudge_mail"):
+    sub(f"{module}/__manifest__.py", r'"version": "18\.0\.', '"version": "17.0.')
 
 # ---------------------------------------------------------------- Hoot does not exist in 17
 s = read("nudge/__manifest__.py")
@@ -72,7 +73,7 @@ for path in files("nudge/static/tests/*.js"):
 print("Hoot tests removed:", not files("nudge/static/tests/*.js"))
 
 # ---------------------------------------------------------------- env._ is 18
-for name in files("nudge/**/*.py"):
+for name in files("nudge/**/*.py", "nudge_mail/**/*.py"):
     s = read(name)
     # self.env._( / env._( / record.env._( / self.env["x"].env._( → _(
     s2, n = re.subn(r"(?<![\w.\]])(?:[A-Za-z_]\w*(?:\[[^\[\]]*\])?\.)*env\._\(", "_(", s)
@@ -118,7 +119,7 @@ class Base(models.AbstractModel):
         self.check_access_rule(operation)
 ''')
 edit("nudge/models/__init__.py", [("from . import nudge_provider\n", "from . import compat17\nfrom . import nudge_provider\n")])
-for name in files("nudge/**/*.py"):
+for name in files("nudge/**/*.py", "nudge_mail/**/*.py"):
     if name.endswith("compat17.py"):
         continue
     n = sub(name, r"\.has_access\(", "._nudge_has_access(")
@@ -180,7 +181,7 @@ if os.path.exists(ROOT + "nudge/tests/test_building.py"):
     sub("nudge/tests/test_building.py", r'"view_type": "list"', '"view_type": "tree"')
     sub("nudge/tests/test_building.py", r'assertIn\("\(list\)"', 'assertIn("(tree)"')
 
-for name in files("nudge/**/*.xml"):
+for name in files("nudge/**/*.xml", "nudge_mail/**/*.xml"):
     n = sub(name, r"<list(?=[\s>])", "<tree")
     n += sub(name, r"</list>", "</tree>")
     n += sub(name, r'(<field name="view_mode">)list', r"\1tree")
