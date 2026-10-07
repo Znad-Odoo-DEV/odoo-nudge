@@ -140,6 +140,13 @@ class TestChat(NudgeCase, TransactionCase):
         _conversation, result = self.ask(self.manager, "Hello")
         self.assertEqual(result["detail"], "quota exceeded for key")
 
+    def test_a_slow_provider_is_told_as_such(self):
+        self.use_adapter(events=[base.error_event(base.ERROR_TIMEOUT, "no answer within 60s")])
+        conversation, result = self.ask(self.user_a, "Hello")
+        self.assertEqual(result["type"], "error")
+        self.assertIn("took too long", result["message"])
+        self.assertEqual(conversation.message_ids[-1].error_code, base.ERROR_TIMEOUT)
+
     def test_failed_turn_is_not_replayed(self):
         adapter = self.use_adapter(events=[base.error_event(base.ERROR_NETWORK)])
         conversation, _result = self.ask(self.user_a, "First")

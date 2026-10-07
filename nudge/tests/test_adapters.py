@@ -203,6 +203,32 @@ class TestOpenAICompatAdapter(BaseCase):
         self.assertIn("refused for key ***", logs.output[0])
         self.assertNotIn("sk-test", logs.output[0])
 
+    def test_a_silent_provider_is_told_as_such(self):
+        def post(payload, stream, read_timeout):
+            raise requests.exceptions.ReadTimeout("Read timed out. (read timeout=30)")
+
+        self.patch(self.adapter, "_post", post)
+        with self.assertLogs("odoo.addons.nudge.llm.openai_compat_adapter", logging.INFO):
+            events = self.run_stream()
+        self.assertEqual(events, [base.error_event(base.ERROR_TIMEOUT, "no answer within 30s")])
+
+    def test_reasoning_effort(self):
+        self.respond(FakeResponse(lines=sse(delta("ok", finish="stop"))))
+        self.run_stream()
+        self.assertNotIn("reasoning_effort", self.posted[0], "Nothing asked, nothing sent")
+
+        self.adapter = OpenAICompatAdapter(base.ProviderConfig(
+            kind="openai_compatible", model="test-model", api_key="sk-test",
+            base_url="https://llm.invalid/v1/", timeout=30, effort="max"))
+        self.posted.clear()
+        refused = FakeResponse(400, body={"error": {"message": "reasoning_effort is not supported"}})
+        self.respond(refused, FakeResponse(lines=sse(delta("ok", finish="stop"))))
+        events = self.run_stream()
+        self.assertEqual(events[0]["text"], "ok")
+        self.assertEqual(self.posted[0]["reasoning_effort"], "high", "Max is high in the words of this API")
+        self.assertNotIn("reasoning_effort", self.posted[1], "Refused once, not sent again")
+        self.assertTrue(refused.closed)
+
     def test_finish_reasons(self):
         cases = {"length": base.STOP_MAX_TOKENS, "content_filter": base.STOP_REFUSAL, None: base.STOP_END}
         for finish, reason in cases.items():
@@ -263,6 +289,10 @@ class FakeRateLimitError(FakeAPIStatusError):
 
 
 class FakeAPIConnectionError(FakeAPIError):
+    pass
+
+
+class FakeAPITimeoutError(FakeAPIConnectionError):
     pass
 
 
@@ -359,6 +389,7 @@ class TestAnthropicAdapter(BaseCase):
         sdk.NotFoundError = FakeNotFoundError
         sdk.RateLimitError = FakeRateLimitError
         sdk.APIConnectionError = FakeAPIConnectionError
+        sdk.APITimeoutError = FakeAPITimeoutError
         patcher = patch.dict(sys.modules, {"anthropic": sdk})
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -480,6 +511,7 @@ class TestAnthropicAdapter(BaseCase):
             (FakeAPIStatusError(529), base.ERROR_UNAVAILABLE),
             (FakeAPIStatusError(400), base.ERROR_BAD_REQUEST),
             (FakeAPIConnectionError(), base.ERROR_NETWORK),
+            (FakeAPITimeoutError(), base.ERROR_TIMEOUT),
         ]
         for error, code in cases:
             self.stream = FakeStream(["Hel"], FINAL, error=error)

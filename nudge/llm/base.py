@@ -22,6 +22,8 @@ ERROR_RATE_LIMIT = "rate_limit"
 ERROR_BAD_REQUEST = "bad_request"
 ERROR_UNAVAILABLE = "unavailable"
 ERROR_NETWORK = "network"
+# The provider was reached and did not answer in time
+ERROR_TIMEOUT = "timeout"
 ERROR_MISSING_LIBRARY = "missing_library"
 ERROR_UNSUPPORTED = "unsupported"
 ERROR_UNKNOWN = "unknown"

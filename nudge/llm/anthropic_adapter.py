@@ -251,6 +251,9 @@ class AnthropicAdapter(base.BaseAdapter):
             if exc.status_code >= 500:
                 return base.ERROR_UNAVAILABLE, detail
             return base.ERROR_BAD_REQUEST, detail
+        timeout_error = getattr(anthropic, "APITimeoutError", None)
+        if timeout_error is not None and isinstance(exc, timeout_error):
+            return base.ERROR_TIMEOUT, type(exc).__name__
         if isinstance(exc, anthropic.APIConnectionError):
             return base.ERROR_NETWORK, type(exc).__name__
         return base.ERROR_UNKNOWN, detail
