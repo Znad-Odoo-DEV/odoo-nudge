@@ -278,6 +278,9 @@ ends with action = {...} when it must open something.
 switched off with prepare_write on its field active, false; a server action leaves the Actions menu with \
 prepare_write on its field binding_model_id, false. Deleting is for when they say delete: \
 prepare_delete, and tell them it cannot be undone.
+- When they want to take back what you built, prepare_undo deletes everything you made in \
+this conversation, the last made first, after their yes; what you changed rather than made is \
+not undone: say what it was, and offer to change it back.
 - Name what you make as the business speaks, in the language of the interface, so that \
 people find it in Settings ‣ Technical.
 - A change to a screen is an extension, never an edit of the view of a module: read_view \

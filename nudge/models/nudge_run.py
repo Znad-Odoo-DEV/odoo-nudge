@@ -265,6 +265,28 @@ class NudgeRun(models.Model):
                     self.env.ref("nudge.cron_agent_runs").sudo()._trigger()
                 break
 
+    def action_undo_built(self):
+        """Delete what Nudge built for this request in Developer mode, the last
+        made first. Its own requests only, for an administrator."""
+        from ..tools.developer import undo_built
+
+        if not self.env.user.has_group("base.group_system"):
+            raise AccessError(self.env._("Only an administrator undoes what was built."))
+        runs = self.filtered(lambda run: run.is_developer and run.user_id == self.env.user)
+        if not runs:
+            raise UserError(self.env._("Only your own requests in Developer mode can be undone here."))
+        deleted, kept = undo_built(self.env, runs)
+        message = self.env._("Deleted: %s.", ", ".join(deleted)) if deleted else self.env._("Nothing made here still exists.")
+        if kept:
+            message += " " + self.env._("Kept: %s.", "; ".join(kept))
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {"title": self.env._("Undo"), "message": message, "sticky": bool(kept),
+                       "type": "warning" if kept else "success",
+                       "next": {"type": "ir.actions.client", "tag": "reload"}},
+        }
+
     def action_stop(self):
         """Stop what was asked, by the one who asked it or by a manager. What
         was done stays done."""

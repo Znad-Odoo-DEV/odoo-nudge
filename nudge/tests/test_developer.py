@@ -491,3 +491,58 @@ class TestDeveloper(NudgeCase, TransactionCase):
         self.assertTrue(refused.is_error)
         self.assertIn("belongs to the module", refused.content)
         self.assertIn("Switch it off", refused.content)
+
+    def test_what_was_built_is_undone(self):
+        self.switch(True)
+        conversation = self.env["nudge.conversation"].with_user(self.admin)._chat_open()
+        run = self.env["nudge.run"].sudo().create({
+            "name": "Build", "conversation_id": conversation.id, "user_id": self.admin.id, "is_developer": True})
+        env = self.env(user=self.admin, context={"nudge_mode": "dev", "nudge_conversation_id": conversation.id})
+
+        def made(tool, arguments):
+            result = tools.base.call(env, tool, arguments, None, "dev")
+            self.assertFalse(result.is_error, result.content)
+            done = tools.base.TOOLS[tool].execute(env, SimpleNamespace(
+                values=result.pending["values"], res_model=result.pending["res_model"], res_ids=[]))
+            self.assertFalse(done.is_error, done.content)
+            model, ids, _names = done.records
+            self.env["nudge.step"].sudo().create({
+                "run_id": run.id, "tool": tool, "kind": "create", "state": "done", "res_model": model, "res_ids": ids})
+            return self.env[model].browse(ids)
+
+        action = made("prepare_server_action", {
+            "name": "Undo me", "model": "res.partner", "action": {"kind": "update", "field": "function", "value": "x"}})
+        field = made("prepare_field", {"model": "res.partner", "label": "Undo Field", "type": "char"})
+        self.assertIn("x_undo_field", self.env["res.partner"]._fields)
+        # What a module made is kept, said so
+        owned = self.env["ir.actions.server"].search([], limit=200).filtered(
+            lambda one: (one.get_external_id().get(one.id) or "").split(".")[0] not in ("", "nudge_custom", "__export__"))[:1]
+        if owned:
+            self.env["nudge.step"].sudo().create({
+                "run_id": run.id, "tool": "prepare_server_action", "kind": "create", "state": "done",
+                "res_model": "ir.actions.server", "res_ids": owned.ids})
+
+        asked = tools.base.call(env, "prepare_undo", {}, None, "dev")
+        self.assertFalse(asked.is_error, asked.content)
+        self.assertTrue(asked.pending["is_sensitive"])
+        self.assertIn("Undo Field", asked.pending["record_names"])
+        self.assertTrue(action.exists(), "Nothing before the yes")
+        done = tools.base.TOOLS["prepare_undo"].execute(env, SimpleNamespace(values=asked.pending["values"], res_model="nudge.run", res_ids=[]))
+        self.assertFalse(done.is_error, done.content)
+        self.assertFalse(action.exists())
+        self.assertFalse(field.exists())
+        self.assertNotIn("x_undo_field", self.env["res.partner"]._fields)
+        if owned:
+            self.assertTrue(owned.exists(), "What a module owns is not Nudge's to undo")
+            self.assertNotIn(owned.name, asked.pending["record_names"])
+        again = tools.base.call(env, "prepare_undo", {}, None, "dev")
+        self.assertTrue(again.is_error, "Nothing left to undo")
+
+        # The button of the request, for its own requests only
+        theirs = self.env["nudge.conversation"].with_user(self.agent)._chat_open()
+        other = self.env["nudge.run"].sudo().create({
+            "name": "Not mine", "conversation_id": theirs.id, "user_id": self.agent.id, "is_developer": True})
+        with self.assertRaises(UserError):
+            other.with_user(self.admin).action_undo_built()
+        notification = run.with_user(self.admin).action_undo_built()
+        self.assertEqual(notification["tag"], "display_notification")

@@ -145,6 +145,10 @@
                     <button name="action_stop" type="object" string="Stop"
                             invisible="state not in ('queued', 'running', 'waiting')"
                             confirm="What was done stays done. Nothing more is done for this request."/>
+                    <button name="action_undo_built" type="object" string="Undo What Was Built"
+                            groups="base.group_system"
+                            invisible="not is_developer or state in ('queued', 'running', 'waiting')"
+                            confirm="Delete everything Nudge built for this request: rules, actions, templates, views, buttons, fields, reports. What was changed rather than made stays as it is. This cannot be undone."/>
                     <field name="state" widget="statusbar" statusbar_visible="queued,running,waiting,done"/>
                 </header>
                 <sheet>

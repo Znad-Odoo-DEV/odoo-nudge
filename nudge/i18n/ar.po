@@ -4386,3 +4386,57 @@ msgstr "الكود يعمل فعلًا داخل التجربة. ما يكتبه 
 #: code:addons/nudge/tools/developer.py:0
 msgid "Try on a dummy record: %s"
 msgstr "تجربة على سجل وهمي: %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Undo what was built: %s item(s)"
+msgstr "تراجع عمّا بُني: %s عنصر"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Not undone"
+msgstr "لا يُتراجع عنه"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "What was changed rather than made"
+msgstr "ما عُدّل لا ما أُنشئ"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_run.py:0
+msgid "Only an administrator undoes what was built."
+msgstr "وحده المدير يتراجع عمّا بُني."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_run.py:0
+msgid "Only your own requests in Developer mode can be undone here."
+msgstr "يمكن التراجع هنا عن طلباتك أنت في وضع المطوّر فقط."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_run.py:0
+msgid "Deleted: %s."
+msgstr "حُذف: %s."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_run.py:0
+msgid "Nothing made here still exists."
+msgstr "لم يبقَ شيء مما صُنع هنا."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_run.py:0
+msgid "Kept: %s."
+msgstr "أُبقي: %s."
+
+#. module: nudge
+#. odoo-python
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_form
+msgid "Undo What Was Built"
+msgstr "تراجع عمّا بُني"

@@ -870,25 +870,161 @@ class PrepareDelete(Building):
             return base.ToolResult("This cannot be deleted.", is_error=True)
         model = get_model(env, step.res_model, "unlink")
         records = get_records(model.with_context(active_test=False), step.res_ids or [], "unlink")
-        self._check_deletable(records)
-        names = records.mapped("display_name")
-        if model._name == "ir.model.fields":
-            for field in records:
-                self._views_showing(field).unlink()
-        templates = env["ir.ui.view"]
-        if model._name == "ir.actions.report":
-            # The template made with the report goes with it
-            Views = env["ir.ui.view"].with_context(active_test=False)
-            templates = Views.search([("type", "=", "qweb"), ("key", "in", records.mapped("report_name"))])
-            xml_ids = templates.get_external_id()
-            templates = templates.filtered(lambda view: (xml_ids.get(view.id) or "").split(".")[0] in CUSTOM_MODULES)
-        records.unlink()
-        templates.unlink()
-        env.registry.clear_cache("templates")
+        names = delete_built(records)
         return base.ToolResult(
             f"Deleted: {model._description} {', '.join(repr(cut(name, 60)) for name in names)}.",
             event={"type": "changed", "model": model._name, "ids": []},
             records=(model._name, [], names),
+        )
+
+
+def delete_built(records):
+    """Delete what Nudge or Studio made, with what goes with it: the views that
+    show a field, the template of a report, the email templates made for a
+    rule and used by nothing else.
+
+    :return: the names of what was deleted
+    :raise Refused: for what a module owns"""
+    env = records.env
+    PrepareDelete._check_deletable(records)
+    names = records.mapped("display_name")
+    extra = []
+    if records._name == "ir.model.fields":
+        for field in records:
+            extra.append(PrepareDelete._views_showing(field))
+    if records._name == "ir.actions.report":
+        Views = env["ir.ui.view"].with_context(active_test=False)
+        templates = Views.search([("type", "=", "qweb"), ("key", "in", records.mapped("report_name"))])
+        xml_ids = templates.get_external_id()
+        extra.append(templates.filtered(lambda view: (xml_ids.get(view.id) or "").split(".")[0] in CUSTOM_MODULES))
+    mail_templates = env["mail.template"] if "mail.template" in env else None
+    if records._name == "base.automation" and mail_templates is not None:
+        actions = records.action_server_ids.filtered(lambda action: action.state == "mail_post")
+        used = actions.mapped("template_id")
+        others = env["ir.actions.server"].with_context(active_test=False).search(
+            [("template_id", "in", used.ids), ("id", "not in", actions.ids)])
+        mail_templates = (used - others.mapped("template_id")).filtered(lambda template: not template.get_external_id().get(template.id))
+    else:
+        mail_templates = None
+    for views in extra:
+        if records._name == "ir.model.fields":
+            views.unlink()
+    records.unlink()
+    for views in extra:
+        if views.exists():
+            views.unlink()
+    if mail_templates:
+        mail_templates.exists().unlink()
+    env.registry.clear_cache("templates")
+    return names
+
+
+def built_by(env, runs):
+    """:return: ``[(step, records)]`` that the runs made and that still exist,
+    the last made first"""
+    steps = env["nudge.step"].sudo().search([
+        ("run_id", "in", runs.ids), ("state", "=", "done"), ("kind", "=", "create"),
+        ("res_model", "in", list(DELETABLE))], order="id desc")
+    found = []
+    for step in steps:
+        if step.res_model not in env or not step.res_ids:
+            continue
+        records = env[step.res_model].with_context(active_test=False).browse(step.res_ids).exists()
+        if not records:
+            continue
+        try:
+            PrepareDelete._check_deletable(records)
+        except Refused:
+            continue
+        found.append((step, records))
+    return found
+
+
+def undo_built(env, runs):
+    """Delete what the runs made, the last made first.
+    :return: ``(names deleted, names kept with the reason)``"""
+    deleted, kept = [], []
+    for step, records in built_by(env, runs):
+        records = records.with_env(env).exists()
+        if not records:
+            continue
+        try:
+            with env.cr.savepoint():
+                deleted += [f"{records._description}: {name}" for name in delete_built(records)]
+        except Refused as refusal:
+            kept.append(f"{records._description}: {', '.join(records.mapped('display_name'))} ({refusal})")
+    return deleted, kept
+
+
+@base.register
+class PrepareUndo(Building):
+    name = "prepare_undo"
+    kind = "delete"
+    description = (
+        "Undo what you built in Developer mode: everything made in this conversation (rules, "
+        "server actions, scheduled actions, email templates, views, buttons, fields, reports, "
+        "approval rules), or in one request of What Nudge Did with run_id, is deleted, the last "
+        "made first. What was changed rather than made (a rule switched off, a value written) "
+        "is not undone: say so. Nothing is deleted by this call: the person is shown the list "
+        "and says yes or no; you read their answer as the result."
+    )
+    input_schema = {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "run_id": {"type": "integer", "minimum": 1, "description": "One request of What Nudge Did."},
+        },
+    }
+
+    def _runs(self, env, run_id):
+        Run = env["nudge.run"].sudo()
+        if run_id:
+            runs = Run.search([("id", "=", run_id), ("user_id", "=", env.uid), ("is_developer", "=", True)])
+            if not runs:
+                raise Refused("No request of yours in Developer mode has this number.")
+            return runs
+        conversation_id = env.context.get("nudge_conversation_id")
+        if not conversation_id:
+            raise Refused("Give the run_id of the request to undo.")
+        return Run.search([("conversation_id", "=", conversation_id), ("user_id", "=", env.uid), ("is_developer", "=", True)])
+
+    @refusing
+    def run(self, env, arguments, screen):
+        check_developing(env)
+        runs = self._runs(env, arguments.get("run_id"))
+        found = built_by(env, runs)
+        if not found:
+            raise Refused("Nothing made here still exists: there is nothing to undo.")
+        shown = [{"id": index, "name": f"{records._description}: {', '.join(records.mapped('display_name'))}"}
+                 for index, (_step, records) in enumerate(found, start=1)]
+        return base.ToolResult(
+            "The person is being shown what is about to be deleted.",
+            pending={
+                "summary": env._("Undo what was built: %s item(s)", len(found)),
+                "res_model": "nudge.run",
+                "res_ids": runs.ids,
+                "record_names": ", ".join(item["name"] for item in shown)[:500],
+                "values": {"run_ids": runs.ids},
+                "is_sensitive": True,
+                "preview": {"records": shown, "lines": [
+                    {"label": env._("Undo"), "value": env._("Not possible: deleted for good")},
+                    {"label": env._("Not undone"), "value": env._("What was changed rather than made")},
+                ]},
+            },
+        )
+
+    def execute(self, env, step):
+        check_developing(env)
+        runs = env["nudge.run"].sudo().browse((step.values or {}).get("run_ids") or []).exists()
+        runs = runs.filtered(lambda run: run.user_id == env.user and run.is_developer)
+        deleted, kept = undo_built(env, runs)
+        told = f"Deleted {len(deleted)} item(s): " + "; ".join(deleted) if deleted else "Nothing was deleted."
+        if kept:
+            told += " Kept: " + "; ".join(kept)
+        return base.ToolResult(
+            told,
+            event={"type": "changed", "model": "ir.ui.view", "ids": [], "action": {"type": "ir.actions.client", "tag": "reload"}},
+            records=("nudge.run", runs.ids, deleted[:10]),
         )
 
 
