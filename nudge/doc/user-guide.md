@@ -187,6 +187,26 @@ afterwards; a scheduled action can be run once the same way. What Nudge made is 
 a change, and deleted only when you ask for it by name; a view or a field of a module is never
 touched. Every step is in What Nudge Did.
 
+### Emails that look designed
+
+With the companion **Nudge: Emails** (it installs itself where Discuss is), ask for an email
+("when a quotation is confirmed, email the customer, the salesperson in copy") and Nudge asks
+which style you want: **classic** (a coloured band and a clean table), **modern** (a large
+coloured header and rounded cards), **minimal** (quiet, a thin line of colour) or **formal** (a
+letter with the logo on top). It proposes the title, the text, the values of the record in a
+table, its lines, and a box for what the reader must answer; the logo and the name of your
+company close every email unless you say otherwise. Arabic text makes the email right to left.
+The card shows the email as it will be read, for a real record. Once you said yes, Nudge offers
+to send you a test, to your own address only.
+
+Then the email goes the way you asked: by itself on an event, or from a button. With a button,
+pressing it opens a window with the email ready for the record on screen: read it, change it,
+attach a file, and **Send** does what the button it goes with does (approve, confirm, validate)
+and sends the email with a real Cc. Closing the window does neither. The original button can be
+hidden behind the new one, fields can be required before Send, and the work can be done
+**Without the Email** when you allow it. These buttons are listed under Nudge ‣ Configuration ‣
+Emails with Review, where one is switched off or deleted with its button.
+
 ## For administrators: the setup of Odoo
 
 Off by default. When an administrator switches on **Nudge for Administrators** (Settings ‣

@@ -254,6 +254,20 @@ Technical ‣ Automation Rules, Server Actions, Email Templates) and how to try 
 salesperson, the responsible) or an address, and who is in copy; propose the subject and the \
 body, with {{ object.field }} for the values of the record; then prepare_automation with an \
 action of kind email: the template and the rule come in one card.
+- When prepare_email_design is offered, every email is made with it, as a designed email: \
+ask which style they want (classic: a coloured band and a clean table; modern: a large \
+coloured header and rounded cards; minimal: quiet, a thin line of colour; formal: a letter \
+with the logo on top and a bordered table), who receives it, who is in copy, and propose the \
+title, the text, the values of the record shown in a table, the lines, and a box for what \
+the reader must answer. The logo and the name of the company close every email unless they \
+say otherwise. The card shows the email as it will be read, for a real record. Once made, \
+offer to send them a test, to their own address only: send_test_email. Then it goes out the \
+way they asked: by itself on an event (prepare_automation, an action of kind email with the \
+template_id), or from a button with a window to read and change it before it goes \
+(prepare_email_review, on the button they press: Approve, Confirm, Validate); ask which only \
+when their words do not say. For the window, ask whether the button it goes with is hidden \
+behind the new one, which fields must be filled before Send, and whether it may be done \
+without the email.
 - Before the card of a rule, offer in one sentence to try it: try_automation makes a dummy \
 record with the values you give (the fields a person would fill in), fires the rule on it, \
 tells what changed, what emails would have gone out, or what failed, then discards \

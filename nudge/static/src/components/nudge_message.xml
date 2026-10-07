@@ -134,12 +134,17 @@
                         <t t-set="lines" t-value="line.lines"/>
                     </t>
                 </dd>
-                <dd t-else="" dir="auto">
+                <dd t-else="" dir="auto" t-att-class="{ o_nudge_card_wide: line.html }">
                     <t t-if="'before' in line">
                         <del class="o_nudge_card_before" t-esc="show(line.before)"/>
                         <i class="fa fa-long-arrow-right o_nudge_card_arrow"/>
                     </t>
-                    <pre t-if="line.code" class="o_nudge_card_code" t-esc="show(line.value)"/>
+                    <!-- An email as its reader will see it, in a frame of its
+                         own: sandboxed without scripts, so nothing in it runs;
+                         the same origin only lets the page measure it -->
+                    <iframe t-if="line.html" class="o_nudge_card_email" sandbox="allow-same-origin"
+                            t-att-srcdoc="line.html" t-att-title="line.label"/>
+                    <pre t-elif="line.code" class="o_nudge_card_code" t-esc="show(line.value)"/>
                     <span t-else="" class="o_nudge_card_value" t-esc="show(line.value)"/>
                 </dd>
             </t>

@@ -92,3 +92,38 @@ test("a card shows code as code", async () => {
     expect(queryOne(".o_nudge_card_code").textContent).toBe("for r in records:\n    r.write({})");
     expect(".o_nudge_card_value").toHaveText("when a record is created");
 });
+
+test("a card shows an email as its reader sees it, in a sandboxed frame", async () => {
+    const { nudge } = await start({
+        answer: streamed({
+            type: "confirm",
+            step_id: 42,
+            kind: "create",
+            state: "pending",
+            title: "Create: email “Welcome”",
+            records: [],
+            lines: [
+                { label: "Style", value: "Modern" },
+                {
+                    label: "Preview",
+                    value: "Welcome, Acme",
+                    html: '<div style="color:#111"><h1>Welcome, Acme</h1><script>parent.x = 1</script></div>',
+                },
+            ],
+            sensitive: false,
+            error: "",
+        }),
+    });
+    nudge.setMode("dev");
+    await nudge.send("Make the welcome email");
+    await animationFrame();
+    expect(".o_nudge_card_email").toHaveCount(1);
+    const frame = queryOne(".o_nudge_card_email");
+    // No script runs in it, no form is sent from it
+    expect(frame.getAttribute("sandbox")).toBe("allow-same-origin");
+    expect(frame.getAttribute("srcdoc")).toInclude("<h1>Welcome, Acme</h1>");
+    await animationFrame();
+    expect(window.x).toBe(undefined, { message: "The script of the email never ran" });
+    expect(frame.parentElement).toHaveClass("o_nudge_card_wide");
+    expect(".o_nudge_card_value").toHaveText("Modern", { message: "The other lines stay as they were" });
+});

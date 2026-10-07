@@ -311,8 +311,10 @@ class CheckPythonCode(base.Tool):
 
 # ---------------------------------------------------------------- building
 
-def read_email(env, model, email):
-    """:return: ``(values of the template, lines of the card)``"""
+def read_recipients(env, model, to, cc=None):
+    """:param to: fields of the record that hold a contact or an address, or addresses
+    :return: ``(partner_to, email_to, email_cc, lines of the card)``, as the
+        placeholders of a template"""
     partner_to, email_to, email_cc, shown_to, shown_cc = [], [], [], [], []
 
     def recipient(text, into_partners, into_emails, shown):
@@ -333,14 +335,23 @@ def read_email(env, model, email):
                 f"{text!r} is neither an address nor a field that holds a contact or an address.")
         shown.append(field.string + f" ({text})")
 
-    for text in email["to"]:
+    for text in to:
         recipient(text, partner_to, email_to, shown_to)
     # A template has no contacts in copy: their addresses go in
     cc_partners = []
-    for text in email.get("cc") or []:
+    for text in cc or []:
         recipient(text, cc_partners, email_cc, shown_cc)
     email_cc += [placeholder.replace(".id }}", ".email_formatted }}") for placeholder in cc_partners]
+    lines = [
+        {"label": env._("To"), "value": ", ".join(shown_to)},
+        {"label": env._("Copy to"), "value": ", ".join(shown_cc) or None},
+    ]
+    return ",".join(partner_to), ",".join(email_to), ",".join(email_cc), lines
 
+
+def read_email(env, model, email):
+    """:return: ``(values of the template, lines of the card)``"""
+    partner_to, email_to, email_cc, lines = read_recipients(env, model, email["to"], email.get("cc"))
     for name in ("subject", "body"):
         for placeholder in PLACEHOLDER.findall(email[name]):
             if not FIELD_PLACEHOLDER.match(placeholder):
@@ -354,13 +365,11 @@ def read_email(env, model, email):
         "model_id": ir_model(env, model).id,
         "subject": email["subject"].strip(),
         "body_html": body_html,
-        "partner_to": ",".join(partner_to),
-        "email_to": ",".join(email_to),
-        "email_cc": ",".join(email_cc),
+        "partner_to": partner_to,
+        "email_to": email_to,
+        "email_cc": email_cc,
     }
-    lines = [
-        {"label": env._("To"), "value": ", ".join(shown_to)},
-        {"label": env._("Copy to"), "value": ", ".join(shown_cc) or None},
+    lines += [
         {"label": env._("Subject"), "value": values["subject"]},
         {"label": env._("Body"), "value": body, "code": True},
     ]
