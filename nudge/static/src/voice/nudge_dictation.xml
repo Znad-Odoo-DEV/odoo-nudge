@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="nudge.Dictation">
+        <!-- A press on it must not take the cursor out of the field -->
+        <div t-if="isDictating" class="o_nudge_dictation" t-ref="pill" role="status"
+             t-on-mousedown.prevent="">
+            <i t-if="state.phase === 'transcribing'" class="fa fa-circle-o-notch fa-spin"/>
+            <span t-else="" class="o_nudge_mic_dot"/>
+            <span t-if="state.phase === 'transcribing'" class="o_nudge_dictation_text">Writing what you said…</span>
+            <span t-elif="state.interim" class="o_nudge_dictation_text" dir="auto" t-esc="state.interim"/>
+            <span t-else="" class="o_nudge_dictation_text">I'm listening…</span>
+            <button type="button" class="o_nudge_language" tabindex="-1"
+                    title="Language I speak" aria-label="Language I speak"
+                    t-on-click="() => this.voice.switchLanguage()" t-esc="languageName"/>
+            <button type="button" class="o_nudge_dictation_stop" tabindex="-1"
+                    title="Done" aria-label="Done" t-on-click="() => this.voice.stop()">
+                <i class="fa fa-check"/>
+            </button>
+        </div>
+    </t>
+
+</templates>

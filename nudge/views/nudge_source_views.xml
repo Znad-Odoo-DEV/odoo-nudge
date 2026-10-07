@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_source_view_list" model="ir.ui.view">
+        <field name="name">nudge.source.view.list</field>
+        <field name="model">nudge.source</field>
+        <field name="arch" type="xml">
+            <list string="Company Files" decoration-danger="state == 'failed'" decoration-muted="state == 'empty'">
+                <field name="name"/>
+                <field name="purpose"/>
+                <field name="group_ids" widget="many2many_tags"/>
+                <field name="pages"/>
+                <field name="passage_count" string="Passages"/>
+                <field name="state" widget="badge" decoration-success="state == 'ready'" decoration-danger="state == 'failed'"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_source_view_form" model="ir.ui.view">
+        <field name="name">nudge.source.view.form</field>
+        <field name="model">nudge.source</field>
+        <field name="arch" type="xml">
+            <form string="Company File">
+                <header>
+                    <button name="action_read_again" type="object" string="Read Again" invisible="not file"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="HR Policy"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="purpose" placeholder="Leave, working hours, end of service"/>
+                            <field name="file" filename="file_name" widget="binary"/>
+                            <field name="file_name" invisible="1"/>
+                            <field name="group_ids" widget="many2many_tags"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="pages"/>
+                            <field name="passage_count" string="Passages"/>
+                            <field name="chars"/>
+                            <field name="error" invisible="not error"/>
+                        </group>
+                    </group>
+                    <div class="text-muted">
+                        PDF or text (TXT, CSV, Markdown), 10 MB at most. The file is read on the server and
+                        cut into passages Nudge searches; a scanned PDF holds no text and cannot be read.
+                        Nothing is sent to the AI provider until someone asks, and then only the passages
+                        that match, to people of the groups chosen here.
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_source_view_search" model="ir.ui.view">
+        <field name="name">nudge.source.view.search</field>
+        <field name="model">nudge.source</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="purpose"/>
+                <filter name="ready" string="Ready" domain="[('state', '=', 'ready')]"/>
+                <filter name="failed" string="Could Not Be Read" domain="[('state', '=', 'failed')]"/>
+                <filter name="inactive" string="Archived" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_source_action" model="ir.actions.act_window">
+        <field name="name">Company Files</field>
+        <field name="res_model">nudge.source</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Give Nudge your company's files</p>
+            <p>
+                Policies, procedures, price lists, catalogues: upload them once, and Nudge answers
+                from them, citing the file and the page. A file can be kept for some groups.
+            </p>
+        </field>
+    </record>
+</odoo>

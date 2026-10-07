@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_usage_view_list" model="ir.ui.view">
+        <field name="name">nudge.usage.view.list</field>
+        <field name="model">nudge.usage</field>
+        <field name="arch" type="xml">
+            <list string="Usage" create="0" edit="0" delete="0">
+                <field name="date"/>
+                <field name="user_id" widget="many2one_avatar"/>
+                <field name="kind"/>
+                <field name="model_name" optional="show"/>
+                <field name="conversation_id" optional="hide"/>
+                <field name="input_tokens" sum="Input" optional="hide"/>
+                <field name="output_tokens" sum="Output" optional="hide"/>
+                <field name="cache_read_tokens" optional="hide"/>
+                <field name="cache_write_tokens" optional="hide"/>
+                <field name="tokens" sum="Tokens"/>
+                <field name="cost" sum="Cost"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_usage_view_search" model="ir.ui.view">
+        <field name="name">nudge.usage.view.search</field>
+        <field name="model">nudge.usage</field>
+        <field name="arch" type="xml">
+            <search string="Usage">
+                <field name="user_id"/>
+                <field name="model_name"/>
+                <filter name="today" string="Today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter name="this_month" string="This Month"
+                        domain="[('date', '>=', (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter name="chat" string="Conversations" domain="[('kind', '=', 'chat')]"/>
+                <filter name="speech" string="Speech to Text" domain="[('kind', '=', 'speech')]"/>
+                <separator/>
+                <filter name="date" string="Date" date="date"/>
+                <group>
+                    <filter name="group_user" string="Person" context="{'group_by': 'user_id'}"/>
+                    <filter name="group_day" string="Day" context="{'group_by': 'date:day'}"/>
+                    <filter name="group_month" string="Month" context="{'group_by': 'date:month'}"/>
+                    <filter name="group_kind" string="Kind" context="{'group_by': 'kind'}"/>
+                    <filter name="group_company" string="Company" context="{'group_by': 'company_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_usage_action" model="ir.actions.act_window">
+        <field name="name">Usage</field>
+        <field name="res_model">nudge.usage</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'search_default_this_month': 1, 'search_default_group_user': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Nothing was spent yet</p>
+            <p>Every call to an AI provider is written here, with its tokens and its cost:
+               what the budgets of Settings are checked against.</p>
+        </field>
+    </record>
+</odoo>

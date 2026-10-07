@@ -1,0 +1,275 @@
+"""Adapter for Anthropic Claude, through the official ``anthropic`` SDK.
+
+The SDK is imported lazily: the module installs without it, and the provider
+reports a clear error when it is selected but not installed.
+"""
+import logging
+
+from . import base
+from .prompt import render_user_text
+
+_logger = logging.getLogger(__name__)
+
+DEFAULT_MAX_TOKENS = 16000
+
+# Models whose safety classifiers can decline a request, and that accept the
+# server-side fallback parameter
+FALLBACK_MODELS = frozenset({
+    "claude-fable-5-1",
+    "claude-opus-5-5",
+    "claude-opus-5",
+    "claude-sonnet-5-5",
+})
+FALLBACK_BETA = "server-side-fallback-2026-07-01"
+
+STOP_REASONS = {
+    "end_turn": base.STOP_END,
+    "stop_sequence": base.STOP_END,
+    "max_tokens": base.STOP_MAX_TOKENS,
+    "refusal": base.STOP_REFUSAL,
+    "tool_use": base.STOP_TOOL_USE,
+    "pause_turn": base.STOP_PAUSE,
+}
+
+# Keys accepted when a content block is sent back in a later request
+REPLAY_KEYS = {
+    "text": ("type", "text"),
+    "thinking": ("type", "thinking", "signature"),
+    "redacted_thinking": ("type", "data"),
+    "tool_use": ("type", "id", "name", "input"),
+}
+MODEL_INTERNAL_BLOCKS = ("thinking", "redacted_thinking", "tool_use")
+
+
+def sanitize_blocks(blocks):
+    """Prepare the content blocks of a stored assistant turn for replay.
+
+    Blocks are passed back unchanged, which thinking blocks require. When the
+    turn was completed by a fallback model, the model-internal blocks that
+    precede the last ``fallback`` marker belong to the model that declined and
+    must not be echoed.
+    """
+    last_fallback = max(
+        (index for index, block in enumerate(blocks) if block.get("type") == "fallback"),
+        default=-1,
+    )
+    result = []
+    for index, block in enumerate(blocks):
+        block_type = block.get("type")
+        if block_type not in REPLAY_KEYS:
+            continue
+        if index < last_fallback and block_type in MODEL_INTERNAL_BLOCKS:
+            continue
+        if block_type == "text" and not (block.get("text") or "").strip():
+            continue
+        result.append({key: block[key] for key in REPLAY_KEYS[block_type] if key in block})
+    return result
+
+
+def _supported(capabilities, *path):
+    node = capabilities
+    for key in path:
+        if not isinstance(node, dict):
+            return False
+        node = node.get(key)
+    return bool(isinstance(node, dict) and node.get("supported"))
+
+
+@base.register
+class AnthropicAdapter(base.BaseAdapter):
+    kind = "anthropic"
+
+    def _sdk(self):
+        try:
+            import anthropic  # noqa: PLC0415
+        except ImportError as exc:
+            raise base.AdapterError(
+                base.ERROR_MISSING_LIBRARY, "pip install anthropic",
+            ) from exc
+        return anthropic
+
+    def _client(self, anthropic):
+        kwargs = {"timeout": float(self.config.timeout), "max_retries": 2}
+        # Without a stored key the SDK resolves credentials from the environment
+        if self.config.api_key:
+            kwargs["api_key"] = self.config.api_key
+        if self.config.base_url:
+            kwargs["base_url"] = self.config.base_url
+        return anthropic.Anthropic(**kwargs)
+
+    # ------------------------------------------------------------------
+    # Request building
+    # ------------------------------------------------------------------
+    def _build_system(self, system):
+        blocks = [{"type": "text", "text": text} for text in system if text]
+        if blocks:
+            # Read point for the stable prefix (tools + system)
+            blocks[-1]["cache_control"] = {"type": "ephemeral"}
+        return blocks
+
+    def _build_messages(self, turns):
+        messages = []
+        for turn in turns:
+            role = turn["role"]
+            if role == "tool":
+                role = "user"
+                content = [
+                    {
+                        "type": "tool_result",
+                        "tool_use_id": result["id"],
+                        "content": result["content"],
+                        "is_error": bool(result.get("is_error")),
+                    }
+                    for result in turn.get("results") or []
+                ]
+            elif role == "assistant":
+                content = []
+                if turn.get("blocks") and turn.get("provider_kind") == self.kind:
+                    content = sanitize_blocks(turn["blocks"])
+                if not content:
+                    # A turn written by another provider
+                    if turn["text"]:
+                        content.append({"type": "text", "text": turn["text"]})
+                    content.extend(
+                        {"type": "tool_use", "id": call["id"], "name": call["name"],
+                         "input": call.get("input") or {}}
+                        for call in turn.get("tool_calls") or []
+                    )
+            else:
+                content = [
+                    *({"type": "image", "source": {
+                        "type": "base64", "media_type": image["media_type"], "data": image["data"]}}
+                      for image in turn.get("images") or []),
+                    {"type": "text", "text": render_user_text(turn)},
+                ]
+            if content:
+                messages.append({"role": role, "content": content})
+        return messages
+
+    def _build_params(self, system, turns, tools=None, tool_choice=None):
+        config = self.config
+        params = {
+            "model": config.model,
+            "max_tokens": config.max_output_tokens or DEFAULT_MAX_TOKENS,
+            "system": self._build_system(system),
+            "messages": self._build_messages(turns),
+            # Automatic breakpoint on the growing conversation tail
+            "cache_control": {"type": "ephemeral"},
+        }
+        if tools:
+            params["tools"] = [
+                # Inputs are streamed as they are written, and checked by
+                # Nudge before anything runs
+                dict(tool, eager_input_streaming=True) for tool in tools
+            ]
+        if tools and tool_choice == "required":
+            # A forced call; the API allows no thinking before one
+            params["tool_choice"] = {"type": "any"}
+        capabilities = config.capabilities or {}
+        if (_supported(capabilities, "thinking", "types", "adaptive")
+                and "tool_choice" not in params):
+            params["thinking"] = {"type": "adaptive"}
+        if config.effort and _supported(capabilities, "effort", config.effort):
+            params["output_config"] = {"effort": config.effort}
+        return params
+
+    # ------------------------------------------------------------------
+    # API
+    # ------------------------------------------------------------------
+    def stream_chat(self, system, turns, deadline=None, tools=None, tool_choice=None):
+        try:
+            anthropic = self._sdk()
+        except base.AdapterError as exc:
+            yield base.error_event(exc.code, exc.detail)
+            return
+        params = self._build_params(system, turns, tools, tool_choice)
+        try:
+            client = self._client(anthropic)
+            if self.config.refusal_fallback and self.config.model in FALLBACK_MODELS:
+                manager = client.beta.messages.stream(
+                    betas=[FALLBACK_BETA], fallbacks="default", **params)
+            else:
+                manager = client.messages.stream(**params)
+            # The SDK raises ValueError for tool arguments it cannot read at all
+            with manager as stream:
+                for event in stream:
+                    if base.expired(deadline):
+                        snapshot = stream.current_message_snapshot
+                        yield base.stop_event(
+                            base.STOP_DEADLINE,
+                            usage=self._normalize_usage(snapshot.to_dict().get("usage")),
+                            model=snapshot.model,
+                            request_id=stream.request_id,
+                        )
+                        return
+                    if event.type == "content_block_delta" and event.delta.type == "text_delta":
+                        yield base.text_event(event.delta.text)
+                final = stream.get_final_message().to_dict()
+                request_id = stream.request_id
+            reason = STOP_REASONS.get(final.get("stop_reason"), base.STOP_END)
+            if reason == base.STOP_TOOL_USE:
+                # Not on max_tokens nor on a refusal: a call cut short reads
+                # as a valid, shorter one
+                for block in final.get("content") or []:
+                    if block.get("type") == "tool_use":
+                        yield base.tool_use_event(block["id"], block["name"], block.get("input"))
+            yield base.stop_event(
+                reason,
+                usage=self._normalize_usage(final.get("usage")),
+                blocks=final.get("content"),
+                model=final.get("model"),
+                request_id=request_id,
+            )
+        except anthropic.APIError as exc:
+            code, detail = self._map_error(anthropic, exc)
+            _logger.info("Nudge: Anthropic request failed (%s): %s", code, detail)
+            yield base.error_event(code, detail)
+        except ValueError as exc:
+            _logger.info("Nudge: Anthropic answer could not be read: %s", exc)
+            yield base.error_event(base.ERROR_UNKNOWN, "unreadable tool arguments")
+
+    @staticmethod
+    def _normalize_usage(usage):
+        usage = usage or {}
+        return {
+            "input_tokens": usage.get("input_tokens"),
+            "output_tokens": usage.get("output_tokens"),
+            "cache_read_tokens": usage.get("cache_read_input_tokens"),
+            "cache_write_tokens": usage.get("cache_creation_input_tokens"),
+        }
+
+    @staticmethod
+    def _map_error(anthropic, exc):
+        detail = getattr(exc, "message", "") or type(exc).__name__
+        if isinstance(exc, (anthropic.AuthenticationError, anthropic.PermissionDeniedError)):
+            return base.ERROR_AUTH, detail
+        if isinstance(exc, anthropic.NotFoundError):
+            return base.ERROR_MODEL_NOT_FOUND, detail
+        if isinstance(exc, anthropic.RateLimitError):
+            return base.ERROR_RATE_LIMIT, detail
+        if isinstance(exc, anthropic.APIStatusError):
+            if exc.status_code >= 500:
+                return base.ERROR_UNAVAILABLE, detail
+            return base.ERROR_BAD_REQUEST, detail
+        if isinstance(exc, anthropic.APIConnectionError):
+            return base.ERROR_NETWORK, type(exc).__name__
+        return base.ERROR_UNKNOWN, detail
+
+    def _call(self, function):
+        anthropic = self._sdk()
+        try:
+            return function(self._client(anthropic))
+        except anthropic.APIError as exc:
+            raise base.AdapterError(*self._map_error(anthropic, exc)) from exc
+
+    def list_models(self):
+        return sorted(self._call(lambda client: [model.id for model in client.models.list()]))
+
+    def fetch_capabilities(self):
+        """:return: the capability tree of the configured model, as a dict"""
+        def fetch(client):
+            return client.models.retrieve(self.config.model).to_dict().get("capabilities") or {}
+        return self._call(fetch)
+
+    def check(self):
+        self.fetch_capabilities()

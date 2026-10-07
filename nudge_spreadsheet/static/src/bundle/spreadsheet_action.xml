@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="nudge_spreadsheet.Action">
+        <div class="o_nudge_spreadsheet d-flex flex-column h-100">
+            <div class="o_nudge_spreadsheet_bar d-flex align-items-center gap-2 px-3 py-2 border-bottom">
+                <i class="fa fa-table"/>
+                <span class="fw-bold flex-grow-1" t-esc="state.name"/>
+                <button type="button" class="btn btn-sm btn-secondary" t-on-click="download">
+                    <i class="fa fa-download me-1"/>Download
+                </button>
+            </div>
+            <div class="flex-grow-1 position-relative">
+                <SpreadsheetComponent t-if="state.ready" model="model"/>
+            </div>
+        </div>
+    </t>
+
+</templates>
