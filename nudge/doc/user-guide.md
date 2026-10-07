@@ -256,6 +256,10 @@ undoes it.
 
 - "Nudge needs an AI provider": ask your administrator.
 - "The AI provider's limit is reached": wait a minute and try again.
+- "The AI provider took too long to answer": ask again; when it happens often, your
+  administrator can set a lower reasoning effort on the provider, or a faster model.
+- "Nudge ran out of time before it was done": it read what it needed and the time was up. Say
+  "go on" and it continues from there, or press the clock and leave the work to it.
 - "You used all of your Nudge tokens for today": your administrator set a budget.
 - Nudge does not see your screen: open the eye, or ask your administrator, who may have turned
   screen sharing off.

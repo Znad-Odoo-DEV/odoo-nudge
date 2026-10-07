@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-01 11:58+0000\n"
-"PO-Revision-Date: 2026-10-01 11:58+0000\n"
+"POT-Creation-Date: 2026-10-07 15:04+0000\n"
+"PO-Revision-Date: 2026-10-07 15:04+0000\n"
 "Last-Translator: \n"
 "Language-Team: Arabic\n"
 "Language: ar\n"
@@ -21,6 +21,24 @@ msgstr ""
 #: code:addons/nudge/models/nudge_doc.py:0
 msgid "%(count)s pages of the official documentation of Odoo %(version)s."
 msgstr "%(count)s صفحة من توثيق Odoo %(version)s الرسمي."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "%(number)s %(unit)s after"
+msgstr "%(number)s %(unit)s بعد"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "%(number)s %(unit)s before"
+msgstr "%(number)s %(unit)s قبل"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "%s day(s)"
+msgstr "%s يوم"
 
 #. module: nudge
 #. odoo-python
@@ -53,6 +71,12 @@ msgid "A Python library is missing on the server. Ask your administrator."
 msgstr "توجد مكتبة Python ناقصة على الخادم. تواصل مع مسؤول النظام."
 
 #. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "A comparison or a report: how would you like it?"
+msgstr "مقارنة أو تقرير: كيف تريده؟"
+
+#. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_provider__stt_mode__chat
 msgid "A model that listens"
 msgstr "نموذج يستمع"
@@ -61,6 +85,12 @@ msgstr "نموذج يستمع"
 #: model:ir.model.constraint,message:nudge.constraint_nudge_doc_page_path_unique
 msgid "A page of the documentation is loaded once."
 msgstr "تُحمَّل صفحة التوثيق مرة واحدة."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_message.py:0
+msgid "A rating is up or down."
+msgstr "التقييم إمّا مفيد أو غير مفيد."
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
@@ -92,11 +122,30 @@ msgid "Access"
 msgstr "الصلاحيات"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Action %s"
+msgstr "الإجراء %s"
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_conversation__active
 #: model:ir.model.fields,field_description:nudge.field_nudge_note__active
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider__active
+#: model:ir.model.fields,field_description:nudge.field_nudge_source__active
 msgid "Active"
 msgstr "نشط"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Activity"
+msgstr "النشاط"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+msgid "Add a server action to the Actions menu"
+msgstr "أضف إجراء خادم إلى قائمة الإجراءات"
 
 #. module: nudge
 #: model_terms:ir.actions.act_window,help:nudge.nudge_provider_action
@@ -108,6 +157,18 @@ msgstr "أضف مزود ذكاء اصطناعي"
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 msgid "Add an API key to one of the providers, then open Nudge again."
 msgstr "أضف مفتاح API لأحد المزودين، ثم افتح Nudge مرة أخرى."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Add the button “%s”"
+msgstr "إضافة الزر “%s”"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Add the field “%s”"
+msgstr "إضافة الحقل “%s”"
 
 #. module: nudge
 #. odoo-python
@@ -163,6 +224,7 @@ msgstr "المرساة"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__message_id
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_message_view_feedback
 msgid "Answer"
 msgstr "الإجابة"
 
@@ -195,6 +257,21 @@ msgid "App"
 msgstr "التطبيق"
 
 #. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_note_view_list
+msgid "Approve"
+msgstr "اعتماد"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_note__state__approved
+msgid "Approved"
+msgstr "معتمد"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_note__approved_by
+msgid "Approved By"
+msgstr "اعتمده"
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.js:0
 #: model:ir.model.fields.selection,name:nudge.selection__res_users_settings__nudge_voice_language__ar
@@ -206,6 +283,7 @@ msgstr "العربية"
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_conversation_view_search
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_search
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_source_view_search
 msgid "Archived"
 msgstr "مؤرشف"
 
@@ -213,6 +291,12 @@ msgstr "مؤرشف"
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__arguments
 msgid "Arguments"
 msgstr "المعطيات"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "As a spreadsheet, with a chart"
+msgstr "جدول بيانات مع رسم بياني"
 
 #. module: nudge
 #. odoo-javascript
@@ -264,6 +348,11 @@ msgid "Asked by the Model"
 msgstr "ما طلبه النموذج"
 
 #. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_run__is_developer
+msgid "Asked in Developer mode: Nudge built rather than did."
+msgstr "طُلب في وضع المطوّر: بنى Nudge ولم ينفّذ."
+
+#. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_profile_slice__kind__automation
 msgid "Automation"
 msgstr "الأتمتة"
@@ -292,7 +381,10 @@ msgid "Base URL"
 msgstr "العنوان الأساسي"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
 #: model:ir.model.fields,field_description:nudge.field_nudge_doc_passage__body
+#: model:ir.model.fields,field_description:nudge.field_nudge_source_passage__body
 msgid "Body"
 msgstr "المتن"
 
@@ -314,10 +406,18 @@ msgid "Business Notes"
 msgstr "ملاحظات العمل"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__method
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_step__kind__method
 msgid "Button"
 msgstr "زر"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Button %(label)s on %(model)s"
+msgstr "زر %(label)s على %(model)s"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider__price_cache_read
@@ -379,14 +479,34 @@ msgid "Category"
 msgstr "الفئة"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_step__kind__write
 msgid "Change"
 msgstr "تعديل"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Change by Nudge: %s"
+msgstr "تعديل من Nudge: %s"
+
+#. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_profile__trigger__modules
 msgid "Change of the installed modules"
 msgstr "تغير في الموديولات المثبتة"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Change the screen: %s"
+msgstr "تعديل الشاشة: %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/configuration.py:0
+msgid "Change the settings"
+msgstr "تغيير الإعدادات"
 
 #. module: nudge
 #. odoo-python
@@ -420,10 +540,21 @@ msgid "Changes when the installed modules change."
 msgstr "يتغير عندما تتغير الموديولات المثبتة."
 
 #. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_source__chars
+msgid "Characters"
+msgstr "الأحرف"
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_message.xml:0
 msgid "Check it twice: this is not taken back with a click"
 msgstr "راجعه جيدًا: هذا الإجراء لا يُتراجع عنه بنقرة"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Checked code"
+msgstr "فحص الكود"
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
@@ -458,12 +589,20 @@ msgid "Click in a text field first, then start the dictation."
 msgstr "انقر داخل حقل نصي أولًا، ثم ابدأ الإملاء."
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/navigation.py:0
+msgid "Click “%s”."
+msgstr "اضغط “%s”."
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 msgid "Close"
 msgstr "إغلاق"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_step__kind__code
 msgid "Code"
 msgstr "كود"
@@ -481,6 +620,18 @@ msgstr "اللون"
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_search
 msgid "Company"
 msgstr "الشركة"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_source_view_form
+msgid "Company File"
+msgstr "ملف الشركة"
+
+#. module: nudge
+#: model:ir.actions.act_window,name:nudge.nudge_source_action
+#: model:ir.ui.menu,name:nudge.nudge_menu_sources
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_source_view_list
+msgid "Company Files"
+msgstr "ملفات الشركة"
 
 #. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_message__state__complete
@@ -533,6 +684,7 @@ msgstr "السياق"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__conversation_id
+#: model:ir.model.fields,field_description:nudge.field_nudge_note__conversation_id
 #: model:ir.model.fields,field_description:nudge.field_nudge_run__conversation_id
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__conversation_id
 #: model:ir.model.fields,field_description:nudge.field_nudge_usage__conversation_id
@@ -554,6 +706,12 @@ msgstr "المحادثات"
 #: model_terms:ir.actions.act_window,help:nudge.nudge_conversation_action
 msgid "Conversations appear here once people start talking to Nudge."
 msgstr "تظهر المحادثات هنا عندما يبدأ المستخدمون في التحدث مع Nudge."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Copy to"
+msgstr "نسخة إلى"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__override_summary
@@ -583,6 +741,18 @@ msgid "Cost per Person and per Day"
 msgstr "التكلفة لكل مستخدم في اليوم"
 
 #. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_source__state__failed
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_source_view_search
+msgid "Could Not Be Read"
+msgstr "تعذّرت قراءته"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Counted from"
+msgstr "محسوب من"
+
+#. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_step__kind__create
 msgid "Create"
 msgstr "إنشاء"
@@ -600,6 +770,36 @@ msgid "Create: %s"
 msgstr "إنشاء: %s"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Create: automation rule “%s”"
+msgstr "إنشاء: قاعدة أتمتة “%s”"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Create: email template “%s”"
+msgstr "إنشاء: قالب بريد “%s”"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/reports.py:0
+msgid "Create: report “%s”"
+msgstr "إنشاء: تقرير “%s”"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Create: scheduled action “%s”"
+msgstr "إنشاء: إجراء مجدول “%s”"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Create: server action “%s”"
+msgstr "إنشاء: إجراء خادم “%s”"
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_conversation__create_uid
 #: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__create_uid
 #: model:ir.model.fields,field_description:nudge.field_nudge_doc_passage__create_uid
@@ -610,6 +810,8 @@ msgstr "إنشاء: %s"
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider__create_uid
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider_model__create_uid
 #: model:ir.model.fields,field_description:nudge.field_nudge_run__create_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_source__create_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_source_passage__create_uid
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__create_uid
 #: model:ir.model.fields,field_description:nudge.field_nudge_usage__create_uid
 msgid "Created by"
@@ -626,6 +828,8 @@ msgstr "أنشئ بواسطة"
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider__create_date
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider_model__create_date
 #: model:ir.model.fields,field_description:nudge.field_nudge_run__create_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_source__create_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_source_passage__create_date
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__create_date
 #: model:ir.model.fields,field_description:nudge.field_nudge_usage__create_date
 msgid "Created on"
@@ -673,6 +877,8 @@ msgid "Custom Module"
 msgstr "موديول مخصص"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
 #: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__data
 msgid "Data"
 msgstr "البيانات"
@@ -728,9 +934,66 @@ msgid "Default Provider"
 msgstr "المزود الافتراضي"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Delay"
+msgstr "المهلة"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_step__kind__delete
+msgid "Delete"
+msgstr "حذف"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_form
+msgid ""
+"Delete everything Nudge built for this request: rules, actions, templates, "
+"views, buttons, fields, reports. What was changed rather than made stays as "
+"it is. This cannot be undone."
+msgstr ""
+"حذف كل ما بناه Nudge لهذا الطلب: القواعد والإجراءات والقوالب والعروض "
+"والأزرار والحقول والتقارير. ما عُدّل ولم يُصنع يبقى كما هو. لا يمكن التراجع "
+"عن هذا."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Delete: %s"
+msgstr "حذف: %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_run.py:0
+msgid "Deleted: %s."
+msgstr "حُذف: %s."
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__description
 msgid "Description"
 msgstr "الوصف"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Dev"
+msgstr "مطوّر"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_message__mode__dev
+#: model:ir.model.fields.selection,name:nudge.selection__res_users_settings__nudge_mode__dev
+msgid "Developer"
+msgstr "مطوّر"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__is_developer
+msgid "Developer Mode"
+msgstr "وضع المطوّر"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Developer mode is not open to you. Ask your administrator."
+msgstr "وضع المطوّر غير متاح لك. اسأل مديرك."
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_ir_http__display_name
@@ -745,7 +1008,10 @@ msgstr "الوصف"
 #: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__display_name
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider__display_name
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider_model__display_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_quick__display_name
 #: model:ir.model.fields,field_description:nudge.field_nudge_run__display_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_source__display_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_source_passage__display_name
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__display_name
 #: model:ir.model.fields,field_description:nudge.field_nudge_usage__display_name
 #: model:ir.model.fields,field_description:nudge.field_nudge_voice__display_name
@@ -791,6 +1057,12 @@ msgid "Drag the avatar to put Nudge where you want it."
 msgstr "اسحب الأيقونة لتضع Nudge حيث تريد."
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Due in"
+msgstr "يستحق خلال"
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__duration_ms
 #: model:ir.model.fields,field_description:nudge.field_nudge_profile__duration_ms
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__duration_ms
@@ -815,6 +1087,7 @@ msgid "English"
 msgstr "الإنجليزية"
 
 #. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_source__error
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__error
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_message__state__error
 msgid "Error"
@@ -834,6 +1107,12 @@ msgstr "تفاصيل الخطأ"
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__error_message
 msgid "Error Message"
 msgstr "رسالة الخطأ"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Every"
+msgstr "كل"
 
 #. module: nudge
 #: model_terms:ir.actions.act_window,help:nudge.nudge_usage_action
@@ -883,9 +1162,50 @@ msgid "Fallback on Refusal"
 msgstr "نموذج بديل عند الرفض"
 
 #. module: nudge
+#: model:ir.actions.act_window,name:nudge.nudge_feedback_action
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__feedback
+#: model:ir.ui.menu,name:nudge.nudge_menu_feedback
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_message_view_feedback
+msgid "Feedback"
+msgstr "التقييم"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__feedback_note
+msgid "Feedback Note"
+msgstr "ملاحظة التقييم"
+
+#. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
 msgid "Fetch Models"
 msgstr "جلب النماذج"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Field"
+msgstr "الحقل"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Field %(field)s on %(model)s"
+msgstr "الحقل %(field)s على %(model)s"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__attachment_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_source__file
+msgid "File"
+msgstr "الملف"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_source__file_name
+msgid "File Name"
+msgstr "اسم الملف"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__attachment_id
+msgid "File Sent"
+msgstr "الملف المرسل"
 
 #. module: nudge
 #. odoo-javascript
@@ -897,6 +1217,18 @@ msgstr "ابحث عن آخر طلبات هذا العميل"
 #: model:ir.model.fields,field_description:nudge.field_nudge_profile__fingerprint
 msgid "Fingerprint"
 msgstr "البصمة"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "First run"
+msgstr "أول تشغيل"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "For"
+msgstr "لـ"
 
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_res_users_settings__nudge_explain
@@ -915,6 +1247,11 @@ msgid ""
 msgstr ""
 "مثال: نسمي عروض الأسعار \"عروضًا\". الطلبات التي تزيد على 10,000 تحتاج إلى "
 "موافقة مدير المبيعات قبل التأكيد."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_source__group_ids
+msgid "For the Groups"
+msgstr "للمجموعات"
 
 #. module: nudge
 #: model:nudge.provider,notes:nudge.provider_gemini
@@ -953,6 +1290,11 @@ msgstr ""
 "واحدًا واحدًا."
 
 #. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_source_action
+msgid "Give Nudge your company's files"
+msgstr "أعطِ Nudge ملفات شركتك"
+
+#. module: nudge
 #: model:nudge.provider,name:nudge.provider_gemini
 msgid "Google Gemini (free tier)"
 msgstr "Google Gemini (الباقة المجانية)"
@@ -963,6 +1305,11 @@ msgid "Groq (free tier)"
 msgstr "Groq (الباقة المجانية)"
 
 #. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_source_view_form
+msgid "HR Policy"
+msgstr "سياسة الموارد البشرية"
+
+#. module: nudge
 #: model:ir.model,name:nudge.model_ir_http
 msgid "HTTP Routing"
 msgstr "مسار HTTP"
@@ -971,6 +1318,18 @@ msgstr "مسار HTTP"
 #: model:ir.model.fields,field_description:nudge.field_nudge_doc_passage__heading
 msgid "Heading"
 msgstr "العنوان الفرعي"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Help"
+msgstr "المساعدة"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_quick.py:0
+msgid "Here is “%s”: set it as you need."
+msgstr "هذا هو “%s”: اضبطه كما تحتاج."
 
 #. module: nudge
 #. odoo-javascript
@@ -1026,10 +1385,16 @@ msgstr "كيف أنشئ عرض سعر؟"
 #: model:ir.model.fields,help:nudge.field_nudge_provider__effort
 msgid ""
 "How much reasoning the model spends on an answer. Lower is faster and "
-"cheaper. Only sent to models that support it."
+"cheaper: a free tier that takes long per call answers in time with Low. Sent"
+" to Anthropic Claude as its effort, and to OpenAI-compatible providers "
+"(Google Gemini, OpenAI) as reasoning_effort, low, medium or high; a provider"
+" that refuses it is asked again without it."
 msgstr ""
-"مقدار التفكير الذي يبذله النموذج في الإجابة. الأقل أسرع وأرخص. يرسل فقط إلى "
-"النماذج التي تدعمه."
+"كم من التفكير يبذله النموذج في الإجابة. الأقل أسرع وأرخص: الخطة المجانية "
+"التي تتأخر في كل نداء تجيب في الوقت مع «منخفض». يُرسل إلى Anthropic Claude "
+"كجهده، وإلى المزوّدين المتوافقين مع OpenAI ‏(Google Gemini وOpenAI) كـ "
+"reasoning_effort: منخفض أو متوسط أو عالٍ؛ والمزوّد الذي يرفضه يُسأل مرة أخرى"
+" بدونه."
 
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_provider__stt_mode
@@ -1112,7 +1477,10 @@ msgstr "أعمل عليه في الخلفية. سأخبرك عندما ينته�
 #: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__id
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider__id
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider_model__id
+#: model:ir.model.fields,field_description:nudge.field_nudge_quick__id
 #: model:ir.model.fields,field_description:nudge.field_nudge_run__id
+#: model:ir.model.fields,field_description:nudge.field_nudge_source__id
+#: model:ir.model.fields,field_description:nudge.field_nudge_source_passage__id
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__id
 #: model:ir.model.fields,field_description:nudge.field_nudge_usage__id
 #: model:ir.model.fields,field_description:nudge.field_nudge_voice__id
@@ -1136,6 +1504,12 @@ msgstr "مستخدم"
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_search
 msgid "In the Background"
 msgstr "في الخلفية"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "In the chat"
+msgstr "في المحادثة"
 
 #. module: nudge
 #. odoo-javascript
@@ -1172,6 +1546,12 @@ msgid "Input Tokens"
 msgstr "رموز المدخلات"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/configuration.py:0
+msgid "Install the app %s"
+msgstr "تثبيت التطبيق %s"
+
+#. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_profile__trigger__install
 msgid "Installation of Nudge"
 msgstr "تثبيت Nudge"
@@ -1201,11 +1581,20 @@ msgid ""
 msgstr "تُقرأ بعد التثبيت بلحظات، ثم في كل مرة تتغير فيها الموديولات."
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_run.py:0
+msgid "Kept: %s."
+msgstr "أُبقي: %s."
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__key
 msgid "Key"
 msgstr "المفتاح"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+#: model:ir.model.fields,field_description:nudge.field_nudge_note__kind
 #: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__kind
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__kind
 #: model:ir.model.fields,field_description:nudge.field_nudge_usage__kind
@@ -1249,6 +1638,8 @@ msgstr "آخر نشاط"
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider__write_uid
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider_model__write_uid
 #: model:ir.model.fields,field_description:nudge.field_nudge_run__write_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_source__write_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_source_passage__write_uid
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__write_uid
 #: model:ir.model.fields,field_description:nudge.field_nudge_usage__write_uid
 msgid "Last Updated by"
@@ -1265,15 +1656,27 @@ msgstr "آخر تحديث بواسطة"
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider__write_date
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider_model__write_date
 #: model:ir.model.fields,field_description:nudge.field_nudge_run__write_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_source__write_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_source_passage__write_date
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__write_date
 #: model:ir.model.fields,field_description:nudge.field_nudge_usage__write_date
 msgid "Last Updated on"
 msgstr "آخر تحديث في"
 
 #. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_note__reason
+msgid "Learnt From"
+msgstr "تعلّمه من"
+
+#. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_slice_view_form
 msgid "Leave empty to keep what was read from the database."
 msgstr "اتركه فارغًا للإبقاء على ما قُرئ من قاعدة البيانات."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_source_view_form
+msgid "Leave, working hours, end of service"
+msgstr "الإجازات، ساعات العمل، نهاية الخدمة"
 
 #. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_step__state__cancelled
@@ -1287,10 +1690,49 @@ msgid "Left undecided"
 msgstr "تُرك بلا قرار"
 
 #. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_note__kind__lesson
+msgid "Lesson"
+msgstr "درس"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_note_view_search
+msgid "Lessons"
+msgstr "الدروس"
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 msgid "Let Nudge see my screen"
 msgstr "اسمح لـ Nudge برؤية شاشتي"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_developer
+msgid ""
+"Let administrators (the group Settings) build through Nudge, in Developer "
+"mode: automation rules, server actions, emails sent on an event, buttons, "
+"fields and changes to the screens. Nudge explains first and shows everything"
+" on the card, the code included; nothing is made before a yes; deletion only"
+" when asked for by name. Every step is in What Nudge Did. Off by default."
+msgstr ""
+"السماح للمديرين (مجموعة الإعدادات) بالبناء عبر Nudge في وضع المطوّر: قواعد "
+"الأتمتة، إجراءات الخادم، رسائل البريد عند حدث، الأزرار، الحقول وتعديلات "
+"الشاشات. يشرح Nudge أولًا ويعرض كل شيء على البطاقة بما فيه الكود؛ لا يُصنع "
+"شيء قبل الموافقة؛ ولا حذف إلا بطلب صريح بالاسم. كل خطوة مسجّلة في What Nudge"
+" Did. مطفأ افتراضيًا."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_admin
+msgid ""
+"Let administrators (the group Settings) read and change the setup of Odoo "
+"through the agent: users, groups and privileges, companies, menus, views, "
+"actions, scheduled actions, system parameters. As the person, one "
+"confirmation per change, never a deletion; passwords, keys and tokens stay "
+"hidden. Off by default."
+msgstr ""
+"السماح للمديرين (مجموعة الإعدادات) بقراءة إعدادات Odoo وتعديلها عبر الوكيل: "
+"المستخدمون والمجموعات والصلاحيات، الشركات، القوائم، العروض، الإجراءات، "
+"الإجراءات المجدولة، معاملات النظام. بصفة الشخص نفسه، تأكيد واحد لكل تعديل، "
+"ولا حذف أبدًا؛ كلمات المرور والمفاتيح والرموز تبقى مخفية. مطفأ افتراضيًا."
 
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_sql
@@ -1302,6 +1744,38 @@ msgstr ""
 "يسمح للمديرين (مجموعة Settings، المسموح لهم في كل الشركات) بقراءة قاعدة "
 "البيانات بجملة SELECT واحدة عبر الوكيل: لا تغيير ولا قفل، جداول Odoo التي "
 "يقرؤونها، 50 صفًا، 10 ثوانٍ. مطفأ افتراضيًا."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid ""
+"Let administrators build through Nudge, in Developer mode: automation rules,"
+" server actions, emails sent on an event, buttons, fields and changes to the"
+" screens. Only the group Settings. Nudge explains first and shows everything"
+" on the card, the code included; nothing is made before a yes; deletion only"
+" when asked for by name. Every step is in What Nudge Did. Off by default."
+msgstr ""
+"السماح للمديرين بالبناء عبر Nudge في وضع المطوّر: قواعد الأتمتة، إجراءات "
+"الخادم، رسائل البريد عند حدث، الأزرار، الحقول وتعديلات الشاشات. لمجموعة "
+"الإعدادات فقط. يشرح Nudge أولًا ويعرض كل شيء على البطاقة بما فيه الكود؛ لا "
+"يُصنع شيء قبل الموافقة؛ ولا حذف إلا بطلب صريح بالاسم. كل خطوة مسجّلة في What"
+" Nudge Did. مطفأ افتراضيًا."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid ""
+"Let administrators read and change the setup of Odoo through the agent: "
+"users, groups and privileges, companies, menus, views, actions, scheduled "
+"actions, system parameters, as Settings and Technical show them. Only the "
+"group Settings. As the person, one confirmation per change, never a "
+"deletion; passwords, keys and tokens stay hidden, and SQL keeps away from "
+"those tables. Off by default."
+msgstr ""
+"السماح للمديرين بقراءة إعدادات Odoo وتعديلها عبر الوكيل: المستخدمون "
+"والمجموعات والصلاحيات، الشركات، القوائم، العروض، الإجراءات، الإجراءات "
+"المجدولة، معاملات النظام، كما تعرضها الإعدادات والقائمة التقنية. لمجموعة "
+"الإعدادات فقط. بصفة الشخص نفسه، تأكيد واحد لكل تعديل، ولا حذف أبدًا؛ كلمات "
+"المرور والمفاتيح والرموز تبقى مخفية، وSQL لا يقترب من تلك الجداول. مطفأ "
+"افتراضيًا."
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
@@ -1375,6 +1849,12 @@ msgstr ""
 " قبل كل تغيير."
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/reports.py:0
+msgid "Lines"
+msgstr "الأسطر"
+
+#. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
 msgid "Load Again"
 msgstr "حمّل من جديد"
@@ -1409,6 +1889,12 @@ msgid "Low"
 msgstr "منخفض"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/reports.py:0
+msgid "Made of"
+msgstr "مكوّن من"
+
+#. module: nudge
 #: model:res.groups,name:nudge.group_nudge_manager
 msgid "Manager"
 msgstr "المدير"
@@ -1432,6 +1918,13 @@ msgstr "الأقصى"
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider__max_output_tokens
 msgid "Maximum Output Tokens"
 msgstr "الحد الأقصى لرموز المخرجات"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid ""
+"Meanwhile, search the screens, the settings and the Odoo documentation:"
+msgstr "في هذه الأثناء، ابحث في الشاشات والإعدادات وتوثيق Odoo:"
 
 #. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_provider__effort__medium
@@ -1458,6 +1951,11 @@ msgid "Messages"
 msgstr "الرسائل"
 
 #. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_source__mimetype
+msgid "Mimetype"
+msgstr "نوع الملف"
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__mode
@@ -1465,6 +1963,9 @@ msgid "Mode"
 msgstr "الوضع"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+#: code:addons/nudge/tools/developer.py:0 code:addons/nudge/tools/reports.py:0
 #: model:ir.model.fields,field_description:nudge.field_nudge_conversation__model_name
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__model_name
 #: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__model_name
@@ -1514,6 +2015,7 @@ msgstr "محادثاتي"
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider__name
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider_model__name
+#: model:ir.model.fields,field_description:nudge.field_nudge_source__name
 msgid "Name"
 msgstr "الاسم"
 
@@ -1559,6 +2061,17 @@ msgid "No AI provider is set up to turn speech into text."
 msgstr "لا يوجد مزود ذكاء اصطناعي مهيأ لتحويل الكلام إلى نص."
 
 #. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_source__state__empty
+msgid "No File"
+msgstr "لا ملف"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "No answer came. Ask again, in other words."
+msgstr "لم يصل جواب. اسأل من جديد بكلمات أخرى."
+
+#. module: nudge
 #: model_terms:ir.actions.act_window,help:nudge.nudge_conversation_action
 msgid "No conversation yet"
 msgstr "لا توجد محادثات بعد"
@@ -1575,10 +2088,21 @@ msgid "No description"
 msgstr "لا وصف"
 
 #. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_feedback_action
+msgid "No feedback yet"
+msgstr "لا تقييمات بعد"
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/voice/voice_service.js:0
 msgid "No microphone was found."
 msgstr "لم يُعثر على ميكروفون."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/reports.py:0
+msgid "No record to print yet"
+msgstr "لا سجل للطباعة بعد"
 
 #. module: nudge
 #. odoo-javascript
@@ -1587,6 +2111,12 @@ msgstr "لم يُعثر على ميكروفون."
 #: model:ir.model.fields.selection,name:nudge.selection__res_users_settings__nudge_hotkey__none
 msgid "No shortcut"
 msgstr "بدون اختصار"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "No visible difference"
+msgstr "لا فرق ظاهر"
 
 #. module: nudge
 #: model_terms:ir.actions.act_window,help:nudge.nudge_run_action
@@ -1599,17 +2129,38 @@ msgid "Not Over"
 msgstr "لم ينتهِ"
 
 #. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_message__feedback__down
+msgid "Not Useful"
+msgstr "غير مفيد"
+
+#. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_provider__stt_mode__none
 msgid "Not available"
 msgstr "غير متاح"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Not possible: deleted for good"
+msgstr "غير ممكن: يُحذف نهائيًا"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Not undone"
+msgstr "لا يُتراجع عنه"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
 #: model:ir.model.fields,field_description:nudge.field_nudge_note__body
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_note__kind__note
 msgid "Note"
 msgstr "الملاحظة"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider__notes
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_note_view_search
 msgid "Notes"
 msgstr "ملاحظات"
 
@@ -1618,6 +2169,19 @@ msgstr "ملاحظات"
 #: code:addons/nudge/models/nudge_profile.py:0
 msgid "Nothing changed."
 msgstr "لم يتغير شيء."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid ""
+"Nothing found. Try other words; the documentation is written in English."
+msgstr "لم يُعثر على شيء. جرّب كلمات أخرى؛ التوثيق مكتوب بالإنكليزية."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_run.py:0
+msgid "Nothing made here still exists."
+msgstr "لم يبقَ شيء مما صُنع هنا."
 
 #. module: nudge
 #. odoo-python
@@ -1674,6 +2238,16 @@ msgid "Nudge Colour"
 msgstr "لون Nudge"
 
 #. module: nudge
+#: model:ir.model,name:nudge.model_nudge_source
+msgid "Nudge Company File"
+msgstr "ملف شركة في Nudge"
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_source_passage
+msgid "Nudge Company File Passage"
+msgstr "مقطع من ملف شركة في Nudge"
+
+#. module: nudge
 #: model:ir.model,name:nudge.model_nudge_conversation
 msgid "Nudge Conversation"
 msgstr "محادثة Nudge"
@@ -1719,6 +2293,11 @@ msgid "Nudge Reads Its Answers Aloud"
 msgstr "Nudge يقرأ إجاباته بصوت مسموع"
 
 #. module: nudge
+#: model:ir.model,name:nudge.model_nudge_quick
+msgid "Nudge Search Without AI"
+msgstr "بحث Nudge بدون ذكاء اصطناعي"
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_res_users_settings__nudge_hotkey
 msgid "Nudge Shortcut"
 msgstr "اختصار Nudge"
@@ -1737,6 +2316,14 @@ msgstr "صوت Nudge"
 #: model_terms:ir.actions.act_window,help:nudge.nudge_provider_action
 msgid "Nudge answers through the first provider that has a model and a key."
 msgstr "يجيب Nudge عبر أول مزود له نموذج ومفتاح."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid ""
+"Nudge builds: automations, server actions, emails. It explains first; you "
+"confirm"
+msgstr "Nudge يبني: أتمتة، إجراءات خادم، رسائل بريد. يشرح أولًا؛ وأنت تؤكد"
 
 #. module: nudge
 #. odoo-python
@@ -1775,9 +2362,19 @@ msgid "Nudge explains and shows; you do the work"
 msgstr "Nudge يشرح ويُري، وأنت تنفّذ"
 
 #. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_admin
+msgid "Nudge for Administrators"
+msgstr "Nudge للمديرين"
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_res_config_settings__group_nudge_all_users
 msgid "Nudge for All Internal Users"
 msgstr "Nudge لكل المستخدمين الداخليين"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_developer
+msgid "Nudge for Developers"
+msgstr "Nudge للمطوّرين"
 
 #. module: nudge
 #. odoo-python
@@ -1795,6 +2392,12 @@ msgstr "لم يغيّر Nudge شيئًا بعد"
 #: code:addons/nudge/static/src/core/nudge_service.js:0
 msgid "Nudge is done"
 msgstr "Nudge أنهى"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_quick.py:0
+msgid "Nudge is not open to you."
+msgstr "Nudge غير متاح لك."
 
 #. module: nudge
 #. odoo-python
@@ -1853,10 +2456,32 @@ msgid "Nudge needs your answer"
 msgstr "Nudge يحتاج إلى إجابتك"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid ""
+"Nudge ran out of time before it was done. Say \"go on\" and it continues "
+"from here; or press the clock to leave the work to it."
+msgstr ""
+"نفد وقت Nudge قبل أن ينتهي. قل «كمّل» فيتابع من حيث وصل؛ أو اضغط الساعة "
+"واترك له العمل."
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/core/nudge_service.js:0
 msgid "Nudge stopped"
 msgstr "Nudge توقف"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Nudge was updated. Reload the page to use the new version."
+msgstr "تم تحديث Nudge. أعد تحميل الصفحة لتستعمل النسخة الجديدة."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "Nudge was updated. Reload the page, then ask again."
+msgstr "تم تحديث Nudge. أعد تحميل الصفحة ثم اسأل من جديد."
 
 #. module: nudge
 #: model:ir.actions.server,name:nudge.cron_profile_refresh_ir_actions_server
@@ -1867,6 +2492,16 @@ msgstr "Nudge: إعادة قراءة ملف قاعدة البيانات"
 #: model:ir.actions.server,name:nudge.cron_agent_runs_ir_actions_server
 msgid "Nudge: work on what was asked in the background"
 msgstr "Nudge: العمل على ما طُلب في الخلفية"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__passage_count
+msgid "Number of Passages"
+msgstr "عدد المقاطع"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_run__step_count
+msgid "Number of Steps"
+msgstr "عدد الخطوات"
 
 #. module: nudge
 #: model:ir.actions.act_window,name:nudge.nudge_doc_page_action
@@ -1889,9 +2524,21 @@ msgid "Odoo Documentation Passage"
 msgstr "مقطع من توثيق Odoo"
 
 #. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Odoo documentation"
+msgstr "توثيق Odoo"
+
+#. module: nudge
 #: model:nudge.provider,name:nudge.provider_ollama
 msgid "Ollama (local)"
 msgstr "Ollama (محلي)"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "On the form"
+msgstr "على النموذج"
 
 #. module: nudge
 #. odoo-javascript
@@ -1908,10 +2555,37 @@ msgid "On the screen, with the pointer"
 msgstr "على الشاشة، بالمؤشر"
 
 #. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_source__purpose
+msgid ""
+"One line Nudge reads to know when to look in it: \"HR policy: leave, working"
+" hours, end of service\"."
+msgstr ""
+"سطر واحد يقرؤه Nudge ليعرف متى يبحث فيه: «سياسة الموارد البشرية: الإجازات، "
+"ساعات العمل، نهاية الخدمة»."
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.js:0
 msgid "One request is worked on in the background."
 msgstr "طلب واحد يُعمل عليه في الخلفية."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "Only PDF, text, CSV and image files can be read."
+msgstr "لا تُقرأ إلا ملفات PDF والنصوص وCSV والصور."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_run.py:0
+msgid "Only an administrator undoes what was built."
+msgstr "وحده المدير يتراجع عمّا بُني."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Only for"
+msgstr "فقط لـ"
 
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_profile_slice__model_name
@@ -1925,9 +2599,39 @@ msgstr "لا يُخبر بهذا الجزء إلا مديرو Nudge."
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/models/nudge_message.py:0
+msgid "Only the person who asked may rate an answer."
+msgstr "لا يقيّم الجواب إلا من سأل."
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "Only the title of a conversation can be changed."
 msgstr "يمكن تغيير عنوان المحادثة فقط."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Only when these change"
+msgstr "فقط عند تغيّر هذه"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_run.py:0
+msgid "Only your own requests in Developer mode can be undone here."
+msgstr "يمكن التراجع هنا عن طلباتك أنت في وضع المطوّر فقط."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/guidance/target_resolver.js:0
+msgid "Open the apps first."
+msgstr "افتح التطبيقات أولًا."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/configuration.py:0
+msgid "Open the settings of “%s”."
+msgstr "افتح إعدادات “%s”."
 
 #. module: nudge
 #. odoo-javascript
@@ -1940,6 +2644,12 @@ msgstr "افتح تبويب “%s” أولًا."
 #: code:addons/nudge/static/src/guidance/target_resolver.js:0
 msgid "Open this menu first."
 msgstr "افتح هذه القائمة أولًا."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/guidance/target_resolver.js:0
+msgid "Open “%s” first."
+msgstr "افتح “%s” أولًا."
 
 #. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_provider__kind__openai_compatible
@@ -2004,7 +2714,21 @@ msgid "Overview"
 msgstr "نظرة عامة"
 
 #. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_source_view_form
+msgid ""
+"PDF or text (TXT, CSV, Markdown), 10 MB at most. The file is read on the server and\n"
+"                        cut into passages Nudge searches; a scanned PDF holds no text and cannot be read.\n"
+"                        Nothing is sent to the AI provider until someone asks, and then only the passages\n"
+"                        that match, to people of the groups chosen here."
+msgstr ""
+"ملف PDF أو نص (TXT أو CSV أو Markdown)، بحد أقصى 10 ميغابايت. يُقرأ الملف "
+"على الخادم ويُقطَّع إلى مقاطع يبحث فيها Nudge؛ ملف PDF الممسوح ضوئيًا لا "
+"يحوي نصًا ولا يمكن قراءته. لا يُرسل شيء إلى مزوّد الذكاء الاصطناعي حتى يسأل "
+"أحد، وحينها المقاطع المطابقة فقط، ولأشخاص المجموعات المختارة هنا."
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_doc_passage__page_id
+#: model:ir.model.fields,field_description:nudge.field_nudge_source_passage__page
 msgid "Page"
 msgstr "الصفحة"
 
@@ -2012,6 +2736,11 @@ msgstr "الصفحة"
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_doc_page_view_form
 msgid "Page of the Documentation"
 msgstr "صفحة من التوثيق"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_source__pages
+msgid "Pages"
+msgstr "الصفحات"
 
 #. module: nudge
 #: model:nudge.provider,notes:nudge.provider_anthropic
@@ -2023,15 +2752,23 @@ msgstr ""
 "يتطلب حزمة Python \"anthropic\" على الخادم. الأسعار بالدولار الأمريكي لكل مليون رمز."
 
 #. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_source__passage_ids
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_doc_passage_view_form
 msgid "Passage"
 msgstr "مقطع"
 
 #. module: nudge
-#: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__passage_count
+#: model:ir.model.fields,field_description:nudge.field_nudge_source__passage_count
+msgid "Passage Count"
+msgstr "عدد المقاطع"
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__passage_ids
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_doc_page_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_doc_page_view_list
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_doc_passage_view_list
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_source_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_source_view_list
 msgid "Passages"
 msgstr "المقاطع"
 
@@ -2120,6 +2857,21 @@ msgid "Pointed at the screen"
 msgstr "أشار إلى الشاشة"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Points to"
+msgstr "يشير إلى"
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_source_action
+msgid ""
+"Policies, procedures, price lists, catalogues: upload them once, and Nudge answers\n"
+"                from them, citing the file and the page. A file can be kept for some groups."
+msgstr ""
+"السياسات والإجراءات وقوائم الأسعار والكتالوجات: ارفعها مرة واحدة، فيجيب "
+"Nudge منها مع ذكر الملف والصفحة. يمكن حصر ملف ببعض المجموعات."
+
+#. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_step__is_sensitive
 msgid "Posts, validates, cancels, or touches money or stock."
 msgstr "يرحّل أو يعتمد أو يلغي، أو يمس المال أو المخزون."
@@ -2147,6 +2899,12 @@ msgid "Prices"
 msgstr "الأسعار"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/reports.py:0
+msgid "Prints, for one record"
+msgstr "يطبع، لسجل واحد"
+
+#. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
 msgid "Privacy"
 msgstr "الخصوصية"
@@ -2160,6 +2918,16 @@ msgstr "الملف"
 #: model:ir.model.fields,field_description:nudge.field_nudge_run__progress
 msgid "Progress"
 msgstr "التقدّم"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_note__state__proposed
+msgid "Proposed"
+msgstr "مقترح"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_note__proposed_by
+msgid "Proposed By"
+msgstr "اقترحه"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__provider_kind
@@ -2215,6 +2983,11 @@ msgid "Read"
 msgstr "قراءة"
 
 #. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_source_view_form
+msgid "Read Again"
+msgstr "اقرأ من جديد"
+
+#. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_view_form
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_view_list
 msgid "Read On"
@@ -2225,6 +2998,12 @@ msgstr "تاريخ القراءة"
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_doc_page_view_list
 msgid "Read Online"
 msgstr "اقرأ على الموقع"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Read a screen's definition"
+msgstr "قرأ تعريف شاشة"
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_slice_view_form
@@ -2245,11 +3024,19 @@ msgstr "اقرأ لي الإجابات"
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Read what runs by itself"
+msgstr "قرأ ما يعمل من تلقاء نفسه"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
 msgid "Read: %s"
 msgstr "قرأ: %s"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider__is_configured
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_source__state__ready
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_source_view_search
 msgid "Ready"
 msgstr "جاهز"
 
@@ -2275,9 +3062,27 @@ msgid "Refresh asked by a manager"
 msgstr "تحديث بطلب من مدير"
 
 #. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_note_view_list
+msgid "Refuse"
+msgstr "رفض"
+
+#. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_message__state__refused
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_note__state__refused
 msgid "Refused"
 msgstr "مرفوض"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Reload"
+msgstr "إعادة التحميل"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Remove the file"
+msgstr "أزل الملف"
 
 #. module: nudge
 #. odoo-python
@@ -2293,6 +3098,12 @@ msgid ""
 msgstr "يحل محل الملخص فيما يقرؤه Nudge. ويبقى عند تحديث الملف."
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/reports.py:0
+msgid "Report"
+msgstr "التقرير"
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_run__name
 msgid "Request"
 msgstr "الطلب"
@@ -2304,11 +3115,19 @@ msgid "Requests"
 msgstr "الطلبات"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Required"
+msgstr "إلزامي"
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider__requires_api_key
 msgid "Requires an API Key"
 msgstr "يتطلب مفتاح API"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__result
 msgid "Result"
 msgstr "النتيجة"
@@ -2337,11 +3156,25 @@ msgid "Run"
 msgstr "الطلب"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Run code"
+msgstr "تشغيل كود"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
 #: model:ir.model.fields,field_description:nudge.field_nudge_conversation__run_ids
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_list
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_search
 msgid "Runs"
 msgstr "الطلبات"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Runs as"
+msgstr "يعمل باسم"
 
 #. module: nudge
 #: model:nudge.provider,notes:nudge.provider_ollama
@@ -2365,9 +3198,27 @@ msgstr "قيلت صوتًا"
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/models/nudge_message.py:0
+msgid "Said after the answer to: %s"
+msgstr "قيل بعد الجواب عن: %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/configuration.py:0
+msgid "Save the settings."
+msgstr "احفظ الإعدادات."
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "Say yes or no."
 msgstr "قل نعم أو لا."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Schedule: %s"
+msgstr "جدولة: %s"
 
 #. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_profile__trigger__scheduled
@@ -2398,8 +3249,45 @@ msgstr "الشاشة غير مشاركة"
 #. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Screens"
+msgstr "الشاشات"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Search"
+msgstr "بحث"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
 msgid "Send"
 msgstr "إرسال"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Send a file"
+msgstr "أرسل ملفًا"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Send a file with the question: a PDF, a text, an image"
+msgstr "أرسل ملفًا مع السؤال: PDF أو نص أو صورة"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Send an email"
+msgstr "إرسال بريد"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+msgid "Send an email when a record is confirmed"
+msgstr "أرسل بريدًا عند تأكيد سجل"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__is_sensitive
@@ -2408,9 +3296,16 @@ msgid "Sensitive"
 msgstr "حساس"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Sent as"
+msgstr "يُرسل كـ"
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_doc_passage__sequence
 #: model:ir.model.fields,field_description:nudge.field_nudge_note__sequence
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider__sequence
+#: model:ir.model.fields,field_description:nudge.field_nudge_source_passage__sequence
 msgid "Sequence"
 msgstr "الترتيب"
 
@@ -2433,6 +3328,8 @@ msgid "Set up a provider"
 msgstr "إعداد مزود"
 
 #. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
 #: model:ir.actions.act_window,name:nudge.nudge_config_settings_action
 #: model:ir.ui.menu,name:nudge.nudge_menu_settings
 msgid "Settings"
@@ -2468,6 +3365,24 @@ msgid "Show me on the screen"
 msgstr "أرني على الشاشة"
 
 #. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Show me the way"
+msgstr "أرني الطريق"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Shown"
+msgstr "يظهر"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Shown in"
+msgstr "يظهر في"
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__screen_events
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_step__kind__show
 msgid "Shown on Screen"
@@ -2478,6 +3393,12 @@ msgstr "ما عُرض على الشاشة"
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_form
 msgid "Shown to the Person"
 msgstr "ما عُرض على المستخدم"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/reports.py:0
+msgid "Shows"
+msgstr "يعرض"
 
 #. module: nudge
 #. odoo-javascript
@@ -2493,6 +3414,11 @@ msgstr "رمادي"
 #: code:addons/nudge/static/src/core/nudge_service.js:0
 msgid "Something went wrong while answering."
 msgstr "حدث خطأ أثناء الإجابة."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_source_passage__source_id
+msgid "Source"
+msgstr "المصدر"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider__stt_model
@@ -2518,7 +3444,9 @@ msgstr "منطوقة"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__state
+#: model:ir.model.fields,field_description:nudge.field_nudge_note__state
 #: model:ir.model.fields,field_description:nudge.field_nudge_run__state
+#: model:ir.model.fields,field_description:nudge.field_nudge_source__state
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__state
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_search
 msgid "State"
@@ -2531,9 +3459,9 @@ msgstr "الخطوة"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__step_ids
-#: model:ir.model.fields,field_description:nudge.field_nudge_run__step_count
 #: model:ir.model.fields,field_description:nudge.field_nudge_run__step_ids
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_list
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_list
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_search
 msgid "Steps"
@@ -2574,6 +3502,8 @@ msgid "Stopped."
 msgstr "تم الإيقاف."
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
 #: model:ir.model.fields,field_description:nudge.field_nudge_note__name
 msgid "Subject"
 msgstr "الموضوع"
@@ -2583,6 +3513,12 @@ msgstr "الموضوع"
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__summary
 msgid "Summary"
 msgstr "الملخص"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Taken off the screens: %s"
+msgstr "أُزيل من الشاشات: %s"
 
 #. module: nudge
 #. odoo-javascript
@@ -2620,6 +3556,12 @@ msgid "Teal"
 msgstr "أزرق مخضرّ"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Technical name"
+msgstr "الاسم التقني"
+
+#. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_doc_page__modules
 msgid "Technical names of the modules the page is about, between spaces."
 msgstr "الأسماء التقنية للموديولات التي تتناولها الصفحة، بين مسافات."
@@ -2632,14 +3574,33 @@ msgstr "أخبر Nudge كيف يسير عملك"
 #. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.js:0
+msgid "Tell Nudge what to build…"
+msgstr "قل لـ Nudge ماذا يبني…"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
 msgid "Tell Nudge what to do…"
 msgstr "قل لـ Nudge ماذا يفعل…"
 
 #. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid ""
+"Tell me what to build. I explain first; nothing is made before you say yes."
+msgstr "قل لي ماذا أبني. أشرح أولًا؛ ولا يُصنع شيء قبل أن تقول نعم."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
 msgid "Tell me what to do. I ask you before I change anything."
 msgstr "قل لي ماذا أفعل. أسألك قبل أن أغيّر أي شيء."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0 code:addons/nudge/tools/reports.py:0
+msgid "Template"
+msgstr "القالب"
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
@@ -2650,6 +3611,12 @@ msgstr "اختبار الاتصال"
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_doc_page_view_search
 msgid "Text"
 msgstr "النص"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid "Thanks, noted."
+msgstr "شكرًا، سُجّل."
 
 #. module: nudge
 #. odoo-python
@@ -2690,6 +3657,16 @@ msgstr "أعاد مزود الذكاء الاصطناعي إجابة فارغة.
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/models/nudge_conversation.py:0
+msgid ""
+"The AI provider took too long to answer. Ask again; when it happens often, a"
+" faster model or a lower reasoning effort on the provider helps."
+msgstr ""
+"استغرق مزوّد الذكاء الاصطناعي وقتًا طويلًا في الإجابة. اسأل من جديد؛ وإن "
+"تكرر ذلك، يساعد نموذج أسرع أو جهد تفكير أقل على المزوّد."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
 msgid "The AI provider's limit is reached. Try again in a minute."
 msgstr ""
 "تم بلوغ الحد المسموح لدى مزود الذكاء الاصطناعي. حاول مرة أخرى بعد دقيقة."
@@ -2720,6 +3697,22 @@ msgid "The browser when it can, the AI provider otherwise"
 msgstr "المتصفح إن استطاع، وإلا فمزود الذكاء الاصطناعي"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid ""
+"The code runs for real inside the trial. What it writes is discarded; an "
+"email it sends by itself goes out."
+msgstr ""
+"الكود يعمل فعلًا داخل التجربة. ما يكتبه يُلغى؛ أما البريد الذي يرسله بنفسه "
+"فيُرسل."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "The column and every value in it are deleted too"
+msgstr "يُحذف العمود وكل قيمة فيه أيضًا"
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/core/nudge_service.js:0
 msgid "The connection was lost before the answer was complete."
@@ -2740,6 +3733,12 @@ msgstr "التوثيق غير محمَّل"
 #: code:addons/nudge/models/nudge_doc.py:0
 msgid "The documentation is not loaded."
 msgstr "التوثيق غير محمَّل."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "The file is too large. The limit is %s MB."
+msgstr "الملف كبير جدًا. الحد %s ميغابايت."
 
 #. module: nudge
 #. odoo-python
@@ -2934,6 +3933,12 @@ msgid "Title"
 msgstr "العنوان"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "To"
+msgstr "إلى"
+
+#. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_search
 msgid "Today"
 msgstr "اليوم"
@@ -2976,6 +3981,24 @@ msgid "Transcription service"
 msgstr "خدمة تحويل الكلام"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Tried"
+msgstr "المُجرَّب"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Tried it on a dummy record"
+msgstr "جرّبه على سجل وهمي"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Tried the import"
+msgstr "جرّب الاستيراد"
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_profile__trigger
 msgid "Trigger"
 msgstr "السبب"
@@ -2986,9 +4009,21 @@ msgid "Truncated"
 msgstr "مقطوع"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Try on a dummy record: %s"
+msgstr "تجربة على سجل وهمي: %s"
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider__can_transcribe
 msgid "Turns Speech into Text"
 msgstr "يحوّل الكلام إلى نص"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Type"
+msgstr "النوع"
 
 #. module: nudge
 #. odoo-python
@@ -3002,10 +4037,33 @@ msgid "URL"
 msgstr "الرابط"
 
 #. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_feedback_action
+msgid ""
+"Under every answer people say whether it helped. A \"no\" with a reason "
+"becomes a lesson to approve under Business Notes."
+msgstr ""
+"تحت كل إجابة يقول الناس إن كانت مفيدة. «لا» مع سبب تصبح درسًا يُعتمد من "
+"ملاحظات العمل."
+
+#. module: nudge
 #. odoo-javascript
+#. odoo-python
+#: code:addons/nudge/models/nudge_run.py:0
 #: code:addons/nudge/static/src/guidance/nudge_guide.xml:0
+#: code:addons/nudge/tools/developer.py:0
 msgid "Undo"
 msgstr "تراجع"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_form
+msgid "Undo What Was Built"
+msgstr "تراجع عمّا بُني"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Undo what was built: %s item(s)"
+msgstr "تراجع عمّا بُني: %s عنصر"
 
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_provider__requires_api_key
@@ -3019,6 +4077,12 @@ msgstr "ألغ التحديد مع خادم محلي مثل Ollama يقبل ال
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 msgid "Untitled"
 msgstr "بدون عنوان"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Update %s"
+msgstr "تحديث %s"
 
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_provider__max_output_tokens
@@ -3038,6 +4102,16 @@ msgstr "الاستهلاك"
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
 msgid "Use"
 msgstr "استخدام"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_profile_slice__kind__activity
+msgid "Use of the Data"
+msgstr "استخدام البيانات"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_message__feedback__up
+msgid "Useful"
+msgstr "مفيد"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_conversation__user_id
@@ -3060,6 +4134,8 @@ msgid "Users and Access"
 msgstr "المستخدمون والصلاحيات"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__values
 msgid "Values"
 msgstr "القيم"
@@ -3068,6 +4144,18 @@ msgstr "القيم"
 #: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__version
 msgid "Version"
 msgstr "الإصدار"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "View"
+msgstr "العرض"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Views"
+msgstr "العروض"
 
 #. module: nudge
 #. odoo-javascript
@@ -3095,6 +4183,11 @@ msgid "Waiting For"
 msgstr "بانتظار"
 
 #. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_note_view_search
+msgid "Waiting for Approval"
+msgstr "بانتظار الاعتماد"
+
+#. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_run__state__queued
 msgid "Waiting for Its Turn"
 msgstr "بانتظار دوره"
@@ -3107,6 +4200,12 @@ msgid "Waiting for the Person"
 msgstr "بانتظار المستخدم"
 
 #. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid "Was this helpful?"
+msgstr "هل أفادك هذا؟"
+
+#. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_form
 msgid "What"
 msgstr "ماذا"
@@ -3115,6 +4214,11 @@ msgstr "ماذا"
 #: model:ir.model.fields,field_description:nudge.field_nudge_profile__changes_text
 msgid "What Changed"
 msgstr "ما الذي تغير"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_source__purpose
+msgid "What It Is For"
+msgstr "لماذا هو"
 
 #. module: nudge
 #: model:ir.ui.menu,name:nudge.nudge_menu_agent
@@ -3213,6 +4317,12 @@ msgstr ""
 #. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.js:0
+msgid "What runs by itself on this screen?"
+msgstr "ما الذي يعمل تلقائيًا في هذه الشاشة؟"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
 msgid "What should I do next here?"
 msgstr "ما الخطوة التالية هنا؟"
 
@@ -3227,6 +4337,11 @@ msgid "What the model asked for, as it wrote it."
 msgstr "ما طلبه النموذج، كما كتبه."
 
 #. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_note__reason
+msgid "What the person said."
+msgstr "ما قاله الشخص."
+
+#. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_step__summary
 msgid "What the step does, in the words shown to the person."
 msgstr "ما تفعله الخطوة، بالكلمات التي عُرضت على المستخدم."
@@ -3235,6 +4350,12 @@ msgstr "ما تفعله الخطوة، بالكلمات التي عُرضت عل
 #: model:ir.model.fields,help:nudge.field_nudge_message__snapshot
 msgid "What the user was looking at when sending the message."
 msgstr "ما كان المستخدم ينظر إليه عند إرسال الرسالة."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "What was changed rather than made"
+msgstr "ما عُدّل لا ما أُنشئ"
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_form
@@ -3255,6 +4376,12 @@ msgstr "ما عُرض على المستخدم قبل أن يقرر."
 #: model:ir.model.fields,help:nudge.field_nudge_step__result
 msgid "What was told to the model once the step was over."
 msgstr "ما أُخبر به النموذج بعد انتهاء الخطوة."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid "What was wrong? It becomes a lesson for a manager to approve"
+msgstr "ما الخطأ؟ يصبح درسًا يعتمده مدير"
 
 #. module: nudge
 #: model_terms:ir.actions.act_window,help:nudge.nudge_note_action
@@ -3282,6 +4409,12 @@ msgstr ""
 "تسجيل."
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "When"
+msgstr "متى"
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 msgid "When I ask with my screen shared"
@@ -3295,6 +4428,12 @@ msgid ""
 msgstr ""
 "عندما يرفض النموذج طلبًا لأسباب تتعلق بالأمان، اسمح للمزود بإعادة المحاولة "
 "على النموذج البديل الذي يوصي به."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0 code:addons/nudge/tools/reports.py:0
+msgid "Where"
+msgstr "أين"
 
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_res_users_settings__nudge_position
@@ -3316,9 +4455,20 @@ msgid "Who and When"
 msgstr "مَن ومتى"
 
 #. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_source__group_ids
+msgid "Who may be answered from this file. Empty: everybody who uses Nudge."
+msgstr "من يُجاب من هذا الملف. فارغ: كل من يستخدم Nudge."
+
+#. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_search
 msgid "With Changes"
 msgstr "فيها تغييرات"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Words to look for"
+msgstr "كلمات للبحث عنها"
 
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_run__is_background
@@ -3379,6 +4529,7 @@ msgstr "كُتب في “%s”:"
 #. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_message.js:0
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
 msgid "Yes"
 msgstr "نعم"
 
@@ -3476,10 +4627,40 @@ msgid "Your screen"
 msgstr "شاشتك"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/reports.py:0
+msgid "a template of its own"
+msgstr "قالب خاص به"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "after %s"
+msgstr "بعد %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "always"
+msgstr "دائمًا"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "at the end of the form"
+msgstr "في آخر النموذج"
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 msgid "calls me from anywhere"
 msgstr "لاستدعائي من أي مكان"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "computed: %s"
+msgstr "محسوب: %s"
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
@@ -3497,577 +4678,16 @@ msgid "https://api.example.com/v1"
 msgstr "https://api.example.com/v1"
 
 #. module: nudge
-#. odoo-javascript
-#: code:addons/nudge/static/src/guidance/target_resolver.js:0
-msgid "Open “%s” first."
-msgstr "افتح “%s” أولًا."
-
-#. module: nudge
-#. odoo-javascript
-#: code:addons/nudge/static/src/guidance/target_resolver.js:0
-msgid "Open the apps first."
-msgstr "افتح التطبيقات أولًا."
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "in the first group of the form"
+msgstr "في المجموعة الأولى من النموذج"
 
 #. module: nudge
 #. odoo-python
-#: code:addons/nudge/tools/navigation.py:0
-msgid "Click “%s”."
-msgstr "اضغط “%s”."
-
-#. module: nudge
-#: model:ir.model.fields.selection,name:nudge.selection__nudge_profile_slice__kind__activity
-msgid "Use of the Data"
-msgstr "استخدام البيانات"
-
-#. module: nudge
-#. odoo-javascript
-#: code:addons/nudge/static/src/core/nudge_service.js:0
-msgid "Nudge was updated. Reload the page, then ask again."
-msgstr "تم تحديث Nudge. أعد تحميل الصفحة ثم اسأل من جديد."
-
-#. module: nudge
-#. odoo-javascript
-#: code:addons/nudge/static/src/core/nudge_service.js:0
-msgid "No answer came. Ask again, in other words."
-msgstr "لم يصل جواب. اسأل من جديد بكلمات أخرى."
-
-#. module: nudge
-#. odoo-javascript
-#: model_terms:ir.ui.view,arch_db:nudge.NudgePanel
-msgid "Nudge was updated. Reload the page to use the new version."
-msgstr "تم تحديث Nudge. أعد تحميل الصفحة لتستعمل النسخة الجديدة."
-
-#. module: nudge
-#. odoo-javascript
-#: model_terms:ir.ui.view,arch_db:nudge.NudgePanel
-msgid "Reload"
-msgstr "إعادة التحميل"
-
-#. module: nudge
-#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_admin
-msgid "Nudge for Administrators"
-msgstr "Nudge للمديرين"
-
-#. module: nudge
-#. odoo-javascript
-#: model_terms:ir.ui.view,arch_db:nudge.NudgePanel
-msgid "Send a file with the question: a PDF, a text, an image"
-msgstr "أرسل ملفًا مع السؤال: PDF أو نص أو صورة"
-
-#. module: nudge
-#. odoo-javascript
-#: model_terms:ir.ui.view,arch_db:nudge.NudgePanel
-msgid "Send a file"
-msgstr "أرسل ملفًا"
-
-#. module: nudge
-#. odoo-javascript
-#: model_terms:ir.ui.view,arch_db:nudge.NudgePanel
-msgid "Remove the file"
-msgstr "أزل الملف"
-
-#. module: nudge
-#. odoo-javascript
-#: code:addons/nudge/static/src/core/nudge_service.js:0
-msgid "The file is too large. The limit is %s MB."
-msgstr "الملف كبير جدًا. الحد %s ميغابايت."
-
-#. module: nudge
-#. odoo-javascript
-#: code:addons/nudge/static/src/core/nudge_service.js:0
-msgid "Only PDF, text, CSV and image files can be read."
-msgstr "لا تُقرأ إلا ملفات PDF والنصوص وCSV والصور."
-
-#. module: nudge
-#: model:ir.model.fields,field_description:nudge.field_nudge_message__attachment_name
-msgid "File"
-msgstr "الملف"
-
-#. module: nudge
-#: model:ir.model.fields,field_description:nudge.field_nudge_message__attachment_id
-msgid "Image Sent"
-msgstr "الصورة المرسلة"
-
-#. module: nudge
-#. odoo-javascript
-#: model_terms:ir.ui.view,arch_db:nudge.NudgePanel
-msgid "A comparison or a report: how would you like it?"
-msgstr "مقارنة أو تقرير: كيف تريده؟"
-
-#. module: nudge
-#. odoo-javascript
-#: model_terms:ir.ui.view,arch_db:nudge.NudgePanel
-msgid "As a spreadsheet, with a chart"
-msgstr "جدول بيانات مع رسم بياني"
-
-#. module: nudge
-#. odoo-javascript
-#: model_terms:ir.ui.view,arch_db:nudge.NudgePanel
-msgid "In the chat"
-msgstr "في المحادثة"
-
-#. module: nudge
-#: model:ir.model.fields.selection,name:nudge.selection__nudge_note__kind__lesson
-msgid "Lesson"
-msgstr "درس"
-
-#. module: nudge
-#: model:ir.model.fields.selection,name:nudge.selection__nudge_note__state__proposed
-msgid "Proposed"
-msgstr "مقترح"
-
-#. module: nudge
-#: model:ir.model.fields.selection,name:nudge.selection__nudge_note__state__approved
-msgid "Approved"
-msgstr "معتمد"
-
-#. module: nudge
-#: model:ir.model.fields,field_description:nudge.field_nudge_note__reason
-msgid "Learnt From"
-msgstr "تعلّمه من"
-
-#. module: nudge
-#: model:ir.model.fields,field_description:nudge.field_nudge_note__proposed_by
-msgid "Proposed By"
-msgstr "اقترحه"
-
-#. module: nudge
-#: model:ir.model.fields,field_description:nudge.field_nudge_note__approved_by
-msgid "Approved By"
-msgstr "اعتمده"
-
-#. module: nudge
-#: model_terms:ir.ui.view,arch_db:nudge.nudge_note_view_list
-msgid "Approve"
-msgstr "اعتماد"
-
-#. module: nudge
-#: model_terms:ir.ui.view,arch_db:nudge.nudge_note_view_list
-msgid "Refuse"
-msgstr "رفض"
-
-#. module: nudge
-#: model_terms:ir.ui.view,arch_db:nudge.nudge_note_view_search
-msgid "Waiting for Approval"
-msgstr "بانتظار الاعتماد"
-
-#. module: nudge
-#: model_terms:ir.ui.view,arch_db:nudge.nudge_note_view_search
-msgid "Lessons"
-msgstr "الدروس"
-
-#. module: nudge
-#: model:ir.model,name:nudge.model_nudge_source
-msgid "Nudge Company File"
-msgstr "ملف شركة في Nudge"
-
-#. module: nudge
-#: model:ir.model,name:nudge.model_nudge_source_passage
-msgid "Nudge Company File Passage"
-msgstr "مقطع من ملف شركة في Nudge"
-
-#. module: nudge
-#: model:ir.actions.act_window,name:nudge.nudge_source_action
-msgid "Company Files"
-msgstr "ملفات الشركة"
-
-#. module: nudge
-#: model_terms:ir.ui.view,arch_db:nudge.nudge_source_view_form
-msgid "Company File"
-msgstr "ملف الشركة"
-
-#. module: nudge
-#: model:ir.model.fields,field_description:nudge.field_nudge_source__purpose
-msgid "What It Is For"
-msgstr "لماذا هو"
-
-#. module: nudge
-#: model:ir.model.fields,field_description:nudge.field_nudge_source__group_ids
-msgid "For the Groups"
-msgstr "للمجموعات"
-
-#. module: nudge
-#: model:ir.model.fields,field_description:nudge.field_nudge_source__pages
-msgid "Pages"
-msgstr "الصفحات"
-
-#. module: nudge
-#: model:ir.model.fields,field_description:nudge.field_nudge_source__chars
-msgid "Characters"
-msgstr "الأحرف"
-
-#. module: nudge
-#: model:ir.model.fields.selection,name:nudge.selection__nudge_source__state__empty
-msgid "No File"
-msgstr "لا ملف"
-
-#. module: nudge
-#: model:ir.model.fields.selection,name:nudge.selection__nudge_source__state__failed
-msgid "Could Not Be Read"
-msgstr "تعذّرت قراءته"
-
-#. module: nudge
-#: model_terms:ir.ui.view,arch_db:nudge.nudge_source_view_form
-msgid "Read Again"
-msgstr "اقرأ من جديد"
-
-#. module: nudge
-#: model_terms:ir.actions.act_window,help:nudge.nudge_source_action
-msgid "Give Nudge your company's files"
-msgstr "أعطِ Nudge ملفات شركتك"
-
-#. module: nudge
-#: model:ir.model.fields,field_description:nudge.field_nudge_message__feedback
-msgid "Feedback"
-msgstr "التقييم"
-
-#. module: nudge
-#: model:ir.model.fields,field_description:nudge.field_nudge_message__feedback_note
-msgid "Feedback Note"
-msgstr "ملاحظة التقييم"
-
-#. module: nudge
-#: model:ir.model.fields.selection,name:nudge.selection__nudge_message__feedback__up
-msgid "Useful"
-msgstr "مفيد"
-
-#. module: nudge
-#: model:ir.model.fields.selection,name:nudge.selection__nudge_message__feedback__down
-msgid "Not Useful"
-msgstr "غير مفيد"
-
-#. module: nudge
-#: model_terms:ir.actions.act_window,help:nudge.nudge_feedback_action
-msgid "No feedback yet"
-msgstr "لا تقييمات بعد"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/models/nudge_message.py:0
-msgid "A rating is up or down."
-msgstr "التقييم إمّا مفيد أو غير مفيد."
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/models/nudge_message.py:0
-msgid "Only the person who asked may rate an answer."
-msgstr "لا يقيّم الجواب إلا من سأل."
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/models/nudge_message.py:0
-msgid "Said after the answer to: %s"
-msgstr "قيل بعد الجواب عن: %s"
-
-#. module: nudge
-#. odoo-javascript
-#: model_terms:ir.ui.view,arch_db:nudge.Message
-msgid "Was this helpful?"
-msgstr "هل أفادك هذا؟"
-
-#. module: nudge
-#. odoo-javascript
-#: model_terms:ir.ui.view,arch_db:nudge.Message
-msgid "What was wrong? It becomes a lesson for a manager to approve"
-msgstr "ما الخطأ؟ يصبح درسًا يعتمده مدير"
-
-#. module: nudge
-#. odoo-javascript
-#: model_terms:ir.ui.view,arch_db:nudge.Message
-msgid "Thanks, noted."
-msgstr "شكرًا، سُجّل."
-
-#. module: nudge
-#: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__passage_count
-msgid "Number of Passages"
-msgstr "عدد المقاطع"
-
-#. module: nudge
-#: model:ir.model.fields,field_description:nudge.field_nudge_run__step_count
-msgid "Number of Steps"
-msgstr "عدد الخطوات"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/configuration.py:0
-msgid "Install the app %s"
-msgstr "تثبيت التطبيق %s"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/configuration.py:0
-msgid "Change the settings"
-msgstr "تغيير الإعدادات"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/configuration.py:0
-msgid "Open the settings of “%s”."
-msgstr "افتح إعدادات “%s”."
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/configuration.py:0
-msgid "Save the settings."
-msgstr "احفظ الإعدادات."
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/models/nudge_quick.py:0
-msgid "Nudge is not open to you."
-msgstr "Nudge غير متاح لك."
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/models/nudge_quick.py:0
-msgid "Here is “%s”: set it as you need."
-msgstr "هذا هو “%s”: اضبطه كما تحتاج."
-
-#. module: nudge
-#. odoo-javascript
-#: model_terms:ir.ui.view,arch_db:nudge.Panel
-msgid "Meanwhile, search the screens, the settings and the Odoo documentation:"
-msgstr "في هذه الأثناء، ابحث في الشاشات والإعدادات وتوثيق Odoo:"
-
-#. module: nudge
-#. odoo-javascript
-#: model_terms:ir.ui.view,arch_db:nudge.Panel
-msgid "Words to look for"
-msgstr "كلمات للبحث عنها"
-
-#. module: nudge
-#. odoo-javascript
-#: model_terms:ir.ui.view,arch_db:nudge.Panel
-msgid "Screens"
-msgstr "الشاشات"
-
-#. module: nudge
-#. odoo-javascript
-#: model_terms:ir.ui.view,arch_db:nudge.Panel
-msgid "Odoo documentation"
-msgstr "توثيق Odoo"
-
-#. module: nudge
-#. odoo-javascript
-#: model_terms:ir.ui.view,arch_db:nudge.Panel
-msgid "Show me the way"
-msgstr "أرني الطريق"
-
-#. module: nudge
-#. odoo-javascript
-#: model_terms:ir.ui.view,arch_db:nudge.Panel
-msgid "Nothing found. Try other words; the documentation is written in English."
-msgstr "لم يُعثر على شيء. جرّب كلمات أخرى؛ التوثيق مكتوب بالإنكليزية."
-
-#. module: nudge
-#. odoo-javascript
-#: model_terms:ir.ui.view,arch_db:nudge.Panel
-msgid "Search"
-msgstr "بحث"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/models/nudge_conversation.py:0
-msgid "Developer mode is not open to you. Ask your administrator."
-msgstr "وضع المطوّر غير متاح لك. اسأل مديرك."
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/models/nudge_conversation.py:0
-msgid "Read what runs by itself"
-msgstr "قرأ ما يعمل من تلقاء نفسه"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/models/nudge_conversation.py:0
-msgid "Checked code"
-msgstr "فحص الكود"
-
-#. module: nudge
-#. odoo-python
-#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_developer
-msgid "Nudge for Developers"
-msgstr "Nudge للمطوّرين"
-
-#. module: nudge
-#. odoo-python
-#: model:ir.model.fields,field_description:nudge.field_nudge_run__is_developer
-msgid "Developer Mode"
-msgstr "وضع المطوّر"
-
-#. module: nudge
-#. odoo-python
-#: model:ir.model.fields.selection,name:nudge.selection__nudge_message__mode__dev
-msgid "Developer"
-msgstr "مطوّر"
-
-#. module: nudge
-#. odoo-python
-#: model:ir.model.fields.selection,name:nudge.selection__nudge_step__kind__delete
-msgid "Delete"
-msgstr "حذف"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "Create: automation rule “%s”"
-msgstr "إنشاء: قاعدة أتمتة “%s”"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "Create: server action “%s”"
-msgstr "إنشاء: إجراء خادم “%s”"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "Create: email template “%s”"
-msgstr "إنشاء: قالب بريد “%s”"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "Delete: %s"
-msgstr "حذف: %s"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "When"
-msgstr "متى"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "Only when these change"
-msgstr "فقط عند تغيّر هذه"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "Only for"
-msgstr "فقط لـ"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "Counted from"
-msgstr "محسوب من"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "Delay"
-msgstr "المهلة"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "%(number)s %(unit)s before"
-msgstr "%(number)s %(unit)s قبل"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "%(number)s %(unit)s after"
-msgstr "%(number)s %(unit)s بعد"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "Action %s"
-msgstr "الإجراء %s"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "Run code"
-msgstr "تشغيل كود"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "computed: %s"
-msgstr "محسوب: %s"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "Update %s"
-msgstr "تحديث %s"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "Template"
-msgstr "القالب"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "Send an email"
-msgstr "إرسال بريد"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "To"
-msgstr "إلى"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "Copy to"
-msgstr "نسخة إلى"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "Sent as"
-msgstr "يُرسل كـ"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "Activity"
-msgstr "النشاط"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "Due in"
-msgstr "يستحق خلال"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "%s day(s)"
-msgstr "%s يوم"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "For"
-msgstr "لـ"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "Schedule: %s"
-msgstr "جدولة: %s"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "Shown in"
-msgstr "يظهر في"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "the Actions menu of %s"
-msgstr "قائمة الإجراءات في %s"
+#: code:addons/nudge/tools/building.py:0
+msgid "not added"
+msgstr "غير مضاف"
 
 #. module: nudge
 #. odoo-python
@@ -4078,266 +4698,8 @@ msgstr "لا مكان بعد: سيشغّله زر أو قاعدة"
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/developer.py:0
-msgid "Not possible: deleted for good"
-msgstr "غير ممكن: يُحذف نهائيًا"
-
-#. module: nudge
-#. odoo-javascript
-#: model_terms:ir.ui.view,arch_db:nudge.Panel
-msgid "Dev"
-msgstr "مطوّر"
-
-#. module: nudge
-#. odoo-javascript
-#: model_terms:ir.ui.view,arch_db:nudge.Panel
-msgid "Nudge builds: automations, server actions, emails. It explains first; you confirm"
-msgstr "Nudge يبني: أتمتة، إجراءات خادم، رسائل بريد. يشرح أولًا؛ وأنت تؤكد"
-
-#. module: nudge
-#. odoo-javascript
-#: model_terms:ir.ui.view,arch_db:nudge.Panel
-msgid "Tell me what to build. I explain first; nothing is made before you say yes."
-msgstr "قل لي ماذا أبني. أشرح أولًا؛ ولا يُصنع شيء قبل أن تقول نعم."
-
-#. module: nudge
-#. odoo-javascript
-#: code:addons/nudge/static/src/components/nudge_panel.js:0
-msgid "Tell Nudge what to build…"
-msgstr "قل لـ Nudge ماذا يبني…"
-
-#. module: nudge
-#. odoo-javascript
-#: code:addons/nudge/static/src/components/nudge_panel.js:0
-msgid "Send an email when a record is confirmed"
-msgstr "أرسل بريدًا عند تأكيد سجل"
-
-#. module: nudge
-#. odoo-javascript
-#: code:addons/nudge/static/src/components/nudge_panel.js:0
-msgid "What runs by itself on this screen?"
-msgstr "ما الذي يعمل تلقائيًا في هذه الشاشة؟"
-
-#. module: nudge
-#. odoo-javascript
-#: code:addons/nudge/static/src/components/nudge_panel.js:0
-msgid "Add a server action to the Actions menu"
-msgstr "أضف إجراء خادم إلى قائمة الإجراءات"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/models/nudge_conversation.py:0
-msgid "Tried it on a dummy record"
-msgstr "جرّبه على سجل وهمي"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "Create: scheduled action “%s”"
-msgstr "إنشاء: إجراء مجدول “%s”"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "Every"
-msgstr "كل"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "First run"
-msgstr "أول تشغيل"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "Runs as"
-msgstr "يعمل باسم"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/models/nudge_conversation.py:0
-msgid "Tried the import"
-msgstr "جرّب الاستيراد"
-
-#. module: nudge
-#. odoo-python
-#: model:ir.model.fields,field_description:nudge.field_nudge_message__attachment_id
-msgid "File Sent"
-msgstr "الملف المرسل"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/models/nudge_conversation.py:0
-msgid "Read a screen's definition"
-msgstr "قرأ تعريف شاشة"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "The column and every value in it are deleted too"
-msgstr "يُحذف العمود وكل قيمة فيه أيضًا"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/building.py:0
-msgid "Change by Nudge: %s"
-msgstr "تعديل من Nudge: %s"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/building.py:0
-msgid "View"
-msgstr "العرض"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/building.py:0
-msgid "Where"
-msgstr "أين"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/building.py:0
-msgid "No visible difference"
-msgstr "لا فرق ظاهر"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/building.py:0
-msgid "Change the screen: %s"
-msgstr "تعديل الشاشة: %s"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/building.py:0
-msgid "Button %(label)s on %(model)s"
-msgstr "زر %(label)s على %(model)s"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/building.py:0
-msgid "Shown"
-msgstr "يظهر"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/building.py:0
-msgid "unless %s"
-msgstr "إلا إذا %s"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/building.py:0
-msgid "always"
-msgstr "دائمًا"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/building.py:0
-msgid "Add the button “%s”"
-msgstr "إضافة الزر “%s”"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/building.py:0
-msgid "Field"
-msgstr "الحقل"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/building.py:0
-msgid "Technical name"
-msgstr "الاسم التقني"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/building.py:0
-msgid "Type"
-msgstr "النوع"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/building.py:0
-msgid "Points to"
-msgstr "يشير إلى"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/building.py:0
-msgid "Required"
-msgstr "إلزامي"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/building.py:0
-msgid "Help"
-msgstr "المساعدة"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/building.py:0
-msgid "after %s"
-msgstr "بعد %s"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/building.py:0
-msgid "in the first group of the form"
-msgstr "في المجموعة الأولى من النموذج"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/building.py:0
-msgid "at the end of the form"
-msgstr "في آخر النموذج"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/building.py:0
-msgid "Field %(field)s on %(model)s"
-msgstr "الحقل %(field)s على %(model)s"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/building.py:0
-msgid "On the form"
-msgstr "على النموذج"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/building.py:0
-msgid "not added"
-msgstr "غير مضاف"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/building.py:0
-msgid "Add the field “%s”"
-msgstr "إضافة الحقل “%s”"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/reports.py:0
-msgid "Made of"
-msgstr "مكوّن من"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/reports.py:0
-msgid "a template of its own"
-msgstr "قالب خاص به"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/reports.py:0
-msgid "Shows"
-msgstr "يعرض"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/reports.py:0
-msgid "Lines"
-msgstr "الأسطر"
+msgid "the Actions menu of %s"
+msgstr "قائمة الإجراءات في %s"
 
 #. module: nudge
 #. odoo-python
@@ -4347,96 +4709,6 @@ msgstr "قائمة الطباعة في %s"
 
 #. module: nudge
 #. odoo-python
-#: code:addons/nudge/tools/reports.py:0
-msgid "Report"
-msgstr "التقرير"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/reports.py:0
-msgid "Prints, for one record"
-msgstr "يطبع، لسجل واحد"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/reports.py:0
-msgid "No record to print yet"
-msgstr "لا سجل للطباعة بعد"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/reports.py:0
-msgid "Create: report “%s”"
-msgstr "إنشاء: تقرير “%s”"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "Tried"
-msgstr "المُجرَّب"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "The code runs for real inside the trial. What it writes is discarded; an email it sends by itself goes out."
-msgstr "الكود يعمل فعلًا داخل التجربة. ما يكتبه يُلغى؛ أما البريد الذي يرسله بنفسه فيُرسل."
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "Try on a dummy record: %s"
-msgstr "تجربة على سجل وهمي: %s"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "Undo what was built: %s item(s)"
-msgstr "تراجع عمّا بُني: %s عنصر"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "Not undone"
-msgstr "لا يُتراجع عنه"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/tools/developer.py:0
-msgid "What was changed rather than made"
-msgstr "ما عُدّل لا ما أُنشئ"
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/models/nudge_run.py:0
-msgid "Only an administrator undoes what was built."
-msgstr "وحده المدير يتراجع عمّا بُني."
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/models/nudge_run.py:0
-msgid "Only your own requests in Developer mode can be undone here."
-msgstr "يمكن التراجع هنا عن طلباتك أنت في وضع المطوّر فقط."
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/models/nudge_run.py:0
-msgid "Deleted: %s."
-msgstr "حُذف: %s."
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/models/nudge_run.py:0
-msgid "Nothing made here still exists."
-msgstr "لم يبقَ شيء مما صُنع هنا."
-
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/models/nudge_run.py:0
-msgid "Kept: %s."
-msgstr "أُبقي: %s."
-
-#. module: nudge
-#. odoo-python
-#: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_form
-msgid "Undo What Was Built"
-msgstr "تراجع عمّا بُني"
+#: code:addons/nudge/tools/building.py:0
+msgid "unless %s"
+msgstr "إلا إذا %s"
