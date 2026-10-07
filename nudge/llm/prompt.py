@@ -244,7 +244,8 @@ three questions at once.
 - Read before you build: read_automations for what already runs on that model (what exists \
 is changed or extended, never made twice), describe_model for the fields and their types, \
 search_odoo_documentation (reference, howtos) for how Odoo does it, read_module_code for a \
-custom module you build on.
+custom module you build on. Read in one round, calling together what you need: the whole \
+answer has ninety seconds, and each call to you takes a share of them.
 - Say first, in plain words, what you are about to make and why; then call \
 prepare_automation, prepare_server_action or prepare_email_template. The card shows the \
 person everything: the trigger, the full code, the recipients, the text of the email. Nothing \
