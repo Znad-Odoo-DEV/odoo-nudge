@@ -816,6 +816,15 @@ class PrepareDelete(Building):
     @staticmethod
     def _check_deletable(records):
         """:raise Refused: for what a module owns, which an update would bring back or break"""
+        if records._name in ("base.automation", "ir.actions.server", "mail.template", "ir.cron"):
+            xml_ids = records.get_external_id()
+            for record in records:
+                module = (xml_ids.get(record.id) or "").split(".")[0]
+                if module and module not in CUSTOM_MODULES:
+                    raise Refused(
+                        f"{record.display_name!r} belongs to the module {module}: it is never deleted, "
+                        "which would break the module and come back with its next update. Switch it "
+                        "off with prepare_write on active instead.")
         if records._name == "ir.ui.view":
             xml_ids = records.get_external_id()
             for view in records:
@@ -949,10 +958,8 @@ def _changes(env, model, names, before, after):
 
 
 @base.register
-class TryAutomation(base.Tool):
+class TryAutomation(Building):
     name = "try_automation"
-    modes = (base.MODE_DEV,)
-    group = "base.group_system"
     kind = "code"
     description = (
         "Try before making, or try what exists: a dummy record is created with the values "
@@ -964,8 +971,9 @@ class TryAutomation(base.Tool):
         "rule on records, give record: the fields a person would fill in; for "
         "on_create_or_write, on_archive and on_unarchive, give change: what is changed on it "
         "afterwards. Offer it in one sentence before the card of a rule; a rule that failed on "
-        "the dummy record is fixed before the card. Code that sends an email by itself sends "
-        "it for real; an email action only queues it."
+        "the dummy record is fixed before the card. A trial that runs code is shown to the "
+        "person first, the code in full, and runs after their yes: code runs for real inside "
+        "the trial, and an email it sends by itself goes out; an email action only queues it."
     )
     input_schema = {
         "type": "object",
@@ -980,15 +988,76 @@ class TryAutomation(base.Tool):
         },
     }
 
-    def is_available(self, env, mode=base.MODE_TALK):
-        return super().is_available(env, mode) and env["nudge.conversation"]._can_develop()
+    @staticmethod
+    def _given(arguments):
+        given = [key for key in ("rule", "rule_id", "action_id", "cron_id") if arguments.get(key)]
+        if len(given) != 1:
+            raise Refused("Give one of rule, rule_id, action_id or cron_id.")
+        return given[0]
+
+    @staticmethod
+    def _code_of(env, given, arguments):
+        """:return: ``(what is tried, the code it runs)``; no code, nothing to ask"""
+        def codes(actions):
+            found = []
+            for action in actions:
+                if action.state == "code" and (action.code or "").strip():
+                    found.append(action.code.strip())
+                if action.state == "multi":
+                    found += codes(action.child_ids)
+            return found
+
+        if given == "rule":
+            rule = arguments["rule"]
+            found = [action.get("code", "").strip() for action in rule.get("actions") or []
+                     if action.get("kind") == "code" and action.get("code", "").strip()]
+            return f"the rule {rule.get('name', '')!r}", found
+        if given == "rule_id":
+            automations_installed(env)
+            rule = get_records(get_model(env, "base.automation").with_context(active_test=False), [arguments["rule_id"]])
+            return f"the rule {rule.name!r}", codes(rule.action_server_ids)
+        if given == "action_id":
+            action = get_records(get_model(env, "ir.actions.server"), [arguments["action_id"]])
+            return f"the server action {action.name!r}", codes(action)
+        cron = get_records(get_model(env, "ir.cron").with_context(active_test=False), [arguments["cron_id"]])
+        return f"the scheduled action {cron.cron_name!r}", codes(cron.ir_actions_server_id)
 
     @refusing
     def run(self, env, arguments, screen):
         check_developing(env)
-        given = [key for key in ("rule", "rule_id", "action_id", "cron_id") if arguments.get(key)]
-        if len(given) != 1:
-            raise Refused("Give one of rule, rule_id, action_id or cron_id.")
+        given = self._given(arguments)
+        what, code = self._code_of(env, given, arguments)
+        if not code:
+            return self._trial(env, given, arguments)
+        lines = [{"label": env._("Tried"), "value": what}]
+        lines += [{"label": env._("Code"), "value": text, "code": True} for text in code]
+        lines.append({"label": env._("Note"), "value": env._(
+            "The code runs for real inside the trial. What it writes is discarded; an email it "
+            "sends by itself goes out.")})
+        return base.ToolResult(
+            "The person is being shown the code the trial runs.",
+            pending={
+                "summary": env._("Try on a dummy record: %s", what),
+                "res_model": "base.automation" if given.startswith("rule") else
+                ("ir.cron" if given == "cron_id" else "ir.actions.server"),
+                "res_ids": [],
+                "record_names": what,
+                "values": {"arguments": arguments},
+                "is_sensitive": True,
+                "preview": {"records": [], "lines": lines},
+            },
+        )
+
+    def execute(self, env, step):
+        check_developing(env)
+        arguments = (step.values or {}).get("arguments") or {}
+        try:
+            return self._trial(env, self._given(arguments), arguments)
+        except Refused as refusal:
+            return base.ToolResult(str(refusal), is_error=True)
+
+    def _trial(self, env, given, arguments):
+        given = [given]
         report = []
         try:
             with env.cr.savepoint():

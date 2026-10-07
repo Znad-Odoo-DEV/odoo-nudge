@@ -4368,3 +4368,21 @@ msgstr "لا سجل للطباعة بعد"
 #: code:addons/nudge/tools/reports.py:0
 msgid "Create: report “%s”"
 msgstr "إنشاء: تقرير “%s”"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Tried"
+msgstr "المُجرَّب"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "The code runs for real inside the trial. What it writes is discarded; an email it sends by itself goes out."
+msgstr "الكود يعمل فعلًا داخل التجربة. ما يكتبه يُلغى؛ أما البريد الذي يرسله بنفسه فيُرسل."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Try on a dummy record: %s"
+msgstr "تجربة على سجل وهمي: %s"

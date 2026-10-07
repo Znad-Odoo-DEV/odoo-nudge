@@ -335,11 +335,17 @@ class TestDeveloper(NudgeCase, TransactionCase):
             self.skipTest("Automation Rules is not installed")
         self.switch(True)
         before = self.counts()
-        result = self.run_tool("try_automation", {
+        asked = self.run_tool("try_automation", {
             "rule": self.RULE,
             "record": [{"field": "name", "value": "Dummy (Nudge)"}],
             "change": [{"field": "function", "value": "Buyer"}],
         })
+        self.assertFalse(asked.is_error, asked.content)
+        self.assertTrue(asked.pending["is_sensitive"], "Code runs only after a yes")
+        code = [line for line in asked.pending["preview"]["lines"] if line.get("code")]
+        self.assertIn("r.write", code[0]["value"])
+        self.assertEqual(self.counts(), before, "Nothing ran before the yes")
+        result = self.do("try_automation", asked)
         self.assertFalse(result.is_error, result.content)
         self.assertIn("dummy Contact", result.content)
         self.assertIn("The conditions match", result.content)
@@ -349,11 +355,11 @@ class TestDeveloper(NudgeCase, TransactionCase):
         self.assertEqual(self.counts(), before)
         self.assertFalse(self.env["res.partner"].search([("name", "=", "Dummy (Nudge)")]))
         # A record that does not match is left alone, and said so
-        result = self.run_tool("try_automation", {
+        result = self.do("try_automation", self.run_tool("try_automation", {
             "rule": self.RULE,
             "record": [{"field": "name", "value": "Dummy (Nudge)"}],
             "change": [{"field": "function", "value": "Seller"}],
-        })
+        }))
         self.assertIn("do NOT match", result.content)
         self.assertIn("No field of the dummy record was changed", result.content)
         self.assertEqual(self.counts(), before)
@@ -365,7 +371,7 @@ class TestDeveloper(NudgeCase, TransactionCase):
         before = self.counts()
         rule = dict(self.RULE, trigger="on_create", fields=[], conditions=[],
                     actions=[{"kind": "code", "code": "raise UserError('Stop right there')"}])
-        result = self.run_tool("try_automation", {"rule": rule, "record": [{"field": "name", "value": "Dummy"}]})
+        result = self.do("try_automation", self.run_tool("try_automation", {"rule": rule, "record": [{"field": "name", "value": "Dummy"}]}))
         self.assertFalse(result.is_error, result.content)
         self.assertIn("It failed", result.content)
         self.assertIn("Stop right there", result.content)
@@ -423,7 +429,9 @@ class TestDeveloper(NudgeCase, TransactionCase):
         self.assertIn("Checked tonight", cron.ir_actions_server_id.code)
 
         buyer = self.env["res.partner"].create({"name": "Nudge Night Buyer", "function": "Buyer"})
-        tried = self.run_tool("try_automation", {"cron_id": cron.id})
+        asked = self.run_tool("try_automation", {"cron_id": cron.id})
+        self.assertTrue(asked.pending, "A scheduled action runs code: a yes first")
+        tried = self.do("try_automation", asked)
         self.assertFalse(tried.is_error, tried.content)
         self.assertIn("ran once", tried.content)
         self.assertFalse(buyer.comment, "What the trial wrote was discarded")
@@ -472,3 +480,14 @@ class TestDeveloper(NudgeCase, TransactionCase):
         self.assertIn("Settings ‣ Nudge ‣ Nudge for Developers", off)
         self.assertIn("Never give another reason", off)
         self.assertIn("approval rule on that button", dev)
+
+    def test_what_a_module_owns_is_never_deleted(self):
+        self.switch(True)
+        owned = self.env["ir.actions.server"].search([], limit=200).filtered(
+            lambda action: (action.get_external_id().get(action.id) or "").split(".")[0] not in ("", "nudge_custom", "__export__"))[:1]
+        if not owned:
+            self.skipTest("No server action of a module here")
+        refused = self.run_tool("prepare_delete", {"model": "ir.actions.server", "ids": owned.ids})
+        self.assertTrue(refused.is_error)
+        self.assertIn("belongs to the module", refused.content)
+        self.assertIn("Switch it off", refused.content)
