@@ -40,8 +40,8 @@ ACTIVITY_UNITS = ("days", "weeks", "months")
 # The fields an update action writes by itself; anything else is code
 UPDATABLE_TYPES = ("char", "text", "html", "integer", "float", "monetary", "boolean", "date", "datetime")
 # What may be deleted: what Nudge builds, never records of the business
-DELETABLE = ("base.automation", "ir.actions.server", "mail.template", "ir.cron", "ir.ui.view", "ir.model.fields",
-             "ir.actions.report")
+DELETABLE = ["base.automation", "ir.actions.server", "mail.template", "ir.cron", "ir.ui.view", "ir.model.fields",
+             "ir.actions.report"]
 # Where what Nudge makes is registered; a view or a field of a module is never deleted
 CUSTOM_MODULES = ("nudge_custom", "studio_customization", "__export__")
 INTERVAL_UNITS = ("minutes", "hours", "days", "weeks", "months")
@@ -778,7 +778,7 @@ class PrepareDelete(Building):
         "additionalProperties": False,
         "required": ["model", "ids"],
         "properties": {
-            "model": {"type": "string", "enum": list(DELETABLE)},
+            "model": {"type": "string", "enum": DELETABLE},
             "ids": {"type": "array", "minItems": 1, "maxItems": 10, "items": {"type": "integer", "minimum": 1}},
         },
     }

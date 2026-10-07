@@ -575,7 +575,7 @@ class NudgeConversation(models.Model):
             "test_import": self.env._("Tried the import"),
             "read_view": self.env._("Read a screen's definition"),
         }
-        text = words.get(call["name"], call["name"])
+        text = words.get(call["name"]) or (tool and tool.summary and self.env._(tool.summary)) or call["name"]
         if "%s" in text:
             return text % (label or model or "?")
         return text

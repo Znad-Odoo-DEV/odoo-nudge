@@ -385,6 +385,31 @@ function texts(selector, limit = LIMITS.notices) {
 
 const DESCRIBERS = { form: describeForm, list: describeList, kanban: describeKanban };
 const MAX_IMPORT_COLUMNS = 40;
+const STUDIO_TABS = { o_web_studio_new: "new", o_web_studio_view: "view", o_web_studio_properties: "properties" };
+
+/**
+ * Studio's editor, when the person is inside it: which view they edit and
+ * which tab of the sidebar is open.
+ */
+function describeStudio() {
+    const editor = document.querySelector(".o_web_studio_editor, .o_web_studio_editor_manager");
+    if (!editor || !isShown(editor)) {
+        return null;
+    }
+    const result = { editing: true };
+    const renderer = document.querySelector(".o_web_studio_view_renderer");
+    const kind = renderer && [...renderer.classList].find((cls) => /^o_web_studio_(\w+)_view_editor$/.test(cls));
+    if (kind) {
+        result.view_type = kind.replace(/^o_web_studio_(\w+)_view_editor$/, "$1");
+    }
+    for (const [cls, tab] of Object.entries(STUDIO_TABS)) {
+        const element = document.querySelector(`.o_web_studio_sidebar .${cls}`);
+        if (element && (element.classList.contains("active") || element.getAttribute("aria-selected") === "true")) {
+            result.tab = tab;
+        }
+    }
+    return result;
+}
 
 /**
  * The Import screen: what is imported into which model, how its columns are
@@ -496,6 +521,10 @@ export function takeSnapshot({ action, views }) {
             }
         }
     }
+    const studio = describeStudio();
+    if (studio) {
+        snapshot.studio = studio;
+    }
 
     const mounted = views.filter(isMounted);
     const dialogs = mounted.filter((entry) => entry.controller.env.inDialog);
@@ -539,6 +568,8 @@ export function summarize(snapshot) {
     const last = snapshot.breadcrumbs?.at(-1);
     if (snapshot.import) {
         parts.push(snapshot.import.file ? `Import: ${snapshot.import.file}` : "Import");
+    } else if (snapshot.studio) {
+        parts.push(snapshot.studio.view_type ? `Studio: ${snapshot.studio.view_type} view` : "Studio");
     } else if (snapshot.record?.name) {
         parts.push(snapshot.record.name);
     } else if (last) {

@@ -332,6 +332,19 @@ def build_domain(model, conditions, match="all"):
     return domain
 
 
+# One condition, as the tools that search and the rules that filter take it
+CONDITION_SCHEMA_ITEMS = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["field", "operator", "value"],
+    "properties": {
+        "field": {"type": "string", "pattern": PATH_PATTERN},
+        "operator": {"type": "string", "enum": list(OPERATORS)},
+        "value": {"type": "string", "maxLength": 200},
+    },
+}
+
+
 def refusing(function):
     """What is refused is an answer for the model, not an error of Nudge."""
     def run(self, env, arguments, screen):

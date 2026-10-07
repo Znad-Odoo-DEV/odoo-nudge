@@ -50,6 +50,8 @@ class Tool:
     modes = MODES
     # What the tool does, for the log: read, show, create, write, method
     kind = "read"
+    # What a step of it says in the log, when it is not a change, in English
+    summary = None
 
     def is_available(self, env, mode=MODE_TALK):
         # What the agent may do, the developer may do too

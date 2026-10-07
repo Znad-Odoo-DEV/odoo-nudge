@@ -406,3 +406,22 @@ test("the Import screen is described: file, columns and errors", () => {
     expect(snapshot.model).toBe("res.partner");
     expect(summarize(snapshot)).toBe("Import: contacts.xlsx");
 });
+
+test("Studio is seen in the snapshot, with the view edited and the tab open", () => {
+    getFixture().innerHTML = `
+        <div class="o_web_studio_editor_manager">
+            <div class="o_web_studio_sidebar">
+                <div class="o_web_studio_new">Add</div>
+                <div class="o_web_studio_properties active">Properties</div>
+            </div>
+            <div class="o_web_studio_view_renderer o_web_studio_form_view_editor"></div>
+        </div>`;
+    const snapshot = takeSnapshot({
+        action: { currentController: { displayName: "Studio", action: { type: "ir.actions.client", tag: "studio" } } },
+        views: [],
+    });
+    expect(snapshot.studio).toEqual({ editing: true, view_type: "form", tab: "properties" });
+    expect(summarize(snapshot)).toBe("Studio: form view");
+    getFixture().innerHTML = "";
+    expect(takeSnapshot({ action: { currentController: null }, views: [] }).studio).toBe(undefined);
+});
