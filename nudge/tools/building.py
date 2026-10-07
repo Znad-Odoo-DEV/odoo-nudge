@@ -191,11 +191,16 @@ def _quote(text):
     return '"' + str(text).replace("&", "&amp;").replace('"', "&quot;").replace("<", "&lt;") + '"'
 
 
-def preview_change(env, model, root, view_type, arch_before, name, xpath, position, snippet):
+def preview_change(env, model, root, view_type, arch_before, name, xpath=None, position=None, snippet=None,
+                   make_arch=None):
     """Apply the change in a savepoint that is rolled back.
+
+    :param make_arch: instead of one xpath, a function called inside the
+        savepoint that makes what the change needs (a server action its
+        button runs) and returns the whole arch of the extension view
     :return: ``(values of the extension view, lines of the difference)``
     :raise Refused: with what Odoo would refuse"""
-    arch = inheritance_arch(xpath, position, snippet)
+    arch = inheritance_arch(xpath, position, snippet) if make_arch is None else None
     values = {
         "name": name,
         "model": model._name,
@@ -209,6 +214,8 @@ def preview_change(env, model, root, view_type, arch_before, name, xpath, positi
     try:
         with env.cr.savepoint():
             try:
+                if make_arch is not None:
+                    values["arch_db"] = make_arch()
                 env["ir.ui.view"].create(values)
                 env.registry.clear_cache("templates")
                 _root, arch_after = combined_arch(model, root.id, view_type)

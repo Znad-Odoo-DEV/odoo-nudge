@@ -213,6 +213,22 @@ As a manager.
 | 12d.4 | As a manager, press Approve; start a new conversation and ask about salaries | The answer follows the lesson |
 | 12d.5 | Refuse a lesson | It no longer reaches the conversations |
 
+## 12f. Designed emails (Nudge: Emails, Developer mode)
+
+| # | Do | Expect |
+|---|---|---|
+| 12f.1 | "When a contact is created as a company, email them a welcome, the salesperson in copy" | Nudge asks the style (classic, modern, minimal, formal), proposes the text; nothing made yet |
+| 12f.2 | Answer "modern" | The card shows the email drawn for a real contact: coloured header, table of values, the logo and the company under it |
+| 12f.3 | Say yes, then accept the test | One email arrives at your own address, subject starting with [Test]; nobody else is written to |
+| 12f.4 | "Send it by itself when a company is created" | An automation rule with the template, after a yes |
+| 12f.5 | "Change it to formal" | The same template changes, after a yes |
+| 12f.6 | On a model with Approve: "Put the email on Approve, hide the original, the phone must be filled, allow without email" | A card with the new button and the difference to the form |
+| 12f.7 | Press the new button on a record with no phone | The window opens, a yellow line says what to fill; Send is refused |
+| 12f.8 | Fill the phone, open again, add a Cc, Send | The record is approved, the email leaves with the Cc, a note in the chatter shows it |
+| 12f.9 | Press **Without the Email** | The record is approved, no email, a note says so |
+| 12f.10 | Nudge ‣ Configuration ‣ Emails with Review: switch it off | The new button leaves the form |
+| 12f.11 | Arabic text in the request | The email reads right to left, Yes/No in Arabic |
+
 ## 12b. The setup of Odoo, for administrators
 
 | # | Do | Expect |

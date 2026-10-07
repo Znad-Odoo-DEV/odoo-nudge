@@ -1,0 +1,552 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* nudge_mail
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_email_review.py:0
+msgid ""
+"%(label)s: \"%(text)s\" is not a list of email addresses separated by "
+"commas."
+msgstr "%(label)s: \"%(text)s\" ليست قائمة عناوين بريد مفصولة بفواصل."
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_email_flow.py:0
+msgid "%(model)s has no method %(name)s."
+msgstr "لا يوجد في %(model)s تابع اسمه %(name)s."
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_email_flow.py:0
+msgid "%s is not a button this email may go with."
+msgstr "%s ليس زراً يمكن أن يرافقه هذا البريد."
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_email_review.py:0
+msgid "%s, without the email."
+msgstr "%s، بدون البريد."
+
+#. module: nudge_mail
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_email_review_view_form
+msgid "<strong>Fill in on the record first:</strong>"
+msgstr "<strong>املأ في السجل أولاً:</strong>"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__active
+msgid "Active"
+msgstr "نشط"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "Add the button “%s” with its email"
+msgstr "إضافة الزر «%s» مع بريده"
+
+#. module: nudge_mail
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_email_review_view_form
+msgid "Addresses separated by commas"
+msgstr "عناوين مفصولة بفواصل"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "As %s reads it"
+msgstr "كما يقرؤه %s"
+
+#. module: nudge_mail
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_email_review_view_form
+msgid "Attach a File"
+msgstr "إرفاق ملف"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__attachment_ids
+msgid "Attachments"
+msgstr "المرفقات"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "Button"
+msgstr "الزر"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "Button %(label)s with an email, on %(model)s"
+msgstr "الزر %(label)s مع بريد، على %(model)s"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__method_label
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__method_label
+msgid "Button It Goes With"
+msgstr "الزر الذي يرافقه"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__view_id
+msgid "Button on the Form"
+msgstr "الزر على النموذج"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_email_review.py:0
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__email_cc
+msgid "Cc"
+msgstr "نسخة إلى"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_email_review.py:0
+msgid "Cc:"
+msgstr "نسخة إلى:"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "Change: email “%s”"
+msgstr "تعديل: البريد «%s»"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__body
+msgid "Contents"
+msgstr "المحتوى"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "Create: email “%s”"
+msgstr "إنشاء: البريد «%s»"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__create_uid
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__create_uid
+msgid "Created by"
+msgstr "أنشئ بواسطة"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__create_date
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__create_date
+msgid "Created on"
+msgstr "أنشئ في"
+
+#. module: nudge_mail
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_email_review_view_form
+msgid "Discard"
+msgstr "تجاهل"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__display_name
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__display_name
+msgid "Display Name"
+msgstr "الاسم المعروض"
+
+#. module: nudge_mail
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_email_review_view_form
+msgid "Email"
+msgstr "البريد"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__template_id
+msgid "Email Template"
+msgstr "قالب البريد"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_email_review.py:0
+msgid "Email sent: %s"
+msgstr "أُرسل البريد: %s"
+
+#. module: nudge_mail
+#: model:ir.model,name:nudge_mail.model_nudge_email_review
+msgid "Email to Read Before It Goes"
+msgstr "بريد يُقرأ قبل إرساله"
+
+#. module: nudge_mail
+#: model:ir.model,name:nudge_mail.model_nudge_email_flow
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_email_flow_view_form
+msgid "Email with Review"
+msgstr "بريد مع مراجعة"
+
+#. module: nudge_mail
+#: model:ir.actions.act_window,name:nudge_mail.nudge_email_flow_action
+#: model:ir.ui.menu,name:nudge_mail.nudge_email_flow_menu
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_email_flow_view_list
+msgid "Emails with Review"
+msgstr "رسائل البريد مع المراجعة"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_email_review.py:0
+msgid "Fill in %s on the record first: the email cannot go without it."
+msgstr "املأ %s في السجل أولاً: لا يمكن إرسال البريد بدونه."
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__required_field_ids
+msgid "Filled Before Send"
+msgstr "يُملأ قبل الإرسال"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "Filled before Send"
+msgstr "يُملأ قبل الإرسال"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__flow_id
+msgid "Flow"
+msgstr "الإعداد"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__record_name
+msgid "For"
+msgstr "لـ"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__email_from
+msgid "From"
+msgstr "من"
+
+#. module: nudge_mail
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_email_review_view_form
+msgid "Go on without sending the email?"
+msgstr "المتابعة بدون إرسال البريد؟"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__method
+msgid "Goes With"
+msgstr "يرافق"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__button_groups
+msgid "Groups of the Button"
+msgstr "مجموعات الزر"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__id
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__id
+msgid "ID"
+msgstr "المعرف"
+
+#. module: nudge_mail
+#: model_terms:ir.actions.act_window,help:nudge_mail.nudge_email_flow_action
+msgid ""
+"In Developer mode, ask Nudge for a button that opens an email to read before"
+" it goes."
+msgstr "في وضع المطوّر، اطلب من Nudge زراً يفتح بريداً تقرؤه قبل إرساله."
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__write_uid
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__write_uid
+msgid "Last Updated by"
+msgstr "آخر تحديث بواسطة"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__write_date
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__write_date
+msgid "Last Updated on"
+msgstr "آخر تحديث في"
+
+#. module: nudge_mail
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_email_flow_view_form
+msgid "Made With It"
+msgstr "ما صُنع معه"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__without_email
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__without_email
+msgid "May Be Done Without the Email"
+msgstr "يمكن تنفيذه بدون البريد"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__model_id
+msgid "Model"
+msgstr "النموذج"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__name
+msgid "Name"
+msgstr "الاسم"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "No %s yet: the email is shown for the first one."
+msgstr "لا يوجد %s بعد: سيُعرض البريد لأول سجل."
+
+#. module: nudge_mail
+#: model_terms:ir.actions.act_window,help:nudge_mail.nudge_email_flow_action
+msgid "No email with review yet"
+msgstr "لا يوجد بريد مع مراجعة بعد"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "No visible difference"
+msgstr "لا فرق ظاهر"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "Not written to"
+msgstr "لن يُراسَل"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "Nothing: no logo, no company name"
+msgstr "لا شيء: بدون شعار ولا اسم شركة"
+
+#. module: nudge_mail
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_email_flow_view_form
+msgid "Off"
+msgstr "متوقف"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_email_flow.py:0
+msgid "Open one %s to send this email."
+msgstr "افتح سجلاً واحداً من %s لإرسال هذا البريد."
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "Opens"
+msgstr "يفتح"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "Preview"
+msgstr "المعاينة"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__res_id
+msgid "Record"
+msgstr "السجل"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "Result"
+msgstr "النتيجة"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_email_review_view_form
+msgid "Send"
+msgstr "إرسال"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "Send a test of “%s” to you"
+msgstr "إرسال نسخة تجريبية من «%s» إليك"
+
+#. module: nudge_mail
+#: model:ir.model.fields,help:nudge_mail.field_nudge_email_flow__required_field_ids
+msgid "Send is refused while one of these fields of the record is empty."
+msgstr "يُرفض الإرسال ما دام أحد هذه الحقول في السجل فارغاً."
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__action_id
+msgid "Server Action"
+msgstr "إجراء الخادم"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__missing
+msgid "Still To Fill In"
+msgstr "ما زال للملء"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "Style"
+msgstr "النمط"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__subject
+msgid "Subject"
+msgstr "الموضوع"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__model
+msgid "Technical Model"
+msgstr "النموذج التقني"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_email_review.py:0
+msgid "The email has no subject."
+msgstr "البريد بلا موضوع."
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_email_review.py:0
+msgid "The email has nobody in To."
+msgstr "لا يوجد أحد في خانة «إلى»."
+
+#. module: nudge_mail
+#: model:ir.model.fields,help:nudge_mail.field_nudge_email_flow__button_groups
+msgid ""
+"The groups of the button it goes with, as the form has them: whoever is not "
+"in one of them cannot open the window."
+msgstr ""
+"مجموعات الزر الذي يرافقه كما في النموذج: من ليس في إحداها لا يستطيع فتح "
+"النافذة."
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "The logo and the name of the company"
+msgstr "شعار الشركة واسمها"
+
+#. module: nudge_mail
+#: model:ir.model.fields,help:nudge_mail.field_nudge_email_flow__method
+msgid ""
+"The method of the button the email goes with: Send runs it before the email "
+"leaves. Empty: the button sends the email only."
+msgstr ""
+"تابع الزر الذي يرافقه البريد: الإرسال ينفّذه قبل خروج البريد. فارغ: الزر "
+"يرسل البريد فقط."
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_email_review.py:0
+msgid "The record of this email is gone."
+msgstr "سجل هذا البريد لم يعد موجوداً."
+
+#. module: nudge_mail
+#: model:ir.model.fields,help:nudge_mail.field_nudge_email_flow__without_email
+#: model:ir.model.fields,help:nudge_mail.field_nudge_email_review__without_email
+msgid ""
+"The window offers to do what the button does without sending the email."
+msgstr "تعرض النافذة تنفيذ ما يفعله الزر بدون إرسال البريد."
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_email_flow.py:0
+msgid "This button is not yours to press."
+msgstr "هذا الزر ليس من صلاحيتك."
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_email_review.py:0
+msgid "This email cannot be skipped."
+msgstr "لا يمكن تخطي هذا البريد."
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_email_flow.py:0
+msgid "This email is switched off."
+msgstr "هذا البريد متوقف."
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_email_review.py:0
+#: code:addons/nudge_mail/tools/emails.py:0
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__email_to
+msgid "To"
+msgstr "إلى"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_email_review.py:0
+msgid "To:"
+msgstr "إلى:"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "Under it"
+msgstr "في أسفله"
+
+#. module: nudge_mail
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_email_review_view_form
+msgid "Without the Email"
+msgstr "بدون البريد"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "Without the email"
+msgstr "بدون البريد"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_email_review.py:0
+msgid ""
+"Your user has no email address, and the email is sent from it. Set it in "
+"your preferences, then send again."
+msgstr ""
+"مستخدمك بلا عنوان بريد، والبريد يُرسل منه. أضفه في تفضيلاتك ثم أرسل من جديد."
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "does what “%s” does, then sends the email"
+msgstr "ينفّذ ما يفعله «%s» ثم يرسل البريد"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "hidden: the new button takes its place"
+msgstr "مخفي: الزر الجديد يحل محله"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "kept, next to the new button"
+msgstr "باقٍ، بجانب الزر الجديد"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "not offered"
+msgstr "غير متاح"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "offered in the window"
+msgstr "متاح في النافذة"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "sends the email"
+msgstr "يرسل البريد"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "the contacts of the record"
+msgstr "جهات اتصال السجل"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "the email “%s”, to read and change"
+msgstr "البريد «%s»، للقراءة والتعديل"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/emails.py:0
+msgid "“%s”"
+msgstr "«%s»"

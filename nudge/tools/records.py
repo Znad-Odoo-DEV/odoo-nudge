@@ -54,7 +54,7 @@ ADMIN_MODELS = re.compile(
 DEVELOPER_MODELS = re.compile(
     r"^(base\.automation|ir\.actions\.server|mail\.template|ir\.ui\.view|ir\.model"
     r"|ir\.model\.fields|ir\.model\.fields\.selection|ir\.actions\.act_window|ir\.ui\.menu"
-    r"|ir\.actions\.report|ir\.cron)$"
+    r"|ir\.actions\.report|ir\.cron|nudge\.email\.flow)$"
 )
 # Parameters whose value is a secret, whatever the administrator may read
 SECRET_KEY = re.compile(r"secret|token|key|password|passwd|credential|oauth", re.IGNORECASE)
@@ -117,7 +117,7 @@ def get_model(env, name, operation="read", to_change=False):
     closed = is_closed(env, name) or (to_change and is_fixed(env, name))
     model = env[name] if name in env and not closed else None
     if model is None or model._abstract or model._transient or not model._nudge_has_access(operation):
-        verb = {"read": "read", "create": "create records of", "write": "change"}[operation]
+        verb = {"read": "read", "create": "create records of", "write": "change", "unlink": "delete records of"}[operation]
         raise Refused(f"There is no model {name!r} that this person can {verb}.")
     return model
 
