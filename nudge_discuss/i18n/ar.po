@@ -1,0 +1,154 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* nudge_discuss
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-08 12:11+0000\n"
+"PO-Revision-Date: 2026-10-08 12:11+0000\n"
+"Last-Translator: \n"
+"Language-Team: Arabic\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+
+#. module: nudge_discuss
+#: model:ir.model.fields,field_description:nudge_discuss.field_nudge_mention__answer_id
+msgid "Answer"
+msgstr "الجواب"
+
+#. module: nudge_discuss
+#: model:ir.model.fields.selection,name:nudge_discuss.selection__nudge_mention__state__done
+msgid "Answered"
+msgstr "تمت الإجابة"
+
+#. module: nudge_discuss
+#: model:ir.model.fields,field_description:nudge_discuss.field_nudge_mention__user_id
+msgid "Asked By"
+msgstr "سأل"
+
+#. module: nudge_discuss
+#: model:ir.model.fields,field_description:nudge_discuss.field_nudge_mention__conversation_id
+msgid "Conversation"
+msgstr "المحادثة"
+
+#. module: nudge_discuss
+#: model:ir.model.fields,field_description:nudge_discuss.field_nudge_mention__create_uid
+msgid "Created by"
+msgstr "أنشئ بواسطة"
+
+#. module: nudge_discuss
+#: model:ir.model.fields,field_description:nudge_discuss.field_nudge_mention__create_date
+msgid "Created on"
+msgstr "أنشئ في"
+
+#. module: nudge_discuss
+#: model:ir.model.fields,field_description:nudge_discuss.field_mail_thread__display_name
+#: model:ir.model.fields,field_description:nudge_discuss.field_nudge_mention__display_name
+msgid "Display Name"
+msgstr "الاسم المعروض"
+
+#. module: nudge_discuss
+#: model:ir.model,name:nudge_discuss.model_mail_thread
+msgid "Email Thread"
+msgstr "سلسلة الإيميل"
+
+#. module: nudge_discuss
+#: model:ir.model.fields,field_description:nudge_discuss.field_nudge_mention__error
+msgid "Error"
+msgstr "الخطأ"
+
+#. module: nudge_discuss
+#: model:ir.model.fields.selection,name:nudge_discuss.selection__nudge_mention__state__failed
+msgid "Failed"
+msgstr "فشل"
+
+#. module: nudge_discuss
+#: model:ir.model.fields,field_description:nudge_discuss.field_mail_thread__id
+#: model:ir.model.fields,field_description:nudge_discuss.field_nudge_mention__id
+msgid "ID"
+msgstr "المعرّف"
+
+#. module: nudge_discuss
+#: model:ir.model.fields,field_description:nudge_discuss.field_nudge_mention__write_uid
+msgid "Last Updated by"
+msgstr "آخر تحديث بواسطة"
+
+#. module: nudge_discuss
+#: model:ir.model.fields,field_description:nudge_discuss.field_nudge_mention__write_date
+msgid "Last Updated on"
+msgstr "آخر تحديث في"
+
+#. module: nudge_discuss
+#: model:ir.model.fields,field_description:nudge_discuss.field_nudge_mention__model
+msgid "Model"
+msgstr "النموذج"
+
+#. module: nudge_discuss
+#: model:ir.model.fields.selection,name:nudge_discuss.selection__nudge_mention__state__refused
+msgid "Not for Them"
+msgstr "غير متاح له"
+
+#. module: nudge_discuss
+#: model:ir.model,name:nudge_discuss.model_nudge_mention
+msgid "Nudge Mention"
+msgstr "إشارة إلى Nudge"
+
+#. module: nudge_discuss
+#. odoo-python
+#: code:addons/nudge_discuss/models/nudge_mention.py:0
+msgid "Nudge could not answer: %s"
+msgstr "لم يستطع Nudge الإجابة: %s"
+
+#. module: nudge_discuss
+#. odoo-python
+#: code:addons/nudge_discuss/models/nudge_mention.py:0
+msgid "Nudge had no answer."
+msgstr "لم يكن لدى Nudge جواب."
+
+#. module: nudge_discuss
+#. odoo-python
+#: code:addons/nudge_discuss/models/nudge_mention.py:0
+msgid "Nudge is not open to the person who asked."
+msgstr "Nudge غير متاح لمن سأل."
+
+#. module: nudge_discuss
+#: model:ir.actions.server,name:nudge_discuss.cron_mentions_ir_actions_server
+msgid "Nudge: answer @Nudge"
+msgstr "Nudge: الرد على ‎@Nudge"
+
+#. module: nudge_discuss
+#: model:ir.model.fields,field_description:nudge_discuss.field_nudge_mention__message_id
+msgid "Question"
+msgstr "السؤال"
+
+#. module: nudge_discuss
+#: model:ir.model.fields,field_description:nudge_discuss.field_nudge_mention__res_id
+msgid "Record ID"
+msgstr "معرّف السجل"
+
+#. module: nudge_discuss
+#: model:ir.model.fields,field_description:nudge_discuss.field_nudge_mention__state
+msgid "State"
+msgstr "الحالة"
+
+#. module: nudge_discuss
+#. odoo-python
+#: code:addons/nudge_discuss/models/nudge_mention.py:0
+msgid "Summarise this for me."
+msgstr "لخّص لي هذا."
+
+#. module: nudge_discuss
+#. odoo-python
+#: code:addons/nudge_discuss/models/nudge_mention.py:0
+msgid "This channel no longer exists."
+msgstr "هذه القناة لم تعد موجودة."
+
+#. module: nudge_discuss
+#: model:ir.model.fields.selection,name:nudge_discuss.selection__nudge_mention__state__queued
+msgid "Waiting"
+msgstr "بالانتظار"

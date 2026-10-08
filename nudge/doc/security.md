@@ -133,6 +133,12 @@ steer Nudge was closed:
   `env`, no `sudo`, no other user or company, no write, no search, no secret.
 - Deletion is for what Nudge or Studio made, when asked for by name: a rule, an action, a
   template, a scheduled action, a view or a field that belongs to a module is never deleted.
+- @Nudge in a chatter or a channel (Nudge: Discuss) is answered as the person who wrote it, in
+  Talk mode, with one tool only, the official documentation. What it is told of the record is
+  what every reader of the record sees: the fields no group keeps, the usual fields of the
+  records it links to, the last messages of the thread, as that person may read them. Nothing
+  else is looked up, since the answer is a note the other employees read. Nothing is changed.
+  Someone who may not use Nudge is told so; a mention by Nudge itself is never answered.
 - A designed email (Nudge: Emails) prints what the model wrote through `t-out` of a literal,
   escaped whatever QWeb does with the static text of a mail template; a value of the record is a
   path of fields the administrator may read, through single records only, printed with
