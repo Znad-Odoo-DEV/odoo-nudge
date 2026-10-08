@@ -34,14 +34,14 @@ class TestParsing(BaseCase):
         self.assertEqual(query, "select id\nfrom res_partner")
 
     def test_anything_else_is_a_question(self):
-        for text in ("screen invoices", "/screens", "what is /screen", "", "/", "/unknown words"):
+        for text in ("screen invoices", "/screens", "what is /screen", "", "/", "/unknown words", "/mention hi"):
             self.assertIsNone(commands.parse(text)[0], text)
 
     def test_every_command_has_its_words_once(self):
         words = [word for command in commands.COMMANDS for word in command.words]
         self.assertEqual(len(words), len(set(words)))
         self.assertTrue(all(word.startswith("/") and word == word.lower() for word in words))
-        self.assertEqual(set(commands.FOCUS), {command.name for command in commands.COMMANDS
+        self.assertEqual(set(commands.FOCUS) - set(commands.INTERNAL_FOCUS), {command.name for command in commands.COMMANDS
                                                if command.kind == commands.FOCUSED})
 
 
