@@ -211,10 +211,33 @@
             <t t-call="nudge.CardLines">
                 <t t-set="lines" t-value="props.card.lines"/>
             </t>
+            <div t-if="props.card.plan" class="o_nudge_plan">
+                <p class="o_nudge_plan_count" t-esc="planCount"/>
+                <ul t-if="props.card.plan.failing.length" class="o_nudge_plan_failing">
+                    <li t-foreach="props.card.plan.failing" t-as="entry" t-key="entry_index" dir="auto">
+                        <strong t-esc="entry.name"/>: <t t-esc="entry.reason"/>
+                    </li>
+                    <li t-if="props.card.plan.more_failing" class="o_nudge_plan_more">
+                        + <t t-esc="props.card.plan.more_failing"/>
+                    </li>
+                </ul>
+                <p t-if="!props.card.plan.undoable" class="o_nudge_plan_note">
+                    <i class="fa fa-exclamation-triangle"/> What a button does is not taken back by Undo.
+                </p>
+                <p t-if="props.card.plan.background" class="o_nudge_plan_note">
+                    <i class="fa fa-clock-o"/> Many records: done in the background, while you go on.
+                </p>
+            </div>
             <div t-if="props.cardState === 'pending'" class="o_nudge_card_actions">
                 <button type="button" class="btn btn-sm btn-primary o_nudge_confirm"
                         t-on-click="() => this.decide('confirm')">
-                    Yes, do it
+                    <t t-if="props.card.plan">Yes, all of them</t>
+                    <t t-else="">Yes, do it</t>
+                </button>
+                <button t-if="props.card.plan and props.card.plan.passing and props.card.plan.passing &lt; props.card.plan.total"
+                        type="button" class="btn btn-sm btn-secondary o_nudge_confirm_passing"
+                        t-on-click="() => this.decide('passing')">
+                    <t t-esc="passingLabel"/>
                 </button>
                 <button type="button" class="btn btn-sm btn-light o_nudge_decline"
                         t-on-click="() => this.decide('decline')">
@@ -222,13 +245,18 @@
                 </button>
             </div>
             <div t-else="" class="o_nudge_card_outcome" role="status">
-                <i t-if="props.cardState === 'deciding'" class="fa fa-circle-o-notch fa-spin"/>
+                <i t-if="props.cardState === 'deciding' or props.cardState === 'working'" class="fa fa-circle-o-notch fa-spin"/>
                 <i t-elif="props.cardState === 'done'" class="fa fa-check"/>
                 <i t-elif="props.cardState === 'failed'" class="fa fa-times"/>
                 <span t-esc="outcome"/>
             </div>
             <div t-if="props.cardError and props.cardState === 'failed'" class="o_nudge_card_error"
                  t-esc="props.cardError"/>
+            <button t-if="props.cardCanUndo and props.onUndo" type="button"
+                    class="btn btn-sm btn-link o_nudge_undo" title="Write back what was there before"
+                    t-on-click="() => props.onUndo(props.card.step_id)">
+                <i class="fa fa-undo"/> Undo
+            </button>
         </div>
     </t>
 

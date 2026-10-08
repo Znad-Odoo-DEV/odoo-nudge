@@ -1079,6 +1079,36 @@ $o-nudge-radius: 18px;
     }
 }
 
+// A plan: how many records go through, and why the others do not
+.o_nudge_plan {
+    margin-top: 6px;
+    font-size: 0.85em;
+
+    p {
+        margin: 0 0 4px;
+    }
+}
+
+.o_nudge_plan_count {
+    font-weight: 600;
+}
+
+.o_nudge_plan_failing {
+    max-height: 140px;
+    margin: 0 0 4px;
+    padding-inline-start: 18px;
+    overflow-y: auto;
+    color: $o-nudge-danger;
+}
+
+.o_nudge_plan_note {
+    color: $o-nudge-text-muted;
+}
+
+.o_nudge_undo {
+    padding-inline: 0;
+}
+
 .o_nudge_card_error {
     margin-top: 4px;
     color: $o-nudge-danger;
