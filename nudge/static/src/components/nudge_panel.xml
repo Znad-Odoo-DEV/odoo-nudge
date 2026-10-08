@@ -265,6 +265,8 @@
                                   cardState="message.card ? message.card.state : ''"
                                   cardError="message.card ? message.card.error : ''"
                                   onDecide="(stepId, decision) => this.nudge.decide(stepId, decision)"
+                                  cardCanUndo="message.card ? !!message.card.can_undo : false"
+                                  onUndo="(stepId) => this.nudge.undoStep(stepId)"
                                   runId="message.runId" progress="message.progress"
                                   onStop="(runId) => this.nudge.stopRun(runId)"
                                   onShowGuidance="(steps) => this.nudge.showGuidance(steps)"

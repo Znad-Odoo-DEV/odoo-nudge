@@ -1113,7 +1113,9 @@ function isReadable(file) {
                 case "decided": {
                     const card = findCard(event.step_id);
                     if (card) {
-                        Object.assign(card, { state: event.state, error: event.error || "" });
+                        // A plan says how far it went, and whether it can be taken back
+                        const { type, ...decided } = event;
+                        Object.assign(card, decided, { error: event.error || "" });
                     }
                     break;
                 }
@@ -1440,6 +1442,26 @@ function isReadable(file) {
          * @param {number} stepId
          * @param {"confirm"|"decline"} decision
          */
+        /**
+         * What a change wrote is written back, as it was, unless someone
+         * changed the record since.
+         */
+        async function undoStep(stepId) {
+            const card = findCard(stepId);
+            if (!card?.can_undo) {
+                return;
+            }
+            card.can_undo = false;
+            try {
+                const result = await orm.call("nudge.step", "undo_changes", [stepId]);
+                Object.assign(card, result.card);
+                notification.add(result.message, { type: "success" });
+            } catch (error) {
+                card.can_undo = true;
+                throw error;
+            }
+        }
+
         async function decide(stepId, decision) {
             const card = findCard(stepId);
             if (!card || card.state !== "pending" || state.isStreaming) {
@@ -1494,6 +1516,7 @@ function isReadable(file) {
             useFound,
             send,
             decide,
+            undoStep,
             stop,
             newConversation,
             openConversation,

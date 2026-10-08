@@ -31,6 +31,7 @@ STEP_KINDS = [
 
 STEP_STATES = [
     ("pending", "Waiting for the Person"),
+    ("working", "Being Done"),
     ("done", "Done"),
     ("failed", "Failed"),
     ("declined", "Declined"),
@@ -218,6 +219,10 @@ class NudgeRun(models.Model):
         self._commit()
 
         conversation = run._as_person()
+        working = run.step_ids.filtered(lambda step: step.state == "working")[:1]
+        if working and not run._work_plan(working, conversation):
+            # More to do: taken up again in the next piece
+            return
         try:
             job = conversation._background_job()
         except UserError as error:
@@ -245,6 +250,39 @@ class NudgeRun(models.Model):
         _logger.info(
             "Nudge: run %s of user %s worked on for %.1f s in the background, now %s",
             run.id, run.user_id.id, time.monotonic() - started, run.state)
+
+    def _work_plan(self, step, conversation):
+        """Do a piece of a plan the person said yes to.
+
+        :return: whether it is all done, and the model may go on
+        """
+        from .. import tools  # noqa: PLC0415
+        from .nudge_conversation import DONE, FAILED  # noqa: PLC0415
+
+        run = self.sudo()
+        tool = tools.base.TOOLS.get(step.tool)
+        env = conversation.with_context(nudge_conversation_id=conversation.id, nudge_mode="agent").env
+        deadline = tools.plans.now() + self._get_piece_seconds()
+
+        def save():
+            card = step._get_card()
+            run.progress = self.env._("%(done)s done, %(failed)s did not go through",
+                                      done=card["done_count"], failed=card["failed_count"])
+            run._tell("progress")
+            self._commit()
+
+        result = tools.base.guarded(env, step.tool, lambda: tool.execute(env, step, deadline=deadline, save=save))
+        if result is None:
+            save()
+            run._queue()
+            self._commit()
+            return False
+        state = "failed" if result.is_error else "done"
+        conversation.sudo()._agent_settle(step, state, tools.base.ToolResult(
+            (FAILED if result.is_error else DONE) % result.content,
+            is_error=result.is_error, records=result.records), [result.event] if result.event else [])
+        self._commit()
+        return True
 
     @api.model
     def _nudge_commit_progress(self, started):
@@ -424,6 +462,8 @@ class NudgeStep(models.Model):
         that waited"""
         self.ensure_one()
         preview = self.preview or {}
+        values = self.values if isinstance(self.values, dict) else {}
+        progress = values.get("progress") or {}
         return {
             "step_id": self.id,
             "kind": self.kind,
@@ -433,7 +473,43 @@ class NudgeStep(models.Model):
             "lines": preview.get("lines") or [],
             "sensitive": self.is_sensitive,
             "error": self.error or "",
+            # Many records at once: how many go through, why the others do not
+            "plan": preview.get("plan") or False,
+            "done_count": progress.get("done", 0),
+            "failed_count": len(progress.get("failed") or {}),
+            # What was written can be taken back, once
+            "can_undo": self.state == "done" and bool(self._undo_data()) and not values.get("undone"),
+            "undone": bool(values.get("undone")),
         }
+
+    def _undo_data(self):
+        values = self.values if isinstance(self.values, dict) else {}
+        return values.get("undo") or (values.get("progress") or {}).get("undo") or {}
+
+    @api.model
+    def undo_changes(self, step_id):
+        """Write back what a step wrote, as the person who said yes to it;
+        a record changed since is left as it is.
+
+        :return: ``{"message", "card"}``
+        """
+        from ..tools.plans import undo_changes  # noqa: PLC0415
+
+        step = self.sudo().browse(int(step_id)).exists()
+        if not step or step.user_id != self.env.user:
+            raise AccessError(self.env._("This is not yours to undo."))
+        values = step.values if isinstance(step.values, dict) else {}
+        if step.state != "done" or not step._undo_data() or values.get("undone"):
+            raise UserError(self.env._("There is nothing to undo here."))
+        restored, kept = undo_changes(self.env, step._undo_data())
+        step.values = dict(values, undone=True)
+        message = self.env._("%s records are back as they were.", restored)
+        if kept:
+            message += " " + self.env._("Left as they are: %s", "; ".join(
+                f"{name} ({why})" for name, why in kept[:10]))
+        _logger.info("Nudge: step %s undone by user %s: %s back, %s left", step.id, self.env.uid,
+                     restored, len(kept))
+        return {"message": message, "card": step._get_card()}
 
     @api.model
     def get_cards(self, conversation_id):

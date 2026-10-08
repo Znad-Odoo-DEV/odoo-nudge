@@ -36,6 +36,9 @@ export class NudgeMessage extends Component {
         cardState: { type: String, optional: true },
         cardError: { type: String, optional: true },
         onDecide: { type: Function, optional: true },
+        // What was written can be taken back once
+        cardCanUndo: { type: Boolean, optional: true },
+        onUndo: { type: Function, optional: true },
         // Worked on in the background: what Nudge is doing now
         runId: { type: [Number, { value: null }], optional: true },
         progress: { type: String, optional: true },
@@ -106,12 +109,46 @@ export class NudgeMessage extends Component {
     get outcome() {
         const outcomes = {
             deciding: _t("Working on it…"),
+            working: _t("Being done in the background: I'll tell you when it is over."),
             done: _t("Done"),
             failed: _t("It did not work"),
             declined: _t("You said no"),
             cancelled: _t("Left undecided"),
         };
+        const card = this.props.card;
+        if (card?.plan && this.props.cardState === "done") {
+            if (!card.failed_count) {
+                return _t("%s done", card.done_count || 0);
+            }
+            return _t("%(done)s done · %(failed)s did not go through", {
+                done: card.done_count || 0,
+                failed: card.failed_count,
+            });
+        }
+        if (card?.undone) {
+            return _t("Undone");
+        }
         return outcomes[this.props.cardState] || "";
+    }
+
+    get passingLabel() {
+        return _t("Only the %s that go through", this.props.card?.plan?.passing || 0);
+    }
+
+    /** @returns {string} how many records a plan takes, and how many go through */
+    get planCount() {
+        const plan = this.props.card?.plan;
+        if (!plan) {
+            return "";
+        }
+        if (plan.passing === plan.total) {
+            return _t("%s records: all go through, as tried just now.", plan.total);
+        }
+        return _t("%(total)s records: %(passing)s go through, %(failing)s do not, as tried just now.", {
+            total: plan.total,
+            passing: plan.passing,
+            failing: plan.total - plan.passing,
+        });
     }
 
     /**

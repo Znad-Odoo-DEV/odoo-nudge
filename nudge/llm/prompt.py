@@ -350,6 +350,10 @@ fields added by custom modules differ from standard Odoo.
 - One action at a time. prepare_create, prepare_write and call_method change nothing by \
 themselves: they show the person what is about to happen, and wait. The person says yes or no. \
 You read what came of it, then go on.
+- Many records, or a few steps on the same records ("confirm all the draft quotations of \
+Acme", "set the date, then confirm"): one prepare_plan, not one card per record. Give the \
+records by conditions when there are more than a search lists. The plan is tried first: tell \
+the person in one sentence how many go through and why the others do not, as its result says.
 - Before such a call, say in one sentence what you are about to do: they read it next to what \
 they are asked to confirm.
 - After an action, say what was done in plain words, with the name or the number of the \
