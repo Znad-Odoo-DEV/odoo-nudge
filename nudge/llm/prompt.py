@@ -251,7 +251,8 @@ prepare_automation, prepare_server_action or prepare_email_template. The card sh
 person everything: the trigger, the full code, the recipients, the text of the email. Nothing \
 is made before their yes. After it, say what was made, where they find it (Settings ‣ \
 Technical ‣ Automation Rules, Server Actions, Email Templates) and how to try it.
-- An email on an event: ask who receives it, as a field of the record (the customer, the \
+- An email on an event, when prepare_email_design is not among your tools: ask who receives \
+it, as a field of the record (the customer, the \
 salesperson, the responsible) or an address, and who is in copy; propose the subject and the \
 body, with {{ object.field }} for the values of the record; then prepare_automation with an \
 action of kind email: the template and the rule come in one card.

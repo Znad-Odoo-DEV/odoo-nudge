@@ -7,6 +7,7 @@ from odoo.addons.nudge import tools
 from odoo.addons.nudge.llm import base as llm
 from odoo.addons.nudge.llm import loop, prompt
 from odoo.addons.nudge.models.nudge_conversation import DEVELOPER_PARAM
+from odoo.addons.nudge.tools import developer
 from odoo.addons.nudge.tools.developer import compile_code
 from odoo.addons.nudge.tools.records import Refused
 
@@ -28,6 +29,8 @@ class TestDeveloper(NudgeCase, TransactionCase):
 
     def setUp(self):
         super().setUp()
+        # The plain emails of Nudge, whether Nudge: Emails is installed here or not
+        self.patch(developer, "designed_emails_here", lambda env: False)
         if self.has_rules:
             # A rule made in a test patches the model; Odoo 18 wants it clean afterwards
             self.addCleanup(self.env["base.automation"]._unregister_hook)

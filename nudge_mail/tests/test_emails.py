@@ -85,6 +85,28 @@ class TestEmails(NudgeCase, MockEmail, TransactionCase):
             tool.name for tool in tools.base.available(self.env(user=self.clerk), "dev")])
 
     # ----------------------------------------------------------------- design
+    def test_an_email_is_always_a_designed_one(self):
+        plain = {"to": ["email"], "cc": ["user_id"], "subject": "Welcome", "body": "Hello"}
+        rule = self.run_tool("prepare_automation", {
+            "name": "Welcome", "model": "res.partner", "trigger": "on_create",
+            "actions": [{"kind": "email", "email": plain}]})
+        self.assertTrue(rule.is_error)
+        self.assertIn("prepare_email_design", rule.content)
+        self.assertIn("style", rule.content)
+        template = self.run_tool("prepare_email_template", {"name": "Welcome", "model": "res.partner", "email": plain})
+        self.assertTrue(template.is_error)
+        self.assertIn("prepare_email_design", template.content)
+        # A designed email goes on a rule by its template
+        designed = self.made()
+        rule = self.run_tool("prepare_automation", {
+            "name": "Welcome", "model": "res.partner", "trigger": "on_create",
+            "actions": [{"kind": "email", "template_id": designed.id}]})
+        self.assertFalse(rule.is_error, rule.content)
+
+    def test_recipients_read_as_people_read_them(self):
+        line = next(item for item in self.design().pending["preview"]["lines"] if item["label"] == "Copy to")
+        self.assertIn("Salesperson", line["value"])
+
     def test_the_card_shows_the_email_as_it_will_be_read(self):
         result = self.design()
         self.assertFalse(result.is_error, result.content)
