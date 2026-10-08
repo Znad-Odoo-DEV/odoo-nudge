@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-08 10:41+0000\n"
-"PO-Revision-Date: 2026-10-08 10:41+0000\n"
+"POT-Creation-Date: 2026-10-08 11:34+0000\n"
+"PO-Revision-Date: 2026-10-08 11:34+0000\n"
 "Last-Translator: \n"
 "Language-Team: Arabic\n"
 "Language: ar\n"
@@ -21,6 +21,18 @@ msgstr ""
 #: code:addons/nudge/models/nudge_doc.py:0
 msgid "%(count)s pages of the official documentation of Odoo %(version)s."
 msgstr "%(count)s صفحة من توثيق Odoo %(version)s الرسمي."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.js:0
+msgid "%(done)s done · %(failed)s did not go through"
+msgstr "تم %(done)s · لم ينجح %(failed)s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_run.py:0
+msgid "%(done)s done, %(failed)s did not go through"
+msgstr "تم %(done)s، ولم ينجح %(failed)s"
 
 #. module: nudge
 #. odoo-python
@@ -46,6 +58,15 @@ msgstr "%(number)s %(unit)s قبل"
 
 #. module: nudge
 #. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.js:0
+msgid ""
+"%(total)s records: %(passing)s go through, %(failing)s do not, as tried just"
+" now."
+msgstr ""
+"%(total)s سجل: %(passing)s سينجح و%(failing)s لن ينجح، حسب التجربة الآن."
+
+#. module: nudge
+#. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.js:0
 msgid "%s asks the AI: it works once a provider is set up."
 msgstr "%s يسأل الذكاء الاصطناعي: يعمل بعد ضبط مزوّد."
@@ -68,6 +89,12 @@ msgid "%s day(s)"
 msgstr "%s يوم"
 
 #. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.js:0
+msgid "%s done"
+msgstr "تم %s"
+
+#. module: nudge
 #. odoo-python
 #: code:addons/nudge/models/nudge_provider.py:0
 msgid "%s models found."
@@ -78,6 +105,18 @@ msgstr "تم العثور على %s نموذج."
 #: code:addons/nudge/models/nudge_doc.py:0
 msgid "%s pages of the documentation loaded."
 msgstr "حُمِّلت %s صفحة من التوثيق."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_run.py:0
+msgid "%s records are back as they were."
+msgstr "رجع %s سجل كما كان."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.js:0
+msgid "%s records: all go through, as tried just now."
+msgstr "%s سجل: كلها ستنجح، حسب التجربة الآن."
 
 #. module: nudge
 #. odoo-javascript
@@ -530,6 +569,17 @@ msgid "Base URL"
 msgstr "العنوان الأساسي"
 
 #. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_step__state__working
+msgid "Being Done"
+msgstr "قيد التنفيذ"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.js:0
+msgid "Being done in the background: I'll tell you when it is over."
+msgstr "قيد التنفيذ في الخلفية: سأخبرك عندما ينتهي."
+
+#. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/developer.py:0
 #: model:ir.model.fields,field_description:nudge.field_nudge_doc_passage__body
@@ -638,6 +688,12 @@ msgstr "الفئة"
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_step__kind__write
 msgid "Change"
 msgstr "تعديل"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/plans.py:0
+msgid "Change %(fields)s on %(count)s × %(model)s"
+msgstr "تعديل %(fields)s على %(count)s × %(model)s"
 
 #. module: nudge
 #. odoo-python
@@ -1591,6 +1647,12 @@ msgid "How do I create a quotation?"
 msgstr "كيف أنشئ عرض سعر؟"
 
 #. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_plan_max_records
+msgid "How many records the agent may change with one yes. At most 1000."
+msgstr ""
+"عدد السجلات التي يستطيع الوكيل تغييرها بموافقة واحدة. 1000 على الأكثر."
+
+#. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_provider__effort
 msgid ""
 "How much reasoning the model spends on an answer. Lower is faster and "
@@ -1792,6 +1854,18 @@ msgstr "تُقرأ بعد التثبيت بلحظات، ثم في كل مرة ت
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/tools/plans.py:0
+msgid "It no longer exists."
+msgstr "لم يعد موجودًا."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/plans.py:0
+msgid "It was changed since."
+msgstr "تغيّر بعدها."
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/models/nudge_run.py:0
 msgid "Kept: %s."
 msgstr "أُبقي: %s."
@@ -1892,6 +1966,12 @@ msgstr "الإجازات، ساعات العمل، نهاية الخدمة"
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_step__state__cancelled
 msgid "Left Undecided"
 msgstr "تُرك بلا قرار"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_run.py:0
+msgid "Left as they are: %s"
+msgstr "بقيت كما هي: %s"
 
 #. module: nudge
 #. odoo-javascript
@@ -2118,6 +2198,26 @@ msgstr "للمديرين فقط"
 #: model:res.groups,comment:nudge.group_nudge_manager
 msgid "Manages Nudge settings and sees every conversation."
 msgstr "يدير إعدادات Nudge ويرى كل المحادثات."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid ""
+"Many records with one yes: the same change or the same button on many "
+"records, or a few steps on the same records. Nudge tries the plan first and "
+"undoes it, shows how many records go through and why the others do not; "
+"beyond 20 records it is done in the background. What it wrote can be undone;"
+" what a button did cannot."
+msgstr ""
+"سجلات كثيرة بموافقة واحدة: نفس التعديل أو نفس الزر على سجلات كثيرة، أو بضع "
+"خطوات على نفس السجلات. يجرّب Nudge الخطة أولًا ثم يتراجع عنها، ويعرض كم "
+"سجلًا سينجح ولماذا لن ينجح الباقي؛ وما يزيد عن 20 سجلًا يُنفَّذ في الخلفية. "
+"ما كتبه يمكن التراجع عنه؛ وما فعله زر لا يمكن."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid "Many records: done in the background, while you go on."
+msgstr "سجلات كثيرة: تُنفَّذ في الخلفية بينما تكمل عملك."
 
 #. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_provider__effort__max
@@ -2952,6 +3052,12 @@ msgid "Only people who can read this model are told about this piece."
 msgstr "لا يُخبر بهذا الجزء إلا من يستطيع قراءة هذا النموذج."
 
 #. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.js:0
+msgid "Only the %s that go through"
+msgstr "فقط الـ %s التي ستنجح"
+
+#. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_profile_slice__restricted
 msgid "Only the managers of Nudge are told about this piece."
 msgstr "لا يُخبر بهذا الجزء إلا مديرو Nudge."
@@ -3289,6 +3395,12 @@ msgstr "التجهيز لـ Nudge خاص بسيرفر Ollama."
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/tools/plans.py:0
+msgid "Press “%(button)s” on %(count)s × %(model)s"
+msgstr "ضغط «%(button)s» على %(count)s × %(model)s"
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/tools/actions.py:0
 msgid "Press “%(button)s”: %(model)s"
 msgstr "ضغط “%(button)s”: %(model)s"
@@ -3483,6 +3595,11 @@ msgstr "سجلات"
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_profile_slice__kind__model
 msgid "Records and Fields"
 msgstr "السجلات والحقول"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_plan_max_records
+msgid "Records per Plan"
+msgstr "السجلات في الخطة الواحدة"
 
 #. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_profile__trigger__manual
@@ -4161,6 +4278,12 @@ msgstr "المتصفح إن استطاع، وإلا فمزود الذكاء ال
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/tools/plans.py:0
+msgid "The button is not there in the state this record is in."
+msgstr "الزر غير موجود في الحالة التي عليها هذا السجل."
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/tools/developer.py:0
 msgid ""
 "The code runs for real inside the trial. What it writes is discarded; an "
@@ -4394,6 +4517,12 @@ msgstr ""
 " 0: غير معروف."
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_run.py:0
+msgid "There is nothing to undo here."
+msgstr "لا يوجد شيء للتراجع عنه هنا."
+
+#. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_search
 msgid "This Month"
 msgstr "هذا الشهر"
@@ -4440,6 +4569,12 @@ msgid "This is no longer waiting for you."
 msgstr "هذا الإجراء لم يعد ينتظر قرارك."
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_run.py:0
+msgid "This is not yours to undo."
+msgstr "هذا ليس لك لتتراجع عنه."
+
+#. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_view_form
 msgid "This is the first reading of the database."
 msgstr "هذه أول قراءة لقاعدة البيانات."
@@ -4449,6 +4584,12 @@ msgstr "هذه أول قراءة لقاعدة البيانات."
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "This message is too long. The limit is %s characters."
 msgstr "هذه الرسالة طويلة جدًا. الحد الأقصى %s حرف."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/plans.py:0
+msgid "This record no longer exists."
+msgstr "هذا السجل لم يعد موجودًا."
 
 #. module: nudge
 #. odoo-python
@@ -4619,6 +4760,7 @@ msgstr ""
 #. odoo-javascript
 #. odoo-python
 #: code:addons/nudge/models/nudge_run.py:0
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
 #: code:addons/nudge/static/src/guidance/nudge_guide.xml:0
 #: code:addons/nudge/tools/developer.py:0
 msgid "Undo"
@@ -4634,6 +4776,12 @@ msgstr "تراجع عمّا بُني"
 #: code:addons/nudge/tools/developer.py:0
 msgid "Undo what was built: %s item(s)"
 msgstr "تراجع عمّا بُني: %s عنصر"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.js:0
+msgid "Undone"
+msgstr "تم التراجع"
 
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_provider__requires_api_key
@@ -4844,6 +4992,12 @@ msgstr "ما أجاب به أودو على استدعاءات الرسالة ا�
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
 msgid "What Was Spent"
 msgstr "ما صُرف"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid "What a button does is not taken back by Undo."
+msgstr "ما يفعله الزر لا يُلغى بالتراجع."
 
 #. module: nudge
 #. odoo-javascript
@@ -5084,6 +5238,12 @@ msgid "Write a message first."
 msgstr "اكتب رسالة أولًا."
 
 #. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid "Write back what was there before"
+msgstr "أرجِع ما كان موجودًا قبلها"
+
+#. module: nudge
 #. odoo-python
 #: code:addons/nudge/models/nudge_quick.py:0
 msgid ""
@@ -5140,6 +5300,12 @@ msgstr "كُتب في “%s”:"
 #: code:addons/nudge/static/src/components/nudge_message.xml:0
 msgid "Yes"
 msgstr "نعم"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid "Yes, all of them"
+msgstr "نعم، كلها"
 
 #. module: nudge
 #. odoo-javascript

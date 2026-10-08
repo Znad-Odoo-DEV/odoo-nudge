@@ -100,7 +100,7 @@ ESSENTIAL_TOOLS = frozenset({
     "remember_lesson", "search_products",
     # Agent
     "search_records", "read_record", "find_record", "aggregate_records", "filter_screen", "open_record",
-    "prepare_create", "prepare_write", "call_method",
+    "prepare_create", "prepare_write", "call_method", "prepare_plan",
     # Developer
     "read_automations", "check_python_code", "prepare_automation", "prepare_server_action",
     "prepare_email_template", "prepare_email_design", "prepare_email_review", "prepare_delete",

@@ -403,7 +403,16 @@ class PrepareWrite(base.Action):
     def execute(self, env, step):
         model = get_model(env, step.res_model, "write", to_change=True)
         records = get_records(model, step.res_ids, "write")
+        # Imported here: plans are built on the actions of this file
+        from .plans import snapshot  # noqa: PLC0415
+
+        names = list(step.values["values"])
+        before = {str(record.id): snapshot(record, names) for record in records}
         records.write(to_write(step.values["values"], step.values.get("lines")))
+        step.values = dict(step.values, undo={model._name: {
+            str(record.id): {"before": before[str(record.id)], "after": snapshot(record, names)}
+            for record in records
+        }})
         names = ", ".join(repr(name) for name in records[:MAX_SHOWN_RECORDS].mapped("display_name"))
         return base.ToolResult(
             f"Changed: {model._description} {names}.",

@@ -281,6 +281,21 @@ If you see **Talk** and **Agent** under the messages, you may ask Nudge to do th
 Every change is made as you, with your rights. Nudge never deletes. A warning sign on a card
 means the action is not taken back with a click: read twice.
 
+### Many records with one yes
+
+"Confirm all the draft quotations of Acme", "set the delivery date on these orders, then
+confirm them": Nudge makes one plan and one card, not a card per record. Before you decide, it
+tries the plan and undoes it, and the card says how many records go through and why the others
+do not ("missing Payment Terms"). Say **Yes, all of them**, **Only the … that go through**, or
+**No**. Each record is done on its own: one that fails does not stop the others. Beyond 20
+records the plan is done in the background while you go on; the top bar tells you when it is
+over. Your administrator sets how many records one plan may take (200 by default, Settings ‣
+Nudge ‣ Records per Plan).
+
+**Undo** on the card writes back what the change wrote, record by record; a record someone
+changed since is left as it is. What a button did (a confirmation, a validation) is not taken
+back: the card says so before you decide. Undo works for a single change too.
+
 ## Reports and comparisons as spreadsheets
 
 Ask for a comparison or a report ("compare this month's salaries with last month's", "stock of
