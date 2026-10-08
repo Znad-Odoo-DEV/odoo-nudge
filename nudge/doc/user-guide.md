@@ -296,6 +296,23 @@ Nudge ‣ Records per Plan).
 changed since is left as it is. What a button did (a confirmation, a validation) is not taken
 back: the card says so before you decide. Undo works for a single change too.
 
+### Tasks Nudge does by itself
+
+In Agent mode, ask for something to be done again and again: "every morning at 8, send me the
+customer invoices overdue by more than a week", "every Monday, the quotations still waiting",
+"when a purchase order above 50,000 is created, compare its prices with the last ones". Nudge
+shows the task on a card (what it does, when, which records) and makes it on your yes.
+
+A task runs as you, with your rights, in the background, and **only reads**: what it finds worth
+changing waits for your yes, as a card in the top bar. The records it is about are counted
+first: when none matches, or none is new, the AI is not asked and nothing is spent. A task
+that watches records looks at them every 10 minutes. The answer comes in the top bar, in the
+conversation of the task, and by email when you asked for it.
+
+Your tasks are in the panel, **Preferences ‣ My scheduled tasks**: pause one, run it now, read
+its answers, delete it. Your administrator sets how many tasks each person may have (5 by
+default; Settings ‣ Nudge ‣ Scheduled Tasks per Person; 0 switches them off).
+
 ## Reports and comparisons as spreadsheets
 
 Ask for a comparison or a report ("compare this month's salaries with last month's", "stock of
