@@ -634,8 +634,14 @@ class ReadModuleCode(base.Tool):
                     break
             return base.ToolResult("\n".join(found) if found else f"No line of {name} holds {arguments['find']!r}.")
         if not arguments.get("path"):
-            listed = "\n".join(f"- {relative} ({os.path.getsize(os.path.join(root, relative))} bytes)" for relative in files)
-            return base.ToolResult(f"Files of {name}:\n{listed}")
+            # One line per folder: a whole module fits in what a tool may return
+            folders = {}
+            for relative in files:
+                folder, _sep, file_name = relative.rpartition("/")
+                folders.setdefault(folder, []).append(file_name)
+            listed = "\n".join(f"- {folder + '/' if folder else '(top)'}: {', '.join(names)}"
+                               for folder, names in folders.items())
+            return base.ToolResult(f"Files of {name}, by folder (read one with path=folder/file):\n{listed}")
         relative = arguments["path"].strip("/")
         full = os.path.realpath(os.path.join(root, relative))
         if not full.startswith(root + os.sep) or relative not in files:

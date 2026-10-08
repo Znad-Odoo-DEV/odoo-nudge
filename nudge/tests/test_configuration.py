@@ -96,7 +96,8 @@ class TestConfiguration(NudgeCase, TransactionCase):
         self.assertIn("no tool named", self.run_tool("read_module_code", {"module": "nudge"}, user=self.agent).content)
         files = self.run_tool("read_module_code", {"module": "nudge"})
         self.assertFalse(files.is_error, files.content)
-        self.assertIn("tools/configuration.py", files.content)
+        tools_line = next(line for line in files.content.splitlines() if line.startswith("- tools/:"))
+        self.assertIn("configuration.py", tools_line, "The last folders are listed too")
         self.assertNotIn(".po", files.content)
 
         manifest = self.run_tool("read_module_code", {"module": "nudge", "path": "__manifest__.py"})
