@@ -311,6 +311,32 @@ class CheckPythonCode(base.Tool):
 
 # ---------------------------------------------------------------- building
 
+DESIGN_FIRST = (
+    "Nudge: Emails is installed here: every email is a designed one. Ask the person which style "
+    "they want (classic: a coloured band and a clean table; modern: a large coloured header and "
+    "rounded cards; minimal: quiet, a thin line of colour; formal: a letter with the logo on top), "
+    "make the email with prepare_email_design, then give its template_id here."
+)
+
+
+def designed_emails_here(env):
+    """:return: whether emails are made designed, by Nudge: Emails"""
+    return "nudge.email.flow" in env
+
+
+def path_label(model, path):
+    """:return: a path of fields as the person reads it: Salesperson › Email"""
+    labels = []
+    for name in path.split("."):
+        field = model._fields.get(name)
+        if field is None:
+            return path
+        labels.append(field.string)
+        if field.comodel_name:
+            model = model.env[field.comodel_name]
+    return " › ".join(labels)
+
+
 def read_recipients(env, model, to, cc=None):
     """:param to: fields of the record that hold a contact or an address, or addresses
     :return: ``(partner_to, email_to, email_cc, lines of the card)``, as the
@@ -333,7 +359,7 @@ def read_recipients(env, model, to, cc=None):
         else:
             raise Refused(
                 f"{text!r} is neither an address nor a field that holds a contact or an address.")
-        shown.append(field.string + f" ({text})")
+        shown.append(f"{path_label(model, text)} ({text})")
 
     for text in to:
         recipient(text, partner_to, email_to, shown_to)
@@ -434,6 +460,8 @@ def read_action(env, model, action, position=1):
             values["template_id"] = record.id
             lines.append({"label": _("Template"), "value": record.name})
         elif action.get("email"):
+            if designed_emails_here(env):
+                raise Refused(f"Action {position}: {DESIGN_FIRST}")
             template, email_lines = read_email(env, model, action["email"])
             template["name"] = name or action["email"]["subject"].strip()[:120]
             lines += email_lines
@@ -740,6 +768,8 @@ class PrepareEmailTemplate(Building):
         check_developing(env)
         if "mail.template" not in env:
             raise Refused("Emails need the app Discuss (mail), which is not installed.")
+        if designed_emails_here(env):
+            raise Refused(DESIGN_FIRST.replace("then give its template_id here", "which makes the template"))
         model = get_model(env, arguments["model"])
         values, lines = read_email(env, model, arguments["email"])
         values["name"] = arguments["name"].strip()
