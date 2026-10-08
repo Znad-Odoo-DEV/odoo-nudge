@@ -24,6 +24,9 @@
                             class="btn-primary" groups="base.group_system"/>
                     <button name="action_fetch_models" type="object" string="Fetch Models"
                             groups="base.group_system"/>
+                    <button name="action_ollama_prepare" type="object" string="Prepare for Nudge"
+                            invisible="not is_ollama or not model_name" groups="base.group_system"
+                            help="A copy of the model with the context Nudge needs, made on the Ollama server and chosen. Nothing is downloaded."/>
                 </header>
                 <sheet>
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
@@ -31,6 +34,9 @@
                     <div class="oe_title">
                         <label for="name"/>
                         <h1><field name="name" placeholder="e.g. Google Gemini"/></h1>
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="not context_warning">
+                        <field name="context_warning" readonly="1" class="mb-0"/>
                     </div>
                     <div class="alert alert-info" role="alert" invisible="not notes">
                         <field name="notes" readonly="1" class="mb-0"/>
@@ -43,10 +49,15 @@
                             <field name="requires_api_key" invisible="kind == 'anthropic'"/>
                             <field name="api_key" password="True" invisible="not requires_api_key"/>
                             <field name="timeout"/>
+                            <field name="is_ollama" invisible="not is_ollama"/>
+                            <field name="ollama_version" invisible="not is_ollama"/>
                         </group>
                         <group string="Model" name="model">
                             <field name="model_name" placeholder="Pick one with Fetch Models"/>
                             <field name="max_output_tokens"/>
+                            <field name="tool_set" required="1"/>
+                            <field name="context_length" invisible="not is_ollama"/>
+                            <field name="context_needed" invisible="not is_ollama"/>
                             <field name="effort"/>
                             <field name="refusal_fallback" invisible="kind != 'anthropic'"/>
                             <field name="is_configured"/>
@@ -64,6 +75,10 @@
                             <field name="model_ids" readonly="1">
                                 <tree>
                                     <field name="name"/>
+                                    <field name="size" optional="show"/>
+                                    <field name="uses_tools" optional="show"/>
+                                    <field name="sees_pictures" optional="show"/>
+                                    <field name="context_max" optional="show"/>
                                     <field name="is_selected"/>
                                     <button name="action_select" type="object" string="Use"
                                             invisible="is_selected" groups="base.group_system"/>

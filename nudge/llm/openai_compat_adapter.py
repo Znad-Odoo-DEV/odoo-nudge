@@ -24,7 +24,10 @@ RETRY_STATUSES = frozenset({500, 502, 503, 504, 529})
 RETRY_DELAYS = (1.0, 3.0)
 # What the provider is asked to spend on reasoning, in the words of the
 # OpenAI API, which Gemini and OpenAI read
-REASONING_EFFORT = {"low": "low", "medium": "medium", "high": "high", "xhigh": "high", "max": "high"}
+# "none": no reasoning at all, which Ollama and OpenAI read; a thinking
+# model on a laptop answers in seconds instead of a minute
+REASONING_EFFORT = {"none": "none", "low": "low", "medium": "medium", "high": "high", "xhigh": "high",
+                    "max": "high"}
 
 FINISH_REASONS = {
     "stop": base.STOP_END,
@@ -220,6 +223,9 @@ class OpenAICompatAdapter(base.BaseAdapter):
             read_timeout = base.remaining(deadline, self.config.timeout)
             self._read_timeout = read_timeout
             response = self._post(payload, stream=True, read_timeout=read_timeout)
+            if response.status_code == 400 and "does not support tools" in (response.text or ""):
+                # Nothing taken out of the request changes that: told as it is
+                return response
             if response.status_code == 400 and "reasoning_effort" in payload:
                 # A model without reasoning, or a server that does not
                 # know the word: once more without it
@@ -247,7 +253,12 @@ class OpenAICompatAdapter(base.BaseAdapter):
         try:
             response = self._open(payload, deadline)
             if response.status_code != 200:
-                yield base.error_event(_error_code(response.status_code), _error_detail(response))
+                detail = _error_detail(response)
+                code = _error_code(response.status_code)
+                if response.status_code == 400 and "does not support tools" in detail:
+                    # Ollama, for a model made without tool calling
+                    code = base.ERROR_UNSUPPORTED
+                yield base.error_event(code, detail)
                 return
             yield from self._consume(response, deadline)
         except requests.exceptions.ReadTimeout as exc:
@@ -384,8 +395,17 @@ class OpenAICompatAdapter(base.BaseAdapter):
             "model": self.config.model,
             "messages": [{"role": "user", "content": "Reply with the single word: OK"}],
         }
+        # As the answers will be asked: a thinking model told not to think
+        # answers this in seconds, and would otherwise think past the timeout
+        if self.config.effort in REASONING_EFFORT:
+            payload["reasoning_effort"] = REASONING_EFFORT[self.config.effort]
         try:
             response = self._post(payload, stream=False, read_timeout=self.config.timeout)
+            if response.status_code == 400 and payload.pop("reasoning_effort", None):
+                response.close()
+                response = self._post(payload, stream=False, read_timeout=self.config.timeout)
+        except requests.exceptions.ReadTimeout as exc:
+            raise base.AdapterError(base.ERROR_TIMEOUT, f"no answer within {self.config.timeout}s") from exc
         except requests.exceptions.RequestException as exc:
             raise base.AdapterError(base.ERROR_NETWORK, type(exc).__name__) from exc
         try:

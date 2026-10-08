@@ -33,3 +33,4 @@ from . import test_developer
 from . import test_import
 from . import test_building
 from . import test_reports
+from . import test_ollama

@@ -258,6 +258,8 @@ undoes it.
 - "The AI provider's limit is reached": wait a minute and try again.
 - "The AI provider took too long to answer": ask again; when it happens often, your
   administrator can set a lower reasoning effort on the provider, or a faster model.
+- "Ollama does not answer" or "Ollama has no model": your administrator runs the AI on a machine
+  of the company with Ollama; it must be started, or the model pulled. See doc/ollama.md.
 - "Nudge ran out of time before it was done": it read what it needed and the time was up. Say
   "go on" and it continues from there, or press the clock and leave the work to it.
 - "You used all of your Nudge tokens for today": your administrator set a budget.

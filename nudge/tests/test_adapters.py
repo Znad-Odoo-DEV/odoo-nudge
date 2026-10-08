@@ -158,6 +158,32 @@ class TestOpenAICompatAdapter(BaseCase):
             self.assertEqual(events, [base.error_event(code, f"failed {status}")])
             self.assertEqual(len(self.posted), 1, "Asking again would not change the answer")
 
+    def test_the_check_follows_the_effort(self):
+        self.adapter = OpenAICompatAdapter(base.ProviderConfig(
+            kind="openai_compatible", model="qwen3:4b", base_url="http://localhost:11434/v1", effort="none"))
+        posted = []
+
+        def post(payload, stream, read_timeout):
+            posted.append(dict(payload))
+            return FakeResponse(body={"choices": [{"message": {"content": "OK"}}]})
+
+        self.patch(self.adapter, "_post", post)
+        self.adapter.check()
+        self.assertEqual(posted[0]["reasoning_effort"], "none")
+
+        def silent(payload, stream, read_timeout):
+            raise requests.exceptions.ReadTimeout("Read timed out.")
+
+        self.patch(self.adapter, "_post", silent)
+        with self.assertRaises(base.AdapterError) as caught:
+            self.adapter.check()
+        self.assertEqual(caught.exception.code, base.ERROR_TIMEOUT)
+
+    def test_a_model_without_tools(self):
+        self.respond(FakeResponse(400, body={"error": {"message": "registry.ollama.ai/library/gemma:2b does not support tools"}}))
+        events = self.run_stream(tools=[{"name": "t", "description": "d", "input_schema": {"type": "object"}}])
+        self.assertEqual(events[0]["code"], base.ERROR_UNSUPPORTED)
+
     def test_busy_provider_is_asked_again(self):
         busy = [FakeResponse(503, body={"error": {"message": "high demand"}}) for _index in range(2)]
         self.respond(*busy, FakeResponse(lines=sse(delta("ok", finish="stop"))))
@@ -228,6 +254,14 @@ class TestOpenAICompatAdapter(BaseCase):
         self.assertEqual(self.posted[0]["reasoning_effort"], "high", "Max is high in the words of this API")
         self.assertNotIn("reasoning_effort", self.posted[1], "Refused once, not sent again")
         self.assertTrue(refused.closed)
+
+        # No reasoning at all: what Ollama reads to answer a thinking model at once
+        self.adapter = OpenAICompatAdapter(base.ProviderConfig(
+            kind="openai_compatible", model="qwen3:8b", base_url="http://localhost:11434/v1", effort="none"))
+        self.posted.clear()
+        self.respond(FakeResponse(lines=sse(delta("ok", finish="stop"))))
+        self.run_stream()
+        self.assertEqual(self.posted[0]["reasoning_effort"], "none")
 
     def test_finish_reasons(self):
         cases = {"length": base.STOP_MAX_TOKENS, "content_filter": base.STOP_REFUSAL, None: base.STOP_END}
