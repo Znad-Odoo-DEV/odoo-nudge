@@ -127,6 +127,28 @@ the module. The figures it gives are counted as you: what you cannot open is not
 
 If your managers wrote business notes ("we call quotations offers"), Nudge follows them.
 
+## Find a product: /product
+
+Type `/product` (or `/منتج`) and what you look for: a name, a description, a code, a size.
+"/product bolt 8 mm stainless", "/product red t-shirt XL", "/product laptop 16 GB",
+"/منتج برغي 8 ملم". Nudge looks in every product you may see, in any trade: the names, the
+codes and barcodes, the descriptions, the variants (size, colour), the categories and the names
+the suppliers give them. A size is read with its unit and compared in any unit (12.7 mm finds the
+1/2 inch pipe), a product of another size comes after, and a word misspelt still finds what it
+meant. You get cards: the picture, the price, the cost and the stock per warehouse, each where you
+may see it, and why the product came (the code, the size, the words). **Open** opens it.
+
+Without `/product`, a question about products ("do we have stainless bolts?", "what is the
+price of…") does the same through the conversation. Attach a picture with `/product` and Nudge
+describes what it shows and searches with that, when the provider can look at pictures. The
+search itself needs no AI: it works before any provider is set up, from the search box.
+
+## Nudge: On / Off
+
+Your own menu (your name at the top right) has **Nudge: On**. Press it and Nudge goes away for
+you: the avatar, the button of the top bar and the shortcuts, on every page, until you press
+**Nudge: Off** there. Nobody else is affected, and nothing is lost.
+
 ## Send a file with the question
 
 The paperclip next to the message box takes a PDF, a text or CSV file, or an image. Nudge reads
