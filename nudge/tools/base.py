@@ -89,16 +89,38 @@ class Action(Tool):
 
 TOOLS = {}
 
+# The tools a small model is given when its provider asks for the essential
+# ones: finding, reading, showing, and in each mode what it is for. A model
+# that runs on a laptop reads fewer tools faster, and picks the right one more
+# often. Named here for the companion modules too.
+ESSENTIAL_TOOLS = frozenset({
+    # Talk
+    "search_odoo_documentation", "show_on_screen", "show_menu_path", "find_screen", "open_screen",
+    "describe_model", "locate_data", "search_company_files", "write_in_field", "test_import",
+    "remember_lesson",
+    # Agent
+    "search_records", "read_record", "find_record", "aggregate_records", "filter_screen", "open_record",
+    "prepare_create", "prepare_write", "call_method",
+    # Developer
+    "read_automations", "check_python_code", "prepare_automation", "prepare_server_action",
+    "prepare_email_template", "prepare_email_design", "prepare_email_review", "prepare_delete",
+    "prepare_undo", "read_view", "prepare_view_change", "prepare_button", "prepare_field",
+    "try_automation", "prepare_approval_rule",
+})
+TOOL_SETS = ("full", "essential")
+
 
 def register(tool_class):
     TOOLS[tool_class.name] = tool_class()
     return tool_class
 
 
-def available(env, mode=MODE_TALK):
-    """:return: tools offered to the current user. Sorted: the list is part
+def available(env, mode=MODE_TALK, tool_set="full"):
+    """:param tool_set: "essential" keeps the tools of ESSENTIAL_TOOLS only
+    :return: tools offered to the current user. Sorted: the list is part
     of the prompt, and its order must not change between two requests."""
-    return [tool for _name, tool in sorted(TOOLS.items()) if tool.is_available(env, mode)]
+    return [tool for name, tool in sorted(TOOLS.items())
+            if (tool_set != "essential" or name in ESSENTIAL_TOOLS) and tool.is_available(env, mode)]
 
 
 def guarded(env, name, function):

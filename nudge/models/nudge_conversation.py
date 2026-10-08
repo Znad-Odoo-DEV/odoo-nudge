@@ -343,7 +343,8 @@ class NudgeConversation(models.Model):
                 is_administrator=self.env.user.has_group("base.group_system"),
                 work="\n\n".join(block for block in (
                     self._chat_where_the_work_is(), self.env["nudge.source"]._get_text()) if block)),
-            "tools": [tool.definition() for tool in tools.base.available(self.env, mode)],
+            "tools": [tool.definition() for tool in tools.base.available(
+                self.env, mode, provider.tool_set if provider else "full")],
             "turns": conversation._chat_build_turns(),
             "seconds": self._get_stream_seconds(),
             "rounds": rounds,
@@ -669,7 +670,7 @@ class NudgeConversation(models.Model):
             results.append(dict(entry, content=result.content, is_error=result.is_error))
         return results, events, must_read, waiting
 
-    def _chat_error_message(self, code):
+    def _chat_error_message(self, code, provider=None):
         messages = {
             base.ERROR_AUTH: self.env._(
                 "The AI provider rejected the API key. Ask your administrator to check it."),
@@ -685,6 +686,23 @@ class NudgeConversation(models.Model):
             base.ERROR_MISSING_LIBRARY: self.env._(
                 "A Python library is missing on the server. Ask your administrator."),
         }
+        if provider and provider.is_ollama:
+            # A server of one's own: what to do about it is known
+            messages.update({
+                base.ERROR_NETWORK: self.env._(
+                    "Ollama does not answer at %s. Start it on its server (the Ollama app, or "
+                    "ollama serve), then ask again.", provider.base_url),
+                base.ERROR_MODEL_NOT_FOUND: self.env._(
+                    "Ollama has no model %(model)s. On its server: ollama pull %(model)s",
+                    model=provider.model_name),
+                base.ERROR_TIMEOUT: self.env._(
+                    "Ollama took too long to answer: the model may still be loading, or be too "
+                    "large for the machine. Ask again; choose the essential tools or a smaller "
+                    "model if it happens often."),
+            })
+        messages[base.ERROR_UNSUPPORTED] = self.env._(
+            "The model of the AI provider cannot use tools: it can talk, not act or build. Choose "
+            "a model with tools on the provider.")
         return messages.get(code, self.env._("Something went wrong while answering."))
 
     def _chat_record(self, outcome):
@@ -730,7 +748,7 @@ class NudgeConversation(models.Model):
 
         error_message = False
         if error:
-            error_message = self._chat_error_message(error["code"])
+            error_message = self._chat_error_message(error["code"], provider)
         elif state == "refused" and not text:
             error_message = self.env._("Nudge cannot help with this request.")
         elif waiting:

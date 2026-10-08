@@ -1,7 +1,13 @@
 from odoo.tests import new_test_user
 
-from odoo.addons.nudge.llm import loop
+import requests
+
+from odoo.addons.nudge.llm import loop, ollama
 from odoo.addons.nudge.llm.fake_adapter import FakeAdapter
+
+
+def _no_server(*args, **kwargs):
+    raise requests.exceptions.ConnectionError("no server in tests")
 
 
 class NudgeCase:
@@ -41,6 +47,8 @@ class NudgeCase:
         """:return: the adapter every provider answers with from now on"""
         adapter = FakeAdapter(**kwargs)
         self.patch(type(self.env["nudge.provider"]), "_get_adapter", lambda provider: adapter)
+        # No Ollama answers behind a fake provider, unless a test plays one
+        self.patch(ollama.requests, "request", _no_server)
         return adapter
 
     def ask(self, user, text, conversation_id=None, snapshot=None):

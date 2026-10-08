@@ -89,6 +89,14 @@ For data that must not leave the company, run the model yourself:
    server itself), leave **Requires an API Key** unticked, press **Fetch Models**, pick one with
    **Use**, then **Test Connection**.
 
+Nudge knows Ollama when it answers: Fetch Models shows which models use tools, see pictures, and
+how much context they take; the essential tools are chosen for a small model; Test Connection
+reads the context the server gives the model and says when it is too small, and **Prepare for
+Nudge** makes a copy of the model with enough context (Ollama gives 4096 tokens on a card under
+24 GB, and cuts what does not fit without a word). When Ollama is stopped or a model is missing,
+Nudge says what to run. The whole guide, with a reverse proxy for Odoo.sh: [doc/ollama.md](nudge/doc/ollama.md)
+([العربية](nudge/doc/ollama.ar.md)).
+
 Nothing goes out: questions, screens, files and what the agent reads stay on that server.
 Speech stays with the browser, as Ollama does not turn speech into text.
 

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-07 15:04+0000\n"
-"PO-Revision-Date: 2026-10-07 15:04+0000\n"
+"POT-Creation-Date: 2026-10-08 08:52+0000\n"
+"PO-Revision-Date: 2026-10-08 08:52+0000\n"
 "Last-Translator: \n"
 "Language-Team: Arabic\n"
 "Language: ar\n"
@@ -24,6 +24,16 @@ msgstr "%(count)s صفحة من توثيق Odoo %(version)s الرسمي."
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/models/nudge_provider.py:0
+msgid ""
+"%(name)s is ready with %(context)s tokens of context, and chosen. Test the "
+"connection: the first answer loads it."
+msgstr ""
+"%(name)s جاهز بسياق %(context)s توكن، وتم اختياره. اختبر الاتصال: أول إجابة "
+"تُحمّله."
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/tools/developer.py:0
 msgid "%(number)s %(unit)s after"
 msgstr "%(number)s %(unit)s بعد"
@@ -33,6 +43,17 @@ msgstr "%(number)s %(unit)s بعد"
 #: code:addons/nudge/tools/developer.py:0
 msgid "%(number)s %(unit)s before"
 msgstr "%(number)s %(unit)s قبل"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_provider.py:0
+msgid ""
+"%s cannot use tools: Nudge can talk with it, not act or build. For Agent and"
+" Developer modes, choose a model with tools: qwen3, llama3.1, mistral-nemo."
+msgstr ""
+"%s لا يستطيع استعمال الأدوات: يستطيع Nudge التحدث به، لا التنفيذ ولا البناء."
+" لوضع الوكيل ووضع المطوّر اختر نموذجًا يستعمل الأدوات: qwen3 أو llama3.1 أو "
+"mistral-nemo."
 
 #. module: nudge
 #. odoo-python
@@ -77,6 +98,15 @@ msgid "A comparison or a report: how would you like it?"
 msgstr "مقارنة أو تقرير: كيف تريده؟"
 
 #. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
+msgid ""
+"A copy of the model with the context Nudge needs, made on the Ollama server "
+"and chosen. Nothing is downloaded."
+msgstr ""
+"نسخة من النموذج بالسياق الذي يحتاجه Nudge، تُصنع على سيرفر Ollama وتُختار. "
+"لا يُنزَّل شيء."
+
+#. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_provider__stt_mode__chat
 msgid "A model that listens"
 msgstr "نموذج يستمع"
@@ -115,6 +145,15 @@ msgstr "مفتاح API"
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider__has_api_key
 msgid "API Key Set"
 msgstr "تم إدخال مفتاح API"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_provider__context_needed
+msgid ""
+"About the tokens of the heaviest request Nudge sends with these tools: "
+"Developer mode, the instructions, the tools and room for the conversation."
+msgstr ""
+"تقدير توكنات أثقل طلب يرسله Nudge بهذه الأدوات: وضع المطوّر، والتعليمات، "
+"والأدوات، ومساحة للمحادثة."
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
@@ -209,6 +248,11 @@ msgstr "مستخدم الوكيل"
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "Agent mode is not open to you. Ask your administrator."
 msgstr "وضع الوكيل غير متاح لك. تواصل مع مسؤول النظام."
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_provider__tool_set__full
+msgid "All the tools"
+msgstr "كل الأدوات"
 
 #. module: nudge
 #. odoo-javascript
@@ -452,6 +496,11 @@ msgid "Calls to the Model"
 msgstr "مرات استدعاء النموذج"
 
 #. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_provider_model__uses_tools
+msgid "Can act and build: Agent and Developer modes."
+msgstr "يستطيع التنفيذ والبناء: وضع الوكيل ووضع المطوّر."
+
+#. module: nudge
 #: model:res.groups,comment:nudge.group_nudge_agent
 msgid "Can also let Nudge perform actions on their behalf."
 msgstr "يمكنه أيضًا أن يجعل Nudge ينفذ الإجراءات نيابة عنه."
@@ -681,6 +730,26 @@ msgstr "بصمة المحتوى"
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__context_text
 msgid "Context"
 msgstr "السياق"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__context_length
+msgid "Context Given"
+msgstr "السياق المعطى"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__context_needed
+msgid "Context Nudge Needs"
+msgstr "السياق الذي يحتاجه Nudge"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__context_warning
+msgid "Context Warning"
+msgstr "تحذير السياق"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider_model__context_max
+msgid "Context at Most"
+msgstr "أقصى سياق"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__conversation_id
@@ -1109,6 +1178,22 @@ msgid "Error Message"
 msgstr "رسالة الخطأ"
 
 #. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_provider__tool_set__essential
+msgid "Essential tools"
+msgstr "الأدوات الأساسية"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_provider__tool_set
+msgid ""
+"Essential tools: finding, reading, showing, and what each mode is for, about"
+" half of them. A small model, such as one run by Ollama on a laptop, reads "
+"them faster and picks the right one more often; and less context is needed."
+msgstr ""
+"الأدوات الأساسية: البحث والقراءة والعرض وما يخص كل وضع، نحو نصفها. النموذج "
+"الصغير، كالذي يشغّله Ollama على لابتوب، يقرؤها أسرع ويختار الأداة الصحيحة "
+"أكثر؛ ويحتاج سياقًا أقل."
+
+#. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/developer.py:0
 msgid "Every"
@@ -1385,16 +1470,17 @@ msgstr "كيف أنشئ عرض سعر؟"
 #: model:ir.model.fields,help:nudge.field_nudge_provider__effort
 msgid ""
 "How much reasoning the model spends on an answer. Lower is faster and "
-"cheaper: a free tier that takes long per call answers in time with Low. Sent"
-" to Anthropic Claude as its effort, and to OpenAI-compatible providers "
-"(Google Gemini, OpenAI) as reasoning_effort, low, medium or high; a provider"
-" that refuses it is asked again without it."
+"cheaper: a free tier that takes long per call answers in time with Low; a "
+"model run by Ollama on a laptop needs No reasoning. Sent to Anthropic Claude"
+" as its effort, and to OpenAI-compatible providers (Google Gemini, OpenAI) "
+"as reasoning_effort (none, low, medium or high); a provider that refuses it "
+"is asked again without it."
 msgstr ""
 "كم من التفكير يبذله النموذج في الإجابة. الأقل أسرع وأرخص: الخطة المجانية "
-"التي تتأخر في كل نداء تجيب في الوقت مع «منخفض». يُرسل إلى Anthropic Claude "
-"كجهده، وإلى المزوّدين المتوافقين مع OpenAI ‏(Google Gemini وOpenAI) كـ "
-"reasoning_effort: منخفض أو متوسط أو عالٍ؛ والمزوّد الذي يرفضه يُسأل مرة أخرى"
-" بدونه."
+"التي تتأخر في كل نداء تجيب في الوقت مع «منخفض»؛ والنموذج الذي يشغّله Ollama "
+"على لابتوب يحتاج «بدون تفكير». يُرسل إلى Anthropic Claude كجهده، وإلى "
+"المزوّدين المتوافقين مع OpenAI ‏(Google Gemini وOpenAI) كـ reasoning_effort "
+"‏(none أو low أو medium أو high)؛ والمزوّد الذي يرفضه يُسأل مرة أخرى بدونه."
 
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_provider__stt_mode
@@ -2099,6 +2185,11 @@ msgid "No microphone was found."
 msgstr "لم يُعثر على ميكروفون."
 
 #. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_provider__effort__none
+msgid "No reasoning"
+msgstr "بدون تفكير"
+
+#. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/reports.py:0
 msgid "No record to print yet"
@@ -2530,9 +2621,69 @@ msgid "Odoo documentation"
 msgstr "توثيق Odoo"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_provider.py:0
+msgid ""
+"Ollama %s answers here: the essential tools and no reasoning were chosen for"
+" its models, which a laptop needs to answer in time. A large model on a "
+"strong server can be given all the tools and its reasoning."
+msgstr ""
+"Ollama %s يجيب هنا: اختيرت الأدوات الأساسية وبدون تفكير لنماذجه، وهذا ما "
+"يحتاجه اللابتوب ليجيب في الوقت. النموذج الكبير على سيرفر قوي يمكن إعطاؤه كل "
+"الأدوات وتفكيره."
+
+#. module: nudge
 #: model:nudge.provider,name:nudge.provider_ollama
 msgid "Ollama (local)"
 msgstr "Ollama (محلي)"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__is_ollama
+msgid "Ollama Server"
+msgstr "سيرفر Ollama"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__ollama_version
+msgid "Ollama Version"
+msgstr "إصدار Ollama"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_provider__is_ollama
+msgid ""
+"Ollama answers at this address: Nudge reads which models use tools and see "
+"pictures, and the context the server gives them."
+msgstr ""
+"يجيب Ollama على هذا العنوان: يقرأ Nudge أي النماذج تستعمل الأدوات وترى "
+"الصور، والسياق الذي يعطيه السيرفر لها."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid ""
+"Ollama does not answer at %s. Start it on its server (the Ollama app, or "
+"ollama serve), then ask again."
+msgstr ""
+"لا يجيب Ollama على %s. شغّله على سيرفره (تطبيق Ollama، أو ollama serve)، ثم "
+"اسأل من جديد."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Ollama has no model %(model)s. On its server: ollama pull %(model)s"
+msgstr ""
+"لا يوجد في Ollama النموذج %(model)s. على سيرفره: ollama pull %(model)s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid ""
+"Ollama took too long to answer: the model may still be loading, or be too "
+"large for the machine. Ask again; choose the essential tools or a smaller "
+"model if it happens often."
+msgstr ""
+"استغرق Ollama وقتًا طويلًا في الإجابة: ربما ما زال النموذج يُحمَّل، أو هو "
+"أكبر من الجهاز. اسأل من جديد؛ واختر الأدوات الأساسية أو نموذجًا أصغر إن تكرر"
+" ذلك."
 
 #. module: nudge
 #. odoo-python
@@ -2841,6 +2992,11 @@ msgid "Pick one with Fetch Models"
 msgstr "اختر نموذجًا عبر \"جلب النماذج\""
 
 #. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider_model__sees_pictures
+msgid "Pictures"
+msgstr "الصور"
+
+#. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_slice_view_form
 msgid "Piece of the Profile"
 msgstr "جزء من الملف"
@@ -2881,6 +3037,17 @@ msgstr "يرحّل أو يعتمد أو يلغي، أو يمس المال أو �
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 msgid "Preferences"
 msgstr "التفضيلات"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
+msgid "Prepare for Nudge"
+msgstr "تجهيز لـ Nudge"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_provider.py:0
+msgid "Prepare for Nudge is for an Ollama server."
+msgstr "التجهيز لـ Nudge خاص بسيرفر Ollama."
 
 #. module: nudge
 #. odoo-python
@@ -3032,6 +3199,11 @@ msgstr "قرأ ما يعمل من تلقاء نفسه"
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "Read: %s"
 msgstr "قرأ: %s"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_provider_model__sees_pictures
+msgid "Reads the pictures sent with a question."
+msgstr "يقرأ الصور المرسلة مع السؤال."
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider__is_configured
@@ -3399,6 +3571,11 @@ msgstr "ما عُرض على المستخدم"
 #: code:addons/nudge/tools/reports.py:0
 msgid "Shows"
 msgstr "يعرض"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider_model__size
+msgid "Size"
+msgstr "الحجم"
 
 #. module: nudge
 #. odoo-javascript
@@ -3776,6 +3953,16 @@ msgid ""
 msgstr "الميكروفون محظور. اسمح به من شريط العنوان في متصفحك."
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid ""
+"The model of the AI provider cannot use tools: it can talk, not act or "
+"build. Choose a model with tools on the provider."
+msgstr ""
+"نموذج مزوّد الذكاء الاصطناعي لا يستطيع استعمال الأدوات: يستطيع التحدث، لا "
+"التنفيذ ولا البناء. اختر على المزوّد نموذجًا يستعمل الأدوات."
+
+#. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
 msgid ""
 "The official documentation of Odoo, every app, which Nudge searches to say "
@@ -3824,6 +4011,17 @@ msgstr "أعاد المزود خطأ."
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/models/nudge_provider.py:0
+msgid ""
+"The provider took too long to answer. A model that is still loading answers "
+"the next time; a thinking model answers faster with a lower Reasoning "
+"Effort."
+msgstr ""
+"استغرق المزوّد وقتًا طويلًا في الإجابة. النموذج الذي ما زال يُحمَّل يجيب في "
+"المرة التالية؛ والنموذج الذي يفكّر يجيب أسرع بجهد تفكير أقل."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_provider.py:0
 msgid "The provider's rate limit is reached. Try again in a minute."
 msgstr "تم بلوغ حد الطلبات لدى المزود. حاول مرة أخرى بعد دقيقة."
 
@@ -3835,9 +4033,42 @@ msgid ""
 msgstr "انتهى الطلب، أو ينتظر إجابة، ولم يطّلع المستخدم بعد."
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_provider.py:0
+msgid ""
+"The server gives %(model)s %(given)s tokens of context; Nudge needs about "
+"%(needed)s. Press Prepare for Nudge: a copy of the model with enough context"
+" is made and chosen. Or set OLLAMA_CONTEXT_LENGTH on the server."
+msgstr ""
+"يعطي السيرفر %(model)s سياقًا من %(given)s توكن؛ ويحتاج Nudge نحو "
+"%(needed)s. اضغط «تجهيز لـ Nudge»: تُصنع نسخة من النموذج بسياق كافٍ وتُختار."
+" أو اضبط OLLAMA_CONTEXT_LENGTH على السيرفر."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_provider.py:0
+msgid ""
+"The server gives this model %(given)s tokens; Nudge needs about %(needed)s. "
+"What does not fit is cut without a word, and answers go wrong: press Prepare"
+" for Nudge, or choose the essential tools."
+msgstr ""
+"يعطي السيرفر هذا النموذج %(given)s توكن؛ ويحتاج Nudge نحو %(needed)s. ما لا "
+"يتسع يُقص بلا كلمة وتخطئ الإجابات: اضغط «تجهيز لـ Nudge»، أو اختر الأدوات "
+"الأساسية."
+
+#. module: nudge
 #: model:ir.model.constraint,message:nudge.constraint_nudge_provider_check_timeout
 msgid "The timeout must be strictly positive."
 msgstr "يجب أن تكون مهلة الانتظار أكبر من صفر."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_provider__context_length
+msgid ""
+"The tokens the server gives the model in use, read when the connection was "
+"last tested. 0: not known."
+msgstr ""
+"التوكنات التي يعطيها السيرفر للنموذج المستعمل، تُقرأ عند آخر اختبار للاتصال."
+" 0: غير معروف."
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_search
@@ -3974,6 +4205,16 @@ msgstr "استدعاءات الأدوات"
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__tool_results
 msgid "Tool Results"
 msgstr "نتائج الأدوات"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider_model__uses_tools
+msgid "Tools"
+msgstr "الأدوات"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__tool_set
+msgid "Tools Given"
+msgstr "الأدوات المعطاة"
 
 #. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_provider__stt_mode__endpoint
