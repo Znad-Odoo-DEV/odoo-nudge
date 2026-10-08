@@ -4,9 +4,17 @@ import os
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 
-from ..llm import base
+from ..llm import base, ollama
 
 _logger = logging.getLogger(__name__)
+
+# How much of the context a request takes, roughly: JSON and English run
+# about this many characters to a token
+CHARS_PER_TOKEN = 4.0
+# The instructions and what is known of the database
+PROMPT_TOKENS = 5000
+# The conversation, the screen shared, what the tools read, the answer
+CONVERSATION_TOKENS = 5000
 
 DEFAULT_PROVIDER_PARAM = "nudge.default_provider_id"
 
@@ -48,6 +56,7 @@ class NudgeProvider(models.Model):
     )
     effort = fields.Selection(
         [
+            ("none", "No reasoning"),
             ("low", "Low"),
             ("medium", "Medium"),
             ("high", "High"),
@@ -55,9 +64,10 @@ class NudgeProvider(models.Model):
             ("max", "Maximum"),
         ],
         help="How much reasoning the model spends on an answer. Lower is faster and cheaper: a "
-             "free tier that takes long per call answers in time with Low. Sent to Anthropic "
+             "free tier that takes long per call answers in time with Low; a model run by Ollama "
+             "on a laptop needs No reasoning. Sent to Anthropic "
              "Claude as its effort, and to OpenAI-compatible providers (Google Gemini, OpenAI) "
-             "as reasoning_effort, low, medium or high; a provider that refuses it is asked "
+             "as reasoning_effort (none, low, medium or high); a provider that refuses it is asked "
              "again without it.",
     )
     refusal_fallback = fields.Boolean(
@@ -66,6 +76,30 @@ class NudgeProvider(models.Model):
              "on its recommended fallback model.",
     )
     timeout = fields.Integer(string="Timeout (seconds)", default=60)
+    tool_set = fields.Selection(
+        [("full", "All the tools"), ("essential", "Essential tools")],
+        string="Tools Given", default="full",
+        help="Essential tools: finding, reading, showing, and what each mode is for, about half "
+             "of them. A small model, such as one run by Ollama on a laptop, reads them faster "
+             "and picks the right one more often; and less context is needed.",
+    )
+    is_ollama = fields.Boolean(
+        string="Ollama Server", readonly=True, copy=False,
+        help="Ollama answers at this address: Nudge reads which models use tools and see "
+             "pictures, and the context the server gives them.",
+    )
+    ollama_version = fields.Char(readonly=True, copy=False)
+    context_length = fields.Integer(
+        string="Context Given", readonly=True, copy=False,
+        help="The tokens the server gives the model in use, read when the connection was "
+             "last tested. 0: not known.",
+    )
+    context_needed = fields.Integer(
+        string="Context Nudge Needs", compute="_compute_context_needed",
+        help="About the tokens of the heaviest request Nudge sends with these tools: Developer "
+             "mode, the instructions, the tools and room for the conversation.",
+    )
+    context_warning = fields.Char(compute="_compute_context_needed")
     stt_mode = fields.Selection(
         [
             (base.STT_NONE, "Not available"),
@@ -101,6 +135,35 @@ class NudgeProvider(models.Model):
         "CHECK(timeout > 0)", "The timeout must be strictly positive.")
     _check_max_output_tokens = models.Constraint(
         "CHECK(max_output_tokens >= 0)", "The maximum of output tokens cannot be negative.")
+
+    @api.depends("tool_set", "context_length", "is_ollama")
+    def _compute_context_needed(self):
+        for provider in self:
+            needed = provider._tokens_needed()
+            provider.context_needed = needed
+            provider.context_warning = (
+                self.env._(
+                    "The server gives this model %(given)s tokens; Nudge needs about %(needed)s. "
+                    "What does not fit is cut without a word, and answers go wrong: press Prepare "
+                    "for Nudge, or choose the essential tools.",
+                    given=provider.context_length, needed=needed)
+                if provider.is_ollama and 0 < provider.context_length < needed else False)
+
+    def _tokens_needed(self, mode=None):
+        """:param mode: by default the heaviest this database opens:
+            Developer mode when its switch is on, else Agent mode
+        :return: about the tokens of a request in ``mode`` with this
+        provider's tools: every tool of the mode, whoever asks, the
+        instructions and room for a conversation"""
+        self.ensure_one()
+        if mode is None:
+            mode = "dev" if self.env["nudge.conversation"]._is_developer_allowed() else "agent"
+        from ..tools import base as tool_base
+        names = [name for name, tool in tool_base.TOOLS.items()
+                 if (mode in tool.modes or (mode == "dev" and "agent" in tool.modes))
+                 and (self.tool_set != "essential" or name in tool_base.ESSENTIAL_TOOLS)]
+        tools_chars = sum(len(tool_base.dump(tool_base.TOOLS[name].definition())) for name in names)
+        return int(tools_chars / CHARS_PER_TOKEN) + PROMPT_TOKENS + CONVERSATION_TOKENS
 
     @api.depends("api_key")
     def _compute_has_api_key(self):
@@ -231,6 +294,9 @@ class NudgeProvider(models.Model):
             base.ERROR_MODEL_NOT_FOUND: self.env._("The provider does not know this model."),
             base.ERROR_RATE_LIMIT: self.env._("The provider's rate limit is reached. Try again in a minute."),
             base.ERROR_NETWORK: self.env._("The provider could not be reached."),
+            base.ERROR_TIMEOUT: self.env._(
+                "The provider took too long to answer. A model that is still loading answers the "
+                "next time; a thinking model answers faster with a lower Reasoning Effort."),
             base.ERROR_UNAVAILABLE: self.env._("The provider is temporarily unavailable."),
             base.ERROR_MISSING_LIBRARY: self.env._("A Python library is missing on the server."),
             base.ERROR_UNSUPPORTED: self.env._("The provider cannot do this."),
@@ -252,7 +318,84 @@ class NudgeProvider(models.Model):
         except base.AdapterError as exc:
             raise UserError(self._error_message(exc)) from exc
         self._ensure_capabilities()
+        warnings = self._ollama_read() if self.kind == "openai_compatible" else []
+        if warnings:
+            return self._notify("\n".join([self.env._("Connection successful.")] + warnings), "warning")
         return self._notify(self.env._("Connection successful."))
+
+    # ------------------------------------------------------------------
+    # Ollama
+    # ------------------------------------------------------------------
+    def _ollama_detect(self):
+        """Whether Ollama answers at the address; the first time it does,
+        the essential tools are chosen, which a model of a laptop needs.
+        :return: the lines to tell"""
+        self.ensure_one()
+        found = ollama.version(self.base_url, self.api_key or "")
+        told = []
+        if found and not self.is_ollama:
+            values = {"is_ollama": True, "tool_set": "essential"}
+            if not self.effort:
+                # A thinking model on a laptop spends a minute thinking
+                # before a word: the answer would not come in time
+                values["effort"] = "none"
+            self.write(values)
+            told.append(self.env._(
+                "Ollama %s answers here: the essential tools and no reasoning were chosen for its "
+                "models, which a laptop needs to answer in time. A large model on a strong server "
+                "can be given all the tools and its reasoning.", found))
+        elif not found and self.is_ollama:
+            self.is_ollama = False
+        if found:
+            self.ollama_version = found
+        return told
+
+    def _ollama_read(self):
+        """After a successful call: what the model in use can do, and the
+        context the server gave it. :return: warnings, in words"""
+        self.ensure_one()
+        warnings = self._ollama_detect()
+        if not self.is_ollama:
+            return warnings
+        try:
+            facts = ollama.describe(self.base_url, self.model_name, self.api_key or "")
+            given = ollama.loaded_context(self.base_url, self.model_name, self.api_key or "")
+        except base.AdapterError as exc:
+            _logger.info("Nudge: Ollama did not describe %s: %s", self.model_name, exc)
+            return warnings
+        self.context_length = given or facts["context_set"]
+        if not facts["tools"]:
+            warnings.append(self.env._(
+                "%s cannot use tools: Nudge can talk with it, not act or build. For Agent and "
+                "Developer modes, choose a model with tools: qwen3, llama3.1, mistral-nemo.",
+                self.model_name))
+        needed = self._tokens_needed()
+        if 0 < self.context_length < needed:
+            warnings.append(self.env._(
+                "The server gives %(model)s %(given)s tokens of context; Nudge needs about "
+                "%(needed)s. Press Prepare for Nudge: a copy of the model with enough context is "
+                "made and chosen. Or set OLLAMA_CONTEXT_LENGTH on the server.",
+                model=self.model_name, given=self.context_length, needed=needed))
+        return warnings
+
+    def action_ollama_prepare(self):
+        """Make a copy of the model in use with the context Nudge needs, and
+        choose it. Ollama shares the weights: nothing is downloaded."""
+        self.ensure_one()
+        self._check_ready()
+        if not self.is_ollama:
+            raise UserError(self.env._("Prepare for Nudge is for an Ollama server."))
+        try:
+            facts = ollama.describe(self.base_url, self.model_name, self.api_key or "")
+            context = ollama.context_for(self._tokens_needed(), facts["context_max"])
+            name = ollama.prepare(self.base_url, self.model_name, context, self.api_key or "")
+        except base.AdapterError as exc:
+            raise UserError(self._error_message(exc)) from exc
+        self.write({"model_name": name, "context_length": context})
+        self.action_fetch_models()
+        return self._notify(self.env._(
+            "%(name)s is ready with %(context)s tokens of context, and chosen. Test the "
+            "connection: the first answer loads it.", name=name, context=context))
 
     def action_fetch_models(self):
         self.ensure_one()
@@ -267,7 +410,18 @@ class NudgeProvider(models.Model):
         self.env["nudge.provider.model"].create([
             {"provider_id": self.id, "name": name} for name in names if name not in known
         ])
-        return self._notify(self.env._("%s models found.", len(names)))
+        told = self._ollama_detect() if self.kind == "openai_compatible" else []
+        if self.is_ollama:
+            for line in self.model_ids:
+                try:
+                    facts = ollama.describe(self.base_url, line.name, self.api_key or "")
+                except base.AdapterError:
+                    continue
+                line.write({
+                    "uses_tools": facts["tools"], "sees_pictures": facts["vision"],
+                    "context_max": facts["context_max"], "size": facts["size"],
+                })
+        return self._notify("\n".join([self.env._("%s models found.", len(names))] + told))
 
 
 class NudgeProviderModel(models.Model):
@@ -278,6 +432,11 @@ class NudgeProviderModel(models.Model):
     provider_id = fields.Many2one("nudge.provider", required=True, ondelete="cascade", index=True)
     name = fields.Char(required=True)
     is_selected = fields.Boolean(string="In Use", compute="_compute_is_selected")
+    # Read from an Ollama server; other providers do not say
+    uses_tools = fields.Boolean(string="Tools", help="Can act and build: Agent and Developer modes.")
+    sees_pictures = fields.Boolean(string="Pictures", help="Reads the pictures sent with a question.")
+    context_max = fields.Integer(string="Context at Most")
+    size = fields.Char()
 
     @api.depends("name", "provider_id.model_name")
     def _compute_is_selected(self):
