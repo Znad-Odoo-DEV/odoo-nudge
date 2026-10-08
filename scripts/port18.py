@@ -106,16 +106,17 @@ edit("nudge/tools/records.py", [
      "def get_fields(model, names, operation=\"read\"):\n"),
 ])
 for name in ("nudge/tools/records.py", "nudge/tools/actions.py", "nudge/tools/finding.py", "nudge/tools/developer.py",
-             "nudge/tools/building.py", "nudge/tools/configuration.py", "nudge/tools/reports.py", "nudge/tools/importing.py"):
+             "nudge/tools/building.py", "nudge/tools/configuration.py", "nudge/tools/reports.py", "nudge/tools/importing.py",
+             "nudge/tools/product_search.py"):
     if os.path.exists(ROOT + name):
-        sub(name, r"model\._has_field_access\(", "has_field_access(model, ")
+        sub(name, r"\b(\w+)\._has_field_access\(", r"has_field_access(\1, ")
 # The tools of Developer mode take the shim from records, like the others
 for name in ("nudge/tools/developer.py", "nudge/tools/building.py", "nudge/tools/configuration.py",
-             "nudge/tools/reports.py", "nudge/tools/importing.py"):
+             "nudge/tools/reports.py", "nudge/tools/importing.py", "nudge/tools/product_search.py"):
     if not os.path.exists(ROOT + name):
         continue
     s = read(name)
-    if "has_field_access(model, " in s and "has_field_access" not in s.split("from . import base")[0] and "import has_field_access" not in s:
+    if "has_field_access(" in s and "has_field_access" not in s.split("from . import base")[0] and "import has_field_access" not in s:
         # The line may import more than base: `from . import base, schema`
         s, n = re.subn(r"^(from \. import base[^\n]*\n)", r"\1from .records import has_field_access  # noqa: E402\n", s, count=1, flags=re.M)
         assert n == 1, name
