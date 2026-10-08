@@ -91,24 +91,23 @@ def is_open(env, name):
 
 def texts(env):
     """:return: ``{name: (what it does, an example)}`` in the language of the person"""
-    _ = env._
     return {
-        "help": (_("The commands you can use here"), "/help"),
-        "screen": (_("A screen you can open, by its name: shown with the pointer"), _("/screen invoices")),
-        "setting": (_("A setting of the apps, by its name: shown with the pointer"), _("/setting multi currency")),
-        "doc": (_("Pages of the official Odoo documentation"), _("/doc landed costs")),
-        "file": (_("Passages of the company files, with the file and the page"), _("/file annual leave")),
-        "find": (_("A record by its name, number or reference, in any app; its kind first narrows it"),
-                 _("/find invoice: INV/2026/00042")),
-        "product": (_("Products like a name, a description, a code or a size"), _("/product bolt 8 mm")),
-        "stock": (_("The stock of products, by warehouse"), _("/stock cement")),
-        "rules": (_("What runs by itself on a kind of record: automations, scheduled actions, emails"),
-                  _("/rules sale.order")),
-        "sql": (_("One SELECT, read only, at most 50 rows"), "/sql SELECT name FROM res_partner LIMIT 5"),
-        "count": (_("A number about your records, worked out by the AI with your data only"),
-                  _("/count invoices unpaid this month")),
-        "explain": (_("A field, a term or this screen, explained by the AI in a few words"),
-                    _("/explain analytic account")),
+        "help": (env._("The commands you can use here"), "/help"),
+        "screen": (env._("A screen you can open, by its name: shown with the pointer"), env._("/screen invoices")),
+        "setting": (env._("A setting of the apps, by its name: shown with the pointer"), env._("/setting multi currency")),
+        "doc": (env._("Pages of the official Odoo documentation"), env._("/doc landed costs")),
+        "file": (env._("Passages of the company files, with the file and the page"), env._("/file annual leave")),
+        "find": (env._("A record by its name, number or reference, in any app; its kind first narrows it"),
+                 env._("/find invoice: INV/2026/00042")),
+        "product": (env._("Products like a name, a description, a code or a size"), env._("/product bolt 8 mm")),
+        "stock": (env._("The stock of products, by warehouse"), env._("/stock cement")),
+        "rules": (env._("What runs by itself on a kind of record: automations, scheduled actions, emails"),
+                  env._("/rules sale.order")),
+        "sql": (env._("One SELECT, read only, at most 50 rows"), "/sql SELECT name FROM res_partner LIMIT 5"),
+        "count": (env._("A number about your records, worked out by the AI with your data only"),
+                  env._("/count invoices unpaid this month")),
+        "explain": (env._("A field, a term or this screen, explained by the AI in a few words"),
+                    env._("/explain analytic account")),
     }
 
 
