@@ -174,6 +174,17 @@ a fraction of the tokens of a question asked in full.
 
 Nothing found is said at once, without any AI.
 
+## @Nudge in the chatter and in Discuss
+
+With the module Nudge: Discuss (it installs itself with Discuss), write **@Nudge** in the chatter
+of any record, or in a channel, and your question: "@Nudge summarise this order", "@Nudge who
+has to approve it?". A few seconds later Nudge answers under it, as an **internal note** the
+other employees read too, and you are told.
+
+Nudge answers as you, from what every reader of the record sees: its fields (not those kept for
+some groups), the records it links to, the last messages. It looks up nothing else, and it changes
+nothing from a message: ask it in its panel, in Agent mode, for that.
+
 ## Nudge: On / Off
 
 Your own menu (your name at the top right) has **Nudge: On**. Press it and Nudge goes away for

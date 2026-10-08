@@ -48,7 +48,15 @@ FOCUS = {
         "mode": base.MODE_TALK,
         "tools": ("search_odoo_documentation", "describe_model", "search_company_files", "locate_data"),
     },
+    # @Nudge in the chatter of a record or in a channel: what it may know is
+    # given with the question; the documentation is the only thing it looks up
+    "mention": {
+        "mode": base.MODE_TALK,
+        "tools": ("search_odoo_documentation",),
+    },
 }
+# Focused by the code of a companion module, never typed
+INTERNAL_FOCUS = ("mention",)
 # Times the model is called for a focused command: look, look again, answer
 FOCUS_ROUNDS = 3
 

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Whom @Nudge names: a contact without an address, so that a mention
+         sends no email -->
+    <record id="partner_nudge" model="res.partner">
+        <field name="name">Nudge</field>
+        <field name="image_1920" type="base64" file="nudge/static/description/icon.png"/>
+        <field name="active" eval="True"/>
+    </record>
+
+    <data noupdate="1">
+        <!-- Started on demand, when someone writes @Nudge -->
+        <record id="cron_mentions" model="ir.cron">
+            <field name="name">Nudge: answer @Nudge</field>
+            <field name="model_id" ref="model_nudge_mention"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_answer()</field>
+            <field name="interval_number">10</field>
+            <field name="interval_type">minutes</field>
+        </record>
+    </data>
+</odoo>

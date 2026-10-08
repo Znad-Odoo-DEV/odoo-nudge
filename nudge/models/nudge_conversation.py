@@ -396,7 +396,8 @@ class NudgeConversation(models.Model):
         }
 
     def _chat_prepare(self, text, snapshot=None, spoken=False, read_aloud=False, mode=MODE_TALK,
-                      background=False, explain=None, attachment=None, report=None):
+                      background=False, explain=None, attachment=None, report=None, focus=None,
+                      extra=None):
         """Validate the message, store it and gather everything the stream
         needs.
 
@@ -418,8 +419,12 @@ class NudgeConversation(models.Model):
         self.ensure_one()
         text = (text or "").strip()
         command, rest = tools.commands.parse(text)
-        focus = command.name if command and command.name in tools.commands.FOCUS else None
-        if focus:
+        if focus not in tools.commands.INTERNAL_FOCUS:
+            # Asked by the code of a companion module only, never by a browser
+            focus = command.name if command and command.name in tools.commands.FOCUS else None
+        if focus in tools.commands.INTERNAL_FOCUS:
+            mode, background, explain, report = tools.commands.FOCUS[focus]["mode"], False, None, None
+        elif focus:
             if not tools.commands.is_open(self.env, focus):
                 raise UserError(self.env._("The command %s is not open to you.", command.words[0]))
             if len(rest) < 2:
@@ -477,6 +482,9 @@ class NudgeConversation(models.Model):
             context_text = "\n".join((context_text, screen_text))
         if found and found["text"]:
             context_text = "\n".join((context_text, prompt.render_attachment(found)))
+        if extra:
+            # What the caller knows that the person did not type: a record, a conversation
+            context_text = "\n".join((context_text, extra))
         message = self.env["nudge.message"].sudo().create({
             "conversation_id": self.id,
             "role": "user",
