@@ -20,3 +20,4 @@ from . import developer
 from . import importing
 from . import building
 from . import reports
+from . import product_search

@@ -97,7 +97,7 @@ ESSENTIAL_TOOLS = frozenset({
     # Talk
     "search_odoo_documentation", "show_on_screen", "show_menu_path", "find_screen", "open_screen",
     "describe_model", "locate_data", "search_company_files", "write_in_field", "test_import",
-    "remember_lesson",
+    "remember_lesson", "search_products",
     # Agent
     "search_records", "read_record", "find_record", "aggregate_records", "filter_screen", "open_record",
     "prepare_create", "prepare_write", "call_method",
