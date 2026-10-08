@@ -244,7 +244,10 @@ class ReadAutomations(base.Tool):
         else:
             lines.append("Automation rules: the app Automation Rules is not installed.")
         Action = env["ir.actions.server"]
-        domain = [("usage", "=", "ir_actions_server"), ("base_automation_id" if "base_automation_id" in Action._fields else "id", "=", False)]
+        domain = [("usage", "=", "ir_actions_server")]
+        if "base_automation_id" in Action._fields:
+            # The actions of a rule are listed under the rule
+            domain.append(("base_automation_id", "=", False))
         domain += [("model_name", "=", model._name)] if model else [("name", "ilike", words)]
         actions = Action.search(domain, limit=MAX_LISTED)
         lines.append(f"Server actions: {len(actions)}")
