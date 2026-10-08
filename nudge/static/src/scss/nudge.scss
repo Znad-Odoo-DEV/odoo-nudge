@@ -1343,6 +1343,7 @@ $o-nudge-radius: 18px;
 // ---------------------------------------------------------------------
 
 .o_nudge_composer {
+    position: relative;
     display: flex;
     align-items: flex-end;
     gap: 8px;
@@ -1498,4 +1499,136 @@ $o-nudge-radius: 18px;
 
 .o_nudge_product_open {
     flex: none;
+}
+
+// What a command found, without any AI
+.o_nudge_found {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+    font-size: 0.85rem;
+}
+
+.o_nudge_found_list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    .o_nudge_suggestion {
+        display: block;
+        width: 100%;
+        text-decoration: none;
+    }
+}
+
+.o_nudge_found_row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    > .o_nudge_suggestion,
+    > .o_nudge_found_body {
+        flex: 1;
+        min-width: 0;
+    }
+}
+
+.o_nudge_found_record {
+    padding: 6px 8px;
+    border: 1px solid $o-nudge-border;
+    border-radius: 8px;
+    background: $o-nudge-surface;
+
+    .o_nudge_found_body {
+        display: flex;
+        flex-direction: column;
+        overflow-wrap: anywhere;
+    }
+}
+
+.o_nudge_found_open {
+    flex: none;
+}
+
+.o_nudge_found_ai {
+    margin-inline-start: 6px;
+    font-size: 0.65rem;
+    vertical-align: middle;
+}
+
+.o_nudge_found_example {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.75rem;
+}
+
+.o_nudge_found_passage {
+    margin: 0;
+    padding: 6px 10px;
+    border-inline-start: 3px solid $o-nudge-border;
+    background: $o-nudge-surface;
+
+    p {
+        margin: 0 0 4px;
+    }
+}
+
+.o_nudge_found_source {
+    font-size: 0.78rem;
+}
+
+.o_nudge_found_code {
+    max-height: 320px;
+    overflow: auto;
+}
+
+.o_nudge_found_table {
+    max-height: 320px;
+    overflow: auto;
+
+    table {
+        margin: 0;
+        font-size: 0.78rem;
+    }
+}
+
+// The commands offered while one is typed
+.o_nudge_commands {
+    position: absolute;
+    inset-inline: 12px;
+    bottom: calc(100% - 4px);
+    z-index: 2;
+    max-height: 260px;
+    margin: 0;
+    padding: 4px;
+    overflow-y: auto;
+    list-style: none;
+    border: 1px solid $o-nudge-border;
+    border-radius: 10px;
+    background: $o-nudge-surface;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+
+    li {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+        padding: 6px 8px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    li:hover,
+    .o_nudge_command_active {
+        background: rgba(0, 0, 0, 0.06);
+    }
+}
+
+.o_nudge_command_hint {
+    min-width: 0;
+    overflow: hidden;
+    color: $o-nudge-text-muted;
+    font-size: 0.8rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }

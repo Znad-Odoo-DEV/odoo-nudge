@@ -43,6 +43,9 @@ export class NudgeMessage extends Component {
         // Products found for the person: cards with their picture, price and stock
         products: { type: [Array, { value: null }], optional: true },
         onOpenProduct: { type: Function, optional: true },
+        // What a command of the message box found without any AI
+        found: { type: [Object, { value: null }], optional: true },
+        onFound: { type: Function, optional: true },
     };
 
     setup() {
@@ -85,6 +88,11 @@ export class NudgeMessage extends Component {
 
     get isWaiting() {
         return this.props.state === "streaming" && !this.props.content && !this.props.card;
+    }
+
+    /** @returns {string} the cell of a query as it is read */
+    cell(value) {
+        return value === null || value === undefined ? "" : String(value);
     }
 
     get isInBackground() {
