@@ -411,6 +411,12 @@ export class NudgePanel extends Component {
         this.nudge.quickGuide("setting", { app: setting.app, field: setting.field });
     }
 
+    /** What the person asked Nudge to do by itself */
+    openTasks() {
+        this.nudge.close();
+        this.action.doAction("nudge.nudge_task_action");
+    }
+
     openProviders() {
         this.nudge.close();
         this.action.doAction("nudge.nudge_provider_action");

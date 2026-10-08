@@ -322,7 +322,7 @@ class TestReading(AgentCase, TransactionCase):
         self.assertEqual(agent, sorted(agent))
         expected = [
             "aggregate_records", "call_method", "filter_screen", "find_products", "find_record",
-            "open_record", "prepare_create", "prepare_plan", "prepare_write", "read_record", "search_records"]
+            "open_record", "prepare_create", "prepare_plan", "prepare_task", "prepare_write", "read_record", "search_records"]
         # Other modules add their own agent tools
         expected += [name for name in ("make_spreadsheet",) if name in tools.base.TOOLS]
         self.assertEqual(sorted(set(agent) - set(talk)), sorted(expected))

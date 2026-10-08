@@ -16,6 +16,9 @@
     <menuitem id="nudge_menu_steps" name="Changes" sequence="20"
               parent="nudge_menu_agent" action="nudge_step_action"/>
 
+    <menuitem id="nudge_menu_tasks" name="Scheduled Tasks" sequence="30"
+              parent="nudge_menu_agent" action="nudge_task_action"/>
+
     <menuitem id="nudge_menu_knowledge" name="What Nudge Knows" sequence="20"
               parent="nudge_menu_root"/>
 

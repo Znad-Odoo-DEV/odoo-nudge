@@ -12,6 +12,7 @@ from . import python
 from . import sql
 from . import actions
 from . import plans
+from . import tasks
 from . import finding
 from . import products
 from . import assessment

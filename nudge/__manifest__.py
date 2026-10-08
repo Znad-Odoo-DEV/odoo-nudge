@@ -1,6 +1,6 @@
 {
     "name": "Nudge",
-    "version": "17.0.1.47.0",
+    "version": "17.0.1.48.0",
     "category": "Productivity",
     "summary": "An AI companion that lives in the Odoo web client",
     "description": """
@@ -35,6 +35,7 @@ Ollama) and with Anthropic Claude.
         "views/nudge_provider_views.xml",
         "views/nudge_conversation_views.xml",
         "views/nudge_run_views.xml",
+        "views/nudge_task_views.xml",
         "views/nudge_usage_views.xml",
         "views/nudge_profile_views.xml",
         "views/nudge_doc_views.xml",

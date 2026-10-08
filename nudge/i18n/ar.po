@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-08 11:34+0000\n"
-"PO-Revision-Date: 2026-10-08 11:34+0000\n"
+"POT-Creation-Date: 2026-10-08 11:53+0000\n"
+"PO-Revision-Date: 2026-10-08 11:53+0000\n"
 "Last-Translator: \n"
 "Language-Team: Arabic\n"
 "Language: ar\n"
@@ -123,6 +123,12 @@ msgstr "%s سجل: كلها ستنجح، حسب التجربة الآن."
 #: code:addons/nudge/static/src/components/nudge_panel.js:0
 msgid "%s requests are worked on in the background."
 msgstr "%s طلبات يُعمل عليها في الخلفية."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/tasks.py:0
+msgid ", at %s:00"
+msgstr "، الساعة %s:00"
 
 #. module: nudge
 #. odoo-python
@@ -260,6 +266,24 @@ msgid "A setting of the apps, by its name: shown with the pointer"
 msgstr "إعداد من إعدادات التطبيقات، باسمه: يدلّك عليه المؤشر"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_task.py:0
+msgid "A task runs every 1 unit of time or more."
+msgstr "تعمل المهمة كل وحدة زمنية واحدة أو أكثر."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_task.py:0
+msgid "A task stays with the one who made it."
+msgstr "تبقى المهمة لمن أنشأها."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_task.py:0
+msgid "A task that watches records needs their kind."
+msgstr "المهمة التي تراقب السجلات تحتاج إلى نوعها."
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_message.xml:0
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
@@ -315,6 +339,7 @@ msgstr "الإجراء %s"
 #: model:ir.model.fields,field_description:nudge.field_nudge_note__active
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider__active
 #: model:ir.model.fields,field_description:nudge.field_nudge_source__active
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__active
 msgid "Active"
 msgstr "نشط"
 
@@ -394,6 +419,11 @@ msgid "Agent mode is not open to you. Ask your administrator."
 msgstr "وضع الوكيل غير متاح لك. تواصل مع مسؤول النظام."
 
 #. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_task__match__all
+msgid "All"
+msgstr "الكل"
+
+#. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_provider__tool_set__full
 msgid "All the tools"
 msgstr "كل الأدوات"
@@ -432,10 +462,20 @@ msgid "Answering Since"
 msgstr "يجيب منذ"
 
 #. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_task_view_form
+msgid "Answers"
+msgstr "الأجوبة"
+
+#. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_provider__kind__anthropic
 #: model:nudge.provider,name:nudge.provider_anthropic
 msgid "Anthropic Claude"
 msgstr "Anthropic Claude"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_task__match__any
+msgid "Any"
+msgstr "أيٌّ منها"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__app
@@ -485,6 +525,17 @@ msgstr "المعطيات"
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 msgid "As a spreadsheet, with a chart"
 msgstr "جدول بيانات مع رسم بياني"
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_task_action
+msgid ""
+"Ask Nudge in Agent mode: \"every morning at 8, send me the overdue invoices\", or \"when a\n"
+"                purchase order above 50,000 is created, compare its prices with the last ones\".\n"
+"                A task reads, as you; a change it finds needed waits for your yes."
+msgstr ""
+"اطلب من Nudge في وضع Agent: \"كل يوم الساعة 8 الصبح ابعتلي الفواتير "
+"المتأخرة\"، أو \"لما ينعمل أمر شراء أكبر من 50,000 قارن أسعاره مع آخر مرة\"."
+" المهمة تقرأ باسمك؛ وأي تعديل تراه لازمًا ينتظر موافقتك."
 
 #. module: nudge
 #. odoo-javascript
@@ -539,6 +590,11 @@ msgstr "ما طلبه النموذج"
 #: model:ir.model.fields,help:nudge.field_nudge_run__is_developer
 msgid "Asked in Developer mode: Nudge built rather than did."
 msgstr "طُلب في وضع المطوّر: بنى Nudge ولم ينفّذ."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__hour
+msgid "At"
+msgstr "الساعة"
 
 #. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_profile_slice__kind__automation
@@ -843,6 +899,7 @@ msgstr "الأوامر"
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_conversation__company_id
 #: model:ir.model.fields,field_description:nudge.field_nudge_run__company_id
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__company_id
 #: model:ir.model.fields,field_description:nudge.field_nudge_usage__company_id
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_search
 msgid "Company"
@@ -864,6 +921,12 @@ msgstr "ملفات الشركة"
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_message__state__complete
 msgid "Complete"
 msgstr "مكتمل"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__conditions
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__conditions_text
+msgid "Conditions"
+msgstr "الشروط"
 
 #. module: nudge
 #: model:ir.model,name:nudge.model_res_config_settings
@@ -934,6 +997,7 @@ msgstr "أقصى سياق"
 #: model:ir.model.fields,field_description:nudge.field_nudge_note__conversation_id
 #: model:ir.model.fields,field_description:nudge.field_nudge_run__conversation_id
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__conversation_id
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__conversation_id
 #: model:ir.model.fields,field_description:nudge.field_nudge_usage__conversation_id
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_usage__kind__chat
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_conversation_view_form
@@ -994,6 +1058,12 @@ msgstr "التكلفة لكل مستخدم في اليوم"
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_source_view_search
 msgid "Could Not Be Read"
 msgstr "تعذّرت قراءته"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_task.py:0
+msgid "Could not start: %s"
+msgstr "تعذّر البدء: %s"
 
 #. module: nudge
 #. odoo-python
@@ -1062,6 +1132,7 @@ msgstr "إنشاء: إجراء خادم “%s”"
 #: model:ir.model.fields,field_description:nudge.field_nudge_source__create_uid
 #: model:ir.model.fields,field_description:nudge.field_nudge_source_passage__create_uid
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__create_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__create_uid
 #: model:ir.model.fields,field_description:nudge.field_nudge_usage__create_uid
 msgid "Created by"
 msgstr "أنشئ بواسطة"
@@ -1080,6 +1151,7 @@ msgstr "أنشئ بواسطة"
 #: model:ir.model.fields,field_description:nudge.field_nudge_source__create_date
 #: model:ir.model.fields,field_description:nudge.field_nudge_source_passage__create_date
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__create_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__create_date
 #: model:ir.model.fields,field_description:nudge.field_nudge_usage__create_date
 msgid "Created on"
 msgstr "أنشئ في"
@@ -1156,6 +1228,11 @@ msgstr "التاريخ"
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_search
 msgid "Day"
 msgstr "يوم"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_task__interval_type__days
+msgid "Days"
+msgstr "أيام"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__decided_at
@@ -1262,6 +1339,7 @@ msgstr "وضع المطوّر غير متاح لك. اسأل مديرك."
 #: model:ir.model.fields,field_description:nudge.field_nudge_source__display_name
 #: model:ir.model.fields,field_description:nudge.field_nudge_source_passage__display_name
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__display_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__display_name
 #: model:ir.model.fields,field_description:nudge.field_nudge_usage__display_name
 #: model:ir.model.fields,field_description:nudge.field_nudge_voice__display_name
 #: model:ir.model.fields,field_description:nudge.field_res_config_settings__display_name
@@ -1319,9 +1397,26 @@ msgid "Duration (ms)"
 msgstr "المدة (مللي ثانية)"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/tasks.py:0
+msgid "Each time"
+msgstr "في كل مرة"
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider__effort
 msgid "Effort"
 msgstr "مستوى الجهد"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/tasks.py:0
+msgid "Email"
+msgstr "الإيميل"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__send_email
+msgid "Email Me"
+msgstr "أرسل لي إيميل"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_run__ended_at
@@ -1376,8 +1471,15 @@ msgstr ""
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/developer.py:0
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__interval_number
 msgid "Every"
 msgstr "كل"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/tasks.py:0
+msgid "Every %(number)s %(unit)s"
+msgstr "كل %(number)s %(unit)s"
 
 #. module: nudge
 #: model_terms:ir.actions.act_window,help:nudge.nudge_usage_action
@@ -1505,6 +1607,11 @@ msgstr ""
 "الشاشة، أم يكتب الخطوات في المحادثة."
 
 #. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_task__weekday
+msgid "For a weekly task: the day it runs on."
+msgstr "للمهمة الأسبوعية: اليوم الذي تعمل فيه."
+
+#. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_note__body
 msgid ""
 "For instance: We call quotations \"offers\". Orders above 10,000 need the "
@@ -1517,6 +1624,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:nudge.field_nudge_source__group_ids
 msgid "For the Groups"
 msgstr "للمجموعات"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_task__weekday__4
+msgid "Friday"
+msgstr "الجمعة"
 
 #. module: nudge
 #: model:nudge.provider,notes:nudge.provider_gemini
@@ -1636,6 +1748,11 @@ msgstr ""
 "                            أو اضغط على الميكروفون."
 
 #. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_task__interval_type__hours
+msgid "Hours"
+msgstr "ساعات"
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_res_users_settings__nudge_explain
 msgid "How Nudge Explains"
 msgstr "كيف يشرح Nudge"
@@ -1651,6 +1768,11 @@ msgstr "كيف أنشئ عرض سعر؟"
 msgid "How many records the agent may change with one yes. At most 1000."
 msgstr ""
 "عدد السجلات التي يستطيع الوكيل تغييرها بموافقة واحدة. 1000 على الأكثر."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_tasks_per_user
+msgid "How many tasks each person may ask Nudge to do by itself. 0: none."
+msgstr "عدد المهام التي يستطيع كل شخص أن يطلب من Nudge عملها وحده. 0: لا شيء."
 
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_provider__effort
@@ -1754,6 +1876,7 @@ msgstr "أعمل عليه في الخلفية. سأخبرك عندما ينته�
 #: model:ir.model.fields,field_description:nudge.field_nudge_source__id
 #: model:ir.model.fields,field_description:nudge.field_nudge_source_passage__id
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__id
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__id
 #: model:ir.model.fields,field_description:nudge.field_nudge_usage__id
 #: model:ir.model.fields,field_description:nudge.field_nudge_voice__id
 #: model:ir.model.fields,field_description:nudge.field_res_config_settings__id
@@ -1829,6 +1952,11 @@ msgid "Installation of Nudge"
 msgstr "تثبيت Nudge"
 
 #. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__instruction
+msgid "Instruction"
+msgstr "التعليمات"
+
+#. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_doc_passage_view_form
 msgid "Introduction"
 msgstr "مقدمة"
@@ -1851,6 +1979,12 @@ msgid ""
 "It is read a moment after the installation, then each time its modules "
 "change."
 msgstr "تُقرأ بعد التثبيت بلحظات، ثم في كل مرة تتغير فيها الموديولات."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/tasks.py:0
+msgid "It may"
+msgstr "يستطيع"
 
 #. module: nudge
 #. odoo-python
@@ -1881,6 +2015,7 @@ msgstr "المفتاح"
 #: model:ir.model.fields,field_description:nudge.field_nudge_note__kind
 #: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__kind
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__kind
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__kind
 #: model:ir.model.fields,field_description:nudge.field_nudge_usage__kind
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_search
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_search
@@ -1912,6 +2047,21 @@ msgid "Last Activity"
 msgstr "آخر نشاط"
 
 #. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__last_check
+msgid "Last Check"
+msgstr "آخر فحص"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__last_result
+msgid "Last Result"
+msgstr "آخر نتيجة"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__last_run
+msgid "Last Run"
+msgstr "آخر تشغيل"
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_conversation__write_uid
 #: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__write_uid
 #: model:ir.model.fields,field_description:nudge.field_nudge_doc_passage__write_uid
@@ -1925,6 +2075,7 @@ msgstr "آخر نشاط"
 #: model:ir.model.fields,field_description:nudge.field_nudge_source__write_uid
 #: model:ir.model.fields,field_description:nudge.field_nudge_source_passage__write_uid
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__write_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__write_uid
 #: model:ir.model.fields,field_description:nudge.field_nudge_usage__write_uid
 msgid "Last Updated by"
 msgstr "آخر تحديث بواسطة"
@@ -1943,6 +2094,7 @@ msgstr "آخر تحديث بواسطة"
 #: model:ir.model.fields,field_description:nudge.field_nudge_source__write_date
 #: model:ir.model.fields,field_description:nudge.field_nudge_source_passage__write_date
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__write_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__write_date
 #: model:ir.model.fields,field_description:nudge.field_nudge_usage__write_date
 msgid "Last Updated on"
 msgstr "آخر تحديث في"
@@ -2145,6 +2297,13 @@ msgid "Lines"
 msgstr "الأسطر"
 
 #. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_task_view_form
+msgid ""
+"List the customer invoices overdue by more than 7 days, with the amount and "
+"the salesperson"
+msgstr "اعرض فواتير الزبائن المتأخرة أكثر من 7 أيام، مع المبلغ والبائع"
+
+#. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
 msgid "Load Again"
 msgstr "حمّل من جديد"
@@ -2220,6 +2379,11 @@ msgid "Many records: done in the background, while you go on."
 msgstr "سجلات كثيرة: تُنفَّذ في الخلفية بينما تكمل عملك."
 
 #. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__match
+msgid "Match"
+msgstr "المطابقة"
+
+#. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_provider__effort__max
 msgid "Maximum"
 msgstr "الأقصى"
@@ -2272,6 +2436,11 @@ msgid "Mimetype"
 msgstr "نوع الملف"
 
 #. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_task_view_search
+msgid "Mine"
+msgstr "مهامي"
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__mode
@@ -2319,9 +2488,19 @@ msgid "Modules"
 msgstr "الموديولات"
 
 #. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_task__weekday__0
+msgid "Monday"
+msgstr "الاثنين"
+
+#. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_search
 msgid "Month"
 msgstr "شهر"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_task__interval_type__months
+msgid "Months"
+msgstr "أشهر"
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_conversation_view_search
@@ -2329,9 +2508,18 @@ msgid "My Conversations"
 msgstr "محادثاتي"
 
 #. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "My scheduled tasks"
+msgstr "مهامي المجدولة"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/tasks.py:0
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider__name
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider_model__name
 #: model:ir.model.fields,field_description:nudge.field_nudge_source__name
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__name
 msgid "Name"
 msgstr "الاسم"
 
@@ -2368,6 +2556,11 @@ msgstr "جديد للمستخدم"
 #: code:addons/nudge/static/src/guidance/nudge_guide.xml:0
 msgid "Next"
 msgstr "التالي"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__next_run
+msgid "Next Run"
+msgstr "التشغيل القادم"
 
 #. module: nudge
 #. odoo-javascript
@@ -2456,6 +2649,11 @@ msgstr "لا سجل للطباعة بعد"
 #: code:addons/nudge/models/nudge_quick.py:0
 msgid "No record you may read is called “%s”."
 msgstr "لا يوجد سجل يمكنك قراءته باسم «%s»."
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_task_action
+msgid "No scheduled task yet"
+msgstr "لا توجد مهام مجدولة بعد"
 
 #. module: nudge
 #. odoo-python
@@ -2562,6 +2760,17 @@ msgstr ""
 #: code:addons/nudge/models/nudge_run.py:0
 msgid "Nothing made here still exists."
 msgstr "لم يبقَ شيء مما صُنع هنا."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_task.py:0
+msgid "Nothing matched: the AI was not asked."
+msgstr "لم يطابق شيء: لم يُسأل الذكاء الاصطناعي."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__skip_count
+msgid "Nothing to Do"
+msgstr "لا شيء للعمل"
 
 #. module: nudge
 #. odoo-python
@@ -2672,6 +2881,11 @@ msgstr "موضع Nudge"
 #: model:ir.model.fields,field_description:nudge.field_res_users_settings__nudge_speak_answers
 msgid "Nudge Reads Its Answers Aloud"
 msgstr "Nudge يقرأ إجاباته بصوت مسموع"
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_task
+msgid "Nudge Scheduled Task"
+msgstr "مهمة Nudge المجدولة"
 
 #. module: nudge
 #: model:ir.model,name:nudge.model_nudge_quick
@@ -2865,6 +3079,12 @@ msgid "Nudge was updated. Reload the page, then ask again."
 msgstr "تم تحديث Nudge. أعد تحميل الصفحة ثم اسأل من جديد."
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_task.py:0
+msgid "Nudge: %s"
+msgstr "Nudge: %s"
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_user_menu.js:0
 msgid "Nudge: Off"
@@ -2880,6 +3100,11 @@ msgstr "Nudge: يعمل"
 #: model:ir.actions.server,name:nudge.cron_profile_refresh_ir_actions_server
 msgid "Nudge: read the database profile again"
 msgstr "Nudge: إعادة قراءة ملف قاعدة البيانات"
+
+#. module: nudge
+#: model:ir.actions.server,name:nudge.cron_tasks_ir_actions_server
+msgid "Nudge: scheduled tasks"
+msgstr "Nudge: المهام المجدولة"
 
 #. module: nudge
 #: model:ir.actions.server,name:nudge.cron_agent_runs_ir_actions_server
@@ -2988,6 +3213,11 @@ msgstr ""
 " ذلك."
 
 #. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_task__kind__schedule
+msgid "On a Schedule"
+msgstr "حسب جدول زمني"
+
+#. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/building.py:0
 msgid "On the form"
@@ -3073,6 +3303,12 @@ msgstr "لا يقيّم الجواب إلا من سأل."
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "Only the title of a conversation can be changed."
 msgstr "يمكن تغيير عنوان المحادثة فقط."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/tasks.py:0
+msgid "Only when there is"
+msgstr "فقط عندما يوجد"
 
 #. module: nudge
 #. odoo-python
@@ -3190,11 +3426,21 @@ msgid "Output Tokens"
 msgstr "رموز المخرجات"
 
 #. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_task_view_form
+msgid "Overdue invoices every morning"
+msgstr "الفواتير المتأخرة كل صباح"
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_profile__overview_text
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_profile_slice__kind__overview
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_view_form
 msgid "Overview"
 msgstr "نظرة عامة"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__user_id
+msgid "Owner"
+msgstr "المالك"
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_source_view_form
@@ -3271,6 +3517,12 @@ msgstr "مقاطع من ملفات الشركة، مع اسم الملف وال�
 #: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__path
 msgid "Path"
 msgstr "المسار"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_task_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_task_view_search
+msgid "Paused"
+msgstr "متوقفة"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__pending_results
@@ -3564,6 +3816,12 @@ msgstr "قرأ ما يعمل من تلقاء نفسه"
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/tools/tasks.py:0
+msgid "Read, as you. A change it finds needed waits for your yes."
+msgstr "القراءة باسمك. أي تعديل تراه لازمًا ينتظر موافقتك."
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "Read: %s"
 msgstr "قرأ: %s"
@@ -3582,11 +3840,13 @@ msgstr "جاهز"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__res_ids
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_task_view_form
 msgid "Records"
 msgstr "السجلات"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__res_model
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__model_name
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_search
 msgid "Records Of"
 msgstr "سجلات"
@@ -3701,6 +3961,11 @@ msgid "Run"
 msgstr "الطلب"
 
 #. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_task_view_form
+msgid "Run Now"
+msgstr "شغّلها الآن"
+
+#. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/developer.py:0
 msgid "Run code"
@@ -3710,8 +3975,10 @@ msgstr "تشغيل كود"
 #. odoo-python
 #: code:addons/nudge/tools/building.py:0
 #: model:ir.model.fields,field_description:nudge.field_nudge_conversation__run_ids
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__run_count
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_list
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_search
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_task_view_form
 msgid "Runs"
 msgstr "الطلبات"
 
@@ -3766,6 +4033,11 @@ msgid "Same size: %s"
 msgstr "نفس المقاس: %s"
 
 #. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_task__weekday__5
+msgid "Saturday"
+msgstr "السبت"
+
+#. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/configuration.py:0
 msgid "Save the settings."
@@ -3784,9 +4056,40 @@ msgid "Schedule: %s"
 msgstr "جدولة: %s"
 
 #. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__task_id
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_task_view_form
+msgid "Scheduled Task"
+msgstr "مهمة مجدولة"
+
+#. module: nudge
+#: model:ir.actions.act_window,name:nudge.nudge_task_action
+#: model:ir.ui.menu,name:nudge.nudge_menu_tasks
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_task_view_list
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid "Scheduled Tasks"
+msgstr "المهام المجدولة"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_tasks_per_user
+msgid "Scheduled Tasks per Person"
+msgstr "المهام المجدولة لكل شخص"
+
+#. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_profile__trigger__scheduled
 msgid "Scheduled refresh"
 msgstr "تحديث مجدول"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/tasks.py:0
+msgid "Scheduled task: %s"
+msgstr "مهمة مجدولة: %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_task.py:0
+msgid "Scheduled tasks are for those who may use Agent mode."
+msgstr "المهام المجدولة لمن يستطيع استخدام وضع Agent."
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__snapshot
@@ -4023,6 +4326,12 @@ msgstr ""
 "الاصطناعي بأدوات قليلة فقط؛ والباقي يجيب فورًا بدون أي ذكاء اصطناعي."
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_task.py:0
+msgid "Started; Nudge tells you when it is done."
+msgstr "بدأت؛ سيخبرك Nudge عندما تنتهي."
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__state
 #: model:ir.model.fields,field_description:nudge.field_nudge_note__state
 #: model:ir.model.fields,field_description:nudge.field_nudge_run__state
@@ -4083,6 +4392,12 @@ msgstr "تم الإيقاف."
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/models/nudge_task.py:0
+msgid "Stopped: the owner may no longer use Agent mode."
+msgstr "توقفت: المالك لم يعد يستطيع استخدام وضع Agent."
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/tools/developer.py:0
 #: model:ir.model.fields,field_description:nudge.field_nudge_note__name
 msgid "Subject"
@@ -4093,6 +4408,11 @@ msgstr "الموضوع"
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__summary
 msgid "Summary"
 msgstr "الملخص"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_task__weekday__6
+msgid "Sunday"
+msgstr "الأحد"
 
 #. module: nudge
 #. odoo-python
@@ -4127,6 +4447,19 @@ msgstr ""
 #: model:ir.model.fields,help:nudge.field_nudge_message__mode
 msgid "Talk: Nudge explains and shows. Agent: Nudge does the work."
 msgstr "حوار: Nudge يشرح ويُري. الوكيل: Nudge ينفّذ العمل."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid ""
+"Tasks Nudge does by itself, on a schedule or when records appear: \"every "
+"morning, the overdue invoices\". As their owner, reading only: a change a "
+"task finds needed waits for the owner's yes. The records are counted first: "
+"when nothing matches, the AI is not asked. Each run counts in the budgets."
+msgstr ""
+"مهام يعملها Nudge وحده، حسب جدول زمني أو عند ظهور سجلات: \"كل صباح، الفواتير"
+" المتأخرة\". باسم مالكها، للقراءة فقط: أي تعديل تراه المهمة لازمًا ينتظر "
+"موافقة مالكها. تُعدّ السجلات أولًا: إذا لم يطابق شيء لا يُسأل الذكاء "
+"الاصطناعي. كل تشغيل يُحسب من الميزانيات."
 
 #. module: nudge
 #. odoo-javascript
@@ -4261,6 +4594,11 @@ msgstr ""
 " أول مزود جاهز."
 
 #. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_task__send_email
+msgid "The answer is also sent to the owner by email."
+msgstr "يُرسل الجواب أيضًا إلى المالك بالإيميل."
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_message.xml:0
 msgid "The answer was cut short. Ask Nudge to continue."
@@ -4318,6 +4656,11 @@ msgid "The commands you can use here"
 msgstr "الأوامر التي يمكنك استخدامها هنا"
 
 #. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_task__conditions
+msgid "The conditions the records must meet, as the agent reads them."
+msgstr "الشروط التي يجب أن تحققها السجلات، كما يقرؤها الوكيل."
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/core/nudge_service.js:0
 msgid "The connection was lost before the answer was complete."
@@ -4344,6 +4687,17 @@ msgstr "التوثيق غير محمَّل."
 #: code:addons/nudge/static/src/core/nudge_service.js:0
 msgid "The file is too large. The limit is %s MB."
 msgstr "الملف كبير جدًا. الحد %s ميغابايت."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_task.py:0
+msgid "The hour is between 0 and 23."
+msgstr "الساعة بين 0 و 23."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_task__hour
+msgid "The hour of the day, in the time zone of the owner."
+msgstr "ساعة اليوم، بتوقيت المالك."
 
 #. module: nudge
 #. odoo-python
@@ -4503,6 +4857,12 @@ msgid "The stock of products, by warehouse"
 msgstr "مخزون المنتجات حسب المستودع"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_task.py:0
+msgid "The task runs in a moment. Nudge tells you when it is done."
+msgstr "ستعمل المهمة بعد لحظات. سيخبرك Nudge عندما تنتهي."
+
+#. module: nudge
 #: model:ir.model.constraint,message:nudge.constraint_nudge_provider_check_timeout
 msgid "The timeout must be strictly positive."
 msgstr "يجب أن تكون مهلة الانتظار أكبر من صفر."
@@ -4610,6 +4970,11 @@ msgid "This request is not yours."
 msgstr "هذا الطلب ليس لك."
 
 #. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_task__weekday__3
+msgid "Thursday"
+msgstr "الخميس"
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider__timeout
 msgid "Timeout (seconds)"
 msgstr "مهلة الانتظار (بالثواني)"
@@ -4618,6 +4983,15 @@ msgstr "مهلة الانتظار (بالثواني)"
 #: model:ir.model.fields,field_description:nudge.field_nudge_run__pieces
 msgid "Times Taken Up"
 msgstr "مرات الاستئناف"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_task__skip_count
+msgid ""
+"Times the conditions matched nothing: the AI was not asked, nothing was "
+"spent."
+msgstr ""
+"المرات التي لم تطابق فيها الشروط شيئًا: لم يُسأل الذكاء الاصطناعي ولم يُصرف "
+"شيء."
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_conversation__name
@@ -4720,6 +5094,11 @@ msgid "Try on a dummy record: %s"
 msgstr "تجربة على سجل وهمي: %s"
 
 #. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_task__weekday__1
+msgid "Tuesday"
+msgstr "الثلاثاء"
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider__can_transcribe
 msgid "Turns Speech into Text"
 msgstr "يحوّل الكلام إلى نص"
@@ -4782,6 +5161,11 @@ msgstr "تراجع عمّا بُني: %s عنصر"
 #: code:addons/nudge/static/src/components/nudge_message.js:0
 msgid "Undone"
 msgstr "تم التراجع"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__interval_type
+msgid "Unit"
+msgstr "الوحدة"
 
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_provider__requires_api_key
@@ -4924,6 +5308,27 @@ msgid "Was this helpful?"
 msgstr "هل أفادك هذا؟"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/tasks.py:0
+msgid "Watches"
+msgstr "تراقب"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_task__weekday__2
+msgid "Wednesday"
+msgstr "الأربعاء"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__weekday
+msgid "Weekday"
+msgstr "يوم الأسبوع"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_task__interval_type__weeks
+msgid "Weeks"
+msgstr "أسابيع"
+
+#. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_form
 msgid "What"
 msgstr "ماذا"
@@ -4955,6 +5360,11 @@ msgstr "ما يعرفه Nudge"
 #: model:ir.model.fields,help:nudge.field_nudge_message__tool_calls
 msgid "What Nudge asked Odoo to do, as the model wrote it."
 msgstr "ما طلبه Nudge من أودو، كما كتبه النموذج."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_task__instruction
+msgid "What Nudge is asked each time, in the words of the person."
+msgstr "ما يُطلب من Nudge في كل مرة، بكلمات الشخص."
 
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_profile__overview_text
@@ -5143,7 +5553,8 @@ msgstr ""
 
 #. module: nudge
 #. odoo-python
-#: code:addons/nudge/tools/developer.py:0
+#: code:addons/nudge/tools/developer.py:0 code:addons/nudge/tools/tasks.py:0
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_task_view_form
 msgid "When"
 msgstr "متى"
 
@@ -5152,6 +5563,25 @@ msgstr "متى"
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 msgid "When I ask with my screen shared"
 msgstr "عندما أسأل وشاشتي مشاركة"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_task__kind__watch
+msgid "When Records Appear"
+msgstr "عند ظهور سجلات"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_task__last_check
+msgid "When records appear: records created after it are new."
+msgstr "عند ظهور سجلات: السجلات المنشأة بعده جديدة."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_task__model_name
+msgid ""
+"When records appear: the kind of record watched. On a schedule: the kind of "
+"record counted first, and nothing is asked of the AI when none matches."
+msgstr ""
+"عند ظهور سجلات: نوع السجل المراقَب. حسب جدول زمني: نوع السجل الذي يُعدّ "
+"أولًا، ولا يُسأل الذكاء الاصطناعي إذا لم يطابق شيء."
 
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_provider__refusal_fallback
@@ -5196,6 +5626,12 @@ msgstr "من يُجاب من هذا الملف. فارغ: كل من يستخدم
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_search
 msgid "With Changes"
 msgstr "فيها تغييرات"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/tasks.py:0
+msgid "Within 10 minutes of a new record"
+msgstr "خلال 10 دقائق من سجل جديد"
 
 #. module: nudge
 #. odoo-javascript
@@ -5312,6 +5748,15 @@ msgstr "نعم، كلها"
 #: code:addons/nudge/static/src/components/nudge_message.xml:0
 msgid "Yes, do it"
 msgstr "نعم، نفّذ"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_task.py:0
+msgid ""
+"You have %(count)s tasks: the limit set by your administrator is %(limit)s. "
+"Delete one first."
+msgstr ""
+"لديك %(count)s مهام: الحد الذي وضعه المسؤول %(limit)s. احذف واحدة أولًا."
 
 #. module: nudge
 #. odoo-javascript
