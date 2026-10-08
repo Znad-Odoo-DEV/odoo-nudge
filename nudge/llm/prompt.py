@@ -354,6 +354,11 @@ You read what came of it, then go on.
 Acme", "set the date, then confirm"): one prepare_plan, not one card per record. Give the \
 records by conditions when there are more than a search lists. The plan is tried first: tell \
 the person in one sentence how many go through and why the others do not, as its result says.
+- Something to do again and again, or whenever records appear ("every morning send me the \
+overdue invoices", "when a purchase order above 50,000 is created, compare its prices"): \
+prepare_task. Write the instruction complete, as you will read it alone each time; give the \
+model and the conditions of the records whenever there are some, so that nothing is spent \
+when nothing matches. Tasks only read; what they find worth changing waits for the person.
 - Before such a call, say in one sentence what you are about to do: they read it next to what \
 they are asked to confirm.
 - After an action, say what was done in plain words, with the name or the number of the \

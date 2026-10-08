@@ -89,6 +89,9 @@ class ResConfigSettings(models.TransientModel):
     nudge_plan_max_records = fields.Integer(
         string="Records per Plan", config_parameter="nudge.plan_max_records", default=200,
         help="How many records the agent may change with one yes. At most 1000.")
+    nudge_tasks_per_user = fields.Integer(
+        string="Scheduled Tasks per Person", config_parameter="nudge.tasks_per_user", default=5,
+        help="How many tasks each person may ask Nudge to do by itself. 0: none.")
     nudge_budget_user_tokens = fields.Integer(
         string="Tokens per Person and per Day", config_parameter="nudge.budget_user_tokens")
     nudge_budget_user_cost = fields.Float(

@@ -16,4 +16,5 @@ access_nudge_doc_page_user,nudge.doc.page user,model_nudge_doc_page,group_nudge_
 access_nudge_doc_passage_user,nudge.doc.passage user,model_nudge_doc_passage,group_nudge_user,1,0,0,0
 access_nudge_run_agent,nudge.run agent,model_nudge_run,group_nudge_agent,1,0,0,0
 access_nudge_step_agent,nudge.step agent,model_nudge_step,group_nudge_agent,1,0,0,0
+access_nudge_task_agent,nudge.task agent,model_nudge_task,group_nudge_agent,1,1,1,1
 access_nudge_usage_manager,nudge.usage manager,model_nudge_usage,group_nudge_manager,1,0,0,0

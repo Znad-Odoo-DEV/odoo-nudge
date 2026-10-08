@@ -11,6 +11,17 @@
 
     <!-- Started on demand, when someone asks for something in the background.
          The interval takes up what a stopped server left behind. -->
+    <!-- What people asked Nudge to do by itself: counted first, then asked
+         as requests in the background of their owner -->
+    <record id="cron_tasks" model="ir.cron">
+        <field name="name">Nudge: scheduled tasks</field>
+        <field name="model_id" ref="model_nudge_task"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_run()</field>
+        <field name="interval_number">10</field>
+        <field name="interval_type">minutes</field>
+    </record>
+
     <record id="cron_agent_runs" model="ir.cron">
         <field name="name">Nudge: work on what was asked in the background</field>
         <field name="model_id" ref="model_nudge_run"/>

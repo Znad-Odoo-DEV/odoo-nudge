@@ -101,6 +101,9 @@ class NudgeConversation(models.Model):
     _description = "Nudge Conversation"
     _order = "write_date desc, id desc"
 
+    task_id = fields.Many2one("nudge.task", string="Scheduled Task", index="btree_not_null",
+                              ondelete="set null", readonly=True)
+
     name = fields.Char(string="Title")
     active = fields.Boolean(default=True)
     user_id = fields.Many2one(
