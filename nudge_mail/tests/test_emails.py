@@ -91,11 +91,17 @@ class TestEmails(NudgeCase, MockEmail, TransactionCase):
             "name": "Welcome", "model": "res.partner", "trigger": "on_create",
             "actions": [{"kind": "email", "email": plain}]})
         self.assertTrue(rule.is_error)
-        self.assertIn("prepare_email_design", rule.content)
-        self.assertIn("style", rule.content)
+        has_rules = "base.automation" in self.env
+        if has_rules:
+            self.assertIn("prepare_email_design", rule.content)
+            self.assertIn("style", rule.content)
+        else:
+            self.assertIn("Automation Rules", rule.content, "Without the app, the rule itself is refused")
         template = self.run_tool("prepare_email_template", {"name": "Welcome", "model": "res.partner", "email": plain})
         self.assertTrue(template.is_error)
         self.assertIn("prepare_email_design", template.content)
+        if not has_rules:
+            return
         # A designed email goes on a rule by its template
         designed = self.made()
         rule = self.run_tool("prepare_automation", {
