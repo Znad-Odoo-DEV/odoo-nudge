@@ -58,6 +58,10 @@
                     </ul>
                 </t>
                 <div t-elif="state.view === 'settings'" class="o_nudge_settings">
+                    <button t-if="state.canUseAgent" type="button" class="btn btn-light o_nudge_open_tasks"
+                            t-on-click="openTasks">
+                        <i class="fa fa-calendar-check-o"/> My scheduled tasks
+                    </button>
                     <label class="o_nudge_setting">
                         <span class="o_nudge_setting_label">Shortcut to call Nudge</span>
                         <select class="o_nudge_hotkey form-select"

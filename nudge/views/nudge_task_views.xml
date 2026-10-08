@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_task_view_list" model="ir.ui.view">
+        <field name="name">nudge.task.list</field>
+        <field name="model">nudge.task</field>
+        <field name="arch" type="xml">
+            <list string="Scheduled Tasks" decoration-muted="not active">
+                <field name="name"/>
+                <field name="kind"/>
+                <field name="model_name" optional="show"/>
+                <field name="user_id" groups="nudge.group_nudge_manager" optional="show"/>
+                <field name="next_run"/>
+                <field name="last_run" optional="show"/>
+                <field name="run_count" optional="show"/>
+                <field name="skip_count" optional="hide"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_task_view_form" model="ir.ui.view">
+        <field name="name">nudge.task.form</field>
+        <field name="model">nudge.task</field>
+        <field name="arch" type="xml">
+            <form string="Scheduled Task">
+                <header>
+                    <button name="action_run_now" type="object" string="Run Now" class="btn-primary"
+                            invisible="not active"/>
+                    <button name="action_open_conversation" type="object" string="Answers"
+                            invisible="not conversation_id"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Paused" bg_color="text-bg-warning" invisible="active"/>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Overdue invoices every morning"/></h1>
+                    </div>
+                    <group>
+                        <field name="instruction" placeholder="List the customer invoices overdue by more than 7 days, with the amount and the salesperson"/>
+                    </group>
+                    <group>
+                        <group string="When">
+                            <field name="kind" widget="radio"/>
+                            <label for="interval_number" invisible="kind != 'schedule'"/>
+                            <div class="o_row" invisible="kind != 'schedule'">
+                                <field name="interval_number"/>
+                                <field name="interval_type"/>
+                            </div>
+                            <field name="hour" invisible="kind != 'schedule' or interval_type == 'hours'"/>
+                            <field name="weekday" invisible="kind != 'schedule' or interval_type != 'weeks'"/>
+                            <field name="send_email"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                        <group string="Records">
+                            <field name="model_name" required="kind == 'watch'"/>
+                            <field name="conditions_text"/>
+                            <field name="match" invisible="not conditions"/>
+                            <field name="conditions" invisible="1"/>
+                        </group>
+                    </group>
+                    <group string="Runs">
+                        <field name="next_run"/>
+                        <field name="last_run"/>
+                        <field name="run_count"/>
+                        <field name="skip_count"/>
+                        <field name="last_result"/>
+                        <field name="user_id" groups="nudge.group_nudge_manager"/>
+                        <field name="conversation_id" invisible="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_task_view_search" model="ir.ui.view">
+        <field name="name">nudge.task.search</field>
+        <field name="model">nudge.task</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="instruction"/>
+                <filter name="paused" string="Paused" domain="[('active', '=', False)]"/>
+                <filter name="mine" string="Mine" domain="[('user_id', '=', uid)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_task_action" model="ir.actions.act_window">
+        <field name="name">Scheduled Tasks</field>
+        <field name="res_model">nudge.task</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_mine': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No scheduled task yet</p>
+            <p>Ask Nudge in Agent mode: "every morning at 8, send me the overdue invoices", or "when a
+                purchase order above 50,000 is created, compare its prices with the last ones".
+                A task reads, as you; a change it finds needed waits for your yes.</p>
+        </field>
+    </record>
+</odoo>

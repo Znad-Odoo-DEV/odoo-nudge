@@ -2,6 +2,7 @@ from . import nudge_provider
 from . import nudge_conversation
 from . import nudge_message
 from . import nudge_run
+from . import nudge_task
 from . import nudge_usage
 from . import nudge_profile
 from . import nudge_doc

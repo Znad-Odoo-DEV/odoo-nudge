@@ -138,6 +138,8 @@ class NudgeRun(models.Model):
         ended = self.filtered(lambda run: run.state in OPEN_STATES)
         ended.write({"state": state, "ended_at": fields.Datetime.now()})
         ended.filtered("is_background")._tell(state)
+        for run in ended.sudo().filtered("conversation_id.task_id"):
+            run.conversation_id.task_id._deliver(run)
 
     # ------------------------------------------------------------------
     # In the background

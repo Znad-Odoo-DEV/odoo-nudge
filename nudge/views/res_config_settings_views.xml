@@ -50,6 +50,14 @@
                             <field name="nudge_plan_max_records"/>
                         </setting>
                         <setting invisible="not nudge_agent"
+                                 help="Tasks Nudge does by itself, on a schedule or when records appear: &quot;every morning, the overdue invoices&quot;. As their owner, reading only: a change a task finds needed waits for the owner's yes. The records are counted first: when nothing matches, the AI is not asked. Each run counts in the budgets.">
+                            <field name="nudge_tasks_per_user"/>
+                            <div class="mt8">
+                                <button name="%(nudge_task_action)d" type="action"
+                                        string="Scheduled Tasks" icon="oi-arrow-right" class="btn-link"/>
+                            </div>
+                        </setting>
+                        <setting invisible="not nudge_agent"
                                  help="Let the agent compute with Python when counting and searching are not enough: a loop over records, a calculation per record. The code runs in the sandbox of Odoo, as the person, and reads only: what it writes is discarded, and changes still go through the yes of the person. Every run is in What Nudge Did. Off by default.">
                             <field name="nudge_python"/>
                         </setting>

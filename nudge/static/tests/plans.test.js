@@ -9,6 +9,7 @@ import {
     models,
     mountView,
     onRpc,
+    patchWithCleanup,
     webModels,
 } from "@web/../tests/web_test_helpers";
 
@@ -114,4 +115,22 @@ test("many records go on in the background", async () => {
     expect(nudge.state.messages[1].card.state).toBe("working");
     expect(".o_nudge_card_outcome").toHaveText("Being done in the background: I'll tell you when it is over.");
     expect(".o_nudge_confirm").toHaveCount(0);
+});
+
+test("the person finds the tasks Nudge does by itself in the preferences", async () => {
+    setupNudge({ config: { can_use_agent: true } });
+    await mountView({ resModel: "partner", type: "form", arch: "<form><field name='name'/></form>", resId: 1 });
+    patchWithCleanup(getService("action"), {
+        doAction(action) {
+            expect.step(`open ${action}`);
+        },
+    });
+    const nudge = getService("nudge");
+    nudge.open();
+    nudge.showSettings();
+    await animationFrame();
+    await click(".o_nudge_open_tasks");
+    await animationFrame();
+    expect.verifySteps(["open nudge.nudge_task_action"]);
+    expect(nudge.state.isOpen).toBe(false);
 });
