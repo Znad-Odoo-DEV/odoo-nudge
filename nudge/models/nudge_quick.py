@@ -5,14 +5,25 @@ of the apps (for an administrator) and the official documentation; a menu or
 a setting found is shown on the screen by the pointer. Nothing here calls a
 provider, and nothing here is offered once one is ready: the conversation
 takes over.
+
+The commands of the message box that need no AI are answered here too, with
+or without a provider: /screen, /setting, /doc, /file, /find, /product,
+/stock, /rules, /sql, /help.
 """
+import json
+import logging
+import re
+
 from odoo import api, models
 from odoo.exceptions import AccessError
 
+from ..tools import base, commands, product_search
 from ..tools.configuration import find_app, settings_layout, settings_steps
+from ..tools.finding import REFERENCE_FIELDS, _score, candidate_models, look_in
 from ..tools.navigation import _visible_menus, menu_path, menu_steps
-from ..tools import product_search
-from ..tools.records import Refused
+from ..tools.records import MODEL_PATTERN, Refused, cut, get_model
+
+_logger = logging.getLogger(__name__)
 
 MAX_WORDS = 80
 MAX_MENUS = 6
@@ -20,6 +31,10 @@ MAX_SETTINGS = 6
 MAX_PAGES = 5
 MAX_PRODUCTS = 5
 MAX_SNIPPET = 160
+MAX_COMMAND_CHARS = 2000
+MAX_RECORDS = 8
+MAX_PASSAGES = 5
+MAX_PASSAGE_CHARS = 400
 
 
 class NudgeQuick(models.AbstractModel):
@@ -75,6 +90,181 @@ class NudgeQuick(models.AbstractModel):
         except (Refused, ValueError, TypeError):
             return []
         return []
+
+    @api.model
+    def list_commands(self):
+        """:return: the commands the person may type, for the message box"""
+        self._check_user()
+        return commands.listed(self.env)
+
+    @api.model
+    def run_command(self, text, model_name=None):
+        """A command typed in the message box, answered without any AI.
+
+        :param text: the message, starting with the command
+        :param model_name: model of the screen the person is on, for /rules
+        :return: ``{"command", "query", "focused", "content", ...}`` with what
+            was found: ``menus``, ``settings``, ``pages``, ``records``,
+            ``passages``, ``products``, ``code``, ``table``, ``commands``;
+            ``command`` is False when the text is no command; a focused
+            command is left to the conversation
+        """
+        self._check_user()
+        command, rest = commands.parse(str(text or "")[:MAX_COMMAND_CHARS])
+        if command is None:
+            return {"command": False}
+        answer = {"command": command.name, "query": rest, "focused": command.kind == commands.FOCUSED,
+                  "content": ""}
+        if not commands.is_open(self.env, command.name):
+            answer["content"] = self.env._("The command %s is not open to you.", command.words[0])
+            return answer
+        if command.kind == commands.FOCUSED:
+            return answer
+        needs_words = command.name not in ("help", "rules")
+        if needs_words and len(rest) < 2:
+            example = commands.texts(self.env)[command.name][1]
+            answer["content"] = self.env._(
+                "Write what to look for after %(command)s, for example: %(example)s",
+                command=command.words[0], example=example)
+            return answer
+        getattr(self, f"_command_{command.name}")(rest, answer, model_name)
+        if not answer["content"] and not any(
+                answer.get(key) for key in ("menus", "settings", "pages", "records", "passages",
+                                            "products", "code", "table", "commands")):
+            answer["content"] = self.env._("Nothing found for “%s”. Try other words.", rest)
+        return answer
+
+    def _command_help(self, rest, answer, model_name):
+        answer["commands"] = commands.listed(self.env)
+        answer["content"] = self.env._(
+            "Start a message with one of these words to tell me where to look. Those marked AI ask "
+            "the AI with a few tools only; the others answer at once, without any AI.")
+
+    def _command_screen(self, rest, answer, model_name):
+        answer["menus"] = self._find_menus([term.casefold() for term in rest.split()])
+        if not answer["menus"]:
+            answer["content"] = self.env._("No screen you can open is called “%s”.", rest)
+
+    def _command_setting(self, rest, answer, model_name):
+        answer["settings"] = self._find_settings([term.casefold() for term in rest.split()])
+        if not answer["settings"]:
+            answer["content"] = self.env._("No setting is called “%s”. The settings are named in English.", rest)
+
+    def _command_doc(self, rest, answer, model_name):
+        answer["pages"] = self._find_pages(rest)
+        if not answer["pages"]:
+            answer["content"] = self.env._(
+                "No page of the documentation speaks of “%s”. It is written in English.", rest)
+
+    def _command_file(self, rest, answer, model_name):
+        passages = self.env["nudge.source.passage"]._search_text(rest, limit=MAX_PASSAGES)
+        answer["passages"] = [{
+            "id": passage.id,
+            "file": passage.source_id.name,
+            "page": passage.page,
+            "text": cut(" ".join((passage.body or "").split()), MAX_PASSAGE_CHARS),
+            "url": f"/web/content/nudge.source/{passage.source_id.id}/file",
+        } for passage in passages]
+        if not passages:
+            answer["content"] = self.env._(
+                "Nothing in the company files matches “%s”. Try the words the files would use.", rest)
+
+    def _command_find(self, rest, answer, model_name):
+        # "invoice: INV/2026/0042": the kind first, when the person knows it
+        topic, colon, name = rest.partition(":")
+        if not colon or not name.strip() or len(topic) > 40:
+            topic, name = "", rest
+        topic, name = topic.strip(), name.strip()
+        rest = name
+        found = []
+        try:
+            target = self._rules_target(topic) if topic else {}
+            if target.get("model"):
+                models_ = [get_model(self.env, target["model"])]
+            else:
+                models_ = candidate_models(self.env, topic, name)
+        except (Refused, AccessError):
+            models_ = []
+        for rank, model in enumerate(models_):
+            for record in look_in(model, rest):
+                if self._is_called(record, rest):
+                    found.append((-_score(record, rest), rank, model, record))
+        found.sort(key=lambda item: item[:2])
+        records = []
+        for _score_, _rank, model, record in found[:MAX_RECORDS]:
+            entry = {"model": model._name, "kind": model._description, "id": record.id,
+                     "name": cut(record.display_name or "", 120)}
+            field = model._fields.get("state")
+            if field is not None and field.type == "selection" and product_search._readable(model, "state"):
+                entry["state"] = dict(field._description_selection(self.env)).get(record.state, record.state or "")
+            records.append(entry)
+        answer["records"] = records
+        if not records:
+            answer["content"] = self.env._("No record you may read is called “%s”.", rest)
+
+    @staticmethod
+    def _is_called(record, text):
+        """:return: whether every word of ``text`` is in what ``record`` is
+        called: its name or a reference; a search may find more, it is not
+        shown without an AI to judge it"""
+        values = [record.display_name or ""]
+        for name in REFERENCE_FIELDS:
+            field = record._fields.get(name)
+            if field is not None and field.type == "char" and product_search._readable(record, name):
+                values.append(record[name] or "")
+        called = " ".join(values).casefold()
+        return all(word in called for word in text.casefold().split())
+
+    def _command_product(self, rest, answer, model_name):
+        answer["products"] = product_search.find(self.env, rest)["items"]
+        if not answer["products"]:
+            answer["content"] = self.env._(
+                "No product looks like “%s”. Try another word, a code or a size.", rest)
+
+    def _command_stock(self, rest, answer, model_name):
+        items = product_search.find(self.env, rest)["items"]
+        answer["products"] = [item for item in items if "on_hand" in item]
+        if not answer["products"]:
+            answer["content"] = self.env._("No product kept in stock looks like “%s”.", rest)
+
+    def _command_rules(self, rest, answer, model_name):
+        arguments = self._rules_target(rest or model_name or "")
+        if not arguments:
+            answer["content"] = self.env._(
+                "Write the kind of record after /rules, its technical name or its name: /rules sale.order")
+            return
+        env = self.with_context(nudge_mode=base.MODE_DEV).env
+        result = base.call(env, "read_automations", arguments, None, base.MODE_DEV)
+        if result.is_error:
+            answer["content"] = result.content
+        else:
+            answer["code"] = result.content
+
+    def _rules_target(self, text):
+        """:return: the arguments of read_automations for ``text``: a model
+        by its technical name or its name, else the words"""
+        text = text.strip()
+        if not text:
+            return {}
+        if re.fullmatch(MODEL_PATTERN, text) and text in self.env:
+            return {"model": text}
+        models_ = self.env["ir.model"].search(["|", ("name", "=ilike", text), ("model", "=ilike", text)], limit=2)
+        if len(models_) != 1:
+            models_ = self.env["ir.model"].search([("name", "ilike", text)], limit=2)
+        if len(models_) == 1 and models_.model in self.env:
+            return {"model": models_.model}
+        return {"words": text[:80]} if len(text) >= 2 else {}
+
+    def _command_sql(self, rest, answer, model_name):
+        _logger.info("Nudge: /sql by user %s: %s", self.env.uid, rest[:500])
+        result = base.call(self.env, "run_sql", {"query": rest, "purpose": "/sql"}, None, base.MODE_AGENT)
+        if result.is_error:
+            answer["content"] = result.content
+            return
+        read = json.loads(result.content)
+        answer["table"] = {"columns": read["columns"], "rows": read["rows"], "note": read.get("note", "")}
+        if not read["rows"]:
+            answer["content"] = self.env._("The query returned no row.")
 
     def _find_menus(self, terms):
         menus = _visible_menus(self.env)

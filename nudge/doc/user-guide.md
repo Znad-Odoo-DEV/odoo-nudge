@@ -143,6 +143,37 @@ price of…") does the same through the conversation. Attach a picture with `/pr
 describes what it shows and searches with that, when the provider can look at pictures. The
 search itself needs no AI: it works before any provider is set up, from the search box.
 
+## Tell Nudge where to look: the commands
+
+Start a message with a word after a slash and Nudge looks there only. Type `/` and the list of
+the commands open to you comes up; the arrows and Enter pick one. `/help` (or `/مساعدة`) lists
+them with an example each.
+
+Answered at once, **without any AI** (no token spent, and they work before any provider is set
+up, from the search box):
+
+| Command | What it finds |
+|---|---|
+| `/screen` `/شاشة` | A screen you can open, by its name: the pointer shows the way, **Open** goes there. |
+| `/setting` `/إعداد` | A setting of the apps (administrators): the pointer shows it. |
+| `/doc` `/توثيق` | Pages of the official Odoo documentation, with their links. |
+| `/file` `/ملف` | Passages of the company files, with the file and the page. |
+| `/find` `/سجل` | A record by its name, number or reference, in any app: "/find S00042". Put its kind first to narrow it: "/find invoice: INV/2026/00042". |
+| `/product` `/منتج` | Products like a name, a description, a code or a size. |
+| `/stock` `/مخزون` | The same, for products kept in stock, with the quantity in each warehouse. |
+| `/rules` `/قواعد` | What runs by itself on a kind of record: automation rules, server actions, scheduled actions, email templates (Developer mode). Without a name, the screen in front. |
+| `/sql` | One SELECT, read only (administrators, when SQL is switched on). |
+
+Asked of the AI **with a few tools only** and a short brief, without the rest of the conversation:
+a fraction of the tokens of a question asked in full.
+
+| Command | What it answers |
+|---|---|
+| `/count` `/كم` | A number about your records: "/count invoices unpaid this month" (Agent users). |
+| `/explain` `/اشرح` | A field, a term or this screen, explained in a few words. |
+
+Nothing found is said at once, without any AI.
+
 ## Nudge: On / Off
 
 Your own menu (your name at the top right) has **Nudge: On**. Press it and Nudge goes away for
