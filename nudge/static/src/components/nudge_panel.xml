@@ -162,8 +162,8 @@
                     <form class="o_nudge_quick" t-on-submit.prevent="quickSearch">
                         <p class="o_nudge_empty_text">Meanwhile, search the screens, the settings and the Odoo documentation:</p>
                         <div class="input-group">
-                            <input type="search" class="form-control o_nudge_quick_input" maxlength="80"
-                                   placeholder="Words to look for" t-model="quick.words"/>
+                            <input type="search" class="form-control o_nudge_quick_input" maxlength="2000"
+                                   placeholder="Words to look for, or /help" t-model="quick.words"/>
                             <button type="submit" class="btn btn-secondary o_nudge_quick_go" title="Search"
                                     aria-label="Search" t-att-disabled="quick.words.trim().length &lt; 2">
                                 <i class="fa fa-search"/>
@@ -172,6 +172,13 @@
                     </form>
                     <div t-if="quick.isSearching" class="o_nudge_quick_busy">
                         <i class="fa fa-circle-o-notch fa-spin"/>
+                    </div>
+                    <div t-elif="quick.answer" class="o_nudge_quick_results o_nudge_quick_command">
+                        <NudgeMessage role="'assistant'" content="quick.answer.content" state="quick.answer.state"
+                                      error="quick.answer.error" products="quick.answer.products"
+                                      onOpenProduct="(productId) => this.nudge.openProduct(productId)"
+                                      found="quick.answer.found"
+                                      onFound="(kind, item) => this.useQuickFound(kind, item)"/>
                     </div>
                     <div t-elif="quick.results" class="o_nudge_quick_results">
                         <t t-if="quick.results.menus.length">
@@ -238,6 +245,9 @@
                                 type="button" class="o_nudge_suggestion" dir="auto"
                                 t-on-click="() => this.send(suggestion)" t-esc="suggestion"/>
                     </div>
+                    <p t-if="state.commands.length" class="o_nudge_hint o_nudge_commands_hint">
+                        Type “/” to tell me where to look
+                    </p>
                     <p t-if="hotkeyHint" class="o_nudge_hint">
                         <kbd t-esc="hotkeyHint"/> calls me from anywhere
                         <span t-if="canTalk" class="o_nudge_hint_line">Hold it to talk to me</span>
@@ -261,7 +271,9 @@
                                   choice="message.choice"
                                   onChoose="(how) => this.nudge.chooseGuidance(message.id, how)"
                                   products="message.products"
-                                  onOpenProduct="(productId) => this.nudge.openProduct(productId)"/>
+                                  onOpenProduct="(productId) => this.nudge.openProduct(productId)"
+                                  found="message.found"
+                                  onFound="(kind, item) => this.nudge.useFound(kind, item)"/>
                     <!-- Theirs to say first: on the screen, or in writing -->
                     <div t-if="state.asking" class="o_nudge_message o_nudge_message_assistant o_nudge_ask" role="status">
                         <div class="o_nudge_bubble">
@@ -377,6 +389,17 @@
                         aria-label="Send a file" t-on-click="pickFile">
                     <i class="fa fa-paperclip"/>
                 </button>
+                <ul t-if="commandChoices.length" class="o_nudge_commands" role="listbox"
+                    aria-label="Commands">
+                    <li t-foreach="commandChoices" t-as="choice" t-key="choice.name" role="option"
+                        t-att-aria-selected="choice_index === commandIndex ? 'true' : 'false'"
+                        t-att-class="{ o_nudge_command_active: choice_index === commandIndex }"
+                        t-on-mousedown.prevent="() => this.pickCommand(choice)">
+                        <strong t-esc="wordOf(choice)"/>
+                        <span t-if="choice.kind === 'focused'" class="badge text-bg-info o_nudge_found_ai">AI</span>
+                        <span class="o_nudge_command_hint" t-esc="choice.hint"/>
+                    </li>
+                </ul>
                 <textarea class="o_nudge_input" rows="1" dir="auto" maxlength="8000"
                           t-att-placeholder="placeholder" aria-label="Message"
                           t-ref="input" t-model="state.draft" t-on-keydown="onInputKeydown"

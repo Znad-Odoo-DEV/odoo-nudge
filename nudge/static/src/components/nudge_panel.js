@@ -29,7 +29,9 @@ export class NudgePanel extends Component {
         this.inputRef = useRef("input");
         this.fileRef = useRef("file");
         // The search without AI, before a provider is set up
-        this.quick = useState({ words: "", results: null, isSearching: false });
+        this.quick = useState({ words: "", results: null, answer: null, isSearching: false });
+        // The commands offered while one is typed: the one chosen with the arrows
+        this.commandMenu = useState({ index: 0, closedFor: null });
 
         useEffect(
             () => this.inputRef.el?.focus(),
@@ -281,7 +283,57 @@ export class NudgePanel extends Component {
         return { text: texts[latest.state] || latest.state, unseen: latest.is_unseen };
     }
 
+    // ------------------------------------------------------------------
+    // The commands of the message box
+    // ------------------------------------------------------------------
+
+    /** @returns {Object[]} the commands that start like the word being typed */
+    get commandChoices() {
+        const draft = this.state.draft || "";
+        if (!draft.startsWith("/") || /\s/.test(draft) || this.commandMenu.closedFor === draft) {
+            return [];
+        }
+        const typed = draft.toLowerCase();
+        return this.state.commands.filter((command) => command.words.some((word) => word.startsWith(typed)));
+    }
+
+    get commandIndex() {
+        return Math.min(this.commandMenu.index, Math.max(this.commandChoices.length - 1, 0));
+    }
+
+    /** @returns {string} the word of the command in the alphabet being typed */
+    wordOf(command) {
+        const typed = (this.state.draft || "").toLowerCase();
+        return command.words.find((word) => typed.length > 1 && word.startsWith(typed)) || command.words[0];
+    }
+
+    pickCommand(command) {
+        this.state.draft = `${this.wordOf(command)} `;
+        this.commandMenu.index = 0;
+        this.inputRef.el?.focus();
+    }
+
     onInputKeydown(ev) {
+        const choices = this.commandChoices;
+        if (choices.length && !ev.isComposing) {
+            if (ev.key === "ArrowDown" || ev.key === "ArrowUp") {
+                ev.preventDefault();
+                const step = ev.key === "ArrowDown" ? 1 : choices.length - 1;
+                this.commandMenu.index = (this.commandIndex + step) % choices.length;
+                return;
+            }
+            if (ev.key === "Tab" || (ev.key === "Enter" && !ev.shiftKey)) {
+                ev.preventDefault();
+                this.pickCommand(choices[this.commandIndex]);
+                return;
+            }
+            if (ev.key === "Escape") {
+                ev.preventDefault();
+                ev.stopPropagation();
+                this.commandMenu.closedFor = this.state.draft;
+                return;
+            }
+        }
         // Enter sends; Shift+Enter, or Enter while composing a character, does not
         if (ev.key === "Enter" && !ev.shiftKey && !ev.isComposing) {
             ev.preventDefault();
@@ -315,7 +367,21 @@ export class NudgePanel extends Component {
         }
         this.quick.isSearching = true;
         try {
-            this.quick.results = await this.nudge.quickFind(words);
+            const typed = this.nudge.parseCommand(words);
+            if (typed?.command.kind === "focused") {
+                this.quick.results = null;
+                this.quick.answer = {
+                    content: _t("%s asks the AI: it works once a provider is set up.", typed.word),
+                    state: "complete", error: "", products: null, found: null,
+                };
+            } else if (typed) {
+                // A command answers here as in the chat, without any AI
+                this.quick.results = null;
+                this.quick.answer = await this.nudge.answerCommand(words);
+            } else {
+                this.quick.answer = null;
+                this.quick.results = await this.nudge.quickFind(words);
+            }
         } finally {
             this.quick.isSearching = false;
         }
@@ -327,6 +393,14 @@ export class NudgePanel extends Component {
             results && !results.menus.length && !results.settings.length && !results.pages.length &&
                 !results.products?.length
         );
+    }
+
+    useQuickFound(kind, item) {
+        if (kind === "command") {
+            this.quick.words = `${item.words[0]} `;
+            return;
+        }
+        return this.nudge.useFound(kind, item);
     }
 
     quickMenu(menu) {

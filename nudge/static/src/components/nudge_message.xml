@@ -76,6 +76,9 @@
                                 t-on-click="() => props.onOpenProduct(product.id)">Open</button>
                     </div>
                 </div>
+                <t t-if="props.found" t-call="nudge.Found">
+                    <t t-set="found" t-value="props.found"/>
+                </t>
                 <t t-if="props.card" t-call="nudge.Card"/>
                 <div t-if="isInBackground" class="o_nudge_background" role="status">
                     <div class="o_nudge_background_head">
@@ -110,6 +113,85 @@
                     The answer was cut short. Ask Nudge to continue.
                 </div>
                 <div t-elif="props.state === 'aborted'" class="o_nudge_notice">Stopped.</div>
+            </div>
+        </div>
+    </t>
+
+    <!-- What a command of the message box found, without any AI -->
+    <t t-name="nudge.Found">
+        <div class="o_nudge_found">
+            <div t-if="found.commands and found.commands.length" class="o_nudge_found_list">
+                <button t-foreach="found.commands" t-as="command" t-key="command.name" type="button"
+                        class="o_nudge_suggestion o_nudge_found_command" title="Put it in the message box"
+                        t-on-click="() => props.onFound and props.onFound('command', command)">
+                    <strong t-esc="command.words.join(' · ')"/>
+                    <span t-if="command.kind === 'focused'" class="badge text-bg-info o_nudge_found_ai">AI</span>
+                    <span class="o_nudge_quick_text" t-esc="command.hint"/>
+                    <code class="o_nudge_found_example" t-esc="command.example"/>
+                </button>
+            </div>
+            <div t-if="found.menus and found.menus.length" class="o_nudge_found_list">
+                <div t-foreach="found.menus" t-as="menu" t-key="menu.id" class="o_nudge_found_row">
+                    <button type="button" class="o_nudge_suggestion o_nudge_found_menu" title="Show me the way"
+                            t-on-click="() => props.onFound and props.onFound('menu', menu)">
+                        <i class="fa fa-location-arrow"/> <t t-esc="menu.path"/>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-light o_nudge_found_open" title="Open it"
+                            t-on-click="() => props.onFound and props.onFound('open_menu', menu)">Open</button>
+                </div>
+            </div>
+            <div t-if="found.settings and found.settings.length" class="o_nudge_found_list">
+                <button t-foreach="found.settings" t-as="setting" t-key="setting.app + setting.field" type="button"
+                        class="o_nudge_suggestion o_nudge_found_setting" title="Show me the way"
+                        t-on-click="() => props.onFound and props.onFound('setting', setting)">
+                    <i class="fa fa-cog"/> <strong t-esc="setting.label"/>
+                    <span class="o_nudge_quick_app" t-esc="' · ' + setting.app_label"/>
+                    <span t-if="setting.help" class="o_nudge_quick_text" t-esc="setting.help"/>
+                </button>
+            </div>
+            <div t-if="found.pages and found.pages.length" class="o_nudge_found_list">
+                <a t-foreach="found.pages" t-as="page" t-key="page.url" t-att-href="page.url" target="_blank"
+                   rel="noopener noreferrer" class="o_nudge_suggestion o_nudge_found_page">
+                    <i class="fa fa-book"/> <strong t-esc="page.title"/>
+                    <span class="o_nudge_quick_text" t-esc="page.snippet"/>
+                </a>
+            </div>
+            <div t-if="found.records and found.records.length" class="o_nudge_found_list">
+                <div t-foreach="found.records" t-as="record" t-key="record.model + record.id"
+                     class="o_nudge_found_row o_nudge_found_record">
+                    <div class="o_nudge_found_body">
+                        <strong t-esc="record.name"/>
+                        <span class="o_nudge_quick_text">
+                            <t t-esc="record.kind"/><t t-if="record.state" t-esc="' · ' + record.state"/>
+                        </span>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-light o_nudge_found_open"
+                            t-on-click="() => props.onFound and props.onFound('record', record)">Open</button>
+                </div>
+            </div>
+            <div t-if="found.passages and found.passages.length" class="o_nudge_found_list">
+                <blockquote t-foreach="found.passages" t-as="passage" t-key="passage.id" class="o_nudge_found_passage"
+                            dir="auto">
+                    <p t-esc="passage.text"/>
+                    <a t-att-href="passage.url" target="_blank" rel="noopener noreferrer" class="o_nudge_found_source">
+                        <i class="fa fa-file-text-o"/> <t t-esc="passage.file"/>
+                        <t t-if="passage.page">, <span>page</span> <t t-esc="passage.page"/></t>
+                    </a>
+                </blockquote>
+            </div>
+            <pre t-if="found.code" class="o_nudge_card_code o_nudge_found_code" dir="ltr" t-esc="found.code"/>
+            <div t-if="found.table and found.table.rows.length" class="o_nudge_found_table" dir="ltr">
+                <table class="table table-sm">
+                    <thead>
+                        <tr><th t-foreach="found.table.columns" t-as="column" t-key="column_index" t-esc="column"/></tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="found.table.rows" t-as="row" t-key="row_index">
+                            <td t-foreach="row" t-as="value" t-key="value_index" t-esc="cell(value)"/>
+                        </tr>
+                    </tbody>
+                </table>
+                <p t-if="found.table.note" class="o_nudge_quick_text" t-esc="found.table.note"/>
             </div>
         </div>
     </t>

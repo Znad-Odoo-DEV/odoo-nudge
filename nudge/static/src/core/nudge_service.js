@@ -124,6 +124,8 @@ export const nudgeService = {
             canMakeSpreadsheet: Boolean(config?.can_make_spreadsheet) && canUseAgent,
             isManager: Boolean(config?.is_manager),
             isConfigured: Boolean(config?.is_configured),
+            // The commands of the message box this person may type: /screen, /find...
+            commands: Array.isArray(config?.commands) ? config.commands : [],
             isOpen: false,
             view: "chat",
             conversationId: null,
@@ -741,6 +743,92 @@ function isReadable(file) {
             return match ? text.trim().slice(match[0].length).trim() : null;
         }
 
+        /**
+         * @param {string} text what was typed
+         * @returns {{ command: Object, word: string, rest: string }|null} the
+         *   command the message starts with, among those of the person
+         */
+        function parseCommand(text) {
+            const trimmed = (text || "").trim();
+            const first = trimmed.split(/\s/, 1)[0].toLowerCase();
+            if (!first.startsWith("/")) {
+                return null;
+            }
+            const command = state.commands.find((entry) => entry.words.includes(first));
+            return command ? { command, word: first, rest: trimmed.slice(first.length).trim() } : null;
+        }
+
+        /** The model of the screen in front: /rules without words is about it */
+        function screenModel() {
+            const current = action.currentController;
+            return current?.props?.resModel || current?.action?.res_model || null;
+        }
+
+        /**
+         * A command answered by the server without any AI: what it found is
+         * drawn in the answer, with the pointer, the screen or the record a
+         * click away.
+         *
+         * @param {string} text the whole message
+         * @returns {Promise<Object>} the answer, as a message of the chat
+         */
+        async function answerCommand(text) {
+            const answer = {
+                id: `local_${++localId}`, role: "assistant", content: "", state: "complete",
+                error: "", found: null, products: null,
+            };
+            try {
+                const result = await orm.call("nudge.quick", "run_command", [text, screenModel()]);
+                answer.products = result.products || null;
+                answer.found = result;
+                answer.content = result.content || "";
+            } catch {
+                answer.state = "error";
+                answer.error = _t("The command could not be run.");
+            }
+            return answer;
+        }
+
+        async function runCommand(text, spoken = false) {
+            state.view = "chat";
+            state.messages.push({
+                id: `local_${++localId}`, role: "user", content: text, state: "complete",
+                error: "", screen: "", spoken, attachment: "",
+            });
+            state.messages.push({
+                id: `local_${++localId}`, role: "assistant", content: "", state: "streaming", error: "",
+            });
+            const waiting = state.messages.at(-1);
+            Object.assign(waiting, await answerCommand(text), { id: waiting.id });
+        }
+
+        /**
+         * What was found by a command is used: the way shown, the screen or
+         * the record opened, a command put in the message box.
+         *
+         * @param {"menu"|"open_menu"|"setting"|"record"|"command"} kind
+         * @param {Object} item
+         */
+        function useFound(kind, item) {
+            if (kind === "menu") {
+                return quickGuide("menu", item.id);
+            }
+            if (kind === "open_menu") {
+                close();
+                return menu.selectMenu(item.id);
+            }
+            if (kind === "setting") {
+                return quickGuide("setting", { app: item.app, field: item.field });
+            }
+            if (kind === "record") {
+                return openRecord({ model: item.model, id: item.id });
+            }
+            if (kind === "command") {
+                state.draft = `${item.words[0]} `;
+                state.focusRequest++;
+            }
+        }
+
         function isPicture(attachment) {
             return Boolean(attachment?.file?.type?.startsWith("image/"));
         }
@@ -1177,7 +1265,17 @@ function isReadable(file) {
                 // Found at once, without any AI: the words are enough
                 return findProducts(text, productQuery, spoken);
             }
-            if (state.canUseAgent && state.mode === MODE_TALK && asksToDoIt(text)) {
+            const typed = parseCommand(text);
+            if (typed?.command.kind === "direct" && !attachment) {
+                // Answered by the server at once, without any AI
+                return runCommand(text, spoken);
+            }
+            if (typed?.command.kind === "focused") {
+                // One precise thing: in writing, with the tools of the command only
+                explain = EXPLAIN_TEXT;
+                report = "chat";
+            }
+            if (!typed && state.canUseAgent && state.mode === MODE_TALK && asksToDoIt(text)) {
                 setMode(MODE_AGENT);
             }
             // What waited for a yes or a no is left: the person moved on
@@ -1394,6 +1492,9 @@ function isReadable(file) {
             setEnabled,
             findProducts,
             openProduct,
+            parseCommand,
+            answerCommand,
+            useFound,
             send,
             decide,
             stop,

@@ -86,14 +86,14 @@ TOO_MANY_STEPS = (
 
 
 # The commands of the message box that look for a product
-PRODUCT_COMMANDS = ("/product", "/منتج")
+PRODUCT_COMMANDS = tools.commands.BY_NAME["product"].words
 
 
 def is_product_command(text):
     """:return: whether ``text`` asks for a product search: the model
     reaches for search_products at once, a picture with it described"""
-    first = (text or "").strip().split(maxsplit=1)[:1]
-    return bool(first) and first[0].lower() in PRODUCT_COMMANDS
+    command, _rest = tools.commands.parse(text)
+    return command is not None and command.name == "product"
 
 
 class NudgeConversation(models.Model):
@@ -335,11 +335,41 @@ class NudgeConversation(models.Model):
         job["seconds"] = self.env["nudge.run"]._get_piece_seconds()
         return job
 
+    def _chat_focus(self):
+        """:return: the focused command (/count, /explain) the question being
+        answered was asked with, or None"""
+        self.ensure_one()
+        question = self.env["nudge.message"].sudo().search([
+            ("conversation_id", "=", self.id),
+            ("role", "=", "user"),
+        ], order="id desc", limit=1)
+        return question.command if question.command in tools.commands.FOCUS else None
+
     def _chat_job(self, provider, mode, rounds):
         """:return: everything the stream needs, as plain data: the
         environment is gone once streaming starts"""
         self.ensure_one()
         conversation = self.sudo()
+        focus = self._chat_focus()
+        tool_set = provider.tool_set if provider else "full"
+        if focus:
+            # One precise thing, with a few tools: no overview, no history
+            offered = tools.commands.FOCUS[focus]["tools"]
+            return {
+                "version": nudge_version(),
+                "conversation_id": self.id,
+                "user_message_id": False,
+                "title": conversation.name,
+                "mode": mode,
+                "adapter": provider._get_adapter(),
+                "system": prompt.build_system_blocks(focus=focus),
+                "tools": [tool.definition() for tool in tools.base.available(self.env, mode, tool_set)
+                          if tool.name in offered],
+                "turns": conversation._chat_build_turns(),
+                "seconds": self._get_stream_seconds(),
+                "rounds": min(rounds, tools.commands.FOCUS_ROUNDS),
+                "first_events": [],
+            }
         return {
             "version": nudge_version(),
             "conversation_id": self.id,
@@ -353,8 +383,7 @@ class NudgeConversation(models.Model):
                 is_administrator=self.env.user.has_group("base.group_system"),
                 work="\n\n".join(block for block in (
                     self._chat_where_the_work_is(), self.env["nudge.source"]._get_text()) if block)),
-            "tools": [tool.definition() for tool in tools.base.available(
-                self.env, mode, provider.tool_set if provider else "full")],
+            "tools": [tool.definition() for tool in tools.base.available(self.env, mode, tool_set)],
             "turns": conversation._chat_build_turns(),
             "seconds": self._get_stream_seconds(),
             "rounds": rounds,
@@ -383,6 +412,19 @@ class NudgeConversation(models.Model):
         """
         self.ensure_one()
         text = (text or "").strip()
+        command, rest = tools.commands.parse(text)
+        focus = command.name if command and command.name in tools.commands.FOCUS else None
+        if focus:
+            if not tools.commands.is_open(self.env, focus):
+                raise UserError(_("The command %s is not open to you.", command.words[0]))
+            if len(rest) < 2:
+                raise UserError(_(
+                    "Write what to look for after %(command)s, for example: %(example)s",
+                    command=command.words[0], example=tools.commands.texts(self.env)[focus][1]))
+            # The command says the mode: reading only, at once
+            mode, background = tools.commands.FOCUS[focus]["mode"], False
+            # Neither the pointer nor a spreadsheet: the answer, in writing
+            explain = report = None
         found = self._chat_read_attachment(attachment)
         if not text and found:
             text = found["name"]
@@ -438,6 +480,7 @@ class NudgeConversation(models.Model):
             "mode": mode,
             "context_text": context_text,
             "attachment_name": found["name"] if found else False,
+            "command": focus or False,
             **screen_values,
         })
         if found and found["image"]:
@@ -486,7 +529,7 @@ class NudgeConversation(models.Model):
             user_message_id=message.id,
             # The pointer or a spreadsheet was asked for: the model reaches for a
             # tool, not for a list
-            tool_choice="required" if explain == "screen" or is_product_command(text) or (
+            tool_choice="required" if focus == "count" or explain == "screen" or is_product_command(text) or (
                 report == "sheet" and self._can_make_spreadsheet()) else None,
         )
 
@@ -527,10 +570,14 @@ class NudgeConversation(models.Model):
         return [{"media_type": attachment.mimetype, "data": attachment.datas.decode("ascii")}]
 
     def _chat_build_turns(self):
-        """:return: the conversation as the adapters read it"""
+        """:return: the conversation as the adapters read it; a question
+        asked with a focused command is read without what came before"""
         self.ensure_one()
         turns = []
         messages = self.message_ids.sorted("id")
+        question = messages.filtered(lambda message: message.role == "user")[-1:]
+        if question.command in tools.commands.FOCUS:
+            messages = messages.filtered(lambda message: message.id >= question.id)
         for message, following in zip(messages, list(messages[1:]) + [messages.browse()]):
             if message.role == "tool":
                 if turns and turns[-1].get("tool_calls"):

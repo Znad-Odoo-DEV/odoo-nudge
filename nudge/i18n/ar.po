@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-08 09:59+0000\n"
-"PO-Revision-Date: 2026-10-08 09:59+0000\n"
+"POT-Creation-Date: 2026-10-08 10:41+0000\n"
+"PO-Revision-Date: 2026-10-08 10:41+0000\n"
 "Last-Translator: \n"
 "Language-Team: Arabic\n"
 "Language: ar\n"
@@ -43,6 +43,12 @@ msgstr "%(number)s %(unit)s بعد"
 #: code:addons/nudge/tools/developer.py:0
 msgid "%(number)s %(unit)s before"
 msgstr "%(number)s %(unit)s قبل"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+msgid "%s asks the AI: it works once a provider is set up."
+msgstr "%s يسأل الذكاء الاصطناعي: يعمل بعد ضبط مزوّد."
 
 #. module: nudge
 #. odoo-python
@@ -81,6 +87,66 @@ msgstr "%s طلبات يُعمل عليها في الخلفية."
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "/count invoices unpaid this month"
+msgstr "/كم فاتورة غير مدفوعة هذا الشهر"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "/doc landed costs"
+msgstr "/توثيق landed costs"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "/explain analytic account"
+msgstr "/اشرح الحساب التحليلي"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "/file annual leave"
+msgstr "/ملف الإجازة السنوية"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "/find invoice: INV/2026/00042"
+msgstr "/سجل فاتورة: INV/2026/00042"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "/product bolt 8 mm"
+msgstr "/منتج برغي 8 ملم"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "/rules sale.order"
+msgstr "/قواعد sale.order"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "/screen invoices"
+msgstr "/شاشة الفواتير"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "/setting multi currency"
+msgstr "/إعداد multi currency"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "/stock cement"
+msgstr "/مخزون إسمنت"
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/models/nudge_provider.py:0
 msgid "A Python library is missing on the server."
 msgstr "توجد مكتبة Python ناقصة على الخادم."
@@ -107,9 +173,21 @@ msgstr ""
 "لا يُنزَّل شيء."
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "A field, a term or this screen, explained by the AI in a few words"
+msgstr "حقل أو مصطلح أو هذه الشاشة، يشرحها الذكاء الاصطناعي بكلمات قليلة"
+
+#. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_provider__stt_mode__chat
 msgid "A model that listens"
 msgstr "نموذج يستمع"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "A number about your records, worked out by the AI with your data only"
+msgstr "رقم عن سجلاتك، يحسبه الذكاء الاصطناعي من بياناتك فقط"
 
 #. module: nudge
 #: model:ir.model.constraint,message:nudge.constraint_nudge_doc_page_path_unique
@@ -121,6 +199,33 @@ msgstr "تُحمَّل صفحة التوثيق مرة واحدة."
 #: code:addons/nudge/models/nudge_message.py:0
 msgid "A rating is up or down."
 msgstr "التقييم إمّا مفيد أو غير مفيد."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid ""
+"A record by its name, number or reference, in any app; its kind first "
+"narrows it"
+msgstr "سجل باسمه أو رقمه أو مرجعه في أي تطبيق؛ ذكر نوعه أولًا يضيّق البحث"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "A screen you can open, by its name: shown with the pointer"
+msgstr "شاشة تستطيع فتحها، باسمها: يدلّك عليها المؤشر"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "A setting of the apps, by its name: shown with the pointer"
+msgstr "إعداد من إعدادات التطبيقات، باسمه: يدلّك عليه المؤشر"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "AI"
+msgstr "AI"
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
@@ -667,6 +772,17 @@ msgstr "كود"
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 msgid "Colour"
 msgstr "اللون"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__command
+msgid "Command"
+msgstr "الأمر"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Commands"
+msgstr "الأوامر"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_conversation__company_id
@@ -2205,7 +2321,21 @@ msgid "No microphone was found."
 msgstr "لم يُعثر على ميكروفون."
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_quick.py:0
+msgid "No page of the documentation speaks of “%s”. It is written in English."
+msgstr "لا توجد صفحة في التوثيق تتحدث عن «%s». التوثيق مكتوب بالإنجليزية."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_quick.py:0
+msgid "No product kept in stock looks like “%s”."
+msgstr "لا يوجد منتج مخزّن يشبه «%s»."
+
+#. module: nudge
 #. odoo-javascript
+#. odoo-python
+#: code:addons/nudge/models/nudge_quick.py:0
 #: code:addons/nudge/static/src/core/nudge_service.js:0
 msgid "No product looks like “%s”. Try another word, a code or a size."
 msgstr "لا يوجد منتج يشبه «%s». جرّب كلمة أخرى أو كودًا أو مقاسًا."
@@ -2220,6 +2350,24 @@ msgstr "بدون تفكير"
 #: code:addons/nudge/tools/reports.py:0
 msgid "No record to print yet"
 msgstr "لا سجل للطباعة بعد"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_quick.py:0
+msgid "No record you may read is called “%s”."
+msgstr "لا يوجد سجل يمكنك قراءته باسم «%s»."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_quick.py:0
+msgid "No screen you can open is called “%s”."
+msgstr "لا توجد شاشة يمكنك فتحها باسم «%s»."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_quick.py:0
+msgid "No setting is called “%s”. The settings are named in English."
+msgstr "لا يوجد إعداد باسم «%s». أسماء الإعدادات بالإنجليزية."
 
 #. module: nudge
 #. odoo-javascript
@@ -2288,11 +2436,26 @@ msgid "Nothing changed."
 msgstr "لم يتغير شيء."
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_quick.py:0
+msgid "Nothing found for “%s”. Try other words."
+msgstr "لم أجد شيئًا لـ «%s». جرّب كلمات أخرى."
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 msgid ""
 "Nothing found. Try other words; the documentation is written in English."
 msgstr "لم يُعثر على شيء. جرّب كلمات أخرى؛ التوثيق مكتوب بالإنكليزية."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_quick.py:0
+msgid ""
+"Nothing in the company files matches “%s”. Try the words the files would "
+"use."
+msgstr ""
+"لا شيء في ملفات الشركة يطابق «%s». جرّب الكلمات التي قد تستخدمها الملفات."
 
 #. module: nudge
 #. odoo-python
@@ -2745,6 +2908,12 @@ msgid "On the screen, with the pointer"
 msgstr "على الشاشة، بالمؤشر"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "One SELECT, read only, at most 50 rows"
+msgstr "استعلام SELECT واحد، قراءة فقط، 50 صفًا على الأكثر"
+
+#. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_source__purpose
 msgid ""
 "One line Nudge reads to know when to look in it: \"HR policy: leave, working"
@@ -2816,6 +2985,12 @@ msgstr "يمكن التراجع هنا عن طلباتك أنت في وضع ال
 #: code:addons/nudge/static/src/components/nudge_message.xml:0
 msgid "Open"
 msgstr "فتح"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid "Open it"
+msgstr "افتحها"
 
 #. module: nudge
 #. odoo-javascript
@@ -2945,6 +3120,12 @@ msgid "Pages"
 msgstr "الصفحات"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "Pages of the official Odoo documentation"
+msgstr "صفحات من توثيق Odoo الرسمي"
+
+#. module: nudge
 #: model:nudge.provider,notes:nudge.provider_anthropic
 msgid ""
 "Paid. Get a key from the Claude console (platform.claude.com).\n"
@@ -2973,6 +3154,12 @@ msgstr "عدد المقاطع"
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_source_view_list
 msgid "Passages"
 msgstr "المقاطع"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "Passages of the company files, with the file and the page"
+msgstr "مقاطع من ملفات الشركة، مع اسم الملف والصفحة"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__path
@@ -3134,6 +3321,12 @@ msgid "Products"
 msgstr "المنتجات"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "Products like a name, a description, a code or a size"
+msgstr "منتجات تشبه اسمًا أو وصفًا أو كودًا أو مقاسًا"
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__profile_id
 msgid "Profile"
 msgstr "الملف"
@@ -3190,6 +3383,12 @@ msgstr ""
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 msgid "Put it back in the corner"
 msgstr "أعده إلى الزاوية"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid "Put it in the message box"
+msgstr "ضعه في خانة الرسالة"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_python
@@ -3613,6 +3812,7 @@ msgstr "أرني على الشاشة"
 
 #. module: nudge
 #. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 msgid "Show me the way"
 msgstr "أرني الطريق"
@@ -3693,6 +3893,17 @@ msgstr "تحويل الكلام إلى نص"
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__is_spoken
 msgid "Spoken"
 msgstr "منطوقة"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_quick.py:0
+msgid ""
+"Start a message with one of these words to tell me where to look. Those "
+"marked AI ask the AI with a few tools only; the others answer at once, "
+"without any AI."
+msgstr ""
+"ابدأ رسالتك بإحدى هذه الكلمات لتخبرني أين أبحث. المعلَّمة بـ AI تسأل الذكاء "
+"الاصطناعي بأدوات قليلة فقط؛ والباقي يجيب فورًا بدون أي ذكاء اصطناعي."
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__state
@@ -3965,6 +4176,25 @@ msgid "The column and every value in it are deleted too"
 msgstr "يُحذف العمود وكل قيمة فيه أيضًا"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+#: code:addons/nudge/models/nudge_quick.py:0
+msgid "The command %s is not open to you."
+msgstr "الأمر %s غير متاح لك."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "The command could not be run."
+msgstr "تعذّر تنفيذ الأمر."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "The commands you can use here"
+msgstr "الأوامر التي يمكنك استخدامها هنا"
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/core/nudge_service.js:0
 msgid "The connection was lost before the answer was complete."
@@ -4107,6 +4337,12 @@ msgid "The provider's rate limit is reached. Try again in a minute."
 msgstr "تم بلوغ حد الطلبات لدى المزود. حاول مرة أخرى بعد دقيقة."
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_quick.py:0
+msgid "The query returned no row."
+msgstr "لم يُرجع الاستعلام أي صف."
+
+#. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_run__is_unseen
 msgid ""
 "The request ended, or waits for an answer, and the person has not looked "
@@ -4136,6 +4372,12 @@ msgstr ""
 "يعطي السيرفر هذا النموذج %(given)s توكن؛ ويحتاج Nudge نحو %(needed)s. ما لا "
 "يتسع يُقص بلا كلمة وتخطئ الإجابات: اضغط «تجهيز لـ Nudge»، أو اختر الأدوات "
 "الأساسية."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "The stock of products, by warehouse"
+msgstr "مخزون المنتجات حسب المستودع"
 
 #. module: nudge
 #: model:ir.model.constraint,message:nudge.constraint_nudge_provider_check_timeout
@@ -4346,6 +4588,12 @@ msgstr "يحوّل الكلام إلى نص"
 #: code:addons/nudge/tools/building.py:0
 msgid "Type"
 msgstr "النوع"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Type “/” to tell me where to look"
+msgstr "اكتب «/» لتخبرني أين أبحث"
 
 #. module: nudge
 #. odoo-python
@@ -4637,6 +4885,15 @@ msgstr ""
 "ما يطلبه المستخدمون من Nudge في وضع الوكيل يُسرد هنا، مع كل خطوة قام بها."
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid ""
+"What runs by itself on a kind of record: automations, scheduled actions, "
+"emails"
+msgstr ""
+"ما يعمل تلقائيًا على نوع من السجلات: الأتمتة والإجراءات المجدولة والإيميلات"
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.js:0
 msgid "What runs by itself on this screen?"
@@ -4789,8 +5046,8 @@ msgstr "فيها تغييرات"
 #. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
-msgid "Words to look for"
-msgstr "كلمات للبحث عنها"
+msgid "Words to look for, or /help"
+msgstr "كلمات للبحث، أو /مساعدة"
 
 #. module: nudge
 #. odoo-python
@@ -4825,6 +5082,21 @@ msgstr "جارٍ التنفيذ…"
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "Write a message first."
 msgstr "اكتب رسالة أولًا."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_quick.py:0
+msgid ""
+"Write the kind of record after /rules, its technical name or its name: "
+"/rules sale.order"
+msgstr "اكتب نوع السجل بعد /قواعد، باسمه التقني أو باسمه: /قواعد sale.order"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+#: code:addons/nudge/models/nudge_quick.py:0
+msgid "Write what to look for after %(command)s, for example: %(example)s"
+msgstr "اكتب ما تبحث عنه بعد %(command)s، مثلًا: %(example)s"
 
 #. module: nudge
 #. odoo-javascript
@@ -5030,6 +5302,12 @@ msgstr "غير مضاف"
 #: code:addons/nudge/tools/developer.py:0
 msgid "nowhere yet: a button or a rule will run it"
 msgstr "لا مكان بعد: سيشغّله زر أو قاعدة"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid "page"
+msgstr "صفحة"
 
 #. module: nudge
 #. odoo-python

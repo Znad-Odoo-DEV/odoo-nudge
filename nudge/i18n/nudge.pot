@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-08 09:59+0000\n"
-"PO-Revision-Date: 2026-10-08 09:59+0000\n"
+"POT-Creation-Date: 2026-10-08 10:41+0000\n"
+"PO-Revision-Date: 2026-10-08 10:41+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -39,6 +39,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/tools/developer.py:0
 msgid "%(number)s %(unit)s before"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.js:0
+msgid "%s asks the AI: it works once a provider is set up."
 msgstr ""
 
 #. module: nudge
@@ -75,6 +81,66 @@ msgstr ""
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "/count invoices unpaid this month"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "/doc landed costs"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "/explain analytic account"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "/file annual leave"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "/find invoice: INV/2026/00042"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "/product bolt 8 mm"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "/rules sale.order"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "/screen invoices"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "/setting multi currency"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "/stock cement"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/models/nudge_provider.py:0
 msgid "A Python library is missing on the server."
 msgstr ""
@@ -99,8 +165,20 @@ msgid ""
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "A field, a term or this screen, explained by the AI in a few words"
+msgstr ""
+
+#. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_provider__stt_mode__chat
 msgid "A model that listens"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "A number about your records, worked out by the AI with your data only"
 msgstr ""
 
 #. module: nudge
@@ -112,6 +190,33 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/models/nudge_message.py:0
 msgid "A rating is up or down."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid ""
+"A record by its name, number or reference, in any app; its kind first "
+"narrows it"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "A screen you can open, by its name: shown with the pointer"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "A setting of the apps, by its name: shown with the pointer"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "AI"
 msgstr ""
 
 #. module: nudge
@@ -649,6 +754,17 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 msgid "Colour"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__command
+msgid "Command"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Commands"
 msgstr ""
 
 #. module: nudge
@@ -2111,7 +2227,21 @@ msgid "No microphone was found."
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_quick.py:0
+msgid "No page of the documentation speaks of “%s”. It is written in English."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_quick.py:0
+msgid "No product kept in stock looks like “%s”."
+msgstr ""
+
+#. module: nudge
 #. odoo-javascript
+#. odoo-python
+#: code:addons/nudge/models/nudge_quick.py:0
 #: code:addons/nudge/static/src/core/nudge_service.js:0
 msgid "No product looks like “%s”. Try another word, a code or a size."
 msgstr ""
@@ -2125,6 +2255,24 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/tools/reports.py:0
 msgid "No record to print yet"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_quick.py:0
+msgid "No record you may read is called “%s”."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_quick.py:0
+msgid "No screen you can open is called “%s”."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_quick.py:0
+msgid "No setting is called “%s”. The settings are named in English."
 msgstr ""
 
 #. module: nudge
@@ -2194,10 +2342,24 @@ msgid "Nothing changed."
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_quick.py:0
+msgid "Nothing found for “%s”. Try other words."
+msgstr ""
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 msgid ""
 "Nothing found. Try other words; the documentation is written in English."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_quick.py:0
+msgid ""
+"Nothing in the company files matches “%s”. Try the words the files would "
+"use."
 msgstr ""
 
 #. module: nudge
@@ -2635,6 +2797,12 @@ msgid "On the screen, with the pointer"
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "One SELECT, read only, at most 50 rows"
+msgstr ""
+
+#. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_source__purpose
 msgid ""
 "One line Nudge reads to know when to look in it: \"HR policy: leave, working"
@@ -2703,6 +2871,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_message.xml:0
 msgid "Open"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid "Open it"
 msgstr ""
 
 #. module: nudge
@@ -2828,6 +3002,12 @@ msgid "Pages"
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "Pages of the official Odoo documentation"
+msgstr ""
+
+#. module: nudge
 #: model:nudge.provider,notes:nudge.provider_anthropic
 msgid ""
 "Paid. Get a key from the Claude console (platform.claude.com).\n"
@@ -2853,6 +3033,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_source_view_form
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_source_view_list
 msgid "Passages"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "Passages of the company files, with the file and the page"
 msgstr ""
 
 #. module: nudge
@@ -3005,6 +3191,12 @@ msgid "Products"
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "Products like a name, a description, a code or a size"
+msgstr ""
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__profile_id
 msgid "Profile"
 msgstr ""
@@ -3058,6 +3250,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 msgid "Put it back in the corner"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid "Put it in the message box"
 msgstr ""
 
 #. module: nudge
@@ -3480,6 +3678,7 @@ msgstr ""
 
 #. module: nudge
 #. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 msgid "Show me the way"
 msgstr ""
@@ -3559,6 +3758,15 @@ msgstr ""
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__is_spoken
 msgid "Spoken"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_quick.py:0
+msgid ""
+"Start a message with one of these words to tell me where to look. Those "
+"marked AI ask the AI with a few tools only; the others answer at once, "
+"without any AI."
 msgstr ""
 
 #. module: nudge
@@ -3823,6 +4031,25 @@ msgid "The column and every value in it are deleted too"
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+#: code:addons/nudge/models/nudge_quick.py:0
+msgid "The command %s is not open to you."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "The command could not be run."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "The commands you can use here"
+msgstr ""
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/core/nudge_service.js:0
 msgid "The connection was lost before the answer was complete."
@@ -3959,6 +4186,12 @@ msgid "The provider's rate limit is reached. Try again in a minute."
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_quick.py:0
+msgid "The query returned no row."
+msgstr ""
+
+#. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_run__is_unseen
 msgid ""
 "The request ended, or waits for an answer, and the person has not looked "
@@ -3981,6 +4214,12 @@ msgid ""
 "The server gives this model %(given)s tokens; Nudge needs about %(needed)s. "
 "What does not fit is cut without a word, and answers go wrong: press Prepare"
 " for Nudge, or choose the essential tools."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid "The stock of products, by warehouse"
 msgstr ""
 
 #. module: nudge
@@ -4187,6 +4426,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/tools/building.py:0
 msgid "Type"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Type “/” to tell me where to look"
 msgstr ""
 
 #. module: nudge
@@ -4474,6 +4719,14 @@ msgid ""
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/commands.py:0
+msgid ""
+"What runs by itself on a kind of record: automations, scheduled actions, "
+"emails"
+msgstr ""
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.js:0
 msgid "What runs by itself on this screen?"
@@ -4618,7 +4871,7 @@ msgstr ""
 #. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
-msgid "Words to look for"
+msgid "Words to look for, or /help"
 msgstr ""
 
 #. module: nudge
@@ -4651,6 +4904,21 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "Write a message first."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_quick.py:0
+msgid ""
+"Write the kind of record after /rules, its technical name or its name: "
+"/rules sale.order"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+#: code:addons/nudge/models/nudge_quick.py:0
+msgid "Write what to look for after %(command)s, for example: %(example)s"
 msgstr ""
 
 #. module: nudge
@@ -4849,6 +5117,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/tools/developer.py:0
 msgid "nowhere yet: a button or a rule will run it"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid "page"
 msgstr ""
 
 #. module: nudge

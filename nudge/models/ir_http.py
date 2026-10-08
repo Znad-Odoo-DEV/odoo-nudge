@@ -37,5 +37,7 @@ class IrHttp(models.AbstractModel):
             "can_develop": self.env["nudge.conversation"]._can_develop(),
             # A report can be a spreadsheet when the module for it is installed
             "can_make_spreadsheet": self.env["nudge.conversation"]._can_make_spreadsheet(),
+            # The commands of the message box this person may type
+            "commands": tools.commands.listed(self.env),
             **self.env["nudge.voice"]._get_session_info(),
         }
