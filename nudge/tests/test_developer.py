@@ -7,6 +7,7 @@ from odoo.addons.nudge import tools
 from odoo.addons.nudge.llm import base as llm
 from odoo.addons.nudge.llm import loop, prompt
 from odoo.addons.nudge.models.nudge_conversation import DEVELOPER_PARAM
+from odoo.addons.nudge.tools import developer
 from odoo.addons.nudge.tools.developer import compile_code
 from odoo.addons.nudge.tools.records import Refused
 
@@ -25,6 +26,11 @@ class TestDeveloper(NudgeCase, TransactionCase):
             groups="nudge.group_nudge_agent,base.group_system,base.group_partner_manager")
         cls.Parameter = cls.env["ir.config_parameter"].sudo()
         cls.has_rules = "base.automation" in cls.env
+
+    def setUp(self):
+        super().setUp()
+        # The plain emails of Nudge, whether Nudge: Emails is installed here or not
+        self.patch(developer, "designed_emails_here", lambda env: False)
 
     def switch(self, on):
         self.Parameter.set_param(DEVELOPER_PARAM, "yes" if on else "no")
