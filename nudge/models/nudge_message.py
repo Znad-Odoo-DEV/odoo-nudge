@@ -34,6 +34,9 @@ class NudgeMessage(models.Model):
     # A file sent with the question: its name for everybody, the file itself
     # (an image, re-shown to the model) for the system
     attachment_name = fields.Char(string="File")
+    # A focused command (/count, /explain): answered with its tools and its
+    # brief only, from this question on
+    command = fields.Char(readonly=True)
     # Said by the person about an answer: useful or not, and why
     feedback = fields.Selection([("up", "Useful"), ("down", "Not Useful")], readonly=True, index=True)
     feedback_note = fields.Char(readonly=True)

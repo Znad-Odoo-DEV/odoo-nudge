@@ -183,8 +183,10 @@ class TestChat(NudgeCase, TransactionCase):
 
     def test_session_info(self):
         IrHttp = self.env["ir.http"]
+        info = IrHttp.with_user(self.user_a)._get_nudge_session_info()
+        self.assertIn("help", [command["name"] for command in info.pop("commands")])
         self.assertEqual(
-            IrHttp.with_user(self.user_a)._get_nudge_session_info(),
+            info,
             {
                 "version": nudge_version(),
                 "is_manager": False, "is_configured": True, "can_share_screen": True,
@@ -201,8 +203,10 @@ class TestChat(NudgeCase, TransactionCase):
 
     def test_status(self):
         Conversation = self.env["nudge.conversation"]
+        status = Conversation.with_user(self.manager).get_status()
+        self.assertIn("help", [command["name"] for command in status.pop("commands")])
         self.assertEqual(
-            Conversation.with_user(self.manager).get_status(),
+            status,
             {
                 "version": nudge_version(),
                 "is_manager": True, "is_configured": True, "can_share_screen": True,

@@ -1,5 +1,6 @@
 from . import schema
 from . import base
+from . import commands
 from . import guidance
 from . import navigation
 from . import profile
