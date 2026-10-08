@@ -40,6 +40,9 @@ export class NudgeMessage extends Component {
         runId: { type: [Number, { value: null }], optional: true },
         progress: { type: String, optional: true },
         onStop: { type: Function, optional: true },
+        // Products found for the person: cards with their picture, price and stock
+        products: { type: [Array, { value: null }], optional: true },
+        onOpenProduct: { type: Function, optional: true },
     };
 
     setup() {

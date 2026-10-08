@@ -34,3 +34,4 @@ from . import test_import
 from . import test_building
 from . import test_reports
 from . import test_ollama
+from . import test_product_search

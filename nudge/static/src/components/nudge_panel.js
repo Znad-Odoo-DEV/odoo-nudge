@@ -321,7 +321,10 @@ export class NudgePanel extends Component {
 
     get quickIsEmpty() {
         const results = this.quick.results;
-        return Boolean(results && !results.menus.length && !results.settings.length && !results.pages.length);
+        return Boolean(
+            results && !results.menus.length && !results.settings.length && !results.pages.length &&
+                !results.products?.length
+        );
     }
 
     quickMenu(menu) {

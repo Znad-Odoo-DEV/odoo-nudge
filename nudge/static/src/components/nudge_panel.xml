@@ -192,6 +192,17 @@
                                 <span t-if="setting.help" class="o_nudge_quick_text" t-esc="setting.help"/>
                             </button>
                         </t>
+                        <t t-if="quick.results.products and quick.results.products.length">
+                            <p class="o_nudge_quick_head">Products</p>
+                            <button t-foreach="quick.results.products" t-as="product" t-key="product.id" type="button"
+                                    class="o_nudge_suggestion o_nudge_quick_product" title="Open the product"
+                                    t-on-click="() => this.nudge.openProduct(product.id)">
+                                <i class="fa fa-cube"/> <strong t-esc="product.name"/>
+                                <span t-if="product.price" class="o_nudge_quick_app" t-esc="' · ' + product.price"/>
+                                <span t-if="'on_hand' in product" class="o_nudge_quick_text"
+                                      t-esc="product.on_hand + ' ' + (product.unit or '')"/>
+                            </button>
+                        </t>
                         <t t-if="quick.results.pages.length">
                             <p class="o_nudge_quick_head">Odoo documentation</p>
                             <a t-foreach="quick.results.pages" t-as="page" t-key="page.url" t-att-href="page.url"
@@ -248,7 +259,9 @@
                                   onStop="(runId) => this.nudge.stopRun(runId)"
                                   onShowGuidance="(steps) => this.nudge.showGuidance(steps)"
                                   choice="message.choice"
-                                  onChoose="(how) => this.nudge.chooseGuidance(message.id, how)"/>
+                                  onChoose="(how) => this.nudge.chooseGuidance(message.id, how)"
+                                  products="message.products"
+                                  onOpenProduct="(productId) => this.nudge.openProduct(productId)"/>
                     <!-- Theirs to say first: on the screen, or in writing -->
                     <div t-if="state.asking" class="o_nudge_message o_nudge_message_assistant o_nudge_ask" role="status">
                         <div class="o_nudge_bubble">

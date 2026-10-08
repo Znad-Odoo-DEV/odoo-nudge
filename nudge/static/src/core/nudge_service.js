@@ -109,7 +109,10 @@ export const nudgeService = {
             return canUseAgent && [MODE_AGENT, MODE_DEV].includes(mode) ? MODE_AGENT : MODE_TALK;
         };
         const state = reactive({
-            isEnabled: Boolean(config),
+            // Nudge is for this person (its groups) ...
+            isAvailable: Boolean(config),
+            // ... and they have it switched on, from their own menu
+            isEnabled: Boolean(config) && settings.nudge_enabled !== false,
             // The server was updated after this page was loaded
             isOutdated: false,
             // A file chosen for the next question: { file, name, size }
@@ -240,6 +243,24 @@ function isReadable(file) {
             } else {
                 open();
             }
+        }
+
+        /**
+         * Nudge: On / Off, from the user menu. Off, the avatar, the button of
+         * the top bar and the shortcuts go, at once and on every page after.
+         *
+         * @param {boolean} value
+         */
+        function setEnabled(value) {
+            if (!state.isAvailable) {
+                return Promise.resolve();
+            }
+            state.isEnabled = Boolean(value);
+            if (!state.isEnabled) {
+                close();
+            }
+            registerHotkeys();
+            return saveSetting("nudge_enabled", state.isEnabled);
         }
 
         function saveSetting(name, value) {
@@ -608,6 +629,7 @@ function isReadable(file) {
         function readMessage(message, cards) {
             const events = message.screen_events || [];
             const shown = events.find((event) => event.type === "guidance");
+            const products = events.find((event) => event.type === "products");
             const told = events
                 .filter((event) =>
                     ["navigate", "write", "open", "filter", "open_action"].includes(event.type)
@@ -620,6 +642,8 @@ function isReadable(file) {
                 state: message.state,
                 error: message.error_message || "",
                 guidance: shown?.steps || [],
+                products: products?.items || null,
+                productQuery: products?.query || "",
                 choice: "",
                 spoken: Boolean(message.is_spoken),
                 attachment: message.attachment_name || "",
@@ -683,7 +707,8 @@ function isReadable(file) {
                 // An answer made of calls to tools only has nothing to read
                 .filter(
                     (message) =>
-                        message.content || message.error || message.guidance.length || message.card
+                        message.content || message.error || message.guidance.length || message.card ||
+                        message.products?.length
                 );
             const working = workingMessage(conversationId);
             if (working) {
@@ -704,11 +729,68 @@ function isReadable(file) {
          * @param {string} words
          * @returns {Promise<{ menus: Object[], settings: Object[], pages: Object[] }>}
          */
+        /**
+         * @param {string} text what was typed
+         * @returns {string|null} the words after /product (or /منتج), null for any other message
+         */
+        function productCommand(text) {
+            const match = /^\/(product|منتج)(?:\s+|$)/iu.exec(text.trim());
+            return match ? text.trim().slice(match[0].length).trim() : null;
+        }
+
+        function isPicture(attachment) {
+            return Boolean(attachment?.file?.type?.startsWith("image/"));
+        }
+
+        /**
+         * /product without a picture: the products most like the words,
+         * found by the server without any AI, shown as cards.
+         */
+        async function findProducts(text, query, spoken = false) {
+            state.view = "chat";
+            state.messages.push({
+                id: `local_${++localId}`, role: "user", content: text, state: "complete",
+                error: "", screen: "", spoken, attachment: "",
+            });
+            state.messages.push({
+                id: `local_${++localId}`, role: "assistant", content: "", state: "streaming",
+                error: "", products: null, productQuery: query,
+            });
+            // The reactive copy: what is changed below is drawn
+            const answer = state.messages.at(-1);
+            if (!query) {
+                answer.content = _t("Write what you look for after /product: a name, a description, a code or a size.");
+                answer.state = "complete";
+                return;
+            }
+            try {
+                const found = await orm.call("nudge.quick", "find_products", [query]);
+                answer.products = found.items || [];
+                answer.content = answer.products.length
+                    ? ""
+                    : _t("No product looks like “%s”. Try another word, a code or a size.", query);
+                answer.state = "complete";
+            } catch {
+                answer.state = "error";
+                answer.error = _t("The products could not be searched.");
+            }
+        }
+
+        function openProduct(productId) {
+            return action.doAction({
+                type: "ir.actions.act_window",
+                res_model: "product.product",
+                res_id: productId,
+                views: [[false, "form"]],
+                target: "current",
+            });
+        }
+
         async function quickFind(words) {
             try {
                 return await orm.call("nudge.quick", "find", [words]);
             } catch {
-                return { menus: [], settings: [], pages: [] };
+                return { menus: [], settings: [], pages: [], products: [] };
             }
         }
 
@@ -928,6 +1010,10 @@ function isReadable(file) {
                 case "open_action":
                     answer.content = join(answer.content, event.text);
                     return action.doAction(event.action).catch(() => {});
+                case "products":
+                    answer.products = event.items || [];
+                    answer.productQuery = event.query || "";
+                    break;
                 case "filter":
                     answer.content = join(answer.content, event.text);
                     return applyFilter(event);
@@ -972,7 +1058,8 @@ function isReadable(file) {
                     answer.id = event.message_id;
                     answer.state = event.state;
                     answer.error = event.message || "";
-                    if (!answer.content && !answer.error && !answer.guidance?.length && !answer.card) {
+                    if (!answer.content && !answer.error && !answer.guidance?.length && !answer.card &&
+                        !answer.products?.length) {
                         // Never an empty bubble: say that nothing came
                         answer.error = state.isOutdated
                             ? _t("Nudge was updated. Reload the page, then ask again.")
@@ -1082,6 +1169,11 @@ function isReadable(file) {
             voice.stopSpeaking();
             // A question still waiting for its how is replaced by this one
             cancelExplain({ keep: false });
+            const productQuery = productCommand(text);
+            if (productQuery !== null && !isPicture(attachment)) {
+                // Found at once, without any AI: the words are enough
+                return findProducts(text, productQuery, spoken);
+            }
             if (state.canUseAgent && state.mode === MODE_TALK && asksToDoIt(text)) {
                 setMode(MODE_AGENT);
             }
@@ -1125,8 +1217,8 @@ function isReadable(file) {
                 attachment: attachment?.name || "",
             };
             state.messages.push(question);
-            if (report) {
-                // A report is not a how-to: nothing to show with the pointer
+            if (report || productQuery !== null) {
+                // A report is not a how-to, nor a product search: nothing to show with the pointer
                 explain = null;
             } else if (!isSharing()) {
                 // Nothing to point at without the screen: in writing, or the work
@@ -1274,7 +1366,8 @@ function isReadable(file) {
             }
         }
 
-        if (state.isEnabled) {
+        if (state.isAvailable) {
+            // Mounted for whoever may use Nudge: switched off, it shows nothing
             registry.category("main_components").add("nudge.Root", { Component: NudgeRoot });
             registerHotkeys();
             if (state.canUseAgent) {
@@ -1295,6 +1388,9 @@ function isReadable(file) {
             open,
             close,
             toggle,
+            setEnabled,
+            findProducts,
+            openProduct,
             send,
             decide,
             stop,

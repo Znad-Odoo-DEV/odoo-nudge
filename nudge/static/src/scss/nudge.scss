@@ -1430,3 +1430,72 @@ $o-nudge-radius: 18px;
         transition: none;
     }
 }
+
+// ---------------------------------------------------------------------
+// Products found: a card each, with its picture, price and stock
+// ---------------------------------------------------------------------
+
+.o_nudge_products {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.o_nudge_product {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px;
+    border: 1px solid $o-nudge-border;
+    border-radius: 8px;
+    background: $o-nudge-surface;
+}
+
+.o_nudge_product_image {
+    flex: none;
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    border-radius: 6px;
+    background: #ffffff;
+}
+
+.o_nudge_product_body {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.85rem;
+}
+
+.o_nudge_product_name {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.o_nudge_product_facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 10px;
+}
+
+.o_nudge_product_cost,
+.o_nudge_product_warehouses,
+.o_nudge_product_why {
+    color: $o-nudge-text-muted;
+}
+
+.o_nudge_product_warehouses span + span::before {
+    content: " · ";
+}
+
+.o_nudge_product_none {
+    color: $o-nudge-danger;
+}
+
+.o_nudge_product_why {
+    font-size: 0.78rem;
+}
+
+.o_nudge_product_open {
+    flex: none;
+}

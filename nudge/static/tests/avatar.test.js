@@ -11,6 +11,8 @@ import { getService, makeMockEnv, mountWithCleanup, onRpc, patchWithCleanup } fr
 import { placement } from "@nudge/core/drag";
 import { readPosition } from "@nudge/core/looks";
 
+import { nudgeMenuItem } from "@nudge/components/nudge_user_menu";
+
 import { setupNudge } from "./voice_helpers";
 
 class Nothing extends Component {
@@ -117,4 +119,34 @@ test("the position and the colour are remembered", async () => {
     await nudge.setTheme("neon");
     expect(nudge.state.theme).toBe("violet");
     expect(getComputedStyle(root).getPropertyValue("--nudge-accent").trim()).not.toBe("");
+});
+
+test("Nudge is switched off and on from the user menu", async () => {
+    const { asked, nudge } = await start();
+    await animationFrame();
+    expect(".o_nudge_avatar").toHaveCount(1);
+    const item = nudgeMenuItem({ services: { nudge } });
+    expect(item.show()).toBe(true);
+    expect(item.description).toBe("Nudge: On");
+
+    nudge.open();
+    await animationFrame();
+    item.callback();
+    await animationFrame();
+    expect(".o_nudge_avatar").toHaveCount(0, { message: "Switched off: gone at once" });
+    expect(nudge.state.isOpen).toBe(false);
+    expect(asked.saved.at(-1)).toEqual({ nudge_enabled: false });
+    expect(nudgeMenuItem({ services: { nudge } }).description).toBe("Nudge: Off");
+
+    nudgeMenuItem({ services: { nudge } }).callback();
+    await animationFrame();
+    expect(".o_nudge_avatar").toHaveCount(1);
+    expect(asked.saved.at(-1)).toEqual({ nudge_enabled: true });
+});
+
+test("switched off, Nudge stays off on the next page", async () => {
+    await start({ nudge_enabled: false });
+    await animationFrame();
+    expect(".o_nudge_avatar").toHaveCount(0);
+    expect(getService("nudge").state.isAvailable).toBe(true, { message: "and can be switched on again" });
 });

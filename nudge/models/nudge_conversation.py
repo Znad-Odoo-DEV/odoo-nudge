@@ -1,5 +1,4 @@
 import base64
-import base64
 import time
 from datetime import timedelta
 
@@ -84,6 +83,17 @@ TOO_MANY_STEPS = (
     "Nothing more can be done for this request: the limit of steps is reached. Tell the "
     "person what was done and what is left, so that they can ask for the rest."
 )
+
+
+# The commands of the message box that look for a product
+PRODUCT_COMMANDS = ("/product", "/منتج")
+
+
+def is_product_command(text):
+    """:return: whether ``text`` asks for a product search: the model
+    reaches for search_products at once, a picture with it described"""
+    first = (text or "").strip().split(maxsplit=1)[:1]
+    return bool(first) and first[0].lower() in PRODUCT_COMMANDS
 
 
 class NudgeConversation(models.Model):
@@ -476,7 +486,7 @@ class NudgeConversation(models.Model):
             user_message_id=message.id,
             # The pointer or a spreadsheet was asked for: the model reaches for a
             # tool, not for a list
-            tool_choice="required" if explain == "screen" or (
+            tool_choice="required" if explain == "screen" or is_product_command(text) or (
                 report == "sheet" and self._can_make_spreadsheet()) else None,
         )
 

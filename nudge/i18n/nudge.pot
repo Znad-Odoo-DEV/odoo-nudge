@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-08 08:52+0000\n"
-"PO-Revision-Date: 2026-10-08 08:52+0000\n"
+"POT-Creation-Date: 2026-10-08 09:59+0000\n"
+"PO-Revision-Date: 2026-10-08 09:59+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -634,6 +634,12 @@ msgstr ""
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/tools/product_search.py:0
+msgid "Close to: %s"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/tools/developer.py:0
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_step__kind__code
 msgid "Code"
@@ -772,6 +778,8 @@ msgid "Correction"
 msgstr ""
 
 #. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
 #: model:ir.model.fields,field_description:nudge.field_nudge_conversation__cost
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__cost
 #: model:ir.model.fields,field_description:nudge.field_nudge_run__cost
@@ -1926,6 +1934,12 @@ msgid "Medium"
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/product_search.py:0
+msgid "Mentioned: %s"
+msgstr ""
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 #: model:ir.model.fields,field_description:nudge.field_nudge_usage__message_id
@@ -2012,6 +2026,12 @@ msgid "Name"
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/product_search.py:0
+msgid "Name close to what was asked"
+msgstr ""
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__record_names
 msgid "Names"
 msgstr ""
@@ -2088,6 +2108,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/nudge/static/src/voice/voice_service.js:0
 msgid "No microphone was found."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "No product looks like “%s”. Try another word, a code or a size."
 msgstr ""
 
 #. module: nudge
@@ -2196,6 +2222,7 @@ msgstr ""
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 #: code:addons/nudge/static/src/components/nudge_root.xml:0
 #: code:addons/nudge/static/src/components/nudge_systray.xml:0
+#: model:ir.model.fields,field_description:nudge.field_res_users_settings__nudge_enabled
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_message__role__assistant
 #: model:ir.module.category,name:nudge.module_category_nudge
 #: model:ir.ui.menu,name:nudge.nudge_menu_root
@@ -2476,6 +2503,18 @@ msgid "Nudge was updated. Reload the page, then ask again."
 msgstr ""
 
 #. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_user_menu.js:0
+msgid "Nudge: Off"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_user_menu.js:0
+msgid "Nudge: On"
+msgstr ""
+
+#. module: nudge
 #: model:ir.actions.server,name:nudge.cron_profile_refresh_ir_actions_server
 msgid "Nudge: read the database profile again"
 msgstr ""
@@ -2662,8 +2701,20 @@ msgstr ""
 
 #. module: nudge
 #. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid "Open"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
 #: code:addons/nudge/static/src/guidance/target_resolver.js:0
 msgid "Open the apps first."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Open the product"
 msgstr ""
 
 #. module: nudge
@@ -2945,6 +2996,12 @@ msgstr ""
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
 msgid "Privacy"
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Products"
 msgstr ""
 
 #. module: nudge
@@ -3239,6 +3296,24 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/models/nudge_message.py:0
 msgid "Said after the answer to: %s"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/product_search.py:0
+msgid "Same barcode"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/product_search.py:0
+msgid "Same code: %s"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/product_search.py:0
+msgid "Same size: %s"
 msgstr ""
 
 #. module: nudge
@@ -3824,6 +3899,12 @@ msgid ""
 "The official documentation of Odoo, every app, which Nudge searches to say "
 "how standard Odoo works. It comes with the module: nothing is fetched from "
 "outside."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "The products could not be searched."
 msgstr ""
 
 #. module: nudge
@@ -4541,6 +4622,12 @@ msgid "Words to look for"
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/product_search.py:0
+msgid "Words: %s"
+msgstr ""
+
+#. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_run__is_background
 msgid ""
 "Worked on while the person does something else. They are told when it is "
@@ -4564,6 +4651,14 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "Write a message first."
+msgstr ""
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid ""
+"Write what you look for after /product: a name, a description, a code or a "
+"size."
 msgstr ""
 
 #. module: nudge

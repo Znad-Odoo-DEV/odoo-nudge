@@ -19,6 +19,9 @@ class ResUsersSettings(models.Model):
         string="Nudge Shortcut", required=True, default=DEFAULT_HOTKEY,
     )
     nudge_share_screen = fields.Boolean(string="Share Screen with Nudge", default=True)
+    # Switched by each person from their own menu: off, the avatar, the button
+    # of the top bar and the shortcuts are gone until it is switched on again
+    nudge_enabled = fields.Boolean(string="Nudge", default=True)
     nudge_dictation_hotkey = fields.Selection(
         [
             ("alt+control+d", "Ctrl + Alt + D"),
