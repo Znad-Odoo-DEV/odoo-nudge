@@ -59,6 +59,8 @@ STATE_BY_STOP_REASON = {
 
 CONFIRM = "confirm"
 DECLINE = "decline"
+# A plan: only the records the rehearsal found going through
+PASSING = "passing"
 
 DONE = (
     "The person said yes, and it is done. %s Tell them in a sentence what was done, or go on "
@@ -986,7 +988,7 @@ class NudgeConversation(models.Model):
             raise AccessError(self.env._("This conversation is not yours."))
         if not self._can_use_agent():
             raise UserError(self.env._("Agent mode is not open to you. Ask your administrator."))
-        if decision not in (CONFIRM, DECLINE):
+        if decision not in (CONFIRM, DECLINE, PASSING):
             raise UserError(self.env._("Say yes or no."))
         conversation = self.sudo()
         step = conversation.waiting_step_id
@@ -1006,10 +1008,31 @@ class NudgeConversation(models.Model):
         provider = self._chat_provider()
 
         events = []
+        tool = tools.base.TOOLS.get(step.tool)
+        is_plan = step.tool == "prepare_plan" and isinstance(step.values, dict) and "plan" in step.values
+        if decision == PASSING and not is_plan:
+            raise UserError(self.env._("Say yes or no."))
+        if is_plan and decision != DECLINE:
+            step.values = dict(step.values, choice=decision)
+            if tool and tool.is_available(self.env, self._chat_mode()) and (
+                    tools.plans.total_of(step.values["plan"]) > tools.plans.INLINE_RECORDS):
+                # Many records: worked on in the background, by pieces, as the person
+                step.write({"state": "working", "decided_at": fields.Datetime.now()})
+                run = step.run_id
+                run.is_background = True
+                conversation.run_id = run
+                run._queue()
+                return {
+                    "conversation_id": self.id,
+                    "user_message_id": False,
+                    "title": conversation.name,
+                    "mode": self._chat_mode(),
+                    "queued": run.id,
+                    "first_events": [dict(step._get_card(), type="decided")],
+                }
         if decision == DECLINE:
             state, result = "declined", tools.base.ToolResult(DECLINED)
         else:
-            tool = tools.base.TOOLS.get(step.tool)
             mode = self._chat_mode()
             if not isinstance(tool, tools.base.Action) or not tool.is_available(self.env, mode):
                 result = tools.base.ToolResult("This can no longer be done.", is_error=True)

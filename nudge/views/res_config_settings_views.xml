@@ -46,6 +46,10 @@
                             </div>
                         </setting>
                         <setting invisible="not nudge_agent"
+                                 help="Many records with one yes: the same change or the same button on many records, or a few steps on the same records. Nudge tries the plan first and undoes it, shows how many records go through and why the others do not; beyond 20 records it is done in the background. What it wrote can be undone; what a button did cannot.">
+                            <field name="nudge_plan_max_records"/>
+                        </setting>
+                        <setting invisible="not nudge_agent"
                                  help="Let the agent compute with Python when counting and searching are not enough: a loop over records, a calculation per record. The code runs in the sandbox of Odoo, as the person, and reads only: what it writes is discarded, and changes still go through the yes of the person. Every run is in What Nudge Did. Off by default.">
                             <field name="nudge_python"/>
                         </setting>
