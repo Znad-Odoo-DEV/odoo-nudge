@@ -272,14 +272,11 @@ edit("nudge_spreadsheet/tests/test_spreadsheet.py", [
 
 # ---------------------------------------------------------------- Odoo 18 checks that no model keeps a patch after a test
 edit("nudge/tests/test_developer.py", [
-    ("    def switch(self, on):\n        self.Parameter.set_param(DEVELOPER_PARAM, \"yes\" if on else \"no\")\n",
-     "    def setUp(self):\n"
-     "        super().setUp()\n"
+    ("        self.patch(developer, \"designed_emails_here\", lambda env: False)\n",
+     "        self.patch(developer, \"designed_emails_here\", lambda env: False)\n"
      "        if self.has_rules:\n"
      "            # A rule made in a test patches the model; Odoo 18 wants it clean afterwards\n"
-     "            self.addCleanup(self.env[\"base.automation\"]._unregister_hook)\n"
-     "\n"
-     "    def switch(self, on):\n        self.Parameter.set_param(DEVELOPER_PARAM, \"yes\" if on else \"no\")\n"),
+     "            self.addCleanup(self.env[\"base.automation\"]._unregister_hook)\n"),
 ])
 
 # ---------------------------------------------------------------- no AI app in 18: the store page says nothing of it
