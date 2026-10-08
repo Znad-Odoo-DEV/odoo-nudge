@@ -51,6 +51,31 @@
                         </button>
                     </t>
                 </div>
+                <div t-if="props.products and props.products.length" class="o_nudge_products">
+                    <div t-foreach="props.products" t-as="product" t-key="product.id" class="o_nudge_product">
+                        <img class="o_nudge_product_image" t-att-src="product.image" alt="" loading="lazy"/>
+                        <div class="o_nudge_product_body">
+                            <div class="o_nudge_product_name" t-esc="product.name"/>
+                            <div class="o_nudge_product_facts">
+                                <span t-if="product.price"><i class="fa fa-tag"/> <t t-esc="product.price"/></span>
+                                <span t-if="product.cost" class="o_nudge_product_cost">Cost <t t-esc="product.cost"/></span>
+                                <span t-if="'on_hand' in product" class="o_nudge_product_stock"
+                                      t-att-class="{ o_nudge_product_none: !product.on_hand }">
+                                    <i class="fa fa-cubes"/> <t t-esc="product.on_hand"/> <t t-esc="product.unit"/>
+                                </span>
+                            </div>
+                            <div t-if="product.by_warehouse and product.by_warehouse.length" class="o_nudge_product_warehouses">
+                                <span t-foreach="product.by_warehouse" t-as="place" t-key="place_index">
+                                    <t t-esc="place.name"/>: <t t-esc="place.quantity"/>
+                                </span>
+                            </div>
+                            <div t-if="product.reasons and product.reasons.length" class="o_nudge_product_why"
+                                 t-esc="product.reasons.join(' · ')"/>
+                        </div>
+                        <button t-if="props.onOpenProduct" type="button" class="btn btn-sm btn-light o_nudge_product_open"
+                                t-on-click="() => props.onOpenProduct(product.id)">Open</button>
+                    </div>
+                </div>
                 <t t-if="props.card" t-call="nudge.Card"/>
                 <div t-if="isInBackground" class="o_nudge_background" role="status">
                     <div class="o_nudge_background_head">
