@@ -53,7 +53,7 @@ def sub(name, pattern, replacement, flags=0):
 if os.path.isdir(ROOT + "nudge_ai"):
     shutil.rmtree(ROOT + "nudge_ai")  # the AI app is Odoo 19 only
     print("dropped nudge_ai")
-for module in ("nudge", "nudge_spreadsheet", "nudge_documents", "nudge_studio", "nudge_mail"):
+for module in ("nudge", "nudge_spreadsheet", "nudge_documents", "nudge_studio", "nudge_mail", "nudge_discuss"):
     sub(f"{module}/__manifest__.py", r'"version": "19\.0\.', '"version": "18.0.')
 
 # ---------------------------------------------------------------- SQL constraints (models.Constraint is 19)

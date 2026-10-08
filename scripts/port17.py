@@ -61,7 +61,7 @@ for module in ("nudge_spreadsheet", "nudge_documents", "nudge_studio"):
     if os.path.isdir(ROOT + module):
         shutil.rmtree(ROOT + module)
         print("dropped", module)
-for module in ("nudge", "nudge_mail"):
+for module in ("nudge", "nudge_mail", "nudge_discuss"):
     sub(f"{module}/__manifest__.py", r'"version": "18\.0\.', '"version": "17.0.')
 
 # ---------------------------------------------------------------- Hoot does not exist in 17
@@ -73,7 +73,7 @@ for path in files("nudge/static/tests/*.js"):
 print("Hoot tests removed:", not files("nudge/static/tests/*.js"))
 
 # ---------------------------------------------------------------- env._ is 18
-for name in files("nudge/**/*.py", "nudge_mail/**/*.py"):
+for name in files("nudge/**/*.py", "nudge_mail/**/*.py", "nudge_discuss/**/*.py"):
     s = read(name)
     # self.env._( / env._( / record.env._( / self.env["x"].env._( → _(
     s2, n = re.subn(r"(?<![\w.\]])(?:[A-Za-z_]\w*(?:\[[^\[\]]*\])?\.)*env\._\(", "_(", s)

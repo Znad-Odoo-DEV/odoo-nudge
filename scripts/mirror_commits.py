@@ -12,7 +12,7 @@ import sys
 
 WORKTREE, STORE, BRANCH = sys.argv[1], sys.argv[2], sys.argv[3]
 COMMITS = sys.argv[4:]
-MODULES = {"nudge", "nudge_ai", "nudge_spreadsheet", "nudge_documents", "nudge_studio", "nudge_mail"}
+MODULES = {"nudge", "nudge_ai", "nudge_spreadsheet", "nudge_documents", "nudge_studio", "nudge_mail", "nudge_discuss"}
 
 
 def git(repo, *args, binary=False):
