@@ -11,12 +11,14 @@ from odoo.exceptions import AccessError
 
 from ..tools.configuration import find_app, settings_layout, settings_steps
 from ..tools.navigation import _visible_menus, menu_path, menu_steps
+from ..tools import product_search
 from ..tools.records import Refused
 
 MAX_WORDS = 80
 MAX_MENUS = 6
 MAX_SETTINGS = 6
 MAX_PAGES = 5
+MAX_PRODUCTS = 5
 MAX_SNIPPET = 160
 
 
@@ -35,14 +37,23 @@ class NudgeQuick(models.AbstractModel):
         self._check_user()
         text = " ".join(str(words or "").split())[:MAX_WORDS]
         terms = [term.casefold() for term in text.split()]
-        found = {"menus": [], "settings": [], "pages": []}
+        found = {"menus": [], "settings": [], "pages": [], "products": []}
         if not terms or len(text) < 2:
             return found
         found["menus"] = self._find_menus(terms)
         if self.env.user.has_group("base.group_system"):
             found["settings"] = self._find_settings(terms)
         found["pages"] = self._find_pages(text)
+        found["products"] = product_search.find(self.env, text, limit=MAX_PRODUCTS)["items"]
         return found
+
+    @api.model
+    def find_products(self, text):
+        """/product, typed in the panel: the products most like ``text``,
+        found without any AI, as the person may see them
+        :return: ``{"query", "items"}``"""
+        self._check_user()
+        return product_search.find(self.env, text)
 
     @api.model
     def guide(self, kind, ref):

@@ -343,6 +343,6 @@ class TestProfileTools(NudgeCase, TransactionCase):
             ["assess_database", "describe_model", "describe_module", "find_screen", "locate_data",
              "open_screen", "read_configuration", "read_settings",
              "remember_lesson", "search_company_files", "search_database_profile",
-             "search_odoo_documentation",
+             "search_odoo_documentation", "search_products",
              "show_menu_path", "show_on_screen", "test_import", "write_in_field"],
         )

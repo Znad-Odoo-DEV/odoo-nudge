@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-08 08:52+0000\n"
-"PO-Revision-Date: 2026-10-08 08:52+0000\n"
+"POT-Creation-Date: 2026-10-08 09:59+0000\n"
+"PO-Revision-Date: 2026-10-08 09:59+0000\n"
 "Last-Translator: \n"
 "Language-Team: Arabic\n"
 "Language: ar\n"
@@ -651,6 +651,12 @@ msgstr "إغلاق"
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/tools/product_search.py:0
+msgid "Close to: %s"
+msgstr "قريب من: %s"
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/tools/developer.py:0
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_step__kind__code
 msgid "Code"
@@ -789,6 +795,8 @@ msgid "Correction"
 msgstr "تصحيح"
 
 #. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
 #: model:ir.model.fields,field_description:nudge.field_nudge_conversation__cost
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__cost
 #: model:ir.model.fields,field_description:nudge.field_nudge_run__cost
@@ -2018,6 +2026,12 @@ msgid "Medium"
 msgstr "متوسط"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/product_search.py:0
+msgid "Mentioned: %s"
+msgstr "مذكور في الوصف: %s"
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 #: model:ir.model.fields,field_description:nudge.field_nudge_usage__message_id
@@ -2106,6 +2120,12 @@ msgid "Name"
 msgstr "الاسم"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/product_search.py:0
+msgid "Name close to what was asked"
+msgstr "الاسم قريب مما طُلب"
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__record_names
 msgid "Names"
 msgstr "الأسماء"
@@ -2183,6 +2203,12 @@ msgstr "لا تقييمات بعد"
 #: code:addons/nudge/static/src/voice/voice_service.js:0
 msgid "No microphone was found."
 msgstr "لم يُعثر على ميكروفون."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "No product looks like “%s”. Try another word, a code or a size."
+msgstr "لا يوجد منتج يشبه «%s». جرّب كلمة أخرى أو كودًا أو مقاسًا."
 
 #. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_provider__effort__none
@@ -2290,6 +2316,7 @@ msgstr "لم يُصرف شيء بعد"
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 #: code:addons/nudge/static/src/components/nudge_root.xml:0
 #: code:addons/nudge/static/src/components/nudge_systray.xml:0
+#: model:ir.model.fields,field_description:nudge.field_res_users_settings__nudge_enabled
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_message__role__assistant
 #: model:ir.module.category,name:nudge.module_category_nudge
 #: model:ir.ui.menu,name:nudge.nudge_menu_root
@@ -2575,6 +2602,18 @@ msgid "Nudge was updated. Reload the page, then ask again."
 msgstr "تم تحديث Nudge. أعد تحميل الصفحة ثم اسأل من جديد."
 
 #. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_user_menu.js:0
+msgid "Nudge: Off"
+msgstr "Nudge: متوقف"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_user_menu.js:0
+msgid "Nudge: On"
+msgstr "Nudge: يعمل"
+
+#. module: nudge
 #: model:ir.actions.server,name:nudge.cron_profile_refresh_ir_actions_server
 msgid "Nudge: read the database profile again"
 msgstr "Nudge: إعادة قراءة ملف قاعدة البيانات"
@@ -2774,9 +2813,21 @@ msgstr "يمكن التراجع هنا عن طلباتك أنت في وضع ال
 
 #. module: nudge
 #. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid "Open"
+msgstr "فتح"
+
+#. module: nudge
+#. odoo-javascript
 #: code:addons/nudge/static/src/guidance/target_resolver.js:0
 msgid "Open the apps first."
 msgstr "افتح التطبيقات أولًا."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Open the product"
+msgstr "فتح المنتج"
 
 #. module: nudge
 #. odoo-python
@@ -3077,6 +3128,12 @@ msgid "Privacy"
 msgstr "الخصوصية"
 
 #. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Products"
+msgstr "المنتجات"
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__profile_id
 msgid "Profile"
 msgstr "الملف"
@@ -3373,6 +3430,24 @@ msgstr "قيلت صوتًا"
 #: code:addons/nudge/models/nudge_message.py:0
 msgid "Said after the answer to: %s"
 msgstr "قيل بعد الجواب عن: %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/product_search.py:0
+msgid "Same barcode"
+msgstr "نفس الباركود"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/product_search.py:0
+msgid "Same code: %s"
+msgstr "نفس الكود: %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/product_search.py:0
+msgid "Same size: %s"
+msgstr "نفس المقاس: %s"
 
 #. module: nudge
 #. odoo-python
@@ -3971,6 +4046,12 @@ msgid ""
 msgstr ""
 "توثيق Odoo الرسمي لكل التطبيقات، يبحث فيه Nudge ليقول كيف يعمل Odoo القياسي."
 " يأتي مع الموديول: لا شيء يُجلب من الخارج."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "The products could not be searched."
+msgstr "تعذّر البحث في المنتجات."
 
 #. module: nudge
 #. odoo-python
@@ -4712,6 +4793,12 @@ msgid "Words to look for"
 msgstr "كلمات للبحث عنها"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/product_search.py:0
+msgid "Words: %s"
+msgstr "الكلمات: %s"
+
+#. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_run__is_background
 msgid ""
 "Worked on while the person does something else. They are told when it is "
@@ -4738,6 +4825,14 @@ msgstr "جارٍ التنفيذ…"
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "Write a message first."
 msgstr "اكتب رسالة أولًا."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid ""
+"Write what you look for after /product: a name, a description, a code or a "
+"size."
+msgstr "اكتب ما تبحث عنه بعد ‎/product: اسمًا أو وصفًا أو كودًا أو مقاسًا."
 
 #. module: nudge
 #. odoo-javascript
