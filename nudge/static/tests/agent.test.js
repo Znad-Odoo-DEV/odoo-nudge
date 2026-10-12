@@ -13,7 +13,7 @@ import {
     webModels,
 } from "@web/../tests/web_test_helpers";
 
-import { asksToDoIt } from "@nudge/core/nudge_service";
+import { asksHowTo, asksToDoIt } from "@nudge/core/nudge_service";
 
 import { answered, setupNudge, streamed } from "./voice_helpers";
 
@@ -620,6 +620,34 @@ test("an answer is rated, and a no says why", async () => {
     expect.verifySteps([`rate ${id} down ""`, `rate ${id} down "In our own payroll module"`]);
     expect(".o_nudge_rate_done").toHaveCount(1);
     expect(nudge.state.messages[1].feedback).toBe("down");
+});
+
+test("a question of how is told from an order", () => {
+    for (const text of ["How do I confirm it?", "where do I find the bills", "Show me the way",
+        "كيف بأكد العرض؟", "وين الفواتير", "فرجيني كيف"]) {
+        expect(asksHowTo(text)).toBe(true, { message: text });
+    }
+    for (const text of ["Confirm the quotation S00003", "Create a contact named Ebrahim",
+        "أكّدلي عرض السعر S00002", "غيّرلي مدينة Raghad لحلب", ""]) {
+        expect(asksHowTo(text)).toBe(false, { message: text });
+    }
+});
+
+test("an order in Agent mode is the work, without asking how", async () => {
+    const { asked, nudge } = await start({
+        settings: { nudge_explain: "ask" },
+        answer: answered({ type: "delta", text: "Here is the card." }),
+    });
+    nudge.setMode("agent");
+    nudge.open();
+    await animationFrame();
+    await nudge.send("Confirm the quotation S00003");
+    await animationFrame();
+    expect(".o_nudge_ask").toHaveCount(0, { message: "An order is not asked how" });
+    expect(asked.messages.at(-1).mode).toBe("agent");
+    await nudge.send("How do I confirm a quotation?");
+    await animationFrame();
+    expect(".o_nudge_ask").toHaveCount(1, { message: "A question of how still is" });
 });
 
 test("an order in Developer mode is the work, and the choice offers it", async () => {

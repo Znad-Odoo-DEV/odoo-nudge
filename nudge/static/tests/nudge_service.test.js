@@ -405,9 +405,9 @@ test("in Agent mode the question asks for the work as well", async () => {
     nudge.open();
     expect(nudge.state.mode).toBe("agent");
 
+    // An order is the work: it is not asked how
     await nudge.send("Make them a Director");
-    expect(nudge.state.asking).not.toBe(null);
-    await nudge.chooseExplain("do");
+    expect(nudge.state.asking).toBe(null);
     expect(requests[0].body.mode).toBe("agent");
     expect("explain" in requests[0].body).toBe(false);
 
