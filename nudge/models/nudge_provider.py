@@ -17,6 +17,9 @@ PROMPT_TOKENS = 5000
 CONVERSATION_TOKENS = 5000
 
 DEFAULT_PROVIDER_PARAM = "nudge.default_provider_id"
+# A model on a machine of one's own reads a long question slowly: the time it
+# is given to answer, at least
+OLLAMA_TIMEOUT = 180
 # The provider of the work: what the agent does, what a developer builds.
 # Empty: the default provider answers in every mode.
 AGENT_PROVIDER_PARAM = "nudge.agent_provider_id"
@@ -399,6 +402,20 @@ class NudgeProvider(models.Model):
                 model=self.model_name, given=self.context_length, needed=needed))
         return warnings
 
+    def _can_see_pictures(self):
+        """:return: whether the model in use reads pictures; True when it is not
+        known, and the provider says so itself"""
+        self.ensure_one()
+        if not self.is_ollama:
+            return True
+        line = self.model_ids.filtered(lambda line: line.name == self.model_name)[:1]
+        if line:
+            return line.sees_pictures
+        try:
+            return ollama.describe(self.base_url, self.model_name, self.api_key or "")["vision"]
+        except base.AdapterError:
+            return True
+
     def action_ollama_prepare(self):
         """Make a copy of the model in use with the context Nudge needs, and
         choose it. Ollama shares the weights: nothing is downloaded."""
@@ -412,7 +429,8 @@ class NudgeProvider(models.Model):
             name = ollama.prepare(self.base_url, self.model_name, context, self.api_key or "")
         except base.AdapterError as exc:
             raise UserError(self._error_message(exc)) from exc
-        self.write({"model_name": name, "context_length": context})
+        self.write({"model_name": name, "context_length": context,
+                    "timeout": max(self.timeout or 0, OLLAMA_TIMEOUT)})
         self.action_fetch_models()
         return self._notify(_(
             "%(name)s is ready with %(context)s tokens of context, and chosen. Test the "
