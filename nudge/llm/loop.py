@@ -157,3 +157,6 @@ def run(job, record):
             yield step["event"]
             return
         turns = step["turns"]
+        if step.get("tools"):
+            # A small model asked for more tools: offered from now on
+            job["tools"] = step["tools"]

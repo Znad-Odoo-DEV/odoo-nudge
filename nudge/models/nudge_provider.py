@@ -11,10 +11,8 @@ _logger = logging.getLogger(__name__)
 # How much of the context a request takes, roughly: JSON and English run
 # about this many characters to a token
 CHARS_PER_TOKEN = 4.0
-# The instructions and what is known of the database
-PROMPT_TOKENS = 5000
-# The short instructions of a small model
-COMPACT_PROMPT_TOKENS = 2500
+# What is known of the database, where the business works, the files
+OVERVIEW_TOKENS = 1500
 # The conversation, the screen shared, what the tools read, the answer
 CONVERSATION_TOKENS = 5000
 
@@ -169,13 +167,24 @@ class NudgeProvider(models.Model):
         self.ensure_one()
         if mode is None:
             mode = self._served_mode()
-        from ..tools import base as tool_base
-        names = [name for name, tool in tool_base.TOOLS.items()
-                 if (mode in tool.modes or (mode == "dev" and "agent" in tool.modes))
-                 and (self.tool_set != "essential" or name in tool_base.ESSENTIAL_TOOLS)]
-        tools_chars = sum(len(tool_base.dump(tool_base.TOOLS[name].definition())) for name in names)
-        prompt_tokens = COMPACT_PROMPT_TOKENS if self.tool_set == "essential" else PROMPT_TOKENS
-        return int(tools_chars / CHARS_PER_TOKEN) + prompt_tokens + CONVERSATION_TOKENS
+        from ..llm import prompt
+        from ..tools import base as tool_base, groups
+        essential = self.tool_set == "essential"
+        if essential:
+            # The tools of the mode, and room for the two largest groups
+            names = tool_base.ESSENTIAL_BY_MODE[mode] | {"more_tools"}
+            extra_chars = groups.largest(mode)
+        else:
+            names = {name for name, tool in tool_base.TOOLS.items()
+                     if (mode in tool.modes or (mode == "dev" and "agent" in tool.modes))
+                     and not getattr(tool, "small_models_only", False)}
+            extra_chars = 0
+        tools_chars = extra_chars + sum(
+            len(tool_base.dump(tool_base.TOOLS[name].definition())) for name in names if name in tool_base.TOOLS)
+        # The instructions of the mode, as long as they are
+        rules = prompt.build_system_blocks(mode=mode, can_use_agent=True, can_develop=True, compact=essential)
+        prompt_chars = sum(len(block) for block in rules)
+        return int((tools_chars + prompt_chars) / CHARS_PER_TOKEN) + OVERVIEW_TOKENS + CONVERSATION_TOKENS
 
     def _served_mode(self):
         """:return: the heaviest mode this provider answers: Talk only when the

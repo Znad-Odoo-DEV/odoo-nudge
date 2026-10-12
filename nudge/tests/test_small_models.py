@@ -132,6 +132,58 @@ class TestSmallModels(NudgeCase, TransactionCase):
         self.assertIn("Nudge/Configuration/AI Providers", context)
         self.assertIn("thirty days", context)
 
+    def test_the_tools_of_the_mode_and_the_groups_of_the_question(self):
+        self.small()
+        adapter = self.use_adapter()
+        self.order(self.agent, "How many quotations do we have?")
+        names = {tool["name"] for tool in adapter.calls[0]["tools"]}
+        self.assertIn("search_records", names)
+        self.assertIn("more_tools", names, "The rest is a call away")
+        self.assertNotIn("make_spreadsheet", names, "A group is offered when the question asks for it")
+        self.assertNotIn("change_settings", names)
+
+        adapter = self.use_adapter()
+        self.order(self.agent, "بالـ SQL: أكتر 5 زباين عندهم طلبات")
+        names = {tool["name"] for tool in adapter.calls[0]["tools"]}
+        self.assertIn("make_spreadsheet", names, "The words of the question bring their group, in Arabic too")
+
+    def test_more_tools_are_given_for_the_rest_of_the_conversation(self):
+        from odoo.addons.nudge.llm import base as llm_base  # noqa: PLC0415
+
+        self.small()
+        asking = [llm_base.tool_use_event("call_1", "more_tools", {"groups": ["data"]}),
+                  llm_base.stop_event(llm_base.STOP_TOOL_USE)]
+        adapter = self.use_adapter(script=[asking])
+        conversation, _events = self.order(self.agent, "Give me the totals by customer")
+        before = {tool["name"] for tool in adapter.calls[0]["tools"]}
+        after = {tool["name"] for tool in adapter.calls[1]["tools"]}
+        self.assertNotIn("make_spreadsheet", before)
+        self.assertIn("make_spreadsheet", after, "Offered from the next answer on")
+        self.assertEqual(conversation.sudo().tool_groups, "data")
+        # And to the next question of the same conversation
+        adapter = self.use_adapter()
+        self.order(self.agent, "And by country?", conversation_id=conversation.id)
+        self.assertIn("make_spreadsheet", {tool["name"] for tool in adapter.calls[0]["tools"]})
+
+    def test_a_large_model_has_every_tool_and_no_groups(self):
+        adapter = self.use_adapter()
+        self.order(self.agent, "How many quotations do we have?")
+        names = {tool["name"] for tool in adapter.calls[0]["tools"]}
+        self.assertIn("make_spreadsheet", names)
+        self.assertNotIn("more_tools", names)
+
+    def test_words_of_the_groups(self):
+        from odoo.addons.nudge.tools import groups  # noqa: PLC0415
+
+        self.assertEqual(groups.asked("فعّلي خيار الأسعار المتعددة من الإعدادات"), ["settings"])
+        self.assertEqual(groups.asked("كم عدد الطلبات؟"), [], "A count is not a setting")
+        self.assertIn("reports", groups.asked("اطبعلي تقرير PDF للطلب"))
+        self.assertIn("assessment", groups.asked("Audit my database"))
+        # The context of a small model keeps room for its mode's instructions
+        self.small()
+        self.assertGreater(self.provider._tokens_needed("dev"), self.provider._tokens_needed("agent"))
+        self.assertGreater(self.provider._tokens_needed("agent"), self.provider._tokens_needed("talk"))
+
     def test_a_mention_is_given_what_was_found_too(self):
         # "@Nudge how do we record landed costs?" went to the small model bare: "I cannot help"
         self.small()
