@@ -55,6 +55,46 @@ def shape(schema):
     return json.dumps(example(schema), ensure_ascii=False)
 
 
+# What a field path written as a placeholder carries around it: {{ object.x }}, #object.x
+PLACEHOLDER_BITS = re.compile(r"\{\{|\}\}|^\s*#|\bobject\.")
+
+
+def is_pairs(schema):
+    """:return: whether ``schema`` is a list of ``{"field", "value"}``"""
+    items = schema.get("items") or {}
+    return (schema.get("type") == "array" and items.get("type") == "object"
+            and set(items.get("required", ())) == {"field", "value"})
+
+
+def forgive(value, schema):
+    """:return: ``value`` as a small model means it, where it cannot mean
+    anything else: 9 written for "9", ``{"user_id": "8"}`` for a list of
+    ``{"field": "user_id", "value": "8"}``, ``{"field": "user_id"}`` for
+    "user_id", and "{{ object.user_id }}" or "#object.id" for the field path
+    the pattern asks for"""
+    expected = schema.get("type")
+    allowed = [expected] if isinstance(expected, str) else list(expected or ())
+    if allowed == ["string"] and "enum" not in schema and isinstance(value, (int, float)):
+        return str(value).lower() if isinstance(value, bool) else str(value)
+    if allowed == ["string"] and isinstance(value, dict) and len(value) == 1:
+        (only,) = value.values()
+        value = only if isinstance(only, str) else value
+    if allowed == ["string"] and isinstance(value, str) and schema.get("pattern") and not re.fullmatch(
+            schema["pattern"], value):
+        cleaned = PLACEHOLDER_BITS.sub("", value).strip()
+        if cleaned != value and re.fullmatch(schema["pattern"], cleaned):
+            return cleaned
+    if isinstance(value, dict) and is_pairs(schema) and "field" not in value:
+        value = [{"field": name, "value": item} for name, item in value.items()]
+    if isinstance(value, list) and "items" in schema:
+        return [forgive(item, schema["items"]) for item in value]
+    if isinstance(value, dict):
+        properties = schema.get("properties", {})
+        return {name: forgive(item, properties[name]) if name in properties else item
+                for name, item in value.items()}
+    return value
+
+
 def validate(value, schema, path=""):
     """:raise SchemaError: when ``value`` does not follow ``schema``"""
     expected = schema.get("type")

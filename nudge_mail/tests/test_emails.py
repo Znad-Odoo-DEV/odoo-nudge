@@ -271,6 +271,26 @@ class TestEmails(NudgeCase, MockEmail, TransactionCase):
         self.assertFalse(done.is_error, done.content)
         return self.env["nudge.email.flow"].browse(done.records[1])
 
+    def test_the_template_of_the_model_is_taken_when_none_is_given(self):
+        # A small model asked for a review button invented a template id
+        from odoo.addons.nudge_mail.tools.emails import template_of  # noqa: PLC0415
+
+        from odoo.addons.nudge.tools.records import Refused  # noqa: PLC0415
+
+        with self.assertRaisesRegex(Refused, "has no email template"):
+            env = self.dev_env()
+            template_of(env, env["res.partner.category"])
+        without = {"name": "Create and say so", "model": "res.partner", "label": "Create and Email",
+                   "method": "create_company"}
+        template = self.made(name="Company created")
+        result = self.run_tool("prepare_email_review", without)
+        if self.env["mail.template"].search_count([("model", "=", "res.partner")]) == 1:
+            self.assertFalse(result.is_error, result.content)
+            self.made(name="Another one")
+            result = self.run_tool("prepare_email_review", without)
+        self.assertIn("several email templates", result.content)
+        self.assertIn(f"#{template.id} Company created", result.content)
+
     def test_the_button_takes_the_place_of_the_original(self):
         result = self.review()
         self.assertFalse(result.is_error, result.content)

@@ -84,7 +84,7 @@ def run(job, record):
     started = time.monotonic()
     deadline = started + job["seconds"]
     turns = job["turns"]
-    said = False
+    said = acted = False
     forced = job.get("tool_choice") if job["tools"] else None
     last_duration = 0.0
     for round_number in range(1, job["rounds"] + 1):
@@ -111,8 +111,10 @@ def run(job, record):
         sent = [*turns, {"role": "user", "text": LAST_ROUND_NOTE}] if last else turns
         spent, retries = {}, EMPTY_RETRIES
         while True:
+            # Pushed only when it answered in words alone: once a tool was
+            # called, what it says is about what the tool did
             outcome = {"text": "", "tool_calls": [], "said_before": said,
-                       "may_push": bool(job.get("push_to_act")) and not job.get("pushed")}
+                       "may_push": bool(job.get("push_to_act")) and not job.get("pushed") and not acted}
             try:
                 events = job["adapter"].stream_chat(
                     job["system"], sent, deadline=deadline, tools=job["tools"] or None,
@@ -153,6 +155,8 @@ def run(job, record):
         outcome["duration_ms"] = int(last_duration * 1000)
         outcome["last_round"] = round_number == job["rounds"] or base.expired(deadline)
         said = said or bool(outcome["text"])
+        # Asking for more tools is not acting: what it says after may still be talk
+        acted = acted or any(call.get("name") != "more_tools" for call in outcome["tool_calls"])
 
         step = record(outcome)
         if any(event.get("type") in SHOWN_EVENTS for event in step.get("screen_events") or []):

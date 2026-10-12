@@ -642,7 +642,13 @@ class ReadModuleCode(base.Tool):
                 folders.setdefault(folder, []).append(file_name)
             listed = "\n".join(f"- {folder + '/' if folder else '(top)'}: {', '.join(names)}"
                                for folder, names in folders.items())
-            return base.ToolResult(f"Files of {name}, by folder (read one with path=folder/file):\n{listed}")
+            # What it is for, as its own manifest says: told only the files, a
+            # small model guessed the purpose of nudge_spreadsheet from their names
+            module = env["ir.module.module"].sudo().search([("name", "=", name)], limit=1)
+            said = " ".join(filter(None, (module.shortdesc, module.summary)))
+            described = " ".join((module.description or "").split())[:600]
+            about = f"What {name} is, in its manifest: {said}. {described}\n" if said or described else ""
+            return base.ToolResult(f"{about}Files of {name}, by folder (read one with path=folder/file):\n{listed}")
         relative = arguments["path"].strip("/")
         full = os.path.realpath(os.path.join(root, relative))
         if not full.startswith(root + os.sep) or relative not in files:

@@ -125,8 +125,14 @@ class TestBuilding(NudgeCase, TransactionCase):
         self.assertFalse(result.is_error, result.content)
         lines = {line["label"]: line for line in result.pending["preview"]["lines"]}
         self.assertEqual(lines["Runs"]["value"], f"Mark as buyer (#{action.id}, object_write)")
-        self.assertEqual(lines["Shown"]["value"], "unless function == 'Buyer'")
+        self.assertRegex(lines["Shown"]["value"], r"^unless function == 'Buyer': on \d+ of the \d+ records looked at$")
         self.assertIn(f'name="{action.id}" type="action"', lines["Result"]["value"])
+        # Hidden on every record: "active == True" hid an Archive button from every contact
+        hidden = self.run_tool("prepare_button", {
+            "model": "res.partner", "label": "Archive", "action_id": action.id, "invisible": "active == True"})
+        shown = {line["label"]: line["value"] for line in hidden.pending["preview"]["lines"]}["Shown"]
+        self.assertRegex(shown, r": on 0 of the \d+ records looked at$")
+        self.assertIn("hidden on every one", hidden.content)
         done = self.do("prepare_button", result)
         self.assertFalse(done.is_error, done.content)
         arch = self.form_arch()

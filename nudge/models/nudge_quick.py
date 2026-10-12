@@ -18,7 +18,7 @@ from odoo import _, api, models
 from odoo.exceptions import AccessError
 
 from ..tools import base, commands, groups, product_search
-from ..tools.configuration import find_app, settings_layout, settings_steps
+from ..tools.configuration import current_values, find_app, settings_layout, settings_steps
 from ..tools.finding import REFERENCE_FIELDS, _score, candidate_models, look_in
 from ..tools.navigation import _visible_menus, menu_path, menu_steps
 from ..tools.records import MODEL_PATTERN, Refused, cut, get_model
@@ -56,6 +56,10 @@ about show tell use using new add see find me my you we it its is an a to of in 
 \u0634\u0644\u0648\u0646 \u0645\u0627\u0630\u0627 \u0643\u064a\u0641\u064a\u0647 \u0644\u0627
 \u0628\u0639\u0645\u0644 \u0627\u0639\u0645\u0644 \u0628\u0633\u0648\u064a
 """.split())
+# The verbs of an order, as folded: "ضيف" (add) found the screen of Guests (ضيوف)
+ORDER_VERBS = ("ضيف", "ضيفلي", "أضف", "اضف", "اضيف", "حط", "حطلي", "خلي", "خلّي", "اعملي",
+               "اعملها", "سوي", "سويلي", "عدل", "عدلي", "غير", "غيرلي")
+GROUND_STOP_WORDS = GROUND_STOP_WORDS | {commands.fold(verb) for verb in ORDER_VERBS}
 
 
 
@@ -72,6 +76,15 @@ def without_names(text):
 # The products a picture is looked for among, for a small model
 GROUND_PRODUCTS = 3
 GROUND_SETTINGS = 3
+# The kinds of records a question names by their own name, at most
+GROUND_MODELS = 2
+# Kinds of records that are not what a person works on: the reports, read but
+# never changed nor built on ("account.invoice.report"), and the guests of Discuss
+NOT_WORKED_ON = re.compile(r"^report\.|\.report$|^mail\.(guest|tracking)")
+# Nor, when a kind of record is named by its own name, the technical ones
+TECHNICAL = re.compile(r"^(ir|base|bus|nudge|web|res\.config)\.")
+# What is switched on in the settings of one app, at most
+MAX_SETTINGS_ON = 20
 GROUND_GROUPS = 3
 # Where a name an order gives is looked for, by the field that holds it
 NAMED_FIELDS = (("res.users", "name"), ("res.partner", "name"), ("product.product", "default_code"),
@@ -318,6 +331,7 @@ class NudgeQuick(models.AbstractModel):
         if not roots:
             return []
         scored = []
+        technical = self.env.ref("base.menu_custom", raise_if_not_found=False)
         for menu in _visible_menus(self.env):
             english_menu = menu.with_context(lang="en_US")
             own, english = menu._get_full_name(), english_menu._get_full_name()
@@ -325,6 +339,13 @@ class NudgeQuick(models.AbstractModel):
             path = {commands.root_of(word) for word in commands.fold(f"{own} {english}").split()}
             # The screen itself is about it, not only an app above it
             if not roots & leaf:
+                continue
+            if technical and f"/{technical.id}/" in f"/{menu.parent_path or ''}" and not any(
+                    {commands.root_of(word) for word in commands.fold(name).split()
+                     if len(word) >= 3 and word not in GROUND_STOP_WORDS} <= roots
+                    for name in (menu.name, english_menu.name)):
+                # A screen of Settings ‣ Technical is named in full: "go ahead with
+                # the values" is not about Tracking Values
                 continue
             covered = round(len(roots & leaf) / len(leaf), 2)
             scored.append(((-len(roots & path), -len(roots & leaf), -covered), len(own), own, english, menu.id))
@@ -366,7 +387,33 @@ class NudgeQuick(models.AbstractModel):
                         "app": app["label"], "label": setting["label"], "field": setting["fields"][0],
                         "help": setting["help"][:MAX_SNIPPET]}))
         scored.sort(key=lambda item: item[:3])
-        return [setting for *_rank, setting in scored[:GROUND_SETTINGS]]
+        chosen = [setting for *_rank, setting in scored[:GROUND_SETTINGS]]
+        # With its value, for whoever may read it: told none, "which are on?"
+        # was answered "none"
+        values = current_values(self.env, [setting["field"] for setting in chosen]) or {}
+        for setting in chosen:
+            if setting["field"] in values:
+                setting["value"] = values[setting["field"]]
+        return chosen
+
+    def _ground_app_settings(self, text):
+        """:return: for a question about the settings of one app ("the Sales
+        settings"), what is switched on in it, or None"""
+        roots = {commands.root_of(word) for word in commands.fold(without_names(text)).split()
+                 if len(word) >= 3 and word not in GROUND_STOP_WORDS}
+        for app in settings_layout(self.env):
+            named = {commands.root_of(word) for word in commands.fold(app["label"]).split()} - {""}
+            if not named or not named <= roots:
+                continue
+            fields = {setting["fields"][0]: setting["label"] for setting in app["settings"] if setting["fields"]}
+            values = current_values(self.env, list(fields))
+            if values is None:
+                return None
+            Settings = self.env["res.config.settings"]
+            on = [label for name, label in fields.items()
+                  if Settings._fields[name].type == "boolean" and values.get(name) == "on"]
+            return {"app": app["label"], "on": on[:MAX_SETTINGS_ON], "of": len(fields)}
+        return None
 
     def _ground_products(self, text):
         """:return: the products most like ``text`` (what a picture shows),
@@ -397,13 +444,52 @@ class NudgeQuick(models.AbstractModel):
         if scored:
             # The best only, and what ties with it: a small model takes what it is given
             best = scored[0][0]
-            found["screens"] = [screen for rank, screen in scored if rank == best][:MAX_GROUND_SCREENS]
+            found["screens"] = [screen for rank, screen in scored if rank == best
+                                and not NOT_WORKED_ON.search(screen["model"])][:MAX_GROUND_SCREENS]
+            if not found["screens"]:
+                del found["screens"]
+        shown = {screen["model"] for screen in found.get("screens", [])}
+        kinds = [kind for kind in self._ground_models(text) if kind["model"] not in shown]
+        if kinds:
+            found["models"] = kinds
+        return found
+
+    def _ground_models(self, text):
+        """:return: the kinds of records the question names by their own name,
+        in the person's language or in English ("جهة الاتصال", "Contact"),
+        that this person may read; the longest names first"""
+        roots = {commands.root_of(word) for word in commands.fold(without_names(text)).split()
+                 if len(word) >= 3 and word not in GROUND_STOP_WORDS} - {""}
+        if not roots:
+            return []
+        Model = self.env["ir.model"].sudo()
+        english = {record.id: record.name for record in Model.with_context(lang="en_US").search([("transient", "=", False)])}
+        scored = []
+        for record in Model.browse(list(english)):
+            name = record.model
+            if NOT_WORKED_ON.search(name) or TECHNICAL.search(name) or name not in self.env or self.env[name]._abstract:
+                continue
+            for label in {record.name, english[record.id]}:
+                words = {commands.root_of(word) for word in commands.fold(label or "").split()
+                         if len(word) >= 3 and word not in GROUND_STOP_WORDS} - {""}
+                if words and words <= roots:
+                    scored.append((-len(words), len(name), name, record.name))
+                    break
+        scored.sort()
+        found = []
+        for _rank, _length, name, label in scored:
+            if self.env[name]._nudge_has_access("read") and name not in {kind["model"] for kind in found}:
+                found.append({"model": name, "name": label})
+            if len(found) >= GROUND_MODELS:
+                break
         return found
 
     def _ground_named(self, text):
         """:return: the people, contacts, products and records the order names
         by their name or reference (Raghad, Gemini Furniture, S00004), with
-        their ids, as this person may read them"""
+        their ids, as this person may read them. A user and her own contact
+        are one person, told as the user: told as two, "the orders of Gemini
+        Furniture" were looked for on Raghad's contact"""
         found, seen = [], set()
         for name in names_in(text):
             for model_name, field in NAMED_FIELDS:
@@ -416,6 +502,8 @@ class NudgeQuick(models.AbstractModel):
                     if (model_name, record.id) not in seen:
                         seen.add((model_name, record.id))
                         found.append({"model": model_name, "id": record.id, "name": record.display_name})
+                        if model_name == "res.users" and record.partner_id:
+                            seen.add(("res.partner", record.partner_id.id))
             if REFERENCE.fullmatch(name):
                 for *_rank, model, record in self._find_reference(name)[:2]:
                     if (model._name, record.id) not in seen:
@@ -452,6 +540,9 @@ class NudgeQuick(models.AbstractModel):
             settings = self._ground_settings(text)
             if settings:
                 found["settings"] = settings
+            switched = self._ground_app_settings(text)
+            if switched:
+                found["settings_on"] = switched
         if "products" in asked:
             products = self._ground_products(text)
             if products:

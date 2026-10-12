@@ -173,6 +173,20 @@ class TestOllamaProvider(NudgeCase, TransactionCase):
         self.assertEqual(self.provider.context_length, created[0][2]["parameters"]["num_ctx"])
         self.assertGreaterEqual(self.provider.timeout, 180, "A model on one's own machine is given time")
 
+    def test_prepare_chooses_a_picture_model_only_for_a_model_that_cannot_see(self):
+        adapter = self.use_adapter()
+        self.patch(adapter, "list_models", lambda: ["qwen3:8b-nudge", "qwen3.5:4b-nudge", "qwen2.5vl:3b"])
+        seeing = show(capabilities=("completion", "vision"))
+        self.server({("POST", "/api/show"): lambda body: seeing if body["model"] == "qwen2.5vl:3b" else show()})
+        self.provider.is_ollama = True
+        self.provider.action_ollama_prepare()
+        self.assertEqual(self.provider.picture_model, "qwen2.5vl:3b", "Another model reads for it")
+        self.server({("POST", "/api/show"): show(capabilities=("completion", "tools", "vision"))})
+        self.provider.model_name = "qwen3.5:4b"
+        self.provider.action_ollama_prepare()
+        self.assertEqual(self.provider.model_name, "qwen3.5:4b-nudge")
+        self.assertFalse(self.provider.picture_model, "It reads pictures itself: one model on the card")
+
     def test_a_picture_is_not_sent_to_a_model_that_cannot_see(self):
         from .test_attachments import PNG  # noqa: PLC0415
 
@@ -228,6 +242,36 @@ class TestOllamaProvider(NudgeCase, TransactionCase):
         conversation = self.env["nudge.conversation"].with_user(self.user_a)._chat_open(None)
         job = conversation._chat_prepare("Do we sell this?", attachment=("photo.png", PNG, "image/png"))
         self.assertIn("Nudge Oak Cabinet", job["turns"][-1]["context"], "Found for the small model")
+
+    def test_a_small_model_that_sees_says_what_the_picture_shows_first(self):
+        # qwen3.5:4b sees: "Do we sell this product?" found a product by the
+        # words of the question, not by the picture
+        from .test_attachments import PNG  # noqa: PLC0415
+
+        if "product.product" not in self.env:
+            self.skipTest("No products in this database")
+        self.env["product.product"].create({"name": "Nudge Oak Cabinet", "list_price": 320})
+        self.env["product.product"].create({"name": "Nudge Product Cost Sheet", "list_price": 5})
+        self.use_adapter()
+        self.server()
+        self.provider.write({"is_ollama": True, "picture_model": False, "tool_set": "essential"})
+        self.env["nudge.provider.model"].create({
+            "provider_id": self.provider.id, "name": "qwen3:8b", "sees_pictures": True})
+        read = []
+
+        def read_picture(base_url, model, data, question="", api_key=""):
+            read.append(model)
+            return "A large oak cabinet with two doors", {"input_tokens": 1, "output_tokens": 1}
+
+        self.patch(ollama, "read_picture", read_picture)
+        conversation = self.env["nudge.conversation"].with_user(self.user_a)._chat_open(None)
+        job = conversation._chat_prepare("Do we sell this product? What does it cost?",
+                                         attachment=("photo.png", PNG, "image/png"))
+        question = job["turns"][-1]
+        self.assertEqual(read, ["qwen3:8b"], "The model itself says what it sees")
+        self.assertIn("Nudge Oak Cabinet", question["context"])
+        self.assertNotIn("Cost Sheet", question["context"], "Not the words of the question")
+        self.assertTrue(question.get("images"), "The picture itself still goes to the model")
 
     def test_the_warning_follows_the_context(self):
         self.provider.is_ollama = True

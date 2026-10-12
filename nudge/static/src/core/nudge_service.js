@@ -87,6 +87,10 @@ function join(...parts) {
     return parts.filter(Boolean).join("\n\n");
 }
 
+// The conversation kept across a reload of the page, for so long
+const KEPT_KEY = "nudge.kept_conversation";
+const KEPT_MS = 60000;
+
 export const nudgeService = {
     dependencies: [
         "orm",
@@ -949,6 +953,9 @@ function isReadable(file) {
          * the person reads it where it is, and takes it back if they wish.
          */
         async function write(answer, event) {
+            // Said at once: the end of the answer may come before the writing
+            // is done, and an answer that writes is never an empty bubble
+            answer.wrote = true;
             const result = await writeInField(context.frontView(), event);
             if (result.error) {
                 answer.content = join(
@@ -981,6 +988,9 @@ function isReadable(file) {
         async function onChanged(event) {
             try {
                 if (event.action) {
+                    if (event.action.tag === "reload") {
+                        keepAcrossReload();
+                    }
                     await action.doAction(event.action);
                     return;
                 }
@@ -1175,7 +1185,7 @@ function isReadable(file) {
                     answer.state = event.state;
                     answer.error = event.message || "";
                     if (!answer.content && !answer.error && !answer.guidance?.length && !answer.card &&
-                        !answer.products?.length) {
+                        !answer.products?.length && !answer.wrote) {
                         // Never an empty bubble: say that nothing came
                         answer.error = state.isOutdated
                             ? _t("Nudge was updated. Reload the page, then ask again.")
@@ -1313,7 +1323,9 @@ function isReadable(file) {
             // The screen as it is when the question is asked
             const snapshot = lookAtScreen();
             state.view = "chat";
-            if (report === null && state.canMakeSpreadsheet && asksForReport(text)) {
+            // In Developer mode a report is something to build ("a PDF report of
+            // the quotation"), not figures to show: the question goes as it is
+            if (report === null && state.canMakeSpreadsheet && state.mode !== MODE_DEV && asksForReport(text)) {
                 // A comparison or a report: theirs to say, in the chat or as a spreadsheet
                 const question = {
                     id: `local_${++localId}`,
@@ -1515,9 +1527,45 @@ function isReadable(file) {
             }
         }
 
+        /**
+         * What Nudge made reloads the page (a new field, a changed screen): the
+         * conversation is kept for the page that comes, a short while only.
+         */
+        function keepAcrossReload() {
+            if (!state.conversationId) {
+                return;
+            }
+            try {
+                browser.sessionStorage.setItem(
+                    KEPT_KEY,
+                    JSON.stringify({ conversationId: state.conversationId, isOpen: state.isOpen, at: Date.now() })
+                );
+            } catch {
+                // Without storage the page comes back without the conversation
+            }
+        }
+
+        /** @returns {{conversationId: number, isOpen: boolean}|null} what was kept, taken once */
+        function takeKept() {
+            try {
+                const kept = JSON.parse(browser.sessionStorage.getItem(KEPT_KEY) || "null");
+                browser.sessionStorage.removeItem(KEPT_KEY);
+                return kept && Date.now() - kept.at < KEPT_MS ? kept : null;
+            } catch {
+                return null;
+            }
+        }
+
         if (state.isAvailable) {
             // Mounted for whoever may use Nudge: switched off, it shows nothing
             registry.category("main_components").add("nudge.Root", { Component: NudgeRoot });
+            const kept = takeKept();
+            if (kept) {
+                // Back after the reload what Nudge made asked for: where it was
+                openConversation(kept.conversationId)
+                    .then(() => kept.isOpen && open())
+                    .catch(() => {});
+            }
             registerHotkeys();
             if (state.canUseAgent) {
                 bus.subscribe("nudge.run", onNews);

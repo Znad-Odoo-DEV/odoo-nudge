@@ -7,6 +7,7 @@ deleted on its own. Before the card, the change is applied in a savepoint
 that is rolled back: what Odoo would refuse is told, and what the person is
 shown is the difference it makes to the screen.
 """
+import ast
 import difflib
 import re
 
@@ -14,6 +15,7 @@ from lxml import etree
 
 from odoo import Command, _
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools.safe_eval import safe_eval
 
 from . import base
 from .developer import Building, check_developing, ir_model
@@ -258,6 +260,8 @@ def make_view(env, values):
     return view
 
 
+# Records looked at to tell on how many a new button is shown
+HIDDEN_LOOKED = 200
 RELOAD = {"type": "ir.actions.client", "tag": "reload"}
 
 
@@ -387,16 +391,26 @@ class PrepareButton(Building):
             xpath, position, snippet = "//form/*[1]", "before", f"<header>{button}</header>"
         name = _("Button %(label)s on %(model)s", label=label, model=model_label(model))
         values, diff = preview_change(env, model, root, "form", arch_before, name, xpath, position, snippet)
+        condition = (arguments.get("invisible") or "").strip()
+        counted = hidden_on(model, condition) if condition else None
+        shown = _("unless %s", condition) if condition else _("always")
+        told = "The person is being shown the button and the difference it makes to the form."
+        if counted:
+            hidden, looked = counted
+            shown = _("%(shown)s: on %(on)s of the %(looked)s records looked at",
+                          shown=shown, on=looked - hidden, looked=looked)
+            if hidden == looked:
+                told += (f" It would be hidden on every one of the {looked} records looked at: tell the "
+                         "person, and check the condition (it is when the button is HIDDEN).")
         lines = [
             {"label": _("Model"), "value": model_label(model)},
             {"label": _("Button"), "value": label},
             {"label": _("Runs"), "value": f"{action.name} (#{action.id}, {action.state})"},
-            {"label": _("Shown"), "value": _("unless %s", arguments["invisible"].strip())
-             if (arguments.get("invisible") or "").strip() else _("always")},
+            {"label": _("Shown"), "value": shown},
             {"label": _("Result"), "value": "\n".join(diff) or _("No visible difference"), "code": True},
         ]
         return base.ToolResult(
-            "The person is being shown the button and the difference it makes to the form.",
+            told,
             pending={
                 "summary": _("Add the button “%s”", label),
                 "res_model": "ir.ui.view",
@@ -409,6 +423,29 @@ class PrepareButton(Building):
         )
 
     execute = PrepareViewChange.execute
+
+
+def hidden_on(model, condition, looked=HIDDEN_LOOKED):
+    """:param condition: when a button is hidden, as the form reads it: active == True
+    :return: ``(hidden, looked at)`` among the latest records of ``model``, or
+        None when the condition cannot be read here"""
+    try:
+        names = {node.id for node in ast.walk(ast.parse(condition, mode="eval")) if isinstance(node, ast.Name)}
+    except SyntaxError:
+        return None
+    fields = [name for name in names if name in model._fields]
+    records = model.search([], limit=looked, order="id desc")
+    if not records:
+        return None
+    hidden = 0
+    try:
+        for row in records.read(fields):
+            values = {name: value[0] if isinstance(value, tuple) else value for name, value in row.items()}
+            values.update({name: False for name in names if name not in values})
+            hidden += bool(safe_eval(condition, values))
+    except Exception:  # noqa: BLE001
+        return None
+    return hidden, len(records)
 
 
 # ------------------------------------------------------------------- fields

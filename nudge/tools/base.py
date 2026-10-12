@@ -19,6 +19,8 @@ MODE_TALK = "talk"
 MODE_AGENT = "agent"
 MODE_DEV = "dev"
 MODES = (MODE_TALK, MODE_AGENT, MODE_DEV)
+# What a refused action leaves: the model told "has been created" of a refusal
+NOTHING_MADE = "Nothing was made or changed: if you tell the person, say so."
 
 
 class ToolResult:
@@ -158,10 +160,15 @@ def call(env, name, arguments, screen=None, mode=MODE_TALK):
     if not isinstance(arguments, dict):
         return ToolResult("The arguments could not be read as JSON.", is_error=True)
     try:
+        arguments = schema.forgive(arguments, tool.input_schema)
         schema.validate(arguments, tool.input_schema)
     except schema.SchemaError as error:
-        return ToolResult(f"Invalid arguments. {error}", is_error=True)
-    return guarded(env, name, lambda: tool.run(env, arguments, screen))
+        result = ToolResult(f"Invalid arguments. {error}", is_error=True)
+    else:
+        result = guarded(env, name, lambda: tool.run(env, arguments, screen))
+    if result.is_error and isinstance(tool, Action):
+        result.content = f"{result.content} {NOTHING_MADE}"
+    return result
 
 
 def dump(value):

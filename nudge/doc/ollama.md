@@ -12,20 +12,23 @@ machine of yours. Nudge speaks to it like to any provider.
 
 | Machine | Model | Tools Given | What to expect |
 |---|---|---|---|
-| Laptop, graphics card of 6–8 GB | `qwen3:4b-instruct` | Essential tools | Talk works well; Agent and Developer mode answer, slowly and simply |
+| Laptop, graphics card of 6–8 GB | `qwen3.5:4b` | Essential tools | Talk, and the work of Agent mode with its cards; Developer mode simply |
 | Server, graphics card of 16–24 GB | `qwen3:14b` to `qwen3:32b` | All the tools | Talk, Agent and Developer mode |
 | No graphics card | — | — | Too slow for an answer in 90 seconds |
 
-Qwen is the best of its size in Arabic and with tools. On a small card, take a model that does not
-think (`-instruct`): a thinking model spends a minute before its first word, and the thinking-only
-builds (`qwen3:4b`) write their thinking into the answer when told not to think.
+Qwen is the best of its size in Arabic and with tools. On a small card, take Qwen 3.5: it reads
+pictures itself, its context takes a quarter of the memory of Qwen 3's, and it calls the tool an order
+needs where `qwen3:4b-instruct` answered with steps to follow. It thinks before it answers unless told
+not to; Nudge tells it not to (Effort: none). Asked directly, in the Ollama app or with `ollama run`,
+switch its thinking off there (`/set nothink`), or it spends half a minute before its first word. The
+thinking-only builds of Qwen 3 (`qwen3:4b`) write their thinking into the answer when told not to
+think.
 
 Nudge can run on that one machine entirely, for nothing:
 
 | What | Model | Size | Where it is set |
 |---|---|---|---|
-| Talk, Agent and Developer modes | `qwen3:4b-instruct` | 2.5 GB | Model |
-| Pictures sent with a question | `qwen2.5vl:3b` | 3.2 GB | Picture Model (chosen by Prepare for Nudge) |
+| Talk, Agent and Developer modes, and the pictures sent with a question | `qwen3.5:4b` | 3.3 GB | Model |
 | Speech turned into text | Whisper `large-v3-turbo` | 1.6 GB | Speech to Text, Speech Address |
 
 A small model is given the tools of its mode; the others (settings, SQL and spreadsheets, PDF
@@ -54,7 +57,7 @@ curl -fsSL https://ollama.com/install.sh | sh
 Then pull a model:
 
 ```
-ollama pull qwen3:4b-instruct
+ollama pull qwen3.5:4b
 ```
 
 ## Connect Nudge
@@ -72,9 +75,11 @@ ollama pull qwen3:4b-instruct
    server and chosen, and loaded at once. Nothing is downloaded; Ollama shares the weights. Nudge
    then says whether the model **runs entirely on the graphics card**, or how much of it runs on
    the processor: that part answers several times slower.
-5. **Pictures.** `ollama pull qwen2.5vl:3b`, then Prepare for Nudge again: it is chosen as the
-   **Picture Model**. A picture sent to a model that does not see is read by it, and what it read
-   goes with the question; Nudge also looks for what it shows among the products.
+5. **Pictures.** A model that sees (`qwen3.5`) reads them itself: Prepare for Nudge leaves the
+   **Picture Model** empty, and no second model takes the card. For one that does not
+   (`qwen3:4b-instruct`), `ollama pull qwen2.5vl:3b`, then Prepare for Nudge again: it is chosen as
+   the Picture Model, reads the picture, and what it read goes with the question; Nudge also looks
+   for what it shows among the products.
 6. **Speech.** Ollama does not turn speech into text: a Whisper on the same machine does. Any
    service that speaks the API of OpenAI (`/v1/audio/transcriptions`) will do, for instance
    [speaches](https://github.com/speaches-ai/speaches) (`docker run -p 8000:8000
@@ -117,6 +122,11 @@ On such a card set, before Ollama starts: `OLLAMA_FLASH_ATTENTION=1`, `OLLAMA_KV
 and `OLLAMA_KEEP_ALIVE=30m` (a model unloaded after the default 5 minutes takes 20 to 30 seconds to
 come back). Prepare for Nudge says whether the model runs entirely on the card.
 
+`qwen3.5:4b` keeps the context in a quarter of its layers only: with the same 28,672 tokens it takes
+3.4 GB, entirely on the card, against 3.9 GB for `qwen3:4b-instruct`. A request of Nudge of 11,000
+tokens has its first word in 8 seconds, and in 2 when its instructions are those of the request
+before, which Ollama keeps.
+
 ## Measured on a laptop
 
 RTX 4050 with 6 GB, 16 GB of memory, Ollama 0.40, the interface in Arabic, Ollama for Talk and
@@ -135,7 +145,9 @@ context takes half the memory). A card already full is the other trap: an Ollama
 leave `llama-server` processes holding the memory of the card; stop them, or restart the machine.
 
 `qwen3:8b` on the same card: 5.9 GB, a third on the processor, 12 words a second, two to three
-times slower, and no better on the facts. On a 6 GB card, `qwen3:4b-instruct` is the model.
+times slower, and no better on the facts. On a 6 GB card, `qwen3.5:4b` is the model: Ollama for
+every mode, on 2026-10-11, gave Raghad the Inventory access and switched on the units of measure on
+a card each, where `qwen3:4b-instruct` said it could not.
 
 **What a small model does well:** the company's own rules from its files, what a term means, the
 difference between two documents, checking a file before an import, pointing at the button an
