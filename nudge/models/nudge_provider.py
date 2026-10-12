@@ -17,6 +17,11 @@ PROMPT_TOKENS = 5000
 CONVERSATION_TOKENS = 5000
 
 DEFAULT_PROVIDER_PARAM = "nudge.default_provider_id"
+# The provider of the work: what the agent does, what a developer builds.
+# Empty: the default provider answers in every mode.
+AGENT_PROVIDER_PARAM = "nudge.agent_provider_id"
+DEVELOPER_PROVIDER_PARAM = "nudge.developer_provider_id"
+MODE_PROVIDER_PARAMS = {"agent": AGENT_PROVIDER_PARAM, "dev": DEVELOPER_PROVIDER_PARAM}
 
 
 class NudgeProvider(models.Model):
@@ -223,6 +228,21 @@ class NudgeProvider(models.Model):
             if provider.active and provider.is_configured:
                 return provider
         return self.search([]).filtered("is_configured")[:1]
+
+    @api.model
+    def _get_for_mode(self, mode):
+        """:return: the provider set for ``mode`` ("agent" or "dev"), ready to
+        answer, possibly empty; Developer mode falls back on the one of the
+        agent. Must be called in sudo, as :meth:`_get_default`."""
+        Parameter = self.env["ir.config_parameter"].sudo()
+        for param in ([DEVELOPER_PROVIDER_PARAM, AGENT_PROVIDER_PARAM] if mode == "dev"
+                      else [AGENT_PROVIDER_PARAM] if mode == "agent" else []):
+            value = Parameter.get_param(param)
+            if value and value.isdigit():
+                provider = self.browse(int(value)).exists()
+                if provider.active and provider.is_configured:
+                    return provider
+        return self.browse()
 
     @api.model
     def _get_listener(self):
