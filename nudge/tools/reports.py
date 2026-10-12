@@ -17,7 +17,10 @@ from odoo.tools import html2plaintext
 from . import base
 from .building import CUSTOM_MODULE, DryRun, RELOAD, register
 from .developer import Building, check_developing, ir_model
-from .records import MODEL_PATTERN, PATH_PATTERN, Refused, cut, get_model, refusing, target_field
+from .records import (
+    MODEL_PATTERN, PATH_PATTERN, Refused, cut, field_label, get_model, model_label, refusing,
+    target_field,
+)
 
 MAX_FIELDS = 30
 MAX_COLUMNS = 10
@@ -57,10 +60,10 @@ def field_rows(model, paths):
         field = target_field(model, path)
         if field.type in ("binary", "one2many", "many2many", "json", "properties"):
             raise Refused(f"{path} is a {field.type}: it is not printed as a value. Lines print a one2many.")
-        label = field.string
+        label = field_label(field, model.env)
         if "." in path:
             head = model._fields[path.split(".")[0]]
-            label = f"{head.string} › {field.string}"
+            label = f"{field_label(head, model.env)} › {label}"
         rows.append((label, path))
     return rows
 
@@ -214,7 +217,7 @@ class PrepareReport(Building):
                 comodel = get_model(env, field.comodel_name)
                 lines = {
                     "field": field.name,
-                    "label": field.string,
+                    "label": field_label(field, env),
                     "columns": field_rows(comodel, arguments["lines"]["columns"]),
                 }
             arch = build_template(env, key, model, title, rows, lines)
@@ -233,9 +236,9 @@ class PrepareReport(Building):
         printed = preview_report(env, model, values, arch)
         card = [
             {"label": env._("Report"), "value": name},
-            {"label": env._("Model"), "value": model._description},
+            {"label": env._("Model"), "value": model_label(model)},
             *lines_shown,
-            {"label": env._("Where"), "value": env._("the Print menu of %s", model._description)},
+            {"label": env._("Where"), "value": env._("the Print menu of %s", model_label(model))},
             {"label": env._("Template"), "value": arch, "code": True},
             {"label": env._("Prints, for one record"), "value": cut(printed, MAX_PREVIEW_CHARS) or env._("No record to print yet"), "code": True},
         ]

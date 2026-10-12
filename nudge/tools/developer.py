@@ -22,7 +22,7 @@ from . import base, schema
 from .actions import VALUES_SCHEMA, read_moment, read_value, read_values, to_write
 from .records import (
     MODEL_PATTERN, OPERATORS, PATH_PATTERN, Refused, build_domain, cut, format_value, get_model,
-    get_records, is_developing, refusing, target_field,
+    field_label, get_records, is_developing, model_label, refusing, target_field,
 )
 
 TRIGGERS = {
@@ -380,7 +380,7 @@ def path_label(model, path):
         field = model._fields.get(name)
         if field is None:
             return path
-        labels.append(field.string)
+        labels.append(field_label(field, model.env))
         if field.comodel_name:
             model = model.env[field.comodel_name]
     return " › ".join(labels)
@@ -475,7 +475,7 @@ def read_action(env, model, action, position=1):
         field = target_field(model, path)
         if field.readonly and not field.inverse:
             raise Refused(f"Action {position}: {path} is read only.")
-        label = field.string
+        label = field_label(field, env)
         if action.get("expression") and (action.get("value") or "").strip():
             raise Refused(
                 f"Action {position}: an update gives a value or an expression, not both. A fixed "
@@ -552,7 +552,7 @@ def read_action(env, model, action, position=1):
             if field.type != "many2one" or field.comodel_name != "res.users":
                 raise Refused(f"Action {position}: {action['user_field']} does not hold a user.")
             values.update(activity_user_type="generic", activity_user_field_name=action["user_field"])
-            lines.append({"label": env._("For"), "value": field.string})
+            lines.append({"label": env._("For"), "value": field_label(field, env)})
         else:
             values.update(activity_user_type="specific", activity_user_id=env.uid)
             lines.append({"label": env._("For"), "value": env.user.name})
@@ -589,7 +589,7 @@ def read_rule(env, arguments):
         "trigger": trigger,
     }
     lines = [
-        {"label": env._("Model"), "value": model._description},
+        {"label": env._("Model"), "value": model_label(model)},
         {"label": env._("When"), "value": TRIGGERS[trigger]},
     ]
     if arguments.get("fields"):
@@ -761,8 +761,8 @@ class PrepareServerAction(Building):
         values["usage"] = "ir_actions_server"
         if arguments.get("in_menu"):
             values.update(binding_model_id=ir_model(env, model).id, binding_type="action")
-        lines = [{"label": env._("Model"), "value": model._description}] + lines + [
-            {"label": env._("Shown in"), "value": env._("the Actions menu of %s", model._description)
+        lines = [{"label": env._("Model"), "value": model_label(model)}] + lines + [
+            {"label": env._("Shown in"), "value": env._("the Actions menu of %s", model_label(model))
              if arguments.get("in_menu") else env._("nowhere yet: a button or a rule will run it")},
         ]
         return base.ToolResult(
@@ -826,7 +826,7 @@ class PrepareEmailTemplate(Building):
         model = get_model(env, arguments["model"])
         values, lines = read_email(env, model, arguments["email"])
         values["name"] = arguments["name"].strip()
-        lines = [{"label": env._("Model"), "value": model._description}] + lines
+        lines = [{"label": env._("Model"), "value": model_label(model)}] + lines
         return base.ToolResult(
             "The person is being shown the email template, in full.",
             pending={
@@ -883,7 +883,7 @@ class PrepareDelete(Building):
         records = get_records(model.with_context(active_test=False), arguments["ids"], "unlink")
         self._check_deletable(records)
         names = records.mapped("display_name")
-        lines = [{"label": env._("Kind"), "value": model._description},
+        lines = [{"label": env._("Kind"), "value": model_label(model)},
                  {"label": env._("Undo"), "value": env._("Not possible: deleted for good")}]
         if model._name == "ir.model.fields":
             lines.append({"label": env._("Data"), "value": env._("The column and every value in it are deleted too")})
@@ -1471,7 +1471,7 @@ class PrepareScheduledAction(Building):
         }
         shown_when = odoo_fields.Datetime.context_timestamp(env.user, when).strftime("%Y-%m-%d %H:%M")
         lines = [
-            {"label": env._("Model"), "value": model._description},
+            {"label": env._("Model"), "value": model_label(model)},
             {"label": env._("Every"), "value": every_text(env, every["number"], every["unit"])},
             {"label": env._("First run"), "value": shown_when},
             {"label": env._("Runs as"), "value": env.user.name},

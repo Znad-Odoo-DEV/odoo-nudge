@@ -29,8 +29,11 @@ class PrepareTask(base.Action):
         "the instruction as you will read it each time, complete and alone: it is all you will "
         "have. Give a model and conditions whenever the task is about records: they are counted "
         "first, and when none matches, or none is new, the AI is not asked and nothing is "
-        "spent. A task only reads: what it finds worth changing waits as a card for the person. "
-        "Nothing is made by this call: the person reads the task and says yes or no."
+        "spent. A task only reads, and tells the person who asked: what it finds worth changing "
+        "waits as a card for them. What Odoo must do for others on a schedule (remind the "
+        "salespeople, write to customers, change records) is a scheduled action, built in "
+        "Developer mode with prepare_scheduled_action. Nothing is made by this call: the person "
+        "reads the task and says yes or no."
     )
     input_schema = {
         "type": "object",

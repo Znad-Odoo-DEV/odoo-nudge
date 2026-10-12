@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-11 05:57+0000\n"
-"PO-Revision-Date: 2026-10-11 05:57+0000\n"
+"POT-Creation-Date: 2026-10-11 06:09+0000\n"
+"PO-Revision-Date: 2026-10-11 06:09+0000\n"
 "Last-Translator: \n"
 "Language-Team: Arabic\n"
 "Language: ar\n"
@@ -499,6 +499,12 @@ msgid "Amber"
 msgstr "كهرماني"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Amount"
+msgstr "مبلغ"
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_doc_passage__anchor
 msgid "Anchor"
 msgstr "المرساة"
@@ -881,9 +887,21 @@ msgstr "راجعه جيدًا: هذا الإجراء لا يُتراجع عنه 
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Checkbox"
+msgstr "مربع اختيار"
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "Checked code"
 msgstr "فحص الكود"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Choice"
+msgstr "اختيار من قائمة"
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
@@ -1276,6 +1294,8 @@ msgid "Database Profile"
 msgstr "ملف قاعدة البيانات"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
 #: model:ir.model.fields,field_description:nudge.field_nudge_usage__date
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_conversation_view_form
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_form
@@ -1286,6 +1306,12 @@ msgstr "ملف قاعدة البيانات"
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_search
 msgid "Date"
 msgstr "التاريخ"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Date and time"
+msgstr "تاريخ ووقت"
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_search
@@ -1301,6 +1327,12 @@ msgstr "أيام"
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__decided_at
 msgid "Decided On"
 msgstr "تاريخ القرار"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Decimal number"
+msgstr "عدد عشري"
 
 #. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_step__state__declined
@@ -1692,6 +1724,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:nudge.field_nudge_source__group_ids
 msgid "For the Groups"
 msgstr "للمجموعات"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Formatted text"
+msgstr "نص منسّق"
 
 #. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_task__weekday__4
@@ -2371,6 +2409,18 @@ msgid "Lines"
 msgstr "الأسطر"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Link to a record"
+msgstr "رابط إلى سجل"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Links to records"
+msgstr "روابط إلى سجلات"
+
+#. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_task_view_form
 msgid ""
 "List the customer invoices overdue by more than 7 days, with the amount and "
@@ -2381,6 +2431,12 @@ msgstr "اعرض فواتير الزبائن المتأخرة أكثر من 7 أ
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
 msgid "Load Again"
 msgstr "حمّل من جديد"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Long text"
+msgstr "نص طويل"
 
 #. module: nudge
 #. odoo-python
@@ -4618,6 +4674,8 @@ msgid "Test the connection: the first answer loads it."
 msgstr "اختبر الاتصال: أول جواب يحمّله."
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_doc_page_view_search
 msgid "Text"
 msgstr "النص"
@@ -5723,6 +5781,12 @@ msgstr "مَن ومتى"
 #: model:ir.model.fields,help:nudge.field_nudge_source__group_ids
 msgid "Who may be answered from this file. Empty: everybody who uses Nudge."
 msgstr "من يُجاب من هذا الملف. فارغ: كل من يستخدم Nudge."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Whole number"
+msgstr "عدد صحيح"
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_search

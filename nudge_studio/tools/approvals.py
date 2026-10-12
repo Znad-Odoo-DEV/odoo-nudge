@@ -12,7 +12,8 @@ from odoo import Command
 from odoo.addons.nudge.tools import base
 from odoo.addons.nudge.tools.developer import DELETABLE, Building, check_developing, in_words, ir_model
 from odoo.addons.nudge.tools.records import (
-    CONDITION_SCHEMA_ITEMS, MODEL_PATTERN, Refused, build_domain, cut, get_model, get_records, refusing,
+    CONDITION_SCHEMA_ITEMS, MODEL_PATTERN, Refused, build_domain, cut, get_model, get_records, model_label,
+    refusing,
 )
 
 RULE = "studio.approval.rule"
@@ -189,7 +190,7 @@ class PrepareApprovalRule(Building):
             "name": (arguments.get("message") or "").strip() or f"Approval: {button['label']}",
         }
         lines = [
-            {"label": env._("Model"), "value": model._description},
+            {"label": env._("Model"), "value": model_label(model)},
             {"label": env._("Button"), "value": button["label"]},
             {"label": env._("Approvers"), "value": ", ".join(approvers.mapped("name")) or None},
             {"label": env._("Approval group"), "value": group.display_name if group else None},

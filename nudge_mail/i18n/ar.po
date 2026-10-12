@@ -5,11 +5,16 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-11 06:09+0000\n"
+"PO-Revision-Date: 2026-10-11 06:09+0000\n"
+"Last-Translator: \n"
+"Language-Team: Arabic\n"
 "Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: \n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 
 #. module: nudge_mail
 #. odoo-python
@@ -117,6 +122,13 @@ msgid "Change: email “%s”"
 msgstr "تعديل: البريد «%s»"
 
 #. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/designs.py:0
+msgid ""
+"Classic: a coloured band with the title, a clean table, a square button"
+msgstr "كلاسيكي: شريط ملوّن فيه العنوان، وجدول مرتّب، وزر مربّع"
+
+#. module: nudge_mail
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__body
 msgid "Contents"
 msgstr "المحتوى"
@@ -214,6 +226,14 @@ msgid "For"
 msgstr "لـ"
 
 #. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/designs.py:0
+msgid ""
+"Formal: a letter, the logo on top, a reference line, a bordered table, serif"
+" type"
+msgstr "رسمي: رسالة، الشعار في الأعلى، وسطر مرجع، وجدول بإطار، وخط بزوائد"
+
+#. module: nudge_mail
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__email_from
 msgid "From"
 msgstr "من"
@@ -271,10 +291,22 @@ msgstr "يمكن تنفيذه بدون البريد"
 
 #. module: nudge_mail
 #. odoo-python
+#: code:addons/nudge_mail/tools/designs.py:0
+msgid "Minimal: quiet, a thin line of colour, plain text, a link"
+msgstr "بسيط: هادئ، خط رفيع ملوّن، ونص عادي، ورابط"
+
+#. module: nudge_mail
+#. odoo-python
 #: code:addons/nudge_mail/tools/emails.py:0
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__model_id
 msgid "Model"
 msgstr "النموذج"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/tools/designs.py:0
+msgid "Modern: a large coloured header, rounded cards, a round button"
+msgstr "عصري: ترويسة ملوّنة كبيرة، وبطاقات بزوايا دائرية، وزر دائري"
 
 #. module: nudge_mail
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__name

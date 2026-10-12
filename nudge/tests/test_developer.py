@@ -285,6 +285,15 @@ class TestDeveloper(NudgeCase, TransactionCase):
             "action": {"kind": "update", "field": "active", "value": "false", "expression": ""}})
         self.assertFalse(archive.is_error, archive.content)
 
+    def test_labels_are_in_the_language_of_the_person(self):
+        # In Arabic the card said "Customer › Email": field.string is the English of the code
+        from odoo import fields  # noqa: PLC0415
+
+        from odoo.addons.nudge.tools import developer  # noqa: PLC0415
+
+        self.patch(fields.Field, "_description_string", lambda field, env: f"«{field.string}»")
+        self.assertEqual(developer.path_label(self.env["res.partner"], "user_id.email"), "«Salesperson» › «Email»")
+
     # ------------------------------------------------------------- stopping, deleting
     def test_switched_off_then_deleted(self):
         self.switch(True)

@@ -87,6 +87,11 @@ commands and @Nudge; the provider of the work answers Agent mode, the scheduled 
 Developer mode (which falls back on the Agent's). Typically Ollama on your own machine for the
 questions, Gemini or Claude for what Nudge does and builds.
 
+A free tier counts the tokens of each minute, and a request of Agent or Developer mode reads tens
+of thousands of them a round (the instructions, the tools, what was read). When the provider says
+how long to wait, half a minute or less, Nudge waits and asks again by itself; past that, the
+person is told to try again in a minute. A team that works with Nudge all day needs a paid key.
+
 A small model (the essential tools) reads short instructions, and every question goes with what
 Nudge found for it by itself: the screens whose names hold its words, in Arabic or English, the
 pages of the documentation about them, the passages of the company files. It is told the language
