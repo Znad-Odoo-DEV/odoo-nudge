@@ -58,6 +58,20 @@ class TestWorkbook(TransactionCase):
         # What the spreadsheet module checks on save
         self.env["nudge.spreadsheet"].create({"name": "t", "spreadsheet_data": json.dumps(data)})
 
+    def test_a_count_has_no_dot(self):
+        empty = self.env["nudge.spreadsheet"]._empty_spreadsheet_data()
+        data = workbook.build_workbook(empty, [{
+            "name": "Sales by customer",
+            "columns": [{"label": "Customer", "type": "text"}, {"label": "Orders", "type": "number"},
+                        {"label": "Average", "type": "number"}],
+            "rows": [["Acme", 3, 12.5], ["Gemini", 17, "4"], ["Deco", None, 7]],
+            "totals": True,
+        }])
+        sheet = data["sheets"][0]
+        self.assertEqual(data["formats"][sheet["formats"]["B2"]], "#,##0", "3 orders, not 3.")
+        self.assertEqual(data["formats"][sheet["formats"]["B5"]], "#,##0", "Their total too")
+        self.assertEqual(data["formats"][sheet["formats"]["C3"]], "#,##0.##", "A column with decimals keeps them")
+
     def test_letters_and_values(self):
         self.assertEqual([workbook.column_letter(i) for i in (0, 25, 26, 27, 701, 702)],
                          ["A", "Z", "AA", "AB", "ZZ", "AAA"])
