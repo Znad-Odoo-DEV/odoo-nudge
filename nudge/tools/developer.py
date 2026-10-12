@@ -1943,8 +1943,9 @@ class PrepareScheduledAction(Building):
         "first_run \"monday\" and the hour asked. The code runs with no record: it "
         "finds its own with model.search(...). Nothing is made by this call: the person is "
         "shown the action in full, the code included, and says yes or no; you read their "
-        "answer as the result. A reminder (remind the salespeople of the quotations older than "
-        "30 days) is given as remind, not as code: Nudge writes its code. Check other code first "
+        "answer as the result. A reminder (an activity for the person responsible of the records "
+        "older than a number of days) is given as remind, not as code: Nudge writes its code. Check "
+        "other code first "
         "with check_python_code. " + REMIND_TOLD
     )
     input_schema = {
@@ -1987,9 +1988,9 @@ class PrepareScheduledAction(Building):
             code, reminder = remind_code(env, model, arguments["remind"])
         elif not code:
             raise Refused(
-                'Give code, or for a reminder remind: {"summary": "Follow up this quotation", '
-                '"older_than_days": 30, "conditions": [{"field": "state", "operator": "in", '
-                '"value": "draft, sent"}]}.')
+                'Give code, or for a reminder remind: {"summary": "Follow up", '
+                '"older_than_days": 14, "conditions": [{"field": "...", "operator": "=", '
+                '"value": "..."}]}.')
         error = compile_code(code, env, model._name)
         if error:
             raise Refused(f"The code does not compile. {error}")

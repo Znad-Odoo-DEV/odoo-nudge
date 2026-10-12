@@ -38,7 +38,7 @@ PICTURE_PROMPT = (
 # found a desk and a table top for a large cabinet
 PRODUCT_PROMPT = (
     "Name the object in this picture as a shop would list it: 2 to 6 English words, the kind of "
-    "thing first (\"Cabinet, large, two doors, oak\"). Then any code or reference printed on it, "
+    "thing first (\"Office chair, black, swivel, mesh\"). Then any code or reference printed on it, "
     "exactly as written. Nothing else.")
 
 
