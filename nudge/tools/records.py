@@ -10,6 +10,7 @@ use for them, and an administrator who asks a question does not mean to
 send their keys to an AI provider.
 """
 import datetime
+import difflib
 import json
 import re
 
@@ -122,6 +123,18 @@ def get_model(env, name, operation="read", to_change=False):
     return model
 
 
+def close_fields(model, name, operation="read"):
+    """:return: the fields this person may use whose names are close to
+    ``name``: spelt alike (groups_id, group_ids in Odoo 19), or with its
+    first word"""
+    usable = sorted(other for other, candidate in model._fields.items()
+                    if has_field_access(model, candidate, operation))
+    close = difflib.get_close_matches(name, usable, n=5, cutoff=0.6)
+    stem = name.split("_")[0]
+    close += [other for other in usable if stem in other and other not in close]
+    return close[:15]
+
+
 def has_field_access(model, field, operation):
     """Odoo 18 has no _has_field_access: a field kept for some groups is
     for the people of those groups"""
@@ -135,10 +148,7 @@ def get_fields(model, names, operation="read"):
     for name in names:
         field = model._fields.get(name)
         if field is None or not has_field_access(model, field, operation):
-            known = sorted(
-                other for other, candidate in model._fields.items()
-                if has_field_access(model, candidate, operation) and name.split("_")[0] in other
-            )[:15]
+            known = close_fields(model, name, operation)
             hint = f" Close to it: {', '.join(known)}." if known else ""
             raise Refused(
                 f"{model._name} has no field {name!r} that this person can {operation}.{hint} "

@@ -131,13 +131,20 @@ class NudgeMention(models.Model):
         return (self.user_id.lang or self.message_id.author_id.lang
                 or self.env.company.partner_id.lang or self.env.lang or "en_US")
 
+    def _told(self, error=None):
+        """:return: what Nudge posts when it does not answer; called on the
+        mention in the language of the one who asked"""
+        if error is None:
+            return self.env._("Nudge is not open to the person who asked.")
+        return self.env._("Nudge could not answer: %s", error)
+
     def _answer(self):
         self.ensure_one()
         user = self.user_id
-        told = self.with_context(lang=self._lang()).env
+        told = self.with_context(lang=self._lang())
         if not user or not user._is_internal() or not user.has_group("nudge.group_nudge_user"):
             self.state = "refused"
-            self._post(told._("Nudge is not open to the person who asked."), notify=False)
+            self._post(told._told(), notify=False)
             return
         env = self._as_person()
         try:
@@ -163,7 +170,7 @@ class NudgeMention(models.Model):
             self.state = "done"
         except (UserError, AccessError, Refused) as error:
             self.write({"state": "failed", "error": cut(str(error), 300)})
-            self._post(told._("Nudge could not answer: %s", error))
+            self._post(told._told(error))
         except Exception as error:  # noqa: BLE001
             _logger.exception("Nudge: mention %s failed", self.id)
             self.write({"state": "failed", "error": cut(str(error), 300)})
