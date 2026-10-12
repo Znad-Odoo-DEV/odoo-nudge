@@ -3,7 +3,7 @@ from odoo import fields, models
 from .nudge_conversation import (
     ADMIN_PARAM, AGENT_PARAM, DEVELOPER_PARAM, PYTHON_PARAM, SCREEN_SHARING_PARAM, SQL_PARAM,
 )
-from .nudge_provider import DEFAULT_PROVIDER_PARAM
+from .nudge_provider import AGENT_PROVIDER_PARAM, DEFAULT_PROVIDER_PARAM, DEVELOPER_PROVIDER_PARAM
 from .nudge_voice import ENGINE_AUTO, ENGINE_BROWSER, ENGINE_PROVIDER, VOICE_ENGINE_PARAM, VOICE_PARAM
 
 
@@ -16,6 +16,12 @@ class ResConfigSettings(models.TransientModel):
         help="Provider answering new conversations. "
              "Empty uses the first configured provider.",
     )
+    nudge_agent_provider_id = fields.Many2one(
+        "nudge.provider", string="Agent Provider", config_parameter=AGENT_PROVIDER_PARAM,
+        help="Provider doing the work in Agent mode, and the scheduled tasks. Empty: the default one.")
+    nudge_developer_provider_id = fields.Many2one(
+        "nudge.provider", string="Developer Provider", config_parameter=DEVELOPER_PROVIDER_PARAM,
+        help="Provider building in Developer mode. Empty: the one of Agent mode, or the default one.")
     group_nudge_all_users = fields.Boolean(
         string="Nudge for All Internal Users",
         implied_group="nudge.group_nudge_user",

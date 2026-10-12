@@ -308,10 +308,18 @@ class NudgeConversation(models.Model):
         values = {"snapshot": snapshot, "snapshot_hash": fingerprint}
         return values, screen.render(snapshot, unchanged=unchanged)
 
-    def _chat_provider(self):
-        """:return: the provider answering this conversation, in sudo
+    def _chat_provider(self, mode=None):
+        """:param mode: the mode of the request: the work may have a provider
+            of its own, set by the administrator
+        :return: the provider answering this conversation, in sudo
         :raise UserError: when there is none"""
-        provider = self.sudo().provider_id
+        Provider = self.env["nudge.provider"].sudo()
+        provider = Provider._get_for_mode(mode or MODE_TALK)
+        if not provider:
+            provider = self.sudo().provider_id
+            if provider and provider in (Provider._get_for_mode(MODE_AGENT) | Provider._get_for_mode(MODE_DEV)):
+                # Answered by the provider of the work last time: Talk goes back to the default
+                provider = provider.browse()
         if not provider.is_configured or not provider.active:
             provider = self.env["nudge.provider"].sudo()._get_default()
         if not provider:
@@ -334,7 +342,7 @@ class NudgeConversation(models.Model):
         :raise UserError: when the person may not spend more"""
         self.ensure_one()
         self.env["nudge.usage"]._check_budget()
-        job = self._chat_job(self._chat_provider(), self._chat_mode(), AGENT_MAX_ROUNDS)
+        job = self._chat_job(self._chat_provider(self._chat_mode()), self._chat_mode(), AGENT_MAX_ROUNDS)
         job["seconds"] = self.env["nudge.run"]._get_piece_seconds()
         return job
 
@@ -453,7 +461,7 @@ class NudgeConversation(models.Model):
         limit = AGENT_MAX_MESSAGES if self.sudo().run_ids else MAX_MESSAGES
         if self.message_count >= limit:
             raise UserError(self.env._("This conversation is getting long. Start a new one."))
-        provider = self._chat_provider()
+        provider = self._chat_provider(mode)
 
         conversation = self.sudo()
         # What waited for a decision is left: the person moved on
@@ -1016,7 +1024,7 @@ class NudgeConversation(models.Model):
         self._chat_check_not_busy()
         # What follows the yes is a call to the model
         self.env["nudge.usage"]._check_budget()
-        provider = self._chat_provider()
+        provider = self._chat_provider(self._chat_mode())
 
         events = []
         tool = tools.base.TOOLS.get(step.tool)
