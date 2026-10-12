@@ -121,6 +121,24 @@ class TestMentions(NudgeCase, TransactionCase):
         self.assertIn("&lt;script&gt;", html)
         self.assertNotIn("<script>", html)
 
+    def test_italic_becomes_a_message(self):
+        # *Note* kept its asterisks in the channel
+        html = to_html("A *note* and _another_, but file_name_here and 2*3*4 stay")
+        self.assertIn("A <i>note</i> and <i>another</i>, but file_name_here and 2*3*4 stay", html)
+        self.assertIn("<b>bold</b>", to_html("**bold** first"))
+
+    def test_nudge_is_offered_after_an_at_in_a_channel(self):
+        # "@" in #general did not offer Nudge: a channel suggests its members
+        channel = self.env["discuss.channel"].create({"name": "Nudge Offered", "channel_type": "channel"})
+        self.assertIn(self.nudge, channel.channel_member_ids.partner_id)
+        self.assertIn(self.nudge, self.env["res.partner"].search([("channel_ids", "in", channel.ids)]))
+        chat = self.env["discuss.channel"].create({"name": "Nudge Chat", "channel_type": "group"})
+        self.assertNotIn(self.nudge, chat.channel_member_ids.partner_id, "Never added to a private talk")
+        # The channels made before it: on install and on every update
+        self.env["discuss.channel.member"].search([("partner_id", "=", self.nudge.id)]).unlink()
+        self.env["discuss.channel"]._nudge_join_all()
+        self.assertIn(self.nudge, channel.channel_member_ids.partner_id)
+
     def test_steps_keep_their_numbers(self):
         # The answer in #general read "1." for every step: each had lines under it
         html = to_html("Steps:\n\n1. **Enable**:  \n   Go to: Settings\n\n2. **Add**:\n   Go to: Bills\n\n3. **Verify**")
