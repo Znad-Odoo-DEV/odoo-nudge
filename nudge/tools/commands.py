@@ -82,6 +82,27 @@ def fold(text):
     return " ".join(words)
 
 
+# Particles written onto an Arabic word: "هالعرض", "بالفاتورة", "والمخزون"
+ARABIC_PARTICLES = ("\u0647\u0627\u0644", "\u0628\u0627\u0644", "\u0648\u0627\u0644",
+                    "\u0641\u0627\u0644", "\u0643\u0627\u0644", "\u0644\u0644")
+# Long vowels: a broken plural keeps the root without them ("عرض", "عروض")
+ARABIC_VOWELS = str.maketrans("", "", "\u0627\u0648\u064a")
+
+
+def root_of(word):
+    """:return: a folded word with what is written onto it taken off, and,
+    for Arabic, its long vowels: "هالعروض" and "عرض" meet, as do "اسعار"
+    and "سعر"; a Latin word is left as it is"""
+    for particle in ARABIC_PARTICLES:
+        if word.startswith(particle) and len(word) - len(particle) >= 3:
+            word = word[len(particle):]
+            break
+    if word and "\u0600" <= word[0] <= "\u06ff":
+        stripped = word.translate(ARABIC_VOWELS)
+        return stripped if len(stripped) >= 2 else word
+    return word
+
+
 def matches(terms, text):
     """:return: whether every folded term is in the folded ``text``"""
     folded = fold(text)

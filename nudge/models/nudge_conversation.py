@@ -392,6 +392,8 @@ class NudgeConversation(models.Model):
                 self._chat_overview(), mode=mode, can_use_agent=self._can_use_agent(),
                 can_develop=self._can_develop(),
                 is_administrator=self.env.user.has_group("base.group_system"),
+                # A small model reads the short instructions
+                compact=tool_set == "essential",
                 work="\n\n".join(block for block in (
                     self._chat_where_the_work_is(), self.env["nudge.source"]._get_text()) if block)),
             "tools": [tool.definition() for tool in tools.base.available(self.env, mode, tool_set)],
@@ -496,6 +498,12 @@ class NudgeConversation(models.Model):
         if extra:
             # What the caller knows that the person did not type: a record, a conversation
             context_text = "\n".join((context_text, extra))
+        if provider.tool_set == "essential" and mode == MODE_TALK and not focus:
+            # A small model answers far better from what it is given than from
+            # what it remembers: what Nudge finds by itself goes with the question
+            grounded = self.env["nudge.quick"]._ground(text)
+            if grounded:
+                context_text = "\n".join((context_text, prompt.render_found(grounded)))
         message = self.env["nudge.message"].sudo().create({
             "conversation_id": self.id,
             "role": "user",
@@ -505,6 +513,7 @@ class NudgeConversation(models.Model):
             "context_text": context_text,
             "attachment_name": found["name"] if found else False,
             "command": focus or False,
+            "wants_pointer": explain == "screen" and bool(screen_values),
             **screen_values,
         })
         if found and found["image"]:
@@ -623,6 +632,23 @@ class NudgeConversation(models.Model):
                 "tool_calls": calls or [],
             })
         return turns
+
+    def _chat_pointer_from_text(self, text):
+        """:return: the guidance event made from the text of an answer, when
+        the person asked to be shown and nothing was shown; None otherwise"""
+        self.ensure_one()
+        Message = self.env["nudge.message"].sudo()
+        question = Message.search([("conversation_id", "=", self.id), ("role", "=", "user")],
+                                  order="id desc", limit=1)
+        if not question.wants_pointer or not question.snapshot:
+            return None
+        since = Message.search([("conversation_id", "=", self.id), ("id", ">", question.id)])
+        shown = any(isinstance(event, dict) and event.get("type") in ("guidance", "navigate")
+                    for message in since for event in (message.screen_events or []))
+        if shown:
+            return None
+        steps = tools.guidance.steps_from_text(text, question.snapshot)
+        return {"type": "guidance", "steps": steps} if steps else None
 
     def _chat_screen_of_question(self):
         """:return: the screen shared with the question being answered"""
@@ -821,6 +847,11 @@ class NudgeConversation(models.Model):
         if calls:
             results, screen_events, must_read, waiting = self._chat_run_tools(calls)
         again = must_read and not waiting and not outcome.get("last_round")
+        if state == "complete" and text and not calls:
+            # Asked to be shown, the model wrote the steps: what they name is pointed at
+            pointer = self._chat_pointer_from_text(text)
+            if pointer:
+                screen_events = [*screen_events, pointer]
         # In the background, what the time of a piece did not let finish is
         # taken up by the next piece
         later = bool(

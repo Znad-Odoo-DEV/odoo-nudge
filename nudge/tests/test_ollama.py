@@ -60,9 +60,9 @@ class TestOllamaApi(BaseCase):
         self.assertEqual(ollama.name_for_nudge("qwen3:8b"), "qwen3:8b-nudge")
         self.assertEqual(ollama.name_for_nudge("qwen3"), "qwen3:latest-nudge")
         self.assertEqual(ollama.name_for_nudge("qwen3:8b-nudge"), "qwen3:8b-nudge", "Prepared once")
-        self.assertEqual(ollama.context_for(19000, 40960), 24576)
+        self.assertEqual(ollama.context_for(19000, 40960), 20480, "Steps of 4096")
         self.assertEqual(ollama.context_for(19000, 16384), 16384, "Never past what the model knows")
-        self.assertEqual(ollama.context_for(19000, 0), 24576)
+        self.assertEqual(ollama.context_for(19000, 0), 20480)
 
     def test_describe(self):
         http = FakeHttp({("POST", "/api/show"): show(parameters="num_ctx                        32768\nstop <|im_end|>")})
@@ -91,7 +91,8 @@ class TestOllamaApi(BaseCase):
         self.patch(ollama.requests, "request", http)
         self.assertEqual(ollama.prepare("http://box:11434/v1", "qwen3:8b", 24576), "qwen3:8b-nudge")
         self.assertEqual(http.calls[0][2], {"model": "qwen3:8b-nudge", "from": "qwen3:8b",
-                                            "parameters": {"num_ctx": 24576}, "stream": False})
+                                            "parameters": {"num_ctx": 24576, "temperature": ollama.TEMPERATURE},
+                                            "stream": False})
 
 
 @tagged("post_install", "-at_install")

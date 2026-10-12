@@ -39,3 +39,4 @@ from . import test_commands
 from . import test_plans
 from . import test_tasks
 from . import test_mode_providers
+from . import test_small_models
