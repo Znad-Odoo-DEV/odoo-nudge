@@ -56,6 +56,10 @@ def shape(schema):
     return json.dumps(example(schema), ensure_ascii=False)
 
 
+# A text written in quotes of its own: '"en"', "'ar'"
+QUOTED = re.compile(r"""(['"])((?:(?!\1).)*)\1""", re.DOTALL)
+# A comma after the last item of a list or of an object
+TRAILING_COMMA = re.compile(r",\s*([}\]])")
 # What a field path written as a placeholder carries around it: {{ object.x }}, #object.x
 PLACEHOLDER_BITS = re.compile(r"\{\{|\}\}|^\s*#|\bobject\.")
 
@@ -103,9 +107,10 @@ def forgive(value, schema):
     anything else: 9 written for "9", ``{"user_id": "8"}`` for a list of
     ``{"field": "user_id", "value": "8"}``, ``{"field": "user_id"}`` for
     "user_id", "{{ object.user_id }}" or "#object.id" for the field path the
-    pattern asks for, a list written as the text of its JSON, an argument
-    written empty for one not given, and code written on one line with "\\n"
-    for its lines"""
+    pattern asks for, a list written as the text of its JSON (with a comma
+    after its last item too), a text in quotes for the text ('"en"' for en),
+    an argument written empty for one not given, and code written on one line
+    with "\\n" for its lines"""
     expected = schema.get("type")
     allowed = [expected] if isinstance(expected, str) else list(expected or ())
     if allowed in (["array"], ["object"]) and isinstance(value, str) and value.strip().startswith(("[", "{")):
@@ -113,7 +118,11 @@ def forgive(value, schema):
         try:
             parsed = json.loads(value)
         except ValueError:
-            parsed = None
+            # [{...},] as JavaScript allows it: a comma after the last item
+            try:
+                parsed = json.loads(TRAILING_COMMA.sub(r"\1", value))
+            except ValueError:
+                parsed = None
         if isinstance(parsed, TYPES[allowed[0]]):
             value = parsed
     if allowed == ["string"] and "enum" not in schema and isinstance(value, (int, float)):
@@ -121,6 +130,11 @@ def forgive(value, schema):
     if allowed == ["string"] and isinstance(value, dict) and len(value) == 1:
         (only,) = value.values()
         value = only if isinstance(only, str) else value
+    if allowed == ["string"] and isinstance(value, str):
+        quoted = QUOTED.fullmatch(value.strip())
+        if quoted:
+            # The language '"en"' was refused: the quotes read as part of it
+            value = quoted.group(2)
     if allowed == ["string"] and isinstance(value, str) and schema.get("pattern") and not re.fullmatch(
             schema["pattern"], value):
         cleaned = PLACEHOLDER_BITS.sub("", value).strip()
