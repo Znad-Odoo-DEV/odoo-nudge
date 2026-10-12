@@ -80,6 +80,21 @@ in about a second.
 Other providers are already listed under AI Providers: Groq, OpenRouter (models ending in
 `:free`), Ollama, Anthropic Claude. Set the key, press **Fetch Models**, pick a model.
 
+### A free model for the questions, a stronger one for the work
+
+**Settings ‣ Nudge ‣ Agent Provider / Developer Provider**: the default provider answers Talk, the
+commands and @Nudge; the provider of the work answers Agent mode, the scheduled tasks and
+Developer mode (which falls back on the Agent's). Typically Ollama on your own machine for the
+questions, Gemini or Claude for what Nudge does and builds.
+
+A small model (the essential tools) reads short instructions, and every question goes with what
+Nudge found for it by itself: the screens whose names hold its words, in Arabic or English, the
+pages of the documentation about them, the passages of the company files. It is told the language
+of its answer, and to say "I'm not sure" rather than invent. Asked to be shown, a model that wrote
+the steps has them pointed at: the buttons, fields and tabs its answer names are matched against
+the screen. Asked to be taken somewhere and taken nowhere, the person is offered the screens Nudge
+found, with the pointer and Open.
+
 ### Ollama: a model on your own server
 
 For data that must not leave the company, run the model yourself:

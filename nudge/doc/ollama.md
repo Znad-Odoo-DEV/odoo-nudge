@@ -57,9 +57,14 @@ ollama pull qwen3:4b-instruct
    tools** the first time. The list shows, for each model, its size, whether it uses **Tools**
    (needed by Agent and Developer modes), whether it sees **Pictures**, and its context at most.
 3. Press **Use** on a model with tools, then **Test Connection**.
-4. When Nudge says the server gives the model less context than it needs, press **Prepare for
-   Nudge**: a copy of the model with enough context is made on the server and chosen. Nothing
-   is downloaded; Ollama shares the weights.
+4. Press **Prepare for Nudge**: a copy of the model with the context Nudge needs is made on the
+   server and chosen, and loaded at once. Nothing is downloaded; Ollama shares the weights. Nudge
+   then says whether the model **runs entirely on the graphics card**, or how much of it runs on
+   the processor: that part answers several times slower.
+5. **A free model for the questions, a stronger one for the work.** In **Settings ‣ Nudge**, keep
+   Ollama as the **Default Provider** and choose another provider (Gemini, Claude…) as **Agent
+   Provider**. Talk, the commands and @Nudge go to Ollama; what Nudge does and builds goes to the
+   stronger one. Prepared for Talk only, the model needs far less context, and fits a small card.
 
 ### Why the context matters
 
@@ -78,19 +83,31 @@ which need less.
 
 ## Measured on a laptop
 
-RTX 4050 with 6 GB, 16 GB of memory, Ollama 0.40, the essential tools, no reasoning, a context of
-24,576 tokens made by Prepare for Nudge, the interface in Arabic, one question per mode:
+RTX 4050 with 6 GB, 16 GB of memory, Ollama 0.40, the interface in Arabic, Ollama for Talk and
+Gemini for the work, on 2026-10-11:
 
-| Model | Talk: how do I make a quotation | Agent: how many contacts are companies | Developer: a welcome email for new companies |
-|---|---|---|---|
-| `qwen3:4b-instruct` | 28 s, the steps in Arabic | 86 s, read where the companies are, then asked | 58 s, asked what it needed before building |
-| `qwen3:8b` | 30 s, pointed the menu | 67 s, answered in English, no count | over the time |
-| `qwen3:4b` (thinks) | its thinking came out as the answer | — | — |
+| | Before | After |
+|---|---|---|
+| Context of `qwen3:4b-instruct` (Prepare for Nudge) | 24,576, for Developer mode | 12,288, for Talk only |
+| Size of the loaded model | 6.2 GB, 63% on the card | 3.3 GB, 100% on the card |
+| Speed | 4 to 6 words a second | 39 words a second |
+| An answer in Arabic | 30 to 90 s | 5 to 13 s |
 
-The requests weighed 6,800 tokens in Talk, 10,900 in Agent and 17,800 in Developer mode. The 8B
-model does not fit a 6 GB card with that context: two thirds of it ran on the processor. On such a
-card, more speed comes from `OLLAMA_KV_CACHE_TYPE=q8_0` on the server (the context takes half the
-memory). For real use of Agent and Developer mode, a server with a card of 16 GB or more.
+What made the difference: a context for the modes the model serves, the short instructions of a
+small model, and on the server `OLLAMA_FLASH_ATTENTION=1` with `OLLAMA_KV_CACHE_TYPE=q8_0` (the
+context takes half the memory). A card already full is the other trap: an Ollama stopped badly may
+leave `llama-server` processes holding the memory of the card; stop them, or restart the machine.
+
+`qwen3:8b` on the same card: 5.9 GB, a third on the processor, 12 words a second, two to three
+times slower, and no better on the facts. On a 6 GB card, `qwen3:4b-instruct` is the model.
+
+**What a small model does well:** the company's own rules from its files, what a term means, the
+difference between two documents, checking a file before an import, pointing at the button an
+answer names. **Where it stays weak:** the way to a screen when asked in Arabic, and judging a
+whole database. Nudge gives it the screens and the pages it found for the question, and it is told
+to say "I'm not sure" rather than invent; for Arabic-speaking teams who ask how to do things all
+day, a larger model on a server (14B or more, a card of 16 GB) or a provider such as Gemini for Talk
+too gives better answers.
 
 ## Odoo.sh, or Odoo on another machine
 

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-08 11:53+0000\n"
-"PO-Revision-Date: 2026-10-08 11:53+0000\n"
+"POT-Creation-Date: 2026-10-11 05:30+0000\n"
+"PO-Revision-Date: 2026-10-11 05:30+0000\n"
 "Last-Translator: \n"
 "Language-Team: Arabic\n"
 "Language: ar\n"
@@ -37,12 +37,8 @@ msgstr "تم %(done)s، ولم ينجح %(failed)s"
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/models/nudge_provider.py:0
-msgid ""
-"%(name)s is ready with %(context)s tokens of context, and chosen. Test the "
-"connection: the first answer loads it."
-msgstr ""
-"%(name)s جاهز بسياق %(context)s توكن، وتم اختياره. اختبر الاتصال: أول إجابة "
-"تُحمّله."
+msgid "%(name)s is ready with %(context)s tokens of context, and chosen."
+msgstr "%(name)s جاهز بسياق %(context)s توكن، وتم اختياره."
 
 #. module: nudge
 #. odoo-python
@@ -55,6 +51,19 @@ msgstr "%(number)s %(unit)s بعد"
 #: code:addons/nudge/tools/developer.py:0
 msgid "%(number)s %(unit)s before"
 msgstr "%(number)s %(unit)s قبل"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_provider.py:0
+msgid ""
+"%(share)s%% of the model runs on the processor, not the graphics card: "
+"answers come several times slower. Choose a smaller model, or set "
+"OLLAMA_FLASH_ATTENTION=1 and OLLAMA_KV_CACHE_TYPE=q8_0 on the server and "
+"press Prepare for Nudge again."
+msgstr ""
+"%(share)s%% من الموديل يعمل على المعالج لا على كرت الشاشة: تأتي الأجوبة أبطأ"
+" بعدة مرات. اختر موديلًا أصغر، أو اضبط OLLAMA_FLASH_ATTENTION=1 و "
+"OLLAMA_KV_CACHE_TYPE=q8_0 على السيرفر واضغط Prepare for Nudge مرة أخرى."
 
 #. module: nudge
 #. odoo-javascript
@@ -70,6 +79,16 @@ msgstr ""
 #: code:addons/nudge/static/src/components/nudge_panel.js:0
 msgid "%s asks the AI: it works once a provider is set up."
 msgstr "%s يسأل الذكاء الاصطناعي: يعمل بعد ضبط مزوّد."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid ""
+"%s cannot read pictures. Describe it in words, or ask your administrator for"
+" a model that sees them."
+msgstr ""
+"%s لا يستطيع قراءة الصور. صِفها بالكلمات، أو اطلب من المسؤول موديلًا يرى "
+"الصور."
 
 #. module: nudge
 #. odoo-python
@@ -240,6 +259,15 @@ msgid "A page of the documentation is loaded once."
 msgstr "تُحمَّل صفحة التوثيق مرة واحدة."
 
 #. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid ""
+"A provider for the work, if you want one: a free model on your own server "
+"for the questions, a stronger one for what Nudge does and builds."
+msgstr ""
+"مزوّد للعمل إذا أردت: موديل مجاني على سيرفرك للأسئلة، وموديل أقوى لما يعمله "
+"Nudge ويبنيه."
+
+#. module: nudge
 #. odoo-python
 #: code:addons/nudge/models/nudge_message.py:0
 msgid "A rating is up or down."
@@ -406,6 +434,11 @@ msgstr "الوكيل"
 #: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_agent
 msgid "Agent Mode"
 msgstr "وضع الوكيل"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_agent_provider_id
+msgid "Agent Provider"
+msgstr "مزوّد وضع Agent"
 
 #. module: nudge
 #: model:res.groups,name:nudge.group_nudge_agent
@@ -1316,6 +1349,11 @@ msgid "Developer Mode"
 msgstr "وضع المطوّر"
 
 #. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_developer_provider_id
+msgid "Developer Provider"
+msgstr "مزوّد وضع Developer"
+
+#. module: nudge
 #. odoo-python
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "Developer mode is not open to you. Ask your administrator."
@@ -1991,6 +2029,12 @@ msgstr "يستطيع"
 #: code:addons/nudge/tools/plans.py:0
 msgid "It no longer exists."
 msgstr "لم يعد موجودًا."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_provider.py:0
+msgid "It runs entirely on the graphics card."
+msgstr "يعمل كله على كرت الشاشة."
 
 #. module: nudge
 #. odoo-python
@@ -3743,6 +3787,23 @@ msgstr ""
 "جاهز."
 
 #. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_developer_provider_id
+msgid ""
+"Provider building in Developer mode. Empty: the one of Agent mode, or the "
+"default one."
+msgstr ""
+"المزوّد الذي يبني في وضع Developer. فارغ: مزوّد وضع Agent، أو المزوّد "
+"الافتراضي."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_agent_provider_id
+msgid ""
+"Provider doing the work in Agent mode, and the scheduled tasks. Empty: the "
+"default one."
+msgstr ""
+"المزوّد الذي يعمل في وضع Agent والمهام المجدولة. فارغ: المزوّد الافتراضي."
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 msgid "Put it back in the corner"
@@ -4519,6 +4580,12 @@ msgstr "القالب"
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
 msgid "Test Connection"
 msgstr "اختبار الاتصال"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_provider.py:0
+msgid "Test the connection: the first answer loads it."
+msgstr "اختبر الاتصال: أول جواب يحمّله."
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_doc_page_view_search
@@ -5300,6 +5367,11 @@ msgstr "بانتظار دوره"
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_step__state__pending
 msgid "Waiting for the Person"
 msgstr "بانتظار المستخدم"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__wants_pointer
+msgid "Wants Pointer"
+msgstr "طلب المؤشر"
 
 #. module: nudge
 #. odoo-javascript

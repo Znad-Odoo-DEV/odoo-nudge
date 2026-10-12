@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-08 11:53+0000\n"
-"PO-Revision-Date: 2026-10-08 11:53+0000\n"
+"POT-Creation-Date: 2026-10-11 05:30+0000\n"
+"PO-Revision-Date: 2026-10-11 05:30+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -36,9 +36,7 @@ msgstr ""
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/models/nudge_provider.py:0
-msgid ""
-"%(name)s is ready with %(context)s tokens of context, and chosen. Test the "
-"connection: the first answer loads it."
+msgid "%(name)s is ready with %(context)s tokens of context, and chosen."
 msgstr ""
 
 #. module: nudge
@@ -54,6 +52,16 @@ msgid "%(number)s %(unit)s before"
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_provider.py:0
+msgid ""
+"%(share)s%% of the model runs on the processor, not the graphics card: "
+"answers come several times slower. Choose a smaller model, or set "
+"OLLAMA_FLASH_ATTENTION=1 and OLLAMA_KV_CACHE_TYPE=q8_0 on the server and "
+"press Prepare for Nudge again."
+msgstr ""
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_message.js:0
 msgid ""
@@ -65,6 +73,14 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.js:0
 msgid "%s asks the AI: it works once a provider is set up."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid ""
+"%s cannot read pictures. Describe it in words, or ask your administrator for"
+" a model that sees them."
 msgstr ""
 
 #. module: nudge
@@ -231,6 +247,13 @@ msgid "A page of the documentation is loaded once."
 msgstr ""
 
 #. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid ""
+"A provider for the work, if you want one: a free model on your own server "
+"for the questions, a stronger one for what Nudge does and builds."
+msgstr ""
+
+#. module: nudge
 #. odoo-python
 #: code:addons/nudge/models/nudge_message.py:0
 msgid "A rating is up or down."
@@ -392,6 +415,11 @@ msgstr ""
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_agent
 msgid "Agent Mode"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_agent_provider_id
+msgid "Agent Provider"
 msgstr ""
 
 #. module: nudge
@@ -1292,6 +1320,11 @@ msgid "Developer Mode"
 msgstr ""
 
 #. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_developer_provider_id
+msgid "Developer Provider"
+msgstr ""
+
+#. module: nudge
 #. odoo-python
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "Developer mode is not open to you. Ask your administrator."
@@ -1936,6 +1969,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/tools/plans.py:0
 msgid "It no longer exists."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_provider.py:0
+msgid "It runs entirely on the graphics card."
 msgstr ""
 
 #. module: nudge
@@ -3602,6 +3641,20 @@ msgid ""
 msgstr ""
 
 #. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_developer_provider_id
+msgid ""
+"Provider building in Developer mode. Empty: the one of Agent mode, or the "
+"default one."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_agent_provider_id
+msgid ""
+"Provider doing the work in Agent mode, and the scheduled tasks. Empty: the "
+"default one."
+msgstr ""
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 msgid "Put it back in the corner"
@@ -4370,6 +4423,12 @@ msgid "Test Connection"
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_provider.py:0
+msgid "Test the connection: the first answer loads it."
+msgstr ""
+
+#. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_doc_page_view_search
 msgid "Text"
 msgstr ""
@@ -5121,6 +5180,11 @@ msgstr ""
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_run__state__waiting
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_step__state__pending
 msgid "Waiting for the Person"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__wants_pointer
+msgid "Wants Pointer"
 msgstr ""
 
 #. module: nudge
