@@ -407,7 +407,7 @@ def find(env, text, limit=MAX_RESULTS):
 @base.register
 class SearchProducts(base.Tool):
     name = "search_products"
-    terminal = True
+    # The cards, then one sentence: which of them is the one asked about
     summary = "Looked for products"
     description = (
         "Find the products of this database most like a name or a description, in any trade: "

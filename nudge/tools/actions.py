@@ -115,7 +115,9 @@ LINES_SCHEMA = {
 # What the model wrote, read as the fields expect it
 # ----------------------------------------------------------------------
 
-def writable_field(model, name):
+def writable_field(model, name, trial=False):
+    """:param trial: for a trial that is discarded: a stored field Odoo fills
+        (state) may be set, to fire what it fires"""
     field = model._fields.get(name)
     if field is None or not model._has_field_access(field, "write"):
         known = close_fields(model, name, "write")
@@ -129,7 +131,7 @@ def writable_field(model, name):
         raise Refused(
             f"{name!r} is a {field.type} field: Nudge does not write in it. "
             "Show the person where it is instead.")
-    if field.readonly or (field.compute and not field.inverse and not field.store):
+    if (field.readonly and not (trial and field.store)) or (field.compute and not field.inverse and not field.store):
         raise Refused(f"{name!r} is filled by Odoo: it cannot be written in.")
     return field
 
@@ -229,15 +231,16 @@ def read_value(env, field, raw):
     raise Refused(f"Nudge does not write in {field.name}.")
 
 
-def read_values(model, entries):
+def read_values(model, entries, trial=False):
     """:param entries: list of ``{"field", "value"}`` written by the model
+    :param trial: for a trial that is discarded, see :func:`writable_field`
     :return: ``(values, lines)``: what is written, by field, and what the
         person is shown"""
     values, shown = {}, []
     labels = model.fields_get([entry["field"] for entry in entries], ["string"])
     for entry in entries:
         name = entry["field"]
-        field = writable_field(model, name)
+        field = writable_field(model, name, trial)
         if name in values:
             raise Refused(f"The field {name!r} is given twice.")
         values[name], text = read_value(model.env, field, entry["value"])
