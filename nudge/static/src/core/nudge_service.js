@@ -46,6 +46,23 @@ export function asksToDoIt(text) {
     return DO_IT.test(said) || DO_IT_YOURSELF.test(said);
 }
 
+// A question of how, or of where: the steps, written or shown, may be what
+// the person wants, even in Agent mode
+const HOW_TO = new RegExp(
+    "(\\b(how (do|can|could|would|should|to|is|are|does)|where (do|can|is|are|should|does)|show me|teach me|" +
+        "walk me through|what are the steps)\\b" +
+        "|كيف|كيفية|شلون|ازاي|إزاي|وين|فين|فرجيني|ورجيني|وريني|علمني|خطوات|شو الطريقة|ما الطريقة)",
+    "i"
+);
+
+/**
+ * @param {string} text
+ * @returns {boolean} whether the message asks how something is done
+ */
+export function asksHowTo(text) {
+    return HOW_TO.test(String(text || ""));
+}
+
 // A comparison or a report: the person is asked whether they want it in the
 // chat or as a spreadsheet
 const REPORT = new RegExp(
@@ -1323,7 +1340,10 @@ function isReadable(file) {
             } else if (!isSharing()) {
                 // Nothing to point at without the screen: in writing, or the work
                 explain = state.mode !== MODE_TALK ? null : EXPLAIN_TEXT;
-            } else if (explain === EXPLAIN_DO || (state.mode !== MODE_TALK && asksToDoIt(text))) {
+            } else if (
+                explain === EXPLAIN_DO ||
+                (state.mode !== MODE_TALK && (asksToDoIt(text) || !asksHowTo(text)))
+            ) {
                 // An order is the work, not a question of how
                 explain = null;
             } else if (!EXPLAIN_CHOICES.includes(explain)) {
