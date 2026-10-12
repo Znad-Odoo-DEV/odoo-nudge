@@ -76,6 +76,8 @@ def without_names(text):
 
 # The products a picture is looked for among, for a small model
 GROUND_PRODUCTS = 3
+# Looked through for the kind of thing a picture shows, before the best are given
+GROUND_POOL = 10
 # What is already built, given in Developer mode: on the first kinds of records named
 MAX_GROUND_BUILT_MODELS = 2
 GROUND_SETTINGS = 3
@@ -114,6 +116,16 @@ def names_in(text):
             if candidate and candidate not in names and len(candidate) >= 3:
                 names.append(candidate)
     return names[:MAX_NAMED]
+
+def kind_of(text):
+    """:return: the kind of thing a picture was read as: the last word of the
+    first part of what was read, "chair" of "Office chair, black, swivel" and
+    "cabinet" of "A large oak cabinet with two doors"; the first word was
+    "large" there, and the large desks were taken for the cabinet"""
+    first = re.split(r"[,;:(\n]|\s+(?:with|for|in|on|of)\s+|\s+-\s+", text or "", maxsplit=1)[0]
+    words = product_search.words_of(first)
+    return words[-1] if words else ""
+
 
 def weak_note(text, items):
     """:return: what the model is told when the best product found shares at
@@ -434,17 +446,27 @@ class NudgeQuick(models.AbstractModel):
             return {"app": app["label"], "on": on[:MAX_SETTINGS_ON], "of": len(fields)}
         return None
 
-    def _ground_products(self, text):
+    def _ground_products(self, text, by_kind=False):
         """:return: the products most like ``text`` (what a picture shows),
-        with their price and stock as this person may see them"""
+        with their price and stock as this person may see them
+        :param by_kind: ``text`` names the kind of thing first, as a picture is
+            read for the products: those of that kind come, when there are"""
         try:
-            found = product_search.find(self.env, text[:product_search.MAX_QUERY], GROUND_PRODUCTS)
+            found = product_search.find(
+                self.env, text[:product_search.MAX_QUERY], GROUND_POOL if by_kind else GROUND_PRODUCTS)
         except Exception:  # noqa: BLE001
             # A database without products, or a person who cannot read them
             return []
+        items = found["items"]
+        kind = kind_of(text) if by_kind else ""
+        if kind:
+            # A sofa that shared "two" with "Cabinet, large, two doors" came before the cabinets
+            of_kind = [item for item in items if kind in product_search.words_of(item["name"])]
+            items = of_kind or items
+        items = items[:GROUND_PRODUCTS]
         keys = ("name", "code", "price", "on_hand", "unit")
-        products = [{key: item[key] for key in keys if key in item} for item in found["items"]]
-        note = weak_note(text, found["items"]) or product_search.tie_note(found["items"])
+        products = [{key: item[key] for key in keys if key in item} for item in items]
+        note = weak_note(text, items) or product_search.tie_note(items)
         if note:
             # Without the scores, two as like each other read as one first and one after,
             # and a table top that shared one word with a cabinet read as the cabinet

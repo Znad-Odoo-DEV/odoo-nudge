@@ -141,6 +141,25 @@ class TestFinding(NudgeCase, TransactionCase):
         self.assertIn("search_products", [tool.name for tool in tools.base.available(env, "talk")])
         self.assertIn("search_products", tools.base.ESSENTIAL_TOOLS, "Laptops keep it")
 
+    def test_a_picture_finds_the_products_of_its_kind(self):
+        # A sofa and a desk that shared "large", "two" and "oak" came before the cabinet of the picture
+        Product = self.env["product.product"]
+        Product.create([{"name": "Nudge Large Oak Doors Desk"}, {"name": "Nudge Large Oak Doors Shelf"},
+                        {"name": "Nudge Large Oak Doors Sofa"}, {"name": "Nudge Zorbex Unit", "default_code": "NZ-1"}])
+        Quick = self.env["nudge.quick"].with_user(self.user_a)
+        read = "Zorbex, large, two doors, oak"
+        self.assertNotIn("Nudge Zorbex Unit", [item.get("name") for item in Quick._ground_products(read)],
+                         "By the words alone, what shares more of them comes first")
+        found = [item["name"] for item in Quick._ground_products(read, by_kind=True) if "name" in item]
+        self.assertEqual(found, ["[NZ-1] Nudge Zorbex Unit"])
+        from odoo.addons.nudge.models.nudge_quick import kind_of  # noqa: PLC0415
+
+        self.assertEqual(kind_of("Office chair, black, swivel, mesh"), "chair")
+        self.assertEqual(kind_of("A large oak cabinet with two doors"), "cabinet")
+        # When no product is of that kind, the best of the others still come
+        found = [item.get("name") for item in Quick._ground_products("Qwzrt, large, oak, doors", by_kind=True)]
+        self.assertIn("Nudge Large Oak Doors Desk", found)
+
     def test_two_as_alike_are_both_named(self):
         # Two cabinets with doors tied, and the model named the wrong one
         Product = self.env["product.product"]
