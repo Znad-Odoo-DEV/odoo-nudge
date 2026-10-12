@@ -750,6 +750,12 @@ class TestDeveloper(NudgeCase, TransactionCase):
         self.decide(conversation)
         self.assertEqual(len(adapter.calls), 2)
 
+    def test_empty_code_says_where_the_lines_go(self):
+        # A code action came with no code, and "The code is empty." showed no way forward
+        told = compile_code("  ", self.env)
+        self.assertIn("its lines go in code", told)
+        self.assertIn('{"kind": "update", "field": "active", "value": "false"}', told)
+
     def test_code_that_only_defines_is_refused(self):
         # def archive_contact(record): ... was made and never called: the button archived nothing
         refused = compile_code("def archive_contact(record):\n    record.write({'active': False})", self.env)

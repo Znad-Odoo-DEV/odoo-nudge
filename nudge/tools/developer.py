@@ -270,7 +270,9 @@ def compile_code(code, env=None, model_name=None):
     :return: what is wrong with it, or "" """
     text = (code or "").strip()
     if not text:
-        return "The code is empty."
+        # An action of kind code came with its lines elsewhere, or none: said where they go
+        return ("The code is empty: its lines go in code. A field set to a fixed value needs no code: "
+                '{"kind": "update", "field": "active", "value": "false"}.')
     error = test_python_expr(text, mode="exec")
     if error:
         error = str(error)
