@@ -35,6 +35,8 @@ MAX_COMMAND_CHARS = 2000
 MAX_RECORDS = 8
 MAX_PASSAGES = 5
 MAX_PASSAGE_CHARS = 400
+# Kinds of records a bare reference is looked for in, the most filled first
+MAX_REFERENCE_MODELS = 40
 
 
 class NudgeQuick(models.AbstractModel):
@@ -51,7 +53,7 @@ class NudgeQuick(models.AbstractModel):
         """:return: ``{"menus", "settings", "pages"}`` that match every word"""
         self._check_user()
         text = " ".join(str(words or "").split())[:MAX_WORDS]
-        terms = [term.casefold() for term in text.split()]
+        terms = text.split()
         found = {"menus": [], "settings": [], "pages": [], "products": []}
         if not terms or len(text) < 2:
             return found
@@ -141,12 +143,12 @@ class NudgeQuick(models.AbstractModel):
             "the AI with a few tools only; the others answer at once, without any AI.")
 
     def _command_screen(self, rest, answer, model_name):
-        answer["menus"] = self._find_menus([term.casefold() for term in rest.split()])
+        answer["menus"] = self._find_menus(rest.split())
         if not answer["menus"]:
             answer["content"] = _("No screen you can open is called “%s”.", rest)
 
     def _command_setting(self, rest, answer, model_name):
-        answer["settings"] = self._find_settings([term.casefold() for term in rest.split()])
+        answer["settings"] = self._find_settings(rest.split())
         if not answer["settings"]:
             answer["content"] = _("No setting is called “%s”. The settings are named in English.", rest)
 
@@ -189,6 +191,10 @@ class NudgeQuick(models.AbstractModel):
             for record in look_in(model, rest):
                 if self._is_called(record, rest):
                     found.append((-_score(record, rest), rank, model, record))
+        if not found and not topic and any(char.isdigit() for char in rest):
+            # A number or a reference alone: it is looked for as it is written
+            # in every kind of record that holds some
+            found = self._find_reference(rest)
         found.sort(key=lambda item: item[:2])
         records = []
         for _score_, _rank, model, record in found[:MAX_RECORDS]:
@@ -201,6 +207,34 @@ class NudgeQuick(models.AbstractModel):
         answer["records"] = records
         if not records:
             answer["content"] = _("No record you may read is called “%s”.", rest)
+
+    def _find_reference(self, text):
+        """:return: the records whose name or reference is ``text`` exactly,
+        among the kinds of records of this database, the most filled first"""
+        profile = self.env["nudge.profile"]._ensure_current()
+        pieces = [piece for piece in profile.sudo().slice_ids
+                  if piece.kind == "activity" and piece.model_name and (piece.data or {}).get("records")]
+        pieces.sort(key=lambda piece: -(piece.data or {}).get("records", 0))
+        found = []
+        for rank, piece in enumerate(pieces[:MAX_REFERENCE_MODELS]):
+            try:
+                model = get_model(self.env, piece.model_name)
+            except Refused:
+                continue
+            names = [name for name in REFERENCE_FIELDS
+                     if name in model._fields and model._fields[name].type == "char"
+                     and product_search._readable(model, name)]
+            if not names:
+                continue
+            domain = ["|"] * (len(names) - 1) + [(name, "=ilike", text) for name in names]
+            try:
+                records = model.search(domain, limit=MAX_RECORDS)
+            except (AccessError, ValueError):
+                continue
+            found.extend((-3, rank, model, record) for record in records)
+            if len(found) >= MAX_RECORDS:
+                break
+        return found
 
     @staticmethod
     def _is_called(record, text):
@@ -250,7 +284,17 @@ class NudgeQuick(models.AbstractModel):
             return {"model": text}
         models_ = self.env["ir.model"].search(["|", ("name", "=ilike", text), ("model", "=ilike", text)], limit=2)
         if len(models_) != 1:
-            models_ = self.env["ir.model"].search([("name", "ilike", text)], limit=2)
+            # Its name in any spelling, in the language of the person or in English
+            terms = commands.fold(text).split()
+            Model = self.env["ir.model"]
+            english = dict(Model.with_context(lang="en_US").search_fetch([], ["name"]).mapped(lambda m: (m.id, m.name)))
+            models_ = Model.search_fetch([], ["name", "model"]).filtered(
+                lambda m: terms and commands.matches(terms, f"{m.name} {english.get(m.id, '')}"))
+            if len(models_) > 1:
+                # The one called exactly so, else the shortest name
+                exact = models_.filtered(lambda m: commands.fold(m.name) == " ".join(terms)
+                                         or commands.fold(english.get(m.id, "")) == " ".join(terms))
+                models_ = exact[:1] or models_.sorted(lambda m: len(m.name or ""))[:1]
         if len(models_) == 1 and models_.model in self.env:
             return {"model": models_.model}
         return {"words": text[:80]} if len(text) >= 2 else {}
@@ -267,21 +311,25 @@ class NudgeQuick(models.AbstractModel):
             answer["content"] = _("The query returned no row.")
 
     def _find_menus(self, terms):
+        terms = commands.fold(" ".join(terms)).split()
         menus = _visible_menus(self.env)
-        english = dict(zip(menus.ids, menus.with_context(lang="en_US").mapped("complete_name")))
         found = []
         for menu in menus:
-            text = f"{menu.complete_name or ''} {english.get(menu.id) or ''}".casefold()
-            if all(term in text for term in terms):
-                found.append(menu)
-        found.sort(key=lambda menu: (len(menu.complete_name or ""), menu.complete_name or ""))
-        return [{"id": menu.id, "path": menu.complete_name} for menu in found[:MAX_MENUS]]
+            # The path is built in each language: the full name of a menu is
+            # kept in one language only once it was read
+            own = menu._get_full_name()
+            english = menu.with_context(lang="en_US")._get_full_name()
+            if terms and commands.matches(terms, f"{own} {english}"):
+                found.append((own, menu))
+        found.sort(key=lambda item: (len(item[0]), item[0]))
+        return [{"id": menu.id, "path": path} for path, menu in found[:MAX_MENUS]]
 
     def _find_settings(self, terms):
+        terms = commands.fold(" ".join(terms)).split()
         found = []
         for app in settings_layout(self.env):
             for setting in app["settings"]:
-                if setting["fields"] and all(term in setting["words"] for term in terms):
+                if setting["fields"] and terms and commands.matches(terms, setting["words"]):
                     found.append({
                         "app": app["app"],
                         "app_label": app["label"],

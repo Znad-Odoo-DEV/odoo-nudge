@@ -165,9 +165,12 @@ class AnthropicAdapter(base.BaseAdapter):
         if tools and tool_choice == "required":
             # A forced call; the API allows no thinking before one
             params["tool_choice"] = {"type": "any"}
+        elif tools and tool_choice == "none":
+            # The answer now: the tools stay known, none is called
+            params["tool_choice"] = {"type": "none"}
         capabilities = config.capabilities or {}
         if (_supported(capabilities, "thinking", "types", "adaptive")
-                and "tool_choice" not in params):
+                and params.get("tool_choice", {}).get("type") != "any"):
             params["thinking"] = {"type": "adaptive"}
         if config.effort and _supported(capabilities, "effort", config.effort):
             params["output_config"] = {"effort": config.effort}
