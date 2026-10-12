@@ -16,7 +16,10 @@ STYLES = {
     TOTAL_STYLE: {"bold": True},
     TITLE_STYLE: {"bold": True, "fontSize": 14},
 }
-FORMATS = {"money": "#,##0.00", "percent": "0.0%", "number": "#,##0.##", "date": "yyyy-mm-dd"}
+# "number" shows the decimals a value has; a column of whole numbers (a
+# count) is "whole", or 3 is written "3."
+FORMATS = {"money": "#,##0.00", "percent": "0.0%", "number": "#,##0.##", "date": "yyyy-mm-dd",
+           "whole": "#,##0"}
 NUMERIC = ("number", "money", "percent")
 MAX_ROWS = 500
 MAX_COLUMNS = 20
@@ -52,6 +55,15 @@ def _cell_content(value, kind):
     return str(value)
 
 
+def is_whole(content):
+    """:param content: what a numeric cell holds, as text
+    :return: whether it is a whole number; what is not a number is not"""
+    try:
+        return float(content.rstrip("%")).is_integer()
+    except ValueError:
+        return False
+
+
 def build_sheet(spec, number, format_ids):
     """:param spec: {"name", "columns": [{"label", "type"}], "rows": [[...]],
         "totals": bool, "chart": {...} or None}
@@ -64,16 +76,24 @@ def build_sheet(spec, number, format_ids):
         cells[f"{column_letter(index)}1"] = str(column["label"])
         styles[f"{column_letter(index)}1"] = HEADER_STYLE
         cols[str(index)] = {"size": COLUMN_WIDTH}
-    for row_index, row in enumerate(rows, start=2):
-        for index, column in enumerate(columns):
-            value = row[index] if index < len(row) else None
-            content = _cell_content(value, column["type"])
+    contents = [
+        [_cell_content(row[index] if index < len(row) else None, column["type"])
+         for index, column in enumerate(columns)]
+        for row in rows
+    ]
+    kinds = [
+        "whole" if column["type"] == "number" and all(
+            is_whole(row[index]) for row in contents if row[index] is not None) else column["type"]
+        for index, column in enumerate(columns)
+    ]
+    for row_index, row in enumerate(contents, start=2):
+        for index, content in enumerate(row):
             if content is None:
                 continue
             reference = f"{column_letter(index)}{row_index}"
             cells[reference] = content
-            if column["type"] in format_ids:
-                formats[reference] = format_ids[column["type"]]
+            if kinds[index] in format_ids:
+                formats[reference] = format_ids[kinds[index]]
     last_row = len(rows) + 1
     total_row = None
     if spec.get("totals") and rows and any(column["type"] in NUMERIC for column in columns):
@@ -84,8 +104,8 @@ def build_sheet(spec, number, format_ids):
             if column["type"] in NUMERIC:
                 letter = column_letter(index)
                 cells[reference] = f"=SUM({letter}2:{letter}{last_row})"
-                if column["type"] in format_ids:
-                    formats[reference] = format_ids[column["type"]]
+                if kinds[index] in format_ids:
+                    formats[reference] = format_ids[kinds[index]]
             elif not labelled:
                 cells[reference] = "Total"
                 labelled = True
