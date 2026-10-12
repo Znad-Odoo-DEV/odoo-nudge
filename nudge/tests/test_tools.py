@@ -77,6 +77,17 @@ class TestSchema(BaseCase):
         self.check({"steps": [self.step(selector=".o_form")]}, "'selector' is not an accepted argument")
         self.check({"steps": [self.step()], "css": "body"}, "'css' is not an accepted argument")
 
+    def test_a_wrong_shape_is_shown_the_right_one(self):
+        # Gemini wrote a condition as text, then gave up on conditions
+        searching = tools.records.SearchRecords.input_schema
+        with self.assertRaises(schema.SchemaError) as capture:
+            schema.validate({"model": "sale.order", "conditions": ["state = 'sale'"]}, searching)
+        told = str(capture.exception)
+        self.assertIn("conditions[0]: expected object, got str, such as ", told)
+        self.assertIn('{"field": "...", "operator": "=", "value": "..."}', told)
+        # An argument of another tool: the accepted ones are named
+        self.check({"steps": [self.step()], "css": "body"}, "accepted: steps")
+
     def test_a_name_is_never_a_selector(self):
         for name in ('x"] , body *', "a > b", "[name]", "name{}", "a\nb", "a'b", "x" * 121, "#id", "a:b"):
             self.check({"steps": [self.step(target_name=name)]}, "expected form")

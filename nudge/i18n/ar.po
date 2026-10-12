@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-11 05:30+0000\n"
-"PO-Revision-Date: 2026-10-11 05:30+0000\n"
+"POT-Creation-Date: 2026-10-11 05:57+0000\n"
+"PO-Revision-Date: 2026-10-11 05:57+0000\n"
 "Last-Translator: \n"
 "Language-Team: Arabic\n"
 "Language: ar\n"
@@ -108,6 +108,12 @@ msgid "%s day(s)"
 msgstr "%s يوم"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "%s days"
+msgstr "%s أيام"
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_message.js:0
 msgid "%s done"
@@ -115,9 +121,27 @@ msgstr "تم %s"
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "%s hours"
+msgstr "%s ساعات"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "%s minutes"
+msgstr "%s دقائق"
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/models/nudge_provider.py:0
 msgid "%s models found."
 msgstr "تم العثور على %s نموذج."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "%s months"
+msgstr "%s أشهر"
 
 #. module: nudge
 #. odoo-python
@@ -142,6 +166,12 @@ msgstr "%s سجل: كلها ستنجح، حسب التجربة الآن."
 #: code:addons/nudge/static/src/components/nudge_panel.js:0
 msgid "%s requests are worked on in the background."
 msgstr "%s طلبات يُعمل عليها في الخلفية."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "%s weeks"
+msgstr "%s أسابيع"
 
 #. module: nudge
 #. odoo-python
@@ -5954,6 +5984,12 @@ msgid "computed: %s"
 msgstr "محسوب: %s"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "day"
+msgstr "يوم"
+
+#. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
 msgid "e.g. Google Gemini"
 msgstr "مثال: Google Gemini"
@@ -5962,6 +5998,12 @@ msgstr "مثال: Google Gemini"
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
 msgid "e.g. whisper-large-v3"
 msgstr "مثال: whisper-large-v3"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "hour"
+msgstr "ساعة"
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
@@ -5973,6 +6015,18 @@ msgstr "https://api.example.com/v1"
 #: code:addons/nudge/tools/building.py:0
 msgid "in the first group of the form"
 msgstr "في المجموعة الأولى من النموذج"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "minute"
+msgstr "دقيقة"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "month"
+msgstr "شهر"
 
 #. module: nudge
 #. odoo-python
@@ -6009,3 +6063,9 @@ msgstr "قائمة الطباعة في %s"
 #: code:addons/nudge/tools/building.py:0
 msgid "unless %s"
 msgstr "إلا إذا %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "week"
+msgstr "أسبوع"

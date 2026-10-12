@@ -77,7 +77,8 @@ VALUES_SCHEMA = {
                     "\"false\". A date: \"2026-10-01\"; with a time, in the time of the person: "
                     "\"2026-10-01 14:30\". A choice: its label or its key. A record: its id, "
                     "found with search_records, or \"me\". Several records: ids between "
-                    "commas. Empty empties the field."
+                    "commas. Text, such as a city or a street: the words themselves, never "
+                    "looked for. Empty empties the field."
                 ),
             },
         },
@@ -349,8 +350,11 @@ class PrepareWrite(base.Action):
         "Change records of the business, as the person: fill or correct fields, add lines. "
         "Nothing is changed by this call: the person is shown the fields as they are and as "
         "they will be, and says yes or no. You read their answer as the result. Find the ids "
-        "with search_records first. To change a line of an order, change the line itself, by "
-        "its own model and id. To archive a record, write \"false\" in its field \"active\"."
+        "with search_records first. A field that holds text, such as \"city\" or \"street\", "
+        "takes the words as the person said them: only a field that points to a record needs "
+        "an id. Unsure of a field: describe_model gives its type. To change a line of an "
+        "order, change the line itself, by its own model and id. To archive a record, write "
+        "\"false\" in its field \"active\"."
     )
     input_schema = {
         "type": "object",

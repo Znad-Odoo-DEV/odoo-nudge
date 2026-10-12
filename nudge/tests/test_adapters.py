@@ -208,6 +208,30 @@ class TestOpenAICompatAdapter(BaseCase):
         self.assertEqual(events, [base.error_event(base.ERROR_UNAVAILABLE, "high demand")])
         self.assertEqual(self.slept, [], "Waiting must not carry the answer past its deadline")
 
+    def test_a_provider_at_its_limit_is_waited_for_when_it_says_how_long(self):
+        # Gemini's free tier counts the tokens of a minute, and says when to come back
+        limited = FakeResponse(429, body={"error": {"message": "Quota exceeded. Please retry in 17.8s."}})
+        self.respond(limited, FakeResponse(lines=sse(delta("ok", finish="stop"))))
+        events = self.run_stream()
+        self.assertEqual([event["type"] for event in events], ["text", "stop"])
+        self.assertEqual(len(self.slept), 1)
+        self.assertAlmostEqual(self.slept[0], 18.8)
+        self.assertTrue(limited.closed)
+
+        # Too long a wait, or no time left for it: told at once
+        self.slept.clear()
+        self.respond(FakeResponse(429, body={"error": {"message": "Please retry in 52s."}}))
+        self.assertEqual(self.run_stream()[0]["code"], base.ERROR_RATE_LIMIT)
+        self.respond(FakeResponse(429, body={"error": {"message": "Please retry in 5s."}}))
+        self.assertEqual(self.run_stream(deadline=time.monotonic() + 8)[0]["code"], base.ERROR_RATE_LIMIT)
+        self.assertEqual(self.slept, [])
+
+        # Waited for once, not twice; and RetryInfo is read as well
+        details = {"error": {"message": "quota", "details": [{"retryDelay": "2s"}]}}
+        self.respond(FakeResponse(429, body=details), FakeResponse(429, body=details))
+        self.assertEqual(self.run_stream()[0]["code"], base.ERROR_RATE_LIMIT)
+        self.assertEqual(self.slept, [3.0])
+
     def test_error_in_a_list(self):
         self.respond(FakeResponse(429, body=[{"error": {"message": "quota"}}]))
         self.assertEqual(self.run_stream(), [base.error_event(base.ERROR_RATE_LIMIT, "quota")])

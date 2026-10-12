@@ -8,6 +8,9 @@ developer reads before writing, the tools read: what exists already, whether
 the code compiles.
 """
 import re
+from datetime import timedelta
+
+import pytz
 
 from odoo import Command
 from odoo.tools import plaintext2html
@@ -46,6 +49,48 @@ DELETABLE = ["base.automation", "ir.actions.server", "mail.template", "ir.cron",
 # Where what Nudge makes is registered; a view or a field of a module is never deleted
 CUSTOM_MODULES = ("nudge_custom", "studio_customization", "__export__")
 INTERVAL_UNITS = ("minutes", "hours", "days", "weeks", "months")
+# "monday 08:00": the next Monday, at eight in the time of the person
+WEEKDAYS = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
+WEEKDAY_HOUR = re.compile(r"([01]?[0-9]|2[0-3])(?::([0-5][0-9]))?")
+DEFAULT_HOUR = (8, 0)
+
+
+def next_weekday(env, text, now=None):
+    """:param text: "monday", "monday 08:00"
+    :return: the next such day at that hour (eight by default), in the time
+        of the person, as Odoo keeps it (universal, naive); None when ``text``
+        does not start with a day of the week"""
+    words = text.lower().replace(",", " ").split()
+    if not words or words[0] not in WEEKDAYS:
+        return None
+    hour, minute = DEFAULT_HOUR
+    if len(words) > 1:
+        found = WEEKDAY_HOUR.fullmatch(words[1])
+        if not found:
+            raise Refused(f"{words[1]!r} is not an hour: write it as 08:00.")
+        hour, minute = int(found.group(1)), int(found.group(2) or 0)
+    zone = pytz.timezone(env.user.tz or env.context.get("tz") or "UTC")
+    here = pytz.utc.localize(now or odoo_fields.Datetime.now()).astimezone(zone)
+    days = (WEEKDAYS.index(words[0]) - here.weekday()) % 7
+    moment = zone.localize(
+        (here + timedelta(days=days)).replace(hour=hour, minute=minute, second=0, microsecond=0, tzinfo=None))
+    if moment <= here:
+        moment = zone.localize((moment + timedelta(days=7)).replace(tzinfo=None))
+    return moment.astimezone(pytz.utc).replace(tzinfo=None)
+
+
+def every_text(env, number, unit):
+    """:return: how often, as the card says it: "week" or "3 days" """
+    if number == 1:
+        return {
+            "minutes": env._("minute"), "hours": env._("hour"), "days": env._("day"),
+            "weeks": env._("week"), "months": env._("month"),
+        }[unit]
+    return {
+        "minutes": env._("%s minutes", number), "hours": env._("%s hours", number),
+        "days": env._("%s days", number), "weeks": env._("%s weeks", number),
+        "months": env._("%s months", number),
+    }[unit]
 # A placeholder of an email names a field of the record, nothing else
 PLACEHOLDER = re.compile(r"\{\{\s*([^{}]*?)\s*\}\}")
 FIELD_PLACEHOLDER = re.compile(r"^object(\.[a-z_][a-z0-9_]*)+$")
@@ -137,7 +182,9 @@ ACTION_SCHEMA = {
         "expression": {
             "type": "string",
             "maxLength": 1000,
-            "description": "For update, instead of value: a Python expression computed on the record.",
+            "description": (
+                "For update, instead of value, when the value depends on the record: a Python "
+                "expression computed on it. A fixed value is a value: archiving is active, false."),
         },
         "template_id": {"type": "integer", "minimum": 1, "description": "For email: an existing template."},
         "email": dict(EMAIL_SCHEMA, description="For email: the template to make, when there is none."),
@@ -430,6 +477,10 @@ def read_action(env, model, action, position=1):
         if field.readonly and not field.inverse:
             raise Refused(f"Action {position}: {path} is read only.")
         label = field.string
+        if action.get("expression") and (action.get("value") or "").strip():
+            raise Refused(
+                f"Action {position}: an update gives a value or an expression, not both. A fixed "
+                "value, such as false to archive, is a value.")
         if action.get("expression"):
             error = test_python_expr(action["expression"].strip(), mode="eval")
             if error:
@@ -1361,7 +1412,8 @@ class PrepareScheduledAction(Building):
     description = (
         "Make a scheduled action: code that runs by itself every so many minutes, hours, days, "
         "weeks or months, for what happens on a schedule rather than on an event (every "
-        "morning, every Monday, at the end of the month). The code runs with no record: it "
+        "morning, every Monday, at the end of the month). Every Monday is every 1 weeks, with "
+        "first_run \"monday\" and the hour asked. The code runs with no record: it "
         "finds its own with model.search(...). Nothing is made by this call: the person is "
         "shown the action in full, the code included, and says yes or no; you read their "
         "answer as the result. Try the code first with run_python."
@@ -1386,7 +1438,9 @@ class PrepareScheduledAction(Building):
             "first_run": {
                 "type": "string",
                 "maxLength": 40,
-                "description": "When it first runs: a date and time as the person writes it, or now (default).",
+                "description": (
+                    "When it first runs: a day of the week and an hour, \"monday 08:00\" for the "
+                    "next Monday; a date and time as the person writes it; or now (default)."),
             },
         },
     }
@@ -1399,7 +1453,10 @@ class PrepareScheduledAction(Building):
         if error:
             raise Refused(f"The code does not compile. {error}")
         first = (arguments.get("first_run") or "").strip()
-        when = odoo_fields.Datetime.now() if not first or first.lower() == "now" else read_moment(env, first)
+        if not first or first.lower() == "now":
+            when = odoo_fields.Datetime.now()
+        else:
+            when = next_weekday(env, first) or read_moment(env, first)
         every = arguments["every"]
         values = {
             "name": arguments["name"].strip(),
@@ -1416,7 +1473,7 @@ class PrepareScheduledAction(Building):
         shown_when = odoo_fields.Datetime.context_timestamp(env.user, when).strftime("%Y-%m-%d %H:%M")
         lines = [
             {"label": env._("Model"), "value": model._description},
-            {"label": env._("Every"), "value": f"{every['number']} {every['unit']}"},
+            {"label": env._("Every"), "value": every_text(env, every["number"], every["unit"])},
             {"label": env._("First run"), "value": shown_when},
             {"label": env._("Runs as"), "value": env.user.name},
             {"label": env._("Code"), "value": values["code"], "code": True},

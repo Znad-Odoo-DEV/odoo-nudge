@@ -96,6 +96,13 @@ class TestReading(AgentCase, TransactionCase):
         self.assertEqual(found["records"][1]["parent_id"], {"id": self.acme.id, "name": "Nudge Acme"})
         self.assertNotIn("note", found)
 
+    def test_nothing_found_points_at_text_fields(self):
+        # "Change the city of Raghad to Aleppo": Aleppo was looked for as a state
+        found = self.search(conditions=[{"field": "name", "operator": "=", "value": "Aleppo"}])
+        self.assertEqual(found["total"], 0)
+        self.assertIn("write the words themselves", found["note"])
+        self.assertIn('"city"', actions.PrepareWrite.description)
+
     def test_conditions(self):
         def names(conditions, **arguments):
             found = self.search(conditions=conditions, fields=["name"], order="name", **arguments)
