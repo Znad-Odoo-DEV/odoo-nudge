@@ -59,6 +59,10 @@ def to_html(text):
     def inline(line):
         line = str(escape(line))
         line = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", line)
+        # *italic* and _italic_ kept their marks in the channel; never inside a
+        # word or a sum: file_name, 2*3*4
+        line = re.sub(r"(?<![\w*])\*(?=\S)([^*\n]+?)(?<=\S)\*(?![\w*])", r"<i>\1</i>", line)
+        line = re.sub(r"(?<!\w)_(?=\S)([^_\n]+?)(?<=\S)_(?!\w)", r"<i>\1</i>", line)
         line = re.sub(r"`([^`]+)`", r"<code>\1</code>", line)
         return re.sub(r"\[([^\]]+)\]\((https?://[^)\s]+)\)", r'<a href="\2" target="_blank">\1</a>', line)
 
