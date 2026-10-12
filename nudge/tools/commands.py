@@ -7,6 +7,8 @@ costs no token. A focused command goes to the model with the tools of its
 kind only and a short brief instead of everything Nudge knows: a fraction of
 the tokens of a question asked in full.
 """
+import re
+
 from . import base
 
 DIRECT = "direct"
@@ -58,7 +60,32 @@ FOCUS = {
 # Focused by the code of a companion module, never typed
 INTERNAL_FOCUS = ("mention",)
 # Times the model is called for a focused command: look, look again, answer
-FOCUS_ROUNDS = 3
+FOCUS_ROUNDS = 4
+
+
+# Marks over the letters, and the stretching of a word
+ARABIC_MARKS = re.compile("[\u064b-\u065f\u0670\u0640]")
+# The forms of a letter people write one for the other
+ARABIC_LETTERS = str.maketrans("\u0623\u0625\u0622\u0671\u0629\u0649", "\u0627\u0627\u0627\u0627\u0647\u064a")
+
+
+def fold(text):
+    """:return: ``text`` as words compared, whatever the spelling: lower case,
+    no marks, one form of alif, ta marbuta and alif maqsura, and "al" taken
+    off the start of an Arabic word: "عروض الأسعار" and "عروض اسعار" meet"""
+    text = ARABIC_MARKS.sub("", (text or "").casefold()).translate(ARABIC_LETTERS)
+    words = []
+    for word in re.findall(r"\w+", text):
+        if word.startswith("\u0627\u0644") and len(word) > 4:
+            word = word[2:]
+        words.append(word)
+    return " ".join(words)
+
+
+def matches(terms, text):
+    """:return: whether every folded term is in the folded ``text``"""
+    folded = fold(text)
+    return all(term in folded for term in terms)
 
 
 def parse(text):

@@ -228,7 +228,7 @@ class ReadAutomations(base.Tool):
         model = get_model(env, model_name) if model_name else None
         lines = []
         if "base.automation" in env:
-            domain = [("model_name", "=", model._name)] if model else [("name", "ilike", words)]
+            domain = [("model_name", "=", model._name)] if model is not None else [("name", "ilike", words)]
             rules = env["base.automation"].with_context(active_test=False).search(domain, limit=MAX_LISTED)
             lines.append(f"Automation rules: {len(rules)}")
             for rule in rules:
@@ -249,13 +249,13 @@ class ReadAutomations(base.Tool):
         if "base_automation_id" in Action._fields:
             # The actions of a rule are listed under the rule
             domain.append(("base_automation_id", "=", False))
-        domain += [("model_name", "=", model._name)] if model else [("name", "ilike", words)]
+        domain += [("model_name", "=", model._name)] if model is not None else [("name", "ilike", words)]
         actions = Action.search(domain, limit=MAX_LISTED)
         lines.append(f"Server actions: {len(actions)}")
         for action in actions:
             where = " (in the Actions menu)" if action.binding_model_id else ""
             lines.append(f"- #{action.id} {action.name} on {action.model_name} ({action.state}){where}" + self._detail(action))
-        domain = [("model_id.model", "=", model._name)] if model else [("cron_name", "ilike", words)]
+        domain = [("model_id.model", "=", model._name)] if model is not None else [("cron_name", "ilike", words)]
         crons = env["ir.cron"].with_context(active_test=False).search(domain, limit=MAX_LISTED)
         lines.append(f"Scheduled actions: {len(crons)}")
         for cron in crons:
@@ -264,7 +264,7 @@ class ReadAutomations(base.Tool):
                 f"{cron.interval_type}, next {cron.nextcall}, as {cron.user_id.name}"
                 + ("" if cron.active else " (off)") + self._detail(cron.ir_actions_server_id))
         if "mail.template" in env:
-            domain = [("model", "=", model._name)] if model else [("name", "ilike", words)]
+            domain = [("model", "=", model._name)] if model is not None else [("name", "ilike", words)]
             templates = env["mail.template"].with_context(active_test=False).search(domain, limit=MAX_LISTED)
             lines.append(f"Email templates: {len(templates)}")
             for template in templates:

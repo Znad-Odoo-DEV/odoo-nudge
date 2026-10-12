@@ -29,6 +29,15 @@ class TestParsing(BaseCase):
             command, words = commands.parse(text)
             self.assertEqual((command.name, words), (name, rest), text)
 
+    def test_arabic_as_people_type_it(self):
+        self.assertEqual(commands.fold("عروضُ الأسعار"), commands.fold("عروض اسعار"))
+        self.assertEqual(commands.fold("الفاتورة"), commands.fold("فاتوره"))
+        self.assertEqual(commands.fold("إعداد"), commands.fold("اعداد"))
+        self.assertEqual(commands.fold("Quotations"), "quotations")
+        self.assertTrue(commands.matches(commands.fold("عروض اسعار").split(), "المبيعات/الطلبات/عروض الأسعار"))
+        self.assertFalse(commands.matches(commands.fold("فواتير").split(), "المبيعات/الطلبات/عروض الأسعار"))
+        self.assertEqual(commands.fold("الى"), "الي", "A short word keeps its first letters")
+
     def test_a_query_keeps_its_lines(self):
         _command, query = commands.parse("/sql select id\nfrom res_partner")
         self.assertEqual(query, "select id\nfrom res_partner")
@@ -86,6 +95,14 @@ class TestDirectCommands(NudgeCase, TransactionCase):
     def test_screens_the_person_can_open(self):
         answer = self.run_command(self.manager, "/screen ai providers")
         self.assertIn("Nudge/Configuration/AI Providers", [menu["path"] for menu in answer["menus"]])
+        # In the language of the person too, however the cache of the menus was filled
+        menu = self.env.ref("nudge.nudge_menu_providers")
+        self.env["res.lang"]._activate_lang("ar_001")
+        menu.with_context(lang="ar_001").name = "مزودو الذكاء الاصطناعي"
+        self.manager.lang = "ar_001"
+        found = self.env["nudge.quick"].with_user(self.manager).with_context(lang="ar_001")._find_menus(["مزودو", "الذكاء"])
+        self.assertIn(menu.id, [entry["id"] for entry in found])
+        self.assertIn("مزودو الذكاء الاصطناعي", [entry["path"] for entry in found][0])
         answer = self.run_command(self.user_a, "/شاشة ai providers")
         self.assertEqual(answer["menus"], [])
         self.assertTrue(answer["content"], "Nothing found is said, without any AI")
@@ -107,6 +124,9 @@ class TestDirectCommands(NudgeCase, TransactionCase):
             answer = self.run_command(self.admin, text)
             found = [(record["model"], record["id"]) for record in answer["records"]]
             self.assertIn(("res.partner", self.partner.id), found, text)
+        # A reference alone, without its kind: looked for as it is written, everywhere
+        answer = self.run_command(self.admin, "/find ncp-77")
+        self.assertIn(("res.partner", self.partner.id), [(r["model"], r["id"]) for r in answer["records"]])
         answer = self.run_command(self.admin, "/find zzqx nothing like it")
         self.assertEqual(answer["records"], [])
         self.assertTrue(answer["content"])
@@ -130,6 +150,9 @@ class TestDirectCommands(NudgeCase, TransactionCase):
         self.env["ir.config_parameter"].sudo().set_param(DEVELOPER_PARAM, "yes")
         answer = self.run_command(self.admin, "/rules res.partner")
         self.assertIn("Scheduled actions:", answer["code"])
+        listed_on = {line.rsplit(" on ", 1)[1].split()[0] for line in answer["code"].splitlines()
+                     if line.startswith("- #") and " on " in line}
+        self.assertLessEqual(listed_on, {"res.partner"}, "Only what runs on the model asked for")
         # Without words, the screen in front says which
         self.assertIn("Scheduled actions:", self.run_command(self.admin, "/قواعد", "res.partner")["code"])
         self.assertIn("/rules", self.run_command(self.agent, "/rules res.partner")["content"])
@@ -187,6 +210,18 @@ class TestFocusedCommands(NudgeCase, TransactionCase):
         self.assertLessEqual(names, set(commands.FOCUS["count"]["tools"]))
         self.assertEqual(call["tool_choice"], "required")
         self.assertEqual(call["system"][1], prompt.FOCUS_BRIEFS["count"])
+
+    def test_the_last_round_is_for_the_answer(self):
+        from odoo.addons.nudge.llm import base as llm_base  # noqa: PLC0415
+
+        def looking(index):
+            return [llm_base.tool_use_event(f"call_{index}", "describe_model", {"model": "res.partner"}),
+                    llm_base.stop_event(llm_base.STOP_TOOL_USE)]
+
+        adapter = self.use_adapter(script=[looking(1), looking(2), looking(3)])
+        _conversation, event = self.ask(self.agent, "/count contacts by country")
+        self.assertEqual([call["tool_choice"] for call in adapter.calls], ["required", "required", None, "none"])
+        self.assertEqual(event["state"], "complete", "Answered, not cut")
 
     def test_count_is_not_for_everyone(self):
         self.use_adapter()

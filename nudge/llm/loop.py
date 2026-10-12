@@ -71,8 +71,14 @@ def run(job, record):
             return
         round_started = time.monotonic()
         outcome = {"text": "", "tool_calls": [], "said_before": said}
-        # The last round is always free: the model must be able to answer
-        tool_choice = forced if round_number <= FORCED_ROUNDS < job["rounds"] else None
+        # The last round is for the answer: what was read is told, rather
+        # than one more call left without a round to read its result
+        if round_number <= FORCED_ROUNDS < job["rounds"]:
+            tool_choice = forced
+        elif round_number == job["rounds"] > 1 and job["tools"]:
+            tool_choice = "none"
+        else:
+            tool_choice = None
         try:
             events = job["adapter"].stream_chat(
                 job["system"], turns, deadline=deadline, tools=job["tools"] or None,
