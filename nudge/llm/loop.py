@@ -114,7 +114,9 @@ def run(job, record):
             # Pushed only when it answered in words alone: once a tool was
             # called, what it says is about what the tool did
             outcome = {"text": "", "tool_calls": [], "said_before": said,
-                       "may_push": bool(job.get("push_to_act")) and not job.get("pushed") and not acted}
+                       "may_push": bool(job.get("push_to_act")) and not job.get("pushed") and not acted,
+                       # Work left by what was said yes to: a question is no answer to it
+                       "push_on_question": bool(job.get("push_on_question"))}
             try:
                 events = job["adapter"].stream_chat(
                     job["system"], sent, deadline=deadline, tools=job["tools"] or None,

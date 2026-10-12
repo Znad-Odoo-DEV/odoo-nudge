@@ -11,7 +11,7 @@ from odoo.tools import config
 
 from .. import tools
 from ..llm import base, prompt
-from ..llm import attachments
+from ..llm import attachments, ollama
 from ..llm import snapshot as screen
 from ..profile import retrieval
 from .ir_http import nudge_version
@@ -520,7 +520,8 @@ class NudgeConversation(models.Model):
             # the words of the question, not by the picture
             media_type, data = found["image"]
             try:
-                found = dict(found, seen=provider._read_picture(media_type, data, text, model=provider.model_name))
+                found = dict(found, seen=provider._read_picture(
+                    media_type, data, text, model=provider.model_name, prompt=ollama.PRODUCT_PROMPT))
             except UserError as error:
                 _logger.info("Nudge: the picture was not described for the products: %s", error)
 
@@ -575,6 +576,8 @@ class NudgeConversation(models.Model):
             products = self.env["nudge.quick"]._ground_products(found["seen"])
             # Those of the words of the question ("this product") are not those of the picture
             grounded = {key: value for key, value in grounded.items() if key != "products"}
+            # What the picture was read as stays with the question, for what is said of it
+            grounded["picture_read_as"] = found["seen"]
             if products:
                 grounded["products"] = products
             else:
@@ -973,7 +976,8 @@ class NudgeConversation(models.Model):
         # unless it asked the person something
         pushed = bool(
             outcome.get("may_push") and state == "complete" and not calls and text
-            and not text.rstrip().endswith(("?", "\u061f")) and not outcome.get("last_round"))
+            and (outcome.get("push_on_question") or not text.rstrip().endswith(("?", "\u061f")))
+            and not outcome.get("last_round"))
         again = again or pushed
         if state == "complete" and text and not calls:
             # Asked to be shown, the model wrote the steps: what they name is pointed at
@@ -1239,7 +1243,8 @@ class NudgeConversation(models.Model):
             # Said plainly: what comes next depends on the model having understood
             result = tools.base.ToolResult(
                 (FAILED if result.is_error else DONE_NOT_FINISHED if result.unfinished else DONE)
-                % result.content, is_error=result.is_error, records=result.records)
+                % result.content, is_error=result.is_error, records=result.records,
+                unfinished=result.unfinished and not result.is_error)
         self._agent_settle(step, state, result, events)
         run = step.run_id
         first_events = [dict(step._get_card(), type="decided"), *events]
@@ -1263,6 +1268,8 @@ class NudgeConversation(models.Model):
         job = self._chat_job(provider, self._chat_mode(), AGENT_MAX_ROUNDS)
         job["first_events"] = first_events
         # The person said yes or no: what the model says of it is not talk
-        # instead of work, and is never pushed into the same card again
-        job["push_to_act"] = False
+        # instead of work, and is never pushed into the same card again; unless
+        # what was said yes to leaves work to do: told "Call prepare_button now",
+        # a small model asked the person a question instead
+        job["push_to_act"] = job["push_on_question"] = result.unfinished
         return job

@@ -28,7 +28,7 @@ from . import base, schema
 from .records import has_field_access  # noqa: E402
 from .actions import VALUES_SCHEMA, read_moment, read_value, read_values, to_write
 from .records import (
-    MODEL_PATTERN, OPERATORS, PATH_PATTERN, Refused, build_domain, cut, format_value, get_model,
+    FIELD_PATTERN, MODEL_PATTERN, OPERATORS, PATH_PATTERN, Refused, build_domain, cut, format_value, get_model,
     field_label, get_records, is_developing, model_label, refusing, target_field,
 )
 
@@ -232,6 +232,8 @@ FORBIDDEN_TOLD = {
                    "A fixed value is best an update action instead of code: "
                    '{"kind": "update", "field": "active", "value": false}.'),
     "IMPORT_NAME": "Nothing is imported in an action: datetime, dateutil, time and Command are given.",
+    "'return' outside function": ("An action is not a function: no def, no return; write the lines "
+                                  "themselves, with record (records for several)."),
 }
 # What the code of a server action is given when it runs (ir.actions.server,
 # base.automation): any other name it reads fails then
@@ -277,6 +279,15 @@ def compile_code(code, env=None, model_name=None):
                 return f"{error} {told}"
         return error
     tree = ast.parse(text)
+    defined = [node.name for node in tree.body
+               if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))]
+    if defined and all(isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+                       or (isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant))
+                       for node in tree.body):
+        # def archive_contact(record): ... was made, never called: the button archived nothing
+        return (f"The code only defines {', '.join(defined)}, which nothing calls: it does nothing "
+                "when it runs. An action is not a function: no def, no return; write the lines "
+                "themselves, with record (records for several).")
     unknown = unknown_names(tree)
     if unknown:
         # A small model wrote object and self: the action failed when run
@@ -1861,6 +1872,67 @@ class TryAutomation(Building):
 
 # ------------------------------------------------------- scheduled actions
 
+# A reminder, written by Nudge: a small model could not write its code in eight tries
+REMIND_SCHEMA = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["summary"],
+    "description": (
+        "A reminder instead of code: an activity To Do, with summary, for the person of "
+        "user_field (user_id when not given) on every record that matches the conditions and, "
+        "with older_than_days, whose date_field (create_date when not given) is older."),
+    "properties": {
+        "summary": {"type": "string", "minLength": 2, "maxLength": 200},
+        "conditions": CONDITION_SCHEMA,
+        "older_than_days": {"type": "integer", "minimum": 1, "maximum": 3650},
+        "date_field": {"type": "string", "pattern": FIELD_PATTERN},
+        "user_field": {"type": "string", "pattern": FIELD_PATTERN},
+    },
+}
+
+
+def remind_code(env, model, remind):
+    """:return: ``(code, lines of the card)``: the code of a reminder, an
+    activity To Do on every record that matches, written here
+    :raise Refused: for a field that is not there, or not of its kind"""
+    if "activity_ids" not in model._fields:
+        raise Refused(f"{model._name} has no activities: a reminder is an activity on its records.")
+    user_name = remind.get("user_field") or "user_id"
+    user_field = model._fields.get(user_name)
+    if not (user_field and user_field.type == "many2one" and user_field.comodel_name == "res.users"):
+        users = [name for name, field in model._fields.items()
+                 if field.type == "many2one" and field.comodel_name == "res.users" and field.store]
+        raise Refused(f"user_field is the field of the person reminded, a user of {model._name}: one of "
+                      f"{', '.join(users[:MAX_LISTED]) or 'none'}.")
+    summary = " ".join(remind["summary"].split())
+    domain = list(build_domain(model, remind["conditions"])) if remind.get("conditions") else []
+    code = ["# Written by Nudge: an activity To Do for each person, once", f"domain = {domain!r}"]
+    lines = [{"label": _("Reminds"), "value": field_label(user_field, env)},
+             {"label": _("Summary"), "value": summary}]
+    if remind.get("conditions"):
+        lines.append({"label": _("Only for"), "value": in_words(model, remind["conditions"], "all")})
+    if remind.get("older_than_days"):
+        date_name = remind.get("date_field") or "create_date"
+        date_field = model._fields.get(date_name)
+        if not (date_field and date_field.type in ("date", "datetime") and date_field.store):
+            dates = [name for name, field in model._fields.items()
+                     if field.type in ("date", "datetime") and field.store]
+            raise Refused(f"date_field is a date of {model._name}: one of {', '.join(dates[:MAX_LISTED])}.")
+        now = "datetime.date.today()" if date_field.type == "date" else "datetime.datetime.now()"
+        days = int(remind["older_than_days"])
+        code.append(f"domain += [({date_name!r}, '<', {now} - datetime.timedelta(days={days}))]")
+        lines.append({"label": _("Older than"), "value": _(
+            "%(days)s days, by %(field)s", days=days, field=field_label(date_field, env))})
+    code += [
+        "for rec in model.search(domain):",
+        # Every run would add the same activity again: once is enough
+        f"    if rec.{user_name} and {summary!r} not in rec.activity_ids.mapped('summary'):",
+        f"        rec.activity_schedule('mail.mail_activity_data_todo', user_id=rec.{user_name}.id, "
+        f"summary={summary!r})",
+    ]
+    return "\n".join(code), lines
+
+
 @base.register
 class PrepareScheduledAction(Building):
     name = "prepare_scheduled_action"
@@ -1872,16 +1944,19 @@ class PrepareScheduledAction(Building):
         "first_run \"monday\" and the hour asked. The code runs with no record: it "
         "finds its own with model.search(...). Nothing is made by this call: the person is "
         "shown the action in full, the code included, and says yes or no; you read their "
-        "answer as the result. Check the code first with check_python_code. " + REMIND_TOLD
+        "answer as the result. A reminder (remind the salespeople of the quotations older than "
+        "30 days) is given as remind, not as code: Nudge writes its code. Check other code first "
+        "with check_python_code. " + REMIND_TOLD
     )
     input_schema = {
         "type": "object",
         "additionalProperties": False,
-        "required": ["name", "model", "code", "every", "first_run"],
+        "required": ["name", "model", "every", "first_run"],
         "properties": {
             "name": {"type": "string", "minLength": 2, "maxLength": 120},
             "model": {"type": "string", "pattern": MODEL_PATTERN},
             "code": {"type": "string", "minLength": 1, "maxLength": MAX_CODE_CHARS},
+            "remind": REMIND_SCHEMA,
             "every": {
                 "type": "object",
                 "additionalProperties": False,
@@ -1905,7 +1980,18 @@ class PrepareScheduledAction(Building):
     def run(self, env, arguments, screen):
         check_developing(env)
         model = get_model(env, arguments["model"])
-        error = compile_code(arguments["code"], env, model._name)
+        code = (arguments.get("code") or "").strip()
+        reminder = []
+        if arguments.get("remind"):
+            if code:
+                raise Refused("Give remind or code, not both: remind writes the code itself.")
+            code, reminder = remind_code(env, model, arguments["remind"])
+        elif not code:
+            raise Refused(
+                'Give code, or for a reminder remind: {"summary": "Follow up this quotation", '
+                '"older_than_days": 30, "conditions": [{"field": "state", "operator": "in", '
+                '"value": "draft, sent"}]}.')
+        error = compile_code(code, env, model._name)
         if error:
             raise Refused(f"The code does not compile. {error}")
         first = (arguments.get("first_run") or "").strip()
@@ -1918,7 +2004,7 @@ class PrepareScheduledAction(Building):
             "name": arguments["name"].strip(),
             "model_id": ir_model(env, model).id,
             "state": "code",
-            "code": arguments["code"].strip(),
+            "code": code,
             "usage": "ir_cron",
             "interval_number": every["number"],
             "interval_type": every["unit"],
@@ -1932,6 +2018,7 @@ class PrepareScheduledAction(Building):
             {"label": _("Every"), "value": every_text(env, every["number"], every["unit"])},
             {"label": _("First run"), "value": shown_when},
             {"label": _("Runs as"), "value": env.user.name},
+            *reminder,
             {"label": _("Code"), "value": values["code"], "code": True},
         ]
         return base.ToolResult(

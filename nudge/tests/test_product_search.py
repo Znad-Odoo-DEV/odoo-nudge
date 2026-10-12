@@ -43,6 +43,17 @@ class TestReading(BaseCase):
         self.assertEqual(product_search.compare_specs({"size": ["xl"]}, {"length": [5.0]}), ([], []),
                          "A measure the product does not say is neither for nor against")
 
+    def test_a_product_that_shares_one_word_is_said_so(self):
+        # A table top was named for a large cabinet: "top" was all they shared
+        from odoo.addons.nudge.models.nudge_quick import weak_note  # noqa: PLC0415
+
+        top = [{"name": "Table Top", "code": "TT-1"}]
+        self.assertIn("'Table Top' shares only 'top'", weak_note("Large cabinet with a top", top))
+        self.assertIn("shares no word", weak_note("Large oak cabinet", top))
+        self.assertEqual(weak_note("Large cabinet", [{"name": "[E-COM07] Large Cabinet", "code": "E-COM07"}]), "")
+        self.assertEqual(weak_note("Cabinet, code TT-1", top), "", "The code printed on it leaves no doubt")
+        self.assertEqual(weak_note("Top", top), "", "One word asked, one found")
+
     def test_the_command(self):
         for text in ("/product bolt", "/Product  bolt", "/منتج برغي", "/product"):
             self.assertTrue(is_product_command(text), text)
