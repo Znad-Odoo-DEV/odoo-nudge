@@ -114,6 +114,18 @@ class TestTool(NudgeCase, TransactionCase):
         self.assertIn("3 rows", result.content)
         self.assertTrue(tools.base.TOOLS["make_spreadsheet"].terminal)
 
+        # The model gave no chart: one is drawn, of the amounts, for the person chose it
+        bare = {key: value for key, value in SHEET.items() if key != "chart"}
+        result = tools.base.call(self.env(user=self.agent), "make_spreadsheet", {
+            "title": "No chart given", "sheets": [bare, dict(bare, name="One row", rows=SHEET["rows"][:1])],
+            "text": "Here.",
+        }, None, "agent")
+        drawn = json.loads(self.env["nudge.spreadsheet"].browse(
+            result.event["action"]["params"]["spreadsheet_id"]).spreadsheet_data)["sheets"]
+        self.assertEqual([d["dataRange"] for d in drawn[0]["figures"][0]["data"]["dataSets"]], ["B1:B4", "C1:C4"])
+        self.assertEqual(drawn[0]["figures"][0]["data"]["type"], "bar")
+        self.assertEqual(drawn[1]["figures"], [], "One row is no chart")
+
         # Theirs: another person does not see it
         with self.assertRaises(AccessError):
             spreadsheet.with_user(self.user_a).read(["name"])

@@ -58,6 +58,21 @@ SHEET_SCHEMA = {
 }
 
 
+def with_chart(sheet):
+    """:return: ``sheet`` with a chart: a bar per row of its values, when the
+    model gave none and there are rows enough and numbers to draw"""
+    if sheet.get("chart") or len(sheet.get("rows") or []) < 2:
+        return sheet
+    columns = sheet["columns"]
+    # The amounts first: a percentage of change drawn beside them is a flat line
+    values = [index for index, column in enumerate(columns) if column["type"] in ("money", "number")]
+    values = values or [index for index, column in enumerate(columns) if column["type"] == "percent"]
+    if not values:
+        return sheet
+    labels = next((index for index, column in enumerate(columns) if column["type"] in ("text", "date")), 0)
+    return dict(sheet, chart={"type": "bar", "label_column": labels, "data_columns": values[:6]})
+
+
 @base.register
 class MakeSpreadsheet(base.Tool):
     name = "make_spreadsheet"
@@ -94,7 +109,8 @@ class MakeSpreadsheet(base.Tool):
     def run(self, env, arguments, screen):
         Spreadsheet = env["nudge.spreadsheet"]
         empty = Spreadsheet._empty_spreadsheet_data()
-        data = workbook.build_workbook(empty, arguments["sheets"])
+        # "As a spreadsheet, with a chart" was chosen, and the model gave the table only
+        data = workbook.build_workbook(empty, [with_chart(sheet) for sheet in arguments["sheets"]])
         title = cut(arguments["title"].strip(), 80)
         action, where = Spreadsheet._store_for_nudge(
             title, data, env.context.get("nudge_conversation_id") or False)
