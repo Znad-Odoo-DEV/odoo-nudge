@@ -40,7 +40,8 @@ export class NudgePanel extends Component {
             () => {
                 const body = this.bodyRef.el;
                 if (body) {
-                    body.scrollTop = body.scrollHeight;
+                    // The chat follows its last words; the other views open at their top
+                    body.scrollTop = this.state.view === "chat" ? body.scrollHeight : 0;
                 }
             },
             () => [this.state.view, this.state.messages.length, this.state.messages.at(-1)?.content]
