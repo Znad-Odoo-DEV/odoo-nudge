@@ -274,6 +274,20 @@ class TestDeveloper(NudgeCase, TransactionCase):
         action.with_context(active_model="res.partner", active_ids=partner.ids).run()
         self.assertEqual(partner.function, "LOWER")
 
+    def test_a_value_or_an_expression_never_both(self):
+        # "Archive them": Gemini sent false, and active = record.action_archive() with it
+        self.switch(True)
+        refused = self.run_tool("prepare_server_action", {
+            "name": "Archive", "model": "res.partner",
+            "action": {"kind": "update", "field": "active", "value": "false",
+                       "expression": "record.action_archive()"}})
+        self.assertTrue(refused.is_error)
+        self.assertIn("not both", refused.content)
+        archive = self.run_tool("prepare_server_action", {
+            "name": "Archive", "model": "res.partner",
+            "action": {"kind": "update", "field": "active", "value": "false", "expression": ""}})
+        self.assertFalse(archive.is_error, archive.content)
+
     # ------------------------------------------------------------- stopping, deleting
     def test_switched_off_then_deleted(self):
         self.switch(True)
@@ -432,7 +446,7 @@ class TestDeveloper(NudgeCase, TransactionCase):
         self.assertFalse(result.is_error, result.content)
         self.assertTrue(result.pending["is_sensitive"])
         lines = {line["label"]: line for line in result.pending["preview"]["lines"]}
-        self.assertEqual(lines["Every"]["value"], "1 days")
+        self.assertEqual(lines["Every"]["value"], "day")
         self.assertTrue(lines["Code"]["code"])
         self.assertFalse(self.env["ir.cron"].search([("cron_name", "=", "Nightly buyers")]), "Nothing before the yes")
         done = self.do("prepare_scheduled_action", result)
@@ -460,6 +474,36 @@ class TestDeveloper(NudgeCase, TransactionCase):
         self.assertFalse(result.is_error, result.content)
         self.do("prepare_delete", result)
         self.assertFalse(cron.exists())
+
+    def test_every_monday_starts_on_a_monday(self):
+        from datetime import datetime  # noqa: PLC0415
+
+        from odoo.addons.nudge.tools import developer  # noqa: PLC0415
+
+        self.admin.tz = "Asia/Damascus"
+        env = self.env(user=self.admin)
+        # Sunday 11 October 2026, 09:00 in Damascus (06:00 universal)
+        sunday = datetime(2026, 10, 11, 6, 0)
+        self.assertEqual(developer.next_weekday(env, "monday 08:00", sunday), datetime(2026, 10, 12, 5, 0))
+        self.assertEqual(developer.next_weekday(env, "Monday", sunday), datetime(2026, 10, 12, 5, 0))
+        # Today, the hour gone: next week; the hour to come: today
+        self.assertEqual(developer.next_weekday(env, "sunday 08:00", sunday), datetime(2026, 10, 18, 5, 0))
+        self.assertEqual(developer.next_weekday(env, "sunday 17:30", sunday), datetime(2026, 10, 11, 14, 30))
+        self.assertIsNone(developer.next_weekday(env, "2026-10-12 08:00", sunday))
+        with self.assertRaises(developer.Refused):
+            developer.next_weekday(env, "monday morning", sunday)
+        self.assertEqual(developer.every_text(env, 2, "weeks"), "2 weeks")
+
+        self.switch(True)
+        result = self.run_tool("prepare_scheduled_action", {
+            "name": "Monday reminder", "model": "res.partner", "code": "log('monday')",
+            "every": {"number": 1, "unit": "weeks"}, "first_run": "monday 08:00"})
+        self.assertFalse(result.is_error, result.content)
+        lines = {line["label"]: line["value"] for line in result.pending["preview"]["lines"]}
+        self.assertEqual(lines["Every"], "week")
+        self.assertTrue(lines["First run"].endswith("08:00"))
+        first = datetime.strptime(lines["First run"], "%Y-%m-%d %H:%M")
+        self.assertEqual(first.weekday(), 0, "A Monday")
 
     # ------------------------------------------------------------- the conversation
     def test_a_developer_conversation(self):

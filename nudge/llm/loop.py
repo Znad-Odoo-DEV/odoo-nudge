@@ -21,6 +21,31 @@ SHOWN_EVENTS = ("guidance", "navigate")
 # A round is not started when the time left would not see it through: this
 # long at least, or most of what the round before took
 MIN_ROUND_SECONDS = 15
+# The last round is told in words as well: tool_choice "none" is not enough
+# for every model (Gemini then tries a call it cannot make, and says nothing)
+LAST_ROUND_NOTE = (
+    "No round is left to call a tool. Answer now, in words, from what you have read: what you "
+    "found, what is left to do, and what the person can ask next.")
+# An answer with neither words nor a call (Gemini: a call it could not
+# write) is asked for once more: nothing of it reached the person
+EMPTY_RETRIES = 1
+
+
+def is_empty(outcome):
+    """:return: whether a call to the model brought nothing at all"""
+    stop = outcome.get("stop")
+    return (
+        stop is not None and "error" not in outcome and not outcome.get("aborted")
+        and not outcome["text"] and not outcome["tool_calls"]
+        and stop.get("reason") in (base.STOP_END, base.STOP_TOOL_USE))
+
+
+def add_usage(stop, spent):
+    """What the calls asked again consumed is counted with the last one."""
+    usage = dict(stop.get("usage") or {})
+    for key, value in spent.items():
+        usage[key] = int(usage.get(key) or 0) + value
+    return dict(stop, usage=usage)
 
 
 def time_for_a_round(deadline, last_duration, now=None):
@@ -70,41 +95,55 @@ def run(job, record):
             yield step["event"]
             return
         round_started = time.monotonic()
-        outcome = {"text": "", "tool_calls": [], "said_before": said}
         # The last round is for the answer: what was read is told, rather
         # than one more call left without a round to read its result
+        last = round_number == job["rounds"] > 1 and bool(job["tools"])
         if round_number <= FORCED_ROUNDS < job["rounds"]:
             tool_choice = forced
-        elif round_number == job["rounds"] > 1 and job["tools"]:
+        elif last:
             tool_choice = "none"
         else:
             tool_choice = None
-        try:
-            events = job["adapter"].stream_chat(
-                job["system"], turns, deadline=deadline, tools=job["tools"] or None,
-                tool_choice=tool_choice)
-            for event in events:
-                if event["type"] == "text":
-                    if said and not outcome["text"]:
-                        # What follows a tool is a new paragraph
-                        yield {"type": "delta", "text": "\n\n"}
-                    outcome["text"] += event["text"]
-                    yield {"type": "delta", "text": event["text"]}
-                elif event["type"] == "tool_use":
-                    outcome["tool_calls"].append(event)
-                elif event["type"] in ("stop", "error"):
-                    outcome[event["type"]] = event
-        except GeneratorExit:
-            # The browser closed the connection: keep what was generated
-            outcome.update(aborted=True, last_round=True)
-            outcome["duration_ms"] = int((time.monotonic() - round_started) * 1000)
-            record(outcome)
-            raise
-        except Exception:  # noqa: BLE001
-            _logger.exception("Nudge: stream failed for conversation %s", job["conversation_id"])
-            outcome["error"] = base.error_event(base.ERROR_UNKNOWN)
-        if "stop" not in outcome and "error" not in outcome:
-            outcome["error"] = base.error_event(base.ERROR_UNKNOWN, "stream ended without a result")
+        sent = [*turns, {"role": "user", "text": LAST_ROUND_NOTE}] if last else turns
+        spent, retries = {}, EMPTY_RETRIES
+        while True:
+            outcome = {"text": "", "tool_calls": [], "said_before": said}
+            try:
+                events = job["adapter"].stream_chat(
+                    job["system"], sent, deadline=deadline, tools=job["tools"] or None,
+                    tool_choice=tool_choice)
+                for event in events:
+                    if event["type"] == "text":
+                        if said and not outcome["text"]:
+                            # What follows a tool is a new paragraph
+                            yield {"type": "delta", "text": "\n\n"}
+                        outcome["text"] += event["text"]
+                        yield {"type": "delta", "text": event["text"]}
+                    elif event["type"] == "tool_use":
+                        outcome["tool_calls"].append(event)
+                    elif event["type"] in ("stop", "error"):
+                        outcome[event["type"]] = event
+            except GeneratorExit:
+                # The browser closed the connection: keep what was generated
+                outcome.update(aborted=True, last_round=True)
+                outcome["duration_ms"] = int((time.monotonic() - round_started) * 1000)
+                record(outcome)
+                raise
+            except Exception:  # noqa: BLE001
+                _logger.exception("Nudge: stream failed for conversation %s", job["conversation_id"])
+                outcome["error"] = base.error_event(base.ERROR_UNKNOWN)
+            if "stop" not in outcome and "error" not in outcome:
+                outcome["error"] = base.error_event(base.ERROR_UNKNOWN, "stream ended without a result")
+            if not (retries and is_empty(outcome) and time_for_a_round(deadline, 0)):
+                break
+            retries -= 1
+            for key, value in outcome["stop"]["usage"].items():
+                spent[key] = spent.get(key, 0) + value
+            _logger.info(
+                "Nudge: empty answer in round %s for conversation %s, asked once more",
+                round_number, job["conversation_id"])
+        if spent and "stop" in outcome:
+            outcome["stop"] = add_usage(outcome["stop"], spent)
         last_duration = time.monotonic() - round_started
         outcome["duration_ms"] = int(last_duration * 1000)
         outcome["last_round"] = round_number == job["rounds"] or base.expired(deadline)

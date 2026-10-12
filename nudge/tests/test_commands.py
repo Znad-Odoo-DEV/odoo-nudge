@@ -3,7 +3,7 @@ import base64
 from odoo.exceptions import UserError
 from odoo.tests import BaseCase, TransactionCase, new_test_user, tagged
 
-from odoo.addons.nudge.llm import prompt
+from odoo.addons.nudge.llm import loop, prompt
 from odoo.addons.nudge.models.nudge_conversation import DEVELOPER_PARAM
 from odoo.addons.nudge.tools import commands
 from odoo.addons.nudge.tools.sql import SQL_PARAM
@@ -222,6 +222,28 @@ class TestFocusedCommands(NudgeCase, TransactionCase):
         _conversation, event = self.ask(self.agent, "/count contacts by country")
         self.assertEqual([call["tool_choice"] for call in adapter.calls], ["required", "required", None, "none"])
         self.assertEqual(event["state"], "complete", "Answered, not cut")
+        # Told in words too: Gemini tries one more call whatever tool_choice says
+        self.assertEqual(adapter.calls[-1]["turns"][-1], {"role": "user", "text": loop.LAST_ROUND_NOTE})
+        self.assertNotIn(loop.LAST_ROUND_NOTE, str(adapter.calls[-2]["turns"]))
+
+    def test_an_empty_answer_is_asked_for_once_more(self):
+        from odoo.addons.nudge.llm import base as llm_base  # noqa: PLC0415
+
+        # What Gemini sends for a call it could not write: no words, no call
+        empty = [llm_base.stop_event(llm_base.STOP_END, usage={"input_tokens": 900, "output_tokens": 36})]
+        adapter = self.use_adapter(script=[empty])
+        conversation, event = self.ask(self.agent, "How many contacts are there?")
+        self.assertEqual(len(adapter.calls), 2)
+        self.assertEqual(event["state"], "complete")
+        answer = conversation.message_ids.filtered(lambda message: message.role == "assistant")
+        self.assertEqual(answer.content, adapter.reply)
+        self.assertEqual(answer.input_tokens, 900 + 12, "What the empty answer cost is counted")
+
+        # Twice empty: said, not asked a third time
+        adapter = self.use_adapter(script=[empty, empty])
+        _conversation, event = self.ask(self.agent, "How many contacts are there?")
+        self.assertEqual(len(adapter.calls), 2)
+        self.assertEqual(event["state"], "error")
 
     def test_count_is_not_for_everyone(self):
         self.use_adapter()

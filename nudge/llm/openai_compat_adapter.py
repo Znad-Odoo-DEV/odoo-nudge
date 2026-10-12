@@ -7,6 +7,7 @@ needs no extra package.
 import base64
 import json
 import logging
+import re
 import time
 
 import requests
@@ -22,6 +23,14 @@ CONNECT_TIMEOUT = 10
 # answer "overloaded" many times a day.
 RETRY_STATUSES = frozenset({500, 502, 503, 504, 529})
 RETRY_DELAYS = (1.0, 3.0)
+# A limit per minute (Gemini's free tier: tokens a minute) says how long to
+# wait: waited once when it is this short and the answer has the time, with
+# this much left for the answer itself
+RATE_LIMITED = 429
+MAX_RATE_WAIT = 30.0
+MIN_ANSWER_SECONDS = 10.0
+RETRY_IN = re.compile(r"retry in ([0-9]+(?:\.[0-9]+)?)\s*s", re.IGNORECASE)
+RETRY_DELAY = re.compile(r'"retryDelay"\s*:\s*"([0-9]+(?:\.[0-9]+)?)s"')
 # What the provider is asked to spend on reasoning, in the words of the
 # OpenAI API, which Gemini and OpenAI read
 # "none": no reasoning at all, which Ollama and OpenAI read; a thinking
@@ -64,6 +73,24 @@ def _error_detail(response):
     if isinstance(error, dict):
         return error.get("message") or json.dumps(error)[:500]
     return str(error or body)[:500]
+
+
+def rate_wait(response):
+    """:return: the seconds a provider at its limit asks to wait, or None
+    when it does not say"""
+    header = (getattr(response, "headers", None) or {}).get("Retry-After")
+    if header:
+        try:
+            return max(float(header), 0.0)
+        except ValueError:
+            pass
+    try:
+        text = response.text or ""
+    except Exception:  # noqa: BLE001
+        return None
+    # Gemini says it in words, and as RetryInfo: "retryDelay": "17s"
+    found = RETRY_IN.search(text) or RETRY_DELAY.search(text)
+    return float(found.group(1)) + 1.0 if found else None
 
 
 @base.register
@@ -203,8 +230,21 @@ class OpenAICompatAdapter(base.BaseAdapter):
         :param send: callable sending the request and returning the response
         """
         delays = list(RETRY_DELAYS)
+        waited = False
         while True:
             response = send()
+            if response.status_code == RATE_LIMITED and not waited:
+                delay = rate_wait(response)
+                if delay is None or delay > MAX_RATE_WAIT or (
+                        deadline is not None
+                        and time.monotonic() + delay + MIN_ANSWER_SECONDS >= deadline):
+                    return response
+                _logger.info(
+                    "Nudge: %s is at its limit, trying again in %.0fs", self.config.base_url, delay)
+                response.close()
+                time.sleep(delay)
+                waited = True
+                continue
             if response.status_code not in RETRY_STATUSES or not delays:
                 return response
             delay = delays.pop(0)

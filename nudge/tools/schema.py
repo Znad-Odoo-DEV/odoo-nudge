@@ -10,6 +10,7 @@ Supported: ``type`` (object, array, string, integer, number, boolean),
 ``enum``, ``minItems``, ``maxItems``, ``minLength``, ``maxLength``,
 ``minimum``, ``maximum``, ``pattern``.
 """
+import json
 import re
 
 TYPES = {
@@ -32,6 +33,28 @@ def _fail(path, message):
     raise SchemaError(f"{path or 'arguments'}: {message}")
 
 
+def example(schema, depth=0):
+    """:return: a value written the way ``schema`` wants it, its required
+    parts only: what a model that got it wrong is shown"""
+    kind = schema.get("type")
+    kind = kind if isinstance(kind, str) else (kind or ["string"])[0]
+    if "enum" in schema:
+        return schema["enum"][0]
+    if kind == "object":
+        if depth > 2:
+            return {}
+        properties = schema.get("properties", {})
+        names = [name for name in schema.get("required", ()) if name in properties]
+        return {name: example(properties[name], depth + 1) for name in (names or list(properties)[:3])}
+    if kind == "array":
+        return [example(schema["items"], depth + 1)] if "items" in schema else []
+    return {"integer": 1, "number": 1.5, "boolean": True, "null": None}.get(kind, "...")
+
+
+def shape(schema):
+    return json.dumps(example(schema), ensure_ascii=False)
+
+
 def validate(value, schema, path=""):
     """:raise SchemaError: when ``value`` does not follow ``schema``"""
     expected = schema.get("type")
@@ -44,7 +67,11 @@ def validate(value, schema, path=""):
             isinstance(value, TYPES[name]) and (not is_boolean or name == "boolean")
             for name in allowed
         ):
-            _fail(path, f"expected {' or '.join(allowed)}, got {type(value).__name__}")
+            told = f"expected {' or '.join(allowed)}, got {type(value).__name__}"
+            if "object" in allowed or "array" in allowed:
+                # A model that wrote text where the parts go is shown them
+                told += f", such as {shape(schema)}"
+            _fail(path, told)
 
     if "enum" in schema and value not in schema["enum"]:
         allowed = ", ".join(repr(item) for item in schema["enum"])
@@ -81,7 +108,8 @@ def validate(value, schema, path=""):
         if schema.get("additionalProperties") is False:
             for name in value:
                 if name not in properties:
-                    _fail(path, f"'{name}' is not an accepted argument")
+                    accepted = ", ".join(properties)
+                    _fail(path, f"'{name}' is not an accepted argument; accepted: {accepted}")
         for name, item in value.items():
             if name in properties:
                 validate(item, properties[name], f"{path}.{name}" if path else name)
