@@ -561,7 +561,7 @@ class NudgeConversation(models.Model):
         elif provider.tool_set == "essential" and mode != MODE_TALK and not focus:
             # Doing the work, it is told which kind of record the words name
             grounded = self.env["nudge.quick"]._ground_work(text)
-        lesson = tools.lessons.taught(text) if provider.tool_set == "essential" and not focus else ""
+        lesson = tools.lessons.taught(text) if not focus else ""
         if lesson:
             # Asked to remember, a small model said it had and wrote nothing down,
             # or the rule turned around: Nudge writes the person's words down itself

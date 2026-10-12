@@ -546,6 +546,60 @@ class TestDeveloper(NudgeCase, TransactionCase):
         self.assertTrue(refused.is_error)
         self.assertIn("cannot delete them", refused.content)
 
+    def test_a_trial_tries_what_is_asked_only(self):
+        from odoo.addons.nudge.tools.actions import writable_field  # noqa: PLC0415
+        from odoo.addons.nudge.tools.records import Refused  # noqa: PLC0415
+
+        # "When the quotation is confirmed" is tried by setting what Odoo fills, discarded after
+        partners = self.env["res.partner"]
+        with self.assertRaises(Refused):
+            writable_field(partners, "commercial_partner_id")
+        self.assertTrue(writable_field(partners, "commercial_partner_id", trial=True))
+        if "base.automation" not in self.env:
+            self.skipTest("No automation rules here")
+        self.switch(True)
+        model = self.env["ir.model"]._get("res.partner")
+        broken = self.env["base.automation"].create({
+            "name": "Broken old rule", "model_id": model.id, "trigger": "on_create",
+            "action_server_ids": [(0, 0, {"name": "Fails", "model_id": model.id, "state": "code",
+                                          "code": "raise UserError('the old rule')"})]})
+        tried = self.env["base.automation"].create({
+            "name": "Mark buyers", "model_id": model.id, "trigger": "on_create",
+            "action_server_ids": [(0, 0, {"name": "Buyer", "model_id": model.id, "state": "code",
+                                          "code": "record.write({'function': 'Buyer'})"})]})
+        result = self.run_tool("try_automation", {"rule_id": tried.id})
+        if result.pending:
+            result = self.do("try_automation", result)
+        self.assertNotIn("the old rule", result.content, "Another rule of the model failed the trial")
+        self.assertIn("Broken old rule", result.content, "Said to be off for the trial")
+        self.assertIn("Buyer", result.content)
+        self.assertTrue(broken.active, "Back on after the trial")
+        # A scheduled action says what it made
+        cron = self.env["ir.cron"].create({
+            "name": "Note on a contact", "model_id": model.id, "state": "code",
+            "code": "model.search([], limit=1).message_post(body='checked')",
+            "interval_number": 1, "interval_type": "days"})
+        tried = self.run_tool("try_automation", {"cron_id": cron.id})
+        if tried.pending:
+            tried = self.do("try_automation", tried)
+        self.assertIn("Messages it posted: 1", tried.content)
+
+    def test_an_expression_that_is_a_value(self):
+        # "expression": "false" failed with NameError when run
+        self.switch(True)
+        result = self.run_tool("prepare_server_action", {
+            "name": "Archive it", "model": "res.partner",
+            "action": {"kind": "update", "field": "active", "expression": "false"}})
+        self.assertFalse(result.is_error, result.content)
+        done = self.do("prepare_server_action", result)
+        action = self.env["ir.actions.server"].search([("name", "=", "Archive it")])
+        self.assertEqual((action.evaluation_type, action.update_boolean_value), ("value", "false"))
+        self.assertTrue(done)
+        refused = self.run_tool("prepare_server_action", {
+            "name": "Unknown", "model": "res.partner",
+            "action": {"kind": "update", "field": "comment", "expression": "note_of_today"}})
+        self.assertIn("note_of_today is not known", refused.content)
+
     def test_every_monday_starts_on_a_monday(self):
         from datetime import datetime  # noqa: PLC0415
 

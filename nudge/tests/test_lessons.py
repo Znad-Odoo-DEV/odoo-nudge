@@ -75,6 +75,12 @@ class TestLessons(NudgeCase, TransactionCase):
         self.assertEqual(lesson.body, "our discount never goes above 10% on any quotation")
         self.assertEqual(lesson.proposed_by, self.user_a)
         self.assertIn('"lesson"', adapter.calls[0]["turns"][-1]["context"])
+        # Any provider: Gemini said "saved" and called nothing
+        self.provider.tool_set = "full"
+        self.use_adapter(reply="Saved.")
+        self.ask(self.user_a, "Remember: deliveries leave the warehouse at seven in the morning")
+        self.assertTrue(self.env["nudge.note"].sudo().search_count(
+            [("kind", "=", "lesson"), ("body", "=", "deliveries leave the warehouse at seven in the morning")]))
 
         # Called anyway, with its own sentence: the person's words are kept
         conversation = self.env["nudge.conversation"].with_user(self.user_a)._chat_open(None)
