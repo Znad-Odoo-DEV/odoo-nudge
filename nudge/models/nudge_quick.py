@@ -115,6 +115,22 @@ def names_in(text):
                 names.append(candidate)
     return names[:MAX_NAMED]
 
+def weak_note(text, items):
+    """:return: what the model is told when the best product found shares at
+    most one word with ``text``, of several, or "" """
+    asked = set(product_search.words_of(text))
+    code = (items[0].get("code") or "").lower() if items else ""
+    if not items or len(asked) < 2 or (code and code in text.lower()):
+        # Found by the code printed on it: no doubt left
+        return ""
+    shared = sorted(asked & set(product_search.words_of(items[0]["name"])))
+    if len(shared) > 1:
+        return ""
+    told = f"only {shared[0]!r}" if shared else "no word"
+    return (f"{items[0]['name']!r} shares {told} with what was asked: it may not be it. Say so, "
+            "and name none of them as the one.")
+
+
 class NudgeQuick(models.AbstractModel):
     _name = "nudge.quick"
     _description = "Nudge Search Without AI"
@@ -428,10 +444,11 @@ class NudgeQuick(models.AbstractModel):
             return []
         keys = ("name", "code", "price", "on_hand", "unit")
         products = [{key: item[key] for key in keys if key in item} for item in found["items"]]
-        tie = product_search.tie_note(found["items"])
-        if tie:
-            # Without the scores, two as like each other read as one first and one after
-            products.append({"note": tie})
+        note = weak_note(text, found["items"]) or product_search.tie_note(found["items"])
+        if note:
+            # Without the scores, two as like each other read as one first and one after,
+            # and a table top that shared one word with a cabinet read as the cabinet
+            products.append({"note": note})
         return products
 
     def _ground_work(self, text, developing=False):

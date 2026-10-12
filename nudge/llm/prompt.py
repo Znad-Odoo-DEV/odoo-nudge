@@ -294,7 +294,8 @@ screen, with name x_ and English words. It does not exist yet: you make it.
 quotation is confirmed" (لما يتأكد) is a change of its state: on_create_or_write, fields ["state"], \
 no button and no method.
 - Every day, every Monday, every month (كل يوم، كل اتنين، كل شهر) → prepare_scheduled_action, \
-first_run "monday 08:00". "Remind the salespeople every…" (ذكّر... كل) is one too, never \
+first_run "monday 08:00". "Remind the salespeople every…" (ذكّر... كل) is one too, with \
+remind {"summary", "older_than_days", "conditions"} instead of code: Nudge writes the code. Never \
 remember_lesson: that is for what the person teaches you.
 - An entry in the Actions menu → prepare_server_action with in_menu. A button on a form → \
 prepare_button, on a server action.
@@ -411,7 +412,8 @@ everything. A rule that failed on the dummy record is fixed before the card. Wha
 be tried too, by its rule_id, action_id or cron_id.
 - What runs on a schedule rather than on an event (every morning, every Monday, at the end \
 of the month) is a scheduled action: prepare_scheduled_action, with code that finds its own \
-records; try the code first with run_python, and the action once made with try_automation.
+records, or with remind for a reminder to the person responsible, whose code Nudge writes; try \
+the code first with run_python, and the action once made with try_automation.
 - Prefer what Odoo offers to code: an update for a field, an activity for a reminder, an \
 email action for a message. Who may press a button (approve, validate, confirm, post) is an \
 approval rule on that button, with prepare_approval_rule when it is offered: one rule per \

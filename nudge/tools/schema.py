@@ -10,6 +10,7 @@ Supported: ``type`` (object, array, string, integer, number, boolean),
 ``enum``, ``minItems``, ``maxItems``, ``minLength``, ``maxLength``,
 ``minimum``, ``maximum``, ``pattern``.
 """
+import ast
 import json
 import re
 
@@ -66,14 +67,55 @@ def is_pairs(schema):
             and set(items.get("required", ())) == {"field", "value"})
 
 
+def is_empty(value):
+    return value is None or (isinstance(value, (str, list, dict)) and not value)
+
+
+def unescaped_code(code):
+    """:return: ``code`` with its lines, when it was written on one line with
+    "\\n" between them and does not compile as it is"""
+    if "\\n" not in code:
+        return code
+    try:
+        ast.parse(code)
+    except SyntaxError:
+        # 7 of 8 tries of a reminder held "\\n": each refused as a SyntaxError of line 1
+        return code.replace("\\r\\n", "\n").replace("\\n", "\n").replace("\\t", "    ")
+    return code
+
+
+def _kept(name, item, properties, required):
+    """:return: whether an argument written empty is kept: "view_id": "" and
+    an argument no tool has were refused four times in a row for nothing"""
+    if not is_empty(item) or name in required:
+        return True
+    if name not in properties:
+        return False
+    try:
+        validate(item, properties[name], name)
+    except SchemaError:
+        return False
+    return True
+
+
 def forgive(value, schema):
     """:return: ``value`` as a small model means it, where it cannot mean
     anything else: 9 written for "9", ``{"user_id": "8"}`` for a list of
     ``{"field": "user_id", "value": "8"}``, ``{"field": "user_id"}`` for
-    "user_id", and "{{ object.user_id }}" or "#object.id" for the field path
-    the pattern asks for"""
+    "user_id", "{{ object.user_id }}" or "#object.id" for the field path the
+    pattern asks for, a list written as the text of its JSON, an argument
+    written empty for one not given, and code written on one line with "\\n"
+    for its lines"""
     expected = schema.get("type")
     allowed = [expected] if isinstance(expected, str) else list(expected or ())
+    if allowed in (["array"], ["object"]) and isinstance(value, str) and value.strip().startswith(("[", "{")):
+        # actions: "[{...}]" was refused: expected array, got str
+        try:
+            parsed = json.loads(value)
+        except ValueError:
+            parsed = None
+        if isinstance(parsed, TYPES[allowed[0]]):
+            value = parsed
     if allowed == ["string"] and "enum" not in schema and isinstance(value, (int, float)):
         return str(value).lower() if isinstance(value, bool) else str(value)
     if allowed == ["string"] and isinstance(value, dict) and len(value) == 1:
@@ -90,8 +132,13 @@ def forgive(value, schema):
         return [forgive(item, schema["items"]) for item in value]
     if isinstance(value, dict):
         properties = schema.get("properties", {})
-        return {name: forgive(item, properties[name]) if name in properties else item
-                for name, item in value.items()}
+        required = schema.get("required", ())
+        forgiven = {name: forgive(item, properties[name]) if name in properties else item
+                    for name, item in value.items()
+                    if not properties or _kept(name, item, properties, required)}
+        if isinstance(forgiven.get("code"), str) and properties.get("code", {}).get("type") == "string":
+            forgiven["code"] = unescaped_code(forgiven["code"])
+        return forgiven
     return value
 
 

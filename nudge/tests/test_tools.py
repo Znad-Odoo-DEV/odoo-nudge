@@ -136,6 +136,31 @@ class TestSchema(BaseCase):
                          "Text with placeholders is left as written")
         self.assertEqual(schema.forgive("partner id!", path), "partner id!", "Not a path after cleaning: refused")
 
+    def test_what_a_small_model_writes_around_its_arguments_is_forgiven(self):
+        # Refused four times: "view_id": "" and an argument no tool has, written empty
+        button = tools.base.TOOLS["prepare_button"].input_schema
+        arguments = {"model": "res.partner", "label": "Archive", "action_id": 5, "view_id": "",
+                     "read_automations_on_model_first": ""}
+        forgiven = schema.forgive(arguments, button)
+        self.assertEqual(forgiven, {"model": "res.partner", "label": "Archive", "action_id": 5})
+        schema.validate(forgiven, button)
+        with self.assertRaisesRegex(schema.SchemaError, "not an accepted argument"):
+            schema.validate(schema.forgive(dict(arguments, colour="red"), button), button)
+        with self.assertRaisesRegex(schema.SchemaError, "must not be empty"):
+            schema.validate(schema.forgive(dict(arguments, label=""), button), button)
+        # actions written as the text of a list: expected array, got str
+        rule = tools.base.TOOLS["prepare_automation"].input_schema
+        written = json.dumps([{"kind": "update", "field": "lang", "value": "ar"}])
+        self.assertEqual(schema.forgive({"actions": written}, rule)["actions"][0]["kind"], "update")
+        self.assertEqual(schema.forgive({"actions": "not a list"}, rule)["actions"], "not a list")
+        # Code written on one line with "\n" between its lines: 7 of 8 tries refused as a SyntaxError
+        checking = tools.base.TOOLS["check_python_code"].input_schema
+        one_line = "for rec in records:\\n    rec.write({'comment': 'x'})"
+        self.assertEqual(schema.forgive({"code": one_line}, checking)["code"],
+                         "for rec in records:\n    rec.write({'comment': 'x'})")
+        kept = "rec.write({'comment': 'one\\ntwo'})"
+        self.assertEqual(schema.forgive({"code": kept}, checking)["code"], kept, "Code that compiles is left")
+
 
 @tagged("post_install", "-at_install")
 class TestOpenAIToolCalls(BaseCase):
