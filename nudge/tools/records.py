@@ -449,6 +449,11 @@ class SearchRecords(base.Tool):
         if total > len(records):
             result["note"] = (
                 f"{len(records)} of {total} are listed. Add conditions to narrow the search.")
+        elif not total and arguments.get("conditions"):
+            # A value looked for as a record is often the text of a field
+            result["note"] = (
+                "Nothing matches. To fill a field that holds text, such as a city, write the "
+                "words themselves: describe_model gives the type of each field.")
         return base.ToolResult(
             base.dump(result), records=(model._name, records.ids, records.mapped("display_name")))
 

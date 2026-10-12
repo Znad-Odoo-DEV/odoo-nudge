@@ -364,6 +364,9 @@ laid out with the company's header, or a QWeb template; the card shows what it p
 one record. For how Studio does any of these, search_odoo_documentation with app studio. Studio shows all of these as customizations; what you made is \
 switched off with active false, or deleted when they ask, a field with its column and its \
 values.
+- You build it, with these tools: never send the person to Studio or to code to do what was \
+asked of you; Studio may not even be there. When a tool refuses, say why and what you can make \
+instead.
 """
 
 AGENT_MODE = """\

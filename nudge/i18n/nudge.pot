@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-11 05:30+0000\n"
-"PO-Revision-Date: 2026-10-11 05:30+0000\n"
+"POT-Creation-Date: 2026-10-11 05:57+0000\n"
+"PO-Revision-Date: 2026-10-11 05:57+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -98,6 +98,12 @@ msgid "%s day(s)"
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "%s days"
+msgstr ""
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_message.js:0
 msgid "%s done"
@@ -105,8 +111,26 @@ msgstr ""
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "%s hours"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "%s minutes"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/models/nudge_provider.py:0
 msgid "%s models found."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "%s months"
 msgstr ""
 
 #. module: nudge
@@ -131,6 +155,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.js:0
 msgid "%s requests are worked on in the background."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "%s weeks"
 msgstr ""
 
 #. module: nudge
@@ -5744,6 +5774,12 @@ msgid "computed: %s"
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "day"
+msgstr ""
+
+#. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
 msgid "e.g. Google Gemini"
 msgstr ""
@@ -5751,6 +5787,12 @@ msgstr ""
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
 msgid "e.g. whisper-large-v3"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "hour"
 msgstr ""
 
 #. module: nudge
@@ -5762,6 +5804,18 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/tools/building.py:0
 msgid "in the first group of the form"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "minute"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "month"
 msgstr ""
 
 #. module: nudge
@@ -5798,4 +5852,10 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/tools/building.py:0
 msgid "unless %s"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "week"
 msgstr ""
