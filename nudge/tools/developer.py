@@ -17,6 +17,7 @@ import pytz
 from lxml import etree
 
 from odoo import Command, _
+from odoo.exceptions import AccessError
 from odoo.tools import plaintext2html
 from odoo.tools import safe_eval as safe_eval_module
 from odoo.tools.safe_eval import test_python_expr
@@ -106,6 +107,8 @@ MAX_ACTIONS = 5
 MAX_CONDITIONS = 8
 MAX_RECIPIENTS = 8
 MAX_LISTED = 25
+# Of each kind, given with a question of Developer mode: a small model reads them all
+MAX_BUILT_SHOWN = 3
 
 CONDITION_SCHEMA = {
     "type": "array",
@@ -236,6 +239,11 @@ CODE_NAMES = frozenset({
     "env", "model", "record", "records", "time", "datetime", "dateutil", "timezone", "float_compare",
     "b64encode", "b64decode", "Command", "UserError", "log", "_logger", "uid", "user", "payload",
 })
+# How a person is reminded from code, told where code reached for an email
+REMINDING = re.compile(r"mail|send|notif|remind", re.IGNORECASE)
+REMIND_TOLD = (
+    "A person is reminded with an activity: rec.activity_schedule('mail.mail_activity_data_todo', "
+    "user_id=rec.user_id.id, summary='…'); the chatter with rec.message_post(body='…').")
 # Calls that only read: code made of them alone changes nothing
 READING_CALLS = frozenset({
     "search", "search_count", "search_read", "search_fetch", "browse", "exists", "mapped", "filtered",
@@ -272,8 +280,12 @@ def compile_code(code, env=None, model_name=None):
     unknown = unknown_names(tree)
     if unknown:
         # A small model wrote object and self: the action failed when run
-        return (f"{', '.join(unknown)} is not known when the code runs. It knows: "
+        told = (f"{', '.join(unknown)} is not known when the code runs. It knows: "
                 f"{', '.join(sorted(CODE_NAMES))}; the record is record (records for several).")
+        if any(REMINDING.search(name) for name in unknown):
+            # mail.send(...) was refused, and nothing showed the way to a reminder
+            told += f" {REMIND_TOLD}"
+        return told
     builtin = set(getattr(safe_eval_module, "_BUILTINS", vars(builtins)))
     for node in ast.walk(tree):
         if (isinstance(node, ast.Subscript) and isinstance(node.value, ast.Name) and node.value.id == "env"
@@ -463,6 +475,37 @@ def named(Model, field, words, domain=()):
     folded = [word.lower() for word in words]
     return records.sorted(
         lambda record: -sum(word in (record[field] or "").lower() for word in folded))[:MAX_LISTED]
+
+
+def built_on(env, model_name, words="", limit=MAX_BUILT_SHOWN):
+    """:return: the automation rules, server actions and scheduled actions on
+    ``model_name``, one line each with its id, those named with most of
+    ``words`` first; at most ``limit`` of each"""
+    folded = [word.lower() for word in name_words(words)] if words else []
+
+    def ranked(records, field):
+        return records.sorted(lambda record: -sum(word in (record[field] or "").lower() for word in folded))[:limit]
+
+    lines = []
+    try:
+        if "base.automation" in env:
+            rules = env["base.automation"].with_context(active_test=False).search(
+                [("model_name", "=", model_name)], limit=MAX_LISTED * 4)
+            lines += [f"rule #{rule.id} {rule.name!r}, {TRIGGERS.get(rule.trigger, rule.trigger)}"
+                      + ("" if rule.active else " (off)") for rule in ranked(rules, "name")]
+        Action = env["ir.actions.server"]
+        domain = [("usage", "=", "ir_actions_server"), ("model_name", "=", model_name)]
+        if "base_automation_id" in Action._fields:
+            domain.append(("base_automation_id", "=", False))
+        actions = Action.search(domain, limit=MAX_LISTED * 4)
+        lines += [f"server action #{action.id} {action.name!r} ({action.state})" for action in ranked(actions, "name")]
+        crons = env["ir.cron"].with_context(active_test=False).search(
+            [("model_id.model", "=", model_name)], limit=MAX_LISTED * 4)
+        lines += [f"scheduled action #{cron.id} {cron.cron_name!r}, every {cron.interval_number} "
+                  f"{cron.interval_type}" + ("" if cron.active else " (off)") for cron in ranked(crons, "cron_name")]
+    except AccessError:
+        return []
+    return lines
 
 
 @base.register
@@ -1030,13 +1073,41 @@ class PrepareServerAction(Building):
             return base.ToolResult("This action cannot be made.", is_error=True)
         action = make_action(env, values["action"], values.get("template"))
         where = " It is in the Actions menu." if action.binding_model_id else ""
+        told = (f"Made: server action #{action.id} {action.name!r} ({action.state}).{where} "
+                "It is in Settings ‣ Technical ‣ Server Actions.")
+        button = asks_for_button(env)
+        if button:
+            # Told it could say what was done, a small model said the button was on the form
+            told += (f" Not finished: the button is not on the form yet. Call prepare_button now: "
+                     f"action_id {action.id}, model {action.model_name}.")
+        else:
+            told += (f" Its id is {action.id}: a button that runs it is made with prepare_button, "
+                     f"action_id {action.id}.")
         return base.ToolResult(
-            f"Made: server action #{action.id} {action.name!r} ({action.state}).{where} "
-            f"It is in Settings ‣ Technical ‣ Server Actions. Its id is {action.id}: a button that "
-            f"runs it is made with prepare_button, action_id {action.id}.",
+            told,
             event={"type": "changed", "model": "ir.actions.server", "ids": action.ids},
             records=("ir.actions.server", action.ids, [action.name]),
+            unfinished=button,
         )
+
+
+# A button asked for, in English or in Arabic: "a button", "زر", "بالزر", "زرًا", "أزرار";
+# never "زرع" or "وزارة"
+BUTTON_WORDS = re.compile(
+    r"\bbuttons?\b|(?:^|[\s«\"'(])(?:و|ف)?(?:بال|لل|ال|ب|ل)?(?:زرار|زر|أزرار|ازرار)"
+    r"(?=$|[\s.,،؛:؟?!»\"')\u064b\u0651]|ا(?:$|[\s.,،؟?!]))",
+    re.IGNORECASE)
+
+
+def asks_for_button(env):
+    """:return: whether the person asked, in their last words of this
+    conversation, for a button"""
+    conversation_id = env.context.get("nudge_conversation_id")
+    if not conversation_id:
+        return False
+    asked = env["nudge.message"].sudo().search(
+        [("conversation_id", "=", conversation_id), ("role", "=", "user")], order="id desc", limit=3)
+    return any(BUTTON_WORDS.search(message.content or "") for message in asked)
 
 
 @base.register
@@ -1272,6 +1343,9 @@ def delete_built(records):
         mail_templates = (used - others.mapped("template_id")).filtered(lambda template: not template.get_external_id().get(template.id))
     else:
         mail_templates = None
+    # A scheduled action holds its code in a server action, which Odoo keeps when
+    # the scheduled action goes: the trial database filled with them
+    behind = records.ir_actions_server_id if records._name == "ir.cron" else None
     for views in extra:
         if records._name in ("ir.model.fields", "ir.actions.server"):
             views.unlink()
@@ -1279,6 +1353,8 @@ def delete_built(records):
     for views in extra:
         if views.exists():
             views.unlink()
+    if behind:
+        behind.exists().unlink()
     if mail_templates:
         mail_templates.exists().unlink()
     env.registry.clear_cache("templates")
@@ -1796,7 +1872,7 @@ class PrepareScheduledAction(Building):
         "first_run \"monday\" and the hour asked. The code runs with no record: it "
         "finds its own with model.search(...). Nothing is made by this call: the person is "
         "shown the action in full, the code included, and says yes or no; you read their "
-        "answer as the result. Try the code first with run_python."
+        "answer as the result. Check the code first with check_python_code. " + REMIND_TOLD
     )
     input_schema = {
         "type": "object",

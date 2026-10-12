@@ -352,6 +352,13 @@ done by an administrator in Nudge's Developer mode. When they ask for it, say so
 the plan for their administrator.
 """
 
+# Agent mode only: Developer mode deletes what was built, with prepare_delete;
+# said in both, a small model refused "delete the rule" and sent the person away
+AGENT_NEVER_DELETES = """\
+- You never delete. When they ask to delete, offer to archive or to cancel, or show them where \
+they can delete themselves.
+"""
+
 AGENT_WITH_DEV = """\
 - Building (an automation rule, a server action, an email sent on an event, a button, a \
 field, a change to a screen) is done in Developer mode, the third button under the message \
@@ -496,8 +503,6 @@ actions, system parameters) is open to you only when the tools reach it: then th
 an administrator and the administrator allowed it. Treat it as Odoo does: give a group \
 rather than edit an access rule, say what a change implies for other people before the card, \
 and never show or ask for a password, a key or a token, which stay hidden.
-- You never delete. When they ask to delete, offer to archive or to cancel, or show them where \
-they can delete themselves.
 - Stay within what they asked. Do not change records they did not mention, even when something \
 in them looks wrong: tell them.
 - When the context block says "explain": "on the screen" or "in writing", they asked how \
@@ -575,7 +580,7 @@ def build_system_blocks(overview="", mode="talk", can_use_agent=False, work="", 
     if mode == "dev":
         rules = AGENT_MODE + DEV_MODE
     elif mode == "agent":
-        rules = AGENT_MODE + (AGENT_WITH_DEV if can_develop else no_dev)
+        rules = AGENT_MODE + AGENT_NEVER_DELETES + (AGENT_WITH_DEV if can_develop else no_dev)
     elif can_use_agent:
         rules = TALK_MODE_WITH_AGENT + (TALK_WITH_DEV if can_develop else no_dev)
     else:

@@ -19,6 +19,7 @@ from odoo.exceptions import AccessError
 
 from ..tools import base, commands, groups, product_search
 from ..tools.configuration import current_values, find_app, settings_layout, settings_steps
+from ..tools.developer import built_on
 from ..tools.finding import REFERENCE_FIELDS, _score, candidate_models, look_in
 from ..tools.navigation import _visible_menus, menu_path, menu_steps
 from ..tools.records import MODEL_PATTERN, Refused, cut, get_model
@@ -75,6 +76,8 @@ def without_names(text):
 
 # The products a picture is looked for among, for a small model
 GROUND_PRODUCTS = 3
+# What is already built, given in Developer mode: on the first kinds of records named
+MAX_GROUND_BUILT_MODELS = 2
 GROUND_SETTINGS = 3
 # The kinds of records a question names by their own name, at most
 GROUND_MODELS = 2
@@ -424,13 +427,20 @@ class NudgeQuick(models.AbstractModel):
             # A database without products, or a person who cannot read them
             return []
         keys = ("name", "code", "price", "on_hand", "unit")
-        return [{key: item[key] for key in keys if key in item} for item in found["items"]]
+        products = [{key: item[key] for key in keys if key in item} for item in found["items"]]
+        tie = product_search.tie_note(found["items"])
+        if tie:
+            # Without the scores, two as like each other read as one first and one after
+            products.append({"note": tie})
+        return products
 
-    def _ground_work(self, text):
+    def _ground_work(self, text, developing=False):
         """For a small model doing the work: the screens the question names,
         with the kind of record behind each. Short: the context of the work
         is taken by its tools.
 
+        :param developing: in Developer mode: what is already built on the
+            kinds of records named comes too
         :return: ``{"screens"}``, or empty"""
         found = self._ground_quick(text)
         named = self._ground_named(text)
@@ -452,6 +462,18 @@ class NudgeQuick(models.AbstractModel):
         kinds = [kind for kind in self._ground_models(text) if kind["model"] not in shown]
         if kinds:
             found["models"] = kinds
+        if developing:
+            # "Delete the rule" and "add its button" were asked of what a small model
+            # had never looked up: what exists on the kind of record comes with the question
+            built = {}
+            for model_name in dict.fromkeys(item["model"] for item in found.get("screens", []) + kinds):
+                lines = built_on(self.env, model_name, text)
+                if lines:
+                    built[model_name] = lines
+                if len(built) == MAX_GROUND_BUILT_MODELS:
+                    break
+            if built:
+                found["built"] = built
         return found
 
     def _ground_models(self, text):

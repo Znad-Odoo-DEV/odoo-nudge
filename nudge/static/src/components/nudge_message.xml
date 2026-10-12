@@ -246,6 +246,7 @@
             </div>
             <div t-else="" class="o_nudge_card_outcome" role="status">
                 <i t-if="props.cardState === 'deciding' or props.cardState === 'working'" class="fa fa-circle-o-notch fa-spin"/>
+                <i t-elif="props.card.undone" class="fa fa-undo"/>
                 <i t-elif="props.cardState === 'done'" class="fa fa-check"/>
                 <i t-elif="props.cardState === 'failed'" class="fa fa-times"/>
                 <span t-esc="outcome"/>

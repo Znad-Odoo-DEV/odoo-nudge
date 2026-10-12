@@ -273,6 +273,26 @@ class TestOllamaProvider(NudgeCase, TransactionCase):
         self.assertNotIn("Cost Sheet", question["context"], "Not the words of the question")
         self.assertTrue(question.get("images"), "The picture itself still goes to the model")
 
+    def test_a_picture_like_no_product_is_said_so(self):
+        # Nothing found, nothing said: the model sold "Oxford Oak 2-Drawer Cabinet, $419"
+        from .test_attachments import PNG  # noqa: PLC0415
+
+        if "product.product" not in self.env:
+            self.skipTest("No products in this database")
+        self.use_adapter()
+        self.server()
+        self.provider.write({"is_ollama": True, "picture_model": False, "tool_set": "essential"})
+        self.env["nudge.provider.model"].create({
+            "provider_id": self.provider.id, "name": "qwen3:8b", "sees_pictures": True})
+        self.patch(ollama, "read_picture", lambda *args, **kwargs: (
+            "Qwzrt blorf vexl", {"input_tokens": 1, "output_tokens": 1}))
+        conversation = self.env["nudge.conversation"].with_user(self.user_a)._chat_open(None)
+        job = conversation._chat_prepare("Do we sell this?", attachment=("photo.png", PNG, "image/png"))
+        context = job["turns"][-1]["context"]
+        self.assertIn("None like the picture (read as: Qwzrt blorf vexl). Name no product", context)
+        self.assertIn("Qwzrt blorf vexl", conversation.sudo().message_ids.filtered(
+            lambda message: message.role == "user").context_text, "Kept with the question")
+
     def test_the_warning_follows_the_context(self):
         self.provider.is_ollama = True
         self.provider.context_length = 4096

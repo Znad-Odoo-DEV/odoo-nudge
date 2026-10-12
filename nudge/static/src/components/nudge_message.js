@@ -118,6 +118,10 @@ export class NudgeMessage extends Component {
             cancelled: _t("Left undecided"),
         };
         const card = this.props.card;
+        if (card?.undone) {
+            // Before the count of a plan: "5 done" stayed on a card that was undone
+            return _t("Undone");
+        }
         if (card?.plan && this.props.cardState === "done") {
             if (!card.failed_count) {
                 return _t("%s done", card.done_count || 0);
@@ -126,9 +130,6 @@ export class NudgeMessage extends Component {
                 done: card.done_count || 0,
                 failed: card.failed_count,
             });
-        }
-        if (card?.undone) {
-            return _t("Undone");
         }
         return outcomes[this.props.cardState] || "";
     }
