@@ -161,6 +161,19 @@ class TestSchema(BaseCase):
         kept = "rec.write({'comment': 'one\\ntwo'})"
         self.assertEqual(schema.forgive({"code": kept}, checking)["code"], kept, "Code that compiles is left")
 
+    def test_quotes_and_a_last_comma_are_forgiven(self):
+        # The language '"en"' was refused, the quotes read as part of it
+        searching = tools.records.SearchRecords.input_schema
+        arguments = {"model": "res.partner", "conditions": [
+            {"field": "lang", "operator": "=", "value": '"en_US"'}, {"field": "name", "operator": "=", "value": "'ar'"},
+            {"field": "name", "operator": "=", "value": "'Bob', 'Alice'"}]}
+        forgiven = schema.forgive(arguments, searching)
+        self.assertEqual([condition["value"] for condition in forgiven["conditions"]], ["en_US", "ar", "'Bob', 'Alice'"])
+        # A comma after the last item, as JavaScript allows it
+        rule = tools.base.TOOLS["prepare_automation"].input_schema
+        written = '[{"kind": "update", "field": "lang", "value": "ar"},]'
+        self.assertEqual(schema.forgive({"actions": written}, rule)["actions"], [{"kind": "update", "field": "lang", "value": "ar"}])
+
 
 @tagged("post_install", "-at_install")
 class TestOpenAIToolCalls(BaseCase):
