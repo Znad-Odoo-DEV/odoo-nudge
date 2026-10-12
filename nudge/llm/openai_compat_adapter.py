@@ -524,12 +524,17 @@ class OpenAICompatAdapter(base.BaseAdapter):
         if hints:
             data["prompt"] = ", ".join(hints)
 
+        # A service of its own address is not given the key of the provider
+        elsewhere = self.config.stt_url.strip().rstrip("/")
+        url = (elsewhere or self.config.base_url.rstrip("/")) + "/audio/transcriptions"
+        headers = {} if elsewhere else self._headers(json_body=False)
+
         def send():
             return requests.post(
-                self._url("/audio/transcriptions"),
+                url,
                 data=data,
                 files={"file": ("speech.wav", audio, "audio/wav")},
-                headers=self._headers(json_body=False),
+                headers=headers,
                 timeout=(CONNECT_TIMEOUT, base.remaining(deadline, self.config.timeout)),
             )
 
