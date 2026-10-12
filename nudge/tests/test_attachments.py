@@ -197,6 +197,10 @@ class TestProducts(NudgeCase, TransactionCase):
             names = [tool.name for tool in tools.base.available(self.env(user=user), mode)]
             self.assertNotIn("find_products", names)
 
+    def test_the_cards_of_products_are_followed_by_a_sentence(self):
+        # Six cards for "do we sell this?" and no word of which was the cabinet of the picture
+        self.assertFalse(tools.base.TOOLS["search_products"].terminal)
+
 
 @tagged("post_install", "-at_install")
 class TestUpload(NudgeCase, HttpCase):

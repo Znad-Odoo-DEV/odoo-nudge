@@ -565,6 +565,9 @@ def read_action(env, model, action, position=1):
         if field.readonly and not field.inverse:
             raise Refused(f"Action {position}: {path} is read only.")
         label = field_label(field, env)
+        if (action.get("expression") or "").strip().lower() in ("true", "false"):
+            # "false" as an expression failed with NameError when run: it is a value
+            action = dict(action, value=action["expression"].strip().lower(), expression="")
         if action.get("expression") and (action.get("value") or "").strip():
             raise Refused(
                 f"Action {position}: an update gives a value or an expression, not both. A fixed "
@@ -573,6 +576,11 @@ def read_action(env, model, action, position=1):
             error = test_python_expr(action["expression"].strip(), mode="eval")
             if error:
                 raise Refused(f"Action {position}: the expression does not compute. {error}")
+            unknown = unknown_names(ast.parse(action["expression"].strip(), mode="eval"))
+            if unknown:
+                raise Refused(
+                    f"Action {position}: {', '.join(unknown)} is not known when it runs. It knows: "
+                    f"{', '.join(sorted(CODE_NAMES))}; True and False are written with capitals.")
             values.update(state="object_write", update_path=path, evaluation_type="equation",
                           value=action["expression"].strip())
             lines.append({"label": label, "value": _("computed: %s", action["expression"].strip())})
@@ -1232,6 +1240,14 @@ def _mails_since(env, last_id):
     return found
 
 
+def _made_since(env):
+    """:return: activities and messages in the whole database, counted: what a
+    scheduled action made is their difference"""
+    if "mail.activity" not in env:
+        return (0, 0)
+    return (env["mail.activity"].sudo().search_count([]), env["mail.message"].sudo().search_count([]))
+
+
 def _on_record(env, record):
     """:return: activities and messages of a record, counted"""
     if not record or not record.exists() or "mail.activity" not in env:
@@ -1431,8 +1447,17 @@ class TryAutomation(Building):
             action = get_records(get_model(env, "ir.actions.server"), [arguments["action_id"]])
         model_name = rule.model_name if rule is not None else action.model_name
         model = get_model(env, model_name, "create", to_change=True)
-        values, _shown = read_values(model, arguments.get("record") or [])
-        change, _shown = read_values(model, arguments.get("change") or [])
+        # Discarded after: what Odoo fills may be set ("state": "sale" fires "when confirmed")
+        values, _shown = read_values(model, arguments.get("record") or [], trial=True)
+        change, _shown = read_values(model, arguments.get("change") or [], trial=True)
+        if "base.automation" in env:
+            # The other rules of the model are off for the trial: what fails is what is tried
+            others = env["base.automation"].sudo().search(
+                [("model_name", "=", model_name), ("id", "!=", rule.id if rule is not None else 0)])
+            if others:
+                others.active = False
+                report.append(f"The other rules of {model_name} were off for the trial: "
+                              + ", ".join(repr(other.name) for other in others) + ".")
         trigger = rule.trigger if rule is not None else ""
         if trigger == "on_unarchive" and "active" in model._fields:
             values.setdefault("active", False)
@@ -1442,11 +1467,20 @@ class TryAutomation(Building):
             values[name_field.name] = _("Nudge trial")
         # What the trial writes to fire the rule is not what the actions did
         written = set(change) | ({"active"} if trigger in ("on_archive", "on_unarchive") else set())
+        names = _watched_fields(model)
+        twins = None
+        if rule is not None and trigger in ("on_create", "on_create_or_write") and not change:
+            # The rule acts inside create(): what the record would hold without it
+            # is read on twins made while it is off; two, for what changes by itself
+            rule.active = False
+            twins = [model.create(to_write(values, None)).read(names)[0] for _twin in range(2)]
+            rule.active = True
         mails_at = _mail_watch(env)
         record = model.create(to_write(values, None))
         report.append(f"A dummy {model._description} was created: {record.display_name!r} (id {record.id}).")
-        names = _watched_fields(model)
-        before = record.read(names)[0]
+        before = twins[0] if twins else record.read(names)[0]
+        # A sequence, a date of creation: what differs between the twins is no change of the rule
+        unstable = {name for name in names if twins and twins[0][name] != twins[1][name]}
         counted = _on_record(env, record)
         if rule is None:
             action.with_context(active_model=model._name, active_ids=record.ids, active_id=record.id).run()
@@ -1475,7 +1509,8 @@ class TryAutomation(Building):
                 report.append("The conditions match the dummy record." if matches
                               else "The conditions do NOT match the dummy record: the rule leaves it alone.")
             after = record.read(names)[0]
-            changed = _changes(env, model, [name for name in names if name not in written], before, after)
+            changed = _changes(env, model, [name for name in names if name not in written | unstable],
+                               before, after)
             report.append("Changed by the actions: " + "; ".join(changed) if changed
                           else "No field of the dummy record was changed by the actions.")
             activities, messages = _on_record(env, record)
@@ -1490,8 +1525,12 @@ class TryAutomation(Building):
         Cron = get_model(env, "ir.cron").with_context(active_test=False)
         cron = get_records(Cron, [cron_id])
         mails_at = _mail_watch(env)
+        counted = _made_since(env)
         cron.ir_actions_server_id.with_context(active_model=cron.model_id.model).run()
         report.append(f"The scheduled action {cron.cron_name!r} ran once, as {env.user.name}.")
+        activities, messages = (now - then for now, then in zip(_made_since(env), counted))
+        # A reminder makes activities: told none, a trial that found nothing looked fine
+        report.append(f"Activities it scheduled: {activities}. Messages it posted: {messages}.")
         mails = _mails_since(env, mails_at)
         report.append(f"Emails that would be sent: {len(mails)}" + (" — " + "; ".join(mails) if mails else "."))
         report.append("What its code wrote in log() is in Settings ‣ Technical ‣ Logging.")
