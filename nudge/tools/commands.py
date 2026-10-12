@@ -60,6 +60,8 @@ FOCUS = {
 }
 # Focused by the code of a companion module, never typed
 INTERNAL_FOCUS = ("mention",)
+# Focused questions a small model answers from what Nudge found for them
+GROUNDED_FOCUS = ("mention", "explain")
 # Times the model is called for a focused command: look, look again, answer
 FOCUS_ROUNDS = 4
 

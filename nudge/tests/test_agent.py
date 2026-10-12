@@ -551,6 +551,32 @@ class TestActing(AgentCase, TransactionCase):
         self.assertEqual(self.bob.write_uid, self.agent)
         self.assertEqual(result.event, {"type": "changed", "model": "res.partner", "ids": self.bob.ids})
 
+    def test_many2many_is_added_to_not_replaced(self):
+        # "Give Marc the Inventory access" as group_ids = [45] took away every other access
+        first, second = self.env["res.partner.category"].create([{"name": "Nudge A"}, {"name": "Nudge B"}])
+        self.bob.category_id = first
+
+        def write(text):
+            pending = self.prepare("prepare_write", {
+                "model": "res.partner", "ids": [self.bob.id], "values": values(category_id=text)})
+            result = self.execute("prepare_write", pending)
+            self.assertFalse(result.is_error, result.content)
+            return pending["preview"]["lines"][0]["value"]
+
+        self.assertEqual(write(f"+{second.id}"), "+ Nudge B")
+        self.assertEqual(self.bob.category_id, first | second, "What the field held stays")
+        self.assertEqual(write(f"-{first.id}"), "− Nudge A")
+        self.assertEqual(self.bob.category_id, second)
+        write(f"{first.id}")
+        self.assertEqual(self.bob.category_id, first, "Ids alone replace")
+
+        users = self.env["res.users"]
+        accesses = users._fields["group_ids" if "group_ids" in users._fields else "groups_id"]
+        with self.assertRaises(records.Refused):
+            actions.read_value(self.env, accesses, str(self.env.ref("base.group_user").id))
+        added, shown = actions.read_value(self.env, accesses, f"+{self.env.ref('base.group_user').id}")
+        self.assertEqual(added, {"add": [self.env.ref("base.group_user").id], "remove": []})
+
     def test_the_card_names_the_kind_of_record_as_the_interface_does(self):
         # In Arabic the card said "تعديل: Contact": _description is the English of the code
         self.env["ir.model"]._get("res.partner").name = "Nudge Contact"
