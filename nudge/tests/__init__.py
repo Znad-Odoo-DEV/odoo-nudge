@@ -38,3 +38,4 @@ from . import test_product_search
 from . import test_commands
 from . import test_plans
 from . import test_tasks
+from . import test_mode_providers

@@ -12,6 +12,19 @@
                         <setting string="Default Provider"
                                  help="The AI service answering new conversations. Leave empty to use the first provider that is ready.">
                             <field name="nudge_provider_id" options="{'no_create': True, 'no_open': True}"/>
+                            <div class="content-group mt16">
+                                <div class="text-muted">
+                                    A provider for the work, if you want one: a free model on your own server for the questions, a stronger one for what Nudge does and builds.
+                                </div>
+                                <div class="row mt8">
+                                    <label for="nudge_agent_provider_id" class="col-lg-5 o_light_label"/>
+                                    <field name="nudge_agent_provider_id" class="col-lg-7" options="{'no_create': True, 'no_open': True}"/>
+                                </div>
+                                <div class="row">
+                                    <label for="nudge_developer_provider_id" class="col-lg-5 o_light_label"/>
+                                    <field name="nudge_developer_provider_id" class="col-lg-7" options="{'no_create': True, 'no_open': True}"/>
+                                </div>
+                            </div>
                             <div class="mt8">
                                 <button name="%(nudge_provider_action)d" type="action"
                                         string="Configure Providers" icon="oi-arrow-right" class="btn-link"/>
