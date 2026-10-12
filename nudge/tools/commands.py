@@ -95,7 +95,7 @@ ARABIC_VOWELS = str.maketrans("", "", "\u0627\u0648\u064a")
 def root_of(word):
     """:return: a folded word with what is written onto it taken off, and,
     for Arabic, its long vowels: "هالعروض" and "عرض" meet, as do "اسعار"
-    and "سعر"; a Latin word is left as it is"""
+    and "سعر"; an English plural meets its singular: "quotations", "quotation" """
     for particle in ARABIC_PARTICLES:
         if word.startswith(particle) and len(word) - len(particle) >= 3:
             word = word[len(particle):]
@@ -103,6 +103,13 @@ def root_of(word):
     if word and "\u0600" <= word[0] <= "\u06ff":
         stripped = word.translate(ARABIC_VOWELS)
         return stripped if len(stripped) >= 2 else word
+    if len(word) > 4 and word.isascii():
+        if word.endswith("ies"):
+            return word[:-3] + "y"
+        if word.endswith(("ses", "xes", "ches", "shes")):
+            return word[:-2]
+        if word.endswith("s") and not word.endswith(("ss", "us", "is")):
+            return word[:-1]
     return word
 
 

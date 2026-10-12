@@ -261,7 +261,7 @@ class TestProfileTools(NudgeCase, TransactionCase):
     def test_search(self):
         self.assertEqual(self.keys("tours")[0], "module:web_tour")
         self.assertEqual(self.keys("web_tour.tour")[0], "model:web_tour.tour")
-        self.assertEqual(self.keys("tours", kind="model"), ["model:web_tour.tour"])
+        self.assertEqual(self.keys("tours", kind="model")[0], "model:web_tour.tour", "The tours first, then their steps")
         self.assertEqual(self.keys("zzzzzz"), [])
         self.assertEqual(self.keys(""), [])
 

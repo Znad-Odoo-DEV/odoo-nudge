@@ -110,8 +110,10 @@ class TestActivity(NudgeCase, TransactionCase):
         self.assertTrue(job["system"][-1].startswith(prompt.TALK_MODE), "The rules stay last")
 
     def test_arabic_is_read_however_it_is_written(self):
-        self.assertIn("رواتب", retrieval._words("الرواتب"))
-        self.assertIn("رواتب", retrieval._words("بالرواتب"))
+        # By the root: a salary and the salaries, however they are written
+        self.assertEqual(retrieval._words("الرواتب"), retrieval._words("راتب"))
+        self.assertEqual(retrieval._words("بالرواتب"), retrieval._words("رواتب"))
+        self.assertEqual(retrieval._words("Invoices"), retrieval._words("invoice"))
         self.assertEqual(retrieval._words("أجازة"), retrieval._words("اجازه"))
         self.assertIn("payslip", retrieval._words("hr.payslip"))
 

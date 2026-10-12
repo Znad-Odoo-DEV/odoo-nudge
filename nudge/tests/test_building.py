@@ -137,12 +137,40 @@ class TestBuilding(NudgeCase, TransactionCase):
         self.assertIn("not on res.partner", refused.content)
 
     # ------------------------------------------------------------- a field
+    def test_no_field_on_a_form_that_is_not_there(self):
+        # Built on lines edited inside another form, it failed on the yes
+        result = self.run_tool("prepare_field", {
+            "model": "product.attribute.value", "label": "Nudge Shade", "type": "char"})
+        self.assertTrue(result.is_error)
+        self.assertIn("no form of its own", result.content)
+        made = self.run_tool("prepare_field", {
+            "model": "product.attribute.value", "label": "Nudge Shade", "type": "char", "on_form": False})
+        self.assertFalse(made.is_error, made.content)
+
+    def test_the_field_to_follow_is_found_by_its_label(self):
+        # A small model wrote customer_id for partner_id
+        result = self.run_tool("prepare_field", {
+            "model": "res.partner", "label": "Nudge Title", "type": "char", "after": "job_position"})
+        self.assertFalse(result.is_error, result.content)
+        lines = {line["label"]: line["value"] for line in result.pending["preview"]["lines"]}
+        self.assertIn("after Job Position", lines["On the form"])
+        nowhere = self.run_tool("prepare_field", {
+            "model": "res.partner", "label": "Nudge Other", "type": "char", "after": "zzz_unknown"})
+        self.assertFalse(nowhere.is_error, "Not on the form: in the first group, as the card says")
+
+    def test_a_view_id_of_another_model_is_let_go(self):
+        # A small model wrote view_id 1, a view of ir.demo
+        other = self.env["ir.ui.view"].search([("model", "!=", "res.partner")], limit=1)
+        result = self.run_tool("prepare_field", {
+            "model": "res.partner", "label": "Nudge Site", "type": "char", "view_id": other.id})
+        self.assertFalse(result.is_error, result.content)
+
     def test_a_field_is_added_and_put_on_the_form(self):
         self.assertEqual(field_name_for("Nudge Score"), "x_nudge_score")
         self.assertEqual(field_name_for("x", "x_given_name"), "x_given_name")
-        # An Arabic label: an English name is asked for, never x_field
-        with self.assertRaises(Refused):
-            field_name_for("الموقع")
+        # An Arabic label: its letters in Latin, never x_field, never a refusal
+        self.assertEqual(field_name_for("الموقع"), "x_mwqa")
+        self.assertEqual(field_name_for("رقم المشروع"), "x_rqm_mshrwa")
         self.assertEqual(field_name_for("الموقع", "x_site"), "x_site")
         with self.assertRaises(Refused):
             field_name_for("x", "bad name")

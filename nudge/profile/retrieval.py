@@ -45,11 +45,15 @@ def _fold(word):
 
 
 def _words(text):
+    # Imported here: the tools import the profile
+    from ..tools.commands import root_of  # noqa: PLC0415
+
     words = set()
     for word in WORD.findall((text or "").lower()):
         # "hr.payslip" is found by "payslip" too
         for part in {word, *word.replace("_", ".").split(".")}:
-            part = _fold(part)
+            # By the root: "عرض السعر" meets "عروض الأسعار", "invoice" "Invoices"
+            part = root_of(_fold(part))
             if len(part) > 1:
                 words.add(part)
     return words

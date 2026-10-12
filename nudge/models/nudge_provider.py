@@ -520,7 +520,8 @@ class NudgeProvider(models.Model):
         return _(
             "%(share)s%% of the model runs on the processor, not the graphics card: answers come "
             "several times slower. Choose a smaller model, or set OLLAMA_FLASH_ATTENTION=1 and "
-            "OLLAMA_KV_CACHE_TYPE=q8_0 on the server and press Prepare for Nudge again.", share=share)
+            "OLLAMA_KV_CACHE_TYPE=q8_0 on the server (q4_0 on a card of 6 GB) and press Prepare "
+            "for Nudge again.", share=share)
 
     def action_fetch_models(self):
         self.ensure_one()
