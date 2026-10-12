@@ -551,6 +551,14 @@ class TestActing(AgentCase, TransactionCase):
         self.assertEqual(self.bob.write_uid, self.agent)
         self.assertEqual(result.event, {"type": "changed", "model": "res.partner", "ids": self.bob.ids})
 
+    def test_the_card_names_the_kind_of_record_as_the_interface_does(self):
+        # In Arabic the card said "تعديل: Contact": _description is the English of the code
+        self.env["ir.model"]._get("res.partner").name = "Nudge Contact"
+        pending = self.prepare("prepare_write", {
+            "model": "res.partner", "ids": [self.bob.id], "values": values(function="Buyer")})
+        self.assertEqual(pending["summary"], "Change: Nudge Contact")
+        self.assertEqual(records.model_label(self.env["res.partner"]), "Nudge Contact")
+
     def test_write_several_and_archive(self):
         pending = self.prepare("prepare_write", {
             "model": "res.partner", "ids": [self.bob.id, self.carol.id],

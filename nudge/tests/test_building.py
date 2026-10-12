@@ -140,6 +140,10 @@ class TestBuilding(NudgeCase, TransactionCase):
     def test_a_field_is_added_and_put_on_the_form(self):
         self.assertEqual(field_name_for("Nudge Score"), "x_nudge_score")
         self.assertEqual(field_name_for("x", "x_given_name"), "x_given_name")
+        # An Arabic label: an English name is asked for, never x_field
+        with self.assertRaises(Refused):
+            field_name_for("الموقع")
+        self.assertEqual(field_name_for("الموقع", "x_site"), "x_site")
         with self.assertRaises(Refused):
             field_name_for("x", "bad name")
         result = self.run_tool("prepare_field", {
@@ -148,8 +152,8 @@ class TestBuilding(NudgeCase, TransactionCase):
         self.assertFalse(result.is_error, result.content)
         self.assertTrue(result.pending["is_sensitive"])
         lines = {line["label"]: line["value"] for line in result.pending["preview"]["lines"]}
-        self.assertEqual((lines["Technical name"], lines["Type"]), ("x_nudge_score", "integer"))
-        self.assertIn("after function", lines["On the form"])
+        self.assertEqual((lines["Technical name"], lines["Type"]), ("x_nudge_score", "Whole number"))
+        self.assertIn("after Job Position", lines["On the form"], "The field it follows, as the form names it")
         self.assertNotIn("x_nudge_score", self.env["res.partner"]._fields, "Nothing before the yes")
 
         done = self.do("prepare_field", result)
