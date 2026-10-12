@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-11 06:09+0000\n"
-"PO-Revision-Date: 2026-10-11 06:09+0000\n"
+"POT-Creation-Date: 2026-10-11 06:43+0000\n"
+"PO-Revision-Date: 2026-10-11 06:43+0000\n"
 "Last-Translator: \n"
 "Language-Team: Arabic\n"
 "Language: ar\n"
@@ -1578,8 +1578,8 @@ msgstr "كل"
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/tasks.py:0
-msgid "Every %(number)s %(unit)s"
-msgstr "كل %(number)s %(unit)s"
+msgid "Every %s"
+msgstr "كل %s"
 
 #. module: nudge
 #: model_terms:ir.actions.act_window,help:nudge.nudge_usage_action

@@ -25,6 +25,7 @@ from .records import (
     ME,
     MODEL_PATTERN,
     Refused,
+    close_fields,
     cut,
     describe,
     format_value,
@@ -116,8 +117,10 @@ LINES_SCHEMA = {
 def writable_field(model, name):
     field = model._fields.get(name)
     if field is None or not model._has_field_access(field, "write"):
+        known = close_fields(model, name, "write")
+        hint = f" Close to it: {', '.join(known)}." if known else ""
         raise Refused(
-            f"{model._name} has no field {name!r} that this person can change. "
+            f"{model._name} has no field {name!r} that this person can change.{hint} "
             "describe_model lists the fields.")
     if name in KEPT_FIELDS or is_secret(field):
         raise Refused(f"The field {name!r} is not one Nudge writes in.")

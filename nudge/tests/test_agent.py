@@ -103,6 +103,14 @@ class TestReading(AgentCase, TransactionCase):
         self.assertIn("write the words themselves", found["note"])
         self.assertIn('"city"', actions.PrepareWrite.description)
 
+    def test_a_field_of_another_version_is_shown_the_close_ones(self):
+        # Gemini wrote groups_id, the name of Odoo 18, for group_ids
+        partners = self.env["res.partner"]
+        self.assertIn("category_id", records.close_fields(partners, "categories_id"))
+        with self.assertRaises(records.Refused) as refused:
+            actions.writable_field(partners, "categories_id")
+        self.assertIn("Close to it: category_id", str(refused.exception))
+
     def test_conditions(self):
         def names(conditions, **arguments):
             found = self.search(conditions=conditions, fields=["name"], order="name", **arguments)
