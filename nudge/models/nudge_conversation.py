@@ -504,7 +504,8 @@ class NudgeConversation(models.Model):
         if extra:
             # What the caller knows that the person did not type: a record, a conversation
             context_text = "\n".join((context_text, extra))
-        if provider.tool_set == "essential" and mode == MODE_TALK and not focus:
+        if provider.tool_set == "essential" and mode == MODE_TALK and (
+                not focus or focus in tools.commands.GROUNDED_FOCUS):
             # A small model answers far better from what it is given than from
             # what it remembers: what Nudge finds by itself goes with the question
             grounded = self.env["nudge.quick"]._ground(text)

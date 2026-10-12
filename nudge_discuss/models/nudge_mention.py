@@ -18,7 +18,9 @@ from odoo.exceptions import AccessError, UserError
 
 from odoo.addons.nudge.llm import loop
 from odoo.addons.nudge.tools import base
-from odoo.addons.nudge.tools.records import SKIPPED_TYPES, Refused, cut, describe, get_model, get_records, usual_fields
+from odoo.addons.nudge.tools.records import (
+    SKIPPED_TYPES, Refused, cut, describe, get_model, get_records, model_label, usual_fields,
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -123,12 +125,19 @@ class NudgeMention(models.Model):
         context["allowed_company_ids"] = user.company_ids.ids
         return self.env(user=user.id, su=False, context=context)
 
+    def _lang(self):
+        """:return: the language of the person who asked: what Nudge posts is
+        read by them, not by the background job that posts it"""
+        return (self.user_id.lang or self.message_id.author_id.lang
+                or self.env.company.partner_id.lang or self.env.lang or "en_US")
+
     def _answer(self):
         self.ensure_one()
         user = self.user_id
+        told = self.with_context(lang=self._lang()).env
         if not user or not user._is_internal() or not user.has_group("nudge.group_nudge_user"):
             self.state = "refused"
-            self._post(self.env._("Nudge is not open to the person who asked."), notify=False)
+            self._post(told._("Nudge is not open to the person who asked."), notify=False)
             return
         env = self._as_person()
         try:
@@ -154,7 +163,7 @@ class NudgeMention(models.Model):
             self.state = "done"
         except (UserError, AccessError, Refused) as error:
             self.write({"state": "failed", "error": cut(str(error), 300)})
-            self._post(self.env._("Nudge could not answer: %s", error))
+            self._post(told._("Nudge could not answer: %s", error))
         except Exception as error:  # noqa: BLE001
             _logger.exception("Nudge: mention %s failed", self.id)
             self.write({"state": "failed", "error": cut(str(error), 300)})
@@ -172,7 +181,7 @@ class NudgeMention(models.Model):
             model = get_model(env, self.model)
             record = get_records(model, [self.res_id], "read")
             payload = {
-                "kind": model._description,
+                "kind": model_label(model),
                 "record": record.display_name,
                 "fields": self._fields_of(env, record),
                 "linked": self._linked(env, record),

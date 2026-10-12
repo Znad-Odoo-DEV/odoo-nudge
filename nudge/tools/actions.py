@@ -55,6 +55,8 @@ EMPTY_WORDS = ("", "false", "none", "null")
 SENSITIVE_METHOD = re.compile(
     r"post|validate|cancel|pay|refund|reverse|lock|draft|approve|refuse|reconcile|done|close|"
     r"send|confirm|archive")
+# Fields a list of ids would empty of what they hold: added to or taken from only
+KEPT_WHOLE = {"res.users": ("group_ids", "groups_id", "company_ids")}
 SENSITIVE_MODEL = re.compile(
     r"^(account|payment|stock|hr\.payslip|hr\.expense|res\.users|res\.groups|res\.company|ir)(\.|$)")
 
@@ -76,8 +78,9 @@ VALUES_SCHEMA = {
                     "\"false\". A date: \"2026-10-01\"; with a time, in the time of the person: "
                     "\"2026-10-01 14:30\". A choice: its label or its key. A record: its id, "
                     "found with search_records, or \"me\". Several records: ids between "
-                    "commas. Text, such as a city or a street: the words themselves, never "
-                    "looked for. Empty empties the field."
+                    "commas, which replace those in the field; \"+12\" adds one and \"-12\" "
+                    "takes one out, the others staying (\"+12, +15\"). Text, such as a city or "
+                    "a street: the words themselves, never looked for. Empty empties the field."
                 ),
             },
         },
@@ -200,8 +203,23 @@ def read_value(env, field, raw):
             items = json.loads(text)
         except ValueError:
             items = text.split(",")
-        items = items if isinstance(items, list) else [items]
-        records = [read_id(env, field, str(item).strip()) for item in items[:MAX_RECORDS]]
+        items = [str(item).strip() for item in (items if isinstance(items, list) else [items])]
+        items = [item for item in items if item][:MAX_RECORDS]
+        if any(item[:1] in "+-" for item in items):
+            # Added to, or taken from: what else the field holds stays
+            change = {"add": [], "remove": []}
+            shown = []
+            for item in items:
+                key, sign = ("remove", "−") if item[:1] == "-" else ("add", "+")
+                record = read_id(env, field, item.lstrip("+-").strip())
+                change[key].append(record.id)
+                shown.append(f"{sign} {cut(record.display_name, 60)}")
+            return change, ", ".join(shown)
+        if field.name in KEPT_WHOLE.get(field.model_name, ()):
+            raise Refused(
+                f"{field.name} holds every access of the user: never replaced. Add one with "
+                "\"+id\", take one out with \"-id\".")
+        records = [read_id(env, field, item) for item in items]
         names = ", ".join(cut(record.display_name, 60) for record in records)
         return [record.id for record in records], names
     raise Refused(f"Nudge does not write in {field.name}.")
@@ -255,6 +273,9 @@ def to_write(values, lines):
     for name, value in values.items():
         if isinstance(value, list):
             written[name] = [Command.set(value)]
+        elif isinstance(value, dict) and set(value) <= {"add", "remove"}:
+            written[name] = [Command.link(ident) for ident in value.get("add", [])] + [
+                Command.unlink(ident) for ident in value.get("remove", [])]
     return written
 
 

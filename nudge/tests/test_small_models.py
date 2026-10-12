@@ -132,6 +132,20 @@ class TestSmallModels(NudgeCase, TransactionCase):
         self.assertIn("Nudge/Configuration/AI Providers", context)
         self.assertIn("thirty days", context)
 
+    def test_a_mention_is_given_what_was_found_too(self):
+        # "@Nudge how do we record landed costs?" went to the small model bare: "I cannot help"
+        self.small()
+        adapter = self.use_adapter()
+        conversation = self.env["nudge.conversation"].with_user(self.manager).create({})
+        job = conversation._chat_prepare(
+            "Where are the AI providers?", focus="mention", extra="<nudge_record>\n{}\n</nudge_record>")
+        list(loop.run(job, conversation._chat_record))
+        context = adapter.calls[0]["turns"][-1]["context"]
+        self.assertIn("<nudge_found>", context)
+        self.assertIn("Nudge/Configuration/AI Providers", context)
+        self.assertEqual(adapter.calls[0]["system"][0], prompt.FOCUS_PERSONA)
+        self.assertIn("<nudge_found>", prompt.FOCUS_PERSONA)
+
     def test_a_large_model_reads_everything_and_looks_itself(self):
         adapter = self.use_adapter()
         self.ask(self.manager, "Where are the AI providers?")

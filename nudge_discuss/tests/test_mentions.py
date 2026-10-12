@@ -73,6 +73,11 @@ class TestMentions(NudgeCase, TransactionCase):
         self.Mention._cron_answer()
         self.assertEqual(adapter.calls, [])
         self.assertIn("not open", self.answers().body)
+        # Said in the language of the one who asked, not in that of the background job
+        refused = self.Mention.search([("state", "=", "refused")], order="id desc", limit=1)
+        self.env["res.lang"]._activate_lang("fr_FR")
+        self.outsider.sudo().lang = "fr_FR"
+        self.assertEqual(refused._lang(), "fr_FR")
 
     def test_only_when_named(self):
         self.use_adapter()
