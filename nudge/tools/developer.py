@@ -220,6 +220,11 @@ def automations_installed(env):
             "is needed. Tell the person; a server action can still be made.")
 
 
+# What safe_eval refuses, and how it is written instead
+FORBIDDEN_TOLD = {
+    "STORE_ATTR": "A field is written with record.write({'active': False}), never record.active = False.",
+    "IMPORT_NAME": "Nothing is imported in an action: datetime, dateutil, time and Command are given.",
+}
 # What the code of a server action is given when it runs (ir.actions.server,
 # base.automation): any other name it reads fails then
 CODE_NAMES = frozenset({
@@ -228,28 +233,63 @@ CODE_NAMES = frozenset({
 })
 
 
-def compile_code(code):
+def compile_code(code, env=None):
     """The code of a server action, an automation rule or a scheduled action.
+    :param env: to know the models the code names, when given
     :return: what is wrong with it, or "" """
     text = (code or "").strip()
     if not text:
         return "The code is empty."
     error = test_python_expr(text, mode="exec")
     if error:
-        return str(error)
+        error = str(error)
+        for opcode, told in FORBIDDEN_TOLD.items():
+            if opcode in error:
+                return f"{error} {told}"
+        return error
     tree = ast.parse(text)
     unknown = unknown_names(tree)
     if unknown:
         # A small model wrote object and self: the action failed when run
         return (f"{', '.join(unknown)} is not known when the code runs. It knows: "
                 f"{', '.join(sorted(CODE_NAMES))}; the record is record (records for several).")
-    if not any(isinstance(node, (ast.Call, ast.Raise)) or (
-            isinstance(node, (ast.Attribute, ast.Subscript)) and isinstance(node.ctx, ast.Store))
-            for node in ast.walk(tree)):
+    builtin = set(getattr(safe_eval_module, "_BUILTINS", vars(builtins)))
+    for node in ast.walk(tree):
+        if (isinstance(node, ast.Subscript) and isinstance(node.value, ast.Name) and node.value.id == "env"
+                and isinstance(node.slice, ast.Constant) and isinstance(node.slice.value, str)
+                and env is not None and node.slice.value not in env):
+            # env['ir.lang'] for res.lang: the rule failed on every new contact
+            return f"There is no model {node.slice.value!r} here: describe_model finds the right one."
+        if (isinstance(node, ast.Attribute) and node.attr in ("now", "today", "utcnow")
+                and isinstance(node.value, ast.Name) and node.value.id == "datetime"):
+            return ("datetime is the module here: datetime.datetime.now(), or datetime.date.today().")
+        if (isinstance(node, ast.Assign) and any(isinstance(target, ast.Name) and target.id == "action"
+                                                 for target in node.targets)
+                and not _opens_something(node.value)):
+            # action = dict(active='False') archived nothing
+            return ("action = {...} only opens a window, with its type: to change the record, write it, "
+                    "such as record.write({'active': False}).")
+    changes = (
+        node for node in ast.walk(tree)
+        if isinstance(node, ast.Raise)
+        or (isinstance(node, ast.Call) and not (isinstance(node.func, ast.Name) and node.func.id in builtin))
+        or (isinstance(node, ast.Assign) and any(isinstance(target, ast.Name) and target.id == "action"
+                                                 for target in node.targets))
+    )
+    if not any(changes):
         # lang = 'ar' was made into an automation rule that changed nothing
         return ("The code changes nothing: it calls no method and writes no field. Write it, such as "
                 "record.write({'lang': 'ar_001'}), or use an update action instead of code.")
     return ""
+
+
+def _opens_something(value):
+    """:return: whether what is given to ``action`` names the type of an action"""
+    if isinstance(value, ast.Dict):
+        return any(isinstance(key, ast.Constant) and key.value == "type" for key in value.keys)
+    if isinstance(value, ast.Call) and isinstance(value.func, ast.Name) and value.func.id == "dict":
+        return any(keyword.arg == "type" for keyword in value.keywords)
+    return True
 
 
 def unknown_names(tree):
@@ -396,7 +436,7 @@ class CheckPythonCode(base.Tool):
     @refusing
     def run(self, env, arguments, screen):
         check_developing(env)
-        error = compile_code(arguments["code"])
+        error = compile_code(arguments["code"], env)
         return base.ToolResult(error or "The code compiles.", is_error=bool(error))
 
 
@@ -507,7 +547,7 @@ def read_action(env, model, action, position=1):
     values = {"model_id": ir_model(env, model).id}
     lines = []
     if kind == "code":
-        error = compile_code(action.get("code"))
+        error = compile_code(action.get("code"), env)
         if error:
             raise Refused(f"Action {position}: the code does not compile. {error}")
         values.update(state="code", code=action["code"].strip())
@@ -1502,7 +1542,7 @@ class PrepareScheduledAction(Building):
     def run(self, env, arguments, screen):
         check_developing(env)
         model = get_model(env, arguments["model"])
-        error = compile_code(arguments["code"])
+        error = compile_code(arguments["code"], env)
         if error:
             raise Refused(f"The code does not compile. {error}")
         first = (arguments.get("first_run") or "").strip()

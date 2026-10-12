@@ -175,3 +175,21 @@ class TestConfiguration(NudgeCase, TransactionCase):
         self.assertIn("## Setting Odoo up", prompt.SYSTEM_PERSONA)
         self.assertIn("read_settings", prompt.SYSTEM_PERSONA)
         self.assertIn("show_settings", prompt.SYSTEM_PERSONA)
+
+    def test_a_setting_of_the_company_is_read(self):
+        # The fiscal country, the default taxes, the currency read "not set": they are the company's
+        from odoo.addons.nudge.tools.configuration import current_values  # noqa: PLC0415
+
+        Settings = self.env["res.config.settings"]
+        company = self.env.company
+        for name, field in Settings._fields.items():
+            if field.type != "many2one" or not (field.related or "").startswith("company_id."):
+                continue
+            value = company
+            for part in field.related.split(".")[1:]:
+                value = value[part]
+            if value:
+                self.assertEqual(current_values(self.env, [name])[name], value.display_name[:80], name)
+                break
+        else:
+            self.skipTest("No setting of the company with a value here")
