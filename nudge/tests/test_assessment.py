@@ -30,7 +30,8 @@ class TestAssessment(NudgeCase, TransactionCase):
         self.assertEqual(found["business"], "contracting")
         installed = {entry["module"]: entry for entry in found["installed"]}
         missing = {entry["module"]: entry for entry in found["missing"]}
-        self.assertEqual(set(installed) | set(missing),
+        enterprise_only = {entry["module"] for entry in found.get("enterprise_only", [])}
+        self.assertEqual(set(installed) | set(missing) | enterprise_only,
                          {module for module, _why, _words in assessment.BUSINESSES["contracting"]["needs"]})
         self.assertNotIn("project", installed, "Not installed on this test database")
         self.assertIn("project", missing)
@@ -61,3 +62,18 @@ class TestAssessment(NudgeCase, TransactionCase):
             self.assertIn("assess_database", names)
         self.assertIn("assess_database", prompt.SYSTEM_PERSONA)
         self.assertIn("senior", prompt.SYSTEM_PERSONA.lower())
+
+    def test_advice_is_for_the_edition_of_this_database(self):
+        # Two warehouses were said to need Enterprise, and Barcode proposed to a Community database
+        runs = assessment.edition(self.env)
+        found = json.loads(self.assess("services").content)
+        self.assertEqual(found["edition"], runs)
+        self.assertEqual(found["edition_note"], assessment.EDITION_NOTE[runs])
+        self.assertEqual(json.loads(tools.base.call(self.env(user=self.user_a), "assess_database", {}).content)["edition"], runs)
+        if runs == "Community":
+            self.assertNotIn("helpdesk", [entry["module"] for entry in found["missing"]])
+            self.assertIn("helpdesk", [entry["module"] for entry in found["enterprise_only"]])
+        self.assertIn("never say that a Community feature", prompt.SYSTEM_PERSONA)
+        # A note that names a thing in one language is not quoted in another
+        self.env["nudge.note"].sudo().create({"name": "Offers", "body": "Here quotations are called offers (عروض)."})
+        self.assertIn("in another, use the usual name", self.env["nudge.profile"]._get_overview())
