@@ -518,7 +518,7 @@ class NudgeConversation(models.Model):
             # the words of the question, not by the picture
             media_type, data = found["image"]
             try:
-                found = dict(found, seen=provider._read_picture(
+                found = dict(found, seen_by_kind=True, seen=provider._read_picture(
                     media_type, data, text, model=provider.model_name, prompt=ollama.PRODUCT_PROMPT))
             except UserError as error:
                 _logger.info("Nudge: the picture was not described for the products: %s", error)
@@ -571,7 +571,7 @@ class NudgeConversation(models.Model):
             grounded = dict(grounded, lesson=f"{told} The lesson, in their words: {lesson}")
         if provider.tool_set == "essential" and found and found.get("seen"):
             # What the picture shows, among the products: "do we sell this?"
-            products = self.env["nudge.quick"]._ground_products(found["seen"])
+            products = self.env["nudge.quick"]._ground_products(found["seen"], by_kind=found.get("seen_by_kind"))
             # Those of the words of the question ("this product") are not those of the picture
             grounded = {key: value for key, value in grounded.items() if key != "products"}
             # What the picture was read as stays with the question, for what is said of it
