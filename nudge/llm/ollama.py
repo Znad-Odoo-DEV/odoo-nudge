@@ -24,6 +24,16 @@ CONTEXT_STEP = 4096
 TEMPERATURE = 0.4
 REPEAT_PENALTY = 1.1
 TAG = re.compile(r"^[A-Za-z0-9_.-]+$")
+# A picture is read by a model of the server that sees, for one that does not:
+# in English, which a small model reads best, every word on it as written
+PICTURE_TIMEOUT = 180
+PICTURE_PROMPT = (
+    "Describe this picture for someone who cannot see it and must answer this question: "
+    "{question}\n"
+    "Say what it is (a product, a document, an invoice, a screen of a software...). Copy every "
+    "word, number, code, reference, price and date written on it exactly as written, in its own "
+    "language and script. Give the colours, shapes, sizes and quantities you can see. Do not "
+    "guess what you cannot read. Plain text, no more than 200 words.")
 
 
 def root_of(base_url):
@@ -69,6 +79,31 @@ def _detail(response):
     except ValueError:
         return (response.text or "")[:300]
     return str(body.get("error") if isinstance(body, dict) else body)[:300]
+
+
+def read_picture(base_url, model, data, question="", api_key=""):
+    """:param data: the picture, in base64
+    :param question: what the person asked with it
+    :return: ``(text, usage)``: what the model read in the picture, and the
+        tokens it took
+    :raise base.AdapterError: when the server could not read it"""
+    payload = {
+        "model": model,
+        "stream": False,
+        "messages": [{
+            "role": "user",
+            "content": PICTURE_PROMPT.format(question=(question or "What is this?")[:500]),
+            "images": [data],
+        }],
+        "options": {"temperature": 0.1},
+    }
+    body = _call("POST", base_url, "/api/chat", api_key, payload, timeout=PICTURE_TIMEOUT)
+    text = ((body.get("message") or {}).get("content") or "").strip()
+    if not text:
+        raise base.AdapterError(base.ERROR_BAD_REQUEST, f"{model} read nothing in the picture")
+    usage = {"input_tokens": int(body.get("prompt_eval_count") or 0),
+             "output_tokens": int(body.get("eval_count") or 0)}
+    return text, usage
 
 
 def version(base_url, api_key=""):

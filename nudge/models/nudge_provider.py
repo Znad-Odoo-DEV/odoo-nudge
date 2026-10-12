@@ -108,6 +108,11 @@ class NudgeProvider(models.Model):
              "mode, the instructions, the tools and room for the conversation.",
     )
     context_warning = fields.Char(compute="_compute_context_needed")
+    picture_model = fields.Char(
+        string="Picture Model",
+        help="A model of this Ollama server that sees pictures, such as qwen2.5vl:3b, for a model "
+             "in use that does not: it reads the picture sent, and what it read goes with the "
+             "question. Prepare for Nudge chooses one when the server has it.")
     stt_mode = fields.Selection(
         [
             (base.STT_NONE, "Not available"),
@@ -127,6 +132,11 @@ class NudgeProvider(models.Model):
         help="Model that turns speech into text. For a model that listens, empty uses the "
              "model of the conversations.",
     )
+    stt_url = fields.Char(
+        string="Speech Address",
+        help="The address of the transcription service, when it is not this provider's: a "
+             "Whisper on your own machine for an Ollama, which does not transcribe "
+             "(http://localhost:8000/v1). The key of this provider is not sent there.")
     can_transcribe = fields.Boolean(
         string="Turns Speech into Text", compute="_compute_can_transcribe", compute_sudo=True)
     price_input = fields.Float(string="Input Price", digits=(12, 4), help="Per million tokens.")
@@ -298,6 +308,7 @@ class NudgeProvider(models.Model):
             capabilities=self.capabilities or {},
             stt_mode=self.stt_mode or base.STT_NONE,
             stt_model=(self.stt_model or "").strip(),
+            stt_url=(self.stt_url or "").strip(),
         )
 
     def _get_adapter(self):
@@ -449,6 +460,25 @@ class NudgeProvider(models.Model):
         except base.AdapterError:
             return True
 
+    def _read_picture(self, media_type, data, question):
+        """:param data: the picture, in base64
+        :return: what the picture model of this server read in it
+        :raise UserError: when there is none, or it could not"""
+        self.ensure_one()
+        if not self.picture_model:
+            raise UserError(self.env._(
+                "%s cannot read pictures. Describe it in words, or ask your administrator for a "
+                "model that sees them.", self.model_name))
+        try:
+            text, usage = ollama.read_picture(self.base_url, self.picture_model, data, question,
+                                              self.api_key or "")
+        except base.AdapterError as exc:
+            raise UserError(self._error_message(exc)) from exc
+        self.env["nudge.usage"]._add(
+            "chat", base.normalize_usage(usage), 0.0, self.env.user, self.env.company,
+            provider_id=self.id, model_name=self.picture_model)
+        return text
+
     def action_ollama_prepare(self):
         """Make a copy of the model in use with the context Nudge needs, and
         choose it. Ollama shares the weights: nothing is downloaded."""
@@ -465,6 +495,11 @@ class NudgeProvider(models.Model):
         self.write({"model_name": name, "context_length": context,
                     "timeout": max(self.timeout or 0, OLLAMA_TIMEOUT)})
         self.action_fetch_models()
+        if not self.picture_model and not self._can_see_pictures():
+            # A model of the server that sees reads the pictures for it
+            seeing = self.model_ids.filtered("sees_pictures").sorted("name")[:1]
+            if seeing:
+                self.picture_model = seeing.name
         told = self.env._("%(name)s is ready with %(context)s tokens of context, and chosen.",
                           name=name, context=context)
         try:
