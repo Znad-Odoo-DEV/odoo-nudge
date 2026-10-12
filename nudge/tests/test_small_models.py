@@ -111,6 +111,15 @@ class TestSmallModels(NudgeCase, TransactionCase):
     def small(self):
         self.provider.tool_set = "essential"
 
+    def assertSheet(self, names, msg=None, offered=True):
+        """make_spreadsheet comes with nudge_spreadsheet, not on every version:
+        where it is not, the group brings its other tools"""
+        from odoo.addons.nudge import tools  # noqa: PLC0415
+
+        if "make_spreadsheet" not in tools.base.TOOLS:
+            return
+        (self.assertIn if offered else self.assertNotIn)("make_spreadsheet", names, msg)
+
     def ask_shown(self, text, snapshot, reply):
         adapter = self.use_adapter(reply=reply)
         Conversation = self.env["nudge.conversation"].with_user(self.user_contacts)
@@ -145,13 +154,13 @@ class TestSmallModels(NudgeCase, TransactionCase):
         names = {tool["name"] for tool in adapter.calls[0]["tools"]}
         self.assertIn("search_records", names)
         self.assertIn("more_tools", names, "The rest is a call away")
-        self.assertNotIn("make_spreadsheet", names, "A group is offered when the question asks for it")
+        self.assertSheet(names, "A group is offered when the question asks for it", offered=False)
         self.assertNotIn("change_settings", names)
 
         adapter = self.use_adapter()
         self.order(self.agent, "بالـ SQL: أكتر 5 زباين عندهم طلبات")
         names = {tool["name"] for tool in adapter.calls[0]["tools"]}
-        self.assertIn("make_spreadsheet", names, "The words of the question bring their group, in Arabic too")
+        self.assertSheet(names, "The words of the question bring their group, in Arabic too")
 
     def test_the_work_is_told_the_kind_of_record_named(self):
         # "ضيفلي حقل على عرض السعر" was read as an exchange rate
@@ -174,6 +183,52 @@ class TestSmallModels(NudgeCase, TransactionCase):
         screens = self.env["nudge.quick"]._ground_screens("change the email template")
         self.assertIn("Email Templates", " ".join(screen["path_en"] for screen in screens))
 
+    def test_a_kind_of_record_named_by_its_own_name(self):
+        # Without the Contacts app no screen says "Contact": the button went to Guests
+        Quick = self.env["nudge.quick"]
+        self.assertIn({"model": "res.partner", "name": "Contact"},
+                      Quick._ground_models("Add an Archive button on the contact form"))
+        found = Quick._ground_work("Add an Archive button on the contact form")
+        named = [item["model"] for item in found.get("models", []) + found.get("screens", [])]
+        self.assertIn("res.partner", named, "Given once: as a screen, or by its own name")
+        models = [kind["model"] for kind in Quick._ground_models("Add a field on the contact")]
+        self.assertNotIn("ir.model.fields", models, "A technical kind of record is never the one meant")
+        self.assertFalse([kind for kind in Quick._ground_models("Hello there") if kind], "Nothing named")
+
+    def test_the_settings_found_carry_their_value(self):
+        # "Which options are switched on in the Sales settings?" was answered "none"
+        from odoo.addons.nudge.tools.configuration import settings_layout  # noqa: PLC0415
+
+        Quick = self.env["nudge.quick"]
+        found = Quick._ground_quick("Switch on the units of measure in the settings")
+        self.assertTrue(found.get("settings"), found)
+        self.assertTrue(all(setting.get("value") in ("on", "off") or setting.get("value")
+                            for setting in found["settings"]), found)
+        apps = {app["label"]: app for app in settings_layout(self.env)}
+        if "Sales" not in apps:
+            self.skipTest("No settings of Sales in this database")
+        found = Quick._ground_quick("Which options are switched on in the Sales settings?")
+        self.assertEqual(found["settings_on"]["app"], "Sales")
+        self.assertEqual(found["settings_on"]["of"], len([s for s in apps["Sales"]["settings"] if s["fields"]]))
+
+    def test_a_technical_screen_is_named_in_full(self):
+        # "اعملها هلق بالقيم يلي اقترحتها" took a small model to Tracking Values
+        Quick = self.env["nudge.quick"]
+        asked = [("en_US", "Fine: go ahead now with the values you proposed")]
+        if self.env["res.lang"]._lang_get("ar_001"):
+            # The Arabic names of the menus are only there once Arabic is loaded
+            asked.append(("ar_001", "تمام، اعملها هلق بالقيم يلي اقترحتها"))
+        for lang, text in asked:
+            paths = " ".join(screen["path_en"] for _rank, screen in Quick.with_context(lang=lang)._scored_screens(text))
+            self.assertNotIn("Technical", paths, text)
+        # The verb of an order is no word of a screen: "ضيف" (add) found Guests
+        from odoo.addons.nudge.models.nudge_quick import GROUND_STOP_WORDS  # noqa: PLC0415
+
+        self.assertIn(commands.fold("ضيفلي"), GROUND_STOP_WORDS)
+        self.assertNotIn(commands.fold("ضيوف"), GROUND_STOP_WORDS, "Guests asked for are still found")
+        paths = " ".join(screen["path_en"] for _rank, screen in Quick._scored_screens("Show me the tracking values"))
+        self.assertIn("Tracking Values", paths, "Named in full, it is found")
+
     def test_told_once_to_act_when_it_only_talked(self):
         # "Give Raghad the Inventory access" was answered with steps to follow
         self.small()
@@ -185,6 +240,25 @@ class TestSmallModels(NudgeCase, TransactionCase):
         adapter = self.use_adapter(reply="Which Raghad do you mean?")
         self.order(self.agent, "Archive the contact Raghad")
         self.assertEqual(len(adapter.calls), 1)
+        # Nor what it says once a tool was called: a plan said yes to was
+        # proposed a second time, after "done"
+        from odoo.addons.nudge.llm import base as llm_base  # noqa: PLC0415
+
+        searching = [llm_base.tool_use_event("call_1", "search_records", {"model": "res.partner", "conditions": [
+                         {"field": "name", "operator": "=", "value": "Raghad"}]}),
+                     llm_base.stop_event(llm_base.STOP_TOOL_USE)]
+        adapter = self.use_adapter(script=[searching], reply="Raghad is not in the contacts.")
+        self.order(self.agent, "Archive the contact Raghad")
+        self.assertEqual(len(adapter.calls), 2, "The search, then what it found: not pushed")
+        # Nor what it says of a card the person said yes to
+        from .test_agent import asking, call, saying, values  # noqa: PLC0415
+
+        creating = call("prepare_create", {"model": "res.partner", "values": values(name="Nudge Made")})
+        adapter = self.use_adapter(script=[asking(creating), saying("Done: Nudge Made is created.")])
+        conversation, _events = self.order(self.agent, "Create the contact Nudge Made")
+        self.decide(conversation)
+        self.assertEqual(len(adapter.calls), 2, "Said yes to, then told: never pushed into the same card")
+        self.assertFalse(conversation._background_job()["push_to_act"], "Nor a piece of it in the background")
         # Nor a large model
         self.provider.tool_set = "full"
         adapter = self.use_adapter(reply="Open Settings, then Users.")
@@ -199,6 +273,14 @@ class TestSmallModels(NudgeCase, TransactionCase):
         found = self.env["nudge.quick"]._ground_work("Give Raghad the Settings user access")
         self.assertIn({"model": "res.partner", "id": raghad.id, "name": "Raghad"}, found["records"])
         self.assertTrue(found.get("access_groups"), "An order about access: the groups it names")
+        # A user and her own contact are one person: the orders of Gemini
+        # Furniture were looked for on Raghad's contact
+        user = self.env["res.users"].create({"name": "Rghd Nudge", "login": "rghd_nudge"})
+        customer = self.env["res.partner"].create({"name": "Nudge Furniture"})
+        found = self.env["nudge.quick"]._ground_work("Set Rghd Nudge as salesperson of every order of Nudge Furniture")
+        self.assertIn({"model": "res.users", "id": user.id, "name": "Rghd Nudge"}, found["records"])
+        contacts = [record["id"] for record in found["records"] if record["model"] == "res.partner"]
+        self.assertEqual(contacts, [customer.id], "Only the customer is a contact of its own")
         # A model on one's own machine is given its time where no worker is killed
         self.provider.write({"is_ollama": True, "timeout": 300})
         Conversation = self.env["nudge.conversation"]
@@ -216,19 +298,19 @@ class TestSmallModels(NudgeCase, TransactionCase):
         conversation, _events = self.order(self.agent, "Give me the totals by customer")
         before = {tool["name"] for tool in adapter.calls[0]["tools"]}
         after = {tool["name"] for tool in adapter.calls[1]["tools"]}
-        self.assertNotIn("make_spreadsheet", before)
-        self.assertIn("make_spreadsheet", after, "Offered from the next answer on")
+        self.assertSheet(before, offered=False)
+        self.assertSheet(after, "Offered from the next answer on")
         self.assertEqual(conversation.sudo().tool_groups, "data")
         # And to the next question of the same conversation
         adapter = self.use_adapter()
         self.order(self.agent, "And by country?", conversation_id=conversation.id)
-        self.assertIn("make_spreadsheet", {tool["name"] for tool in adapter.calls[0]["tools"]})
+        self.assertSheet({tool["name"] for tool in adapter.calls[0]["tools"]})
 
     def test_a_large_model_has_every_tool_and_no_groups(self):
         adapter = self.use_adapter()
         self.order(self.agent, "How many quotations do we have?")
         names = {tool["name"] for tool in adapter.calls[0]["tools"]}
-        self.assertIn("make_spreadsheet", names)
+        self.assertSheet(names)
         self.assertNotIn("more_tools", names)
 
     def test_words_of_the_groups(self):
@@ -285,6 +367,22 @@ class TestSmallModels(NudgeCase, TransactionCase):
         self.assertFalse([event for event in loop.run(job, conversation._chat_record)
                           if event.get("type") == "guidance"])
         self.assertTrue(adapter.calls)
+
+    def test_shown_the_setting_the_question_names(self):
+        # "Show me where to switch on units of measure" was answered with a path not there
+        from odoo.tests import new_test_user  # noqa: PLC0415
+
+        admin = new_test_user(self.env, login="nudge_settings", groups="base.group_system,nudge.group_nudge_user")
+        text = "Show me where to switch on units of measure in the settings"
+        grounded = self.env["nudge.quick"].with_user(admin)._ground_settings(text)
+        if not grounded:
+            self.skipTest("No setting of units of measure in this database")
+        self.use_adapter(reply="Go to Your Company, then Inventory & Warehouse, then tick it.")
+        conversation = self.env["nudge.conversation"].with_user(admin)._chat_open(None)
+        job = conversation._chat_prepare(text, snapshot=dict(SCREEN), explain="screen")
+        guidance = [event for event in loop.run(job, conversation._chat_record) if event.get("type") == "guidance"]
+        self.assertTrue(guidance, "Pointed at, by what Nudge found")
+        self.assertIn(grounded[0]["field"], str(guidance[0]["steps"]))
 
     def test_taken_nowhere_the_screens_found_are_offered(self):
         adapter = self.use_adapter(reply="Go to Nudge, then Configuration.")

@@ -13,7 +13,7 @@ GROUPS = {
     "settings": {
         "about": "read, show and change the settings of the apps, as on the Settings screen",
         "tools": ("read_settings", "show_settings", "change_settings", "read_configuration"),
-        "words": ("setting", "configur", "enable", "activat", "switch on", "turn on", "option",
+        "words": ("setting", "configur", "set up", "setup", "enable", "activat", "switch on", "turn on", "option",
                   "اعدادات", "ضبط", "فعل", "تفعيل", "خيار"),
     },
     "data": {

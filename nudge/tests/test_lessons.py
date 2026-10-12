@@ -58,6 +58,33 @@ class TestLessons(NudgeCase, TransactionCase):
             self.env["nudge.note"].with_user(self.user_a).search([]).read(["body"])
         self.assertTrue(self.env["nudge.note"].with_user(self.manager).search([("kind", "=", "lesson")]))
 
+    def test_asked_to_remember_the_words_are_the_persons(self):
+        # "تذكّر: الخصم عنا ما بيتجاوز 10%" was told back as "a discount above
+        # 10% is a must", and nothing was written down
+        self.assertEqual(tools.lessons.taught("Remember: our discount never goes above 10% on any quotation"),
+                         "our discount never goes above 10% on any quotation")
+        self.assertEqual(tools.lessons.taught("تذكّر: الخصم عنا ما بيتجاوز 10%"), "الخصم عنا ما بيتجاوز 10%")
+        for text in ("How do I remember a password?", "Remembering is hard", "remember"):
+            self.assertEqual(tools.lessons.taught(text), "", text)
+
+        # A small model: Nudge writes it down itself, and tells the model
+        self.provider.tool_set = "essential"
+        adapter = self.use_adapter(reply="Noted.")
+        self.ask(self.user_a, "Remember: our discount never goes above 10% on any quotation")
+        lesson = self.env["nudge.note"].sudo().search([("kind", "=", "lesson")], order="id desc", limit=1)
+        self.assertEqual(lesson.body, "our discount never goes above 10% on any quotation")
+        self.assertEqual(lesson.proposed_by, self.user_a)
+        self.assertIn('"lesson"', adapter.calls[0]["turns"][-1]["context"])
+
+        # Called anyway, with its own sentence: the person's words are kept
+        conversation = self.env["nudge.conversation"].with_user(self.user_a)._chat_open(None)
+        conversation._chat_prepare("Remember: invoices are sent on the last day of the month")
+        result = tools.base.call(
+            self.env(user=self.user_a, context=dict(self.env.context, nudge_conversation_id=conversation.id)),
+            "remember_lesson",
+            {"lesson": "Invoices are sent at the start of the month.", "why": "They said so"})
+        self.assertIn("already written down", result.content, "Nudge wrote their words already: not twice")
+
     def test_for_everybody_and_told(self):
         for mode in ("talk", "agent"):
             names = [tool.name for tool in tools.base.available(self.env(user=self.user_a), mode)]

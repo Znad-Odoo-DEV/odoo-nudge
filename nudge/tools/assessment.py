@@ -153,19 +153,51 @@ class AssessDatabase(base.Tool):
     input_schema = {
         "type": "object",
         "additionalProperties": False,
-        "required": ["business"],
         "properties": {
             "business": {
                 "type": "string",
                 "minLength": 2,
                 "maxLength": 80,
-                "description": "The kind of business, in the person's words: \"شركة مقاولات\", \"trading\".",
+                "description": (
+                    "The kind of business, only as the person named it: \"شركة مقاولات\", \"trading\". "
+                    "Left out when they named none: never guessed."),
             },
         },
     }
 
+    @staticmethod
+    def _used(env):
+        """:return: ``(installed, custom, used)`` module names, by the profile"""
+        installed = set(env["ir.module.module"].sudo().search([("state", "=", "installed")]).mapped("name"))
+        profile = env["nudge.profile"]._ensure_current().sudo()
+        custom = {
+            module["name"] for piece in profile.slice_ids.filtered(lambda piece: piece.key == "overview")
+            for module in (piece.data or {}).get("custom_modules", [])
+        }
+        used = {(piece.data or {}).get("module") or "" for piece in profile.slice_ids
+                if piece.kind == "activity" and (piece.data or {}).get("changed")}
+        return installed, custom, used
+
+    def _overview(self, env):
+        """What is set up and in use, with no kind of business to judge it by"""
+        installed, custom, used = self._used(env)
+        apps = env["ir.module.module"].sudo().search([("state", "=", "installed"), ("application", "=", True)])
+        return base.ToolResult(base.dump({
+            "apps": [{"module": app.name, "name": app.shortdesc, "in_use": app.name in used} for app in apps],
+            "custom_modules": sorted(custom),
+            "custom_modules_in_use": sorted(custom & used),
+            "note": (
+                "No kind of business was named: tell what is set up and what is in use, from this "
+                "only, and ask what the business does to say what is missing. Known kinds: "
+                + ", ".join(sorted(BUSINESSES)) + "."),
+        }))
+
     def run(self, env, arguments, screen):
-        key = business_of(arguments["business"])
+        business = (arguments.get("business") or "").strip()
+        if not business:
+            # A small model named a business the person never named, and judged by it
+            return self._overview(env)
+        key = business_of(business)
         if key is None:
             known = ", ".join(sorted(BUSINESSES))
             return base.ToolResult(

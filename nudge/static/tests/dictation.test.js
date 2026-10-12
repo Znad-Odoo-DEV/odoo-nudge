@@ -395,6 +395,9 @@ test("an answer writes in the form, the person reads and decides", async () => {
     expect(nudge.state.messages[1].content).toBe(
         "Written in “Remarks”:\n\n> The customer called."
     );
+    expect(nudge.state.messages[1].error).toBe("", {
+        message: "The answer ended before the writing did: never told as an empty answer",
+    });
     expect(nudge.state.messages[1].guidance).toEqual([]);
 
     await click(".o_nudge_guide_undo");

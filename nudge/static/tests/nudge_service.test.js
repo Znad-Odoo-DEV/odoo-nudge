@@ -47,6 +47,35 @@ async function startNudge(config, fetch, settings = { nudge_explain: "text" }) {
     return { nudge: getService("nudge"), requests };
 }
 
+test("the conversation is open again after the reload what Nudge made asked for", async () => {
+    // "Undo everything you made in this conversation" went to a new, empty one
+    browser.sessionStorage.setItem(
+        "nudge.kept_conversation",
+        JSON.stringify({ conversationId: 3, isOpen: true, at: Date.now() })
+    );
+    onRpc("nudge.conversation", "read", () => [{ id: 3, name: "A field" }]);
+    onRpc("nudge.message", "search_read", () => [
+        { id: 1, role: "user", content: "Add a field", state: "complete", screen_events: [] },
+    ]);
+    const { nudge } = await startNudge({ is_configured: true }, () => {});
+    await animationFrame();
+    expect(nudge.state.conversationId).toBe(3);
+    expect(nudge.state.isOpen).toBe(true);
+    expect(browser.sessionStorage.getItem("nudge.kept_conversation")).toBe(null, {
+        message: "Taken once: the next page starts as usual",
+    });
+});
+
+test("a conversation kept long ago is not opened again", async () => {
+    browser.sessionStorage.setItem(
+        "nudge.kept_conversation",
+        JSON.stringify({ conversationId: 3, isOpen: true, at: Date.now() - 3600000 })
+    );
+    const { nudge } = await startNudge({ is_configured: true }, () => {});
+    await animationFrame();
+    expect(nudge.state.conversationId).toBe(null);
+});
+
 test("nothing is shown to someone outside the groups", async () => {
     const { nudge } = await startNudge(undefined, () => {});
     expect(nudge.state.isEnabled).toBe(false);
@@ -479,6 +508,19 @@ test("a comparison asks: chat or spreadsheet", async () => {
     await nudge.send("How many contacts do we have?");
     expect(requests).toHaveLength(3, { message: "A plain question is not asked about" });
     expect(requests[2].body.report).toBe(undefined);
+});
+
+test("in Developer mode a report is something to build: nothing is asked", async () => {
+    // "اعمل تقرير PDF لعرض السعر" stopped at the question, and never reached the model
+    const { nudge, requests } = await startNudge(
+        { is_configured: true, can_use_agent: true, can_develop: true, can_make_spreadsheet: true },
+        () => streamed([lines({ type: "start", conversation_id: 7, message_id: 1, title: "Report" })])
+    );
+    await nudge.setMode("dev");
+    await nudge.send("Make a PDF report of the quotation with the project site");
+    expect(nudge.state.asking).toBe(null);
+    expect(requests).toHaveLength(1);
+    expect(requests[0].body.mode).toBe("dev");
 });
 
 test("without the spreadsheet module nothing is asked", async () => {

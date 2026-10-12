@@ -1,4 +1,5 @@
 import base64
+import logging
 import time
 from datetime import timedelta
 
@@ -15,6 +16,8 @@ from ..llm import snapshot as screen
 from ..profile import retrieval
 from .ir_http import nudge_version
 from ..tools.base import MODE_AGENT, MODE_DEV, MODE_TALK
+
+_logger = logging.getLogger(__name__)
 
 # How the person wants the answer, as the model reads it
 REPORT_WORDS = {"sheet": "spreadsheet", "chat": "in the chat"}
@@ -361,6 +364,10 @@ class NudgeConversation(models.Model):
         self.env["nudge.usage"]._check_budget()
         job = self._chat_job(self._chat_provider(self._chat_mode()), self._chat_mode(), AGENT_MAX_ROUNDS)
         job["seconds"] = self.env["nudge.run"]._get_piece_seconds()
+        if self.sudo().run_id.step_ids:
+            # A piece that follows what was already done, or said yes to: what
+            # the model says of it is never pushed into doing it again
+            job["push_to_act"] = False
         return job
 
     def _chat_focus(self):
@@ -503,6 +510,16 @@ class NudgeConversation(models.Model):
             found = dict(found, image=None, text=self.env._(
                 "What the picture shows, as read by %(model)s:\n%(text)s",
                 model=provider.picture_model or "", text=seen), kept_image=found["image"], seen=seen)
+        elif found and found["image"] and provider.is_ollama and provider.tool_set == "essential":
+            # A small model that sees is sent the picture, but what it shows is
+            # looked for among the products from words: it says them first, in
+            # a short call of its own. "Do we sell this?" found a product by
+            # the words of the question, not by the picture
+            media_type, data = found["image"]
+            try:
+                found = dict(found, seen=provider._read_picture(media_type, data, text, model=provider.model_name))
+            except UserError as error:
+                _logger.info("Nudge: the picture was not described for the products: %s", error)
 
         conversation = self.sudo()
         # What waited for a decision is left: the person moved on
@@ -544,11 +561,19 @@ class NudgeConversation(models.Model):
         elif provider.tool_set == "essential" and mode != MODE_TALK and not focus:
             # Doing the work, it is told which kind of record the words name
             grounded = self.env["nudge.quick"]._ground_work(text)
+        lesson = tools.lessons.taught(text) if provider.tool_set == "essential" and not focus else ""
+        if lesson:
+            # Asked to remember, a small model said it had and wrote nothing down,
+            # or the rule turned around: Nudge writes the person's words down itself
+            _written, told = tools.lessons.propose(self.env, lesson, text, self.id)
+            grounded = dict(grounded, lesson=f"{told} The lesson, in their words: {lesson}")
         if provider.tool_set == "essential" and found and found.get("seen"):
             # What the picture shows, among the products: "do we sell this?"
             products = self.env["nudge.quick"]._ground_products(found["seen"])
+            # Those of the words of the question ("this product") are not those of the picture
+            grounded = {key: value for key, value in grounded.items() if key != "products"}
             if products:
-                grounded = dict(grounded, products=products)
+                grounded["products"] = products
         if grounded:
             context_text = "\n".join((context_text, prompt.render_found(grounded)))
         message = self.env["nudge.message"].sudo().create({
@@ -708,6 +733,14 @@ class NudgeConversation(models.Model):
                     for message in since for event in (message.screen_events or []))
         if shown:
             return None
+        Quick = self.env["nudge.quick"]
+        settings = Quick._ground_settings(question.content) if "settings" in tools.groups.asked(question.content) else []
+        if settings:
+            # The setting the question names, found without AI: a small model asked
+            # "show me where to switch on units of measure" wrote a path that is not there
+            steps = Quick.guide("setting", {"app": settings[0]["app"], "field": settings[0]["field"]})
+            if steps:
+                return {"type": "guidance", "steps": steps}
         steps = tools.guidance.steps_from_text(text, question.snapshot)
         return {"type": "guidance", "steps": steps} if steps else None
 
@@ -1221,4 +1254,7 @@ class NudgeConversation(models.Model):
         # What bounds a run is the number of things done for it
         job = self._chat_job(provider, self._chat_mode(), AGENT_MAX_ROUNDS)
         job["first_events"] = first_events
+        # The person said yes or no: what the model says of it is not talk
+        # instead of work, and is never pushed into the same card again
+        job["push_to_act"] = False
         return job
