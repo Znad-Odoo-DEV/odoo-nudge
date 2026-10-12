@@ -130,6 +130,18 @@ class TestFinding(NudgeCase, TransactionCase):
         self.assertIn("search_products", [tool.name for tool in tools.base.available(env, "talk")])
         self.assertIn("search_products", tools.base.ESSENTIAL_TOOLS, "Laptops keep it")
 
+    def test_two_as_alike_are_both_named(self):
+        # Two cabinets with doors tied, and the model named the wrong one
+        Product = self.env["product.product"]
+        Product.create({"name": "Cabinet Two Doors", "default_code": "CAB-A"})
+        Product.create({"name": "Cabinet Two Doors", "default_code": "CAB-B"})
+        env = self.env(user=self.user_a)
+        tied = tools.base.call(env, "search_products", {"words": "cabinet two doors"}, None, "talk")
+        self.assertFalse(tied.is_error, tied.content)
+        self.assertIn("name both, or ask which one is meant", tied.content)
+        apart = tools.base.call(env, "search_products", {"words": "bolt 8 mm"}, None, "talk")
+        self.assertNotIn("name both", apart.content)
+
     def test_found_without_any_ai(self):
         Quick = self.env["nudge.quick"].with_user(self.user_a)
         self.assertEqual(Quick.find_products("HB-8")["items"][0]["id"], self.bolt_8.id)

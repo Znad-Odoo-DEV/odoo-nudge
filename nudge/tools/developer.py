@@ -9,10 +9,12 @@ the code compiles.
 """
 import ast
 import builtins
+import difflib
 import re
 from datetime import timedelta
 
 import pytz
+from lxml import etree
 
 from odoo import Command
 from odoo.tools import plaintext2html
@@ -222,7 +224,9 @@ def automations_installed(env):
 
 # What safe_eval refuses, and how it is written instead
 FORBIDDEN_TOLD = {
-    "STORE_ATTR": "A field is written with record.write({'active': False}), never record.active = False.",
+    "STORE_ATTR": ("A field is written with record.write({'active': False}), never record.active = False. "
+                   "A fixed value is best an update action instead of code: "
+                   '{"kind": "update", "field": "active", "value": false}.'),
     "IMPORT_NAME": "Nothing is imported in an action: datetime, dateutil, time and Command are given.",
 }
 # What the code of a server action is given when it runs (ir.actions.server,
@@ -231,11 +235,27 @@ CODE_NAMES = frozenset({
     "env", "model", "record", "records", "time", "datetime", "dateutil", "timezone", "float_compare",
     "b64encode", "b64decode", "Command", "UserError", "log", "_logger", "uid", "user", "payload",
 })
+# Calls that only read: code made of them alone changes nothing
+READING_CALLS = frozenset({
+    "search", "search_count", "search_read", "search_fetch", "browse", "exists", "mapped", "filtered",
+    "filtered_domain", "sorted", "read", "read_group", "ensure_one", "sudo", "with_context", "with_user",
+    "with_company", "ref", "get", "get_param", "fields_get", "today", "now", "utcnow", "context_today",
+    "timedelta", "relativedelta", "date", "strftime", "strptime", "isoformat", "float_compare",
+    "b64encode", "b64decode", "UserError",
+})
+# Calls whose first argument is a domain
+DOMAIN_CALLS = ("search", "search_count", "search_read", "search_fetch", "filtered_domain")
+# Calls that give records of the model they are called on
+SAME_RECORDS = frozenset({
+    "search", "browse", "exists", "filtered", "filtered_domain", "sorted", "sudo", "with_context",
+    "with_user", "with_company",
+})
 
 
-def compile_code(code, env=None):
+def compile_code(code, env=None, model_name=None):
     """The code of a server action, an automation rule or a scheduled action.
     :param env: to know the models the code names, when given
+    :param model_name: the model of the action, which record and records hold
     :return: what is wrong with it, or "" """
     text = (code or "").strip()
     if not text:
@@ -269,17 +289,122 @@ def compile_code(code, env=None):
             # action = dict(active='False') archived nothing
             return ("action = {...} only opens a window, with its type: to change the record, write it, "
                     "such as record.write({'active': False}).")
+        wrong = _wrong_domain(node)
+        if wrong:
+            return wrong
+    if env is not None and model_name and model_name in env:
+        records = _records_named(tree, model_name)
+        for node in ast.walk(tree):
+            wrong = _wrong_write(env, node, records)
+            if wrong:
+                return wrong
     changes = (
         node for node in ast.walk(tree)
         if isinstance(node, ast.Raise)
-        or (isinstance(node, ast.Call) and not (isinstance(node.func, ast.Name) and node.func.id in builtin))
+        or (isinstance(node, ast.Call) and _called(node) not in READING_CALLS
+            and not (isinstance(node.func, ast.Name) and node.func.id in builtin))
         or (isinstance(node, ast.Assign) and any(isinstance(target, ast.Name) and target.id == "action"
                                                  for target in node.targets))
     )
     if not any(changes):
-        # lang = 'ar' was made into an automation rule that changed nothing
-        return ("The code changes nothing: it calls no method and writes no field. Write it, such as "
-                "record.write({'lang': 'ar_001'}), or use an update action instead of code.")
+        # lang = 'ar' was made into an automation rule that changed nothing; a
+        # search alone was a rule that read the orders and left them as they were
+        return ("The code changes nothing: it calls no method that changes something and writes no "
+                "field. Write it, such as record.write({'lang': 'ar_001'}), or use an update action "
+                "instead of code.")
+    return ""
+
+
+def _called(call):
+    """:return: the name of what ``call`` calls: write for record.write(...)"""
+    if isinstance(call.func, ast.Attribute):
+        return call.func.attr
+    return call.func.id if isinstance(call.func, ast.Name) else ""
+
+
+def _wrong_domain(node):
+    """:return: what is wrong with the domain written in a search(...), or "" """
+    if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+            and node.func.attr in DOMAIN_CALLS):
+        return ""
+    domain = node.args[0] if node.args else next(
+        (keyword.value for keyword in node.keywords if keyword.arg == "domain"), None)
+    if not isinstance(domain, (ast.List, ast.Tuple)):
+        return ""
+    for condition in domain.elts:
+        if isinstance(condition, ast.Constant) and condition.value in ("&", "|", "!"):
+            continue
+        if isinstance(condition, ast.Constant) or (
+                isinstance(condition, (ast.Tuple, ast.List)) and len(condition.elts) != 3):
+            # ('date_order <=', value): the search failed every time the action ran
+            return (f"The domain of {node.func.attr}() holds {ast.unparse(condition)}, which is not a "
+                    "condition: a condition is three parts, (field, operator, value), such as "
+                    "('date_order', '<=', value); '&', '|' and '!' join them.")
+    return ""
+
+
+def _records_of(node, records):
+    """:return: the model of the records ``node`` holds, when it is known
+    :param records: ``{name: model}`` of the names that hold records"""
+    while (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+           and node.func.attr in SAME_RECORDS):
+        node = node.func.value
+    if isinstance(node, ast.Name):
+        return records.get(node.id)
+    if (isinstance(node, ast.Subscript) and isinstance(node.value, ast.Name) and node.value.id == "env"
+            and isinstance(node.slice, ast.Constant) and isinstance(node.slice.value, str)):
+        return node.slice.value
+    return None
+
+
+def _records_named(tree, model_name):
+    """:return: ``{name: model}`` of the names that hold records of the action's
+    model: record and records, and what loops over them, unless set otherwise"""
+    stored = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
+            stored[node.id] = stored.get(node.id, 0) + 1
+    given = {name: model_name for name in ("record", "records") if name not in stored}
+    looped = {}
+    for node in ast.walk(tree):
+        if (isinstance(node, (ast.For, ast.comprehension)) and isinstance(node.target, ast.Name)
+                and stored.get(node.target.id) == 1 and _records_of(node.iter, given) == model_name):
+            looped[node.target.id] = model_name
+    return dict(given, **looped)
+
+
+def _wrong_write(env, node, records):
+    """:return: what is wrong with the values of a write({...}) on records of a
+    known model, or "" """
+    if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "write" and len(node.args) == 1):
+        return ""
+    model_name = _records_of(node.func.value, records)
+    if not model_name or model_name not in env:
+        return ""
+    written = node.args[0]
+    if isinstance(written, ast.Dict):
+        pairs = list(zip(written.keys, written.values))
+    elif isinstance(written, ast.Call) and isinstance(written.func, ast.Name) and written.func.id == "dict":
+        pairs = [(ast.Constant(keyword.arg), keyword.value) for keyword in written.keywords if keyword.arg]
+    else:
+        return ""
+    model = env[model_name]
+    for key, value in pairs:
+        if not (isinstance(key, ast.Constant) and isinstance(key.value, str)):
+            continue
+        field = model._fields.get(key.value)
+        if field is None:
+            close = difflib.get_close_matches(key.value, list(model._fields), n=3)
+            return (f"{model_name} has no field {key.value!r}"
+                    + (f"; close to it: {', '.join(map(repr, close))}" if close else "")
+                    + ". describe_model gives its fields.")
+        if field.type == "selection" and isinstance(value, ast.Constant) and value.value not in (False, None, ""):
+            keys = [choice[0] for choice in model.fields_get([key.value], ["selection"])[key.value].get("selection") or []]
+            if keys and value.value not in keys:
+                # record.write({'lang': 'ar'}): Arabic is ar_001, and the rule failed on every contact
+                return (f"{key.value} is a choice, and {value.value!r} is not one of its keys: "
+                        + ", ".join(map(repr, keys[:MAX_LISTED])) + (", …" if len(keys) > MAX_LISTED else "") + ".")
     return ""
 
 
@@ -322,6 +447,23 @@ def in_words(model, conditions, match):
     return (" or " if match == "any" else " and ").join(parts)
 
 
+def name_words(words):
+    """:return: the words a name is matched on, one by one: "contact archive"
+    found nothing named "Archive contact" when matched as one phrase"""
+    found = [word for word in re.split(r"[\s,;:.!?،؟]+", words or "") if len(word) > 1]
+    return found or [(words or "").strip()]
+
+
+def named(Model, field, words, domain=()):
+    """:return: the records named with any of ``words``, those named with most
+    of them first"""
+    leaves = [(field, "ilike", word) for word in words]
+    records = Model.search(list(domain) + ["|"] * (len(leaves) - 1) + leaves, limit=MAX_LISTED * 4)
+    folded = [word.lower() for word in words]
+    return records.sorted(
+        lambda record: -sum(word in (record[field] or "").lower() for word in folded))[:MAX_LISTED]
+
+
 @base.register
 class ReadAutomations(base.Tool):
     name = "read_automations"
@@ -354,10 +496,12 @@ class ReadAutomations(base.Tool):
         if not model_name and not words:
             raise Refused("Give a model, or words.")
         model = get_model(env, model_name) if model_name else None
+        words = None if model is not None else name_words(words)
         lines = []
         if "base.automation" in env:
-            domain = [("model_name", "=", model._name)] if model is not None else [("name", "ilike", words)]
-            rules = env["base.automation"].with_context(active_test=False).search(domain, limit=MAX_LISTED)
+            Rule = env["base.automation"].with_context(active_test=False)
+            rules = (Rule.search([("model_name", "=", model._name)], limit=MAX_LISTED) if model is not None
+                     else named(Rule, "name", words))
             lines.append(f"Automation rules: {len(rules)}")
             for rule in rules:
                 head = f"- #{rule.id} {rule.name} on {rule.model_name}: {TRIGGERS.get(rule.trigger, rule.trigger)}"
@@ -377,14 +521,15 @@ class ReadAutomations(base.Tool):
         if "base_automation_id" in Action._fields:
             # The actions of a rule are listed under the rule
             domain.append(("base_automation_id", "=", False))
-        domain += [("model_name", "=", model._name)] if model is not None else [("name", "ilike", words)]
-        actions = Action.search(domain, limit=MAX_LISTED)
+        actions = (Action.search(domain + [("model_name", "=", model._name)], limit=MAX_LISTED) if model is not None
+                   else named(Action, "name", words, domain))
         lines.append(f"Server actions: {len(actions)}")
         for action in actions:
             where = " (in the Actions menu)" if action.binding_model_id else ""
             lines.append(f"- #{action.id} {action.name} on {action.model_name} ({action.state}){where}" + self._detail(action))
-        domain = [("model_id.model", "=", model._name)] if model is not None else [("cron_name", "ilike", words)]
-        crons = env["ir.cron"].with_context(active_test=False).search(domain, limit=MAX_LISTED)
+        Cron = env["ir.cron"].with_context(active_test=False)
+        crons = (Cron.search([("model_id.model", "=", model._name)], limit=MAX_LISTED) if model is not None
+                 else named(Cron, "cron_name", words))
         lines.append(f"Scheduled actions: {len(crons)}")
         for cron in crons:
             lines.append(
@@ -392,8 +537,9 @@ class ReadAutomations(base.Tool):
                 f"{cron.interval_type}, next {cron.nextcall}, as {cron.user_id.name}"
                 + ("" if cron.active else " (off)") + self._detail(cron.ir_actions_server_id))
         if "mail.template" in env:
-            domain = [("model", "=", model._name)] if model is not None else [("name", "ilike", words)]
-            templates = env["mail.template"].with_context(active_test=False).search(domain, limit=MAX_LISTED)
+            Template = env["mail.template"].with_context(active_test=False)
+            templates = (Template.search([("model", "=", model._name)], limit=MAX_LISTED) if model is not None
+                         else named(Template, "name", words))
             lines.append(f"Email templates: {len(templates)}")
             for template in templates:
                 to = ", ".join(filter(None, (template.partner_to, template.email_to)))
@@ -547,7 +693,7 @@ def read_action(env, model, action, position=1):
     values = {"model_id": ir_model(env, model).id}
     lines = []
     if kind == "code":
-        error = compile_code(action.get("code"), env)
+        error = compile_code(action.get("code"), env, model._name)
         if error:
             raise Refused(f"Action {position}: the code does not compile. {error}")
         values.update(state="code", code=action["code"].strip())
@@ -862,7 +1008,9 @@ class PrepareServerAction(Building):
              if arguments.get("in_menu") else env._("nowhere yet: a button or a rule will run it")},
         ]
         return base.ToolResult(
-            "The person is being shown the server action, in full.",
+            # A button was asked for with action_id 1 before the action was there
+            "The person is being shown the server action, in full. It has no id before their yes: "
+            "a button for it is made after, with the id their answer gives.",
             pending={
                 "summary": env._("Create: server action “%s”", values["name"]),
                 "res_model": "ir.actions.server",
@@ -883,7 +1031,8 @@ class PrepareServerAction(Building):
         where = " It is in the Actions menu." if action.binding_model_id else ""
         return base.ToolResult(
             f"Made: server action #{action.id} {action.name!r} ({action.state}).{where} "
-            "It is in Settings ‣ Technical ‣ Server Actions.",
+            f"It is in Settings ‣ Technical ‣ Server Actions. Its id is {action.id}: a button that "
+            f"runs it is made with prepare_button, action_id {action.id}.",
             event={"type": "changed", "model": "ir.actions.server", "ids": action.ids},
             records=("ir.actions.server", action.ids, [action.name]),
         )
@@ -981,11 +1130,14 @@ class PrepareDelete(Building):
         names = records.mapped("display_name")
         lines = [{"label": env._("Kind"), "value": model_label(model)},
                  {"label": env._("Undo"), "value": env._("Not possible: deleted for good")}]
+        showing = []
         if model._name == "ir.model.fields":
             lines.append({"label": env._("Data"), "value": env._("The column and every value in it are deleted too")})
             showing = [view.name for field in records for view in self._views_showing(field)]
-            if showing:
-                lines.append({"label": env._("Views"), "value": env._("Taken off the screens: %s", ", ".join(showing))})
+        elif model._name == "ir.actions.server":
+            showing = [view.name for action in records for view in self._views_running(action)]
+        if showing:
+            lines.append({"label": env._("Views"), "value": env._("Taken off the screens: %s", ", ".join(showing))})
         return base.ToolResult(
             "The person is being shown what is about to be deleted.",
             pending={
@@ -1014,6 +1166,9 @@ class PrepareDelete(Building):
                         f"{record.display_name!r} belongs to the module {module}: it is never deleted, "
                         "which would break the module and come back with its next update. Switch it "
                         "off with prepare_write on active instead.")
+            if records._name == "ir.actions.server":
+                for action in records:
+                    PrepareDelete._views_running(action)
         if records._name == "ir.ui.view":
             xml_ids = records.get_external_id()
             for view in records:
@@ -1053,6 +1208,23 @@ class PrepareDelete(Building):
                     "take it out of the view first, by extension, or keep the field.")
         return views
 
+    @staticmethod
+    def _views_running(action):
+        """:return: the extension views made here that hold a button running
+        ``action``, which go with it
+        :raise Refused: when a view of a module holds one"""
+        Views = action.env["ir.ui.view"].with_context(active_test=False)
+        views = Views.search([("type", "!=", "qweb"), ("arch_db", "like", f'name="{action.id}"')])
+        views = views.filtered(lambda view: _buttons_running(view, action)[1])
+        xml_ids = views.get_external_id()
+        for view in views:
+            module = (xml_ids.get(view.id) or "").split(".")[0]
+            if not view.inherit_id or (module and module not in CUSTOM_MODULES):
+                raise Refused(
+                    f"Server action {action.name!r} is run by a button of view #{view.id} {view.name!r} "
+                    "of a module: take the button out of the view first, by extension, or keep the action.")
+        return views
+
     def execute(self, env, step):
         check_developing(env)
         if step.res_model not in DELETABLE:
@@ -1081,6 +1253,10 @@ def delete_built(records):
     if records._name == "ir.model.fields":
         for field in records:
             extra.append(PrepareDelete._views_showing(field))
+    if records._name == "ir.actions.server":
+        # The button stayed on the form and ran an action that was gone
+        for action in records:
+            extra.append(_take_buttons_off(action, PrepareDelete._views_running(action)))
     if records._name == "ir.actions.report":
         Views = env["ir.ui.view"].with_context(active_test=False)
         templates = Views.search([("type", "=", "qweb"), ("key", "in", records.mapped("report_name"))])
@@ -1096,7 +1272,7 @@ def delete_built(records):
     else:
         mail_templates = None
     for views in extra:
-        if records._name == "ir.model.fields":
+        if records._name in ("ir.model.fields", "ir.actions.server"):
             views.unlink()
     records.unlink()
     for views in extra:
@@ -1106,6 +1282,33 @@ def delete_built(records):
         mail_templates.exists().unlink()
     env.registry.clear_cache("templates")
     return names
+
+
+def _buttons_running(view, action):
+    """:return: ``(the arch of view, its buttons that run action)``"""
+    arch = etree.fromstring((view.arch_db or "").encode("utf-8"))
+    return arch, arch.xpath(f"//button[@type='action'][@name='{action.id}']")
+
+
+def _take_buttons_off(action, views):
+    """Take the buttons that run ``action`` out of ``views``.
+    :return: the views that held nothing else, which go whole"""
+    whole = views.browse()
+    for view in views:
+        # Read and written in the language its terms are written in: the
+        # translations of what stays are kept
+        arch, buttons = _buttons_running(view.with_context(lang="en_US"), action)
+        rest = [node for node in arch.iter(etree.Element)
+                if node.tag not in ("data", "xpath", "header") and node not in buttons]
+        if not rest:
+            # The view prepare_button made: the button, and where it goes
+            whole |= view
+            continue
+        # A view of Studio holds the other changes of the form too: those stay
+        for button in buttons:
+            button.getparent().remove(button)
+        view.with_context(lang="en_US").arch = etree.tostring(arch, encoding="unicode")
+    return whole
 
 
 def built_by(env, runs):
@@ -1290,6 +1493,14 @@ def _changes(env, model, names, before, after):
     return changed
 
 
+# What a trial takes when it is given nothing: what was made last
+TRIED_BUILT = {
+    "base.automation": ("rule_id", "rule"),
+    "ir.actions.server": ("action_id", "server action"),
+    "ir.cron": ("cron_id", "scheduled action"),
+}
+
+
 @base.register
 class TryAutomation(Building):
     name = "try_automation"
@@ -1300,7 +1511,8 @@ class TryAutomation(Building):
         "runs once), and what happened is told: the fields that changed, the emails that would "
         "have gone out, the activities and messages added, the error if it failed. Then "
         "everything is discarded: the dummy record, the rule made for the trial, the emails. "
-        "Give one of: rule (what prepare_automation takes), rule_id, action_id, cron_id. For a "
+        "Give one of: rule (what prepare_automation takes), rule_id, action_id, cron_id; given "
+        "none, what was made last in this conversation is tried. For a "
         "rule on records, give record: the fields a person would fill in; for "
         "on_create_or_write, on_archive and on_unarchive, give change: what is changed on it "
         "afterwards. Offer it in one sentence before the card of a rule; a rule that failed on "
@@ -1325,8 +1537,18 @@ class TryAutomation(Building):
     }
 
     @staticmethod
-    def _given(arguments):
+    def _given(env, arguments):
+        """:return: ``(what is tried, what was taken when nothing was named)``;
+        what was taken is written in ``arguments``"""
         given = [key for key in ("rule", "rule_id", "action_id", "cron_id") if arguments.get(key)]
+        taken = ""
+        if not given:
+            # "Try it" right after the rule was made: the model named nothing and was refused
+            taken = TryAutomation._last_built(env, arguments)
+            given = [key for key in ("rule_id", "action_id", "cron_id") if arguments.get(key)]
+            if not given:
+                raise Refused("Give one of rule, rule_id, action_id or cron_id: nothing made in this "
+                              "conversation is there to try.")
         if len(given) != 1:
             raise Refused("Give one of rule, rule_id, action_id or cron_id.")
         if given[0] == "rule":
@@ -1338,7 +1560,29 @@ class TryAutomation(Building):
                 schema.validate(arguments["rule"], PrepareAutomation.input_schema, "rule")
             except schema.SchemaError as error:
                 raise Refused(f"Invalid rule. {error}") from None
-        return given[0]
+        return given[0], taken
+
+    @staticmethod
+    def _last_built(env, arguments):
+        """Name in ``arguments`` the rule, server action or scheduled action
+        made last in this conversation, when one still exists.
+        :return: what was taken, said for the model, or "" """
+        conversation_id = env.context.get("nudge_conversation_id")
+        if not conversation_id:
+            return ""
+        steps = env["nudge.step"].sudo().search([
+            ("conversation_id", "=", conversation_id), ("state", "=", "done"), ("kind", "=", "create"),
+            ("res_model", "in", list(TRIED_BUILT))], order="id desc", limit=20)
+        for step in steps:
+            if step.res_model not in env or not step.res_ids:
+                continue
+            records = env[step.res_model].with_context(active_test=False).browse(step.res_ids).exists()
+            if records:
+                key, kind = TRIED_BUILT[step.res_model]
+                arguments[key] = records[:1].id
+                return (f"Nothing was named: the {kind} #{records[:1].id} {records[:1].display_name!r}, "
+                        "made last in this conversation, is tried.")
+        return ""
 
     @staticmethod
     def _code_of(env, given, arguments):
@@ -1370,17 +1614,20 @@ class TryAutomation(Building):
     @refusing
     def run(self, env, arguments, screen):
         check_developing(env)
-        given = self._given(arguments)
+        given, taken = self._given(env, arguments)
         what, code = self._code_of(env, given, arguments)
         if not code:
-            return self._trial(env, given, arguments)
+            result = self._trial(env, given, arguments)
+            if taken:
+                result.content = f"{taken}\n{result.content}"
+            return result
         lines = [{"label": env._("Tried"), "value": what}]
         lines += [{"label": env._("Code"), "value": text, "code": True} for text in code]
         lines.append({"label": env._("Note"), "value": env._(
             "The code runs for real inside the trial. What it writes is discarded; an email it "
             "sends by itself goes out.")})
         return base.ToolResult(
-            "The person is being shown the code the trial runs.",
+            " ".join(filter(None, (taken, "The person is being shown the code the trial runs."))),
             pending={
                 "summary": env._("Try on a dummy record: %s", what),
                 "res_model": "base.automation" if given.startswith("rule") else
@@ -1397,7 +1644,7 @@ class TryAutomation(Building):
         check_developing(env)
         arguments = (step.values or {}).get("arguments") or {}
         try:
-            return self._trial(env, self._given(arguments), arguments)
+            return self._trial(env, self._given(env, arguments)[0], arguments)
         except Refused as refusal:
             return base.ToolResult(str(refusal), is_error=True)
 
@@ -1581,7 +1828,7 @@ class PrepareScheduledAction(Building):
     def run(self, env, arguments, screen):
         check_developing(env)
         model = get_model(env, arguments["model"])
-        error = compile_code(arguments["code"], env)
+        error = compile_code(arguments["code"], env, model._name)
         if error:
             raise Refused(f"The code does not compile. {error}")
         first = (arguments.get("first_run") or "").strip()
