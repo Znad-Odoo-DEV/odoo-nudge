@@ -26,6 +26,12 @@ What is left is listed under [What is not there yet](#what-is-not-there-yet). A 
 | **Computes with Python** | Off by default; an administrator switches it on. The agent runs Python in the sandbox of Odoo (the one of the server actions), as the person: every record passes their rights. The code reads only: it runs in a savepoint rolled back when it ends, so what it writes is discarded, and a change still goes through the yes of the person. No import, no sudo, no cursor, no private attribute, no model of the system. Every run is in the log. |
 | **SQL for administrators** | Off by default. The group Settings, and only those allowed in every company, may ask the agent for one SELECT: a join or a report no other tool gives. No change, no lock, no comment, one statement; the tables of Odoo they may read, never users, parameters or providers; 50 rows, 10 seconds, in a savepoint rolled back when it ends. Every query is in the log. |
 | **Points at things** | A question asked with the screen shared asks first: on the screen, or in writing (each time, or once for all in the preferences). On the screen, its pointer goes to the button, field or tab to use and presses it, for show; a box with a short text opens, and the rest of the screen is blurred and dimmed, the element clear. Step by step: the next step comes when you have done the current one. A field hidden in a closed tab is reached through the tab. |
+| **Finds products** | `/product` and a name, a description, a code or a size, in any trade: the names, codes, barcodes, descriptions, variants, categories and supplier names of the products the person may see; sizes read with their units and compared across units, a misspelt word still found by its letters. Cards with the picture, the price, the cost and the stock where the person may see them, and why each came. Needs no AI; a picture with it is described by the model. |
+| **Commands: where to look** | A word after a slash says where to look; typing `/` lists those open to the person. Without any AI, before a provider too: `/screen`, `/setting`, `/doc`, `/file`, `/find` (any record by name or reference), `/product`, `/stock`, `/rules` (Developer mode), `/sql`, `/help`, each in English and in Arabic. With the AI, a few tools and a short brief only, without the rest of the conversation: `/count` for a number, `/explain` for a field, a term or the screen. |
+| **Many records, one yes** | "Confirm all the draft quotations of Acme": one plan, one card. Tried first in a savepoint and undone, so the card says how many records go through and why the others do not; yes to all, yes to those that go through, or no. Each record in a savepoint of its own; beyond 20 records, in the background by pieces. 200 records per plan by default, set by the administrator, 1000 at most. Undo writes back what was written, unless a record was changed since; what a button did is not taken back, and the card says so. |
+| **Works by itself** | Scheduled tasks, asked for in words: "every morning at 8, the overdue invoices", "when a purchase order above 50,000 is created, compare its prices". Shown on a card first. Run as their owner, in the background, reading only: a change they find needed waits for the owner's yes. The records are counted first, so nothing is spent when nothing matches or nothing is new. Answers in the top bar, the task's conversation and by email. 5 tasks per person by default, set by the administrator. |
+| **@Nudge in the chatter** | With Nudge: Discuss, "@Nudge summarise this" in the chatter of any record or in a channel: answered as an internal note, as the person who asked, from the fields every reader sees, the records it links to and the last messages, nothing looked up elsewhere, nothing changed. |
+| **Goes away when asked** | Nudge: On / Off in the person's own menu: the avatar, the button and the shortcuts, for them only. |
 | **Takes you there** | "Take me to the quotations" opens the screen, among the menus you can open. |
 | **Knows this database** | Which modules are custom and what they are for, which fields they add to standard screens, how deliveries, approvals and other options are set. Read again when modules change. |
 | **Listens** | Hold the shortcut and ask, or press the microphone. In Arabic and in English, names of buttons in the middle of an Arabic sentence included. |
@@ -74,6 +80,26 @@ in about a second.
 Other providers are already listed under AI Providers: Groq, OpenRouter (models ending in
 `:free`), Ollama, Anthropic Claude. Set the key, press **Fetch Models**, pick a model.
 
+### A free model for the questions, a stronger one for the work
+
+**Settings ‣ Nudge ‣ Agent Provider / Developer Provider**: the default provider answers Talk, the
+commands and @Nudge; the provider of the work answers Agent mode, the scheduled tasks and
+Developer mode (which falls back on the Agent's). Typically Ollama on your own machine for the
+questions, Gemini or Claude for what Nudge does and builds.
+
+A free tier counts the tokens of each minute, and a request of Agent or Developer mode reads tens
+of thousands of them a round (the instructions, the tools, what was read). When the provider says
+how long to wait, half a minute or less, Nudge waits and asks again by itself; past that, the
+person is told to try again in a minute. A team that works with Nudge all day needs a paid key.
+
+A small model (the essential tools) reads short instructions, and every question goes with what
+Nudge found for it by itself: the screens whose names hold its words, in Arabic or English, the
+pages of the documentation about them, the passages of the company files. It is told the language
+of its answer, and to say "I'm not sure" rather than invent. Asked to be shown, a model that wrote
+the steps has them pointed at: the buttons, fields and tabs its answer names are matched against
+the screen. Asked to be taken somewhere and taken nowhere, the person is offered the screens Nudge
+found, with the pointer and Open.
+
 ### Ollama: a model on your own server
 
 For data that must not leave the company, run the model yourself:
@@ -88,6 +114,14 @@ For data that must not leave the company, run the model yourself:
    in **Base URL** (`http://your-server:11434/v1`; `localhost` only when Ollama runs on the Odoo
    server itself), leave **Requires an API Key** unticked, press **Fetch Models**, pick one with
    **Use**, then **Test Connection**.
+
+Nudge knows Ollama when it answers: Fetch Models shows which models use tools, see pictures, and
+how much context they take; the essential tools are chosen for a small model; Test Connection
+reads the context the server gives the model and says when it is too small, and **Prepare for
+Nudge** makes a copy of the model with enough context (Ollama gives 4096 tokens on a card under
+24 GB, and cuts what does not fit without a word). When Ollama is stopped or a model is missing,
+Nudge says what to run. The whole guide, with a reverse proxy for Odoo.sh: [doc/ollama.md](nudge/doc/ollama.md)
+([العربية](nudge/doc/ollama.ar.md)).
 
 Nothing goes out: questions, screens, files and what the agent reads stay on that server.
 Speech stays with the browser, as Ollama does not turn speech into text.
@@ -269,6 +303,10 @@ rewritten into a file path.
 - On Windows, the scheduled actions run in the same server as the pages: a piece of work in the
   background takes a thread while it lasts.
 - A busy provider is asked again twice, after 1 and 3 seconds, before an error is shown.
+- A provider that takes long per call (a free tier, with the many tools of Developer mode)
+  may not finish in 90 seconds: Nudge says it ran out of time and goes on when asked, and no
+  round is started with less time left than it would take. A lower reasoning effort on the
+  provider, or the clock (the background has its own time), helps.
 - A conversation holds 120 messages, 240 when Nudge acted in it; then a new one must be started.
 - Each answer being streamed occupies one Odoo worker until it ends.
 - Free, small models make language mistakes, in Arabic especially, and sometimes point at
