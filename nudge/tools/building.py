@@ -17,7 +17,9 @@ from odoo.exceptions import UserError, ValidationError
 
 from . import base
 from .developer import Building, check_developing, ir_model
-from .records import MODEL_PATTERN, Refused, cut, get_model, get_records, refusing
+from .records import (
+    MODEL_PATTERN, Refused, cut, field_label, get_model, get_records, model_label, refusing,
+)
 
 # Where what Nudge makes is registered, so that it is found again and exported
 CUSTOM_MODULE = "nudge_custom"
@@ -294,12 +296,12 @@ class PrepareViewChange(Building):
         check_developing(env)
         model = get_model(env, arguments["model"])
         root, arch_before, view_type = view_of(env, model, arguments)
-        name = (arguments.get("name") or "").strip() or _("Change by Nudge: %s", model._description)
+        name = (arguments.get("name") or "").strip() or _("Change by Nudge: %s", model_label(model))
         values, diff = preview_change(
             env, model, root, view_type, arch_before, name,
             arguments["xpath"].strip(), arguments["position"], arguments["change"].strip())
         lines = [
-            {"label": _("Model"), "value": model._description},
+            {"label": _("Model"), "value": model_label(model)},
             {"label": _("View"), "value": f"{root.name} ({view_type})"},
             {"label": _("Where"), "value": f"{arguments['xpath'].strip()} · {arguments['position']}"},
             {"label": _("Change"), "value": arguments["change"].strip(), "code": True},
@@ -383,10 +385,10 @@ class PrepareButton(Building):
             xpath, position, snippet = "//sheet", "before", f"<header>{button}</header>"
         else:
             xpath, position, snippet = "//form/*[1]", "before", f"<header>{button}</header>"
-        name = _("Button %(label)s on %(model)s", label=label, model=model._description)
+        name = _("Button %(label)s on %(model)s", label=label, model=model_label(model))
         values, diff = preview_change(env, model, root, "form", arch_before, name, xpath, position, snippet)
         lines = [
-            {"label": _("Model"), "value": model._description},
+            {"label": _("Model"), "value": model_label(model)},
             {"label": _("Button"), "value": label},
             {"label": _("Runs"), "value": f"{action.name} (#{action.id}, {action.state})"},
             {"label": _("Shown"), "value": _("unless %s", arguments["invisible"].strip())
@@ -411,13 +413,29 @@ class PrepareButton(Building):
 
 # ------------------------------------------------------------------- fields
 
+def type_label(env, kind):
+    """:return: the type of a field in words: Odoo labels its types by their keys"""
+    return {
+        "char": _("Text"), "text": _("Long text"), "html": _("Formatted text"),
+        "integer": _("Whole number"), "float": _("Decimal number"), "monetary": _("Amount"),
+        "boolean": _("Checkbox"), "date": _("Date"), "datetime": _("Date and time"),
+        "selection": _("Choice"), "many2one": _("Link to a record"),
+        "many2many": _("Links to records"),
+    }.get(kind, kind)
+
+
 def field_name_for(label, given=""):
     if given:
         name = given.strip().lower()
         if not NAME_PATTERN.match(name):
             raise Refused("A field made here is named x_ followed by letters, digits and underscores.")
         return name
-    slug = re.sub(r"[^a-z0-9]+", "_", label.lower()).strip("_")[:40] or "field"
+    slug = re.sub(r"[^a-z0-9]+", "_", label.lower()).strip("_")[:40]
+    if not slug:
+        # "الموقع" would be x_field, and the next one would collide with it
+        raise Refused(
+            "The label has no Latin letters to make the technical name of: give name, x_ and "
+            "English words, such as x_site.")
     return "x_" + slug
 
 
@@ -441,7 +459,12 @@ class PrepareField(Building):
             "model": {"type": "string", "pattern": MODEL_PATTERN},
             "label": {"type": "string", "minLength": 1, "maxLength": 80},
             "type": {"type": "string", "enum": list(FIELD_TYPES)},
-            "name": {"type": "string", "maxLength": 63, "description": "Technical name, x_...; made from the label otherwise."},
+            "name": {
+                "type": "string", "maxLength": 63,
+                "description": (
+                    "Technical name: x_ and English words, such as x_site. Made from the label "
+                    "otherwise, when the label is in Latin letters."),
+            },
             "help": {"type": "string", "maxLength": 400},
             "required": {"type": "boolean"},
             "readonly": {"type": "boolean"},
@@ -492,10 +515,10 @@ class PrepareField(Building):
             "copied": True,
         }
         lines = [
-            {"label": _("Model"), "value": model._description},
+            {"label": _("Model"), "value": model_label(model)},
             {"label": _("Field"), "value": label},
             {"label": _("Technical name"), "value": name},
-            {"label": _("Type"), "value": kind},
+            {"label": _("Type"), "value": type_label(env, kind)},
         ]
         if kind in ("many2one", "many2many"):
             if not arguments.get("relation"):
@@ -508,7 +531,7 @@ class PrepareField(Building):
             values["relation"] = related._name
             if kind == "many2one":
                 values["on_delete"] = "set null"
-            lines.append({"label": _("Points to"), "value": related._description})
+            lines.append({"label": _("Points to"), "value": model_label(related)})
         elif arguments.get("relation"):
             raise Refused("relation goes with many2one and many2many only.")
         if kind == "selection":
@@ -541,7 +564,8 @@ class PrepareField(Building):
             if after:
                 if tree.find(f".//field[@name='{after}']") is None:
                     raise Refused(f"The form of {model._name} has no field {after!r}: read_view lists them.")
-                xpath, position, where = f"//field[@name='{after}']", "after", _("after %s", after)
+                shown = field_label(model._fields[after], env) if after in model._fields else after
+                xpath, position, where = f"//field[@name='{after}']", "after", _("after %s", shown)
             elif tree.find(".//sheet//group") is not None:
                 xpath, position, where = "//sheet//group[1]", "inside", _("in the first group of the form")
             elif tree.find(".//sheet") is not None:
@@ -550,7 +574,7 @@ class PrepareField(Building):
                 xpath, position, where = "/form", "inside", _("at the end of the form")
             # The field is not there yet: the form is checked once it is, when made
             view = {
-                "name": _("Field %(field)s on %(model)s", field=label, model=model._description),
+                "name": _("Field %(field)s on %(model)s", field=label, model=model_label(model)),
                 "model": model._name,
                 "type": "form",
                 "inherit_id": root.id,

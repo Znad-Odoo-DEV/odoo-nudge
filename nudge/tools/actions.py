@@ -33,6 +33,7 @@ from .records import (
     get_model,
     get_records,
     is_secret,
+    model_label,
     refusing,
 )
 
@@ -314,7 +315,7 @@ class PrepareCreate(base.Action):
         model = get_model(env, arguments["model"], "create", to_change=True)
         values, shown = read_values(model, arguments["values"])
         lines, shown_lines = read_lines(model, arguments.get("lines") or [])
-        title = _("Create: %s", model._description)
+        title = _("Create: %s", model_label(model))
         return base.ToolResult(
             "The person is being shown what is about to be created.",
             pending={
@@ -390,7 +391,7 @@ class PrepareWrite(base.Action):
                 line["before"] = format_value(env, field, before.get(line["field"]))
                 if isinstance(line["before"], dict):
                     line["before"] = line["before"].get("name") or line["before"].get("count")
-        title = _("Change: %s", model._description)
+        title = _("Change: %s", model_label(model))
         return base.ToolResult(
             "The person is being shown what is about to be changed.",
             pending={
@@ -564,7 +565,7 @@ class CallMethod(base.Action):
         return base.ToolResult(
             "The person is being shown which button is about to be pressed.",
             pending={
-                "summary": _("Press “%(button)s”: %(model)s", button=label, model=model._description),
+                "summary": _("Press “%(button)s”: %(model)s", button=label, model=model_label(model)),
                 "res_model": model._name,
                 "res_ids": records.ids,
                 "record_names": ", ".join(records[:MAX_SHOWN_RECORDS].mapped("display_name")),

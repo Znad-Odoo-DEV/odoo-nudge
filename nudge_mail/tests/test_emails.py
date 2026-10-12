@@ -130,6 +130,9 @@ class TestEmails(NudgeCase, MockEmail, TransactionCase):
         self.assertIn("Rana Haddad", line["value"], "The plain text of it for the log")
         labels = [item["label"] for item in result.pending["preview"]["lines"]]
         self.assertIn("Style", labels)
+        style = next(item for item in result.pending["preview"]["lines"] if item["label"] == "Style")
+        self.assertEqual(style["value"], designs.style_text(self.env, "modern"), "Said in the person's words")
+        self.assertTrue(style["value"].startswith("Modern: "))
         subject = next(item for item in result.pending["preview"]["lines"] if item["label"] == "Subject")
         self.assertEqual(subject["value"], "Welcome, Rana Haddad")
         self.assertEqual(self.env["mail.template"].search_count([("name", "=", "Welcome")]), 0, "Nothing made yet")

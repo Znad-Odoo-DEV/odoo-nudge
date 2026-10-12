@@ -167,6 +167,17 @@ def get_records(model, ids, operation="read"):
     return records
 
 
+def model_label(model):
+    """:return: the name of a kind of record in the language of the person:
+    ``_description`` is the English of the code, ir.model has the translations"""
+    return model.env["ir.model"].sudo()._get(model._name).name or model._description
+
+
+def field_label(field, env):
+    """:return: the label of a field in the language of the person"""
+    return field._description_string(env) or field.name
+
+
 def cut(text, size=MAX_TEXT):
     text = " ".join(str(text).split())
     return text if len(text) <= size else text[:size - 1] + "…"

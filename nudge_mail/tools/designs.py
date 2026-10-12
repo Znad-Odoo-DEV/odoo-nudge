@@ -12,11 +12,12 @@ a value of the record is named by a path of fields, checked for the person,
 and printed with t-field, which formats it in the reader's language: a date
 as a date, an amount with its currency, a choice by its label.
 """
+from odoo import _
 import re
 
 from markupsafe import escape
 
-from odoo.addons.nudge.tools.records import Refused, target_field
+from odoo.addons.nudge.tools.records import Refused, field_label, target_field
 
 STYLES = {
     "classic": "A coloured band with the title, a clean table, a square button",
@@ -24,6 +25,16 @@ STYLES = {
     "minimal": "Quiet: a thin line of colour, plain text, a link",
     "formal": "A letter: the logo on top, a reference line, a bordered table, serif type",
 }
+def style_text(env, style):
+    """:return: the style as the card names it, in the language of the person"""
+    return {
+        "classic": _("Classic: a coloured band with the title, a clean table, a square button"),
+        "modern": _("Modern: a large coloured header, rounded cards, a round button"),
+        "minimal": _("Minimal: quiet, a thin line of colour, plain text, a link"),
+        "formal": _("Formal: a letter, the logo on top, a reference line, a bordered table, serif type"),
+    }[style]
+
+
 THEMES = {
     "classic": {
         "font": "Arial,Helvetica,sans-serif", "page": "#f4f5f7", "card_border": "1px solid #e3e5e8",
@@ -161,7 +172,7 @@ def label_of(model, path, given):
     if (given or "").strip():
         return literal(given.strip())
     field = check_path(model, path)
-    return literal(field.string)
+    return literal(field_label(field, model.env))
 
 
 def section_title(written, theme):
@@ -215,7 +226,7 @@ def lines_table(model, spec, theme, align, words):
         f'<td style="padding:8px 10px;font-size:13px;color:{TEXT};text-align:{align};{theme["cell_border"]}">'
         f'{value(comodel, column["field"], "line", words)}</td>'
         for column in columns)
-    return (section_title(spec.get("title") or field.string, theme)
+    return (section_title(spec.get("title") or field_label(field, comodel.env), theme)
             + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" '
             'style="border-collapse:collapse;">'
             f"<thead><tr>{head}</tr></thead>"

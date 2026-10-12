@@ -22,7 +22,8 @@ from odoo.addons.nudge.tools.developer import (
     CUSTOM_MODULES, DELETABLE, EMAIL_SCHEMA, Building, check_developing, ir_model, read_recipients,
 )
 from odoo.addons.nudge.tools.records import (
-    MODEL_PATTERN, PATH_PATTERN, Refused, cut, get_model, get_records, refusing, target_field,
+    MODEL_PATTERN, PATH_PATTERN, Refused, cut, get_model, get_records, model_label, refusing,
+    target_field,
 )
 
 from ..models.nudge_email_flow import FORBIDDEN_METHODS, METHOD
@@ -227,8 +228,8 @@ class PrepareEmailDesign(Mailing):
             "auto_delete": True,
         }
         lines = [
-            {"label": _("Model"), "value": model._description},
-            {"label": _("Style"), "value": f"{design['style'].capitalize()}: {designs.STYLES[design['style']]}"},
+            {"label": _("Model"), "value": model_label(model)},
+            {"label": _("Style"), "value": designs.style_text(env, design["style"])},
         ] + recipient_lines
         sample = sample_of(model, arguments.get("record_id"))
         if sample:
@@ -240,7 +241,7 @@ class PrepareEmailDesign(Mailing):
         else:
             lines += [
                 {"label": _("Subject"), "value": values["subject"]},
-                {"label": _("Preview"), "value": _("No %s yet: the email is shown for the first one.", model._description)},
+                {"label": _("Preview"), "value": _("No %s yet: the email is shown for the first one.", model_label(model))},
             ]
         lines.append({"label": _("Under it"), "value": _("The logo and the name of the company")
                       if design["company_footer"] else _("Nothing: no logo, no company name")})
@@ -521,10 +522,10 @@ class PrepareEmailReview(Mailing):
             action = env["ir.actions.server"].create(server_action_values(env, model, flow.name, flow.id))
             return review_arch(action.id, label, method, originals, review["hide"], review["invisible"], form=form)
 
-        name = _("Button %(label)s with an email, on %(model)s", label=label, model=model._description)
+        name = _("Button %(label)s with an email, on %(model)s", label=label, model=model_label(model))
         view_values, diff = preview_change(env, model, root, "form", arch_before, name, make_arch=make_arch)
         lines = [
-            {"label": _("Model"), "value": model._description},
+            {"label": _("Model"), "value": model_label(model)},
             {"label": _("Button"), "value": label},
             {"label": _("Opens"), "value": _("the email “%s”, to read and change", template.name)},
             {"label": _("Send"), "value": _("does what “%s” does, then sends the email", method_label)

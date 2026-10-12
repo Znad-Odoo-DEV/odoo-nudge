@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-11 05:57+0000\n"
-"PO-Revision-Date: 2026-10-11 05:57+0000\n"
+"POT-Creation-Date: 2026-10-11 06:09+0000\n"
+"PO-Revision-Date: 2026-10-11 06:09+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -481,6 +481,12 @@ msgid "Amber"
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Amount"
+msgstr ""
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_doc_passage__anchor
 msgid "Anchor"
 msgstr ""
@@ -860,8 +866,20 @@ msgstr ""
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Checkbox"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "Checked code"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Choice"
 msgstr ""
 
 #. module: nudge
@@ -1250,6 +1268,8 @@ msgid "Database Profile"
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
 #: model:ir.model.fields,field_description:nudge.field_nudge_usage__date
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_conversation_view_form
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_run_view_form
@@ -1259,6 +1279,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_search
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_search
 msgid "Date"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Date and time"
 msgstr ""
 
 #. module: nudge
@@ -1274,6 +1300,12 @@ msgstr ""
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__decided_at
 msgid "Decided On"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Decimal number"
 msgstr ""
 
 #. module: nudge
@@ -1651,6 +1683,12 @@ msgstr ""
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_source__group_ids
 msgid "For the Groups"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Formatted text"
 msgstr ""
 
 #. module: nudge
@@ -2269,6 +2307,18 @@ msgid "Lines"
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Link to a record"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Links to records"
+msgstr ""
+
+#. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_task_view_form
 msgid ""
 "List the customer invoices overdue by more than 7 days, with the amount and "
@@ -2278,6 +2328,12 @@ msgstr ""
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
 msgid "Load Again"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Long text"
 msgstr ""
 
 #. module: nudge
@@ -4459,6 +4515,8 @@ msgid "Test the connection: the first answer loads it."
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_doc_page_view_search
 msgid "Text"
 msgstr ""
@@ -5522,6 +5580,12 @@ msgstr ""
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_source__group_ids
 msgid "Who may be answered from this file. Empty: everybody who uses Nudge."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "Whole number"
 msgstr ""
 
 #. module: nudge
