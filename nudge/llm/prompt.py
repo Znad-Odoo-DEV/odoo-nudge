@@ -217,7 +217,11 @@ write.
 their exact path ("path" in the language of the person, "path_en" in English), pages of the \
 official documentation with their link, passages of the company files with their page. Prefer \
 them to your memory; give the link or the file you used. A screen's "model" is the kind of \
-record it shows: the one to read, change or build on when the person names that screen.
+record it shows: the one to read, change or build on when the person names that screen. \
+"settings" are the options of the Settings the question names, with their "field" for \
+change_settings; "products" are the products it names, with their price and stock; \
+"records" are the people, contacts, products and documents it names, with their "id"; \
+"access_groups" the groups of access it names: use these ids, no need to look again.
 - When nothing you were given answers it, say in one sentence that you are not sure, and what \
 they could look at. "I'm not sure" is better than a wrong path.
 - In Agent and Developer modes, what they ask for and is not there yet is what you make: a new \
@@ -248,11 +252,34 @@ AGENT_MAP_COMPACT = """\
 ## What to call
 - How many, how much, a total, an average → aggregate_records. A list → search_records.
 - Change a record → prepare_write. Create one → prepare_create. Press its button (confirm, \
-validate, post) → call_method. The same change on many records → prepare_plan.
+validate, post) → call_method. The same change on every record of a kind ("all the orders of…", \
+"كل…") → prepare_plan with the conditions, never the ids of one page of a search.
+- A person they name (Raghad) is found with search_records on res.users, or res.partner for a \
+contact; "me" is only the one asking.
 - Filter the list on their screen → filter_screen. Open a record → open_record.
 - Every day or every week, tell them something → prepare_task.
-- Settings, SQL, spreadsheets, PDF reports, modules, products: more_tools with that group.
+- Switch an option of the settings on or off ("فعّل…", "enable…") → read_settings to find it, \
+then change_settings. Access of a user → prepare_write on res.users, group_ids "+id".
+- Settings, SQL, spreadsheets, PDF reports, modules, products, when those tools are not \
+yours: more_tools with that group.
 Find the ids first; the card that follows is where they say yes: never ask "shall I?" in words.
+"""
+
+TALK_MAP_COMPACT = """\
+## What to call
+- They tell you a rule of theirs or correct you ("تذكّر…", "remember…", "عنا…", "we never…") \
+→ remember_lesson with that rule; then say in one line that it is noted for a manager to approve.
+- Write or type something in a field of the screen they are on ("اكتبلي بخانة…", "write … in \
+the … field") → write_in_field with the field's "name" from <screen_snapshot>. Do not write steps.
+- The settings of an app: which options are on → read_settings; where to switch one on, shown \
+on the screen → show_settings. How something is set up (taxes, currencies, warehouses) → \
+read_configuration. If these tools are not yours, more_tools with settings first.
+- What a module does → describe_module; its code → read_module_code (more_tools modules).
+- Assess the whole database → assess_database (more_tools assessment).
+- Products, their price or stock → search_products. A file before an import → test_import.
+- How or where in Odoo → the screens of <nudge_found>; shown on the screen when asked → \
+show_on_screen or show_menu_path.
+Call the tool first; answer from its result.
 """
 
 DEV_MAP_COMPACT = """\
@@ -546,6 +573,8 @@ def build_system_blocks(overview="", mode="talk", can_use_agent=False, work="", 
         rules += DEV_MAP_COMPACT
     elif compact and mode == "agent":
         rules += AGENT_MAP_COMPACT
+    elif compact:
+        rules += TALK_MAP_COMPACT
     return [block for block in (persona, overview, work, rules) if block]
 
 

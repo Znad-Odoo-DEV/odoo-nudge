@@ -482,7 +482,8 @@ class SearchRecords(base.Tool):
         }
         if total > len(records):
             result["note"] = (
-                f"{len(records)} of {total} are listed. Add conditions to narrow the search.")
+                f"{len(records)} of {total} are listed. Add conditions to narrow the search. To "
+                f"change all {total}, prepare_plan with these conditions: never the ids of this page.")
         elif not total and arguments.get("conditions"):
             # A value looked for as a record is often the text of a field
             result["note"] = (

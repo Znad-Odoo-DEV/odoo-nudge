@@ -212,6 +212,23 @@ class TestOllamaProvider(NudgeCase, TransactionCase):
         message = conversation.sudo().message_ids.filtered(lambda message: message.role == "user")
         self.assertTrue(message.attachment_id, "Kept for the person to see")
 
+    def test_what_a_picture_shows_is_looked_for_among_the_products(self):
+        from .test_attachments import PNG  # noqa: PLC0415
+
+        if "product.product" not in self.env:
+            self.skipTest("No products in this database")
+        self.env["product.product"].create({"name": "Nudge Oak Cabinet", "list_price": 320})
+        self.use_adapter()
+        self.server()
+        self.provider.write({"is_ollama": True, "picture_model": "qwen2.5vl:3b", "tool_set": "essential"})
+        self.env["nudge.provider.model"].create({
+            "provider_id": self.provider.id, "name": "qwen3:8b", "sees_pictures": False})
+        self.patch(ollama, "read_picture", lambda *args, **kwargs: (
+            "A large oak cabinet with two doors", {"input_tokens": 1, "output_tokens": 1}))
+        conversation = self.env["nudge.conversation"].with_user(self.user_a)._chat_open(None)
+        job = conversation._chat_prepare("Do we sell this?", attachment=("photo.png", PNG, "image/png"))
+        self.assertIn("Nudge Oak Cabinet", job["turns"][-1]["context"], "Found for the small model")
+
     def test_the_warning_follows_the_context(self):
         self.provider.is_ollama = True
         self.provider.context_length = 4096

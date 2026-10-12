@@ -17,7 +17,7 @@ import re
 from odoo import _, api, models
 from odoo.exceptions import AccessError
 
-from ..tools import base, commands, product_search
+from ..tools import base, commands, groups, product_search
 from ..tools.configuration import find_app, settings_layout, settings_steps
 from ..tools.finding import REFERENCE_FIELDS, _score, candidate_models, look_in
 from ..tools.navigation import _visible_menus, menu_path, menu_steps
@@ -68,6 +68,36 @@ QUOTED = re.compile(r"['\"\u2018\u2019\u201c\u201d\u00ab\u00bb][^'\"\u2018\u2019
 def without_names(text):
     """:return: ``text`` without what it names in quotes"""
     return QUOTED.sub(" ", text or "")
+
+# The products a picture is looked for among, for a small model
+GROUND_PRODUCTS = 3
+GROUND_SETTINGS = 3
+GROUND_GROUPS = 3
+# Where a name an order gives is looked for, by the field that holds it
+NAMED_FIELDS = (("res.users", "name"), ("res.partner", "name"), ("product.product", "default_code"),
+                ("product.product", "name"))
+MAX_NAMED = 6
+# A reference: letters then digits, "S00004", "INV/2026/0007"
+REFERENCE = re.compile(r"[A-Za-z]{1,6}[/-]?(?:\d{4}[/-])?\d{2,}")
+# What names a person, a company or a product: words with a capital, in a row
+CAPITALISED = re.compile(r"\b[A-Z][\w&'.-]*(?:\s+[A-Z0-9][\w&'.-]*)*")
+# An order about access: "access", "permission", "صلاحية"
+ACCESS_WORDS = re.compile(r"\b(access|permission|rights?)\b", re.IGNORECASE)
+ACCESS_ROOTS = {commands.root_of(commands.fold(word)) for word in (
+    "صلاحية", "صلاحيات", "access", "accesses", "permission", "permissions", "rights", "group", "groups")}
+
+
+def names_in(text):
+    """:return: the names an order gives, as written: each run of words with
+    a capital, and without its first word when it opens a sentence ("Give
+    Raghad" is Raghad); references such as S00004"""
+    names = []
+    for run in CAPITALISED.findall(without_names(text)):
+        words = run.split()
+        for candidate in (run, " ".join(words[1:])):
+            if candidate and candidate not in names and len(candidate) >= 3:
+                names.append(candidate)
+    return names[:MAX_NAMED]
 
 class NudgeQuick(models.AbstractModel):
     _name = "nudge.quick"
@@ -247,7 +277,7 @@ class NudgeQuick(models.AbstractModel):
 
         :return: ``{"screens", "documentation", "company_files"}``, without
             the empty ones; empty when nothing was found"""
-        found = {}
+        found = self._ground_quick(text)
         text = without_names(text)
         screens = self._ground_screens(text)
         if screens:
@@ -309,18 +339,124 @@ class NudgeQuick(models.AbstractModel):
             screens.append((rank, screen))
         return screens
 
+    def _ground_settings(self, text):
+        """:return: the settings whose words most hold those of ``text``, by
+        their roots, the closest first: what a small model switches on with
+        change_settings, or shows"""
+        roots = {commands.root_of(word) for word in commands.fold(without_names(text)).split()
+                 if len(word) >= 3 and word not in GROUND_STOP_WORDS}
+        roots -= groups.TRIGGERS
+        if not roots:
+            return []
+        scored = []
+        Settings = self.env["res.config.settings"]
+        for app in settings_layout(self.env):
+            for setting in app["settings"]:
+                if not setting["fields"]:
+                    continue
+                said = {commands.root_of(word) for word in commands.fold(setting["words"]).split()}
+                field = Settings._fields.get(setting["fields"][0])
+                # The label of the field is translated where the setting's may not be
+                name = f"{setting['label']} {field._description_string(self.env) if field else ''}"
+                named = {commands.root_of(word) for word in commands.fold(name).split()}
+                met = len(roots & said)
+                if met:
+                    # Its own name first, then its help: "Units of Measure" before "Weight"
+                    scored.append((-len(roots & named), -met, len(setting["label"]), {
+                        "app": app["label"], "label": setting["label"], "field": setting["fields"][0],
+                        "help": setting["help"][:MAX_SNIPPET]}))
+        scored.sort(key=lambda item: item[:3])
+        return [setting for *_rank, setting in scored[:GROUND_SETTINGS]]
+
+    def _ground_products(self, text):
+        """:return: the products most like ``text`` (what a picture shows),
+        with their price and stock as this person may see them"""
+        try:
+            found = product_search.find(self.env, text[:product_search.MAX_QUERY], GROUND_PRODUCTS)
+        except Exception:  # noqa: BLE001
+            # A database without products, or a person who cannot read them
+            return []
+        keys = ("name", "code", "price", "on_hand", "unit")
+        return [{key: item[key] for key in keys if key in item} for item in found["items"]]
+
     def _ground_work(self, text):
         """For a small model doing the work: the screens the question names,
         with the kind of record behind each. Short: the context of the work
         is taken by its tools.
 
         :return: ``{"screens"}``, or empty"""
+        found = self._ground_quick(text)
+        named = self._ground_named(text)
+        if named:
+            found["records"] = named
+        if ACCESS_ROOTS & {commands.root_of(word) for word in commands.fold(text).split()} or ACCESS_WORDS.search(text):
+            access = self._ground_access(text)
+            if access:
+                found["access_groups"] = access
         scored = [(rank, screen) for rank, screen in self._scored_screens(without_names(text)) if screen.get("model")]
-        if not scored:
-            return {}
-        # The best only, and what ties with it: a small model takes what it is given
-        best = scored[0][0]
-        return {"screens": [screen for rank, screen in scored if rank == best][:MAX_GROUND_SCREENS]}
+        if scored:
+            # The best only, and what ties with it: a small model takes what it is given
+            best = scored[0][0]
+            found["screens"] = [screen for rank, screen in scored if rank == best][:MAX_GROUND_SCREENS]
+        return found
+
+    def _ground_named(self, text):
+        """:return: the people, contacts, products and records the order names
+        by their name or reference (Raghad, Gemini Furniture, S00004), with
+        their ids, as this person may read them"""
+        found, seen = [], set()
+        for name in names_in(text):
+            for model_name, field in NAMED_FIELDS:
+                if model_name not in self.env or not self.env[model_name]._nudge_has_access("read"):
+                    continue
+                Model = self.env[model_name]
+                if field not in Model._fields:
+                    continue
+                for record in Model.search([(field, "=ilike", name)], limit=2):
+                    if (model_name, record.id) not in seen:
+                        seen.add((model_name, record.id))
+                        found.append({"model": model_name, "id": record.id, "name": record.display_name})
+            if REFERENCE.fullmatch(name):
+                for *_rank, model, record in self._find_reference(name)[:2]:
+                    if (model._name, record.id) not in seen:
+                        seen.add((model._name, record.id))
+                        found.append({"model": model._name, "id": record.id, "name": record.display_name})
+        return found[:MAX_NAMED]
+
+    def _ground_access(self, text):
+        """:return: the groups of access whose names hold the words of an
+        order about access ("Inventory user", "مستخدم المخزون"), closest first"""
+        if "res.groups" not in self.env or not self.env["res.groups"]._nudge_has_access("read"):
+            return []
+        roots = {commands.root_of(word) for word in commands.fold(without_names(text)).split()
+                 if len(word) >= 3 and word not in GROUND_STOP_WORDS} - ACCESS_ROOTS
+        if not roots:
+            return []
+        scored = []
+        Groups = self.env["res.groups"]
+        english = Groups.with_context(lang="en_US")
+        for group in Groups.search([]):
+            name = f"{group.display_name} {english.browse(group.id).display_name}"
+            met = len(roots & {commands.root_of(word) for word in commands.fold(name).split()})
+            if met:
+                scored.append((-met, len(group.display_name), group))
+        scored.sort(key=lambda item: item[:2])
+        return [{"id": group.id, "name": group.display_name} for *_rank, group in scored[:GROUND_GROUPS]]
+
+    def _ground_quick(self, text):
+        """:return: what the quick commands find for ``text``, without any AI,
+        for the groups it names: its settings, its products"""
+        found = {}
+        asked = groups.asked(text)
+        if "settings" in asked:
+            settings = self._ground_settings(text)
+            if settings:
+                found["settings"] = settings
+        if "products" in asked:
+            products = self._ground_products(text)
+            if products:
+                found["products"] = products
+        return found
 
     def _find_reference(self, text):
         """:return: the records whose name or reference is ``text`` exactly,
