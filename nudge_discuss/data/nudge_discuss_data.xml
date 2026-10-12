@@ -8,6 +8,9 @@
         <field name="active" eval="True"/>
     </record>
 
+    <!-- A member of the channels, on every update: "@" offers it there -->
+    <function model="discuss.channel" name="_nudge_join_all"/>
+
     <data noupdate="1">
         <!-- Started on demand, when someone writes @Nudge -->
         <record id="cron_mentions" model="ir.cron">
