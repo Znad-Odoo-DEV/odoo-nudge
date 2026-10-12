@@ -58,6 +58,17 @@ about show tell use using new add see find me my you we it its is an a to of in 
 """.split())
 
 
+
+# A name in quotes is what is to be made or written, not what it is about:
+# "add a field 'Project site' on the quotation"
+QUOTED = re.compile(r"['\"\u2018\u2019\u201c\u201d\u00ab\u00bb][^'\"\u2018\u2019\u201c\u201d\u00ab\u00bb]{1,80}"
+                    r"['\"\u2018\u2019\u201c\u201d\u00ab\u00bb]")
+
+
+def without_names(text):
+    """:return: ``text`` without what it names in quotes"""
+    return QUOTED.sub(" ", text or "")
+
 class NudgeQuick(models.AbstractModel):
     _name = "nudge.quick"
     _description = "Nudge Search Without AI"
@@ -237,6 +248,7 @@ class NudgeQuick(models.AbstractModel):
         :return: ``{"screens", "documentation", "company_files"}``, without
             the empty ones; empty when nothing was found"""
         found = {}
+        text = without_names(text)
         screens = self._ground_screens(text)
         if screens:
             found["screens"] = screens
@@ -263,7 +275,13 @@ class NudgeQuick(models.AbstractModel):
     def _ground_screens(self, text):
         """:return: the screens the person may open whose names hold the
         words of ``text``, in their language or in English, the closest
-        first: ``[{"menu_id", "path", "path_en"}]``"""
+        first: ``[{"menu_id", "path", "path_en", "model"}]``"""
+        return [screen for _rank, screen in self._scored_screens(text)][:MAX_GROUND_SCREENS]
+
+    def _scored_screens(self, text):
+        """:return: ``[(rank, screen)]``, the closest first: the words of the
+        path met, those of the screen's own name, how much of that name they
+        cover ("عروض الأسعار" all of it, "قوالب عرض السعر" two words of three)"""
         words = [word for word in commands.fold(text).split()
                  if len(word) >= 3 and word not in GROUND_STOP_WORDS]
         roots = {commands.root_of(word) for word in words} - {""}
@@ -278,10 +296,31 @@ class NudgeQuick(models.AbstractModel):
             # The screen itself is about it, not only an app above it
             if not roots & leaf:
                 continue
-            scored.append((-len(roots & path), -len(roots & leaf), len(own), own, english, menu.id))
-        scored.sort(key=lambda item: item[:3])
-        return [{"menu_id": menu_id, "path": own, "path_en": english}
-                for *_rank, own, english, menu_id in scored[:MAX_GROUND_SCREENS]]
+            covered = round(len(roots & leaf) / len(leaf), 2)
+            scored.append(((-len(roots & path), -len(roots & leaf), -covered), len(own), own, english, menu.id))
+        scored.sort(key=lambda item: item[:2])
+        screens = []
+        for rank, _length, own, english, menu_id in scored[:MAX_GROUND_SCREENS * 2]:
+            screen = {"menu_id": menu_id, "path": own, "path_en": english}
+            action = self.env["ir.ui.menu"].browse(menu_id).sudo().action
+            if action and action._name == "ir.actions.act_window" and action.res_model:
+                # The kind of record of the screen: what a model reads, changes and builds on
+                screen["model"] = action.res_model
+            screens.append((rank, screen))
+        return screens
+
+    def _ground_work(self, text):
+        """For a small model doing the work: the screens the question names,
+        with the kind of record behind each. Short: the context of the work
+        is taken by its tools.
+
+        :return: ``{"screens"}``, or empty"""
+        scored = [(rank, screen) for rank, screen in self._scored_screens(without_names(text)) if screen.get("model")]
+        if not scored:
+            return {}
+        # The best only, and what ties with it: a small model takes what it is given
+        best = scored[0][0]
+        return {"screens": [screen for rank, screen in scored if rank == best][:MAX_GROUND_SCREENS]}
 
     def _find_reference(self, text):
         """:return: the records whose name or reference is ``text`` exactly,

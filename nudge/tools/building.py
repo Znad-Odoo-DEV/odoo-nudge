@@ -424,19 +424,64 @@ def type_label(env, kind):
     }.get(kind, kind)
 
 
+# Arabic letters written in Latin, for the technical name of a field labelled
+# in Arabic: "الموقع" is x_mwqa, and two labels do not meet in x_field
+LATIN = {
+    "ا": "a", "أ": "a", "إ": "a", "آ": "a", "ب": "b", "ت": "t", "ث": "th", "ج": "j", "ح": "h",
+    "خ": "kh", "د": "d", "ذ": "dh", "ر": "r", "ز": "z", "س": "s", "ش": "sh", "ص": "s", "ض": "d",
+    "ط": "t", "ظ": "z", "ع": "a", "غ": "gh", "ف": "f", "ق": "q", "ك": "k", "ل": "l", "م": "m",
+    "ن": "n", "ه": "h", "ة": "a", "و": "w", "ي": "y", "ى": "a", "ئ": "y", "ؤ": "w", "ء": "",
+}
+
+
+def in_latin(label):
+    """:return: ``label`` with its Arabic letters written in Latin, the
+    article of each word left out"""
+    words = []
+    for word in label.split():
+        if word.startswith("ال") and len(word) > 3:
+            word = word[2:]
+        words.append("".join(LATIN.get(letter, letter) for letter in word))
+    return " ".join(words)
+
+
 def field_name_for(label, given=""):
     if given:
         name = given.strip().lower()
         if not NAME_PATTERN.match(name):
             raise Refused("A field made here is named x_ followed by letters, digits and underscores.")
         return name
-    slug = re.sub(r"[^a-z0-9]+", "_", label.lower()).strip("_")[:40]
+    slug = re.sub(r"[^a-z0-9]+", "_", in_latin(label).lower()).strip("_")[:40]
     if not slug:
-        # "الموقع" would be x_field, and the next one would collide with it
-        raise Refused(
-            "The label has no Latin letters to make the technical name of: give name, x_ and "
-            "English words, such as x_site.")
+        raise Refused("The label has no letters to make the technical name of: give name, x_ and English words.")
     return "x_" + slug
+
+
+def free_name(model, name):
+    """:return: ``name``, or with a number when the model has it already"""
+    candidate, number = name, 2
+    while candidate in model._fields:
+        candidate, number = f"{name}_{number}", number + 1
+    return candidate
+
+
+def form_field(tree, model, env, wanted):
+    """:return: the name of the field of the form ``wanted`` names, by its
+    name or by its label ("customer_id": partner_id, Customer); None"""
+    if tree.find(f".//field[@name='{wanted}']") is not None:
+        return wanted
+    words = [word for word in re.split(r"[^a-z0-9]+", wanted.lower()) if word and word not in ("id", "ids", "x")]
+    if not words:
+        return None
+    for node in tree.iter("field"):
+        name = node.get("name") or ""
+        field = model._fields.get(name)
+        if not field or any(parent.tag == "field" for parent in node.iterancestors()):
+            continue
+        said = f"{name} {field.string} {field_label(field, env)}".lower()
+        if all(word in said for word in words):
+            return name
+    return None
 
 
 @base.register
@@ -499,7 +544,10 @@ class PrepareField(Building):
         label = arguments["label"].strip()
         name = field_name_for(label, arguments.get("name") or "")
         if name in model._fields:
-            raise Refused(f"{model._name} already has a field {name!r}.")
+            if arguments.get("name") or model._fields[name].string == label:
+                raise Refused(f"{model._name} already has a field {name!r}.")
+            # Made from another label: a number keeps them apart
+            name = free_name(model, name)
         kind = arguments["type"]
         values = {
             "name": name,
@@ -558,12 +606,23 @@ class PrepareField(Building):
         on_form = arguments.get("on_form", True)
         view = None
         if on_form:
+            given = arguments.get("view_id")
+            if given:
+                view = env["ir.ui.view"].sudo().browse(given).exists()
+                if not view or view.model != model._name or view.type != "form":
+                    # A small model writes an id it did not read: the main form
+                    arguments = {name: value for name, value in arguments.items() if name != "view_id"}
             root, arch_before, _view_type = view_of(env, model, dict(arguments, view_type="form"))
+            if not root:
+                # Its records are edited inside another form: nothing to extend
+                raise Refused(
+                    f"{model._name} has no form of its own. Make the field on the model of the form the "
+                    "person named, or with on_form false.")
             tree = etree.fromstring(arch_before.encode("utf-8"))
             after = (arguments.get("after") or "").strip()
+            # Named by its label, or not on the form: the card says where it goes
+            after = after and form_field(tree, model, env, after)
             if after:
-                if tree.find(f".//field[@name='{after}']") is None:
-                    raise Refused(f"The form of {model._name} has no field {after!r}: read_view lists them.")
                 shown = field_label(model._fields[after], env) if after in model._fields else after
                 xpath, position, where = f"//field[@name='{after}']", "after", env._("after %s", shown)
             elif tree.find(".//sheet//group") is not None:
