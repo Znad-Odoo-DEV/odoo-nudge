@@ -92,21 +92,32 @@ TOOLS = {}
 # The tools a small model is given when its provider asks for the essential
 # ones: finding, reading, showing, and in each mode what it is for. A model
 # that runs on a laptop reads fewer tools faster, and picks the right one more
-# often. Named here for the companion modules too.
-ESSENTIAL_TOOLS = frozenset({
-    # Talk
+# often; the others come in groups, by the words of the question or when it
+# asks for them (groups.py). Named here for the companion modules too.
+TALK_TOOLS = frozenset({
     "search_odoo_documentation", "show_on_screen", "show_menu_path", "find_screen", "open_screen",
     "describe_model", "locate_data", "search_company_files", "write_in_field", "test_import",
     "remember_lesson", "search_products",
-    # Agent
+})
+AGENT_TOOLS = TALK_TOOLS | {
     "search_records", "read_record", "find_record", "aggregate_records", "filter_screen", "open_record",
     "prepare_create", "prepare_write", "call_method", "prepare_plan", "prepare_task",
-    # Developer
+}
+# Developer mode builds: what it reads to build, what it builds with, and
+# prepare_write to switch off what it built. Records, imports and products
+# come as groups
+DEV_TOOLS = frozenset({
+    "search_odoo_documentation", "show_on_screen", "show_menu_path", "find_screen", "open_screen",
+    "describe_model", "locate_data", "search_company_files", "remember_lesson",
+    "search_records", "read_record", "prepare_write",
     "read_automations", "check_python_code", "prepare_automation", "prepare_server_action",
-    "prepare_email_template", "prepare_email_design", "prepare_email_review", "prepare_delete",
-    "prepare_undo", "read_view", "prepare_view_change", "prepare_button", "prepare_field",
-    "try_automation", "prepare_approval_rule",
+    "prepare_email_template", "prepare_email_design", "prepare_email_review", "send_test_email",
+    "prepare_delete", "prepare_undo", "read_view", "prepare_view_change", "prepare_button",
+    "prepare_field", "try_automation", "prepare_scheduled_action", "prepare_approval_rule",
 })
+ESSENTIAL_BY_MODE = {MODE_TALK: TALK_TOOLS, MODE_AGENT: AGENT_TOOLS, MODE_DEV: DEV_TOOLS}
+ESSENTIAL_TOOLS = TALK_TOOLS | AGENT_TOOLS | DEV_TOOLS | {"more_tools"}
+
 TOOL_SETS = ("full", "essential")
 
 
@@ -115,12 +126,16 @@ def register(tool_class):
     return tool_class
 
 
-def available(env, mode=MODE_TALK, tool_set="full"):
-    """:param tool_set: "essential" keeps the tools of ESSENTIAL_TOOLS only
+def available(env, mode=MODE_TALK, tool_set="full", extra=()):
+    """:param tool_set: "essential" keeps the tools of the mode, and ``extra``
+    :param extra: names of the tools of the groups a small model was given
     :return: tools offered to the current user. Sorted: the list is part
     of the prompt, and its order must not change between two requests."""
-    return [tool for name, tool in sorted(TOOLS.items())
-            if (tool_set != "essential" or name in ESSENTIAL_TOOLS) and tool.is_available(env, mode)]
+    if tool_set == "essential":
+        names = ESSENTIAL_BY_MODE.get(mode, TALK_TOOLS) | set(extra) | {"more_tools"}
+    else:
+        names = {name for name, tool in TOOLS.items() if not getattr(tool, "small_models_only", False)}
+    return [tool for name, tool in sorted(TOOLS.items()) if name in names and tool.is_available(env, mode)]
 
 
 def guarded(env, name, function):

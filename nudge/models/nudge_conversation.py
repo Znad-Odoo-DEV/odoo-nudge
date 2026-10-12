@@ -127,6 +127,9 @@ class NudgeConversation(models.Model):
     waiting_step_id = fields.Many2one(
         "nudge.step", string="Waiting For", copy=False, ondelete="set null")
     run_ids = fields.One2many("nudge.run", "conversation_id", string="Runs")
+    # The groups of tools a small model asked for, given for the rest of the
+    # conversation (tools/groups.py)
+    tool_groups = fields.Char(copy=False)
 
     @api.depends("message_ids.input_tokens", "message_ids.output_tokens",
                  "message_ids.cache_read_tokens", "message_ids.cache_write_tokens",
@@ -359,6 +362,18 @@ class NudgeConversation(models.Model):
         ], order="id desc", limit=1)
         return question.command if question.command in tools.commands.FOCUS else None
 
+    def _chat_tools(self, mode, tool_set):
+        """:return: the definitions of the tools offered for the question being
+        answered: a small model gets those of its mode, and the groups the
+        question or the model asked for"""
+        self.ensure_one()
+        extra = ()
+        if tool_set == "essential":
+            question = self.env["nudge.message"].sudo().search([
+                ("conversation_id", "=", self.id), ("role", "=", "user")], order="id desc", limit=1)
+            extra = tools.groups.offered(self, question.content or "")
+        return [tool.definition() for tool in tools.base.available(self.env, mode, tool_set, extra)]
+
     def _chat_job(self, provider, mode, rounds):
         """:return: everything the stream needs, as plain data: the
         environment is gone once streaming starts"""
@@ -399,7 +414,7 @@ class NudgeConversation(models.Model):
                 compact=tool_set == "essential",
                 work="\n\n".join(block for block in (
                     self._chat_where_the_work_is(), self.env["nudge.source"]._get_text()) if block)),
-            "tools": [tool.definition() for tool in tools.base.available(self.env, mode, tool_set)],
+            "tools": self._chat_tools(mode, tool_set),
             "turns": conversation._chat_build_turns(),
             "seconds": self._get_stream_seconds(),
             "rounds": rounds,
@@ -965,7 +980,11 @@ class NudgeConversation(models.Model):
                 "tool_results": results,
             })
         if again:
-            return {"screen_events": screen_events, "turns": conversation._chat_build_turns()}
+            step = {"screen_events": screen_events, "turns": conversation._chat_build_turns()}
+            if any(call["name"] == "more_tools" for call in calls):
+                # What the model asked for is offered from its next answer
+                step["tools"] = self._chat_tools(self._chat_mode(), provider.tool_set if provider else "full")
+            return step
         if later:
             run._queue()
             return {"screen_events": screen_events, "event": {
