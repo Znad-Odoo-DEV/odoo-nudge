@@ -164,8 +164,21 @@ def current_values(env, names):
     if not can_read_values(env) or not names:
         return None
     Settings = env[SETTINGS]
-    values = Settings.default_get(list(names))
-    return {name: setting_value(env, Settings._fields[name], values.get(name)) for name in names}
+    # A record of the settings as the screen opens them: what is related to the
+    # company (the fiscal country, the default taxes) is not in default_get
+    record = Settings.new(Settings.default_get(list({*names, "company_id"})))
+    return {name: setting_value(env, Settings._fields[name], _raw(record, name)) for name in names}
+
+
+def _raw(record, name):
+    """:return: the value of ``name`` as default_get gives it: ids for relations"""
+    value = record[name]
+    field = record._fields[name]
+    if field.type == "many2one":
+        return value.id or False
+    if field.type in ("many2many", "one2many"):
+        return value.ids
+    return value
 
 
 def settings_menu(env, app):
