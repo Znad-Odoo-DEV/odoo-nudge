@@ -593,7 +593,10 @@ class FilterScreen(base.Tool):
         conditions = arguments.get("conditions") or []
         group_by = arguments.get("group_by") or []
         if not conditions and not group_by:
-            raise Refused("Give conditions, group_by, or both.")
+            raise Refused(
+                "Give conditions, group_by, or both, as lists of their own, never in the text: "
+                '"conditions": [{"field": "partner_id", "operator": "=", "value": "10"}], '
+                '"group_by": ["user_id"].')
         domain = build_domain(model, conditions, arguments.get("match"))
         for item in group_by:
             name, _sep, interval = item.partition(":")

@@ -429,6 +429,20 @@ def server_action_values(env, model, flow_name, flow_id):
     }
 
 
+def template_of(env, model):
+    """:return: the email template of ``model``, when it has one only
+    :raise Refused: naming those it has, or saying it has none
+    A small model asked for a review button invented a template id."""
+    templates = get_model(env, "mail.template").search([("model", "=", model._name)], order="id desc")
+    if len(templates) == 1:
+        return templates
+    if not templates:
+        raise Refused(f"{model._name} has no email template: make one first (prepare_email_design), "
+                      "then give its template_id.")
+    listed = ", ".join(f"#{template.id} {template.name}" for template in templates[:10])
+    raise Refused(f"{model._name} has several email templates; give the template_id of the one meant: {listed}.")
+
+
 @base.register
 class PrepareEmailReview(Mailing):
     name = "prepare_email_review"
@@ -448,11 +462,12 @@ class PrepareEmailReview(Mailing):
     input_schema = {
         "type": "object",
         "additionalProperties": False,
-        "required": ["name", "model", "template_id", "label"],
+        "required": ["name", "model", "label"],
         "properties": {
             "name": {"type": "string", "minLength": 2, "maxLength": 120},
             "model": {"type": "string", "pattern": MODEL_PATTERN},
-            "template_id": {"type": "integer", "minimum": 1},
+            "template_id": {"type": "integer", "minimum": 1,
+                            "description": "Left out: the email template of the model, when it has one."},
             "label": {"type": "string", "minLength": 1, "maxLength": 40, "description": "The new button: Approve."},
             "method": {"type": "string", "pattern": r"[a-z][a-z0-9_]*",
                        "description": "The method of the button it goes with, from the form."},
@@ -469,7 +484,10 @@ class PrepareEmailReview(Mailing):
         check_developing(env)
         mail_installed(env)
         model = get_model(env, arguments["model"])
-        template = get_records(get_model(env, "mail.template"), [arguments["template_id"]])
+        if arguments.get("template_id"):
+            template = get_records(get_model(env, "mail.template"), [arguments["template_id"]])
+        else:
+            template = template_of(env, model)
         if template.model != model._name:
             raise Refused(f"Template #{template.id} is for {template.model}, not {model._name}.")
         root, arch_before, _view_type = view_of(env, model, {"view_type": "form"})

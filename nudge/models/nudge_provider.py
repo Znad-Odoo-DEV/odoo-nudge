@@ -459,18 +459,19 @@ class NudgeProvider(models.Model):
         except base.AdapterError:
             return True
 
-    def _read_picture(self, media_type, data, question):
+    def _read_picture(self, media_type, data, question, model=None):
         """:param data: the picture, in base64
+        :param model: the model that reads it; the picture model by default
         :return: what the picture model of this server read in it
         :raise UserError: when there is none, or it could not"""
         self.ensure_one()
-        if not self.picture_model:
+        model = model or self.picture_model
+        if not model:
             raise UserError(self.env._(
                 "%s cannot read pictures. Describe it in words, or ask your administrator for a "
                 "model that sees them.", self.model_name))
         try:
-            text, usage = ollama.read_picture(self.base_url, self.picture_model, data, question,
-                                              self.api_key or "")
+            text, usage = ollama.read_picture(self.base_url, model, data, question, self.api_key or "")
         except base.AdapterError as exc:
             if "load image" in (exc.detail or ""):
                 raise UserError(self.env._(
@@ -478,7 +479,7 @@ class NudgeProvider(models.Model):
             raise UserError(self._error_message(exc)) from exc
         self.env["nudge.usage"]._add(
             "chat", base.normalize_usage(usage), 0.0, self.env.user, self.env.company,
-            provider_id=self.id, model_name=self.picture_model)
+            provider_id=self.id, model_name=model)
         return text
 
     def action_ollama_prepare(self):
@@ -497,7 +498,10 @@ class NudgeProvider(models.Model):
         self.write({"model_name": name, "context_length": context,
                     "timeout": max(self.timeout or 0, OLLAMA_TIMEOUT)})
         self.action_fetch_models()
-        if not self.picture_model and not self._can_see_pictures():
+        if self._can_see_pictures():
+            # It reads pictures itself: no second model is loaded beside it
+            self.picture_model = False
+        elif not self.picture_model:
             # A model of the server that sees reads the pictures for it
             seeing = self.model_ids.filtered("sees_pictures").sorted("name")[:1]
             if seeing:

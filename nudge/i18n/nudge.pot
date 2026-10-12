@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-11 09:26+0000\n"
-"PO-Revision-Date: 2026-10-11 09:26+0000\n"
+"POT-Creation-Date: 2026-10-11 12:37+0000\n"
+"PO-Revision-Date: 2026-10-11 12:37+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -59,6 +59,12 @@ msgid ""
 "answers come several times slower. Choose a smaller model, or set "
 "OLLAMA_FLASH_ATTENTION=1 and OLLAMA_KV_CACHE_TYPE=q8_0 on the server (q4_0 "
 "on a card of 6 GB) and press Prepare for Nudge again."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/building.py:0
+msgid "%(shown)s: on %(on)s of the %(looked)s records looked at"
 msgstr ""
 
 #. module: nudge
@@ -3089,6 +3095,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/nudge/static/src/core/nudge_service.js:0
 msgid "Nudge stopped"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Nudge trial"
 msgstr ""
 
 #. module: nudge

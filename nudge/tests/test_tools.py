@@ -101,6 +101,41 @@ class TestSchema(BaseCase):
         with self.assertRaises(schema.SchemaError):
             schema.validate({"n": 0}, number)
 
+    def test_a_number_written_for_text_is_forgiven(self):
+        # qwen3.5:4b searched the orders of partner 9 with "value": 9, twice refused
+        searching = tools.records.SearchRecords.input_schema
+        arguments = {"model": "sale.order", "conditions": [{"field": "partner_id", "operator": "=", "value": 9},
+                                                           {"field": "active", "operator": "=", "value": True}]}
+        forgiven = schema.forgive(arguments, searching)
+        self.assertEqual([condition["value"] for condition in forgiven["conditions"]], ["9", "true"])
+        schema.validate(forgiven, searching)
+        self.assertEqual(arguments["conditions"][0]["value"], 9, "What the model wrote is left as it was")
+        # Where a number is meant, or one of a list, nothing is changed
+        number = {"type": "object", "properties": {"n": {"type": "integer"}, "kind": {"type": "string", "enum": ["a"]}}}
+        self.assertEqual(schema.forgive({"n": 3, "kind": 1}, number), {"n": 3, "kind": 1})
+        # Text still refused where it is not text: nothing is guessed
+        listed = {"steps": [self.step(text=["Press it."])]}
+        with self.assertRaisesRegex(schema.SchemaError, "expected string"):
+            schema.validate(schema.forgive(listed, self.SCHEMA), self.SCHEMA)
+        # The values written as a mapping: six calls were refused for it
+        planning = tools.plans.PreparePlan.input_schema
+        plan = {"title": "Raghad on the Acme orders", "steps": [
+            {"model": "sale.order", "action": "write", "ids": [5, 1], "values": {"user_id": 8}}]}
+        forgiven = schema.forgive(plan, planning)
+        self.assertEqual(forgiven["steps"][0]["values"], [{"field": "user_id", "value": "8"}])
+        schema.validate(forgiven, planning)
+        # One pair written alone stays as it was: refused, and shown the list
+        one = {"model": "sale.order", "action": "write", "ids": [5], "values": {"field": "user_id", "value": "8"}}
+        self.assertEqual(schema.forgive({"title": "x", "steps": [one]}, planning)["steps"][0]["values"], one["values"])
+        # A field path written as a placeholder, or wrapped: the details of an email
+        path = {"type": "string", "pattern": r"[a-z_][a-z0-9_.]*"}
+        self.assertEqual(schema.forgive("{{ object.partner_id.email }}", path), "partner_id.email")
+        self.assertEqual(schema.forgive("#object.id", path), "id")
+        self.assertEqual(schema.forgive({"field": "user_id"}, path), "user_id")
+        self.assertEqual(schema.forgive("Dear {{ object.name }}", {"type": "string"}), "Dear {{ object.name }}",
+                         "Text with placeholders is left as written")
+        self.assertEqual(schema.forgive("partner id!", path), "partner id!", "Not a path after cleaning: refused")
+
 
 @tagged("post_install", "-at_install")
 class TestOpenAIToolCalls(BaseCase):
@@ -271,6 +306,9 @@ class TestTools(NudgeCase, TransactionCase):
         self.assertTrue(result.is_error)
         self.assertIn("'target_type' is missing", result.content)
         self.assertTrue(self.run_tool("show_on_screen", "not a dict").is_error)
+        # A number where text is meant is read as that text
+        result = self.run_tool("find_screen", {"words": 2026}, user=self.user_contacts)
+        self.assertNotIn("Invalid arguments", result.content)
 
     def test_a_failing_tool_does_not_break_the_conversation(self):
         def explode(env, arguments, screen):

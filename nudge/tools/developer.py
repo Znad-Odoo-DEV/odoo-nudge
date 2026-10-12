@@ -7,6 +7,8 @@ made: the trigger, the code, the recipients, the text of the email. What a
 developer reads before writing, the tools read: what exists already, whether
 the code compiles.
 """
+import ast
+import builtins
 import re
 from datetime import timedelta
 
@@ -14,6 +16,7 @@ import pytz
 
 from odoo import Command
 from odoo.tools import plaintext2html
+from odoo.tools import safe_eval as safe_eval_module
 from odoo.tools.safe_eval import test_python_expr
 
 from odoo import fields as odoo_fields
@@ -41,7 +44,7 @@ ACTION_KINDS = ("code", "update", "email", "activity")
 EMAIL_WAYS = ("email", "comment", "note")
 ACTIVITY_UNITS = ("days", "weeks", "months")
 # The fields an update action writes by itself; anything else is code
-UPDATABLE_TYPES = ("char", "text", "html", "integer", "float", "monetary", "boolean", "date", "datetime")
+UPDATABLE_TYPES = ("char", "text", "html", "integer", "float", "monetary", "boolean", "date", "datetime", "selection")
 # What may be deleted: what Nudge builds, never records of the business
 DELETABLE = ["base.automation", "ir.actions.server", "mail.template", "ir.cron", "ir.ui.view", "ir.model.fields",
              "ir.actions.report"]
@@ -217,13 +220,52 @@ def automations_installed(env):
             "is needed. Tell the person; a server action can still be made.")
 
 
+# What the code of a server action is given when it runs (ir.actions.server,
+# base.automation): any other name it reads fails then
+CODE_NAMES = frozenset({
+    "env", "model", "record", "records", "time", "datetime", "dateutil", "timezone", "float_compare",
+    "b64encode", "b64decode", "Command", "UserError", "log", "_logger", "uid", "user", "payload",
+})
+
+
 def compile_code(code):
-    """:return: what is wrong with the code, or "" """
+    """The code of a server action, an automation rule or a scheduled action.
+    :return: what is wrong with it, or "" """
     text = (code or "").strip()
     if not text:
         return "The code is empty."
     error = test_python_expr(text, mode="exec")
-    return str(error) if error else ""
+    if error:
+        return str(error)
+    tree = ast.parse(text)
+    unknown = unknown_names(tree)
+    if unknown:
+        # A small model wrote object and self: the action failed when run
+        return (f"{', '.join(unknown)} is not known when the code runs. It knows: "
+                f"{', '.join(sorted(CODE_NAMES))}; the record is record (records for several).")
+    if not any(isinstance(node, (ast.Call, ast.Raise)) or (
+            isinstance(node, (ast.Attribute, ast.Subscript)) and isinstance(node.ctx, ast.Store))
+            for node in ast.walk(tree)):
+        # lang = 'ar' was made into an automation rule that changed nothing
+        return ("The code changes nothing: it calls no method and writes no field. Write it, such as "
+                "record.write({'lang': 'ar_001'}), or use an update action instead of code.")
+    return ""
+
+
+def unknown_names(tree):
+    """:return: the names the code reads that it neither sets nor is given"""
+    given = set(CODE_NAMES) | set(getattr(safe_eval_module, "_BUILTINS", vars(builtins)))
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)):
+            given.add(node.id)
+        elif isinstance(node, ast.arg):
+            given.add(node.arg)
+        elif isinstance(node, (ast.FunctionDef, ast.ClassDef)):
+            given.add(node.name)
+        elif isinstance(node, ast.ExceptHandler) and node.name:
+            given.add(node.name)
+    return sorted({node.id for node in ast.walk(tree)
+                   if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load) and node.id not in given})
 
 
 def in_words(model, conditions, match):
@@ -361,10 +403,11 @@ class CheckPythonCode(base.Tool):
 # ---------------------------------------------------------------- building
 
 DESIGN_FIRST = (
-    "Nudge: Emails is installed here: every email is a designed one. Ask the person which style "
-    "they want (classic: a coloured band and a clean table; modern: a large coloured header and "
-    "rounded cards; minimal: quiet, a thin line of colour; formal: a letter with the logo on top), "
-    "make the email with prepare_email_design, then give its template_id here."
+    "Nudge: Emails is installed here: every email is a designed one. Make it with "
+    "prepare_email_design in the style the person named, classic when they named none (classic: a "
+    "coloured band and a clean table; modern: a large coloured header and rounded cards; minimal: "
+    "quiet, a thin line of colour; formal: a letter with the logo on top), then give its "
+    "template_id here."
 )
 
 
@@ -393,7 +436,9 @@ def read_recipients(env, model, to, cc=None):
     partner_to, email_to, email_cc, shown_to, shown_cc = [], [], [], [], []
 
     def recipient(text, into_partners, into_emails, shown):
-        text = text.strip()
+        # Written as the placeholder itself: "{{ object.partner_id.email }}"
+        text = PLACEHOLDER.sub(r"\1", text.strip())
+        text = text[len("object."):] if text.startswith("object.") else text
         if EMAIL.match(text):
             into_emails.append(text)
             shown.append(text)
@@ -471,7 +516,10 @@ def read_action(env, model, action, position=1):
     elif kind == "update":
         path = action.get("field")
         if not path:
-            raise Refused(f"Action {position}: an update names the field.")
+            raise Refused(
+                f"Action {position}: an update names the field, such as "
+                '{"kind": "update", "field": "active", "value": "false"}; code goes in '
+                '{"kind": "code", "code": "..."}.')
         field = target_field(model, path)
         if field.readonly and not field.inverse:
             raise Refused(f"Action {position}: {path} is read only.")
@@ -1229,6 +1277,8 @@ class TryAutomation(Building):
             # Checked here rather than by the schema of this tool, which
             # would carry the whole of prepare_automation's a second time
             try:
+                # Forgiven as prepare_automation forgives it: the same rule passes both
+                arguments["rule"] = schema.forgive(arguments["rule"], PrepareAutomation.input_schema)
                 schema.validate(arguments["rule"], PrepareAutomation.input_schema, "rule")
             except schema.SchemaError as error:
                 raise Refused(f"Invalid rule. {error}") from None
@@ -1345,6 +1395,10 @@ class TryAutomation(Building):
         trigger = rule.trigger if rule is not None else ""
         if trigger == "on_unarchive" and "active" in model._fields:
             values.setdefault("active", False)
+        name_field = model._fields.get(model._rec_name or "")
+        if name_field and name_field.store and name_field.type == "char" and name_field.name not in values:
+            # A dummy contact without a name broke the trial on res_partner_check_name
+            values[name_field.name] = env._("Nudge trial")
         # What the trial writes to fire the rule is not what the actions did
         written = set(change) | ({"active"} if trigger in ("on_archive", "on_unarchive") else set())
         mails_at = _mail_watch(env)
@@ -1420,7 +1474,7 @@ class PrepareScheduledAction(Building):
     input_schema = {
         "type": "object",
         "additionalProperties": False,
-        "required": ["name", "model", "code", "every"],
+        "required": ["name", "model", "code", "every", "first_run"],
         "properties": {
             "name": {"type": "string", "minLength": 2, "maxLength": 120},
             "model": {"type": "string", "pattern": MODEL_PATTERN},
@@ -1439,7 +1493,7 @@ class PrepareScheduledAction(Building):
                 "maxLength": 40,
                 "description": (
                     "When it first runs: a day of the week and an hour, \"monday 08:00\" for the "
-                    "next Monday; a date and time as the person writes it; or now (default)."),
+                    "next Monday; a date and time as the person writes it; or \"now\"."),
             },
         },
     }

@@ -46,6 +46,15 @@ class TestAssessment(NudgeCase, TransactionCase):
         self.assertIn("No reference", result.content)
         self.assertIn("ask what it does", result.content)
 
+    def test_no_business_named_none_is_guessed(self):
+        # A small model named a business the person never named, and judged the database by it
+        result = tools.base.call(self.env(user=self.user_a), "assess_database", {})
+        self.assertFalse(result.is_error, result.content)
+        found = json.loads(result.content)
+        self.assertNotIn("missing", found, "Nothing is missing without a kind of business to judge by")
+        self.assertTrue(all({"module", "name", "in_use"} <= set(app) for app in found["apps"]), found["apps"])
+        self.assertIn("No kind of business was named", found["note"])
+
     def test_for_everybody_and_told(self):
         for mode in ("talk", "agent"):
             names = [tool.name for tool in tools.base.available(self.env(user=self.user_a), mode)]

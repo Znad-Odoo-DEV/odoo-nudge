@@ -258,6 +258,24 @@ class TestDeveloper(NudgeCase, TransactionCase):
         self.assertTrue(refused.is_error)
         self.assertIn("code", refused.content)
 
+        # A choice is updated too: refused, a small model wrote lang = 'ar' as code instead
+        result = self.run_tool("prepare_server_action", {
+            "name": "In English", "model": "res.partner",
+            "action": {"kind": "update", "field": "lang", "value": "en_US"}})
+        self.assertFalse(result.is_error, result.content)
+        done = self.do("prepare_server_action", result)
+        self.assertFalse(done.is_error, done.content)
+        action = self.env["ir.actions.server"].search([("name", "=", "In English")])
+        partner.lang = False
+        action.with_context(active_model="res.partner", active_ids=partner.ids, active_id=partner.id).run()
+        self.assertEqual(partner.lang, "en_US")
+        # Tried on a dummy record given no name: a contact needs one
+        tried = self.run_tool("try_automation", {"action_id": action.id})
+        if tried.pending:
+            tried = self.do("try_automation", tried)
+        self.assertFalse(tried.is_error, tried.content)
+        self.assertIn("Nudge trial", tried.content)
+
     def test_an_expression_is_computed(self):
         self.switch(True)
         result = self.run_tool("prepare_server_action", {
@@ -473,13 +491,34 @@ class TestDeveloper(NudgeCase, TransactionCase):
         listed = self.run_tool("read_automations", {"model": "res.partner"})
         self.assertIn("Nightly buyers on res.partner: every 1 days", listed.content)
         refused = self.run_tool("prepare_scheduled_action", {
-            "name": "Broken", "model": "res.partner", "code": "model.search(", "every": {"number": 1, "unit": "days"}})
+            "name": "Broken", "model": "res.partner", "code": "model.search(", "every": {"number": 1, "unit": "days"},
+            "first_run": "now"})
         self.assertTrue(refused.is_error)
+        self.assertIn("does not compile", refused.content)
+        self.assertIn("Nothing was made", refused.content, "A refusal is never told as done")
+        # When it first runs is always said: "every Monday" ran every 7 days from now
+        unsaid = self.run_tool("prepare_scheduled_action", {
+            "name": "Monday", "model": "res.partner", "code": "log('x')", "every": {"number": 1, "unit": "weeks"}})
+        self.assertIn("'first_run' is missing", unsaid.content)
 
         result = self.run_tool("prepare_delete", {"model": "ir.cron", "ids": [cron.id]})
         self.assertFalse(result.is_error, result.content)
         self.do("prepare_delete", result)
         self.assertFalse(cron.exists())
+
+    def test_what_a_small_model_writes_wrong_is_read_or_shown(self):
+        from odoo.addons.nudge.tools import developer  # noqa: PLC0415
+
+        # A recipient written as the placeholder itself
+        written = developer.read_recipients(self.env, self.env["res.partner"], ["{{ object.email }}"])
+        self.assertIn("{{ object.email }}", str(written))
+        # An update with code and no field is shown the two shapes
+        self.switch(True)
+        refused = self.run_tool("prepare_server_action", {
+            "name": "Archive", "model": "res.partner",
+            "action": {"kind": "update", "code": "record.write({'active': False})"}})
+        self.assertTrue(refused.is_error)
+        self.assertIn('"kind": "code"', refused.content)
 
     def test_every_monday_starts_on_a_monday(self):
         from datetime import datetime  # noqa: PLC0415
