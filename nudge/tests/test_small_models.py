@@ -174,11 +174,13 @@ class TestSmallModels(NudgeCase, TransactionCase):
         events = [event for message in conversation.sudo().message_ids for event in (message.screen_events or [])]
         self.assertFalse([event for event in events if event.get("type") == "found"])
 
-    def test_a_small_model_is_told_the_language_of_its_answer(self):
-        self.small()
+    def test_every_model_is_told_the_language_of_its_answer(self):
         adapter = self.use_adapter()
+        self.ask(self.user_a, "How many days of leave do we get?")
+        self.assertIn('"answer_in":"English"', adapter.calls[0]["turns"][-1]["context"])
+        self.small()
         self.ask(self.user_a, "كم يوم إجازة سنوية إلنا؟")
-        self.assertIn('"answer_in":"Arabic"', adapter.calls[0]["turns"][-1]["context"])
+        self.assertIn('"answer_in":"Arabic"', adapter.calls[1]["turns"][-1]["context"])
 
     def test_the_context_is_for_the_modes_it_serves(self):
         self.small()
