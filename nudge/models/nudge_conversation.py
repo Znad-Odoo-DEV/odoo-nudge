@@ -529,6 +529,11 @@ class NudgeConversation(models.Model):
             grounded = self.env["nudge.quick"]._ground(text)
             if grounded:
                 context_text = "\n".join((context_text, prompt.render_found(grounded)))
+        elif provider.tool_set == "essential" and mode != MODE_TALK and not focus:
+            # Doing the work, it is told which kind of record the words name
+            grounded = self.env["nudge.quick"]._ground_work(text)
+            if grounded:
+                context_text = "\n".join((context_text, prompt.render_found(grounded)))
         message = self.env["nudge.message"].sudo().create({
             "conversation_id": self.id,
             "role": "user",

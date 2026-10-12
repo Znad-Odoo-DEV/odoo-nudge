@@ -92,7 +92,9 @@ class TestArabicRoots(BaseCase):
         self.assertEqual(root(fold("هالعروض")), root(fold("عرض")))
         self.assertEqual(root(fold("الأسعار")), root(fold("سعر")))
         self.assertEqual(root(fold("بالفاتورة")), root(fold("فاتورة")))
-        self.assertEqual(root("quotations"), "quotations", "A Latin word is left as it is")
+        self.assertEqual(root("quotations"), "quotation", "An English plural meets its singular")
+        self.assertEqual(root("categories"), "category")
+        self.assertEqual(root("address"), "address")
 
 
 @tagged("post_install", "-at_install")
@@ -146,6 +148,27 @@ class TestSmallModels(NudgeCase, TransactionCase):
         self.order(self.agent, "بالـ SQL: أكتر 5 زباين عندهم طلبات")
         names = {tool["name"] for tool in adapter.calls[0]["tools"]}
         self.assertIn("make_spreadsheet", names, "The words of the question bring their group, in Arabic too")
+
+    def test_the_work_is_told_the_kind_of_record_named(self):
+        # "ضيفلي حقل على عرض السعر" was read as an exchange rate
+        self.small()
+        adapter = self.use_adapter()
+        self.order(self.agent, "Change the subject of the email templates of quotations")
+        context = adapter.calls[0]["turns"][-1]["context"]
+        self.assertIn("<nudge_found>", context)
+        self.assertIn('"model":"mail.template"', context, "The screen named, with its kind of record")
+        self.assertNotIn("documentation", context, "Short: the context of the work goes to its tools")
+
+    def test_what_is_named_in_quotes_is_not_what_it_is_about(self):
+        from odoo.addons.nudge.models.nudge_quick import without_names  # noqa: PLC0415
+
+        self.assertEqual(without_names("Add a field 'Project site' on the quotation").split(),
+                         ["Add", "a", "field", "on", "the", "quotation"])
+        self.assertEqual(without_names("ضيفلي حقل «الموقع» على عرض السعر").split(),
+                         ["ضيفلي", "حقل", "على", "عرض", "السعر"])
+        # A singular finds the screen named in the plural
+        screens = self.env["nudge.quick"]._ground_screens("change the email template")
+        self.assertIn("Email Templates", " ".join(screen["path_en"] for screen in screens))
 
     def test_more_tools_are_given_for_the_rest_of_the_conversation(self):
         from odoo.addons.nudge.llm import base as llm_base  # noqa: PLC0415
