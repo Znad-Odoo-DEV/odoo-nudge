@@ -258,8 +258,8 @@ AGENT_MAP_COMPACT = """\
 - Change a record → prepare_write. Create one → prepare_create. Press its button (confirm, \
 validate, post) → call_method. The same change on every record of a kind ("all the orders of…", \
 "كل…") → prepare_plan with the conditions, never the ids of one page of a search.
-- A person they name (Raghad) is found with search_records on res.users, or res.partner for a \
-contact; "me" is only the one asking.
+- A person they name by a first name is found with search_records on res.users, or res.partner \
+for a contact; "me" is only the one asking.
 - Filter the list on their screen → filter_screen. Open a record → open_record.
 - Every day or every week, tell them something → prepare_task.
 - Switch an option of the settings on or off ("فعّل…", "enable…") → read_settings to find it, \
@@ -288,13 +288,13 @@ Call the tool first; answer from its result.
 
 DEV_MAP_COMPACT = """\
 ## What to call
-- A new field ("add a field X on the quotation", ضيف حقل) → prepare_field, on the model of that \
+- A new field ("add a field X on this form", ضيف حقل) → prepare_field, on the model of that \
 screen, with name x_ and English words. It does not exist yet: you make it.
 - When something happens, do something (لما...، when...) → prepare_automation. "When the \
-quotation is confirmed" (لما يتأكد) is a change of its state: on_create_or_write, fields ["state"], \
+record is confirmed" (لما يتأكد) is a change of its state: on_create_or_write, fields ["state"], \
 no button and no method.
 - Every day, every Monday, every month (كل يوم، كل اتنين، كل شهر) → prepare_scheduled_action, \
-first_run "monday 08:00". "Remind the salespeople every…" (ذكّر... كل) is one too, with \
+first_run "monday 08:00". A reminder every so often (ذكّر... كل) is one too, with \
 remind {"summary", "older_than_days", "conditions"} instead of code: Nudge writes the code. Never \
 remember_lesson: that is for what the person teaches you.
 - An entry in the Actions menu → prepare_server_action with in_menu. A button on a form → \
@@ -307,7 +307,7 @@ prepare_view_change. Hiding a field is never a new field.
 - A PDF report → more_tools with reports, then prepare_report.
 - Try a rule or a scheduled action → try_automation. Delete what was made (احذف) → \
 read_automations with its words, then prepare_delete. Take back everything of this conversation \
-(رجّع كل شي) → prepare_undo.
+(ألغِ كل ما بنيته) → prepare_undo.
 The card is where they say yes: call the tool now, never ask "shall I make it?" in words.
 """
 

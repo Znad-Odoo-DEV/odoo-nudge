@@ -652,6 +652,20 @@ class TestDeveloper(NudgeCase, TransactionCase):
                       tried.content)
         self.assertIn("Buyer", tried.content)
 
+    def test_the_instructions_quote_no_trial(self):
+        # The trial's own sentences in what the model reads: its results told nothing of real use
+        from odoo.addons.nudge.llm import ollama  # noqa: PLC0415
+
+        told = [ollama.PRODUCT_PROMPT, *(tool.description for tool in tools.base.TOOLS.values())]
+        for mode in ("talk", "agent", "dev"):
+            for compact in (False, True):
+                told += prompt.build_system_blocks(
+                    mode=mode, can_use_agent=True, can_develop=True, is_administrator=True, compact=compact)
+        told = "\n".join(told)
+        for sentence in ("Cabinet, large", "two doors", "Raghad", "older than 30 days", "remind the salespeople",
+                         "quotation is confirmed", "every morning at 8", "Follow up this quotation", "رجّع كل شي"):
+            self.assertNotIn(sentence.lower(), told.lower(), sentence)
+
     def test_developer_mode_deletes_what_it_built(self):
         # "Delete the rule" was refused: Developer mode was told "you never delete" too
         for compact in (False, True):
