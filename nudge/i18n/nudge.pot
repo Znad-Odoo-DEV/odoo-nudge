@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-11 12:37+0000\n"
-"PO-Revision-Date: 2026-10-11 12:37+0000\n"
+"POT-Creation-Date: 2026-10-12 11:28+0000\n"
+"PO-Revision-Date: 2026-10-12 11:28+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -19,6 +19,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/models/nudge_doc.py:0
 msgid "%(count)s pages of the official documentation of Odoo %(version)s."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "%(days)s days, by %(field)s"
 msgstr ""
 
 #. module: nudge
@@ -3186,6 +3192,12 @@ msgstr ""
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Older than"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/models/nudge_provider.py:0
 msgid ""
 "Ollama %s answers here: the essential tools and no reasoning were chosen for"
@@ -3908,6 +3920,12 @@ msgid "Reload"
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Reminds"
+msgstr ""
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 msgid "Remove the file"
@@ -4429,6 +4447,8 @@ msgid "Subject"
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
 #: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__summary
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__summary
 msgid "Summary"

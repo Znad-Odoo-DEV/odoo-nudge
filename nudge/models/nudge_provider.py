@@ -460,9 +460,10 @@ class NudgeProvider(models.Model):
         except base.AdapterError:
             return True
 
-    def _read_picture(self, media_type, data, question, model=None):
+    def _read_picture(self, media_type, data, question, model=None, prompt=None):
         """:param data: the picture, in base64
         :param model: the model that reads it; the picture model by default
+        :param prompt: what it is asked of the picture; a description by default
         :return: what the picture model of this server read in it
         :raise UserError: when there is none, or it could not"""
         self.ensure_one()
@@ -472,7 +473,8 @@ class NudgeProvider(models.Model):
                 "%s cannot read pictures. Describe it in words, or ask your administrator for a "
                 "model that sees them.", self.model_name))
         try:
-            text, usage = ollama.read_picture(self.base_url, model, data, question, self.api_key or "")
+            text, usage = ollama.read_picture(
+                self.base_url, model, data, question, self.api_key or "", prompt=prompt or ollama.PICTURE_PROMPT)
         except base.AdapterError as exc:
             if "load image" in (exc.detail or ""):
                 raise UserError(self.env._(

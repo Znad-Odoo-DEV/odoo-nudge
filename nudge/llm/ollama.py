@@ -34,6 +34,12 @@ PICTURE_PROMPT = (
     "word, number, code, reference, price and date written on it exactly as written, in its own "
     "language and script. Give the colours, shapes, sizes and quantities you can see. Do not "
     "guess what you cannot read. Plain text, no more than 200 words.")
+# What a picture shows, read to be looked for among the products: a long description
+# found a desk and a table top for a large cabinet
+PRODUCT_PROMPT = (
+    "Name the object in this picture as a shop would list it: 2 to 6 English words, the kind of "
+    "thing first (\"Cabinet, large, two doors, oak\"). Then any code or reference printed on it, "
+    "exactly as written. Nothing else.")
 
 
 def root_of(base_url):
@@ -81,9 +87,10 @@ def _detail(response):
     return str(body.get("error") if isinstance(body, dict) else body)[:300]
 
 
-def read_picture(base_url, model, data, question="", api_key=""):
+def read_picture(base_url, model, data, question="", api_key="", prompt=PICTURE_PROMPT):
     """:param data: the picture, in base64
     :param question: what the person asked with it
+    :param prompt: what the model is asked of the picture, the question in it
     :return: ``(text, usage)``: what the model read in the picture, and the
         tokens it took
     :raise base.AdapterError: when the server could not read it"""
@@ -92,7 +99,7 @@ def read_picture(base_url, model, data, question="", api_key=""):
         "stream": False,
         "messages": [{
             "role": "user",
-            "content": PICTURE_PROMPT.format(question=(question or "What is this?")[:500]),
+            "content": prompt.format(question=(question or "What is this?")[:500]),
             "images": [data],
         }],
         "options": {"temperature": 0.1},

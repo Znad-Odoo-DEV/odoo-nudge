@@ -212,7 +212,7 @@ class TestOllamaProvider(NudgeCase, TransactionCase):
             "provider_id": self.provider.id, "name": "qwen3:8b", "sees_pictures": False})
         read = []
 
-        def read_picture(base_url, model, data, question="", api_key=""):
+        def read_picture(base_url, model, data, question="", api_key="", prompt=""):
             read.append((model, question))
             return "A red office chair, label FURN_7777", {"input_tokens": 300, "output_tokens": 12}
 
@@ -259,9 +259,12 @@ class TestOllamaProvider(NudgeCase, TransactionCase):
             "provider_id": self.provider.id, "name": "qwen3:8b", "sees_pictures": True})
         read = []
 
-        def read_picture(base_url, model, data, question="", api_key=""):
+        def read_picture(base_url, model, data, question="", api_key="", prompt=""):
             read.append(model)
+            asked.append(prompt)
             return "A large oak cabinet with two doors", {"input_tokens": 1, "output_tokens": 1}
+
+        asked = []
 
         self.patch(ollama, "read_picture", read_picture)
         conversation = self.env["nudge.conversation"].with_user(self.user_a)._chat_open(None)
@@ -269,6 +272,9 @@ class TestOllamaProvider(NudgeCase, TransactionCase):
                                          attachment=("photo.png", PNG, "image/png"))
         question = job["turns"][-1]
         self.assertEqual(read, ["qwen3:8b"], "The model itself says what it sees")
+        # Asked as a shop names it: a long description found a desk and a table top for a cabinet
+        self.assertEqual(asked, [ollama.PRODUCT_PROMPT])
+        self.assertIn('"picture_read_as":"A large oak cabinet with two doors"', question["context"])
         self.assertIn("Nudge Oak Cabinet", question["context"])
         self.assertNotIn("Cost Sheet", question["context"], "Not the words of the question")
         self.assertTrue(question.get("images"), "The picture itself still goes to the model")

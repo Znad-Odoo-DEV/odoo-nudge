@@ -705,6 +705,85 @@ class TestDeveloper(NudgeCase, TransactionCase):
                       f"action_id {action.id}, model res.partner.", told)
         self.assertNotIn("Tell them", told)
 
+    def test_an_unfinished_yes_is_gone_on_with_even_after_a_question(self):
+        # Told "Call prepare_button now", a small model asked the person a question instead
+        from .test_agent import asking, call, saying  # noqa: PLC0415
+
+        self.switch(True)
+        adapter = self.use_adapter(script=[
+            asking(call("prepare_server_action", {
+                "name": "Nudge Archive", "model": "res.partner",
+                "action": {"kind": "update", "field": "active", "value": "false"}})),
+            saying("Which label should the button have?"),
+            saying("I cannot."),
+        ])
+        conversation = self.env["nudge.conversation"].with_user(self.admin)._chat_open()
+        job = conversation._chat_prepare("Add an Archive button on the contact form", mode="dev")
+        list(loop.run(job, conversation._chat_record))
+        self.decide(conversation)
+        self.assertEqual(len(adapter.calls), 3, "Pushed once to make the button")
+        self.assertEqual(adapter.calls[2]["turns"][-1]["text"], loop.PUSH_NOTE)
+        # A yes to what finished the work leaves a question as it is
+        adapter = self.use_adapter(script=[
+            asking(call("prepare_server_action", {
+                "name": "Nudge Job", "model": "res.partner",
+                "action": {"kind": "update", "field": "function", "value": "Buyer"}})),
+            saying("Anything else?"),
+        ])
+        conversation = self.env["nudge.conversation"].with_user(self.admin)._chat_open()
+        job = conversation._chat_prepare("Make an action that sets the job to Buyer", mode="dev")
+        list(loop.run(job, conversation._chat_record))
+        self.decide(conversation)
+        self.assertEqual(len(adapter.calls), 2)
+
+    def test_code_that_only_defines_is_refused(self):
+        # def archive_contact(record): ... was made and never called: the button archived nothing
+        refused = compile_code("def archive_contact(record):\n    record.write({'active': False})", self.env)
+        self.assertIn("only defines archive_contact, which nothing calls", refused)
+        self.assertIn("no def, no return", compile_code("record.write({'active': False})\nreturn True", self.env))
+        self.assertEqual(compile_code(
+            "def archive(one):\n    one.write({'active': False})\nfor one in records:\n    archive(one)", self.env), "")
+
+    def test_a_reminder_without_code(self):
+        # Eight tries at the code of a reminder, all refused: Nudge writes it
+        self.switch(True)
+        result = self.run_tool("prepare_scheduled_action", {
+            "name": "Nudge companies reminder", "model": "res.partner",
+            "every": {"number": 1, "unit": "weeks"}, "first_run": "monday 08:00",
+            "remind": {"summary": "Call this company", "older_than_days": 30,
+                       "conditions": [{"field": "is_company", "operator": "=", "value": "true"}]}})
+        self.assertFalse(result.is_error, result.content)
+        lines = {line["label"]: line["value"] for line in result.pending["preview"]["lines"]}
+        self.assertEqual(lines["Reminds"], "Salesperson")
+        self.assertEqual(lines["Summary"], "Call this company")
+        self.assertIn("30 days", lines["Older than"])
+        self.assertIn("datetime.timedelta(days=30)", lines["Code"])
+        self.assertIn("rec.activity_schedule('mail.mail_activity_data_todo', user_id=rec.user_id.id", lines["Code"])
+        self.assertEqual(compile_code(lines["Code"], self.env, "res.partner"), "")
+        # Made, and run: once for each, however often it runs
+        result = self.run_tool("prepare_scheduled_action", {
+            "name": "Nudge reminder now", "model": "res.partner",
+            "every": {"number": 1, "unit": "days"}, "first_run": "now",
+            "remind": {"summary": "Nudge: call them",
+                       "conditions": [{"field": "name", "operator": "=", "value": "Nudge Reminded Co"}]}})
+        self.assertFalse(result.is_error, result.content)
+        self.do("prepare_scheduled_action", result)
+        cron = self.env["ir.cron"].search([("cron_name", "=", "Nudge reminder now")])
+        partner = self.env["res.partner"].create({"name": "Nudge Reminded Co", "user_id": self.admin.id})
+        cron.ir_actions_server_id.run()
+        cron.ir_actions_server_id.run()
+        self.assertEqual(partner.activity_ids.mapped("summary"), ["Nudge: call them"])
+        self.assertEqual(partner.activity_ids.user_id, self.admin)
+        # What is not there is said
+        refused = self.run_tool("prepare_scheduled_action", {
+            "name": "Nudge bad", "model": "res.partner", "every": {"number": 1, "unit": "days"},
+            "first_run": "now", "remind": {"summary": "x x", "user_field": "parent_id"}})
+        self.assertIn("user_field is the field of the person reminded", refused.content)
+        nothing = self.run_tool("prepare_scheduled_action", {
+            "name": "Nudge none", "model": "res.partner", "every": {"number": 1, "unit": "days"},
+            "first_run": "now"})
+        self.assertIn("Give code, or for a reminder remind", nothing.content)
+
     def test_a_reminder_is_shown_the_way(self):
         # mail.send(...) was refused, and nothing showed how a person is reminded
         refused = compile_code("for rec in records:\n    mail.send(rec.user_id, 'Overdue')", self.env, "res.partner")
