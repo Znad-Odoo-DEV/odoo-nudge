@@ -1,0 +1,160 @@
+import base64
+
+from odoo.tests import BaseCase, TransactionCase, tagged
+
+from odoo.addons.nudge.llm import loop, ollama, prompt
+from odoo.addons.nudge.models.nudge_provider import AGENT_PROVIDER_PARAM, DEFAULT_PROVIDER_PARAM
+from odoo.addons.nudge.tools import commands
+from odoo.addons.nudge.tools.guidance import steps_from_text
+
+from .common import NudgeCase
+
+SCREEN = {
+    "model": "sale.order",
+    "buttons": [
+        {"name": "action_quotation_send", "label": "Send"},
+        {"name": "action_quotation_send_by_whatsapp", "label": "Send by WhatsApp"},
+        {"name": "action_confirm", "label": "Confirm"},
+    ],
+    "tabs": [{"name": "other_information", "label": "Other Info"}],
+    "fields": [
+        {"name": "partner_id", "label": "Customer", "on_screen": True},
+        {"name": "payment_term_id", "label": "Payment Terms", "on_screen": True},
+    ],
+}
+ARABIC_SCREEN = {
+    "buttons": [{"name": "action_quotation_send", "label": "إرسال"},
+                {"name": "action_confirm", "label": "تأكيد"}],
+    "fields": [{"name": "payment_term_id", "label": "شروط الدفع"}],
+}
+
+
+@tagged("post_install", "-at_install")
+class TestPointerFromText(BaseCase):
+    """A model asked to show wrote the steps: what they name is pointed at."""
+
+    def targets(self, text, screen=SCREEN):
+        return [(step["target"]["type"], step["target"]["name"]) for step in steps_from_text(text, screen)]
+
+    def test_buttons_and_tabs_in_the_order_they_are_named(self):
+        text = ("1. Open the **Other Info** tab to check the terms.\n"
+                "2. Then press **Send**: the email opens with the quotation attached.")
+        self.assertEqual(self.targets(text), [("tab", "other_information"), ("button", "action_quotation_send")])
+        steps = steps_from_text(text, SCREEN)
+        self.assertEqual(steps[1]["text"], "Then press Send: the email opens with the quotation attached.")
+
+    def test_the_longest_label_wins(self):
+        self.assertEqual(self.targets("Use **Send by WhatsApp** for the customer."),
+                         [("button", "action_quotation_send_by_whatsapp")])
+
+    def test_a_field_only_when_it_is_meant(self):
+        self.assertEqual(self.targets("Tell the customer the price."), [],
+                         "A common word is not a field")
+        self.assertEqual(self.targets("Fill the **Customer** first."), [("field", "partner_id")])
+        self.assertEqual(self.targets("Set the Payment Terms field."), [("field", "payment_term_id")])
+
+    def test_in_arabic(self):
+        text = "عبّي حقل شروط الدفع، وبعدين اضغط على زر **إرسال**."
+        self.assertEqual(self.targets(text, ARABIC_SCREEN),
+                         [("field", "payment_term_id"), ("button", "action_quotation_send")])
+
+    def test_nothing_named_nothing_shown(self):
+        self.assertEqual(steps_from_text("Ask your manager.", SCREEN), [])
+        self.assertEqual(steps_from_text("Press **Send**.", None), [])
+
+
+@tagged("post_install", "-at_install")
+class TestArabicRoots(BaseCase):
+
+    def test_words_as_people_write_them(self):
+        fold, root = commands.fold, commands.root_of
+        self.assertEqual(root(fold("هالعروض")), root(fold("عرض")))
+        self.assertEqual(root(fold("الأسعار")), root(fold("سعر")))
+        self.assertEqual(root(fold("بالفاتورة")), root(fold("فاتورة")))
+        self.assertEqual(root("quotations"), "quotations", "A Latin word is left as it is")
+
+
+@tagged("post_install", "-at_install")
+class TestSmallModels(NudgeCase, TransactionCase):
+    """A small model reads the short instructions, gets what Nudge found with
+    the question, and fits on the graphics card."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.env["ir.config_parameter"].sudo().set_param(DEFAULT_PROVIDER_PARAM, str(cls.provider.id))
+
+    def small(self):
+        self.provider.tool_set = "essential"
+
+    def ask_shown(self, text, snapshot, reply):
+        adapter = self.use_adapter(reply=reply)
+        Conversation = self.env["nudge.conversation"].with_user(self.user_contacts)
+        conversation = Conversation._chat_open(None)
+        job = conversation._chat_prepare(text, snapshot=snapshot, explain="screen")
+        return adapter, list(loop.run(job, conversation._chat_record))
+
+    def test_short_instructions_and_what_was_found(self):
+        self.small()
+        self.env["nudge.source"].create({
+            "name": "Leave policy",
+            "file": base64.b64encode(b"Annual leave is thirty days for every employee."),
+            "file_name": "leave.txt",
+        })
+        adapter = self.use_adapter()
+        self.ask(self.manager, "Where are the AI providers, and how many days of annual leave do we get?")
+        call = adapter.calls[0]
+        self.assertEqual(call["system"][0], prompt.SYSTEM_PERSONA_COMPACT)
+        self.assertLess(len(prompt.SYSTEM_PERSONA_COMPACT), len(prompt.SYSTEM_PERSONA) / 3)
+        context = call["turns"][-1]["context"]
+        self.assertIn("<nudge_found>", context)
+        self.assertIn("Nudge/Configuration/AI Providers", context)
+        self.assertIn("thirty days", context)
+
+    def test_a_large_model_reads_everything_and_looks_itself(self):
+        adapter = self.use_adapter()
+        self.ask(self.manager, "Where are the AI providers?")
+        call = adapter.calls[0]
+        self.assertEqual(call["system"][0], prompt.SYSTEM_PERSONA)
+        self.assertNotIn("<nudge_found>", call["turns"][-1]["context"])
+
+    def test_found_in_arabic_as_written(self):
+        quick = self.env["nudge.quick"].with_user(self.manager)
+        menu = self.env.ref("nudge.nudge_menu_providers")
+        self.env["res.lang"]._activate_lang("ar_001")
+        menu.with_context(lang="ar_001").name = "مزودو الذكاء الاصطناعي"
+        found = quick.with_context(lang="ar_001")._ground("وين بلاقي مزودين الذكاء؟")
+        self.assertIn("Nudge/Configuration/AI Providers", [screen["path_en"] for screen in found["screens"]])
+        self.assertEqual(quick._ground("zzqxw vvbtk"), {}, "Nothing like it, nothing found")
+
+    def test_the_pointer_from_the_text_of_the_answer(self):
+        snapshot = dict(SCREEN, model="res.partner")
+        _adapter, events = self.ask_shown("How do I send it?", snapshot, "Press **Send** to email it.")
+        guidance = [event for event in events if event.get("type") == "guidance"]
+        self.assertEqual(guidance[0]["steps"][0]["target"], {"type": "button", "name": "action_quotation_send"})
+        # Asked in writing: nothing is pointed at
+        adapter = self.use_adapter(reply="Press **Send** to email it.")
+        conversation = self.env["nudge.conversation"].with_user(self.user_contacts)._chat_open(None)
+        job = conversation._chat_prepare("How do I send it?", snapshot=snapshot, explain="text")
+        self.assertFalse([event for event in loop.run(job, conversation._chat_record)
+                          if event.get("type") == "guidance"])
+        self.assertTrue(adapter.calls)
+
+    def test_the_context_is_for_the_modes_it_serves(self):
+        self.small()
+        everything = self.provider._tokens_needed()
+        work = self.provider.copy({"name": "Work", "api_key": "sk-work", "tool_set": "full"})
+        self.env["ir.config_parameter"].sudo().set_param(AGENT_PROVIDER_PARAM, str(work.id))
+        self.assertEqual(self.provider._served_mode(), "talk")
+        self.assertLess(self.provider._tokens_needed(), everything, "Talk only: fewer tools, less context")
+        self.assertIn(work._served_mode(), ("agent", "dev"))
+
+
+@tagged("post_install", "-at_install")
+class TestOnTheCard(BaseCase):
+
+    def test_the_share_on_the_processor(self):
+        self.assertEqual(ollama.on_processor(6_220, 3_940), 37)
+        self.assertEqual(ollama.on_processor(4_000, 4_000), 0)
+        self.assertIsNone(ollama.on_processor(0, 0), "Not said: not known")
+        self.assertEqual(ollama.context_for(11_000, 262_144), 12_288, "Steps of 4096")

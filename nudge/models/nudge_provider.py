@@ -13,6 +13,8 @@ _logger = logging.getLogger(__name__)
 CHARS_PER_TOKEN = 4.0
 # The instructions and what is known of the database
 PROMPT_TOKENS = 5000
+# The short instructions of a small model
+COMPACT_PROMPT_TOKENS = 2500
 # The conversation, the screen shared, what the tools read, the answer
 CONVERSATION_TOKENS = 5000
 
@@ -166,13 +168,29 @@ class NudgeProvider(models.Model):
         instructions and room for a conversation"""
         self.ensure_one()
         if mode is None:
-            mode = "dev" if self.env["nudge.conversation"]._is_developer_allowed() else "agent"
+            mode = self._served_mode()
         from ..tools import base as tool_base
         names = [name for name, tool in tool_base.TOOLS.items()
                  if (mode in tool.modes or (mode == "dev" and "agent" in tool.modes))
                  and (self.tool_set != "essential" or name in tool_base.ESSENTIAL_TOOLS)]
         tools_chars = sum(len(tool_base.dump(tool_base.TOOLS[name].definition())) for name in names)
-        return int(tools_chars / CHARS_PER_TOKEN) + PROMPT_TOKENS + CONVERSATION_TOKENS
+        prompt_tokens = COMPACT_PROMPT_TOKENS if self.tool_set == "essential" else PROMPT_TOKENS
+        return int(tools_chars / CHARS_PER_TOKEN) + prompt_tokens + CONVERSATION_TOKENS
+
+    def _served_mode(self):
+        """:return: the heaviest mode this provider answers: Talk only when the
+        work has a provider of its own, set in Settings"""
+        self.ensure_one()
+        Provider = self.env["nudge.provider"].sudo()
+        developer = self.env["nudge.conversation"]._is_developer_allowed()
+        if developer and self == Provider._get_for_mode("dev"):
+            return "dev"
+        agent = Provider._get_for_mode("agent")
+        if self == agent:
+            return "agent"
+        if agent:
+            return "talk"
+        return "dev" if developer else "agent"
 
     @api.depends("api_key")
     def _compute_has_api_key(self):
@@ -388,6 +406,12 @@ class NudgeProvider(models.Model):
             _logger.info("Nudge: Ollama did not describe %s: %s", self.model_name, exc)
             return warnings
         self.context_length = given or facts["context_set"]
+        try:
+            share = ollama.on_processor(*ollama.memory(self.base_url, self.model_name, self.api_key or ""))
+        except base.AdapterError:
+            share = 0
+        if share:
+            warnings.append(self._processor_warning(share))
         if not facts["tools"]:
             warnings.append(self.env._(
                 "%s cannot use tools: Nudge can talk with it, not act or build. For Agent and "
@@ -432,9 +456,27 @@ class NudgeProvider(models.Model):
         self.write({"model_name": name, "context_length": context,
                     "timeout": max(self.timeout or 0, OLLAMA_TIMEOUT)})
         self.action_fetch_models()
-        return self._notify(self.env._(
-            "%(name)s is ready with %(context)s tokens of context, and chosen. Test the "
-            "connection: the first answer loads it.", name=name, context=context))
+        told = self.env._("%(name)s is ready with %(context)s tokens of context, and chosen.",
+                          name=name, context=context)
+        try:
+            # Loaded now: what does not fit on the graphics card is said at once
+            share = ollama.on_processor(*ollama.memory(self.base_url, name, self.api_key or "", load=True))
+        except base.AdapterError as exc:
+            _logger.info("Nudge: Ollama did not load %s: %s", name, exc)
+            share = None
+        if share is None:
+            told += " " + self.env._("Test the connection: the first answer loads it.")
+        elif share:
+            told += " " + self._processor_warning(share)
+        else:
+            told += " " + self.env._("It runs entirely on the graphics card.")
+        return self._notify(told)
+
+    def _processor_warning(self, share):
+        return self.env._(
+            "%(share)s%% of the model runs on the processor, not the graphics card: answers come "
+            "several times slower. Choose a smaller model, or set OLLAMA_FLASH_ATTENTION=1 and "
+            "OLLAMA_KV_CACHE_TYPE=q8_0 on the server and press Prepare for Nudge again.", share=share)
 
     def action_fetch_models(self):
         self.ensure_one()

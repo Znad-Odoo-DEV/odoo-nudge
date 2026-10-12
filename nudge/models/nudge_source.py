@@ -207,12 +207,16 @@ class NudgeSourcePassage(models.Model):
         rows = self.env.cr.fetchall()
         if not rows:
             # Words written another way: the start of a word, any language
-            words = [word for word in query.split() if len(word) >= 3][:5]
+            # Any of them, the passages holding most of them first: a word of
+            # the question is often written with "al" or a suffix in the file
+            words = [word for word in query.split() if len(word) >= 3 and word.casefold() != "or"][:6]
             if words:
-                domain = [("source_id", "in", sources.ids)]
-                for word in words:
-                    domain.append(("body", "ilike", word))
-                return self.search(domain, limit=limit)
+                domain = [("source_id", "in", sources.ids)] + ["|"] * (len(words) - 1) + [
+                    ("body", "ilike", word) for word in words]
+                found = self.search(domain, limit=limit * 10)
+                ranked = sorted(found, key=lambda passage: -sum(
+                    word.casefold() in (passage.body or "").casefold() for word in words))
+                return self.browse([passage.id for passage in ranked[:limit]])
             return self.browse()
         return self.browse([row[0] for row in rows[:limit]])
 

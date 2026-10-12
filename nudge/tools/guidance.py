@@ -5,7 +5,10 @@ found in the screen snapshot. It never says *where*: the browser finds the
 element. A model has no means to make the browser look for an arbitrary
 selector.
 """
+import re
+
 from . import base
+from .commands import fold
 
 TARGET_TYPES = ("field", "button", "tab", "control")
 CONTROLS = ("new", "save", "discard", "search", "filters", "pager_next", "pager_previous", "actions")
@@ -13,6 +16,70 @@ ADVANCE = ("auto", "manual")
 
 MAX_STEPS = 8
 NAME_PATTERN = r"[A-Za-z0-9_.%()\- ]{1,120}"
+
+
+# What an answer stresses: **Send**, `Send`, "Send", “Send”, «إرسال»
+EMPHASIS = re.compile("\\*\\*(.+?)\\*\\*|`([^`\\n]+)`|[\"\u201c\u00ab]([^\"\u201d\u00bb\\n]{1,60})[\"\u201d\u00bb]")
+# A sentence ends here: the text of a step is the sentence that names its element
+SENTENCE_END = re.compile("(?<=[.!?\u061f])\\s+|\\n+")
+# Words that say a field is meant, when its label is not stressed
+FIELD_WORDS = ("field", "\u062d\u0642\u0644", "\u062e\u0627\u0646\u0647")
+MAX_TEXT_STEPS = 5
+MAX_STEP_CHARS = 300
+
+
+def steps_from_text(text, screen, limit=MAX_TEXT_STEPS):
+    """When a model wrote the steps instead of showing them: the elements of
+    the screen its answer names, in the order it names them, become the
+    steps of the pointer, each with the sentence that names it.
+
+    A button or a tab is named by its label; a field only when its label is
+    stressed, or said to be a field: the label of a field is often a common
+    word. :return: steps, possibly empty"""
+    if not text or not isinstance(screen, dict):
+        return []
+    stressed = {fold(next(group for group in match.groups() if group)) for match in EMPHASIS.finditer(text)}
+    candidates = []
+    for kind, key in (("button", "buttons"), ("tab", "tabs"), ("field", "fields")):
+        for entry in screen.get(key) or []:
+            if not isinstance(entry, dict) or not entry.get("name") or not entry.get("label"):
+                continue
+            label = fold(entry["label"])
+            if len(label) >= 2:
+                candidates.append((kind, entry["name"], label))
+    # The longer label first: "send by email" is not "send"
+    candidates.sort(key=lambda candidate: -len(candidate[2]))
+    steps, used = [], set()
+    for sentence in SENTENCE_END.split(text):
+        folded = fold(sentence)
+        if not folded:
+            continue
+        found = []
+        # What a longer label took is not read again by a shorter one inside it
+        left = folded
+        for kind, name, label in candidates:
+            if name in used:
+                continue
+            match = re.search(rf"(?<!\w){re.escape(label)}(?!\w)", left)
+            if not match:
+                continue
+            if kind == "field" and label not in stressed and not any(word in folded for word in FIELD_WORDS):
+                continue
+            if len(label) < 3 and label not in stressed:
+                continue
+            found.append((match.start(), kind, name))
+            used.add(name)
+            left = left[:match.start()] + " " * (match.end() - match.start()) + left[match.end():]
+        clean = re.sub(r"^\s*(\d+[.)]|[-*\u2022])\s*", "", sentence.replace("**", "").replace("`", "")).strip()
+        for _position, kind, name in sorted(found):
+            steps.append({
+                "target": {"type": kind, "name": name},
+                "text": clean[:MAX_STEP_CHARS],
+                "advance": "auto",
+            })
+        if len(steps) >= limit:
+            break
+    return steps[:limit]
 
 
 @base.register

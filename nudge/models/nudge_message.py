@@ -37,6 +37,9 @@ class NudgeMessage(models.Model):
     # A focused command (/count, /explain): answered with its tools and its
     # brief only, from this question on
     command = fields.Char(readonly=True)
+    # The person asked to be shown on the screen: what the answer names is
+    # pointed at, when the model wrote the steps instead
+    wants_pointer = fields.Boolean(readonly=True)
     # Said by the person about an answer: useful or not, and why
     feedback = fields.Selection([("up", "Useful"), ("down", "Not Useful")], readonly=True, index=True)
     feedback_note = fields.Char(readonly=True)
