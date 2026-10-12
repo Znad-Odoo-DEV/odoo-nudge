@@ -3,6 +3,7 @@ import base64
 from odoo.tests import BaseCase, TransactionCase, tagged
 
 from odoo.addons.nudge.llm import loop, ollama, prompt
+from odoo.addons.nudge.models import nudge_conversation
 from odoo.addons.nudge.models.nudge_provider import AGENT_PROVIDER_PARAM, DEFAULT_PROVIDER_PARAM
 from odoo.addons.nudge.tools import commands
 from odoo.addons.nudge.tools.guidance import steps_from_text
@@ -129,6 +130,9 @@ class TestSmallModels(NudgeCase, TransactionCase):
         call = adapter.calls[0]
         self.assertEqual(call["system"][0], prompt.SYSTEM_PERSONA_COMPACT)
         self.assertLess(len(prompt.SYSTEM_PERSONA_COMPACT), len(prompt.SYSTEM_PERSONA) / 3)
+        # Last before the question: which tool does what it is asked
+        self.assertTrue(call["system"][-1].endswith(prompt.TALK_MAP_COMPACT))
+        self.assertIn("remember_lesson", prompt.TALK_MAP_COMPACT)
         context = call["turns"][-1]["context"]
         self.assertIn("<nudge_found>", context)
         self.assertIn("Nudge/Configuration/AI Providers", context)
@@ -169,6 +173,38 @@ class TestSmallModels(NudgeCase, TransactionCase):
         # A singular finds the screen named in the plural
         screens = self.env["nudge.quick"]._ground_screens("change the email template")
         self.assertIn("Email Templates", " ".join(screen["path_en"] for screen in screens))
+
+    def test_told_once_to_act_when_it_only_talked(self):
+        # "Give Raghad the Inventory access" was answered with steps to follow
+        self.small()
+        adapter = self.use_adapter(reply="Open Settings, then Users, then tick Inventory.")
+        self.order(self.agent, "Archive the contact Raghad")
+        self.assertEqual(len(adapter.calls), 2, "Told once, not twice")
+        self.assertEqual(adapter.calls[1]["turns"][-1], {"role": "user", "text": loop.PUSH_NOTE})
+        # A question back to the person is not pushed
+        adapter = self.use_adapter(reply="Which Raghad do you mean?")
+        self.order(self.agent, "Archive the contact Raghad")
+        self.assertEqual(len(adapter.calls), 1)
+        # Nor a large model
+        self.provider.tool_set = "full"
+        adapter = self.use_adapter(reply="Open Settings, then Users.")
+        self.order(self.agent, "Archive the contact Raghad")
+        self.assertEqual(len(adapter.calls), 1)
+
+    def test_the_records_an_order_names(self):
+        from odoo.addons.nudge.models.nudge_quick import names_in  # noqa: PLC0415
+
+        self.assertEqual(names_in("Give Raghad the Inventory user access")[:2], ["Give Raghad", "Raghad"])
+        raghad = self.env["res.partner"].create({"name": "Raghad"})
+        found = self.env["nudge.quick"]._ground_work("Give Raghad the Settings user access")
+        self.assertIn({"model": "res.partner", "id": raghad.id, "name": "Raghad"}, found["records"])
+        self.assertTrue(found.get("access_groups"), "An order about access: the groups it names")
+        # A model on one's own machine is given its time where no worker is killed
+        self.provider.write({"is_ollama": True, "timeout": 300})
+        Conversation = self.env["nudge.conversation"]
+        self.patch(nudge_conversation.config, "options", dict(nudge_conversation.config.options, limit_time_real=0))
+        self.assertEqual(Conversation._get_stream_seconds(self.provider), 300)
+        self.assertEqual(Conversation._get_stream_seconds(), nudge_conversation.STREAM_MAX_SECONDS)
 
     def test_more_tools_are_given_for_the_rest_of_the_conversation(self):
         from odoo.addons.nudge.llm import base as llm_base  # noqa: PLC0415

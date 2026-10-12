@@ -29,6 +29,10 @@ LAST_ROUND_NOTE = (
 # An answer with neither words nor a call (Gemini: a call it could not
 # write) is asked for once more: nothing of it reached the person
 EMPTY_RETRIES = 1
+# A small model asked to do the work may write about it instead: told once
+PUSH_NOTE = (
+    "You wrote about it instead of doing it. The person asked you to do it: call now the tool "
+    "that does it; the card is where they say yes. Only if no tool can, say why in one sentence.")
 
 
 def is_empty(outcome):
@@ -107,7 +111,8 @@ def run(job, record):
         sent = [*turns, {"role": "user", "text": LAST_ROUND_NOTE}] if last else turns
         spent, retries = {}, EMPTY_RETRIES
         while True:
-            outcome = {"text": "", "tool_calls": [], "said_before": said}
+            outcome = {"text": "", "tool_calls": [], "said_before": said,
+                       "may_push": bool(job.get("push_to_act")) and not job.get("pushed")}
             try:
                 events = job["adapter"].stream_chat(
                     job["system"], sent, deadline=deadline, tools=job["tools"] or None,
@@ -157,6 +162,9 @@ def run(job, record):
             yield step["event"]
             return
         turns = step["turns"]
+        if step.get("pushed"):
+            job["pushed"] = True
+            turns = [*turns, {"role": "user", "text": PUSH_NOTE}]
         if step.get("tools"):
             # A small model asked for more tools: offered from now on
             job["tools"] = step["tools"]
