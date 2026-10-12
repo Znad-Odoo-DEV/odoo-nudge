@@ -526,7 +526,7 @@ class NudgeConversation(models.Model):
         conversation = self.sudo()
         # What waited for a decision is left: the person moved on
         conversation._agent_leave_undecided()
-        conversation.run_id._end("stopped")
+        conversation.run_id._end(conversation.run_id._outcome("stopped"))
         # What is left to the background does not keep the person from asking elsewhere
         values = {
             "stream_started_at": False if background else fields.Datetime.now(),
@@ -1082,7 +1082,7 @@ class NudgeConversation(models.Model):
             }}
 
         conversation.stream_started_at = False
-        run._end("failed" if state == "error" else "stopped" if state == "aborted" else "done")
+        run._end("failed" if state == "error" else run._outcome("stopped") if state == "aborted" else "done")
         event = {
             "type": "error" if state == "error" else "done",
             "message_id": message.id,
