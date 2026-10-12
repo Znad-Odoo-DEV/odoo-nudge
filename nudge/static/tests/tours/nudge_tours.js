@@ -597,11 +597,6 @@ registry.category("web_tour.tours").add("nudge_agent", {
             run: "click",
         },
         {
-            content: "Asked how first: the work itself",
-            trigger: ".o_nudge_ask .o_nudge_explain_do",
-            run: "click",
-        },
-        {
             isCheck: true,
             content: "What is about to change is shown, as it is and as it will be",
             trigger: ".o_nudge_card[data-state=pending] .o_nudge_card_title:contains(Change: Contact)",
@@ -647,11 +642,6 @@ registry.category("web_tour.tours").add("nudge_agent", {
         },
         {
             trigger: ".o_nudge_send:enabled",
-            run: "click",
-        },
-        {
-            content: "Asked how first: the work itself",
-            trigger: ".o_nudge_ask .o_nudge_explain_do",
             run: "click",
         },
         {

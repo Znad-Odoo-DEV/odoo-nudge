@@ -37,6 +37,25 @@ MAX_PASSAGES = 5
 MAX_PASSAGE_CHARS = 400
 # Kinds of records a bare reference is looked for in, the most filled first
 MAX_REFERENCE_MODELS = 40
+# What a small model is given with a question
+MAX_GROUND_SCREENS = 3
+MAX_GROUND_PAGES = 2
+MAX_GROUND_PASSAGES = 2
+MAX_GROUND_CHARS = 500
+# The words of a question that say nothing of what it is about, as fold() writes them
+GROUND_STOP_WORDS = frozenset("""
+how do does did can could would should the and for with what where when which who why this that
+these those our your their have has are was were get make want need please there here from into
+about show tell use using new add see find me my you we it its is an a to of in on at by be or not
+\u0643\u064a\u0641 \u0634\u0648 \u0648\u064a\u0646 \u0644\u064a\u0634 \u0644\u0634\u0648
+\u0628\u062f\u064a \u0628\u062f\u0643 \u0647\u0644 \u0641\u064a \u0639\u0644\u064a
+\u0645\u0646 \u0627\u0644\u064a \u0639\u0646 \u0645\u0639 \u0647\u0627\u062f
+\u0647\u064a\u062f\u0627 \u0647\u064a \u0647\u0648 \u0627\u0646\u0627 \u0627\u0646\u062a
+\u064a\u0644\u064a \u0644\u064a \u0627\u0632\u0627\u064a \u0639\u0627\u064a\u0632
+\u0645\u0645\u0643\u0646 \u0644\u0627\u0632\u0645 \u0643\u0645\u0627\u0646 \u0647\u0644\u0642
+\u0634\u0644\u0648\u0646 \u0645\u0627\u0630\u0627 \u0643\u064a\u0641\u064a\u0647 \u0644\u0627
+\u0628\u0639\u0645\u0644 \u0627\u0639\u0645\u0644 \u0628\u0633\u0648\u064a
+""".split())
 
 
 class NudgeQuick(models.AbstractModel):
@@ -207,6 +226,54 @@ class NudgeQuick(models.AbstractModel):
         answer["records"] = records
         if not records:
             answer["content"] = _("No record you may read is called “%s”.", rest)
+
+    def _ground(self, text):
+        """For a small model, what Nudge finds for a question by itself, before
+        the model is asked: the screens whose names hold its words, in the
+        language of the person and in English, the pages of the documentation
+        about them, the passages of the company files. A small model answers
+        from what it is given far better than from what it remembers.
+
+        :return: ``{"screens", "documentation", "company_files"}``, without
+            the empty ones; empty when nothing was found"""
+        words = [word for word in commands.fold(text).split()
+                 if len(word) >= 3 and word not in GROUND_STOP_WORDS]
+        roots = {commands.root_of(word) for word in words} - {""}
+        found = {}
+        if roots:
+            scored = []
+            for menu in _visible_menus(self.env):
+                english_menu = menu.with_context(lang="en_US")
+                own, english = menu._get_full_name(), english_menu._get_full_name()
+                leaf = {commands.root_of(word) for word in commands.fold(f"{menu.name} {english_menu.name}").split()}
+                path = {commands.root_of(word) for word in commands.fold(f"{own} {english}").split()}
+                # The screen itself is about it, not only an app above it
+                if not roots & leaf:
+                    continue
+                scored.append((-len(roots & path), -len(roots & leaf), len(own), own, english))
+            scored.sort(key=lambda item: item[:3])
+            screens = [{"path": own, "path_en": english} for *_rank, own, english in scored[:MAX_GROUND_SCREENS]]
+            if screens:
+                found["screens"] = screens
+        # The documentation is written in English: the screens found say in
+        # English what an Arabic question is about
+        terms = [screen["path_en"].split("/")[-1] for screen in found.get("screens", [])[:1]]
+        terms += [word for word in re.findall(r"[A-Za-z]{3,}", text) if word.casefold() not in GROUND_STOP_WORDS][:4]
+        if terms:
+            pages = [dict(page, snippet=page["snippet"][:200]) for page in self._find_pages(" or ".join(terms))]
+            if pages:
+                found["documentation"] = pages[:MAX_GROUND_PAGES]
+        # Any of the words that say what it is about, as the person wrote them
+        plain = [word for word in re.findall(r"\w+", text)
+                 if len(word) >= 3 and commands.fold(word) not in GROUND_STOP_WORDS][:6]
+        passages = self.env["nudge.source.passage"]._search_text(" or ".join(plain), limit=MAX_GROUND_PASSAGES)
+        if passages:
+            found["company_files"] = [{
+                "file": passage.source_id.name,
+                "page": passage.page,
+                "text": cut(" ".join((passage.body or "").split()), MAX_GROUND_CHARS),
+            } for passage in passages]
+        return found
 
     def _find_reference(self, text):
         """:return: the records whose name or reference is ``text`` exactly,
