@@ -195,6 +195,19 @@ class TestSmallModels(NudgeCase, TransactionCase):
         self.assertNotIn("ir.model.fields", models, "A technical kind of record is never the one meant")
         self.assertFalse([kind for kind in Quick._ground_models("Hello there") if kind], "Nothing named")
 
+    def test_what_is_built_comes_with_a_question_of_developer_mode(self):
+        # "Delete the rule", "add its button": asked of what a small model had never looked up
+        Quick = self.env["nudge.quick"]
+        partner_model = self.env["ir.model"]._get("res.partner")
+        action = self.env["ir.actions.server"].create({
+            "name": "Nudge Archive contact", "model_id": partner_model.id, "state": "code", "code": "pass"})
+        found = Quick._ground_work("Add an Archive button on the contact form", developing=True)
+        built = found.get("built", {}).get("res.partner", [])
+        self.assertIn(f"server action #{action.id} 'Nudge Archive contact' (code)", built)
+        self.assertLessEqual(len([line for line in built if line.startswith("server action")]), 3, "A few lines")
+        self.assertNotIn("built", Quick._ground_work("Add an Archive button on the contact form"),
+                         "Agent mode builds nothing")
+
     def test_the_settings_found_carry_their_value(self):
         # "Which options are switched on in the Sales settings?" was answered "none"
         from odoo.addons.nudge.tools.configuration import settings_layout  # noqa: PLC0415

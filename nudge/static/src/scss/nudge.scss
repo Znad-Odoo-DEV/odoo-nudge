@@ -985,13 +985,17 @@ $o-nudge-radius: 18px;
 
 .o_nudge_card_lines {
     display: grid;
-    grid-template-columns: minmax(80px, max-content) 1fr;
+    // A long label wraps: "Invoicing / Units of Measure & Packagings" took the
+    // whole width, and "off → on" was written one letter under the other
+    grid-template-columns: fit-content(45%) minmax(0, 1fr);
     gap: 2px 10px;
     margin: 8px 0 0;
 
     dt {
+        min-width: 0;
         color: $o-nudge-text-muted;
         font-weight: 400;
+        overflow-wrap: break-word;
     }
 
     dd {

@@ -99,7 +99,9 @@ test("yes to those that go through, then undo", async () => {
     await animationFrame();
     expect.verifySteps(["undo 41"]);
     expect(".o_nudge_undo").toHaveCount(0);
-    expect(".o_nudge_card_outcome").toHaveText("28 done");
+    // "28 done" stayed, and nothing said the changes were taken back
+    expect(".o_nudge_card_outcome").toHaveText("Undone");
+    expect(".o_nudge_card_outcome .fa-undo").toHaveCount(1);
 });
 
 test("many records go on in the background", async () => {

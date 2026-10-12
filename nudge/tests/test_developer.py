@@ -506,8 +506,10 @@ class TestDeveloper(NudgeCase, TransactionCase):
 
         result = self.run_tool("prepare_delete", {"model": "ir.cron", "ids": [cron.id]})
         self.assertFalse(result.is_error, result.content)
+        behind = cron.ir_actions_server_id
         self.do("prepare_delete", result)
         self.assertFalse(cron.exists())
+        self.assertFalse(behind.exists(), "Its code goes with it: Odoo keeps the server action behind")
 
     def test_what_a_small_model_writes_wrong_is_read_or_shown(self):
         from odoo.addons.nudge.tools import developer  # noqa: PLC0415
@@ -649,6 +651,70 @@ class TestDeveloper(NudgeCase, TransactionCase):
         self.assertIn(f"the server action #{action.id} 'Nudge Job', made last in this conversation, is tried",
                       tried.content)
         self.assertIn("Buyer", tried.content)
+
+    def test_developer_mode_deletes_what_it_built(self):
+        # "Delete the rule" was refused: Developer mode was told "you never delete" too
+        for compact in (False, True):
+            dev = "\n".join(prompt.build_system_blocks(
+                mode="dev", can_use_agent=True, can_develop=True, is_administrator=True, compact=compact))
+            agent = "\n".join(prompt.build_system_blocks(
+                mode="agent", can_use_agent=True, can_develop=True, is_administrator=True, compact=compact))
+            self.assertNotIn("You never delete", dev)
+            self.assertIn("prepare_delete", dev)
+            self.assertIn("You never delete", agent)
+
+    def test_a_choice_by_the_start_of_its_key_or_of_its_label(self):
+        # "ar" and "Arabic" were refused for the language "Arabic / الْعَرَبيّة" (ar_001)
+        from odoo.addons.nudge.tools.records import read_choice  # noqa: PLC0415
+
+        self.env["res.lang"]._activate_lang("ar_001")
+        field = self.env["res.partner"]._fields["lang"]
+        for text in ("ar", "Arabic", "arabic", "ar_001"):
+            self.assertEqual(read_choice(text, field, self.env), "ar_001", text)
+        english = [key for key, _label in field._description_selection(self.env) if key.startswith("en_")]
+        if english == ["en_US"]:
+            self.assertEqual(read_choice("en", field, self.env), "en_US")
+        with self.assertRaises(Refused):
+            read_choice("a", field, self.env)
+        self.switch(True)
+        result = self.run_tool("prepare_server_action", {
+            "name": "In Arabic", "model": "res.partner",
+            "action": {"kind": "update", "field": "lang", "value": "Arabic"}})
+        self.assertFalse(result.is_error, result.content)
+        self.assertEqual(result.pending["values"]["action"]["value"], "ar_001")
+
+    def test_a_button_asked_for_is_not_said_done_before_it_is_there(self):
+        # The action of the button was made, and a small model told the person the
+        # button was on the form: the yes said "tell them in a sentence what was done"
+        from .test_agent import asking, call, saying  # noqa: PLC0415
+
+        self.switch(True)
+        adapter = self.use_adapter(script=[
+            asking(call("prepare_server_action", {
+                "name": "Nudge Archive", "model": "res.partner",
+                "action": {"kind": "update", "field": "active", "value": "false"}})),
+            saying("Now the button."),
+        ])
+        conversation = self.env["nudge.conversation"].with_user(self.admin)._chat_open()
+        job = conversation._chat_prepare("Add an Archive button on the contact form", mode="dev")
+        list(loop.run(job, conversation._chat_record))
+        self.decide(conversation)
+        action = self.env["ir.actions.server"].search([("name", "=", "Nudge Archive")])
+        told = adapter.calls[1]["turns"][-1]["results"][0]["content"]
+        self.assertIn(f"Not finished: the button is not on the form yet. Call prepare_button now: "
+                      f"action_id {action.id}, model res.partner.", told)
+        self.assertNotIn("Tell them", told)
+
+    def test_a_reminder_is_shown_the_way(self):
+        # mail.send(...) was refused, and nothing showed how a person is reminded
+        refused = compile_code("for rec in records:\n    mail.send(rec.user_id, 'Overdue')", self.env, "res.partner")
+        self.assertIn("mail is not known", refused)
+        self.assertIn("rec.activity_schedule('mail.mail_activity_data_todo'", refused)
+        self.assertNotIn("activity_schedule", compile_code("object.write({'comment': 'x'})", self.env))
+        described = tools.base.TOOLS["prepare_scheduled_action"].description
+        self.assertIn("check_python_code", described)
+        self.assertIn("activity_schedule", described)
+        self.assertNotIn("run_python", described)
 
     def test_deleting_what_is_not_there_is_said(self):
         # prepare_delete of an id that does not exist failed with KeyError: 'unlink'

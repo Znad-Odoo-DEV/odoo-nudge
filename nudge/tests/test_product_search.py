@@ -141,6 +141,11 @@ class TestFinding(NudgeCase, TransactionCase):
         self.assertIn("name both, or ask which one is meant", tied.content)
         apart = tools.base.call(env, "search_products", {"words": "bolt 8 mm"}, None, "talk")
         self.assertNotIn("name both", apart.content)
+        # Found for a small model with the question, the tie is said the same way
+        Quick = self.env["nudge.quick"].with_user(self.user_a)
+        self.assertIn("name both, or ask which one is meant",
+                      Quick._ground_products("cabinet two doors")[-1].get("note", ""))
+        self.assertNotIn("note", Quick._ground_products("bolt 8 mm")[-1])
 
     def test_found_without_any_ai(self):
         Quick = self.env["nudge.quick"].with_user(self.user_a)
