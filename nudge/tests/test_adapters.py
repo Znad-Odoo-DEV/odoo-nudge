@@ -583,6 +583,7 @@ class TestToolChoice(BaseCase):
         payload = adapter._build_payload(SYSTEM, TURNS, tools=[TOOL], tool_choice="required")
         self.assertEqual(payload["tool_choice"], "required")
         self.assertNotIn("tool_choice", adapter._build_payload(SYSTEM, TURNS, tools=[TOOL]))
+        self.assertEqual(adapter._build_payload(SYSTEM, TURNS, tools=[TOOL], tool_choice="none")["tool_choice"], "none")
         self.assertNotIn("tool_choice", adapter._build_payload(SYSTEM, TURNS, tool_choice="required"),
                          "Nothing to force without tools")
 
@@ -614,3 +615,6 @@ class TestToolChoice(BaseCase):
         params = adapter._build_params(SYSTEM, TURNS, tools=[TOOL])
         self.assertNotIn("tool_choice", params)
         self.assertEqual(params["thinking"], {"type": "adaptive"})
+        params = adapter._build_params(SYSTEM, TURNS, tools=[TOOL], tool_choice="none")
+        self.assertEqual(params["tool_choice"], {"type": "none"})
+        self.assertEqual(params["thinking"], {"type": "adaptive"}, "Thinking before the answer is allowed")

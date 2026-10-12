@@ -186,8 +186,8 @@ class OpenAICompatAdapter(base.BaseAdapter):
                 }
                 for tool in tools
             ]
-            if tool_choice == "required":
-                payload["tool_choice"] = "required"
+            if tool_choice in ("required", "none"):
+                payload["tool_choice"] = tool_choice
         if self.config.max_output_tokens > 0:
             payload["max_tokens"] = self.config.max_output_tokens
         if self.config.effort in REASONING_EFFORT:
