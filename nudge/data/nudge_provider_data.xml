@@ -38,6 +38,7 @@ Set the key, then use "Fetch Models" and pick a model whose name ends with ":fre
         <field name="kind">openai_compatible</field>
         <field name="base_url">http://localhost:11434/v1</field>
         <field name="requires_api_key" eval="False"/>
+        <field name="timeout">180</field>
         <field name="tool_set">essential</field>
         <field name="notes">Free, on a machine of yours: nothing leaves your network, no key, no bill. Install Ollama on a machine Odoo can reach (with Odoo.sh, a server of yours, not localhost), pull a model that uses tools (qwen3:4b-instruct on a laptop, qwen3:14b or larger on a server with a GPU), set its address here, press Fetch Models, choose it, Test Connection, and Prepare for Nudge when told. The guide is doc/ollama.md in the module.</field>
     </record>
