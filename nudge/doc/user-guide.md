@@ -289,6 +289,10 @@ If you see **Talk** and **Agent** under the messages, you may ask Nudge to do th
 4. Press **Yes, do it** or **No**. Nothing changes before your yes. On a no, it asks what you
    want instead.
 
+An order is the work: "confirm S00003", "create a contact named Ebrahim" goes straight to the card.
+Nudge asks how you want it (on the screen, in writing, or done for you) only when you ask *how* or
+*where* ("how do I confirm it?").
+
 Every change is made as you, with your rights. Nudge never deletes. A warning sign on a card
 means the action is not taken back with a click: read twice.
 
