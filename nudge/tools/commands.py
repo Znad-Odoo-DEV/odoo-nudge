@@ -104,6 +104,31 @@ def root_of(word):
     return word
 
 
+# "Take me to the vendor bills", "خدني على الفواتير", "افتحلي العروض"
+GO_TO = re.compile(
+    r"(\b(take me|bring me|go to|get me to|navigate to|open the|open my)\b"
+    r"|\u062e\u062f\u0646\u064a|\u062e\u0630\u0646\u064a|\u0648\u062f\u064a\u0646\u064a"
+    r"|\u0631\u0648\u062d\u0646\u064a|\u0627\u0641\u062a\u062d|\u0641\u062a\u062d\u0644\u064a)",
+    re.IGNORECASE)
+ARABIC_LETTER = re.compile("[\u0621-\u064a]")
+LATIN_LETTER = re.compile("[A-Za-z]")
+
+
+def asks_to_go(text):
+    """:return: whether the message asks to be taken to a screen"""
+    return bool(GO_TO.search(text or ""))
+
+
+def language_of(text):
+    """:return: "Arabic" when at least as many words of ``text`` are written in
+    Arabic as in Latin letters, else "English": the language a small model is
+    told to answer in. Words, not letters: "شو يعني Incoterm؟" is Arabic"""
+    words = re.findall(r"\w+", text or "")
+    arabic = sum(1 for word in words if ARABIC_LETTER.search(word))
+    latin = sum(1 for word in words if LATIN_LETTER.search(word) and not ARABIC_LETTER.search(word))
+    return "Arabic" if arabic and arabic >= latin else "English"
+
+
 def matches(terms, text):
     """:return: whether every folded term is in the folded ``text``"""
     folded = fold(text)

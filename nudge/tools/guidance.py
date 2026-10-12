@@ -28,6 +28,12 @@ MAX_TEXT_STEPS = 5
 MAX_STEP_CHARS = 300
 
 
+def plain(text):
+    """:return: the text of a step without the marks of Markdown, which the
+    box of the pointer shows as they are"""
+    return re.sub(r"\*\*|__|`", "", text or "").strip()
+
+
 def steps_from_text(text, screen, limit=MAX_TEXT_STEPS):
     """When a model wrote the steps instead of showing them: the elements of
     the screen its answer names, in the order it names them, become the
@@ -166,7 +172,7 @@ class ShowOnScreen(base.Tool):
                 )
             steps.append({
                 "target": {"type": kind, "name": name},
-                "text": step["text"].strip(),
+                "text": plain(step["text"]),
                 "advance": step.get("advance", "auto"),
             })
         return base.ToolResult(
