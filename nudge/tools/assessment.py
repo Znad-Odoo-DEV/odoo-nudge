@@ -137,6 +137,23 @@ def _page_for(env, words):
     return None
 
 
+def edition(env):
+    """:return: "Enterprise" or "Community", what this database runs"""
+    Module = env["ir.module.module"].sudo()
+    return "Enterprise" if Module.search_count([("state", "=", "installed"), ("license", "=", "OEEL-1")]) else "Community"
+
+
+EDITION_NOTE = {
+    "Community": (
+        "This database runs Community: recommend only what Community has. Never say that a "
+        "Community feature (several warehouses and moving goods between them, routes, "
+        "manufacturing, point of sale, several companies) needs Enterprise. What is listed in "
+        "enterprise_only is not available here: never propose it as a step; name it only as an "
+        "Enterprise option, said as such."),
+    "Enterprise": "This database runs Enterprise: its apps and those of Community are available.",
+}
+
+
 @base.register
 class AssessDatabase(base.Tool):
     name = "assess_database"
@@ -183,6 +200,8 @@ class AssessDatabase(base.Tool):
         installed, custom, used = self._used(env)
         apps = env["ir.module.module"].sudo().search([("state", "=", "installed"), ("application", "=", True)])
         return base.ToolResult(base.dump({
+            "edition": edition(env),
+            "edition_note": EDITION_NOTE[edition(env)],
             "apps": [{"module": app.name, "name": app.shortdesc, "in_use": app.name in used} for app in apps],
             "custom_modules": sorted(custom),
             "custom_modules_in_use": sorted(custom & used),
@@ -216,7 +235,9 @@ class AssessDatabase(base.Tool):
             if data.get("changed"):
                 module = data.get("module") or ""
                 used_modules[module] = max(used_modules.get(module, 0), activity.activity(data))
-        found, missing = [], []
+        found, missing, enterprise_only = [], [], []
+        runs = edition(env)
+        Module = env["ir.module.module"].sudo()
         for module, why, words in BUSINESSES[key]["needs"]:
             entry = {"module": module, "for": why}
             page = _page_for(env, words)
@@ -226,13 +247,20 @@ class AssessDatabase(base.Tool):
                 entry["installed"] = True
                 entry["in_use"] = module in used_modules
                 found.append(entry)
+            elif runs == "Community" and Module.search([("name", "=", module)], limit=1).license in (False, "OEEL-1"):
+                # Barcode and the shipping connectors were proposed to a Community database:
+                # a module of Enterprise is not on its server at all
+                enterprise_only.append(entry)
             else:
                 missing.append(entry)
         apps_custom = sorted(custom)
         return base.ToolResult(base.dump({
             "business": key,
+            "edition": runs,
+            "edition_note": EDITION_NOTE[runs],
             "installed": found,
             "missing": missing,
+            **({"enterprise_only": enterprise_only} if enterprise_only else {}),
             "custom_modules": apps_custom,
             "custom_modules_in_use": sorted(module for module in apps_custom if module in used_modules),
             "note": (
