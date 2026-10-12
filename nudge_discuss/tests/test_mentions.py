@@ -120,3 +120,16 @@ class TestMentions(NudgeCase, TransactionCase):
         self.assertIn('<a href="https://www.odoo.com" target="_blank">docs</a>', html)
         self.assertIn("&lt;script&gt;", html)
         self.assertNotIn("<script>", html)
+
+    def test_steps_keep_their_numbers(self):
+        # The answer in #general read "1." for every step: each had lines under it
+        html = to_html("Steps:\n\n1. **Enable**:  \n   Go to: Settings\n\n2. **Add**:\n   Go to: Bills\n\n3. **Verify**")
+        self.assertEqual(html.count("<ol"), 1)
+        self.assertIn("<ol><li><b>Enable</b>:<br>Go to: Settings</li><li><b>Add</b>:<br>Go to: Bills</li>"
+                      "<li><b>Verify</b></li></ol>", html)
+        # A paragraph that is not indented ends the list: the next one starts where it was
+        html = to_html("1. one\nA note between.\n2. two\n3. three")
+        self.assertIn('<p>A note between.</p><ol start="2"><li>two</li><li>three</li></ol>', html)
+        # And the number is kept in the message posted
+        message = self.acme.message_post(body=html, message_type="comment", subtype_xmlid="mail.mt_note")
+        self.assertIn('<ol start="2">', message.body)

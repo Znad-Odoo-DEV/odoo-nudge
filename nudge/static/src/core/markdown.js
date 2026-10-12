@@ -14,7 +14,7 @@ const ALLOWED_TAGS = [
     "a", "blockquote", "br", "code", "del", "em", "h4", "h5", "h6", "hr", "li", "ol", "p",
     "pre", "strong", "table", "tbody", "td", "th", "thead", "tr", "ul",
 ];
-const ALLOWED_ATTR = ["href", "target", "rel"];
+const ALLOWED_ATTR = ["href", "target", "rel", "start"];
 
 const INLINE = new RegExp(
     [
@@ -137,6 +137,33 @@ export function markdownToHtml(text) {
         return items;
     };
 
+    // An indented line goes on with the item above it, across a blank line too:
+    // "1. Enable\n   Go to: …\n\n2. Add" made three lists, each numbered from 1
+    const goesOn = (at) => /^\s+\S/.test(lines[at]) && !isBlockStart(lines, at);
+    const collectItems = (pattern) => {
+        const items = [];
+        while (index < lines.length) {
+            const line = lines[index];
+            if (pattern.test(line)) {
+                items.push([renderInline(line.match(pattern)[1].trim())]);
+            } else if (line.trim() && goesOn(index)) {
+                items[items.length - 1].push(renderInline(line.trim()));
+            } else if (!line.trim()) {
+                let next = index + 1;
+                while (next < lines.length && !lines[next].trim()) {
+                    next++;
+                }
+                if (next === lines.length || !(pattern.test(lines[next]) || goesOn(next))) {
+                    break;
+                }
+            } else {
+                break;
+            }
+            index++;
+        }
+        return items.map((parts) => `<li>${parts.join("<br>")}</li>`);
+    };
+
     while (index < lines.length) {
         const line = lines[index];
         if (!line.trim()) {
@@ -163,11 +190,13 @@ export function markdownToHtml(text) {
             const quote = collect(QUOTE).map(renderInline).join("<br>");
             blocks.push(`<blockquote>${quote}</blockquote>`);
         } else if (BULLET.test(line)) {
-            const items = collect(BULLET).map((item) => `<li>${renderInline(item)}</li>`);
-            blocks.push(`<ul>${items.join("")}</ul>`);
+            blocks.push(`<ul>${collectItems(BULLET).join("")}</ul>`);
         } else if (NUMBER.test(line)) {
-            const items = collect(NUMBER).map((item) => `<li>${renderInline(item)}</li>`);
-            blocks.push(`<ol>${items.join("")}</ol>`);
+            // A list that goes on after a paragraph keeps the number written
+            // (a template inside a template lost its space in the bundle: <olstart="2">)
+            const start = Number(line.match(/\d+/)[0]);
+            const opening = start > 1 ? '<ol start="' + start + '">' : "<ol>";
+            blocks.push(opening + collectItems(NUMBER).join("") + "</ol>");
         } else if (TABLE_ROW.test(line) && TABLE_RULE.test(lines[index + 1] || "")) {
             const header = splitRow(line);
             index += 2;
