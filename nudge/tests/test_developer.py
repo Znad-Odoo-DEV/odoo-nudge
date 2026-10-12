@@ -539,6 +539,117 @@ class TestDeveloper(NudgeCase, TransactionCase):
                      "record.write({'comment': str(datetime.datetime.now())})"):
             self.assertEqual(compile_code(code, self.env), "", code)
 
+    def test_code_that_reads_only_or_writes_what_is_not_there_is_refused(self):
+        # What the trial's model wrote: a search alone, a condition in two parts, a
+        # language by a code that is not one
+        self.assertIn("changes nothing", compile_code(
+            "old = env['res.partner'].search([('create_date', '<=', datetime.datetime.now() - "
+            "datetime.timedelta(days=7))])\nnames = old.mapped('name')", self.env, "res.partner"))
+        shape = compile_code(
+            "records.search([('create_date <=', datetime.datetime.now())]).write({'comment': 'x'})",
+            self.env, "res.partner")
+        self.assertIn("('create_date <=', datetime.datetime.now()), which is not a condition", shape)
+        self.assertIn("(field, operator, value)", shape)
+        self.assertIn("res.partner has no field 'langue'",
+                      compile_code("record.write({'langue': 'en_US'})", self.env, "res.partner"))
+        lang = compile_code("for partner in records:\n    partner.write({'lang': 'ar'})", self.env, "res.partner")
+        self.assertIn("lang is a choice, and 'ar' is not one of its keys", lang)
+        self.assertIn("'en_US'", lang)
+        self.assertIn('{"kind": "update", "field": "active", "value": false}', compile_code("record.active = False", self.env))
+        # What is right passes; records of another model are not judged by the model of the action
+        for code in ("record.write({'lang': 'en_US'})", "record.write(dict(comment='x', lang=False))",
+                     "records.filtered(lambda one: not one.comment).write({'comment': 'x'})",
+                     "for user in record.user_ids:\n    user.write({'signature': 'x'})",
+                     "env['res.users'].search(['|', ('share', '=', False), ('active', '=', True)], limit=1)"
+                     ".write({'signature': 'x'})"):
+            self.assertEqual(compile_code(code, self.env, "res.partner"), "", code)
+        # The model of the action is checked where the card is made
+        self.switch(True)
+        refused = self.run_tool("prepare_server_action", {
+            "name": "In Arabic", "model": "res.partner",
+            "action": {"kind": "code", "code": "record.write({'lang': 'ar'})"}})
+        self.assertTrue(refused.is_error)
+        self.assertIn("lang is a choice", refused.content)
+
+    def test_a_server_action_is_deleted_with_its_button(self):
+        self.switch(True)
+        partner_model = self.env["ir.model"]._get("res.partner")
+        action = self.env["ir.actions.server"].create({
+            "name": "Nudge Archive", "model_id": partner_model.id, "state": "code", "code": "records.action_archive()"})
+        button = self.run_tool("prepare_button", {"model": "res.partner", "label": "Archive it", "action_id": action.id})
+        self.assertFalse(button.is_error, button.content)
+        made = self.do("prepare_button", button)
+        self.assertFalse(made.is_error, made.content)
+        view = self.env["ir.ui.view"].browse(made.records[1])
+        # A view that holds other changes too, as Studio makes them: only the button leaves it
+        studio = self.env["ir.ui.view"].create({
+            "name": "Nudge Studio-like", "type": "form", "model": "res.partner",
+            "inherit_id": view.inherit_id.id, "mode": "extension",
+            "arch_db": f'<data><xpath expr="//sheet" position="before"><header><button name="{action.id}" '
+                       'type="action" string="Archive too"/></header></xpath><xpath expr="//field[@name=\'name\']" '
+                       'position="attributes"><attribute name="placeholder">Nudge kept</attribute></xpath></data>'})
+        result = self.run_tool("prepare_delete", {"model": "ir.actions.server", "ids": [action.id]})
+        self.assertFalse(result.is_error, result.content)
+        lines = {line["label"]: line["value"] for line in result.pending["preview"]["lines"]}
+        self.assertIn(view.name, lines["Views"], "The card says the button goes")
+        self.assertTrue(action.exists() and view.exists(), "Nothing before the yes")
+        done = self.do("prepare_delete", result)
+        self.assertFalse(done.is_error, done.content)
+        self.assertFalse(action.exists())
+        self.assertFalse(view.exists(), "The button left the form with the action it ran")
+        self.assertTrue(studio.exists())
+        self.assertNotIn(f'name="{action.id}"', studio.arch_db)
+        self.assertIn("Nudge kept", studio.arch_db)
+
+    def test_automations_are_found_by_any_of_their_words(self):
+        # "contact archive" found nothing named "Archive contact"
+        self.switch(True)
+        partner_model = self.env["ir.model"]._get("res.partner")
+        Action = self.env["ir.actions.server"]
+        Action.create({"name": "Nudge contact birthday", "model_id": partner_model.id, "state": "code", "code": "pass"})
+        Action.create({"name": "Archive Nudge contact", "model_id": partner_model.id, "state": "code", "code": "pass"})
+        listed = self.run_tool("read_automations", {"words": "nudge contact archive"})
+        self.assertFalse(listed.is_error, listed.content)
+        self.assertIn("Archive Nudge contact", listed.content)
+        self.assertIn("Nudge contact birthday", listed.content)
+        self.assertLess(listed.content.index("Archive Nudge contact"), listed.content.index("Nudge contact birthday"),
+                        "Named with every word comes first")
+
+    def test_a_new_server_action_says_its_id_for_a_button(self):
+        # prepare_button was called with action_id 1 before the action was made
+        self.switch(True)
+        result = self.run_tool("prepare_server_action", {
+            "name": "Nudge Buyer", "model": "res.partner",
+            "action": {"kind": "update", "field": "function", "value": "Buyer"}})
+        self.assertFalse(result.is_error, result.content)
+        self.assertIn("no id before their yes", result.content)
+        done = self.do("prepare_server_action", result)
+        self.assertFalse(done.is_error, done.content)
+        action = self.env["ir.actions.server"].search([("name", "=", "Nudge Buyer")])
+        self.assertIn(f"Its id is {action.id}: a button that runs it is made with prepare_button, "
+                      f"action_id {action.id}.", done.content)
+
+    def test_a_trial_given_nothing_tries_what_was_made_last(self):
+        self.switch(True)
+        conversation = self.env["nudge.conversation"].with_user(self.admin)._chat_open()
+        context = {"nudge_mode": "dev", "nudge_conversation_id": conversation.id}
+        refused = self.run_tool("try_automation", {}, context=context)
+        self.assertTrue(refused.is_error)
+        self.assertIn("nothing made in this conversation", refused.content)
+        run = self.env["nudge.run"].sudo().create({
+            "name": "Build", "conversation_id": conversation.id, "user_id": self.admin.id, "is_developer": True})
+        action = self.env["ir.actions.server"].create({
+            "name": "Nudge Job", "model_id": self.env["ir.model"]._get("res.partner").id, "state": "object_write",
+            "update_path": "function", "evaluation_type": "value", "value": "Buyer"})
+        self.env["nudge.step"].sudo().create({
+            "run_id": run.id, "tool": "prepare_server_action", "kind": "create", "state": "done",
+            "res_model": "ir.actions.server", "res_ids": action.ids})
+        tried = self.run_tool("try_automation", {}, context=context)
+        self.assertFalse(tried.is_error, tried.content)
+        self.assertIn(f"the server action #{action.id} 'Nudge Job', made last in this conversation, is tried",
+                      tried.content)
+        self.assertIn("Buyer", tried.content)
+
     def test_deleting_what_is_not_there_is_said(self):
         # prepare_delete of an id that does not exist failed with KeyError: 'unlink'
         self.switch(True)
