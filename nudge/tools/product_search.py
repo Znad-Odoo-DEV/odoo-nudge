@@ -444,6 +444,11 @@ class SearchProducts(base.Tool):
             stock = f", on hand {item['on_hand']:g} {item.get('unit', '')}" if "on_hand" in item else ""
             price = f", price {item['price']}" if "price" in item else ""
             lines.append(f"- {item['name']}{price}{stock} ({'; '.join(item['reasons'])})")
+        first, second = (found["items"] + [None])[:2]
+        if second and first["score"] == second["score"]:
+            # Two cabinets with doors, as like what was asked: the model named the wrong one
+            lines.append(f"{first['name']!r} and {second['name']!r} are as like what was asked as each "
+                         "other: name both, or ask which one is meant.")
         return base.ToolResult(
             "\n".join(lines),
             event={"type": "products", "query": found["query"], "items": found["items"]},
