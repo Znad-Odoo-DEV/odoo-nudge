@@ -259,7 +259,7 @@ class NudgeRun(models.Model):
         :return: whether it is all done, and the model may go on
         """
         from .. import tools  # noqa: PLC0415
-        from .nudge_conversation import DONE, FAILED  # noqa: PLC0415
+        from .nudge_conversation import DONE, DONE_NOT_FINISHED, FAILED  # noqa: PLC0415
 
         run = self.sudo()
         tool = tools.base.TOOLS.get(step.tool)
@@ -281,7 +281,7 @@ class NudgeRun(models.Model):
             return False
         state = "failed" if result.is_error else "done"
         conversation.sudo()._agent_settle(step, state, tools.base.ToolResult(
-            (FAILED if result.is_error else DONE) % result.content,
+            (FAILED if result.is_error else DONE_NOT_FINISHED if result.unfinished else DONE) % result.content,
             is_error=result.is_error, records=result.records), [result.event] if result.event else [])
         self._commit()
         return True

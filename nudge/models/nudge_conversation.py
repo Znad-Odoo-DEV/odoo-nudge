@@ -69,6 +69,9 @@ DONE = (
     "The person said yes, and it is done. %s Tell them in a sentence what was done, or go on "
     "with what is left of what they asked."
 )
+# A yes to one step of what was asked: told "tell them what was done", a small
+# model said a button was on the form when only its action was made
+DONE_NOT_FINISHED = "The person said yes, and this step is done. %s"
 FAILED = "The person said yes, but it did not work, and nothing was changed. %s"
 DECLINED = (
     "The person said no. Nothing was done. Do not try to reach the same result another way: "
@@ -558,7 +561,7 @@ class NudgeConversation(models.Model):
             grounded = self.env["nudge.quick"]._ground(text)
         elif provider.tool_set == "essential" and mode != MODE_TALK and not focus:
             # Doing the work, it is told which kind of record the words name
-            grounded = self.env["nudge.quick"]._ground_work(text)
+            grounded = self.env["nudge.quick"]._ground_work(text, developing=mode == MODE_DEV)
         lesson = tools.lessons.taught(text) if not focus else ""
         if lesson:
             # Asked to remember, a small model said it had and wrote nothing down,
@@ -572,6 +575,11 @@ class NudgeConversation(models.Model):
             grounded = {key: value for key, value in grounded.items() if key != "products"}
             if products:
                 grounded["products"] = products
+            else:
+                # Nothing like it, and a small model sold "Oxford Oak 2-Drawer Cabinet, $419"
+                grounded["products"] = (
+                    f"None like the picture (read as: {found['seen']}). Name no product: say none "
+                    "was found, or call search_products.")
         if grounded:
             context_text = "\n".join((context_text, prompt.render_found(grounded)))
         message = self.env["nudge.message"].sudo().create({
@@ -1228,8 +1236,8 @@ class NudgeConversation(models.Model):
                 events.append(result.event)
             # Said plainly: what comes next depends on the model having understood
             result = tools.base.ToolResult(
-                (FAILED if result.is_error else DONE) % result.content,
-                is_error=result.is_error, records=result.records)
+                (FAILED if result.is_error else DONE_NOT_FINISHED if result.unfinished else DONE)
+                % result.content, is_error=result.is_error, records=result.records)
         self._agent_settle(step, state, result, events)
         run = step.run_id
         first_events = [dict(step._get_card(), type="decided"), *events]

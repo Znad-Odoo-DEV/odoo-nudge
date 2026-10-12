@@ -30,14 +30,17 @@ class ToolResult:
     :param pending: what is about to be done, for a tool that waits for the
         person to decide; nothing was done yet
     :param records: ``(model, ids, names)`` the call was about, for the log
+    :param unfinished: what was asked is not done yet: the model is not
+        offered to tell the person it is
     """
 
-    def __init__(self, content, is_error=False, event=None, pending=None, records=None):
+    def __init__(self, content, is_error=False, event=None, pending=None, records=None, unfinished=False):
         self.content = str(content)[:MAX_RESULT_CHARS]
         self.is_error = is_error
         self.event = event
         self.pending = pending
         self.records = records
+        self.unfinished = unfinished
 
 
 class Tool:

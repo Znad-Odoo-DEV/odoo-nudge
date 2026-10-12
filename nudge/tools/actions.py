@@ -33,6 +33,7 @@ from .records import (
     get_records,
     is_secret,
     model_label,
+    read_choice,
     refusing,
 )
 
@@ -195,12 +196,9 @@ def read_value(env, field, raw):
     except (ValueError, TypeError):
         raise Refused(f"{raw!r} cannot be read as the {field.type} that {field.name} holds.") from None
     if field.type == "selection":
-        choices = field._description_selection(env)
-        for key, label in choices:
-            if text == key or text.lower() == str(label).lower():
-                return key, label
-        listed = ", ".join(f"{label} ({key})" for key, label in choices[:20])
-        raise Refused(f"{field.name} is one of: {listed}.")
+        # "ar" and "Arabic" were refused for the language "Arabic / الْعَرَبيّة" (ar_001)
+        key = read_choice(text, field, env)
+        return key, dict(field._description_selection(env)).get(key, key)
     if field.type == "many2one":
         record = read_id(env, field, text)
         return record.id, cut(record.display_name, 120)

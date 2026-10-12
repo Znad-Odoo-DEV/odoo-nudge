@@ -404,6 +404,17 @@ def find(env, text, limit=MAX_RESULTS):
     return found
 
 
+def tie_note(items):
+    """:return: what the model is told when the first two products found are as
+    like what was asked, or "" """
+    first, second = (list(items) + [None, None])[:2]
+    if second and first.get("score") == second.get("score"):
+        # Two cabinets with doors, as like what was asked: the model named the wrong one
+        return (f"{first['name']!r} and {second['name']!r} are as like what was asked as each "
+                "other: name both, or ask which one is meant.")
+    return ""
+
+
 @base.register
 class SearchProducts(base.Tool):
     name = "search_products"
@@ -442,11 +453,9 @@ class SearchProducts(base.Tool):
             stock = f", on hand {item['on_hand']:g} {item.get('unit', '')}" if "on_hand" in item else ""
             price = f", price {item['price']}" if "price" in item else ""
             lines.append(f"- {item['name']}{price}{stock} ({'; '.join(item['reasons'])})")
-        first, second = (found["items"] + [None])[:2]
-        if second and first["score"] == second["score"]:
-            # Two cabinets with doors, as like what was asked: the model named the wrong one
-            lines.append(f"{first['name']!r} and {second['name']!r} are as like what was asked as each "
-                         "other: name both, or ask which one is meant.")
+        tie = tie_note(found["items"])
+        if tie:
+            lines.append(tie)
         return base.ToolResult(
             "\n".join(lines),
             event={"type": "products", "query": found["query"], "items": found["items"]},

@@ -1,5 +1,5 @@
 import { expect, test } from "@odoo/hoot";
-import { click, edit, queryAllTexts } from "@odoo/hoot-dom";
+import { click, edit, queryAllTexts, queryOne } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 
 import {
@@ -183,6 +183,25 @@ test("what is about to be done is shown, and waits", async () => {
     expect(".o_nudge_card .fa-exclamation-triangle").toHaveCount(0);
     expect(".o_nudge_typing").toHaveCount(0);
     expect(".o_nudge_message_assistant .o_nudge_markdown").toHaveText("I am about to change the city.");
+});
+
+test("a long label leaves its width to the value", async () => {
+    // "Invoicing / Units of Measure & Packagings" took the whole card, and
+    // "off → on" was written one letter under the other
+    const label = "Invoicing / Units of Measure & Packagings / Sell and purchase products in different units";
+    const card = { ...CARD, title: "Change the settings", lines: [{ label, value: "on", before: "off" }] };
+    const { nudge } = await start({
+        answer: streamed({ type: "confirm", ...card }, { type: "waiting", message_id: 2, step_id: 31 }),
+    });
+    nudge.open();
+    await nudge.send("Switch on units of measure");
+    await animationFrame();
+    const lines = queryOne(".o_nudge_card_lines").getBoundingClientRect();
+    const value = queryOne(".o_nudge_card_lines dd").getBoundingClientRect();
+    expect(value.width / lines.width).toBeGreaterThan(0.4);
+    const before = queryOne(".o_nudge_card_before").getBoundingClientRect();
+    const after = queryOne(".o_nudge_card_value").getBoundingClientRect();
+    expect(Math.abs(before.top - after.top)).toBeLessThan(4, { message: "off → on on one line" });
 });
 
 test("what cannot be taken back is marked", async () => {

@@ -252,8 +252,8 @@ def usual_fields(model, limit=8):
 
 def read_choice(text, field, env):
     """:return: the key of the choice of a selection field named by ``text``:
-    its key, its label, the start of its label ("Sep" for "September") or
-    its number ("9" for "09")
+    its key, its label, the start of its label ("Sep" for "September"), the
+    start of its key ("ar" for "ar_001") or its number ("9" for "09")
     :raise Refused: with the choices, when none is meant"""
     choices = field._description_selection(env)
     lowered = text.lower()
@@ -271,6 +271,10 @@ def read_choice(text, field, env):
         started = [key for key, label in choices if str(label).lower().startswith(lowered)]
         if len(started) == 1:
             return started[0]
+    # "ar" for Arabic, whose key is ar_001: refused, and the language stayed as it was
+    started = [key for key, _label in choices if str(key).lower().split("_")[0] == lowered]
+    if len(started) == 1:
+        return started[0]
     shown = ", ".join(f"{key} ({label})" for key, label in choices[:30])
     raise Refused(f"{field.name} is a choice: {text!r} is not one of {shown}.")
 

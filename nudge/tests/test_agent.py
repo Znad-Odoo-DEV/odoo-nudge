@@ -470,7 +470,7 @@ class TestActing(AgentCase, TransactionCase):
             ("is_company", "maybe"): "yes or no",
             ("color", "red"): "cannot be read",
             ("partner_latitude", "north"): "cannot be read",
-            ("lang", "Klingon"): "is one of",
+            ("lang", "Klingon"): "is a choice",
             ("parent_id", "Nudge Acme"): "give its id",
             ("parent_id", "999999999"): "no res.partner 999999999",
             ("category_id", f"{tags[0].id}, tag"): "give its id",
@@ -799,7 +799,7 @@ class TestAgent(AgentCase, TransactionCase):
         self.ask(self.user_a, "Explain it")
         self.assertNotIn("Agent mode", adapter.calls[2]["system"][-1])
         self.assertEqual(adapter.calls[2]["system"][:2], adapter.calls[0]["system"][:2])
-        self.assertEqual(prompt.build_system_blocks("", "agent"), [prompt.SYSTEM_PERSONA, prompt.AGENT_MODE + prompt.DEV_NOT_FOR_THEM])
+        self.assertEqual(prompt.build_system_blocks("", "agent"), [prompt.SYSTEM_PERSONA, prompt.AGENT_MODE + prompt.AGENT_NEVER_DELETES + prompt.DEV_NOT_FOR_THEM])
 
     def test_for_those_who_may(self):
         self.use_adapter()
