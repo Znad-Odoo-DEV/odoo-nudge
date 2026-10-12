@@ -35,6 +35,22 @@ test("lists, headings, quotes and rules", () => {
     expect(markdownToHtml("Steps:\n- one")).toBe("<p>Steps:</p><ul><li>one</li></ul>");
 });
 
+test("steps keep their numbers", () => {
+    // Every step read "1.": each had lines under it, and a blank line after them
+    expect(
+        markdownToHtml("1. **Enable**:  \n   Go to: Settings\n\n2. **Add**:\n   Go to: Bills\n\n3. **Verify**")
+    ).toBe(
+        "<ol><li><strong>Enable</strong>:<br>Go to: Settings</li>" +
+            "<li><strong>Add</strong>:<br>Go to: Bills</li><li><strong>Verify</strong></li></ol>"
+    );
+    // A paragraph that is not indented ends the list: the next one starts where it was
+    expect(markdownToHtml("1. one\nA note between.\n2. two")).toBe(
+        '<ol><li>one</li></ol><p>A note between.</p><ol start="2"><li>two</li></ol>'
+    );
+    expect(String(renderMarkdown("1. one\n\nA note.\n\n2. two"))).toInclude('<ol start="2">');
+    expect(markdownToHtml("- one\n\n- two\n\nafter")).toBe("<ul><li>one</li><li>two</li></ul><p>after</p>");
+});
+
 test("code blocks", () => {
     expect(markdownToHtml("```python\nx = '<b>'\n**not bold**\n```\nafter")).toBe(
         "<pre><code>x = &#39;&lt;b&gt;&#39;\n**not bold**</code></pre><p>after</p>"

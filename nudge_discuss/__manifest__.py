@@ -16,7 +16,7 @@ mode, where every change waits for a yes.
 Installed by itself when Nudge and Discuss are both there.
 """,
     "category": "Productivity",
-    "version": "19.0.1.0.2",
+    "version": "19.0.1.0.3",
     "author": "Ibrahim Elzenad",
     "license": "OPL-1",
     "images": ["static/description/banner.png"],
