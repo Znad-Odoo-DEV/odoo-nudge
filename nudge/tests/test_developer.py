@@ -951,6 +951,31 @@ class TestDeveloper(NudgeCase, TransactionCase):
         self.assertIn("belongs to the module", refused.content)
         self.assertIn("Switch it off", refused.content)
 
+    def test_a_request_whose_card_was_applied_is_done(self):
+        # "Hide the Website field" was applied, the page reloaded for it, and the request read Stopped
+        self.switch(True)
+        conversation = self.env["nudge.conversation"].with_user(self.admin)._chat_open()
+        run = self.env["nudge.run"].sudo().create({
+            "name": "Hide", "conversation_id": conversation.id, "user_id": self.admin.id,
+            "is_developer": True, "state": "running"})
+        Step = self.env["nudge.step"].sudo()
+        Step.create({"run_id": run.id, "tool": "read_view", "kind": "read", "state": "done"})
+        Step.create({"run_id": run.id, "tool": "prepare_view_change", "kind": "create", "state": "done",
+                     "res_model": "ir.ui.view", "res_ids": [1]})
+        conversation.sudo().run_id = run
+        conversation._chat_prepare("Thanks", mode="dev")
+        self.assertEqual(run.state, "done")
+        # A card left undecided is a request stopped
+        second = self.env["nudge.run"].sudo().create({
+            "name": "Hide more", "conversation_id": conversation.id, "user_id": self.admin.id,
+            "is_developer": True, "state": "waiting"})
+        Step.create({"run_id": second.id, "tool": "prepare_view_change", "kind": "create", "state": "pending"})
+        conversation.sudo().write({"run_id": second.id, "stream_started_at": False})
+        conversation._chat_prepare("Something else", mode="dev")
+        self.assertEqual(second.state, "stopped")
+        self.assertEqual(run._outcome("failed"), "done")
+        self.assertEqual(self.env["nudge.run"]._outcome("stopped"), "stopped", "Nothing done is no outcome")
+
     def test_what_was_built_is_undone(self):
         self.switch(True)
         conversation = self.env["nudge.conversation"].with_user(self.admin)._chat_open()

@@ -134,6 +134,15 @@ class NudgeRun(models.Model):
             "cost": self.cost + message.cost,
         })
 
+    def _outcome(self, state):
+        """:return: done for a run whose cards were all said yes to and done,
+        else ``state``: "Hide the Website field" was applied, the page reloaded
+        for it, the stream was cut, and the request read Stopped"""
+        steps = self.step_ids.filtered(lambda step: step.kind not in ("read", "show"))
+        if steps and all(step.state == "done" for step in steps):
+            return "done"
+        return state
+
     def _end(self, state):
         ended = self.filtered(lambda run: run.state in OPEN_STATES)
         ended.write({"state": state, "ended_at": fields.Datetime.now()})
