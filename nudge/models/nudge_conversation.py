@@ -494,7 +494,9 @@ class NudgeConversation(models.Model):
             spoken=spoken, read_aloud=bool(read_aloud) and voice,
             model_name=(screen_values.get("snapshot") or {}).get("model"),
             explain=explain, attachment=found, report=report,
-            answer_in=tools.commands.language_of(text) if provider.tool_set == "essential" else None))
+            # Every model drifts into the language of what it reads: the
+            # database here may be described in another one
+            answer_in=tools.commands.language_of(text)))
         if screen_text:
             context_text = "\n".join((context_text, screen_text))
         if found and found["text"]:
