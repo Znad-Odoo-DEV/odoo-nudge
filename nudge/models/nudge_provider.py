@@ -472,6 +472,9 @@ class NudgeProvider(models.Model):
             text, usage = ollama.read_picture(self.base_url, self.picture_model, data, question,
                                               self.api_key or "")
         except base.AdapterError as exc:
+            if "load image" in (exc.detail or ""):
+                raise UserError(self.env._(
+                    "This file could not be read as a picture: send a photo, PNG or JPEG.")) from exc
             raise UserError(self._error_message(exc)) from exc
         self.env["nudge.usage"]._add(
             "chat", base.normalize_usage(usage), 0.0, self.env.user, self.env.company,

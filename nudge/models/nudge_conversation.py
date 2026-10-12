@@ -177,13 +177,19 @@ class NudgeConversation(models.Model):
         return self.env["ir.http"]._get_nudge_session_info() or {}
 
     @api.model
-    def _get_stream_seconds(self):
+    def _get_stream_seconds(self, provider=None):
         """A streamed request must end well before the server's hard limit on
-        the duration of a request, past which the worker is killed."""
+        the duration of a request, past which the worker is killed. A model on
+        one's own machine answers slower: it is given its own time, within
+        that limit, and wholly where no worker is killed.
+
+        :param provider: the provider that answers; None for the usual time"""
         limit = config["limit_time_real"] or 0
-        if limit <= 0:
-            return STREAM_MAX_SECONDS
-        return max(STREAM_MIN_SECONDS, min(STREAM_MAX_SECONDS, limit - STREAM_SAFETY_MARGIN))
+        local = bool(provider) and provider.is_ollama
+        wanted = max(STREAM_MAX_SECONDS, provider.timeout or 0) if local else STREAM_MAX_SECONDS
+        if limit <= 0 or (local and not config["workers"]):
+            return wanted
+        return max(STREAM_MIN_SECONDS, min(wanted, limit - STREAM_SAFETY_MARGIN))
 
     @api.model
     def _chat_open(self, conversation_id=None):
@@ -197,7 +203,10 @@ class NudgeConversation(models.Model):
         return conversation
 
     def _chat_check_not_busy(self):
-        limit = fields.Datetime.now() - timedelta(seconds=self._get_stream_seconds())
+        Provider = self.env["nudge.provider"].sudo()
+        longest = max(self._get_stream_seconds(provider)
+                      for provider in (Provider._get_default(), Provider._get_for_mode("dev")))
+        limit = fields.Datetime.now() - timedelta(seconds=longest)
         busy = self.sudo().with_context(active_test=False).search_count([
             ("user_id", "=", self.env.uid),
             ("stream_started_at", ">=", limit),
@@ -416,7 +425,9 @@ class NudgeConversation(models.Model):
                     self._chat_where_the_work_is(), self.env["nudge.source"]._get_text()) if block)),
             "tools": self._chat_tools(mode, tool_set),
             "turns": conversation._chat_build_turns(),
-            "seconds": self._get_stream_seconds(),
+            "seconds": self._get_stream_seconds(provider),
+            # A small model doing the work is told once to act when it only talked
+            "push_to_act": tool_set == "essential" and mode != MODE_TALK,
             "rounds": rounds,
             "first_events": [],
         }
@@ -486,10 +497,10 @@ class NudgeConversation(models.Model):
             # A model of the server that sees reads it; without one, said
             # before anything is sent: the model would refuse the picture
             media_type, data = found["image"]
+            seen = provider._read_picture(media_type, data, text)
             found = dict(found, image=None, text=self.env._(
                 "What the picture shows, as read by %(model)s:\n%(text)s",
-                model=provider.picture_model or "", text=provider._read_picture(media_type, data, text)),
-                kept_image=found["image"])
+                model=provider.picture_model or "", text=seen), kept_image=found["image"], seen=seen)
 
         conversation = self.sudo()
         # What waited for a decision is left: the person moved on
@@ -522,18 +533,22 @@ class NudgeConversation(models.Model):
         if extra:
             # What the caller knows that the person did not type: a record, a conversation
             context_text = "\n".join((context_text, extra))
+        grounded = {}
         if provider.tool_set == "essential" and mode == MODE_TALK and (
                 not focus or focus in tools.commands.GROUNDED_FOCUS):
             # A small model answers far better from what it is given than from
             # what it remembers: what Nudge finds by itself goes with the question
             grounded = self.env["nudge.quick"]._ground(text)
-            if grounded:
-                context_text = "\n".join((context_text, prompt.render_found(grounded)))
         elif provider.tool_set == "essential" and mode != MODE_TALK and not focus:
             # Doing the work, it is told which kind of record the words name
             grounded = self.env["nudge.quick"]._ground_work(text)
-            if grounded:
-                context_text = "\n".join((context_text, prompt.render_found(grounded)))
+        if provider.tool_set == "essential" and found and found.get("seen"):
+            # What the picture shows, among the products: "do we sell this?"
+            products = self.env["nudge.quick"]._ground_products(found["seen"])
+            if products:
+                grounded = dict(grounded, products=products)
+        if grounded:
+            context_text = "\n".join((context_text, prompt.render_found(grounded)))
         message = self.env["nudge.message"].sudo().create({
             "conversation_id": self.id,
             "role": "user",
@@ -911,6 +926,12 @@ class NudgeConversation(models.Model):
         if calls:
             results, screen_events, must_read, waiting = self._chat_run_tools(calls)
         again = must_read and not waiting and not outcome.get("last_round")
+        # Asked to do the work, it wrote about it: told once to call the tool,
+        # unless it asked the person something
+        pushed = bool(
+            outcome.get("may_push") and state == "complete" and not calls and text
+            and not text.rstrip().endswith(("?", "\u061f")) and not outcome.get("last_round"))
+        again = again or pushed
         if state == "complete" and text and not calls:
             # Asked to be shown, the model wrote the steps: what they name is pointed at
             pointer = self._chat_pointer_from_text(text)
@@ -1002,7 +1023,8 @@ class NudgeConversation(models.Model):
                 "tool_results": results,
             })
         if again:
-            step = {"screen_events": screen_events, "turns": conversation._chat_build_turns()}
+            step = {"screen_events": screen_events, "turns": conversation._chat_build_turns(),
+                    "pushed": pushed}
             if any(call["name"] == "more_tools" for call in calls):
                 # What the model asked for is offered from its next answer
                 step["tools"] = self._chat_tools(self._chat_mode(), provider.tool_set if provider else "full")

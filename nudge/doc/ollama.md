@@ -18,9 +18,20 @@ machine of yours. Nudge speaks to it like to any provider.
 
 Qwen is the best of its size in Arabic and with tools. On a small card, take a model that does not
 think (`-instruct`): a thinking model spends a minute before its first word, and the thinking-only
-builds (`qwen3:4b`) write their thinking into the answer when told not to think. A model that sees pictures (`qwen2.5vl`,
-`gemma3`) reads the pictures sent with a question; Ollama does not turn speech into text, so
-speech stays with Chrome and Edge, or with another provider that listens.
+builds (`qwen3:4b`) write their thinking into the answer when told not to think.
+
+Nudge can run on that one machine entirely, for nothing:
+
+| What | Model | Size | Where it is set |
+|---|---|---|---|
+| Talk, Agent and Developer modes | `qwen3:4b-instruct` | 2.5 GB | Model |
+| Pictures sent with a question | `qwen2.5vl:3b` | 3.2 GB | Picture Model (chosen by Prepare for Nudge) |
+| Speech turned into text | Whisper `large-v3-turbo` | 1.6 GB | Speech to Text, Speech Address |
+
+A small model is given the tools of its mode; the others (settings, SQL and spreadsheets, PDF
+reports, modules, the assessment, products) come when the question names them, in Arabic or in
+English, or when the model asks for them with more_tools. It is told which kind of record the
+screens named in the question show, and which tool does what it is asked.
 
 ## Install
 
@@ -61,7 +72,18 @@ ollama pull qwen3:4b-instruct
    server and chosen, and loaded at once. Nothing is downloaded; Ollama shares the weights. Nudge
    then says whether the model **runs entirely on the graphics card**, or how much of it runs on
    the processor: that part answers several times slower.
-5. **A free model for the questions, a stronger one for the work.** In **Settings ‣ Nudge**, keep
+5. **Pictures.** `ollama pull qwen2.5vl:3b`, then Prepare for Nudge again: it is chosen as the
+   **Picture Model**. A picture sent to a model that does not see is read by it, and what it read
+   goes with the question; Nudge also looks for what it shows among the products.
+6. **Speech.** Ollama does not turn speech into text: a Whisper on the same machine does. Any
+   service that speaks the API of OpenAI (`/v1/audio/transcriptions`) will do, for instance
+   [speaches](https://github.com/speaches-ai/speaches) (`docker run -p 8000:8000
+   ghcr.io/speaches-ai/speaches:latest-cpu`). On the provider: **Speech to Text** Transcription
+   service, **Speech Model** `large-v3-turbo` (as the service names it), **Speech Address**
+   `http://localhost:8000/v1`; in **Settings ‣ Nudge**, speech turned into text by the AI provider.
+   The key of the provider is never sent to that address. Whisper runs on the processor: the
+   graphics card stays the model's.
+7. **A free model for the questions, a stronger one for the work.** In **Settings ‣ Nudge**, keep
    Ollama as the **Default Provider** and choose another provider (Gemini, Claude…) as **Agent
    Provider**. Talk, the commands and @Nudge go to Ollama; what Nudge does and builds goes to the
    stronger one. Prepared for Talk only, the model needs far less context, and fits a small card.
@@ -80,6 +102,20 @@ OLLAMA_CONTEXT_LENGTH=32768             (Linux, in the service's environment)
 
 More context takes more memory of the graphics card: on a small card, keep the essential tools,
 which need less.
+
+## A card of 6 GB
+
+Windows leaves Ollama about 5 GB of a 6 GB card. With every mode, `qwen3:4b-instruct` needs a
+context of about 28,000 tokens; its memory decides the speed:
+
+| `OLLAMA_KV_CACHE_TYPE` | On the card | Words a second |
+|---|---|---|
+| `q8_0` | 84 % (4 layers on the processor) | 10 to 11 |
+| `q4_0` | 100 % | about 39 |
+
+On such a card set, before Ollama starts: `OLLAMA_FLASH_ATTENTION=1`, `OLLAMA_KV_CACHE_TYPE=q4_0`,
+and `OLLAMA_KEEP_ALIVE=30m` (a model unloaded after the default 5 minutes takes 20 to 30 seconds to
+come back). Prepare for Nudge says whether the model runs entirely on the card.
 
 ## Measured on a laptop
 

@@ -35,12 +35,13 @@ GROUPS = {
     "assessment": {
         "about": "assess the whole database: what is set up, used, missing or wrong",
         "tools": ("assess_database",),
-        "words": ("assess", "audit", "health", "evaluat", "قيم", "تقييم", "فحص"),
+        "words": ("assess", "audit", "health", "evaluat", "قيم", "قيّم", "تقييم", "فحص"),
     },
     "products": {
         "about": "find products by their name, size, colour or a picture of them",
         "tools": ("search_products", "find_products"),
-        "words": ("product", "item", "منتج", "منتجات", "صنف", "اصناف"),
+        "words": ("product", "item", "stock", "in stock", "inventory", "منتج", "منتجات", "صنف", "اصناف",
+                  "مخزون", "مخزن", "مستودع"),
     },
     "import": {
         "about": "check a file before importing it",
@@ -91,6 +92,10 @@ def asked(text):
                 found.append(name)
                 break
     return found
+
+
+# The words that bring a group, not what it is about: left out of a search
+TRIGGERS = {form for forms in FORMS.values() for form in forms if " " not in form}
 
 
 def tools_of(names):
