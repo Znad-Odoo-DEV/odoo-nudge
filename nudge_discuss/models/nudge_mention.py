@@ -32,6 +32,8 @@ MAX_QUESTION_CHARS = 2000
 # Fields of how a record is followed and talked about, not of what it is
 TECHNICAL = re.compile(r"^(message_|activity_|website_message|rating_|__|has_message|access_)")
 CHANNEL = "discuss.channel"
+HEADING = re.compile(r"^#{1,6}\s+(.*)$")
+LIST_ITEM = re.compile(r"^([-*•]|\d+[.)])\s+")
 
 
 def text_of(body):
@@ -44,6 +46,13 @@ def text_of(body):
         return " ".join(str(body).split())
 
 
+def _goes_on(rest):
+    """:return: whether a list goes on after a blank line: the next line is an
+    item, or indented under the item above"""
+    following = next((raw for raw in rest if raw.strip()), "")
+    return bool(following) and (following[:1].isspace() or bool(LIST_ITEM.match(following.strip())))
+
+
 def to_html(text):
     """Simple Markdown, as the model writes it, to the HTML of a message:
     paragraphs, lists, bold, code, links."""
@@ -53,28 +62,40 @@ def to_html(text):
         line = re.sub(r"`([^`]+)`", r"<code>\1</code>", line)
         return re.sub(r"\[([^\]]+)\]\((https?://[^)\s]+)\)", r'<a href="\2" target="_blank">\1</a>', line)
 
-    parts, items, kind = [], [], None
+    parts, items, kind, start = [], [], None, 1
 
     def close():
         nonlocal items, kind
         if items:
-            parts.append(f"<{kind}>" + "".join(f"<li>{item}</li>" for item in items) + f"</{kind}>")
+            # A list that goes on after a paragraph keeps the number written
+            opening = f'<ol start="{start}">' if kind == "ol" and start > 1 else f"<{kind}>"
+            parts.append(opening + "".join(f"<li>{item}</li>" for item in items) + f"</{kind}>")
         items, kind = [], None
 
-    for raw in (text or "").splitlines():
+    lines = (text or "").splitlines()
+    for index, raw in enumerate(lines):
         line = raw.strip()
         bullet = re.match(r"^[-*•]\s+(.*)$", line)
-        number = re.match(r"^\d+[.)]\s+(.*)$", line)
+        number = re.match(r"^(\d+)[.)]\s+(.*)$", line)
         if bullet or number:
             wanted = "ul" if bullet else "ol"
             if kind and kind != wanted:
                 close()
+            if not kind:
+                start = int(number.group(1)) if number else 1
             kind = wanted
-            items.append(inline((bullet or number).group(1)))
+            items.append(inline(bullet.group(1) if bullet else number.group(2)))
+            continue
+        # "1. Enable", "   Go to: …", "", "2. Add" made three lists, each numbered
+        # from 1: an indented line goes on with the item above it, across a blank line too
+        if items and line and raw[:1].isspace() and not HEADING.match(line):
+            items[-1] += "<br>" + inline(line)
+            continue
+        if items and not line and _goes_on(lines[index + 1:]):
             continue
         close()
         if line:
-            heading = re.match(r"^#{1,6}\s+(.*)$", line)
+            heading = HEADING.match(line)
             parts.append(f"<p><b>{inline(heading.group(1))}</b></p>" if heading else f"<p>{inline(line)}</p>")
     close()
     return Markup("".join(parts))
