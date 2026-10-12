@@ -64,6 +64,27 @@ class TestPointerFromText(BaseCase):
 
 
 @tagged("post_install", "-at_install")
+class TestWords(BaseCase):
+
+    def test_taken_somewhere(self):
+        for text in ("Take me to the vendor bills", "open the quotations", "خدني على فواتير الموردين",
+                     "افتحلي عروض الأسعار", "وديني على المخزون"):
+            self.assertTrue(commands.asks_to_go(text), text)
+        for text in ("How do I open a quotation?", "شو هي هالشاشة؟", ""):
+            self.assertFalse(commands.asks_to_go(text), text)
+
+    def test_the_language_of_the_answer(self):
+        self.assertEqual(commands.language_of("كم يوم إجازة سنوية إلنا؟"), "Arabic")
+        self.assertEqual(commands.language_of("How many days of leave do we get?"), "English")
+        self.assertEqual(commands.language_of("شو يعني Incoterm؟"), "Arabic")
+
+    def test_a_step_reads_without_markup(self):
+        from odoo.addons.nudge.tools.guidance import plain  # noqa: PLC0415
+
+        self.assertEqual(plain("Click on **Invoicing**, then `Bills`"), "Click on Invoicing, then Bills")
+
+
+@tagged("post_install", "-at_install")
 class TestArabicRoots(BaseCase):
 
     def test_words_as_people_write_them(self):
@@ -139,6 +160,25 @@ class TestSmallModels(NudgeCase, TransactionCase):
         self.assertFalse([event for event in loop.run(job, conversation._chat_record)
                           if event.get("type") == "guidance"])
         self.assertTrue(adapter.calls)
+
+    def test_taken_nowhere_the_screens_found_are_offered(self):
+        adapter = self.use_adapter(reply="Go to Nudge, then Configuration.")
+        conversation, _event = self.ask(self.manager, "Take me to the AI providers")
+        events = [event for message in conversation.sudo().message_ids for event in (message.screen_events or [])]
+        found = [event for event in events if event.get("type") == "found"]
+        menu = self.env.ref("nudge.nudge_menu_providers")
+        self.assertIn(menu.id, [entry["id"] for entry in found[0]["menus"]])
+        self.assertTrue(adapter.calls)
+        # Not asked to go anywhere: nothing offered
+        conversation, _event = self.ask(self.manager, "What is an AI provider?")
+        events = [event for message in conversation.sudo().message_ids for event in (message.screen_events or [])]
+        self.assertFalse([event for event in events if event.get("type") == "found"])
+
+    def test_a_small_model_is_told_the_language_of_its_answer(self):
+        self.small()
+        adapter = self.use_adapter()
+        self.ask(self.user_a, "كم يوم إجازة سنوية إلنا؟")
+        self.assertIn('"answer_in":"Arabic"', adapter.calls[0]["turns"][-1]["context"])
 
     def test_the_context_is_for_the_modes_it_serves(self):
         self.small()
