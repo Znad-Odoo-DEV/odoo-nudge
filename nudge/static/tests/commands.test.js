@@ -12,7 +12,7 @@ import {
     webModels,
 } from "@web/../tests/web_test_helpers";
 
-import { setupNudge } from "./voice_helpers";
+import { answered, setupNudge } from "./voice_helpers";
 
 class Partner extends models.Model {
     _name = "partner";
@@ -166,4 +166,22 @@ test("before a provider, a command answers in the search box", async () => {
     expect(".o_nudge_quick_command .o_nudge_markdown").toHaveText(
         "/explain asks the AI: it works once a provider is set up."
     );
+});
+
+test("asked to be taken somewhere, the screens Nudge found are offered", async () => {
+    const asked = setupNudge({
+        config: { commands: COMMANDS },
+        answer: answered(
+            { type: "delta", text: "Go to Invoicing, then Vendors." },
+            { type: "found", menus: [{ id: 7, path: "Invoicing/Vendors/Bills" }] }
+        ),
+    });
+    await mountView({ resModel: "partner", type: "form", arch: "<form><field name='name'/></form>", resId: 1 });
+    const nudge = getService("nudge");
+    nudge.open();
+    await nudge.send("Take me to the vendor bills");
+    await animationFrame();
+    expect(asked.messages).toHaveLength(1);
+    expect(".o_nudge_found_menu").toHaveText("Invoicing/Vendors/Bills");
+    expect(".o_nudge_found_open").toHaveCount(1);
 });

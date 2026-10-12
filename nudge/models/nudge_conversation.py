@@ -203,7 +203,7 @@ class NudgeConversation(models.Model):
             raise UserError(self.env._("Nudge is still answering your previous message."))
 
     def _chat_context_values(self, spoken=False, read_aloud=False, model_name=None,
-                             explain=None, attachment=None, report=None):
+                             explain=None, attachment=None, report=None, answer_in=None):
         """:param model_name: model of the screen the person is on, when shared:
         the pages of the documentation about its app are named
         :param explain: "screen" or "text", how the person wants the answer"""
@@ -221,6 +221,9 @@ class NudgeConversation(models.Model):
             values["answer"] = "read aloud"
         if explain in EXPLAIN_WORDS:
             values["explain"] = EXPLAIN_WORDS[explain]
+        if answer_in:
+            # A small model drifts into the language of what it reads: said plainly
+            values["answer_in"] = answer_in
         if attachment:
             values["attachment"] = attachments.render(attachment)
         if report in REPORT_WORDS and self._can_make_spreadsheet():
@@ -490,7 +493,8 @@ class NudgeConversation(models.Model):
         context_text = prompt.render_context(self._chat_context_values(
             spoken=spoken, read_aloud=bool(read_aloud) and voice,
             model_name=(screen_values.get("snapshot") or {}).get("model"),
-            explain=explain, attachment=found, report=report))
+            explain=explain, attachment=found, report=report,
+            answer_in=tools.commands.language_of(text) if provider.tool_set == "essential" else None))
         if screen_text:
             context_text = "\n".join((context_text, screen_text))
         if found and found["text"]:
@@ -649,6 +653,26 @@ class NudgeConversation(models.Model):
             return None
         steps = tools.guidance.steps_from_text(text, question.snapshot)
         return {"type": "guidance", "steps": steps} if steps else None
+
+    def _chat_screens_to_open(self, screen_events):
+        """:return: a ``found`` event with the screens whose names hold the
+        words of the question, when it asked to be taken to a screen and
+        nothing opened one; None otherwise"""
+        self.ensure_one()
+        Message = self.env["nudge.message"].sudo()
+        question = Message.search([("conversation_id", "=", self.id), ("role", "=", "user")],
+                                  order="id desc", limit=1)
+        if not tools.commands.asks_to_go(question.content):
+            return None
+        since = Message.search([("conversation_id", "=", self.id), ("id", ">", question.id)])
+        events = [event for message in since for event in (message.screen_events or [])] + list(screen_events)
+        if any(isinstance(event, dict) and event.get("type") in ("navigate", "open_action", "open", "found")
+               for event in events):
+            return None
+        screens = self.env["nudge.quick"]._ground_screens(question.content)
+        if not screens:
+            return None
+        return {"type": "found", "menus": [{"id": screen["menu_id"], "path": screen["path"]} for screen in screens]}
 
     def _chat_screen_of_question(self):
         """:return: the screen shared with the question being answered"""
@@ -852,6 +876,11 @@ class NudgeConversation(models.Model):
             pointer = self._chat_pointer_from_text(text)
             if pointer:
                 screen_events = [*screen_events, pointer]
+        if state == "complete" and not (must_read and not waiting and not outcome.get("last_round")):
+            # Asked to be taken somewhere, and taken nowhere: the screens found are offered
+            screens = self._chat_screens_to_open(screen_events)
+            if screens:
+                screen_events = [*screen_events, screens]
         # In the background, what the time of a piece did not let finish is
         # taken up by the next piece
         later = bool(

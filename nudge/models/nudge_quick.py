@@ -236,25 +236,10 @@ class NudgeQuick(models.AbstractModel):
 
         :return: ``{"screens", "documentation", "company_files"}``, without
             the empty ones; empty when nothing was found"""
-        words = [word for word in commands.fold(text).split()
-                 if len(word) >= 3 and word not in GROUND_STOP_WORDS]
-        roots = {commands.root_of(word) for word in words} - {""}
         found = {}
-        if roots:
-            scored = []
-            for menu in _visible_menus(self.env):
-                english_menu = menu.with_context(lang="en_US")
-                own, english = menu._get_full_name(), english_menu._get_full_name()
-                leaf = {commands.root_of(word) for word in commands.fold(f"{menu.name} {english_menu.name}").split()}
-                path = {commands.root_of(word) for word in commands.fold(f"{own} {english}").split()}
-                # The screen itself is about it, not only an app above it
-                if not roots & leaf:
-                    continue
-                scored.append((-len(roots & path), -len(roots & leaf), len(own), own, english))
-            scored.sort(key=lambda item: item[:3])
-            screens = [{"path": own, "path_en": english} for *_rank, own, english in scored[:MAX_GROUND_SCREENS]]
-            if screens:
-                found["screens"] = screens
+        screens = self._ground_screens(text)
+        if screens:
+            found["screens"] = screens
         # The documentation is written in English: the screens found say in
         # English what an Arabic question is about
         terms = [screen["path_en"].split("/")[-1] for screen in found.get("screens", [])[:1]]
@@ -274,6 +259,29 @@ class NudgeQuick(models.AbstractModel):
                 "text": cut(" ".join((passage.body or "").split()), MAX_GROUND_CHARS),
             } for passage in passages]
         return found
+
+    def _ground_screens(self, text):
+        """:return: the screens the person may open whose names hold the
+        words of ``text``, in their language or in English, the closest
+        first: ``[{"menu_id", "path", "path_en"}]``"""
+        words = [word for word in commands.fold(text).split()
+                 if len(word) >= 3 and word not in GROUND_STOP_WORDS]
+        roots = {commands.root_of(word) for word in words} - {""}
+        if not roots:
+            return []
+        scored = []
+        for menu in _visible_menus(self.env):
+            english_menu = menu.with_context(lang="en_US")
+            own, english = menu._get_full_name(), english_menu._get_full_name()
+            leaf = {commands.root_of(word) for word in commands.fold(f"{menu.name} {english_menu.name}").split()}
+            path = {commands.root_of(word) for word in commands.fold(f"{own} {english}").split()}
+            # The screen itself is about it, not only an app above it
+            if not roots & leaf:
+                continue
+            scored.append((-len(roots & path), -len(roots & leaf), len(own), own, english, menu.id))
+        scored.sort(key=lambda item: item[:3])
+        return [{"menu_id": menu_id, "path": own, "path_en": english}
+                for *_rank, own, english, menu_id in scored[:MAX_GROUND_SCREENS]]
 
     def _find_reference(self, text):
         """:return: the records whose name or reference is ``text`` exactly,

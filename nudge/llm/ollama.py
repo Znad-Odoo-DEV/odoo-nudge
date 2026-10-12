@@ -19,8 +19,10 @@ CREATE_TIMEOUT = 120
 # The context Nudge gives a model it prepares is a multiple of this: the
 # memory of a context grows with it, and a laptop's card has little to spare
 CONTEXT_STEP = 4096
-# A model prepared for Nudge answers from what it is given: less inventive
+# A model prepared for Nudge answers from what it is given: less inventive,
+# and a small model writing Arabic falls into repeating a word without a nudge
 TEMPERATURE = 0.4
+REPEAT_PENALTY = 1.1
 TAG = re.compile(r"^[A-Za-z0-9_.-]+$")
 
 
@@ -140,7 +142,7 @@ def prepare(base_url, model, context, api_key=""):
     target = name_for_nudge(model)
     if not TAG.match(target.partition(":")[2]):
         raise base.AdapterError(base.ERROR_BAD_REQUEST, f"{model!r} cannot be named for Nudge")
-    parameters = {"num_ctx": int(context), "temperature": TEMPERATURE}
+    parameters = {"num_ctx": int(context), "temperature": TEMPERATURE, "repeat_penalty": REPEAT_PENALTY}
     _call("POST", base_url, "/api/create", api_key,
           {"model": target, "from": model, "parameters": parameters, "stream": False},
           timeout=CREATE_TIMEOUT)

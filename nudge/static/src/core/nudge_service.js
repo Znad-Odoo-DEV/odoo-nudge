@@ -649,6 +649,7 @@ function isReadable(file) {
             const events = message.screen_events || [];
             const shown = events.find((event) => event.type === "guidance");
             const products = events.find((event) => event.type === "products");
+            const screens = events.find((event) => event.type === "found");
             const told = events
                 .filter((event) =>
                     ["navigate", "write", "open", "filter", "open_action"].includes(event.type)
@@ -663,6 +664,7 @@ function isReadable(file) {
                 guidance: shown?.steps || [],
                 products: products?.items || null,
                 productQuery: products?.query || "",
+                found: screens ? { menus: screens.menus || [] } : null,
                 choice: "",
                 spoken: Boolean(message.is_spoken),
                 attachment: message.attachment_name || "",
@@ -1118,6 +1120,10 @@ function isReadable(file) {
                 case "products":
                     answer.products = event.items || [];
                     answer.productQuery = event.query || "";
+                    break;
+                case "found":
+                    // Screens Nudge found itself: the pointer to each, or Open
+                    answer.found = { menus: event.menus || [] };
                     break;
                 case "filter":
                     answer.content = join(answer.content, event.text);

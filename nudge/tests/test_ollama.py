@@ -91,7 +91,8 @@ class TestOllamaApi(BaseCase):
         self.patch(ollama.requests, "request", http)
         self.assertEqual(ollama.prepare("http://box:11434/v1", "qwen3:8b", 24576), "qwen3:8b-nudge")
         self.assertEqual(http.calls[0][2], {"model": "qwen3:8b-nudge", "from": "qwen3:8b",
-                                            "parameters": {"num_ctx": 24576, "temperature": ollama.TEMPERATURE},
+                                            "parameters": {"num_ctx": 24576, "temperature": ollama.TEMPERATURE,
+                                                           "repeat_penalty": ollama.REPEAT_PENALTY},
                                             "stream": False})
 
 
