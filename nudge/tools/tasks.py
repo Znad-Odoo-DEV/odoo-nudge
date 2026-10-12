@@ -6,6 +6,7 @@ worth changing waits for them as a card.
 """
 from odoo import _
 from . import base
+from .developer import every_text
 from .records import (
     CONDITION_SCHEMA_ITEMS,
     MAX_CONDITIONS,
@@ -13,6 +14,7 @@ from .records import (
     Refused,
     build_domain,
     get_model,
+    model_label,
     refusing,
 )
 
@@ -59,7 +61,9 @@ class PrepareTask(base.Action):
     }
 
     def is_available(self, env, mode=base.MODE_TALK):
-        return super().is_available(env, mode) and env["nudge.task"]._max_per_user() > 0
+        # In Developer mode what runs on a schedule is built: a scheduled action
+        return (mode != base.MODE_DEV and super().is_available(env, mode)
+                and env["nudge.task"]._max_per_user() > 0)
 
     @refusing
     def run(self, env, arguments, screen):
@@ -81,7 +85,6 @@ class PrepareTask(base.Action):
             "weekday": str(WEEKDAYS.index(arguments["weekday"])) if arguments.get("weekday") else False,
             "send_email": bool(arguments.get("email")) and "mail.mail" in env,
         }
-        labels = dict(Task._fields["interval_type"]._description_selection(env))
         lines = [
             {"label": _("Name"), "value": values["name"]},
             {"label": _("Each time"), "value": values["instruction"]},
@@ -95,7 +98,7 @@ class PrepareTask(base.Action):
             # Read now as the person: a condition they cannot use is refused here
             build_domain(model, conditions, arguments.get("match"))
             values.update(model_name=model._name, conditions=conditions, match=arguments.get("match") or "all")
-            watched = model._description + (
+            watched = model_label(model) + (
                 " — " + "; ".join(f"{c['field']} {c['operator']} {c['value']}" for c in conditions)
                 if conditions else "")
             lines.append({
@@ -103,8 +106,7 @@ class PrepareTask(base.Action):
                 "value": watched,
             })
         if kind == "schedule":
-            when = _("Every %(number)s %(unit)s", number=values["interval_number"],
-                         unit=labels.get(values["interval_type"], values["interval_type"]))
+            when = _("Every %s", every_text(env, values["interval_number"], values["interval_type"]))
             if values["interval_type"] != "hours":
                 when += _(", at %s:00", values["hour"])
             if values["weekday"]:

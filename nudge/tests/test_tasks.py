@@ -36,13 +36,20 @@ class TestTasks(BackgroundCase, TransactionCase):
         })
         self.assertFalse(result.is_error, result.content)
         lines = {line["label"]: line["value"] for line in result.pending["preview"]["lines"]}
-        self.assertIn("Every 1 Weeks, at 8:00, Monday", lines["When"])
+        self.assertIn("Every week, at 8:00, Monday", lines["When"])
         self.assertIn("Read, as you", lines["It may"])
         self.assertFalse(self.env["nudge.task"].search([("name", "=", "Overdue every morning")]),
                          "Nothing is made by asking")
         self.assertTrue(self.run_tool("prepare_task", {
             "name": "Watch", "kind": "watch", "instruction": "Tell me about the new contacts."}).is_error,
             "A watch needs its model")
+
+    def test_developer_mode_builds_a_scheduled_action_instead(self):
+        # "Every Monday remind the salespeople", asked in Developer mode, became a personal task
+        task = tools.base.TOOLS["prepare_task"]
+        env = self.env(user=self.agent)
+        self.assertTrue(task.is_available(env, tools.base.MODE_AGENT))
+        self.assertFalse(task.is_available(env, tools.base.MODE_DEV))
 
     def test_said_yes_to(self):
         self.use_adapter(script=[
