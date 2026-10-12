@@ -169,6 +169,22 @@ class TestOllamaProvider(NudgeCase, TransactionCase):
         self.assertGreaterEqual(created[0][2]["parameters"]["num_ctx"], self.provider.context_needed)
         self.assertEqual(self.provider.model_name, "qwen3:8b-nudge")
         self.assertEqual(self.provider.context_length, created[0][2]["parameters"]["num_ctx"])
+        self.assertGreaterEqual(self.provider.timeout, 180, "A model on one's own machine is given time")
+
+    def test_a_picture_is_not_sent_to_a_model_that_cannot_see(self):
+        from .test_attachments import PNG  # noqa: PLC0415
+
+        adapter = self.use_adapter()
+        self.server()
+        self.provider.is_ollama = True
+        line = self.env["nudge.provider.model"].create({
+            "provider_id": self.provider.id, "name": "qwen3:8b", "sees_pictures": False})
+        conversation = self.env["nudge.conversation"].with_user(self.user_a)._chat_open(None)
+        with self.assertRaisesRegex(UserError, "cannot read pictures"):
+            conversation._chat_prepare("What is this?", attachment=("photo.png", PNG, "image/png"))
+        self.assertEqual(adapter.calls, [], "Nothing is sent")
+        line.sees_pictures = True
+        self.assertTrue(conversation._chat_prepare("What is this?", attachment=("photo.png", PNG, "image/png")))
 
     def test_the_warning_follows_the_context(self):
         self.provider.is_ollama = True

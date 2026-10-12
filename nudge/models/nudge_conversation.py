@@ -464,6 +464,11 @@ class NudgeConversation(models.Model):
         if self.message_count >= limit:
             raise UserError(self.env._("This conversation is getting long. Start a new one."))
         provider = self._chat_provider(mode)
+        if found and found["image"] and not provider._can_see_pictures():
+            # Said before anything is sent: the model would refuse the picture
+            raise UserError(self.env._(
+                "%s cannot read pictures. Describe it in words, or ask your administrator for a "
+                "model that sees them.", provider.model_name))
 
         conversation = self.sudo()
         # What waited for a decision is left: the person moved on
