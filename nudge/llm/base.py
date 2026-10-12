@@ -49,6 +49,8 @@ class ProviderConfig:
     capabilities: dict = dataclasses.field(default_factory=dict, repr=False)
     stt_mode: str = STT_NONE
     stt_model: str = ""
+    # The address of the transcription service, when it is not base_url
+    stt_url: str = ""
 
 
 def text_event(text):

@@ -58,6 +58,8 @@
                             <field name="tool_set" required="1"/>
                             <field name="context_length" invisible="not is_ollama"/>
                             <field name="context_needed" invisible="not is_ollama"/>
+                            <field name="picture_model" invisible="not is_ollama"
+                                   placeholder="qwen2.5vl:3b"/>
                             <field name="effort"/>
                             <field name="refusal_fallback" invisible="kind != 'anthropic'"/>
                             <field name="is_configured"/>
@@ -67,6 +69,8 @@
                             <field name="stt_model" invisible="stt_mode == 'none'"
                                    required="stt_mode == 'endpoint'"
                                    placeholder="e.g. whisper-large-v3"/>
+                            <field name="stt_url" invisible="stt_mode != 'endpoint'"
+                                   placeholder="http://localhost:8000/v1"/>
                             <field name="can_transcribe"/>
                         </group>
                     </group>

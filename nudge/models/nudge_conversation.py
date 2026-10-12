@@ -485,10 +485,13 @@ class NudgeConversation(models.Model):
             raise UserError(_("This conversation is getting long. Start a new one."))
         provider = self._chat_provider(mode)
         if found and found["image"] and not provider._can_see_pictures():
-            # Said before anything is sent: the model would refuse the picture
-            raise UserError(_(
-                "%s cannot read pictures. Describe it in words, or ask your administrator for a "
-                "model that sees them.", provider.model_name))
+            # A model of the server that sees reads it; without one, said
+            # before anything is sent: the model would refuse the picture
+            media_type, data = found["image"]
+            found = dict(found, image=None, text=_(
+                "What the picture shows, as read by %(model)s:\n%(text)s",
+                model=provider.picture_model or "", text=provider._read_picture(media_type, data, text)),
+                kept_image=found["image"])
 
         conversation = self.sudo()
         # What waited for a decision is left: the person moved on
@@ -540,7 +543,18 @@ class NudgeConversation(models.Model):
             "wants_pointer": explain == "screen" and bool(screen_values),
             **screen_values,
         })
-        if found and found["image"]:
+        if found and found.get("kept_image"):
+            # Kept for the person to see; the model was given what was read
+            media_type, data = found["kept_image"]
+            message.attachment_id = self.env["ir.attachment"].sudo().create({
+                "name": found["name"],
+                "datas": data,
+                "mimetype": media_type,
+                "res_model": "nudge.message",
+                "res_id": message.id,
+                "description": "read",
+            })
+        elif found and found["image"]:
             media_type, data = found["image"]
             message.attachment_id = self.env["ir.attachment"].sudo().create({
                 "name": found["name"],
@@ -623,6 +637,9 @@ class NudgeConversation(models.Model):
         """:return: the image sent with ``message``, for the model to look at"""
         attachment = message.sudo().attachment_id if message.role == "user" else None
         if not attachment or not attachment.datas or not (attachment.mimetype or "").startswith("image/"):
+            return []
+        if attachment.description == "read":
+            # Read by the picture model: its words went with the question
             return []
         return [{"media_type": attachment.mimetype, "data": attachment.datas.decode("ascii")}]
 

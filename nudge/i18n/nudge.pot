@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-11 06:43+0000\n"
-"PO-Revision-Date: 2026-10-11 06:43+0000\n"
+"POT-Creation-Date: 2026-10-11 07:30+0000\n"
+"PO-Revision-Date: 2026-10-11 07:30+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -77,7 +77,7 @@ msgstr ""
 
 #. module: nudge
 #. odoo-python
-#: code:addons/nudge/models/nudge_conversation.py:0
+#: code:addons/nudge/models/nudge_provider.py:0
 msgid ""
 "%s cannot read pictures. Describe it in words, or ask your administrator for"
 " a model that sees them."
@@ -258,6 +258,15 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/tools/commands.py:0
 msgid "A field, a term or this screen, explained by the AI in a few words"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_provider__picture_model
+msgid ""
+"A model of this Ollama server that sees pictures, such as qwen2.5vl:3b, for "
+"a model in use that does not: it reads the picture sent, and what it read "
+"goes with the question. Prepare for Nudge chooses one when the server has "
+"it."
 msgstr ""
 
 #. module: nudge
@@ -3576,6 +3585,11 @@ msgid "Pick one with Fetch Models"
 msgstr ""
 
 #. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__picture_model
+msgid "Picture Model"
+msgstr ""
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider_model__sees_pictures
 msgid "Pictures"
 msgstr ""
@@ -4289,6 +4303,11 @@ msgid "Source"
 msgstr ""
 
 #. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__stt_url
+msgid "Speech Address"
+msgstr ""
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider__stt_model
 msgid "Speech Model"
 msgstr ""
@@ -4582,6 +4601,14 @@ msgstr ""
 msgid ""
 "The AI service answering new conversations. Leave empty to use the first "
 "provider that is ready."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_provider__stt_url
+msgid ""
+"The address of the transcription service, when it is not this provider's: a "
+"Whisper on your own machine for an Ollama, which does not transcribe "
+"(http://localhost:8000/v1). The key of this provider is not sent there."
 msgstr ""
 
 #. module: nudge
@@ -5008,6 +5035,11 @@ msgstr ""
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__tool_calls
 msgid "Tool Calls"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__tool_groups
+msgid "Tool Groups"
 msgstr ""
 
 #. module: nudge
@@ -5455,6 +5487,14 @@ msgid "What the person said."
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid ""
+"What the picture shows, as read by %(model)s:\n"
+"%(text)s"
+msgstr ""
+
+#. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_step__summary
 msgid "What the step does, in the words shown to the person."
 msgstr ""
@@ -5861,6 +5901,11 @@ msgstr ""
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
+msgid "http://localhost:8000/v1"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
 msgid "https://api.example.com/v1"
 msgstr ""
 
@@ -5898,6 +5943,11 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_message.xml:0
 msgid "page"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
+msgid "qwen2.5vl:3b"
 msgstr ""
 
 #. module: nudge

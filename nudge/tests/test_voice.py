@@ -201,6 +201,23 @@ class TestSpeechAdapter(BaseCase):
         self.assertEqual(request["headers"], {"Authorization": "Bearer sk-test"},
                          "The type of the form is left to the library that writes it")
 
+    def test_a_transcription_service_of_its_own_address(self):
+        # Ollama does not transcribe: a Whisper on the same machine does
+        adapter = self.adapter(stt_mode=base.STT_ENDPOINT, stt_model="large-v3-turbo",
+                               stt_url="http://localhost:8000/v1/")
+        sent = []
+
+        def post(url, **kwargs):
+            sent.append((url, kwargs))
+            return FakeResponse(body={"text": "كيف بأكّد العرض؟"})
+
+        self.patch(openai_compat_adapter.requests, "post", post)
+        result = adapter.transcribe(wav(), language="ar")
+        self.assertEqual(result["text"], "كيف بأكّد العرض؟")
+        url, request = sent[0]
+        self.assertEqual(url, "http://localhost:8000/v1/audio/transcriptions")
+        self.assertEqual(request["headers"], {}, "The key of the provider stays with the provider")
+
     def test_a_transcription_service_needs_a_model(self):
         with self.assertRaises(base.AdapterError) as capture:
             self.adapter(stt_mode=base.STT_ENDPOINT).transcribe(wav())

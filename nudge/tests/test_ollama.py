@@ -188,6 +188,30 @@ class TestOllamaProvider(NudgeCase, TransactionCase):
         line.sees_pictures = True
         self.assertTrue(conversation._chat_prepare("What is this?", attachment=("photo.png", PNG, "image/png")))
 
+    def test_a_picture_model_reads_for_a_model_that_cannot_see(self):
+        from .test_attachments import PNG  # noqa: PLC0415
+
+        self.use_adapter()
+        self.server()
+        self.provider.write({"is_ollama": True, "picture_model": "qwen2.5vl:3b"})
+        self.env["nudge.provider.model"].create({
+            "provider_id": self.provider.id, "name": "qwen3:8b", "sees_pictures": False})
+        read = []
+
+        def read_picture(base_url, model, data, question="", api_key=""):
+            read.append((model, question))
+            return "A red office chair, label FURN_7777", {"input_tokens": 300, "output_tokens": 12}
+
+        self.patch(ollama, "read_picture", read_picture)
+        conversation = self.env["nudge.conversation"].with_user(self.user_a)._chat_open(None)
+        job = conversation._chat_prepare("Do we sell this?", attachment=("photo.png", PNG, "image/png"))
+        self.assertEqual(read, [("qwen2.5vl:3b", "Do we sell this?")])
+        question = job["turns"][-1]
+        self.assertIn("FURN_7777", question["context"], "What was read goes with the question")
+        self.assertFalse(question.get("images"), "The picture itself is not sent to a model without eyes")
+        message = conversation.sudo().message_ids.filtered(lambda message: message.role == "user")
+        self.assertTrue(message.attachment_id, "Kept for the person to see")
+
     def test_the_warning_follows_the_context(self):
         self.provider.is_ollama = True
         self.provider.context_length = 4096
