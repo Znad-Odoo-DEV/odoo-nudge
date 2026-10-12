@@ -170,7 +170,7 @@ def get_records(model, ids, operation="read"):
     except AccessError:
         records = records.browse()
     if len(records) != len(set(ids)):
-        verb = {"read": "read", "write": "change"}[operation]
+        verb = {"read": "read", "write": "change", "unlink": "delete", "create": "create"}.get(operation, operation)
         raise Refused(
             f"Among {model._name} {sorted(set(ids))}, some do not exist or this person cannot "
             f"{verb} them. Look them up with search_records.")

@@ -523,6 +523,29 @@ class TestDeveloper(NudgeCase, TransactionCase):
         self.assertTrue(refused.is_error)
         self.assertIn('"kind": "code"', refused.content)
 
+    def test_code_that_would_fail_or_do_nothing_is_refused(self):
+        from odoo.addons.nudge.tools.developer import compile_code  # noqa: PLC0415
+
+        # What qwen3.5:4b wrote, and the cards said yes to
+        self.assertIn("only opens a window", compile_code("action = dict(active='False')", self.env))
+        self.assertIn("no model 'ir.lang'", compile_code("env['ir.lang'].search([])", self.env))
+        self.assertIn("datetime.datetime.now()", compile_code("record.write({'comment': datetime.now()})", self.env))
+        self.assertIn("record.write(", compile_code("record.active = False", self.env))
+        self.assertIn("changes nothing", compile_code("names = list(records.ids)", self.env))
+        # What is right passes
+        for code in ("records.write({'active': False})", "log('checked')",
+                     "action = {'type': 'ir.actions.act_window', 'res_model': 'res.partner', 'views': [[False, 'list']]}",
+                     "env['res.lang'].search([]).mapped('code')\nlog('ok')",
+                     "record.write({'comment': str(datetime.datetime.now())})"):
+            self.assertEqual(compile_code(code, self.env), "", code)
+
+    def test_deleting_what_is_not_there_is_said(self):
+        # prepare_delete of an id that does not exist failed with KeyError: 'unlink'
+        self.switch(True)
+        refused = self.run_tool("prepare_delete", {"model": "ir.actions.server", "ids": [987654]})
+        self.assertTrue(refused.is_error)
+        self.assertIn("cannot delete them", refused.content)
+
     def test_every_monday_starts_on_a_monday(self):
         from datetime import datetime  # noqa: PLC0415
 
