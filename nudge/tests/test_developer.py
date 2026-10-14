@@ -231,6 +231,8 @@ class TestDeveloper(NudgeCase, TransactionCase):
         template = self.env["mail.template"].search([("name", "=", "Statement")])
         self.assertEqual(template.partner_to, "{{ object.self.id }}")
         self.assertEqual(template.body_html, "<p>Attached.</p>")
+        # Odoo's own sending goes to the people it names, not the record's default recipients
+        self.assertFalse(template.use_default_to)
 
     # ------------------------------------------------------------- server actions
     def test_a_server_action_in_the_actions_menu(self):

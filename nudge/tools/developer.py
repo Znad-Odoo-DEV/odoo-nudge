@@ -673,6 +673,22 @@ def path_label(model, path):
     return " › ".join(labels)
 
 
+# Where a template names the people it goes to
+RECIPIENT_FIELDS = ("partner_to", "email_to", "email_cc")
+
+
+def addressed(values):
+    """:return: the values of a template, made to go to the people it names.
+
+    Odoo 19 makes a template with Default Recipients on, and its own sending
+    (the email of an automation rule, the composer of a record) then writes
+    to the contact of the record and leaves out To and Copy to as written:
+    "to the salesperson" went to the customer."""
+    if any(values.get(name) for name in RECIPIENT_FIELDS):
+        return dict(values, use_default_to=False)
+    return values
+
+
 def read_recipients(env, model, to, cc=None):
     """:param to: fields of the record that hold a contact or an address, or addresses
     :return: ``(partner_to, email_to, email_cc, lines of the card)``, as the
@@ -864,7 +880,7 @@ def make_action(env, values, template):
     """Create the server action and, when it comes with one, its template."""
     values = dict(values)
     if template:
-        values["template_id"] = env["mail.template"].create(template).id
+        values["template_id"] = env["mail.template"].create(addressed(template)).id
     return env["ir.actions.server"].create(values)
 
 
@@ -1176,7 +1192,7 @@ class PrepareEmailTemplate(Building):
         values = (step.values or {}).get("template") or {}
         if not values.get("name"):
             return base.ToolResult("This template cannot be made.", is_error=True)
-        template = env["mail.template"].create(values)
+        template = env["mail.template"].create(addressed(values))
         return base.ToolResult(
             f"Made: email template #{template.id} {template.name!r}. "
             "It is in Settings ‣ Technical ‣ Email Templates.",
