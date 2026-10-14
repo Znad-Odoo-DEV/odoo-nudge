@@ -7,7 +7,7 @@ from what it read, with a formatted table, totals and a chart, and opens it.
 Installed by itself when Nudge and the Spreadsheet module are both there.
 """,
     "category": "Productivity",
-    "version": "18.0.1.0.6",
+    "version": "18.0.1.0.7",
     "author": "Ibrahim Elzenad",
     "license": "OPL-1",
     "images": ["static/description/banner.png"],
