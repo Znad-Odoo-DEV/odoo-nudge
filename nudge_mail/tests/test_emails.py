@@ -1,9 +1,11 @@
+import importlib.util
 from types import SimpleNamespace
 
 from lxml import etree
 
 from odoo.exceptions import UserError
 from odoo.tests import TransactionCase, new_test_user, tagged
+from odoo.tools.misc import file_path
 
 from odoo.addons.mail.tests.common import MockEmail
 from odoo.addons.nudge import tools
@@ -145,6 +147,70 @@ class TestEmails(NudgeCase, MockEmail, TransactionCase):
         self.assertEqual(template.email_to, "{{ object.email }}")
         self.assertEqual(template.email_cc, "{{ object.user_id.partner_id.email_formatted }}")
         self.assertTrue(template.get_external_id()[template.id].startswith("nudge_custom."))
+
+    def test_odoo_sends_a_designed_email_to_whom_it_names(self):
+        # Odoo 19 makes a template with "Default Recipients" on: its own sending, the email of an
+        # automation rule or the composer, then took the contact of the record and left out the
+        # people the design named, To and Copy to
+        to_salesperson = self.made(name="To the salesperson", to=["user_id"], cc=[])
+        self.assertFalse(to_salesperson.use_default_to)
+        salesperson = self.admin.partner_id
+
+        # The email action of an automation rule sends the template
+        action = self.env["ir.actions.server"].create({
+            "name": "Tell the salesperson", "model_id": self.env["ir.model"]._get_id("res.partner"),
+            "state": "mail_post", "mail_post_method": "email", "template_id": to_salesperson.id})
+        before = self.env["mail.mail"].sudo().search([]).ids
+        action.with_context(active_model="res.partner", active_id=self.partner.id).run()
+        mail = self.env["mail.mail"].sudo().search([("id", "not in", before)])
+        self.assertEqual(len(mail), 1)
+        self.assertEqual(mail.recipient_ids, salesperson)
+        self.assertFalse(mail.email_to)
+
+        # Copy to, the default design: the customer in To, the salesperson in copy
+        with_copy = self.made(name="With a copy")
+        mail = self.env["mail.mail"].sudo().browse(with_copy.send_mail(self.partner.id))
+        self.assertEqual(mail.email_to, self.partner.email)
+        self.assertIn("admin@acme.example", mail.email_cc or "")
+
+        # The composer opened with the template, as Send on a record opens it
+        composer = self.env["mail.compose.message"].with_context(
+            default_model="res.partner", default_res_ids=self.partner.ids,
+            default_composition_mode="comment", default_template_id=to_salesperson.id).create({})
+        self.assertEqual(composer.partner_ids, salesperson)
+
+    def test_the_update_sends_what_nudge_made_to_whom_it_names(self):
+        path = file_path("nudge/migrations/17.0.1.56.26/end-migrate.py")
+        spec = importlib.util.spec_from_file_location("nudge_end_migrate", path)
+        script = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(script)
+
+        Template = self.env["mail.template"]
+        partner_model = self.env["ir.model"]._get_id("res.partner")
+        designed = self.made(name="To the salesperson", to=["user_id"], cc=[])
+        # A template of Developer mode, known by the step that made it
+        plain = Template.create({"name": "Plain", "model_id": partner_model, "email_to": "{{ object.email }}"})
+        conversation = self.env["nudge.conversation"].with_user(self.admin)._chat_open()
+        run = self.env["nudge.run"].sudo().create({
+            "name": "Make it", "conversation_id": conversation.id, "user_id": self.admin.id})
+        self.env["nudge.step"].sudo().create({
+            "run_id": run.id, "tool": "prepare_email_template", "kind": "create", "state": "done",
+            "res_model": "mail.template", "res_ids": plain.ids})
+        # Made before this version, both had Default Recipients on
+        (designed | plain).use_default_to = True
+        # Not Nudge's, or naming nobody: left as they are
+        # Made with Default Recipients on, as Odoo 19 makes a template
+        theirs = Template.create({"name": "Theirs", "model_id": partner_model, "partner_to": "{{ object.id }}", "use_default_to": True})
+        nobody = self.made(name="Nobody named")
+        nobody.write({"partner_to": False, "email_to": False, "email_cc": False, "use_default_to": True})
+
+        script.migrate(self.env.cr, "17.0.1.56.25")
+        self.env.invalidate_all()
+        self.assertFalse(designed.use_default_to)
+        self.assertFalse(plain.use_default_to)
+        self.assertTrue(theirs.use_default_to, "Not made by Nudge")
+        self.assertTrue(nobody.use_default_to, "Names nobody: the recipients of the record")
+        script.migrate(self.env.cr, False)
 
     def test_every_style_renders_its_own_way(self):
         bodies = {}
