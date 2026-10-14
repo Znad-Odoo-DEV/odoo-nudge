@@ -2,6 +2,7 @@ import json
 import logging
 
 from odoo import http
+from odoo.exceptions import MissingError
 from odoo.tests import BaseCase, HttpCase, TransactionCase, tagged
 
 from odoo.addons.nudge import tools
@@ -300,6 +301,29 @@ class TestTools(NudgeCase, TransactionCase):
         self.assertEqual(names, sorted(names), "The list is part of the prompt")
         self.assertIn("show_on_screen", names)
         self.assertFalse(tools.base.available(self.env(user=self.outsider)))
+
+    def test_a_reference_to_a_record_deleted_since_reads_as_gone(self):
+        # A rule of Studio pointed at an action deleted since: the name of the action could not
+        # be read, and the whole list of rules failed. Odoo clears the home action of a user
+        # when its action is deleted, by hand; Studio leaves its rules pointing at nothing
+        from odoo.addons.nudge.tools.records import reference_names  # noqa: PLC0415
+
+        action = self.env["ir.actions.act_window"].create({"name": "Nudge Gone", "res_model": "res.partner"})
+        user = self.user_a.sudo()
+        user.write({"action_id": action.id})
+        self.assertEqual(reference_names(user.action_id, "gone"), ["Nudge Gone"])
+        gone = action.id
+        action.unlink()
+        # Nothing in the database ties a reference to an action to it
+        self.env.cr.execute("UPDATE res_users SET action_id = %s WHERE id = %s", (gone, user.id))
+        self.env.invalidate_all()
+        self.assertTrue(user.action_id)
+        with self.assertRaises(MissingError):
+            user.action_id.name  # noqa: B018
+        self.assertEqual(reference_names(user.action_id, "gone"), ["gone"])
+        partners = self.user_a.partner_id | self.env["res.partner"].browse(999999999)
+        self.assertEqual(reference_names(partners, "gone"), [self.user_a.partner_id.display_name, "gone"])
+        self.assertEqual(reference_names(self.env["res.users"], "gone"), [])
 
     def test_unknown_tool(self):
         result = self.run_tool("drop_database", {})

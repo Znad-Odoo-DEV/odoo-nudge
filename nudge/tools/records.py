@@ -177,6 +177,16 @@ def get_records(model, ids, operation="read"):
     return records
 
 
+def reference_names(records, gone):
+    """:return: the names of what ``records``, the value of a many2one or a
+    many2many, point at, read as the system; ``gone`` for each one deleted
+    since. A reference can outlive its record: nothing in the database ties
+    a reference to an action to the action, and the name of one deleted
+    cannot be read (MissingError), which took a whole list down with it."""
+    found = records.sudo().exists()
+    return found.mapped("display_name") + [gone] * (len(records) - len(found))
+
+
 def model_label(model):
     """:return: the name of a kind of record in the language of the person:
     ``_description`` is the English of the code, ir.model has the translations"""
