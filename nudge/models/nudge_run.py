@@ -291,7 +291,8 @@ class NudgeRun(models.Model):
         state = "failed" if result.is_error else "done"
         conversation.sudo()._agent_settle(step, state, tools.base.ToolResult(
             (FAILED if result.is_error else DONE_NOT_FINISHED if result.unfinished else DONE) % result.content,
-            is_error=result.is_error, records=result.records), [result.event] if result.event else [])
+            is_error=result.is_error, records=result.records, card_lines=result.card_lines),
+            [result.event] if result.event else [])
         self._commit()
         return True
 
@@ -327,7 +328,7 @@ class NudgeRun(models.Model):
         deleted, kept = undo_built(self.env, runs)
         message = self.env._("Deleted: %s.", ", ".join(deleted)) if deleted else self.env._("Nothing made here still exists.")
         if kept:
-            message += " " + self.env._("Kept: %s.", "; ".join(kept))
+            message += " " + self.env._("Kept: %s.", "; ".join(f"{name} ({why})" for name, why in kept))
         return {
             "type": "ir.actions.client",
             "tag": "display_notification",

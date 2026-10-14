@@ -747,6 +747,76 @@ class TestDeveloper(NudgeCase, TransactionCase):
         self.decide(conversation)
         self.assertEqual(len(adapter.calls), 2)
 
+    def test_an_undo_that_went_through_reads_as_done(self):
+        # The card of an undo that deleted the one rule made read "Undo: Not possible:
+        # deleted for good" and "Not undone: What was changed rather than made"
+        from .test_agent import asking, call, saying  # noqa: PLC0415
+
+        self.switch(True)
+        self.use_adapter(script=[
+            asking(call("prepare_server_action", {
+                "name": "Nudge Undo Me", "model": "res.partner",
+                "action": {"kind": "update", "field": "function", "value": "Buyer"}})),
+            saying("Made."),
+            asking(call("prepare_undo", {})),
+            saying("Undone."),
+        ])
+        conversation = self.env["nudge.conversation"].with_user(self.admin)._chat_open()
+        job = conversation._chat_prepare("Make an action that sets the job to Buyer", mode="dev")
+        list(loop.run(job, conversation._chat_record))
+        self.decide(conversation)
+        self.assertTrue(self.env["ir.actions.server"].search([("name", "=", "Nudge Undo Me")]))
+
+        job = conversation._chat_prepare("Undo what you built", mode="dev")
+        list(loop.run(job, conversation._chat_record))
+        step = conversation.sudo().waiting_step_id
+        self.assertEqual(step.tool, "prepare_undo")
+        # Before the yes: what deleting means, and nothing about exceptions there are none of
+        self.assertEqual(step._get_card()["lines"], [
+            {"label": "Deleted", "value": "For good: it cannot be brought back"}])
+
+        events = self.decide(conversation)
+        decided = next(event for event in events if event["type"] == "decided")
+        self.assertEqual(decided["state"], "done")
+        self.assertEqual(decided["lines"], [{"label": "Deleted", "value": "All of it"}])
+        self.assertFalse(self.env["ir.actions.server"].search([("name", "=", "Nudge Undo Me")]))
+        # Read again later, the card says the same
+        card = self.env["nudge.step"].with_user(self.admin).get_cards(conversation.id)[step.message_id.id]
+        self.assertEqual(card["lines"], [{"label": "Deleted", "value": "All of it"}])
+
+    def test_what_an_undo_leaves_as_it_is_is_named(self):
+        self.switch(True)
+        conversation = self.env["nudge.conversation"].with_user(self.admin)._chat_open()
+        run = self.env["nudge.run"].sudo().create({
+            "name": "Build", "conversation_id": conversation.id, "user_id": self.admin.id, "is_developer": True})
+        env = self.env(user=self.admin, context={"nudge_mode": "dev", "nudge_conversation_id": conversation.id})
+        made = tools.base.call(env, "prepare_server_action", {
+            "name": "Nudge Undo Too", "model": "res.partner",
+            "action": {"kind": "update", "field": "function", "value": "Buyer"}}, None, "dev")
+        done = self.do("prepare_server_action", made)
+        model, ids, _names = done.records
+        Step = self.env["nudge.step"].sudo()
+        Step.create({"run_id": run.id, "tool": "prepare_server_action", "kind": "create", "state": "done",
+                     "res_model": model, "res_ids": ids})
+        # Changed rather than made; and tried on a dummy record, which kept nothing
+        Step.create({"run_id": run.id, "tool": "prepare_write", "kind": "write", "state": "done",
+                     "res_model": "res.partner", "res_ids": [self.admin.partner_id.id],
+                     "summary": "Change: Contact"})
+        Step.create({"run_id": run.id, "tool": "try_automation", "kind": "code", "state": "done",
+                     "summary": "Try on a dummy record"})
+
+        asked = tools.base.call(env, "prepare_undo", {}, None, "dev")
+        self.assertEqual(asked.pending["preview"]["lines"], [
+            {"label": "Deleted", "value": "For good: it cannot be brought back"},
+            {"label": "Stays as it is", "value": "Change: Contact"}])
+        undone = self.do("prepare_undo", asked)
+        self.assertFalse(undone.is_error, undone.content)
+        self.assertEqual(undone.card_lines, [
+            {"label": "Deleted", "value": "All of it"},
+            {"label": "Stays as it is", "value": "Change: Contact"}])
+        self.assertIn("Left as it is", undone.content)
+        self.assertIn("Change: Contact", undone.content)
+
     def test_empty_code_says_where_the_lines_go(self):
         # A code action came with no code, and "The code is empty." showed no way forward
         told = compile_code("  ", self.env)
