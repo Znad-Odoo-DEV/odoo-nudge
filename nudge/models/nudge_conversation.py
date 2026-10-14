@@ -998,7 +998,9 @@ class NudgeConversation(models.Model):
         error_message = False
         if error:
             error_message = self._chat_error_message(error["code"], provider)
-        elif state == "refused" and not text:
+        elif state == "refused":
+            # Declined midway, what was written is no answer: it is not kept
+            text = ""
             error_message = self.env._("Nudge cannot help with this request.")
         elif waiting:
             state = "waiting"
