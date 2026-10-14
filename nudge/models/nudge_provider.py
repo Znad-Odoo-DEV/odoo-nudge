@@ -249,7 +249,20 @@ class NudgeProvider(models.Model):
         if self.kind == "anthropic":
             self.requires_api_key = True
 
+    @staticmethod
+    def _clean_key(vals):
+        # A blank or a line break around a pasted key makes the HTTP header
+        # invalid: the request is refused before it leaves
+        if vals.get("api_key"):
+            return dict(vals, api_key=vals["api_key"].strip())
+        return vals
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        return super().create([self._clean_key(vals) for vals in vals_list])
+
     def write(self, vals):
+        vals = self._clean_key(vals)
         if "capabilities" not in vals and {"model_name", "kind", "base_url"} & vals.keys():
             # Capabilities belong to one model of one provider
             vals = dict(vals, capabilities=False)
@@ -299,7 +312,7 @@ class NudgeProvider(models.Model):
         return base.ProviderConfig(
             kind=self.kind,
             model=self.model_name or "",
-            api_key=self.api_key or "",
+            api_key=(self.api_key or "").strip(),
             base_url=(self.base_url or "").strip(),
             max_output_tokens=self.max_output_tokens,
             effort=self.effort or "",

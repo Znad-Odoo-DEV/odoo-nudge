@@ -444,7 +444,7 @@ class TestVoice(NudgeCase, TransactionCase):
         self.assertEqual(set(hotkeys) & set(dictation), {"none"}, "Two shortcuts, never the same")
 
     def test_upgrade_tells_the_known_providers_how_to_listen(self):
-        path = file_path("nudge/migrations/19.0.1.1.0/post-migrate.py")
+        path = file_path("nudge/migrations/17.0.1.1.0/post-migrate.py")
         spec = importlib.util.spec_from_file_location("nudge_post_migrate", path)
         script = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(script)
@@ -455,14 +455,14 @@ class TestVoice(NudgeCase, TransactionCase):
         (gemini | groq | ollama).write({"stt_mode": "none", "stt_model": False})
         groq.base_url = "https://proxy.example.com/v1"
 
-        script.migrate(self.env.cr, "19.0.1.0.0")
+        script.migrate(self.env.cr, "17.0.1.0.0")
         self.env.invalidate_all()
         self.assertEqual((gemini.stt_mode, gemini.stt_model), ("chat", "gemini-3.1-flash-lite"))
         self.assertEqual(groq.stt_mode, "none", "Made another provider by its administrator")
         self.assertEqual(ollama.stt_mode, "none")
 
         gemini.write({"stt_mode": "none", "stt_model": "their-choice"})
-        script.migrate(self.env.cr, "19.0.1.0.0")
+        script.migrate(self.env.cr, "17.0.1.0.0")
         self.env.invalidate_all()
         self.assertEqual(gemini.stt_mode, "none", "What someone decided is left alone")
         gemini.write({"stt_model": False})
