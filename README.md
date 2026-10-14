@@ -14,7 +14,7 @@ Long work is done in the background: leave it to Nudge, go on with something els
 when it is done or when your answer is needed.
 
 What is left is listed under [What is not there yet](#what-is-not-there-yet). A short guide for the people who use it:
-[docs/user-guide.md](nudge/doc/user-guide.md), [بالعربية](nudge/doc/user-guide.ar.md).
+[doc/user-guide.md](nudge/doc/user-guide.md), [بالعربية](nudge/doc/user-guide.ar.md).
 
 ## What Nudge does
 
@@ -69,7 +69,7 @@ Nudge acts as the person, never beyond them: every tool runs with their rights, 
 record rules and their companies; the models that hold how Odoo works and the fields
 that hold secrets are closed whatever the rights. What leaves the database, who may do
 what, the switches an administrator holds, what is written down, and the known
-trade-offs are in [docs/security.md](nudge/doc/security.md).
+trade-offs are in [doc/security.md](nudge/doc/security.md).
 
 ## Try it for free
 
@@ -188,8 +188,10 @@ say "Nudge, do it" after it explained how.
 - Writing a new message instead of answering leaves the question undecided: nothing is done.
 
 What Nudge can do is what you can do: a record you cannot open is not found, a button you do not
-have on the form cannot be pressed. Some things it never does, whoever asks: it never deletes,
-and it never touches users, access rights, companies, or the settings of Odoo.
+have on the form cannot be pressed. It never deletes, whoever asks. Users, groups, access rights,
+companies and the settings of Odoo are closed by default; an administrator can switch on **Nudge for
+Administrators** (Settings ‣ Nudge), and from then on those changes go through the same yes-cards,
+for administrators, one at a time.
 
 ### In the background
 
@@ -262,8 +264,8 @@ The administrator is a Manager after installation. Give access to others from
   what Nudge was doing when it was last heard of; a manager can stop it.
 - **Nudge ‣ What Nudge Did ‣ Changes**: every record created or changed, every button pressed:
   for whom, on which records, what was written, what the person was shown, and what they
-  answered. Nobody can change or delete this log, administrators included, and a conversation
-  in which Nudge acted can be archived but not deleted.
+  answered. This log cannot be changed or deleted from the interface, and a conversation in
+  which Nudge acted can be archived but not deleted.
 
 ## API keys
 
@@ -283,7 +285,7 @@ odoo-bin -d <test database> --test-enable --stop-after-init \
     --test-tags "/web:WebSuite.test_unit_desktop[@nudge]"
 ```
 
-Tests never call a real provider. Manual checks: [docs/manual-test.md](nudge/doc/manual-test.md).
+Tests never call a real provider. Manual checks: [doc/manual-test.md](nudge/doc/manual-test.md).
 
 On Windows with Git Bash, prefix the commands with `MSYS_NO_PATHCONV=1`, otherwise `/nudge` is
 rewritten into a file path.
@@ -322,7 +324,8 @@ rewritten into a file path.
 - Each answer being streamed occupies one Odoo worker until it ends.
 - Free, small models make language mistakes, in Arabic especially, and sometimes point at
   less than they could. A stronger model answers better.
-- Tested against the real Gemini API. The Anthropic provider has not been tried against the real API.
+- Tested against the real Gemini and Anthropic APIs. With Anthropic, a key that is not scoped to a
+  workspace (a user key) needs the **Workspace ID** on the provider form; Test Connection says so.
 - Voice through the AI provider was tried with real recordings, in Arabic and English. Voice
   through the browser is tested with a stand-in for the microphone: it has not been tried with
   someone talking.
@@ -340,6 +343,10 @@ rewritten into a file path.
   (`tests/test_injection.py`). What a model does with an injected instruction that stays
   within its rights (say, writing a text the note told it to write) is up to the model, and
   the person who says yes.
+- What Developer mode builds (rules, server actions, email templates, scheduled actions, fields,
+  views, reports) is registered under the xml-id module `nudge_custom`, so it stays when Nudge is
+  uninstalled: list it under Settings ‣ Technical ‣ External Identifiers, filtered on the module
+  `nudge_custom`, or, while Nudge is there, with `/rules` and the model.
 - Dark mode is prepared but only takes effect on Odoo Enterprise; it has not been tested.
 - The blur behind a guided step needs `backdrop-filter`; on a browser without it, the rest
   of the screen is only dimmed.

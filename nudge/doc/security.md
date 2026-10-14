@@ -77,7 +77,7 @@ Every call of a tool by the agent is a step in *What Nudge Did*: the tool, what 
 asked, what was shown to the person, what they decided, what came back, how long it took;
 Python code and SQL queries included, with the purpose the model gave. Every call to a
 provider is a row of the usage ledger: who, when, how many tokens, at what price. Rows of the
-ledger are never edited or deleted, by anybody. Budgets per person per day and per company
+ledger cannot be edited or deleted from the interface. Budgets per person per day and per company
 per month stop Nudge before a call.
 
 ## What Nudge is told about instructions in data
@@ -133,6 +133,9 @@ steer Nudge was closed:
   `env`, no `sudo`, no other user or company, no write, no search, no secret.
 - Deletion is for what Nudge or Studio made, when asked for by name: a rule, an action, a
   template, a scheduled action, a view or a field that belongs to a module is never deleted.
+- What Developer mode builds is registered under the xml-id module `nudge_custom`: that is how it is
+  found again and exported, and it stays when Nudge is uninstalled. Settings ▸ Technical ▸ External
+  Identifiers lists it by that module.
 - @Nudge in a chatter or a channel (Nudge: Discuss) is answered as the person who wrote it, in
   Talk mode, with one tool only, the official documentation. What it is told of the record is
   what every reader of the record sees: the fields no group keeps, the usual fields of the

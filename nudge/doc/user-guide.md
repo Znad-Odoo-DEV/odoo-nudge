@@ -249,7 +249,8 @@ code, the recipients and the text of an email, the difference a change makes to 
 is made before you say yes. A rule can be tried first on a dummy record that is discarded
 afterwards; a scheduled action can be run once the same way. What Nudge made is switched off with
 a change, and deleted only when you ask for it by name; a view or a field of a module is never
-touched. Every step is in What Nudge Did.
+touched. Every step is in What Nudge Did. What Nudge builds is registered under the module name
+`nudge_custom` (Settings ‣ Technical ‣ External Identifiers), and stays when Nudge is uninstalled.
 
 ### Emails that look designed
 
