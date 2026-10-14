@@ -55,6 +55,6 @@ Set the key, then use "Fetch Models" and pick a model whose name ends with ":fre
         <field name="price_cache_read">0.2</field>
         <field name="price_cache_write">5.0</field>
         <field name="notes">Paid. Get a key from the Claude console (platform.claude.com).
-Requires the "anthropic" Python package on the server. Prices are in USD per million tokens.</field>
+Needs the "anthropic" Python package on the server: pip install anthropic, or a line "anthropic" in the requirements.txt at the root of the repository on Odoo.sh, then restart Odoo. Prices are in USD per million tokens.</field>
     </record>
 </odoo>
