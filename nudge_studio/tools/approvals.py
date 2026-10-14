@@ -13,7 +13,7 @@ from odoo.addons.nudge.tools import base
 from odoo.addons.nudge.tools.developer import DELETABLE, Building, check_developing, in_words, ir_model
 from odoo.addons.nudge.tools.records import (
     CONDITION_SCHEMA_ITEMS, MODEL_PATTERN, Refused, build_domain, cut, get_model, get_records, model_label,
-    refusing,
+    reference_names, refusing,
 )
 
 RULE = "studio.approval.rule"
@@ -61,25 +61,54 @@ def find_users(env, names):
     return found
 
 
+def button_of(rule):
+    """:return: the button a rule is on, in words. What it points at may be
+    gone: an action deleted since (rule #56 on purchase.order pointed at
+    action #3375), a method its model no longer has."""
+    if rule.method:
+        model = rule.env[rule.model_name] if rule.model_name in rule.env else None
+        if model is None or not callable(getattr(type(model), rule.method, None)):
+            return f"{rule.method}, a method {rule.model_name} no longer has"
+        return rule.method
+    if rule.action_id:
+        name = reference_names(rule.action_id, "")[0]
+        return (f"action #{rule.action_id.id} {name!r}" if name
+                else f"action #{rule.action_id.id}, a button action that no longer exists")
+    return "?"
+
+
 def describe_rule(rule):
     who = []
     if rule.approver_ids:
-        who.append("approvers " + ", ".join(rule.approver_ids.mapped("name")))
+        who.append("approvers " + ", ".join(reference_names(rule.approver_ids, "a user deleted since")))
     if rule.approval_group_id:
-        who.append(f"group {rule.approval_group_id.display_name}")
-    what = rule.method or (f"action #{rule.action_id.id} {rule.action_id.name!r}" if rule.action_id else "?")
-    line = f"- #{rule.id} on {rule.model_name}, button {what}: {' and '.join(who) or 'nobody yet'}, step {rule.notification_order or '1'}"
+        group = reference_names(rule.approval_group_id, "")[0]
+        who.append(f"group {group}" if group else "a group that no longer exists")
+    line = (f"- #{rule.id} on {rule.model_name}, button {button_of(rule)}: {' and '.join(who) or 'nobody yet'}, "
+            f"step {rule.notification_order or '1'}")
     if rule.exclusive_user:
         line += ", exclusive"
     if rule.domain and rule.domain.strip() not in ("", "[]"):
         line += f", only when {rule.domain}"
     if rule.users_to_notify:
-        line += ", notifies " + ", ".join(rule.users_to_notify.mapped("name"))
+        line += ", notifies " + ", ".join(reference_names(rule.users_to_notify, "a user deleted since"))
     if rule.message:
         line += f" — {cut(rule.message, 120)!r}"
     if not rule.active:
         line += " (off)"
     return line
+
+
+def describe_rules(rules):
+    """:return: a line for each rule; one that cannot be read is said so, and
+    never keeps the others from being listed"""
+    lines = []
+    for rule in rules:
+        try:
+            lines.append(describe_rule(rule))
+        except Exception as error:  # noqa: BLE001
+            lines.append(f"- #{rule.id}: cannot be read ({cut(' '.join(str(error).split()), 160)})")
+    return lines
 
 
 @base.register
@@ -109,7 +138,7 @@ class ReadApprovalRules(base.Tool):
         model = get_model(env, arguments["model"])
         rules = env[RULE].with_context(active_test=False).search([("model_name", "=", model._name)], limit=MAX_LISTED)
         lines = [f"Approval rules on {model._name}: {len(rules)}"]
-        lines += [describe_rule(rule) for rule in rules]
+        lines += describe_rules(rules)
         buttons = form_buttons(env, model)
         lines.append("Buttons of the form a rule can go on: " + ("; ".join(
             f"{button['label']} ({'method ' + button['method'] if button['method'] else 'action #' + str(button['action_id'])})"
@@ -228,7 +257,7 @@ class PrepareApprovalRule(Building):
         values["users_to_notify"] = [Command.set(values.get("users_to_notify") or [])]
         rule = env[RULE].create(values)
         return base.ToolResult(
-            f"Made: approval rule #{rule.id} on {rule.model_name}, button {rule.method or rule.action_id.name!r}. "
+            f"Made: approval rule #{rule.id} on {rule.model_name}, button {button_of(rule)}. "
             "It shows on the button in Studio ‣ Properties, and the approvals asked for in the chatter of each record.",
             event={"type": "changed", "model": RULE, "ids": rule.ids, "action": {"type": "ir.actions.client", "tag": "reload"}},
             records=(RULE, rule.ids, [rule.display_name]),
