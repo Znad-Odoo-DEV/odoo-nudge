@@ -3,7 +3,7 @@ from types import SimpleNamespace
 
 from lxml import etree
 
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
 from odoo.tests import TransactionCase, new_test_user, tagged
 from odoo.tools.misc import file_path
 
@@ -430,6 +430,23 @@ class TestEmails(NudgeCase, MockEmail, TransactionCase):
         flow.button_groups = "base.group_system"
         with self.assertRaises(UserError):
             self.open_window(flow)
+
+    def test_a_window_made_by_hand_for_a_record_one_cannot_read_sends_nothing(self):
+        flow = self.made_flow()
+        self.partner.phone = "+971 4 555 0142"
+        self.partner.company_id = self.env["res.company"].create({"name": "Nudge Far Away"})
+        self.assertFalse(self.partner.with_user(self.clerk).has_access("read"))
+        # Not opened from the button, which checks: created with the ids of one's choice
+        window = self.env["nudge.email.review"].with_user(self.clerk).create({
+            "flow_id": flow.id, "res_id": self.partner.id,
+            "email_to": "rana@bluesky.example", "subject": "Hello"})
+        self.assertFalse(window.missing, "Nothing of the record is told, not even what it lacks")
+        with self.assertRaises(AccessError), self.mock_mail_gateway():
+            window.action_send()
+        with self.assertRaises(AccessError):
+            window.action_without_email()
+        self.assertFalse(self.partner.parent_id, "The button did nothing")
+        self.assertFalse(self.partner.message_ids.filtered(lambda message: "Hello" in (message.body or "")))
 
     def test_switched_off_and_deleted_with_its_button(self):
         flow = self.made_flow()
