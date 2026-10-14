@@ -662,6 +662,22 @@ class TestAnthropicAdapter(BaseCase):
                 self.adapter().check()
             self.assertEqual((caught.exception.code, caught.exception.detail), (code, said))
 
+    def test_a_key_of_no_workspace(self):
+        # A user key (sk-ant-usr-...) belongs to no workspace: every request
+        # names one, or is answered with a 400
+        list(self.adapter().stream_chat(SYSTEM, TURNS))
+        self.assertNotIn("default_headers", self.client_arguments, "Nothing is sent when none is set")
+        list(self.adapter(workspace_id="wrkspc_01abc").stream_chat(SYSTEM, TURNS))
+        self.assertEqual(self.client_arguments["default_headers"], {"anthropic-workspace-id": "wrkspc_01abc"})
+
+        error = FakeAPIStatusError(400)
+        error.message = (
+            "This API key is not scoped to a workspace, so this request must include the "
+            "anthropic-workspace-id header with the ID of the workspace to use.")
+        self.stream = FakeStream([], FINAL, error=error)
+        events = list(self.adapter().stream_chat(SYSTEM, TURNS))
+        self.assertEqual(events[-1], base.error_event(base.ERROR_WORKSPACE, error.message))
+
     def test_check_asks_the_model(self):
         # Test Connection only looked the model up: a key that could not ask
         # it anything passed
