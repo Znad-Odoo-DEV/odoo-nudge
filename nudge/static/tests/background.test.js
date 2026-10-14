@@ -175,6 +175,20 @@ test("elsewhere, the person is told, and taken there", async () => {
     expect(nudge.state.news[0].is_unseen).toBe(false);
 });
 
+test("the answer in the toast reads as in the chat, not as its marks", async () => {
+    // "Nudge is done" showed "* **Reference:** S00049" as it was written
+    await start();
+    tell(news("done", {
+        text: "Your quotation is ready:\n\n* **Reference:** S00049\n* **Total:** *140.00*",
+    }));
+    await waitFor(".o_notification");
+    expect(".o_notification").toHaveText(/Nudge is done/);
+    expect(".o_notification_content li strong").toHaveCount(2);
+    expect(".o_notification_content li em").toHaveText("140.00");
+    expect(queryAllTexts(".o_notification_content li")).toEqual(["Reference: S00049", "Total: 140.00"]);
+    expect(".o_notification_content").not.toHaveText(/\*/);
+});
+
 test("what ended while the person was away is a badge", async () => {
     const { nudge } = await start({
         news: [
