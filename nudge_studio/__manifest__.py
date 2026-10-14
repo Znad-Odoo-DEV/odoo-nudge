@@ -1,6 +1,6 @@
 {
     "name": "Nudge: Studio",
-    "summary": "Approval rules on buttons and guidance inside Studio, by Nudge",
+    "summary": "Approval rules and guidance in Studio; installs with Studio",
     "description": """
 With Odoo Studio installed, Nudge builds what Studio builds: approval rules on
 the buttons of a form, made after a yes in Developer mode, and its pointer
@@ -9,7 +9,7 @@ person asks how to do something there. Installed by itself when Nudge and
 Studio are both there.
 """,
     "category": "Productivity",
-    "version": "18.0.1.0.4",
+    "version": "18.0.1.0.5",
     "author": "Ibrahim Elzenad",
     "license": "OPL-1",
     "images": ["static/description/banner.png"],
