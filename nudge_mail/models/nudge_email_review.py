@@ -90,10 +90,14 @@ class NudgeEmailReview(models.TransientModel):
     def _missing_labels(self):
         if not self.flow_id or not self.res_id:
             return []
-        record = self.env[self.flow_id.model].sudo().browse(self.res_id).exists()
-        if not record:
+        record = self.env[self.flow_id.model].browse(self.res_id).exists()
+        # A record the person cannot read tells them nothing, not even what it
+        # lacks: the window may have been made by hand, with any res_id
+        if not record or not record.has_access("read"):
             return []
-        # What must be filled is the administrator's setting: read as the system
+        # What must be filled is the administrator's setting: read as the
+        # system, as the values are, so that a field behind a group counts
+        record = record.sudo()
         return [field.field_description for field in self.flow_id.sudo().required_field_ids
                 if field.name in record._fields and not record[field.name]]
 
@@ -129,6 +133,8 @@ class NudgeEmailReview(models.TransientModel):
         self.ensure_one()
         flow = self.flow_id
         record = self._record()
+        # Checked here, not only when the window opened: flow_id and res_id
+        # come from the browser, and a window made by hand names any record
         flow.check_open_to(record)
         sender = self.env.user
         if not sender.email:
@@ -150,6 +156,9 @@ class NudgeEmailReview(models.TransientModel):
         # somebody else) is refused here, before anything is written or sent
         opened = self._run_button(record)
 
+        # The attachments were named by the browser too: only those the person
+        # may read go with the email and onto the record
+        self.attachment_ids.check_access("read")
         files = self.attachment_ids.sudo()
         files.write({"res_model": record._name, "res_id": record.id})
         header = Markup("<p><strong>%s</strong><br/>%s %s<br/>%s %s</p>") % (
@@ -159,6 +168,10 @@ class NudgeEmailReview(models.TransientModel):
         if hasattr(record, "message_post"):
             record.message_post(body=header + Markup(self.body or ""), message_type="comment",
                                 subtype_xmlid="mail.mt_note", attachment_ids=files.ids)
+        # As the system: outgoing emails are closed to anyone but administrators,
+        # and the person may send this one, as checked above, with what was
+        # checked too: addresses read by email_split, a subject and a body of
+        # their own, attachments they may read
         mail = self.env["mail.mail"].sudo().create({
             "subject": self.subject,
             "body_html": self.body or "",
