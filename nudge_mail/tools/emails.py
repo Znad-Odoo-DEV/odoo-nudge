@@ -18,7 +18,7 @@ from odoo.tools import html2plaintext
 from odoo.addons.nudge.tools import base
 from odoo.addons.nudge.tools.building import DryRun, RELOAD, make_view, preview_change, register, view_of
 from odoo.addons.nudge.tools.developer import (
-    CUSTOM_MODULES, DELETABLE, EMAIL_SCHEMA, Building, check_developing, ir_model, read_recipients,
+    CUSTOM_MODULES, DELETABLE, EMAIL_SCHEMA, Building, addressed, check_developing, ir_model, read_recipients,
 )
 from odoo.addons.nudge.tools.records import (
     MODEL_PATTERN, PATH_PATTERN, Refused, cut, get_model, get_records, model_label, refusing,
@@ -270,10 +270,10 @@ class PrepareEmailDesign(Mailing):
             if not made_here(template):
                 return base.ToolResult("This template was not designed here.", is_error=True)
             values.pop("model_id", None)
-            template.write(values)
+            template.write(addressed(values))
             told = f"Changed: email template #{template.id} {template.name!r}."
         else:
-            template = env["mail.template"].create(values)
+            template = env["mail.template"].create(addressed(values))
             register(env, template, f"email_{values['name']}")
             told = (f"Made: email template #{template.id} {template.name!r}. Offer a test to their own "
                     "address (send_test_email), then send it on an event (prepare_automation with "
