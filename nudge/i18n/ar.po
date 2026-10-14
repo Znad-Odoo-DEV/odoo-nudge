@@ -6230,3 +6230,51 @@ msgstr "إلا إذا %s"
 #: code:addons/nudge/tools/developer.py:0
 msgid "week"
 msgstr "أسبوع"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "All but what is kept"
+msgstr "الكل إلا ما أُبقي"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "All of it"
+msgstr "كله"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Deleted"
+msgstr "حُذف"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "For good: it cannot be brought back"
+msgstr "نهائيًا: لا يمكن استرجاعه"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Kept"
+msgstr "أُبقي"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Nothing"
+msgstr "لا شيء"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "Stays as it is"
+msgstr "يبقى كما هو"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "and %s more"
+msgstr "و%s غيرها"

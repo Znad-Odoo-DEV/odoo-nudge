@@ -1128,6 +1128,9 @@ class NudgeConversation(models.Model):
         }
         if names:
             values["record_names"] = ", ".join(map(str, names[:10]))[:500]
+        if state == "done" and result.card_lines is not None:
+            # The card says what was done, no longer what was about to be
+            values["preview"] = dict(step.preview or {}, lines=result.card_lines)
         step.write(values)
 
         message = step.message_id
@@ -1249,7 +1252,7 @@ class NudgeConversation(models.Model):
             result = tools.base.ToolResult(
                 (FAILED if result.is_error else DONE_NOT_FINISHED if result.unfinished else DONE)
                 % result.content, is_error=result.is_error, records=result.records,
-                unfinished=result.unfinished and not result.is_error)
+                unfinished=result.unfinished and not result.is_error, card_lines=result.card_lines)
         self._agent_settle(step, state, result, events)
         run = step.run_id
         first_events = [dict(step._get_card(), type="decided"), *events]
