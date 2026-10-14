@@ -632,6 +632,36 @@ class TestAnthropicAdapter(BaseCase):
             self.assertEqual([event["type"] for event in events], ["text", "error"])
             self.assertEqual(events[-1]["code"], code)
 
+    def test_what_the_connection_failed_on(self):
+        # "The provider could not be reached. APIConnectionError" was all that
+        # was told of a key the server took: the SDK raises it for whatever
+        # fails once the request is sent
+        error = FakeAPIConnectionError()
+        error.__cause__ = ValueError("bad gzip\nfor sk-ant-test")
+        self.stream = FakeStream(["Hel"], FINAL, error=error)
+        with self.assertLogs("odoo.addons.nudge.llm.anthropic_adapter", logging.INFO) as logs:
+            events = list(self.adapter().stream_chat(SYSTEM, TURNS))
+        detail = "FakeAPIConnectionError: ValueError: bad gzip for ***"
+        self.assertEqual(events[-1], base.error_event(base.ERROR_NETWORK, detail))
+        self.assertIn(detail, logs.output[0])
+        self.assertNotIn("sk-ant-test", logs.output[0])
+
+        # Test Connection says it too, and so does a timeout, from the first
+        # error under it that has words
+        timeout = FakeAPITimeoutError()
+        timeout.__cause__ = TimeoutError()
+        timeout.__cause__.__cause__ = OSError("The read operation timed out")
+        cases = [
+            (error, base.ERROR_NETWORK, detail),
+            (timeout, base.ERROR_TIMEOUT, "FakeAPITimeoutError: OSError: The read operation timed out"),
+            (FakeAPIConnectionError(), base.ERROR_NETWORK, "FakeAPIConnectionError"),
+        ]
+        for raised, code, said in cases:
+            self.check_error = raised
+            with self.assertRaises(base.AdapterError) as caught:
+                self.adapter().check()
+            self.assertEqual((caught.exception.code, caught.exception.detail), (code, said))
+
     def test_check_asks_the_model(self):
         # Test Connection only looked the model up: a key that could not ask
         # it anything passed
