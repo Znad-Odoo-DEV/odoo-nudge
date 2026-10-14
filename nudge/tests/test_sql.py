@@ -1,10 +1,13 @@
 import json
 
+import psycopg2.errors
+
 from odoo.tests import TransactionCase, new_test_user, tagged
+from odoo.tools import mute_logger
 
 from odoo.addons.nudge import tools
 from odoo.addons.nudge.llm.snapshot import HIDDEN
-from odoo.addons.nudge.tools.sql import SQL_PARAM
+from odoo.addons.nudge.tools.sql import SQL_PARAM, TIMEOUT_MS, read_only
 
 from .common import NudgeCase
 
@@ -75,6 +78,19 @@ class TestSql(NudgeCase, TransactionCase):
             ("select pg_sleep(1) from res_partner", "PG_SLEEP"),
             ("select set_config('x', 'y', false) from res_partner", "SET_CONFIG"),
             ("select 1", "FROM a table"),
+            # A function that runs a query of its own reads past the rule on tables
+            ("select query_to_xml('select * from '||'res_us'||'ers', true, false, '') "
+             "from res_partner limit 1", "may not call query_to_xml()"),
+            ("select table_to_xml('res_users', true, false, '') from res_partner", "may not call table_to_xml()"),
+            ("select xmlforest(name) from res_partner", "may not call xmlforest()"),
+            ("select chr(114) from res_partner", "may not call chr()"),
+            ("select pg_catalog.lower(name) from res_partner", "catalog"),
+            # A name built out of pieces, or spelt so that it is not read as a word
+            ("select 'res_us' || 'ers' as t from res_partner", "built with ||"),
+            ("select name || '!' from res_partner", "built with ||"),
+            ("select * from \"res_users\"", "no table"),
+            ("select * from \"res_us\"\"ers\"", "quoted name"),
+            ("select * from \"Res_Partner\"", "quoted name"),
         ]:
             result = self.query(text)
             self.assertTrue(result.is_error, text)
@@ -87,10 +103,48 @@ class TestSql(NudgeCase, TransactionCase):
         self.assertEqual(self.partners[0].name, "Nudge Sql One")
         self.assertTrue(self.payload("select id from res_partner where id = %d" % self.partners[0].id)["rows"])
 
+    def test_the_functions_of_a_report_are_called(self):
+        self.assertGreaterEqual(self.payload("select count(*) from res_partner")["rows"][0][0], 2)
+        payload = self.payload(
+            "select upper(\"name\") as n, round(coalesce(partner_latitude, 0)::numeric, 2) as lat, "
+            "to_char(create_date, 'YYYY') as y, date_trunc('month', now()) as m, "
+            "row_number() over (order by id) as r from res_partner where name like 'Nudge Sql%' "
+            "and id in (select id from res_partner) and exists (select 1 from res_partner) order by id")
+        self.assertEqual(payload["row_count"], 2)
+        self.assertEqual(payload["rows"][0][0], "NUDGE SQL ONE")
+
+    def test_the_database_itself_keeps_it_read_only(self):
+        # Were every word of a write to pass the checks, Postgres refuses it
+        with self.assertRaises(psycopg2.errors.ReadOnlySqlTransaction), mute_logger("odoo.sql_db"):
+            read_only(self.env.cr, "update res_partner set name = 'x' where id = %d" % self.partners[0].id)
+        self.assertEqual(self.partners[0].name, "Nudge Sql One")
+        with self.assertRaises(psycopg2.errors.ReadOnlySqlTransaction), mute_logger("odoo.sql_db"):
+            read_only(self.env.cr, "delete from res_partner where id = %d" % self.partners[0].id)
+        # The settings hold while the statement runs
+        self.assertEqual(read_only(self.env.cr, "show transaction_read_only")[1], [("on",)])
+        self.assertEqual(TIMEOUT_MS, 10000)
+        self.assertEqual(read_only(self.env.cr, "show statement_timeout")[1], [("10s",)])
+        # And go with the savepoint: the transaction of the request writes again
+        self.env.cr.execute("show transaction_read_only")
+        self.assertEqual(self.env.cr.fetchone(), ("off",))
+        self.partners[0].name = "Nudge Sql One Still"
+        self.partners[0].flush_recordset()
+        self.assertEqual(
+            read_only(self.env.cr, "select name from res_partner where id = %d" % self.partners[0].id)[1],
+            [("Nudge Sql One Still",)])
+
     def test_secrets_are_hidden_by_their_column(self):
         payload = self.payload(
             "select name as password from res_partner where name = 'Nudge Sql One'")
         self.assertEqual(payload["rows"][0][0], HIDDEN)
+
+    def test_secrets_are_hidden_by_their_value(self):
+        # A key or a hash is hidden whatever the column is called, even wrapped in a text
+        payload = self.payload(
+            "select concat('key: ', 'sk-ant-abc') as a, 'AIzaSyAbc' as b, 'gsk_abc' as c, "
+            "'$pbkdf2-sha512$abc' as d, '$2b$12$abc' as e, 'desk-top' as f, name as g "
+            "from res_partner where name = 'Nudge Sql One'")
+        self.assertEqual(payload["rows"][0], [HIDDEN, HIDDEN, HIDDEN, HIDDEN, HIDDEN, "desk-top", "Nudge Sql One"])
 
     def test_who_gets_it(self):
         def names(user, mode="agent"):
