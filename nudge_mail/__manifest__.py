@@ -15,10 +15,11 @@ Send does what the button it goes with does (approve, confirm, validate) and
 sends it, with a real Cc. Fields can be required before Send, and the work
 can be done without the email when the administrator allows it.
 
-Installed by itself when Nudge and Discuss are both there.
+Installed from Apps by an administrator who wants it, with Nudge and Discuss;
+never by itself.
 """,
     "category": "Productivity",
-    "version": "17.0.1.0.8",
+    "version": "17.0.1.0.9",
     "author": "Ibrahim Elzenad",
     "license": "OPL-1",
     "images": ["static/description/banner.png"],
@@ -27,6 +28,6 @@ Installed by itself when Nudge and Discuss are both there.
         "security/ir.model.access.csv",
         "views/nudge_email_views.xml",
     ],
-    "auto_install": True,
+    "auto_install": False,
     "installable": True,
 }
