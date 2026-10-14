@@ -84,12 +84,18 @@ class FindScreen(base.Tool):
 def menu_steps(env, path, texts):
     """:param path: the menus from the app down, as ``menu_path`` gives them
     :param texts: what to say at each menu; a menu without one is named
-    :return: the steps of the pointer through them"""
+    :return: the steps of the pointer through them
+
+    Below the sections of an app, a menu that holds other menus is only a
+    heading in the list its section opens: nothing to click, no step. The menu
+    under it is reached from the section."""
     texts = [text.strip() for text in texts if text and text.strip()]
     steps = []
+    parent = None
     for position, item in enumerate(path):
+        if 1 < position < len(path) - 1:
+            continue
         text = texts[position] if position < len(texts) else env._("Click “%s”.", item.name)
-        parent = path[position - 1] if position else None
         steps.append({
             "target": {
                 "type": "menu",
@@ -103,6 +109,7 @@ def menu_steps(env, path, texts):
             "text": text,
             "advance": "auto",
         })
+        parent = item
     return steps
 
 
