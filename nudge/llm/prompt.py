@@ -571,6 +571,7 @@ or the file you used. Do not do anything, and do not show steps on the screen.
 def build_system_blocks(overview="", mode="talk", can_use_agent=False, work="", can_develop=False,
                         is_administrator=False, focus=None, compact=False):
     """:param overview: what is known of the database, the same for everybody
+        who may know the same of it
     :param work: where the business works, among what this person may read
     :param mode: "talk", "agent" or "dev"
     :param can_use_agent: whether the person may switch to Agent mode

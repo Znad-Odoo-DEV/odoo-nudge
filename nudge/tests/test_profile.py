@@ -105,6 +105,20 @@ class TestCollectors(NudgeCase, TransactionCase):
         self.assertTrue(automation["restricted"])
         self.assertGreater(security["data"]["internal_users"], 4)
         self.assertIn("scheduled actions are active", automation["summary"])
+        # The numbers everybody reads carry no name
+        self.assertIn("scheduled actions are active", automation["data"]["public"])
+        self.assertIn(f"{security['data']['internal_users']} internal users", security["data"]["public"])
+        for cron in automation["data"]["scheduled_actions"]:
+            self.assertNotIn(cron["name"], automation["data"]["public"])
+
+    def test_the_names_are_capped_and_the_counts_are_not(self):
+        self.patch(collectors, "MAX_LISTED", 1)
+        crons = self.env["ir.cron"].search_count([("active", "=", True)])
+        self.assertGreater(crons, 1)
+        automation = self.slices(collectors.collect_automation)["automation"]
+        self.assertEqual(len(automation["data"]["scheduled_actions"]), 1)
+        self.assertIn(f"{crons} scheduled actions are active", automation["summary"])
+        self.assertIn(f"{crons} scheduled actions are active", automation["data"]["public"])
 
     def test_nothing_secret_is_read(self):
         self.env["ir.config_parameter"].set_param("nudge.test_secret", "s3cr3t-value")
@@ -212,7 +226,7 @@ class TestProfile(NudgeCase, TransactionCase):
         Note.create({"name": "Approval", "body": "Orders above 10,000 need the manager.", "sequence": 1})
         Note.create({"name": "Old", "body": "No longer true.", "active": False})
 
-        overview = self.Profile._get_overview()
+        overview = self.Profile.with_user(self.user_a)._get_overview()
         self.assertIn("## This database", overview)
         self.assertIn("Tours (web_tour)", overview)
         self.assertIn('- Words: We call quotations "offers".', overview)
@@ -226,11 +240,43 @@ class TestProfile(NudgeCase, TransactionCase):
         self.assertIn("## Where the work is", system[2])
         self.assertEqual(system[1], overview)
         self.ask(self.user_b, "Hello")
-        self.assertEqual(adapter.calls[1]["system"], system, "The same for everybody: read once")
-        # What depends on the person comes last: what comes before is shared
+        self.assertEqual(adapter.calls[1]["system"], system, "The same for everybody who may know the same: read once")
+        # What depends on the person comes after what is shared: a manager
+        # reads more of the database, and their own rules
         self.ask(self.manager, "Hello")
-        self.assertEqual(adapter.calls[2]["system"][:2], system[:2])
+        self.assertEqual(adapter.calls[2]["system"][:1], system[:1])
+        self.assertIn("## Automation", adapter.calls[2]["system"][1])
         self.assertNotEqual(adapter.calls[2]["system"][-1], system[-1])
+
+    def test_what_the_overview_tells_whom(self):
+        self.use_custom()
+        # A group of a custom module, and a company the person does not work in
+        group = self.env["res.groups"].create({"name": "Nudge Tour Keepers"})
+        self.env["ir.model.data"].create({
+            "name": "group_nudge_tour_keepers", "module": "web_tour", "model": "res.groups", "res_id": group.id})
+        self.env["res.company"].create({"name": "Nudge Second Company"})
+        builder.build(self.env, "install")
+
+        told = self.Profile.with_user(self.user_a)._get_overview()
+        manager = self.Profile.with_user(self.manager)._get_overview()
+        for text in (told, manager):
+            self.assertIn("## This database", text)
+            self.assertIn("scheduled actions are active", text, "The numbers are for everybody")
+            self.assertIn("internal users", text)
+        self.assertIn("1 group(s) added by custom modules", told, "The number, without the names")
+        self.assertNotIn("Nudge Tour Keepers", told, "The names are not for a person who cannot read them")
+        self.assertNotIn("Nudge Second Company", told, "Nor the companies they do not work in")
+        self.assertIn("Groups added by custom modules: Nudge Tour Keepers", manager)
+        self.assertIn("Companies: ", manager)
+        self.assertIn("Nudge Second Company", manager)
+        self.assertIn("Nudge Tour Keepers", self.Profile._get_overview(), "An administrator reads as a manager")
+        # In the conversation too
+        adapter = self.use_adapter()
+        self.ask(self.user_a, "Hello")
+        self.assertNotIn("Nudge Tour Keepers", "".join(adapter.calls[0]["system"]))
+        self.assertIn("scheduled actions are active", adapter.calls[0]["system"][1])
+        self.ask(self.manager, "Hello")
+        self.assertIn("Nudge Tour Keepers", adapter.calls[1]["system"][1])
 
     def test_first_question_reads_the_database(self):
         self.assertFalse(self.Profile._get_current())

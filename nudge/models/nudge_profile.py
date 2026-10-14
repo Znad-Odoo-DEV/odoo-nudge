@@ -103,14 +103,30 @@ class NudgeProfile(models.Model):
 
     @api.model
     def _get_overview(self):
-        """:return: what every conversation starts with: the overview of the
-        database and the notes of the business. The same for everybody, so
-        that it is read once and reused."""
+        """:return: what a conversation starts with: the overview of the
+        database, what of its automation and access the person may know, and
+        the notes of the business. The same for everybody who may know the
+        same, so that it is read once and reused."""
         profile = self._get_current()
+        user = self.env.user
+        # The managers of Nudge and the administrators read the names; the
+        # others read the numbers, and the companies they work in
+        knows_names = user.has_group("nudge.group_nudge_manager") or user.has_group("base.group_system")
         parts = []
         overview = profile.slice_ids.filtered(lambda piece: piece.key == "overview")
         if overview:
-            parts.append("## This database\n" + overview._get_summary())
+            text = overview._get_summary()
+            companies = (overview.data or {}).get("companies") or []
+            if not knows_names:
+                allowed = set(user.company_ids.mapped("name"))
+                companies = [name for name in companies if name in allowed]
+            if len(companies) > 1:
+                text += f"\nCompanies: {', '.join(companies)}."
+            parts.append("## This database\n" + text)
+        for piece in profile.slice_ids.filtered("restricted"):
+            text = piece._get_summary() if knows_names else (piece.data or {}).get("public") or ""
+            if text:
+                parts.append(f"## {piece.title}\n{text}")
         notes = self.env["nudge.note"].sudo()._get_text()
         if notes:
             parts.append(
