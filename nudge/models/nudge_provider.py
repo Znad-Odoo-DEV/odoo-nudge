@@ -382,7 +382,10 @@ class NudgeProvider(models.Model):
                 "The provider took too long to answer. A model that is still loading answers the "
                 "next time; a thinking model answers faster with a lower Reasoning Effort."),
             base.ERROR_UNAVAILABLE: self.env._("The provider is temporarily unavailable."),
-            base.ERROR_MISSING_LIBRARY: self.env._("A Python library is missing on the server."),
+            base.ERROR_MISSING_LIBRARY: self.env._(
+                "The Python package of this provider is not installed on the server. Install it with "
+                "the command below, or on Odoo.sh add its name to the requirements.txt at the root of "
+                "the repository, then restart Odoo."),
             base.ERROR_UNSUPPORTED: self.env._("The provider cannot do this."),
         }
         message = messages.get(error.code, self.env._("The provider returned an error."))

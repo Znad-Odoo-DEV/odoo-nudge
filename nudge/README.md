@@ -47,7 +47,9 @@ What is left is listed under [What is not there yet](#what-is-not-there-yet). A 
 ## Install
 
 Requirements: Odoo 19.0 (Community or Enterprise). No extra Python package, unless you use the
-Anthropic provider (`pip install -r requirements.txt`).
+Anthropic provider: Claude needs the `anthropic` Python package on the server (`pip install anthropic`;
+on Odoo.sh, a line `anthropic` in the `requirements.txt` at the root of the repository). Nudge installs
+without it; **Test Connection** on the provider says when it is missing, and what to do.
 
 1. Add this folder to the `addons_path` of Odoo.
 2. Update the apps list and install **Nudge**.

@@ -44,7 +44,9 @@
 ## التثبيت
 
 المتطلبات: أودو 19.0 (Community أو Enterprise). لا حاجة إلى أي حزمة Python إضافية، إلا إذا
-استخدمت مزود Anthropic‏ (`pip install -r requirements.txt`).
+استخدمت مزود Anthropic: يحتاج Claude إلى حزمة Python ‏`anthropic` على الخادم (`pip install anthropic`؛
+وعلى Odoo.sh سطر `anthropic` في ملف `requirements.txt` في جذر المستودع). يثبَّت Nudge بدونها؛ وزر
+**اختبار الاتصال** في المزود يقول إن كانت ناقصة وماذا تفعل.
 
 1. أضف هذا المجلد إلى `addons_path` في أودو.
 2. حدّث قائمة التطبيقات ثم ثبّت **Nudge**.
