@@ -72,6 +72,35 @@ class TestApprovals(NudgeCase, TransactionCase):
         self.do("prepare_delete", gone)
         self.assertFalse(rule.exists())
 
+    def test_a_rule_left_pointing_at_what_is_gone_is_listed_with_the_others(self):
+        # On dev_0, rule #56 on purchase.order pointed at action #3375, deleted since: reading
+        # its name failed (MissingError), no rule was listed, and the card was built blind
+        for step in (1, 2):
+            result = self.run_tool("prepare_approval_rule", {
+                "model": "res.partner", "method": "create_company", "approvers": ["nudge_approver"], "step": step})
+            self.assertFalse(result.is_error, result.content)
+            self.assertFalse(self.do("prepare_approval_rule", result).is_error)
+        rules = self.env["studio.approval.rule"].search(
+            [("model_name", "=", "res.partner"), ("method", "=", "create_company")], order="id")
+        self.assertEqual(len(rules), 2)
+        action = self.env["ir.actions.act_window"].create({"name": "Nudge Gone", "res_model": "res.partner"})
+        gone = action.id
+        action.unlink()
+        # Nothing in the database ties a rule to its action: it is left pointing at nothing
+        self.env.cr.execute(
+            "UPDATE studio_approval_rule SET method = NULL, action_id = %s WHERE id = %s", (gone, rules[0].id))
+        self.env.cr.execute(
+            "UPDATE studio_approval_rule SET method = 'action_gone_since' WHERE id = %s", (rules[1].id,))
+        self.env.invalidate_all()
+
+        listed = self.run_tool("read_approval_rules", {"model": "res.partner"})
+        self.assertFalse(listed.is_error, listed.content)
+        self.assertIn(f"#{rules[0].id} on res.partner, button action #{gone}, a button action that no "
+                      "longer exists: approvers Nudge Approver", listed.content)
+        self.assertIn(f"#{rules[1].id} on res.partner, button action_gone_since, a method res.partner "
+                      "no longer has: approvers Nudge Approver, step 2", listed.content)
+        self.assertIn("method create_company", listed.content, "The buttons of the form all the same")
+
     def test_what_is_wrong_is_told(self):
         for bad, said in (
             ({"model": "res.partner", "method": "nowhere", "approvers": ["nudge_approver"]}, "no such button"),
