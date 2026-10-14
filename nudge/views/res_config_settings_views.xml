@@ -124,6 +124,9 @@
                                         string="What Was Spent" icon="oi-arrow-right" class="btn-link"/>
                             </div>
                         </setting>
+                        <setting help="One answer holds one worker of the server while it streams; a few at once leave none for the screens of everyone else. 0 is automatic: the workers of the server less two, at least one. Past the limit, Nudge asks the person to try again in a moment. Work in the background does not count.">
+                            <field name="nudge_max_streams"/>
+                        </setting>
                     </block>
                     <block title="Access" name="nudge_access_container">
                         <setting help="Give Nudge to every internal user. Otherwise, add people to the Nudge groups one by one.">

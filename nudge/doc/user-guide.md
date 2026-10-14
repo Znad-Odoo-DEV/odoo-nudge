@@ -364,6 +364,8 @@ undoes it.
 - "Nudge ran out of time before it was done": it read what it needed and the time was up. Say
   "go on" and it continues from there, or press the clock and leave the work to it.
 - "You used all of your Nudge tokens for today": your administrator set a budget.
+- "Nudge is answering other people right now": the server answers only so many at once; try
+  again in a moment.
 - Nudge does not see your screen: open the eye, or ask your administrator, who may have turned
   screen sharing off.
 - The microphone is blocked: allow it in the address bar of your browser.

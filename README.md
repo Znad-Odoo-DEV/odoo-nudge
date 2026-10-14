@@ -260,6 +260,10 @@ The administrator is a Manager after installation. Give access to others from
   day, with tokens and cost. **Settings ‣ Nudge ‣ Budgets** sets what may be spent: tokens or
   cost, per person and per day, per company and per month; 0 is no limit. Past a limit, Nudge
   says it must wait until tomorrow, or until next month.
+- **Settings ‣ Nudge ‣ Budgets ‣ Answers at the Same Time**: one answer holds one worker of the
+  server while it streams, so the answers to everybody together are capped; the default cap is
+  the workers of the server less two. Past it, Nudge asks the person to try again in a moment.
+  Work in the background does not count.
 - **Nudge ‣ What Nudge Did ‣ Requests**: what people asked Nudge to do, with every step it took,
   the model that was used, tokens and cost. A request worked on in the background says so, and
   what Nudge was doing when it was last heard of; a manager can stop it.

@@ -109,6 +109,47 @@ class TestChat(NudgeCase, TransactionCase):
         conversation.sudo().stream_started_at = fields.Datetime.now() - timedelta(minutes=5)
         self.ask(self.user_a, "Again", conversation_id=conversation.id)
 
+    def test_answers_at_the_same_time_are_capped(self):
+        self.use_adapter()
+        self.env["ir.config_parameter"].sudo().set_param(nudge_conversation.MAX_STREAMS_PARAM, "1")
+        conversation, _result = self.ask(self.user_a, "Hello")
+        # One answer streams: the only worker the cap leaves is taken
+        conversation.sudo().stream_started_at = fields.Datetime.now()
+        with self.assertRaisesRegex(UserError, "answering other people"):
+            self.ask(self.user_b, "Hello")
+        # Refused before anything of the question was kept
+        self.assertFalse(self.env["nudge.message"].sudo().search(
+            [("conversation_id.user_id", "=", self.user_b.id)]))
+        # The person being answered is told so, as before
+        with self.assertRaisesRegex(UserError, "your previous message"):
+            self.ask(self.user_a, "Again")
+        # The mark of a worker that died mid-answer does not count past the window
+        conversation.sudo().stream_started_at = fields.Datetime.now() - timedelta(minutes=5)
+        self.ask(self.user_b, "Hello")
+
+    def test_answers_at_the_same_time_follow_the_workers(self):
+        Conversation = self.env["nudge.conversation"]
+        Parameter = self.env["ir.config_parameter"].sudo()
+        # Nothing set: two workers are left to the screens of everyone else;
+        # a server without workers answers many
+        for workers, expected in ((6, 4), (4, 2), (3, 1), (2, 1), (0, 8)):
+            self.patch(nudge_conversation, "config", {"limit_time_real": 0, "workers": workers})
+            self.assertEqual(Conversation._get_max_streams(), expected, workers)
+        Parameter.set_param(nudge_conversation.MAX_STREAMS_PARAM, "0")
+        self.assertEqual(Conversation._get_max_streams(), 8)
+        Parameter.set_param(nudge_conversation.MAX_STREAMS_PARAM, "3")
+        self.assertEqual(Conversation._get_max_streams(), 3)
+        # The automatic value is the one a question meets
+        Parameter.set_param(nudge_conversation.MAX_STREAMS_PARAM, "0")
+        self.use_adapter()
+        conversation, _result = self.ask(self.user_a, "Hello")
+        conversation.sudo().stream_started_at = fields.Datetime.now()
+        self.patch(nudge_conversation, "config", {"limit_time_real": 0, "workers": 3})
+        with self.assertRaisesRegex(UserError, "answering other people"):
+            self.ask(self.user_b, "Hello")
+        self.patch(nudge_conversation, "config", {"limit_time_real": 0, "workers": 4})
+        self.ask(self.user_b, "Hello")
+
     def test_conversation_has_a_maximum_length(self):
         self.use_adapter()
         conversation, _result = self.ask(self.user_a, "Hello")
