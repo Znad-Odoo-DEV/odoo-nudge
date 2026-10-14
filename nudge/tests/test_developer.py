@@ -162,6 +162,7 @@ class TestDeveloper(NudgeCase, TransactionCase):
         self.assertFalse(result.is_error, result.content)
         lines = {line["label"]: line["value"] for line in result.pending["preview"]["lines"] if "value" in line}
         self.assertEqual(lines["Delay"], "2 day after")
+        self.assertEqual(lines["Runs as"], "the system user", "The scheduler runs it, with every right")
         self.assertFalse(result.pending["is_sensitive"], "An update is not code")
         done = self.do("prepare_automation", result)
         rule = self.env["base.automation"].search([("name", "=", "Remind")])
@@ -238,6 +239,23 @@ class TestDeveloper(NudgeCase, TransactionCase):
         self.assertFalse(template.use_default_to)
 
     # ------------------------------------------------------------- server actions
+    def test_a_server_action_card_carries_its_code(self):
+        self.switch(True)
+        code = "for r in records:\n    r.write({'comment': 'Seen by the action'})"
+        result = self.run_tool("prepare_server_action", {
+            "name": "Mark seen", "model": "res.partner", "action": {"kind": "code", "code": code}})
+        self.assertFalse(result.is_error, result.content)
+        self.assertTrue(result.pending["is_sensitive"], "Code is sensitive")
+        lines = {line["label"]: line for line in result.pending["preview"]["lines"]}
+        self.assertEqual(lines["Code"]["value"], result.pending["values"]["action"]["code"],
+                         "The whole code that is about to be made, not a summary of it")
+        self.assertEqual(lines["Code"]["value"], code)
+        self.assertTrue(lines["Code"]["code"])
+        self.assertNotIn("Runs as", lines, "A server action runs as the person who runs it")
+        lines = {line["label"]: line for line in result.pending["preview"]["lines"] if not line.get("code")}
+        self.assertEqual(lines["Model"]["value"], "Contact")
+        self.assertIn("nowhere yet", lines["Shown in"]["value"])
+
     def test_a_server_action_in_the_actions_menu(self):
         self.switch(True)
         result = self.run_tool("prepare_server_action", {

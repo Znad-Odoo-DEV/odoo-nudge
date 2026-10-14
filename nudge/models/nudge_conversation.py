@@ -899,7 +899,9 @@ class NudgeConversation(models.Model):
                 must_read = True
             if result.event:
                 events.append(result.event)
-            results.append(dict(entry, content=result.content, is_error=result.is_error))
+            # What was read is framed as data; what went wrong is Nudge's own words
+            content = result.content if result.is_error else tools.base.as_data(call["name"], result.content)
+            results.append(dict(entry, content=content, is_error=result.is_error))
         return results, events, must_read, waiting
 
     def _chat_error_message(self, code, provider=None):
