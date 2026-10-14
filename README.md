@@ -52,6 +52,15 @@ Anthropic provider (`pip install -r requirements.txt`).
 1. Add this folder to the `addons_path` of Odoo.
 2. Update the apps list and install **Nudge**.
 
+## Editions
+
+- **Community and Enterprise**: Nudge, Nudge: Emails, Nudge: Discuss and Nudge Spreadsheets.
+  Everything in the table above works on Community: the pointer, Agent mode, Developer mode, the
+  commands, the tasks, the spreadsheets.
+- **Enterprise only**: Nudge: Studio (`web_studio`), Nudge: Odoo AI (`ai`) and Nudge Spreadsheets
+  in Documents (`documents_spreadsheet`), since the apps they bridge are Enterprise; and dark
+  mode, which Community does not have.
+
 ## Security
 
 Nudge acts as the person, never beyond them: every tool runs with their rights, their
