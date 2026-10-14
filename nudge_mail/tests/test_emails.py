@@ -331,6 +331,22 @@ class TestEmails(NudgeCase, MockEmail, TransactionCase):
         self.assertEqual(sorted(self._mails[0]["email_cc"]), ["it@acme.example", "manager@acme.example"])
         self.assertIn("Email sent", self.partner.message_ids[0].body)
 
+    def test_a_template_of_odoo_goes_to_the_recipients_of_the_record(self):
+        # The Review Email of a quotation, made with Odoo's "Sales: Send Quotation", opened with
+        # nobody in To: that template names nobody, and goes to the customer of the record
+        stock = self.env["mail.template"].create({
+            "name": "Contact: Send", "model_id": self.env["ir.model"]._get_id("res.partner"),
+            "subject": "Hello {{ object.name }}", "body_html": "<p>Hello</p>", "use_default_to": True,
+        })
+        flow = self.made_flow(template_id=stock.id)
+        self.assertEqual(self.open_window(flow).email_to, self.partner.email_formatted)
+        # A template that names its recipients is followed, as designed
+        designed = self.made_flow(template_id=self.made(name="To the salesperson", to=["user_id"]).id)
+        self.assertEqual(self.open_window(designed).email_to, self.admin.partner_id.email_formatted)
+        # Neither named nor the record's: nobody, which Send refuses
+        stock.use_default_to = False
+        self.assertFalse(self.open_window(flow).email_to)
+
     def test_without_the_email(self):
         flow = self.made_flow()
         window = self.open_window(flow)
