@@ -217,3 +217,27 @@ class TestUpload(NudgeCase, HttpCase):
             [("role", "=", "user"), ("attachment_name", "=", "quote.pdf")], order="id desc", limit=1)
         self.assertTrue(question)
         self.assertIn("S00042", question.context_text)
+
+    def test_a_file_too_large_or_of_another_kind_is_refused_before_it_is_read(self):
+        self.authenticate("nudge_a", "nudge_a")
+        adapter = self.use_adapter(reply="I read it.")
+
+        def refused(name, data, mimetype):
+            response = self.url_open("/nudge/chat/stream", data={
+                "csrf_token": http.Request.csrf_token(self),
+                "message": "What is this?",
+            }, files={"file": (name, data, mimetype)}, timeout=60)
+            self.assertEqual(response.status_code, 200, response.text[:300])
+            events = [json.loads(line) for line in response.text.splitlines() if line]
+            self.assertEqual([event["state"] for event in events], ["rejected"])
+            return events[0]["message"]
+
+        self.assertEqual(
+            refused("notes.txt", b"x" * (attachments.MAX_BYTES + 1), "text/plain"),
+            "The file is too large. The limit is 10 MB.")
+        self.assertEqual(
+            refused("setup.exe", b"MZ" * 10, "application/octet-stream"),
+            "Only PDF, text, CSV, Excel (.xlsx) and image files can be read.")
+        self.assertFalse(adapter.calls, "Nothing was asked")
+        self.assertFalse(self.env["nudge.message"].sudo().search(
+            [("role", "=", "user"), ("attachment_name", "in", ("notes.txt", "setup.exe"))]))

@@ -1211,6 +1211,8 @@ class TestAgentOverHttp(AgentCase, HttpCase):
         self.assertEqual(self.post("/nudge/agent/decide", "nudge_g", csrf=False, **target).status_code, 400)
         refused = self.events(self.post("/nudge/agent/decide", "nudge_m", **target))
         self.assertEqual(refused[0]["state"], "rejected")
+        self.assertEqual(refused[0]["message"], "This is not open to you.",
+                         "What is closed is said to be closed, not whose it is")
         for changed in ({"step_id": "abc"}, {"step_id": ""}, {"conversation_id": ""}, {"decision": "maybe"}):
             refused = self.events(self.post("/nudge/agent/decide", "nudge_g", **dict(target, **changed)))
             self.assertEqual(refused[0]["state"], "rejected", changed)

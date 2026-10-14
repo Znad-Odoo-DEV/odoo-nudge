@@ -3434,8 +3434,8 @@ msgstr "طلب واحد يُعمل عليه في الخلفية."
 #. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/core/nudge_service.js:0
-msgid "Only PDF, text, CSV and image files can be read."
-msgstr "لا تُقرأ إلا ملفات PDF والنصوص وCSV والصور."
+msgid "Only PDF, text, CSV, Excel (.xlsx) and image files can be read."
+msgstr "لا تُقرأ إلا ملفات PDF والنصوص وCSV وExcel (.xlsx) والصور."
 
 #. module: nudge
 #. odoo-python
@@ -5160,6 +5160,12 @@ msgstr "هذا الإجراء قيد التنفيذ بالفعل."
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "This is no longer waiting for you."
 msgstr "هذا الإجراء لم يعد ينتظر قرارك."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/controllers/chat.py:0
+msgid "This is not open to you."
+msgstr "هذا غير متاح لك."
 
 #. module: nudge
 #. odoo-python
