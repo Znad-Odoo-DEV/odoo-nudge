@@ -8,9 +8,13 @@ from odoo.exceptions import AccessError, UserError
 from odoo.http import Response, request
 from odoo.modules.registry import Registry
 
-from ..llm import loop
+from ..llm import attachments, loop
 
 _logger = logging.getLogger(__name__)
+
+# A file, the snapshot of the screen and the fields of the form around them:
+# a request announced larger carries a file too large, told before it is read
+MAX_REQUEST_BYTES = attachments.MAX_BYTES + 2 * 1024 * 1024
 
 STREAM_HEADERS = [
     ("Content-Type", "application/x-ndjson; charset=utf-8"),
@@ -66,10 +70,23 @@ class NudgeChat(http.Controller):
 
     @staticmethod
     def _read_upload(file):
-        """:return: (name, bytes, mimetype) of the uploaded file, or None"""
+        """:return: (name, bytes, mimetype) of the uploaded file, or None
+        :raise UserError: for a file of a kind that is not read, or too
+            large, said before the file is read in full"""
         if file is None or not getattr(file, "filename", None):
             return None
-        return (file.filename, file.read(), file.mimetype or "")
+        env = request.env
+        mimetype = file.mimetype or ""
+        if attachments.kind_of(file.filename, mimetype) is None:
+            raise UserError(_(attachments.WRONG_KIND))
+        too_large = _(attachments.TOO_LARGE, attachments.MAX_BYTES // (1024 * 1024))
+        if (request.httprequest.content_length or 0) > MAX_REQUEST_BYTES:
+            raise UserError(too_large)
+        # One byte more than allowed is enough to know that it is too much
+        data = file.read(attachments.MAX_BYTES + 1)
+        if len(data) > attachments.MAX_BYTES:
+            raise UserError(too_large)
+        return (file.filename, data, mimetype)
 
     @http.route("/nudge/agent/decide", type="http", auth="user", methods=["POST"])
     def agent_decide(self, conversation_id=None, step_id=None, decision=None, **kwargs):
@@ -102,8 +119,13 @@ class NudgeChat(http.Controller):
     @staticmethod
     def _reject(error):
         request.env.cr.rollback()
+        message = str(error)
+        if isinstance(error, AccessError):
+            # Said to be closed, not why: the why names what is closed to them
+            _logger.info("Nudge: refused for user %s: %s", request.env.uid, error)
+            message = _("This is not open to you.")
         return Response(
-            _line({"type": "error", "state": "rejected", "message": str(error)}),
+            _line({"type": "error", "state": "rejected", "message": message}),
             headers=STREAM_HEADERS,
         )
 
