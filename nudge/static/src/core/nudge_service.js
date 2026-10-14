@@ -14,6 +14,8 @@ import { DEFAULT_THEME, readPosition, THEMES } from "./looks";
 import { streamChat, streamDecision } from "./stream_client";
 
 const HISTORY_LIMIT = 30;
+// A change of the settings is read in a new page: menus and rights change with it
+const SETTINGS_MODEL = "res.config.settings";
 const MAX_HINTS = 40;
 // Buttons first: their names are what people say in the middle of a sentence
 const HINT_SOURCES = ["buttons", "tabs", "fields", "columns"];
@@ -578,11 +580,27 @@ function isReadable(file) {
         }
 
         /**
+         * @param {{ model: string, ids?: number[] }[]} [changed] records
+         *  written on the server, which the screen in front may show
+         */
+        async function refreshAll(changed) {
+            for (const records of changed || []) {
+                try {
+                    await refreshScreen(records);
+                } catch {
+                    // Written all the same: a screen that cannot be refreshed is refreshed by hand
+                }
+            }
+        }
+
+        /**
          * Something happened to a request worked on in the background.
          *
          * @param {Object} payload as the server sent it
          */
         function onNews(payload) {
+            // What was done in the background is on the screen in front
+            refreshAll(payload.changed);
             const isOver = ["done", "failed", "stopped"].includes(payload.kind);
             const known = state.news.find((news) => news.run_id === payload.run_id);
             const entry = {
@@ -980,31 +998,70 @@ function isReadable(file) {
         /**
          * Records were created or changed on the server: what the screen
          * shows of them is read again. A button may have opened a window:
-         * it is opened here, as after a click.
+         * it is opened here, as after a click. What Nudge built for the
+         * screens (a view, a button, a field, a report) redraws the screen in
+         * front.
          */
         async function onChanged(event) {
             try {
                 if (event.action) {
-                    if (event.action.tag === "reload") {
+                    const isReload = event.action.type === "ir.actions.client" && event.action.tag === "reload";
+                    if (isReload && event.model !== SETTINGS_MODEL && (await redrawScreen())) {
+                        return;
+                    }
+                    if (isReload) {
+                        forgetScreens();
                         keepAcrossReload();
                     }
                     await action.doAction(event.action);
                     return;
                 }
-                const view = context.frontView();
-                const model = view?.controller.model;
-                if (!model || view.controller.props.resModel !== event.model) {
-                    return;
-                }
-                if (view.type !== "form") {
-                    await model.load();
-                } else if ((event.ids || []).includes(model.root.resId) && !model.root.dirty) {
-                    // What the person typed and did not save is theirs
-                    await model.load();
-                }
+                await refreshScreen(event);
             } catch {
                 // The work is done: a screen that cannot be refreshed is refreshed by hand
             }
+        }
+
+        /**
+         * The list or the kanban in front of the kind of the records is read
+         * again; the form of one of them too, unless what the person typed in
+         * it is not saved.
+         * @param {{ model: string, ids?: number[] }} changed
+         */
+        async function refreshScreen(changed) {
+            const view = context.frontView();
+            const model = view?.controller.model;
+            if (!model || view.controller.props.resModel !== changed.model) {
+                return;
+            }
+            if (view.type !== "form") {
+                await model.load();
+            } else if ((changed.ids || []).includes(model.root.resId) && !model.root.dirty) {
+                // What the person typed and did not save is theirs
+                await model.load();
+            }
+        }
+
+        /**
+         * The browser keeps the screens it has shown (their views, their
+         * menus of actions and of reports), on disk: what Nudge built in them
+         * would not be seen, even after a reload of the page.
+         */
+        function forgetScreens() {
+            env.bus.trigger("CLEAR-CACHES");
+        }
+
+        /**
+         * The screen in front is drawn again, from screens read anew.
+         * @returns {Promise<boolean>} whether there was one
+         */
+        async function redrawScreen() {
+            if (!action.currentController) {
+                return false;
+            }
+            forgetScreens();
+            await action.doAction({ type: "ir.actions.client", tag: "soft_reload" });
+            return true;
         }
 
         async function openRecord(event) {
@@ -1494,6 +1551,7 @@ function isReadable(file) {
                 const result = await orm.call("nudge.step", "undo_changes", [stepId]);
                 Object.assign(card, result.card);
                 notification.add(result.message, { type: "success" });
+                await refreshAll(result.changed);
             } catch (error) {
                 card.can_undo = true;
                 throw error;

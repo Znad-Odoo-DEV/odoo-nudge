@@ -127,6 +127,8 @@ class TestBackground(BackgroundCase, TransactionCase):
         self.assertEqual([payload["kind"] for _channel, payload in told], ["done"])
         self.assertEqual(told[0][1]["text"], "Done: Nudge Made is created.")
         self.assertEqual(told[0][1]["state"], "done")
+        # What was done is on the screen the person has in front
+        self.assertEqual(told[0][1]["changed"], [{"model": "res.partner", "ids": partner.ids}])
         self.assertFalse(conversation.sudo().run_id.state == "running")
 
     def test_taken_up_in_pieces(self):
