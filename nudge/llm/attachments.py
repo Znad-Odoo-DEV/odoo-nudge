@@ -27,6 +27,11 @@ MAX_SHEETS = 5
 MAX_SHEET_ROWS = 60
 MAX_SHEET_COLUMNS = 30
 
+# Told to the person, by the controller before the file is read in full and
+# here when it was read
+TOO_LARGE = "The file is too large. The limit is %s MB."
+WRONG_KIND = "Only PDF, text, CSV, Excel (.xlsx) and image files can be read."
+
 
 class Unreadable(Exception):
     """The file cannot be read; the message is for the person."""
@@ -157,10 +162,10 @@ def read_attachment(name, data, mimetype):
     if not data:
         raise Unreadable("The file is empty.")
     if len(data) > MAX_BYTES:
-        raise Unreadable("The file is too large. The limit is %s MB." % (MAX_BYTES // (1024 * 1024)))
+        raise Unreadable(TOO_LARGE % (MAX_BYTES // (1024 * 1024)))
     kind = kind_of(name, mimetype)
     if kind is None:
-        raise Unreadable("Only PDF, text, CSV, Excel (.xlsx) and image files can be read.")
+        raise Unreadable(WRONG_KIND)
     found = {"name": name, "kind": kind, "size": len(data), "text": "", "truncated": False,
              "pages": 0, "note": "", "image": None}
     if kind == "pdf":
