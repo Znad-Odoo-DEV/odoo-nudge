@@ -4,15 +4,18 @@ import { advanceTime, animationFrame } from "@odoo/hoot-mock";
 
 import { session } from "@web/session";
 import {
+    defineMenus,
     defineModels,
     fields,
     getService,
     models,
     mountView,
+    mountWithCleanup,
     onRpc,
     patchWithCleanup,
     webModels,
 } from "@web/../tests/web_test_helpers";
+import { NavBar } from "@web/webclient/navbar/navbar";
 
 import { PRESS_MS, TRAVEL_MS } from "@nudge/guidance/nudge_guide";
 import { findMenu, registerTarget, resolveTarget } from "@nudge/guidance/target_resolver";
@@ -443,6 +446,129 @@ test("someone already in the app goes straight to its menus", async () => {
     await animationFrame();
     expect(guidance.state.steps).toHaveLength(2, { message: "From another app, the app comes first" });
     guidance.stop();
+});
+
+/**
+ * Odoo's own navbar, with an app whose section opens a list where a heading
+ * stands above the screen: the way to it is the apps, the app, the section,
+ * the screen. Opening a menu only sets it as the current one.
+ */
+async function startWithNavbar() {
+    defineMenus([
+        {
+            id: 5,
+            appID: 5,
+            name: "Inventory",
+            xmlid: "test.inventory",
+            children: [
+                {
+                    id: 6,
+                    appID: 5,
+                    name: "Configuration",
+                    xmlid: "test.configuration",
+                    children: [
+                        {
+                            id: 8,
+                            appID: 5,
+                            name: "Warehouse Management",
+                            children: [{ id: 7, appID: 5, name: "Warehouses", xmlid: "test.warehouses" }],
+                        },
+                    ],
+                },
+            ],
+        },
+    ]);
+    const started = await start();
+    const menus = getService("menu");
+    const opened = [];
+    patchWithCleanup(menus, {
+        async selectMenu(menu) {
+            menu = typeof menu === "number" ? menus.getMenu(menu) : menu;
+            opened.push(menu.id);
+            menus.setCurrentMenu(menu);
+        },
+    });
+    await mountWithCleanup(NavBar, { noMainContainer: true });
+    started.guidance.begin([
+        menuStep(5, { app: true }),
+        menuStep(6, { parent: 5, label: "Inventory" }),
+        menuStep(7, { parent: 6, label: "Configuration" }),
+    ]);
+    await pointed();
+    return { ...started, opened };
+}
+
+/**
+ * The pointer has gone where the guide sent it: a press, Odoo's answer, the
+ * screen looked at again, the pointer's way there.
+ */
+async function walked() {
+    for (let elapsed = 0; elapsed < 2 * (TRAVEL_MS + PRESS_MS); elapsed += 100) {
+        await advanceTime(100);
+    }
+    await animationFrame();
+}
+
+test.tags("desktop");
+test("the apps opened by the person lead the pointer on to the app", async () => {
+    const { guidance } = await startWithNavbar();
+    expect(guidance.state.element).toBe(queryOne(".o_navbar_apps_menu .dropdown-toggle"));
+    expect(".o_nudge_guide_text").toHaveText("Open the apps first.");
+
+    await click(".o_navbar_apps_menu .dropdown-toggle");
+    await walked();
+    expect(guidance.state.index).toBe(0);
+    expect(guidance.state.isDetour).toBe(false);
+    expect(guidance.state.element).toBe(queryOne(".o-dropdown--menu .o_app[data-section='5']"));
+    expect(".o_nudge_guide_text").toHaveText("Menu 5");
+});
+
+test.tags("desktop");
+test("Next on the way to a screen does the step: the guide arrives", async () => {
+    const { guidance, opened } = await startWithNavbar();
+    expect(".o_nudge_guide_text").toHaveText("Open the apps first.");
+
+    // Next opens the apps: the same step, now on the screen
+    await click(".o_nudge_guide_next");
+    await walked();
+    expect(guidance.state.index).toBe(0);
+    expect(guidance.state.element).toBe(queryOne(".o-dropdown--menu .o_app[data-section='5']"));
+    expect(".o_nudge_guide_text").toHaveText("Menu 5");
+
+    // Pressing Next closes the apps; the app is opened all the same
+    await click(".o_nudge_guide_next");
+    await walked();
+    expect(opened).toEqual([5]);
+    expect(guidance.state.index).toBe(1);
+    expect(guidance.state.isDetour).toBe(false);
+    expect(guidance.state.element).toBe(queryOne("button[data-menu-xmlid='test.configuration']"));
+    expect(".o_nudge_guide_text").toHaveText("Menu 6");
+
+    // The section opens its list: the screen is in it, under its heading
+    await click(".o_nudge_guide_next");
+    await walked();
+    expect(guidance.state.index).toBe(2);
+    expect(guidance.state.isDetour).toBe(false);
+    expect(guidance.state.element).toBe(queryOne(".o-dropdown--menu [data-section='7']"));
+    expect(".o_nudge_guide_count").toHaveText("3 / 3");
+
+    // Done opens the screen, through the section its press has closed
+    await click(".o_nudge_guide_next");
+    await walked();
+    expect(opened).toEqual([5, 7]);
+    expect(guidance.state.isActive).toBe(false);
+});
+
+test("Next on any other step leaves it as it is", async () => {
+    const { guidance } = await start();
+    guidance.begin([step("field", "notes", "Write a note."), step("field", "email", "Then the address.")]);
+    await pointed();
+    expect(".o_nudge_guide_text").toHaveText("Open the tab “Internal Notes” first.");
+
+    await click(".o_nudge_guide_next");
+    await pointed();
+    expect(guidance.state.index).toBe(1);
+    expect(".o_notebook_headers .nav-link[name=notes_page]").not.toHaveClass("active");
 });
 
 test("an app of the Settings screen is found in its side list", async () => {

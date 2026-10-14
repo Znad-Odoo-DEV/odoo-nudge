@@ -12,6 +12,10 @@ const MISSING_AFTER = 8;
 const ADVANCE_DELAY = 350;
 // Silence after which someone typing in a field is taken to be done
 const TYPING_PAUSE = 1200;
+// Steps on the way to a screen: the next one is only there once this one is done
+const WAYS = new Set(["menu", "settings_app"]);
+// Presses made for one Next, at most: what leads to the step, then the step
+const MAX_PRESSES = 3;
 
 /**
  * Walks the person through steps on their screen: shows one, waits for them
@@ -81,7 +85,7 @@ export const nudgeGuidanceService = {
                         return;
                     }
                     // A detour leads to the same step, now reachable
-                    return isDetour ? look() : next();
+                    return isDetour ? look() : advance();
                 }, ADVANCE_DELAY);
             };
             // Someone typing is done when they leave the field, or stop typing
@@ -131,7 +135,7 @@ export const nudgeGuidanceService = {
                 const value = readField(step);
                 if (fieldValue !== null && value !== undefined && value !== fieldValue) {
                     unwatch();
-                    next();
+                    advance();
                 }
             }
         }
@@ -168,7 +172,7 @@ export const nudgeGuidanceService = {
             });
         }
 
-        function next() {
+        function advance() {
             if (!state.isActive) {
                 return;
             }
@@ -177,6 +181,43 @@ export const nudgeGuidanceService = {
             } else {
                 show(state.index + 1);
             }
+        }
+
+        /**
+         * Next, asked by the person. A step on the way to a screen cannot be
+         * passed over: the steps after it are only on the screen once it is
+         * done. Nudge presses what the box was about, as the person would
+         * have: what leads to the step (the apps, the menu above) and the
+         * pointer goes on to the step; or the step itself, and the guide goes
+         * on to the next one. Any other step is passed over as it is.
+         */
+        async function next() {
+            const step = currentStep();
+            if (!state.isActive || !WAYS.has(step?.target.type)) {
+                return advance();
+            }
+            const shown = showing;
+            const wasDetour = state.isDetour;
+            for (let presses = 0; presses < MAX_PRESSES; presses++) {
+                // Looked for again: pressing Next may have closed the menu it was in
+                const found = resolveTarget(step.target, context.frontView());
+                if (!found || !isShown(found.element)) {
+                    break;
+                }
+                unwatch();
+                found.element.click();
+                await new Promise((resolve) => browser.setTimeout(resolve, ADVANCE_DELAY));
+                if (shown !== showing || !state.isActive) {
+                    return;
+                }
+                if (!found.isDetour) {
+                    break;
+                }
+                if (wasDetour) {
+                    return look();
+                }
+            }
+            advance();
         }
 
         function previous() {
