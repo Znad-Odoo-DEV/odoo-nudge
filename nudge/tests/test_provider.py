@@ -10,7 +10,7 @@ from odoo.addons.nudge.llm.anthropic_adapter import AnthropicAdapter
 from odoo.addons.nudge.llm.openai_compat_adapter import OpenAICompatAdapter
 
 from .common import NudgeCase
-from .test_adapters import FakeMessage, FakePermissionDeniedError, fake_sdk
+from .test_adapters import FakeAPIStatusError, FakeMessage, FakePermissionDeniedError, fake_sdk
 
 
 @tagged("post_install", "-at_install")
@@ -65,6 +65,11 @@ class TestProvider(NudgeCase, TransactionCase):
         self.provider.api_key = False
         self.assertFalse(self.provider.api_key)
 
+    def test_the_workspace_of_a_user_key(self):
+        self.assertEqual(self.provider._get_config().workspace_id, "", "None unless one is set")
+        self.provider.write({"kind": "anthropic", "workspace_id": " wrkspc_01abc\n"})
+        self.assertEqual(self.provider._get_config().workspace_id, "wrkspc_01abc")
+
     def test_capabilities_follow_the_model(self):
         self.provider.capabilities = {"effort": {"supported": True}}
         self.provider.timeout = 30
@@ -108,6 +113,11 @@ class TestProvider(NudgeCase, TransactionCase):
             self.assertEqual(counted[0]["model"], "claude-opus-5-5")
             refusal.append(FakePermissionDeniedError(403))
             with self.assertRaisesRegex(UserError, "rejected the API key"):
+                self.provider.action_test_connection()
+            # A user key belongs to no workspace: the administrator is told where to say which
+            refusal[0] = FakeAPIStatusError(400)
+            refusal[0].message = "this request must include the anthropic-workspace-id header"
+            with self.assertRaisesRegex(UserError, "fill in the Workspace ID"):
                 self.provider.action_test_connection()
         self.provider.write({"kind": "openai_compatible", "model_name": "test-model"})
 

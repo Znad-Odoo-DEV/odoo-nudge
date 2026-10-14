@@ -48,6 +48,7 @@
                                    required="kind == 'openai_compatible'"/>
                             <field name="requires_api_key" invisible="kind == 'anthropic'"/>
                             <field name="api_key" password="True" invisible="not requires_api_key"/>
+                            <field name="workspace_id" placeholder="wrkspc_..." invisible="kind != 'anthropic'"/>
                             <field name="timeout"/>
                             <field name="is_ollama" invisible="not is_ollama"/>
                             <field name="ollama_version" invisible="not is_ollama"/>
