@@ -176,7 +176,7 @@ Nothing found is said at once, without any AI.
 
 ## @Nudge in the chatter and in Discuss
 
-With the module Nudge: Discuss (it installs itself with Discuss), write **@Nudge** in the chatter
+With the module Nudge: Discuss (an administrator installs it from Apps; it needs Discuss), write **@Nudge** in the chatter
 of any record, or in a channel, and your question: "@Nudge summarise this order", "@Nudge who
 has to approve it?". A few seconds later Nudge answers under it, as an **internal note** the
 other employees read too, and you are told.
@@ -253,7 +253,7 @@ touched. Every step is in What Nudge Did.
 
 ### Emails that look designed
 
-With the companion **Nudge: Emails** (it installs itself where Discuss is), ask for an email
+With the companion **Nudge: Emails** (an administrator installs it from Apps; it needs Discuss), ask for an email
 ("when a quotation is confirmed, email the customer, the salesperson in copy") and Nudge asks
 which style you want: **classic** (a coloured band and a clean table), **modern** (a large
 coloured header and rounded cards), **minimal** (quiet, a thin line of colour) or **formal** (a

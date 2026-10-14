@@ -13,10 +13,11 @@ elsewhere; only the official documentation of Odoo may be searched. Nothing
 is changed from the chatter: for that, Nudge points to its panel, in Agent
 mode, where every change waits for a yes.
 
-Installed by itself when Nudge and Discuss are both there.
+Installed from Apps by an administrator who wants it, with Nudge and Discuss;
+never by itself.
 """,
     "category": "Productivity",
-    "version": "19.0.1.0.4",
+    "version": "19.0.1.0.5",
     "author": "Ibrahim Elzenad",
     "license": "OPL-1",
     "images": ["static/description/banner.png"],
@@ -25,6 +26,6 @@ Installed by itself when Nudge and Discuss are both there.
         "security/ir.model.access.csv",
         "data/nudge_discuss_data.xml",
     ],
-    "auto_install": True,
+    "auto_install": False,
     "installable": True,
 }
