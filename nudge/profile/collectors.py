@@ -8,7 +8,8 @@ so that an answer carries the piece it needs and not the whole database::
 
     {"kind": ..., "key": ..., "title": ..., "summary": ..., "data": {...},
      "model_name": ...,   # reading the slice needs read access to this model
-     "restricted": bool}  # for managers of Nudge only
+     "restricted": bool}  # for managers of Nudge only: its data carries in
+                          # "public" the numbers everybody may read, no names
 
 Collectors run as superuser: they describe the database, not what one user
 sees of it. Who may read a slice is decided when it is looked up.
@@ -28,6 +29,9 @@ _logger = logging.getLogger(__name__)
 OWN_MODULE = "nudge"
 MAX_FIELDS = 60
 MAX_TEXT = 300
+# How many records of one kind are read for their names: the count is counted
+# apart, so that a database of thousands is not scanned and is still counted
+MAX_LISTED = 200
 MAGIC_FIELDS = frozenset({
     "id", "display_name", "create_uid", "create_date", "write_uid", "write_date",
 })
@@ -147,7 +151,7 @@ def collect_modules(env, custom):
             + ", ".join(f"{module.shortdesc} ({module.name})" for module in custom_modules) + "."
             if custom_modules else "No custom module: this is standard Odoo."
         ),
-        f"Companies: {', '.join(data['companies'])}." if len(companies) > 1 else "",
+        # The companies stay in the data: a person is told those they work in
         f"Languages: {', '.join(data['languages'])}.",
     ]
     slices = [_slice("overview", "overview", "This database", summary, data)]
@@ -380,64 +384,85 @@ def collect_configuration(env, custom):
 # ----------------------------------------------------------------------
 
 def collect_automation(env, custom):
-    lines, data = [], {}
-    crons = env["ir.cron"].sudo().search([("active", "=", True)], order="cron_name")
+    """The numbers are for everybody, in ``public``; the names for the managers."""
+    data = {}
+    Cron = env["ir.cron"].sudo()
+    cron_count = Cron.search_count([("active", "=", True)])
+    crons = Cron.search([("active", "=", True)], order="cron_name", limit=MAX_LISTED)
     data["scheduled_actions"] = [
         {"name": _text(cron.cron_name, 100), "every": f"{cron.interval_number} {cron.interval_type}"}
         for cron in crons
     ]
-    lines.append(f"{len(crons)} scheduled actions are active.")
+    public = [f"{cron_count} scheduled actions are active."]
+    lines = list(public)
     if "base.automation" in env:
-        rules = env["base.automation"].sudo().search([("active", "=", True)])
+        Rule = env["base.automation"].sudo()
+        rule_count = Rule.search_count([("active", "=", True)])
+        rules = Rule.search([("active", "=", True)], limit=MAX_LISTED)
         data["automation_rules"] = [
             {"name": _text(rule.name, 100), "model": rule.model_name, "trigger": rule.trigger}
             for rule in rules
         ]
-        lines.append(f"{len(rules)} automation rules are active: "
-                     + ", ".join(f"{rule.name} on {rule.model_name}" for rule in rules[:15]) + ".")
+        public.append(f"{rule_count} automation rules are active.")
+        named = ", ".join(f"{rule.name} on {rule.model_name}" for rule in rules[:15])
+        lines.append(f"{rule_count} automation rules are active" + (f": {named}." if named else "."))
     else:
-        lines.append("Automation rules are not installed.")
+        public.append("Automation rules are not installed.")
+        lines.append(public[-1])
     if "mail.template" in env:
-        templates = env["mail.template"].sudo().search([])
+        Template = env["mail.template"].sudo()
+        template_count = Template.search_count([])
+        templates = Template.search([], limit=MAX_LISTED)
         by_model = {}
         for template in templates:
             by_model.setdefault(template.model or "", []).append(_text(template.name, 80))
         data["email_templates"] = {model: names[:20] for model, names in sorted(by_model.items()) if model}
-        lines.append(f"{len(templates)} email templates on {len(data['email_templates'])} kinds of records.")
+        public.append(f"{template_count} email templates on {len(data['email_templates'])} kinds of records.")
+        lines.append(public[-1])
+    data["public"] = " ".join(public)
     return [_slice("automation", "automation", "Automation", lines, data, restricted=True)]
 
 
 def collect_security(env, custom):
+    """The numbers are for everybody, in ``public``; the names for the managers."""
     business = custom - {OWN_MODULE}
-    origins = {
-        data.res_id: data.module
-        for data in env["ir.model.data"].sudo().search([("model", "=", "res.groups")])
-    }
-    groups = env["res.groups"].sudo().search([])
+    Data = env["ir.model.data"].sudo()
+    group_domain = [("model", "=", "res.groups"), ("module", "in", list(business))]
+    group_count = Data.search_count(group_domain)
+    origins = {data.res_id: data.module for data in Data.search(group_domain, limit=MAX_LISTED)}
     custom_groups = [
         {"name": _text(group.full_name, 100), "module": origins[group.id],
          "users": len(group.all_user_ids), "description": _text(group.comment)}
-        for group in groups if origins.get(group.id) in business
+        for group in env["res.groups"].sudo().browse(list(origins)).exists()
     ]
     internal = env["res.users"].sudo().search_count([("share", "=", False)])
-    lines = [f"{internal} internal users."]
+    public = [f"{internal} internal users."]
+    lines = list(public)
     if custom_groups:
+        public.append(f"{group_count} group(s) added by custom modules.")
         lines.append("Groups added by custom modules: " + "; ".join(
             f"{group['name']} ({group['users']} users)" for group in custom_groups[:20]) + ".")
-    rules = env["ir.rule"].sudo().search([("active", "=", True)])
+    custom_models = [
+        name for name, model in env.registry.items()
+        if getattr(model, "_original_module", None) in business
+    ]
+    Rule = env["ir.rule"].sudo()
+    rule_domain = [("active", "=", True), ("model_id.model", "in", custom_models)]
+    rule_count = Rule.search_count(rule_domain) if custom_models else 0
     custom_rules = [
         {"name": _text(rule.name, 100), "model": rule.model_id.model,
          "applies_to": ", ".join(rule.groups.mapped("full_name")) or "everybody",
          "condition": _text(rule.domain_force, 200)}
-        for rule in rules
-        if getattr(env.registry.get(rule.model_id.model), "_original_module", None) in business
+        for rule in (Rule.search(rule_domain, limit=MAX_LISTED) if custom_models else Rule)
     ]
-    if custom_rules:
-        lines.append(f"{len(custom_rules)} record rules restrict what people see of the custom records.")
+    if rule_count:
+        public.append(f"{rule_count} record rules restrict what people see of the custom records.")
+        lines.append(public[-1])
     return [_slice("security", "security", "Users and access", lines, {
         "internal_users": internal,
         "custom_groups": custom_groups,
         "custom_record_rules": custom_rules[:40],
+        "public": " ".join(public),
     }, restricted=True)]
 
 
