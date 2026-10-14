@@ -1,7 +1,8 @@
 from odoo import fields, models
 
 from .nudge_conversation import (
-    ADMIN_PARAM, AGENT_PARAM, DEVELOPER_PARAM, PYTHON_PARAM, SCREEN_SHARING_PARAM, SQL_PARAM,
+    ADMIN_PARAM, AGENT_PARAM, DEVELOPER_PARAM, MAX_STREAMS_PARAM, PYTHON_PARAM,
+    SCREEN_SHARING_PARAM, SQL_PARAM,
 )
 from .nudge_provider import AGENT_PROVIDER_PARAM, DEFAULT_PROVIDER_PARAM, DEVELOPER_PROVIDER_PARAM
 from .nudge_voice import ENGINE_AUTO, ENGINE_BROWSER, ENGINE_PROVIDER, VOICE_ENGINE_PARAM, VOICE_PARAM
@@ -108,6 +109,11 @@ class ResConfigSettings(models.TransientModel):
     nudge_budget_company_cost = fields.Float(
         string="Cost per Company and per Month", config_parameter="nudge.budget_company_cost",
         digits=(12, 2))
+    # 0 is automatic: the http workers of the server less two, at least one
+    nudge_max_streams = fields.Integer(
+        string="Answers at the Same Time", config_parameter=MAX_STREAMS_PARAM,
+        help="How many people Nudge answers at once, for everybody together. 0 is automatic: "
+             "the workers of the server less two.")
 
     def get_values(self):
         values = super().get_values()

@@ -40,6 +40,12 @@ BACKGROUND_MAX_STEPS = 60
 STREAM_MAX_SECONDS = 90
 STREAM_MIN_SECONDS = 15
 STREAM_SAFETY_MARGIN = 30
+# Answers streamed at the same time, for everybody together: one answer holds
+# one http worker until it is done. 0 is automatic: the workers of the server
+# less two, so that the screens of everyone else keep being served
+MAX_STREAMS_PARAM = "nudge.max_streams"
+# A server without workers (threaded) serves many requests at once: a cap all the same
+THREADED_MAX_STREAMS = 8
 
 USER_WRITABLE_FIELDS = frozenset({"name", "active"})
 
@@ -200,6 +206,23 @@ class NudgeConversation(models.Model):
         return max(STREAM_MIN_SECONDS, min(wanted, limit - STREAM_SAFETY_MARGIN))
 
     @api.model
+    def _get_max_streams(self):
+        """:return: how many answers may stream at the same time, for everybody
+        together: what the administrator set, or the http workers of the
+        server less two, at least one; a server without workers answers many"""
+        value = self.env["ir.config_parameter"].sudo().get_param(MAX_STREAMS_PARAM) or "0"
+        try:
+            wanted = int(float(value))
+        except ValueError:
+            wanted = 0
+        if wanted > 0:
+            return wanted
+        workers = config["workers"] or 0
+        if workers <= 0:
+            return THREADED_MAX_STREAMS
+        return max(1, workers - 2)
+
+    @api.model
     def _chat_open(self, conversation_id=None):
         """:return: the conversation to post in, as the current user"""
         if not conversation_id:
@@ -215,12 +238,24 @@ class NudgeConversation(models.Model):
         longest = max(self._get_stream_seconds(provider)
                       for provider in (Provider._get_default(), Provider._get_for_mode("dev")))
         limit = fields.Datetime.now() - timedelta(seconds=longest)
-        busy = self.sudo().with_context(active_test=False).search_count([
+        Conversation = self.sudo().with_context(active_test=False)
+        busy = Conversation.search_count([
             ("user_id", "=", self.env.uid),
             ("stream_started_at", ">=", limit),
         ], limit=1)
         if busy:
             raise UserError(self.env._("Nudge is still answering your previous message."))
+        # Everybody's answers: each holds one http worker while it streams, and
+        # a few at once leave none for the screens of everyone else. Counted
+        # here, before the provider is called, in the transaction of the
+        # question; two questions that arrive in the same instant may both
+        # pass, and one answer too many is accepted rather than locking the
+        # table. Work in the background holds no http worker and carries no
+        # mark; the mark of a worker that died mid-answer expires with the window
+        streaming = Conversation.search_count([("stream_started_at", ">=", limit)])
+        if streaming >= self._get_max_streams():
+            raise UserError(self.env._(
+                "Nudge is answering other people right now. Try again in a moment."))
 
     def _chat_context_values(self, spoken=False, read_aloud=False, model_name=None,
                              explain=None, attachment=None, report=None, answer_in=None):

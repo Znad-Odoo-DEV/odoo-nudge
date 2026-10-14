@@ -80,6 +80,12 @@ provider is a row of the usage ledger: who, when, how many tokens, at what price
 ledger cannot be edited or deleted from the interface. Budgets per person per day and per company
 per month stop Nudge before a call.
 
+Answers at the same time are capped for everybody together: one answer holds one http worker of
+the server while it streams, and a few at once would leave none for the screens of everyone
+else. The default cap is the workers of the server less two; **Settings ‣ Nudge ‣ Budgets** sets
+another. Past it, a question is refused with a plain message, before anything is sent to the
+provider or kept. Work in the background holds no http worker and does not count.
+
 ## What Nudge is told about instructions in data
 
 The system prompt tells the model that what it reads in records, screens, notes and
