@@ -1,8 +1,12 @@
 import json
+import sys
+import time
+from unittest.mock import patch
 
 from odoo.tests import TransactionCase, tagged
 
 from odoo.addons.nudge import tools
+from odoo.addons.nudge.tools import python as python_tool
 from odoo.addons.nudge.tools.python import PYTHON_PARAM
 
 from .common import NudgeCase
@@ -54,16 +58,118 @@ class TestPython(NudgeCase, TransactionCase):
         payload = self.payload("result = env.user.name, env.company.name, 'res.partner' in env, 'res.users' in env")
         self.assertEqual(payload["result"][2:], [True, False])
 
-    def test_what_it_writes_is_discarded(self):
+    def test_reads_in_every_way_that_reads(self):
         payload = self.payload(
-            "p = env['res.partner'].search([('name', '=', 'Nudge Py One')])\n"
-            "p.write({'name': 'Changed by code'})\n"
-            "log(p.name)\n")
-        self.assertEqual(payload["output"], ["Changed by code"], "Seen by the code itself")
-        self.assertEqual(self.partners[0].name, "Nudge Py One", "Taken back once the code ends")
+            "partners = env['res.partner'].search([('name', 'like', 'Nudge Py')], order='name')\n"
+            "one = partners[0]\n"
+            "def far(p):\n"
+            "    return p.partner_latitude > 3\n"
+            "result = {\n"
+            "    'names': [p.name for p in partners],\n"
+            "    'read': one.read(['name'])[0]['name'],\n"
+            "    'count': env['res.partner'].search_count([('name', 'like', 'Nudge Py')]),\n"
+            "    'exists': env['res.partner'].browse(partners.ids).exists().ids == partners.ids,\n"
+            "    'union': len(one | partners[1]),\n"
+            "    'in': one in partners,\n"
+            "    'sorted': partners.sorted('partner_latitude')[-1].name,\n"
+            "    'filtered': partners.filtered(far).mapped('name'),\n"
+            "    'item': one['name'],\n"
+            "    'rem': 7 % 2,\n"
+            "    'text': '%s and %d' % ('a', 1),\n"
+            "    'f': f'{1 + 1}',\n"
+            "    'company': env.company.name == user.company_id.name,\n"
+            "    'field': env['res.partner'].fields_get(['name'])['name']['type'],\n"
+            "}\n")
+        self.assertEqual(payload["result"], {
+            "names": ["Nudge Py One", "Nudge Py Two"], "read": "Nudge Py One", "count": 2,
+            "exists": True, "union": 2, "in": True, "sorted": "Nudge Py Two",
+            "filtered": ["Nudge Py Two"], "item": "Nudge Py One", "rem": 1, "text": "a and 1",
+            "f": "2", "company": True, "field": "char",
+        })
 
-        self.payload("env['res.partner'].create({'name': 'Nudge Py Made'})")
+    def test_what_would_write_or_act_is_refused(self):
+        for code, text in [
+            ("env['res.partner'].search([('name', '=', 'Nudge Py One')]).write({'name': 'x'})", ".write()"),
+            ("env['res.partner'].create({'name': 'Nudge Py Made'})", ".create()"),
+            ("env['res.partner'].search([], limit=1).copy()", ".copy()"),
+            ("env['res.partner'].search([], limit=1).action_archive()", ".action_archive()"),
+            ("env['res.partner'].search([], limit=1).message_post(body='hi')", ".message_post()"),
+            ("env['res.partner'].search([], limit=1).button_done()", ".button_done()"),
+            ("env['res.partner'].search([], limit=1).send_mail()", ".send_mail()"),
+            ("env['res.partner'].search([], limit=1).do_post()", ".do_post()"),
+            # Held without being called, the method is refused when the code takes it
+            ("p = env['res.partner'].search([], limit=1)\nf = p.toggle_active\nf()", ".toggle_active()"),
+        ]:
+            result = self.run_code(code)
+            self.assertTrue(result.is_error, code)
+            self.assertIn(text, result.content, code)
+            self.assertIn("only reads", result.content, code)
+        self.assertEqual(self.partners[0].name, "Nudge Py One")
         self.assertFalse(self.env["res.partner"].search([("name", "=", "Nudge Py Made")]))
+        # A field named like an action is read all the same
+        self.assertEqual(self.payload("result = env['res.partner'].search([], limit=1).create_date is not None")["result"], True)
+
+    def test_what_leads_to_a_closed_model_is_refused(self):
+        for code, text in [
+            ("result = env['res.partner'].search([], limit=1).user_id", "may not reach res.users"),
+            ("result = env['res.partner'].search([], limit=1).user_id.login", "may not reach res.users"),
+            ("result = env['res.partner'].search([]).mapped('user_id')", "may not reach res.users"),
+            ("result = env['res.partner'].search([]).mapped('user_id.login')", "may not reach res.users"),
+            ("result = env['res.partner'].search([]).filtered('user_id.active')", "may not reach res.users"),
+            ("result = env['res.partner'].search([('user_id.login', '=', 'admin')])", "may not reach res.users"),
+            ("result = env['res.partner'].search([], limit=1).message_ids", "may not reach mail.message"),
+            ("result = user.action_id", "may not reach ir.actions.actions"),
+            ("result = env.company.partner_id.user_ids", "may not reach res.users"),
+            ("result = [p.user_id for p in env['res.partner'].search([], limit=1)]", "may not reach res.users"),
+            ("def who(p):\n    return p.user_id.login\n"
+             "result = env['res.partner'].search([]).mapped(who)", "may not reach res.users"),
+        ]:
+            result = self.run_code(code)
+            self.assertTrue(result.is_error, code)
+            self.assertIn(text, result.content, code)
+        # The person themself is open to the code, as env.user always was
+        self.assertEqual(self.payload("result = user.name == env.user.name")["result"], True)
+
+    def test_what_shows_the_inside_is_refused(self):
+        for code, text in [
+            ("f = float_compare\nresult = ('{0._' + '_globals__}').format(f)", ".format"),
+            ("result = '{x}'.format_map({'x': 1})", ".format_map"),
+            ("result = f'{env!r}'", "!r"),
+            ("result = f'{env!a}'", "!a"),
+            ("result = '%r' % env", "%r"),
+            ("a = '%s'\nresult = a % env", "between two names"),
+            ("result = format(1, 'd')", "format"),
+            ("try:\n    x = 1\nexcept:\n    pass", "bare except"),
+            ("try:\n    x = 1\nexcept BaseException:\n    pass", "BaseException"),
+        ]:
+            result = self.run_code(code)
+            self.assertTrue(result.is_error, code)
+            self.assertIn(text, result.content, code)
+
+    def test_the_deadline(self):
+        refused = self.run_code("while True:\n    pass")
+        self.assertTrue(refused.is_error)
+        self.assertIn("No while", refused.content)
+        refused = self.run_code("time.sleep(1)")
+        self.assertTrue(refused.is_error)
+        self.assertIn(".sleep", refused.content)
+
+        previous = sys.gettrace()
+        with patch.object(python_tool, "DEADLINE_SECONDS", 0.2):
+            started = time.monotonic()
+            result = self.run_code("x = 0\nfor i in range(10 ** 9):\n    x += i\nresult = x")
+            self.assertTrue(result.is_error)
+            self.assertIn("was stopped", result.content)
+            self.assertLess(time.monotonic() - started, 5)
+            # Catching Exception does not catch the stop
+            result = self.run_code(
+                "for i in range(10 ** 9):\n    try:\n        x = i\n    except Exception:\n        pass")
+            self.assertTrue(result.is_error)
+            self.assertIn("was stopped", result.content)
+        self.assertIs(sys.gettrace(), previous, "The trace is gone once the code is")
+        # The transaction goes on
+        self.assertEqual(self.partners[0].name, "Nudge Py One")
+        self.assertEqual(self.payload("result = 1 + 1")["result"], 2)
 
     def test_what_the_sandbox_refuses(self):
         for code, text in [

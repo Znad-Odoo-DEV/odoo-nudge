@@ -55,10 +55,11 @@ TRUE_WORDS = ("true", "yes", "1")
 FALSE_WORDS = ("false", "no", "0")
 EMPTY_WORDS = ("", "false", "none", "null")
 
-# What cannot be taken back with a click, or moves money or goods
+# What cannot be taken back with a click, or moves money or goods: a whole
+# word of the method's name, so that compost or postal is not post
 SENSITIVE_METHOD = re.compile(
-    r"post|validate|cancel|pay|refund|reverse|lock|draft|approve|refuse|reconcile|done|close|"
-    r"send|confirm|archive")
+    r"(^|_)(post|validate|cancel|pay|refund|reverse|lock|draft|approve|refuse|reconcile|done|close|"
+    r"send|confirm|archive)(_|$)")
 # Fields a list of ids would empty of what they hold: added to or taken from only
 KEPT_WHOLE = {"res.users": ("group_ids", "groups_id", "company_ids")}
 SENSITIVE_MODEL = re.compile(
