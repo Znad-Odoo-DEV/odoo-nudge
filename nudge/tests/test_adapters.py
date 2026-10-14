@@ -10,7 +10,7 @@ import requests
 from odoo.tests import BaseCase, tagged
 
 from odoo.addons.nudge.llm import base, openai_compat_adapter
-from odoo.addons.nudge.llm.anthropic_adapter import AnthropicAdapter, sanitize_blocks
+from odoo.addons.nudge.llm.anthropic_adapter import TOOL_NOTE, AnthropicAdapter, sanitize_blocks
 from odoo.addons.nudge.llm.openai_compat_adapter import OpenAICompatAdapter
 
 SYSTEM = ["You are Nudge."]
@@ -633,12 +633,19 @@ class TestToolChoice(BaseCase):
             kind="anthropic", model="claude-test", api_key="sk-ant-test",
             base_url="https://llm.invalid/", timeout=30, capabilities=CAPABILITIES,
         ))
+        # Opus 5.5, Sonnet 5.5 and Fable 5.1 answer a forced call with a 400:
+        # the tool is asked for in words, and the model thinks before it
         params = adapter._build_params(SYSTEM, TURNS, tools=[TOOL], tool_choice="required")
-        self.assertEqual(params["tool_choice"], {"type": "any"})
-        self.assertNotIn("thinking", params, "The API refuses thinking before a forced call")
+        self.assertNotIn("tool_choice", params, "Nothing forced is sent")
+        self.assertEqual(params["thinking"], {"type": "adaptive"})
+        self.assertEqual(len(params["messages"]), len(TURNS) + 1)
+        self.assertEqual(params["messages"][-1], {"role": "user", "content": [{"type": "text", "text": TOOL_NOTE}]})
+        self.assertNotIn(TOOL_NOTE, str(adapter._build_params(SYSTEM, TURNS, tool_choice="required")),
+                         "Nothing to ask for without tools")
         params = adapter._build_params(SYSTEM, TURNS, tools=[TOOL])
         self.assertNotIn("tool_choice", params)
         self.assertEqual(params["thinking"], {"type": "adaptive"})
+        self.assertNotIn(TOOL_NOTE, str(params["messages"]))
         params = adapter._build_params(SYSTEM, TURNS, tools=[TOOL], tool_choice="none")
         self.assertEqual(params["tool_choice"], {"type": "none"})
         self.assertEqual(params["thinking"], {"type": "adaptive"}, "Thinking before the answer is allowed")
