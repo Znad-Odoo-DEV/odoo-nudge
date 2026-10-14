@@ -78,6 +78,13 @@ def sanitize_blocks(blocks):
     return result
 
 
+def _origin(error):
+    """:return: the error ``error`` was raised from, or None"""
+    if error.__cause__ is not None:
+        return error.__cause__
+    return None if error.__suppress_context__ else error.__context__
+
+
 def _supported(capabilities, *path):
     node = capabilities
     for key in path:
@@ -257,8 +264,28 @@ class AnthropicAdapter(base.BaseAdapter):
             "cache_write_tokens": usage.get("cache_creation_input_tokens"),
         }
 
-    @staticmethod
-    def _map_error(anthropic, exc):
+    def _cause(self, exc):
+        """The SDK raises APIConnectionError for whatever fails once the
+        request is sent, a body it cannot decode as well as a server it cannot
+        reach: what it was raised from is told with it.
+
+        :return: one line, as "APIConnectionError: DecodingError: <words>"
+        """
+        causes, cause = [], _origin(exc)
+        while cause is not None and cause not in causes and len(causes) < 5:
+            causes.append(cause)
+            cause = _origin(cause)
+        if not causes:
+            return type(exc).__name__
+        # An error wrapped once more often has no words of its own
+        cause = next((cause for cause in causes if str(cause).strip()), causes[0])
+        words = " ".join(str(cause).split())[:200]
+        if self.config.api_key:
+            # Errors of the transport do not carry the headers; should one, the key stays out
+            words = words.replace(self.config.api_key, "***")
+        return ": ".join(part for part in (type(exc).__name__, type(cause).__name__, words) if part)
+
+    def _map_error(self, anthropic, exc):
         detail = getattr(exc, "message", "") or type(exc).__name__
         if isinstance(exc, (anthropic.AuthenticationError, anthropic.PermissionDeniedError)):
             return base.ERROR_AUTH, detail
@@ -272,9 +299,9 @@ class AnthropicAdapter(base.BaseAdapter):
             return base.ERROR_BAD_REQUEST, detail
         timeout_error = getattr(anthropic, "APITimeoutError", None)
         if timeout_error is not None and isinstance(exc, timeout_error):
-            return base.ERROR_TIMEOUT, type(exc).__name__
+            return base.ERROR_TIMEOUT, self._cause(exc)
         if isinstance(exc, anthropic.APIConnectionError):
-            return base.ERROR_NETWORK, type(exc).__name__
+            return base.ERROR_NETWORK, self._cause(exc)
         return base.ERROR_UNKNOWN, detail
 
     def _call(self, function):
