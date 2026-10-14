@@ -21,6 +21,12 @@ FALLBACK_MODELS = frozenset({
     "claude-sonnet-5-5",
 })
 FALLBACK_BETA = "server-side-fallback-2026-07-01"
+# A forced call (tool_choice "any" or "tool") is refused with a 400 by the
+# models of now: when a tool must be called, it is asked for in words, the way
+# the loop asks for the answer of the last round
+TOOL_NOTE = (
+    "What the person asked for is done with a tool: call it now, before you answer in words. "
+    "Only if no tool can do it, say why in one sentence.")
 
 STOP_REASONS = {
     "end_turn": base.STOP_END,
@@ -148,6 +154,9 @@ class AnthropicAdapter(base.BaseAdapter):
 
     def _build_params(self, system, turns, tools=None, tool_choice=None):
         config = self.config
+        if tools and tool_choice == "required":
+            # Not forced, which the API refuses: told, and left to choose
+            turns = [*turns, {"role": "user", "text": TOOL_NOTE}]
         params = {
             "model": config.model,
             "max_tokens": config.max_output_tokens or DEFAULT_MAX_TOKENS,
@@ -162,15 +171,12 @@ class AnthropicAdapter(base.BaseAdapter):
                 # Nudge before anything runs
                 dict(tool, eager_input_streaming=True) for tool in tools
             ]
-        if tools and tool_choice == "required":
-            # A forced call; the API allows no thinking before one
-            params["tool_choice"] = {"type": "any"}
-        elif tools and tool_choice == "none":
+        if tools and tool_choice == "none":
             # The answer now: the tools stay known, none is called
             params["tool_choice"] = {"type": "none"}
         capabilities = config.capabilities or {}
-        if (_supported(capabilities, "thinking", "types", "adaptive")
-                and params.get("tool_choice", {}).get("type") != "any"):
+        if _supported(capabilities, "thinking", "types", "adaptive"):
+            # Before a call as before an answer: nothing forced is ever sent
             params["thinking"] = {"type": "adaptive"}
         if config.effort and _supported(capabilities, "effort", config.effort):
             params["output_config"] = {"effort": config.effort}
