@@ -123,6 +123,13 @@ class TestOpenAICompatAdapter(BaseCase):
             {"role": "user", "content": "How are you?"},
         ])
 
+    def test_the_betas_of_claude_stay_with_claude(self):
+        self.respond(FakeResponse(lines=sse(delta("ok", finish="stop"))))
+        self.run_stream(tools=[{"name": "t", "description": "d", "input_schema": {"type": "object"}}])
+        sent = json.dumps([self.posted[0], self.adapter._headers()]).lower()
+        for word in ("anthropic-beta", "betas", "block_binding", "thinking-binding", "fallbacks"):
+            self.assertNotIn(word, sent)
+
     def test_turns_of_the_same_role_are_merged(self):
         self.respond(FakeResponse(lines=sse(delta("ok", finish="stop"))))
         turns = [
@@ -413,6 +420,9 @@ CAPABILITIES = {
     "thinking": {"supported": True, "types": {"adaptive": {"supported": True}}},
     "effort": {"supported": True, "low": {"supported": True}, "max": {"supported": False}},
 }
+BINDING_BETA = "thinking-binding-controls-2026-08-01"
+# A replayed thinking block whose prefix changed is dropped, not refused
+THINKING = {"type": "adaptive", "block_binding": {"prefix_mismatch_behavior": "drop_block"}}
 
 
 @tagged("post_install", "-at_install")
@@ -474,7 +484,9 @@ class TestAnthropicAdapter(BaseCase):
         list(self.adapter(max_output_tokens=2000).stream_chat(SYSTEM, TURNS))
         name, params = self.calls[0]
 
-        self.assertEqual(name, "stable")
+        self.assertEqual(name, "beta", "Every request goes where the thinking blocks are controlled")
+        self.assertEqual(params["betas"], [BINDING_BETA])
+        self.assertNotIn("fallbacks", params)
         self.assertEqual(params["model"], "claude-opus-5-5")
         self.assertEqual(params["max_tokens"], 2000)
         self.assertEqual(params["cache_control"], {"type": "ephemeral"})
@@ -495,7 +507,7 @@ class TestAnthropicAdapter(BaseCase):
         adapter = self.adapter(effort="low", capabilities=CAPABILITIES)
         list(adapter.stream_chat(SYSTEM, TURNS))
         params = self.calls[0][1]
-        self.assertEqual(params["thinking"], {"type": "adaptive"})
+        self.assertEqual(params["thinking"], THINKING)
         self.assertEqual(params["output_config"], {"effort": "low"})
 
         adapter = self.adapter(effort="max", capabilities=CAPABILITIES)
@@ -507,13 +519,35 @@ class TestAnthropicAdapter(BaseCase):
         name, params = self.calls[0]
         self.assertEqual(name, "beta")
         self.assertEqual(params["fallbacks"], "default")
-        self.assertEqual(params["betas"], ["server-side-fallback-2026-07-01"])
+        self.assertEqual(params["betas"], [BINDING_BETA, "server-side-fallback-2026-07-01"])
 
         adapter = self.adapter(refusal_fallback=True, model="claude-haiku-4-5")
         list(adapter.stream_chat(SYSTEM, TURNS))
         name, params = self.calls[1]
-        self.assertEqual(name, "stable", "Only sent to the models that accept it")
-        self.assertNotIn("fallbacks", params)
+        self.assertEqual(params["betas"], [BINDING_BETA])
+        self.assertNotIn("fallbacks", params, "Only sent to the models that accept it")
+
+    def test_thinking_survives_a_changed_prefix(self):
+        # The system prompt, the tools and the notes are rebuilt between two
+        # requests: from the second turn on, an account made since 2026-08-31
+        # was answered "The block is bound to a different conversation"
+        blocks = [
+            {"type": "thinking", "thinking": "", "signature": "sig"},
+            {"type": "text", "text": "Hi!"},
+        ]
+        turns = [
+            TURNS[0],
+            {"role": "assistant", "text": "Hi!", "blocks": blocks, "provider_kind": "anthropic"},
+            TURNS[2],
+        ]
+        for system in (SYSTEM, [*SYSTEM, "Where the work is: Sales."]):
+            list(self.adapter(capabilities=CAPABILITIES).stream_chat(system, turns, tools=[TOOL]))
+        for name, params in self.calls:
+            self.assertEqual(name, "beta")
+            self.assertIn(BINDING_BETA, params["betas"])
+            self.assertEqual(params["thinking"], THINKING)
+            self.assertEqual(params["messages"][1]["content"][0], blocks[0],
+                             "Replayed all the same: the API drops the ones it cannot use")
 
     def test_own_blocks_are_replayed(self):
         blocks = [
@@ -637,15 +671,15 @@ class TestToolChoice(BaseCase):
         # the tool is asked for in words, and the model thinks before it
         params = adapter._build_params(SYSTEM, TURNS, tools=[TOOL], tool_choice="required")
         self.assertNotIn("tool_choice", params, "Nothing forced is sent")
-        self.assertEqual(params["thinking"], {"type": "adaptive"})
+        self.assertEqual(params["thinking"], THINKING)
         self.assertEqual(len(params["messages"]), len(TURNS) + 1)
         self.assertEqual(params["messages"][-1], {"role": "user", "content": [{"type": "text", "text": TOOL_NOTE}]})
         self.assertNotIn(TOOL_NOTE, str(adapter._build_params(SYSTEM, TURNS, tool_choice="required")),
                          "Nothing to ask for without tools")
         params = adapter._build_params(SYSTEM, TURNS, tools=[TOOL])
         self.assertNotIn("tool_choice", params)
-        self.assertEqual(params["thinking"], {"type": "adaptive"})
+        self.assertEqual(params["thinking"], THINKING)
         self.assertNotIn(TOOL_NOTE, str(params["messages"]))
         params = adapter._build_params(SYSTEM, TURNS, tools=[TOOL], tool_choice="none")
         self.assertEqual(params["tool_choice"], {"type": "none"})
-        self.assertEqual(params["thinking"], {"type": "adaptive"}, "Thinking before the answer is allowed")
+        self.assertEqual(params["thinking"], THINKING, "Thinking before the answer is allowed")
