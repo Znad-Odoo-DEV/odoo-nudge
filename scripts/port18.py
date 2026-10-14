@@ -200,10 +200,9 @@ sub("nudge/security/nudge_security.xml", r'<field name="user_ids"', '<field name
 sub("nudge/security/nudge_security.xml", r"user\.all_group_ids\.ids", "user.groups_id.ids")
 
 # ---------------------------------------------------------------- safe_eval copies its globals in 18
-edit("nudge/tools/python.py", [
-    ('safe_eval(code, context, mode="exec", filename="nudge:run_python")',
-     'safe_eval(code, context, mode="exec", nocopy=True, filename="nudge:run_python")'),
-])
+# The file name is a literal or a constant, as the tool had it
+sub("nudge/tools/python.py", r'safe_eval\(code, context, mode="exec", filename=',
+    'safe_eval(code, context, mode="exec", nocopy=True, filename=')
 
 # ---------------------------------------------------------------- the tests: names of 18
 edit("nudge/tests/test_agent.py", [
@@ -211,6 +210,8 @@ edit("nudge/tests/test_agent.py", [
     ('"create_company (Create)"', '"create_company (Create company)"'),
     ("\"Pressed 'Create'\"", "\"Pressed 'Create company'\""),
 ])
+# The card of the button reads its label
+sub("nudge/tests/test_agent.py", r'\{"label": "Button", "value": "Create"\}', '{"label": "Button", "value": "Create company"}')
 sub("nudge/tests/test_profile.py", r"Odoo 19\.0 Community", "Odoo 18.0 Community")
 
 # ---------------------------------------------------------------- Hoot tests: the web client of 18
@@ -221,6 +222,9 @@ edit("nudge/static/tests/background.test.js", [
     ('    expect(".o_notification_content").toHaveText(/Nudge could not finish/);\n',
      '    expect(".o_notification").toHaveText(/Nudge could not finish/);\n'),
 ])
+# The title of any other notice of Nudge too
+sub("nudge/static/tests/background.test.js", r'expect\("\.o_notification_content"\)\.toHaveText\(/Nudge ',
+    'expect(".o_notification").toHaveText(/Nudge ')
 # edit() types into the element that has the focus
 edit("nudge/static/tests/agent.test.js", [
     ('    await edit("In our own payroll module");\n',
@@ -241,6 +245,12 @@ for name in ("nudge/tests/test_agent.py", "nudge/tests/test_background.py", "nud
         s = s.replace("values(group_ids=str(group.id))", "values(groups_id=str(group.id))")
         write(name, s)
         print("ported", name)
+
+# ---------------------------------------------------------------- Default Recipients is off by default in 18
+# The test of the update of 19.0.1.56.26 counts on a new template having it on, as in 19
+sub("nudge_mail/tests/test_emails.py",
+    r'^([ \t]+)(theirs = Template\.create\(\{"name": "Theirs", "model_id": partner_model, "partner_to": "\{\{ object\.id \}\}")\}\)',
+    r'\1# Made with Default Recipients on, as Odoo 19 makes a template\n\1\2, "use_default_to": True})', flags=re.M)
 
 # ---------------------------------------------------------------- spreadsheet data of 18 (o-spreadsheet 21)
 # Cells are {"content": ...} objects; a figure sits at x/y pixels, not at a cell
@@ -281,8 +291,48 @@ edit("nudge/tests/test_developer.py", [
 ])
 
 # ---------------------------------------------------------------- no AI app in 18: the store page says nothing of it
+# Named among the other companions, it is left out of the sentence; a line of its own goes
+sub("nudge/static/description/index.html", r", Nudge: Odoo AI \(ai\)", "")
+sub("nudge/static/description/index.html", r"Nudge: Odoo AI, (?=Nudge)", "")
 sub("nudge/static/description/index.html",
     r"^[ \t]*<li>[^\n]*Nudge: Odoo AI[^\n]*</li>\n", "", flags=re.M)
+
+# ---------------------------------------------------------------- migrations: named for the version of 18
+# A folder named 19.0.x is above every version of the 18 module: it would never run
+for module in sorted(os.listdir(ROOT)):
+    folder = ROOT + module + "/migrations/"
+    if os.path.isdir(folder):
+        for name in sorted(os.listdir(folder)):
+            if name.startswith("19.0."):
+                os.rename(folder + name, folder + "18.0." + name[len("19.0."):])
+                print("renamed", module, "migration", name)
+# The tests of a migration read its script by its folder, and give the version it comes from
+for module in sorted(os.listdir(ROOT)):
+    tests = ROOT + module + "/tests/"
+    if os.path.isdir(tests):
+        for name in sorted(os.listdir(tests)):
+            if name.endswith(".py"):
+                sub(f"{module}/tests/{name}", r'(file_path\("[\w/]+/migrations/)19\.0\.', r"\g<1>18.0.")
+                sub(f"{module}/tests/{name}", r'(\.migrate\(self\.env\.cr, ")19\.0\.', r"\g<1>18.0.")
+
+# ---------------------------------------------------------------- the caches of the web client (rpcBus has them in 19)
+# In 18 the views, the fields and the actions forget what they read when env.bus says CLEAR-CACHES
+sub("nudge/static/src/core/nudge_service.js", r'import \{ rpcBus \} from "@web/core/network/rpc";\n', "")
+sub("nudge/static/src/core/nudge_service.js", r'\brpcBus\.trigger\("CLEAR-CACHES"', 'env.bus.trigger("CLEAR-CACHES"')
+# The test listens on the bus of the env of the web client, there once the client is mounted
+REFRESH = "nudge/static/tests/refresh.test.js"
+if os.path.exists(ROOT + REFRESH) and "rpcBus" in read(REFRESH):
+    s = read(REFRESH)
+    s = s.replace('import { rpcBus } from "@web/core/network/rpc";\n', "")
+    if "    getMockEnv,\n" not in s:
+        s = s.replace("    getService,\n", "    getMockEnv,\n    getService,\n", 1)
+    s = re.sub(
+        r'(    )rpcBus\.addEventListener\("CLEAR-CACHES", (\w+)\);\n(    const \{[^}]*\} = await start\(\n(?:.*\n)*?    \);\n)',
+        r'\3\1getMockEnv().bus.addEventListener("CLEAR-CACHES", \2);\n', s)
+    s = s.replace('rpcBus.removeEventListener("CLEAR-CACHES"', 'getMockEnv().bus.removeEventListener("CLEAR-CACHES"')
+    assert "rpcBus" not in s, REFRESH
+    write(REFRESH, s)
+    print("ported", REFRESH)
 
 # ---------------------------------------------------------------- the words "Odoo 19"
 for name in ("nudge/llm/prompt.py", "nudge/README.md", "nudge/README.ar.md", "nudge/static/description/index.html",

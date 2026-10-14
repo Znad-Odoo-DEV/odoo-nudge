@@ -312,10 +312,36 @@ sub("nudge/tests/test_ui.py", r'f"/odoo/action-\{action\.id\}/\{partner\.id\}"',
     'f"/web#action={action.id}&id={partner.id}&model=res.partner&view_type=form"')
 
 # ---------------------------------------------------------------- no Studio, no spreadsheets in 17: the store page says nothing of them
+# Named among the other companions, they are left out of the sentence; a line of their own goes
+sub("nudge/static/description/index.html", r", Nudge: Discuss and Nudge: Spreadsheets\. ", " and Nudge: Discuss. ")
+sub("nudge/static/description/index.html", r", the tasks, the spreadsheets\.", ", the tasks.")
 sub("nudge/static/description/index.html",
-    r"^[ \t]*<li>[^\n]*(Nudge: Studio|Nudge Spreadsheets|Odoo Studio)[^\n]*</li>\n", "", flags=re.M)
+    r"(<b>Odoo Enterprise only</b>: )Nudge: Studio \(web_studio\) and Nudge: Spreadsheets in Documents "
+    r"\(documents_spreadsheet\), since the apps they bridge are Enterprise; and (dark mode)", r"\1\2")
+sub("nudge/static/description/index.html",
+    r"Nudge: Spreadsheets, Nudge: Spreadsheets in Documents and Nudge: Studio install themselves "
+    r"when Nudge and the app they bridge are both there\. ", "")
+sub("nudge/static/description/index.html",
+    r"^[ \t]*<li>[^\n]*(Nudge: Studio|Nudge:? Spreadsheets|Odoo Studio)[^\n]*</li>\n", "", flags=re.M)
 sub("nudge/static/description/index.html",
     r"^[ \t]*<div class=\"col-md-6\"[^\n]*<h4>Reports as spreadsheets</h4>[^\n]*</div>\n", "", flags=re.M)
+
+# ---------------------------------------------------------------- migrations: named for the version of 17
+for module in sorted(os.listdir(ROOT)):
+    folder = ROOT + module + "/migrations/"
+    if os.path.isdir(folder):
+        for name in sorted(os.listdir(folder)):
+            if name.startswith("18.0."):
+                os.rename(folder + name, folder + "17.0." + name[len("18.0."):])
+                print("renamed", module, "migration", name)
+# The tests of a migration read its script by its folder, and give the version it comes from
+for module in sorted(os.listdir(ROOT)):
+    tests = ROOT + module + "/tests/"
+    if os.path.isdir(tests):
+        for name in sorted(os.listdir(tests)):
+            if name.endswith(".py"):
+                sub(f"{module}/tests/{name}", r'(file_path\("[\w/]+/migrations/)18\.0\.', r"\g<1>17.0.")
+                sub(f"{module}/tests/{name}", r'(\.migrate\(self\.env\.cr, ")18\.0\.', r"\g<1>17.0.")
 
 # ---------------------------------------------------------------- the words "Odoo 18"
 for name in ("nudge/llm/prompt.py", "nudge/README.md", "nudge/README.ar.md", "nudge/static/description/index.html",
