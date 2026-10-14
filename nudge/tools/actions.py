@@ -589,6 +589,14 @@ class CallMethod(base.Action):
         method = arguments["method"]
         node = self.find_button(model, records, method)
         label = button_label(node) or method
+        # The card reads what is about to be done, from the view and the
+        # records, never from what the model said of it
+        lines = [
+            {"label": env._("Button"), "value": label},
+            {"label": env._("Method"), "value": method},
+            {"label": env._("Records"), "value": env._(
+                "%(count)s × %(model)s", count=len(records), model=model_label(model))},
+        ]
         return base.ToolResult(
             "The person is being shown which button is about to be pressed.",
             pending={
@@ -598,7 +606,7 @@ class CallMethod(base.Action):
                 "record_names": ", ".join(records[:MAX_SHOWN_RECORDS].mapped("display_name")),
                 "method": method,
                 "is_sensitive": is_sensitive(model._name, method),
-                "preview": {"records": name_records(records), "lines": []},
+                "preview": {"records": name_records(records), "lines": lines},
             },
         )
 

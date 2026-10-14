@@ -941,6 +941,9 @@ def read_rule(env, arguments):
         when = env._("%(number)s %(unit)s before", number=-delay["number"], unit=delay["unit"]) if delay["number"] < 0 \
             else env._("%(number)s %(unit)s after", number=delay["number"], unit=delay["unit"])
         lines.append({"label": env._("Delay"), "value": when})
+        # Run by the scheduler, not by the person who changed the record: with
+        # every right, which the person is told before saying yes
+        lines.append({"label": env._("Runs as"), "value": env._("the system user")})
     elif arguments.get("delay"):
         raise Refused("delay goes with the time triggers only.")
     actions, templates = [], []

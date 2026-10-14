@@ -127,6 +127,17 @@ DEV_TOOLS = frozenset({
 ESSENTIAL_BY_MODE = {MODE_TALK: TALK_TOOLS, MODE_AGENT: AGENT_TOOLS, MODE_DEV: DEV_TOOLS}
 ESSENTIAL_TOOLS = TALK_TOOLS | AGENT_TOOLS | DEV_TOOLS | {"more_tools"}
 
+# The tools whose result is what people wrote: in records, in files, in the
+# pages of the documentation, in code and views. The model reads it inside a
+# frame that says it is data: information to reason about, never an
+# instruction, whatever a note or a file says. Named here for the companion
+# modules too.
+DATA_TOOLS = frozenset({
+    "search_records", "read_record", "find_record", "aggregate_records",
+    "search_company_files", "search_odoo_documentation", "search_products", "find_products",
+    "read_automations", "read_view", "read_module_code", "test_import",
+})
+
 TOOL_SETS = ("full", "essential")
 
 
@@ -176,6 +187,16 @@ def call(env, name, arguments, screen=None, mode=MODE_TALK):
     if result.is_error and isinstance(tool, Action):
         result.content = f"{result.content} {NOTHING_MADE}"
     return result
+
+
+def as_data(name, content):
+    """:return: the result of the tool ``name`` as the model reads it. What a
+    tool of ``DATA_TOOLS`` found is framed as data, so that an instruction
+    written in a note or a file is reported to the person, not followed;
+    "<" is escaped inside, and the frame cannot be closed from within."""
+    if name not in DATA_TOOLS:
+        return content
+    return f'<data source="{name}">{content.replace("<", "&lt;")}</data>'
 
 
 def dump(value):
