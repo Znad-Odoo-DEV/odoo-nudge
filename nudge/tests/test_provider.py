@@ -49,6 +49,17 @@ class TestProvider(NudgeCase, TransactionCase):
         self.assertEqual(adapter.config.api_key, "sk-test-secret")
         self.assertEqual(adapter.config.model, "test-model")
 
+    def test_key_pasted_with_blanks(self):
+        # Pasted with a line break after it, the key made every request fail
+        # before it left: a header cannot hold one
+        self.provider.api_key = " sk-pasted-key\n"
+        self.assertEqual(self.provider.api_key, "sk-pasted-key")
+        self.assertEqual(self.provider._get_config().api_key, "sk-pasted-key")
+        other = self.provider.copy({"api_key": "\tsk-other-key "})
+        self.assertEqual(other.api_key, "sk-other-key", "Nor when a provider is made")
+        self.provider.api_key = False
+        self.assertFalse(self.provider.api_key)
+
     def test_capabilities_follow_the_model(self):
         self.provider.capabilities = {"effort": {"supported": True}}
         self.provider.timeout = 30
