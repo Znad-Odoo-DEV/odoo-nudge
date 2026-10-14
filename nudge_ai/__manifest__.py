@@ -1,6 +1,6 @@
 {
     "name": "Nudge: Odoo AI (Enterprise)",
-    "version": "19.0.1.0.6",
+    "version": "19.0.1.0.7",
     "category": "Productivity",
     "summary": "AI app sources, agents, keys; installs itself (Enterprise)",
     "description": """

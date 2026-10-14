@@ -10,7 +10,7 @@ spreadsheet editor: collaborative, versioned, shareable, downloadable.
 Installed by itself when Nudge Spreadsheets and Documents Spreadsheet are both there.
 """,
     "category": "Productivity",
-    "version": "19.0.1.0.4",
+    "version": "19.0.1.0.5",
     "author": "Ibrahim Elzenad",
     "license": "OPL-1",
     "images": ["static/description/banner.png"],
