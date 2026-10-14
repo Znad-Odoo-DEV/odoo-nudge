@@ -54,9 +54,9 @@
 
 ## الإصدارات
 
-- **Community و Enterprise**: ‏Nudge و Nudge: Emails و Nudge: Discuss و Nudge Spreadsheets. كل ما في الجدول
+- **Community و Enterprise**: ‏Nudge و Nudge: Emails و Nudge: Discuss و Nudge: Spreadsheets. كل ما في الجدول
   أعلاه يعمل على Community: المؤشر، ووضع الوكيل، ووضع المطوّر، والأوامر، والمهام، وجداول البيانات.
-- **Enterprise فقط**: ‏Nudge: Studio (`web_studio`) و Nudge: Odoo AI (`ai`) و Nudge Spreadsheets in
+- **Enterprise فقط**: ‏Nudge: Studio (`web_studio`) و Nudge: Odoo AI (`ai`) و Nudge: Spreadsheets in
   Documents (`documents_spreadsheet`)، لأن التطبيقات التي تربطها من Enterprise؛ والوضع الداكن، وهو غير
   موجود في Community.
 
