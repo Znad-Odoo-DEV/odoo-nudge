@@ -52,6 +52,8 @@ UPDATABLE_TYPES = ("char", "text", "html", "integer", "float", "monetary", "bool
 # What may be deleted: what Nudge builds, never records of the business
 DELETABLE = ["base.automation", "ir.actions.server", "mail.template", "ir.cron", "ir.ui.view", "ir.model.fields",
              "ir.actions.report"]
+# What undoing leaves as it is, named on its card, at most
+MAX_LEFT_SHOWN = 5
 # Where what Nudge makes is registered; a view or a field of a module is never deleted
 CUSTOM_MODULES = ("nudge_custom", "studio_customization", "__export__")
 INTERVAL_UNITS = ("minutes", "hours", "days", "weeks", "months")
@@ -1424,7 +1426,7 @@ def built_by(env, runs):
 
 def undo_built(env, runs):
     """Delete what the runs made, the last made first.
-    :return: ``(names deleted, names kept with the reason)``"""
+    :return: ``(names deleted, [(name kept, why)])``"""
     deleted, kept = [], []
     for step, records in built_by(env, runs):
         records = records.with_env(env).exists()
@@ -1434,8 +1436,30 @@ def undo_built(env, runs):
             with env.cr.savepoint():
                 deleted += [f"{records._description}: {name}" for name in delete_built(records)]
         except Refused as refusal:
-            kept.append(f"{records._description}: {', '.join(records.mapped('display_name'))} ({refusal})")
+            kept.append((f"{records._description}: {', '.join(records.mapped('display_name'))}", str(refusal)))
     return deleted, kept
+
+
+def left_as_it_is(env, runs):
+    """:return: what the runs did that undoing them leaves as it is, as their
+    steps say it: what was changed rather than made (a value written, a button
+    pressed, something deleted), and what was made that is not Nudge's to
+    delete"""
+    undone = {step.id for step, _records in built_by(env, runs)}
+    left = []
+    for step in env["nudge.step"].sudo().search([
+            ("run_id", "in", runs.ids), ("state", "=", "done"),
+            ("kind", "in", ["create", "write", "method", "delete"]), ("tool", "!=", "prepare_undo")],
+            order="id"):
+        if step.id in undone:
+            continue
+        if step.kind == "create" and not (
+                step.res_model in env and step.res_ids
+                and env[step.res_model].sudo().with_context(active_test=False).browse(step.res_ids).exists()):
+            # Made, and gone since
+            continue
+        left.append(step.summary or step.tool)
+    return left
 
 
 @base.register
@@ -1479,6 +1503,8 @@ class PrepareUndo(Building):
             raise Refused("Nothing made here still exists: there is nothing to undo.")
         shown = [{"id": index, "name": f"{records._description}: {', '.join(records.mapped('display_name'))}"}
                  for index, (_step, records) in enumerate(found, start=1)]
+        lines = [{"label": _("Deleted"), "value": _("For good: it cannot be brought back")}]
+        lines += self._left_lines(env, left_as_it_is(env, runs))
         return base.ToolResult(
             "The person is being shown what is about to be deleted.",
             pending={
@@ -1488,25 +1514,48 @@ class PrepareUndo(Building):
                 "record_names": ", ".join(item["name"] for item in shown)[:500],
                 "values": {"run_ids": runs.ids},
                 "is_sensitive": True,
-                "preview": {"records": shown, "lines": [
-                    {"label": _("Undo"), "value": _("Not possible: deleted for good")},
-                    {"label": _("Not undone"), "value": _("What was changed rather than made")},
-                ]},
+                "preview": {"records": shown, "lines": lines},
             },
         )
+
+    @staticmethod
+    def _left_lines(env, left):
+        """:return: the line of the card for what undoing leaves as it is; none
+        when it leaves nothing"""
+        if not left:
+            return []
+        shown = "; ".join(left[:MAX_LEFT_SHOWN])
+        if len(left) > MAX_LEFT_SHOWN:
+            shown += " " + _("and %s more", len(left) - MAX_LEFT_SHOWN)
+        return [{"label": _("Stays as it is"), "value": shown}]
 
     def execute(self, env, step):
         check_developing(env)
         runs = env["nudge.run"].sudo().browse((step.values or {}).get("run_ids") or []).exists()
         runs = runs.filtered(lambda run: run.user_id == env.user and run.is_developer)
+        left = left_as_it_is(env, runs)
         deleted, kept = undo_built(env, runs)
         told = f"Deleted {len(deleted)} item(s): " + "; ".join(deleted) if deleted else "Nothing was deleted."
         if kept:
-            told += " Kept: " + "; ".join(kept)
+            told += " Kept: " + "; ".join(f"{name} ({why})" for name, why in kept)
+        if left:
+            told += " Left as it is (changed rather than made, or not Nudge's to delete): " + "; ".join(left)
+        # The card says what was done: all of it, or all but what it names
+        if not deleted:
+            done = _("Nothing")
+        elif kept:
+            done = _("All but what is kept")
+        else:
+            done = _("All of it")
+        lines = [{"label": _("Deleted"), "value": done}]
+        if kept:
+            lines.append({"label": _("Kept"), "value": "; ".join(name for name, _why in kept)[:500]})
+        lines += self._left_lines(env, left)
         return base.ToolResult(
             told,
             event={"type": "changed", "model": "ir.ui.view", "ids": [], "action": {"type": "ir.actions.client", "tag": "reload"}},
             records=("nudge.run", runs.ids, deleted[:10]),
+            card_lines=lines,
         )
 
 

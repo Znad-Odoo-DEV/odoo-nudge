@@ -32,15 +32,19 @@ class ToolResult:
     :param records: ``(model, ids, names)`` the call was about, for the log
     :param unfinished: what was asked is not done yet: the model is not
         offered to tell the person it is
+    :param card_lines: for a step the person said yes to, what its card reads
+        once it is done, in place of the lines it read before the yes
     """
 
-    def __init__(self, content, is_error=False, event=None, pending=None, records=None, unfinished=False):
+    def __init__(self, content, is_error=False, event=None, pending=None, records=None, unfinished=False,
+                 card_lines=None):
         self.content = str(content)[:MAX_RESULT_CHARS]
         self.is_error = is_error
         self.event = event
         self.pending = pending
         self.records = records
         self.unfinished = unfinished
+        self.card_lines = card_lines
 
 
 class Tool:
