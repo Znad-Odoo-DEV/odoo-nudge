@@ -21,7 +21,7 @@ What is left is listed under [What is not there yet](#what-is-not-there-yet). A 
 | | |
 |---|---|
 | **Sees your screen** | The record you are on, its fields and their values, unsaved changes included, its buttons and tabs. Only when you send a message, and only what you are allowed to see. |
-| **Knows Odoo** | The official documentation of Odoo 17 comes with the module: every app of Community and Enterprise, and the developer documentation (ORM, fields, views, security, automations, QWeb, the JavaScript framework), 1067 pages searched by Postgres. For how standard Odoo works, or how something is done in code, Nudge reads the documentation before answering, and gives the link of the page. Nothing is fetched from outside. |
+| **Knows Odoo** | The official documentation of Odoo comes with the module: every app of Community and Enterprise, and the developer documentation (ORM, fields, views, security, automations, QWeb, the JavaScript framework), 1067 pages searched by Postgres. For how standard Odoo works, or how something is done in code, Nudge reads the documentation before answering, and gives the link of the page. Nothing is fetched from outside. |
 | **Counts and sums** | In Agent mode: how many, how much, which most, per what. Grouped by any field, a date by day, week, month, quarter or year; sum, average, minimum, maximum of any number. Through the ORM, as the person: what they cannot open is not counted. |
 | **Computes with Python** | Off by default; an administrator switches it on. The agent runs Python in the sandbox of Odoo (the one of the server actions), as the person: every record passes their rights. The code reads only: it runs in a savepoint rolled back when it ends, so what it writes is discarded, and a change still goes through the yes of the person. No import, no sudo, no cursor, no private attribute, no model of the system. Every run is in the log. |
 | **SQL for administrators** | Off by default. The group Settings, and only those allowed in every company, may ask the agent for one SELECT: a join or a report no other tool gives. No change, no lock, no comment, one statement; the tables of Odoo they may read, never users, parameters or providers; 50 rows, 10 seconds, in a savepoint rolled back when it ends. Every query is in the log. |
@@ -46,7 +46,8 @@ What is left is listed under [What is not there yet](#what-is-not-there-yet). A 
 
 ## Install
 
-Requirements: Odoo 17 (Community or Enterprise). No extra Python package, unless you use the
+Requirements: Odoo 17 (Community or Enterprise); Nudge exists for Odoo 17 and 18 too, each on its
+own branch. No extra Python package, unless you use the
 Anthropic provider: Claude needs the `anthropic` Python package on the server (`pip install anthropic`;
 on Odoo.sh, a line `anthropic` in the `requirements.txt` at the root of the repository). Nudge installs
 without it; **Test Connection** on the provider says when it is missing, and what to do.
@@ -355,6 +356,7 @@ rewritten into a file path.
 
 The documentation of Odoo included in `data/odoo_docs.jsonl.gz` is © Odoo S.A., licensed
 [CC BY-SA 4.0](https://github.com/odoo/documentation), read into text by
-`scripts/build_odoo_docs.py`. Run the script again to take a newer documentation.
+`scripts/build_odoo_docs.py`. Run the script again to take a newer documentation; the first line of
+the file says which branch of the documentation it was built from.
 - Installed and tested on Odoo.sh (Linux, several workers, behind its proxy): the server
   tests pass there; the browser features were tried there by hand.

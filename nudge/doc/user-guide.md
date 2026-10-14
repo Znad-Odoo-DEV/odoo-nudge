@@ -58,7 +58,7 @@ screen, from wherever you are; if you are already in the app, it starts at its m
 - "How do I set up a payslip batch?"
 - "How do I write a computed field?" or "What is a record rule?" (the developer documentation)
 
-Nudge has the official documentation of Odoo 17 at hand, every app. For a question about
+Nudge has the official documentation of Odoo at hand, every app. For a question about
 standard Odoo it reads the documentation before answering, and gives you the link of the page
 at the end. What your own database changes comes first: Nudge says when a custom module
 does things differently.
