@@ -255,8 +255,10 @@ msgstr "/مخزون إسمنت"
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/models/nudge_provider.py:0
-msgid "A Python library is missing on the server."
-msgstr "توجد مكتبة Python ناقصة على الخادم."
+msgid ""
+"The Python package of this provider is not installed on the server. Install it with the command below, or on Odoo.sh add its name to the requirements.txt at the root of the repository, then restart Odoo."
+msgstr ""
+"حزمة Python الخاصة بهذا المزود غير مثبتة على الخادم. ثبّتها بالأمر أدناه، أو على Odoo.sh أضف اسمها إلى ملف requirements.txt في جذر المستودع، ثم أعد تشغيل Odoo."
 
 #. module: nudge
 #. odoo-python
@@ -3654,10 +3656,10 @@ msgstr "صفحات من توثيق Odoo الرسمي"
 #: model:nudge.provider,notes:nudge.provider_anthropic
 msgid ""
 "Paid. Get a key from the Claude console (platform.claude.com).\n"
-"Requires the \"anthropic\" Python package on the server. Prices are in USD per million tokens."
+"Needs the \"anthropic\" Python package on the server: pip install anthropic, or a line \"anthropic\" in the requirements.txt at the root of the repository on Odoo.sh, then restart Odoo. Prices are in USD per million tokens."
 msgstr ""
 "مدفوع. احصل على مفتاح من لوحة تحكم Claude (platform.claude.com).\n"
-"يتطلب حزمة Python \"anthropic\" على الخادم. الأسعار بالدولار الأمريكي لكل مليون رمز."
+"يحتاج إلى حزمة Python \"anthropic\" على الخادم: pip install anthropic، أو سطر \"anthropic\" في ملف requirements.txt في جذر المستودع على Odoo.sh، ثم أعد تشغيل Odoo. الأسعار بالدولار الأمريكي لكل مليون رمز."
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_source__passage_ids
