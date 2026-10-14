@@ -906,6 +906,9 @@ class NudgeConversation(models.Model):
         messages = {
             base.ERROR_AUTH: _(
                 "The AI provider rejected the API key. Ask your administrator to check it."),
+            base.ERROR_WORKSPACE: _(
+                "The API key of the AI provider is not scoped to a workspace. Ask your administrator "
+                "to fill in the Workspace ID of the provider."),
             base.ERROR_MODEL_NOT_FOUND: _(
                 "The AI provider does not know the configured model."),
             base.ERROR_RATE_LIMIT: _(

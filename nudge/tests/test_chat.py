@@ -147,6 +147,13 @@ class TestChat(NudgeCase, TransactionCase):
         self.assertIn("took too long", result["message"])
         self.assertEqual(conversation.message_ids[-1].error_code, base.ERROR_TIMEOUT)
 
+    def test_a_key_of_no_workspace_is_told_as_such(self):
+        self.use_adapter(events=[base.error_event(
+            base.ERROR_WORKSPACE, "this request must include the anthropic-workspace-id header")])
+        _conversation, result = self.ask(self.user_a, "Hello")
+        self.assertEqual(result["type"], "error")
+        self.assertIn("Workspace ID", result["message"])
+
     def test_failed_turn_is_not_replayed(self):
         adapter = self.use_adapter(events=[base.error_event(base.ERROR_NETWORK)])
         conversation, _result = self.ask(self.user_a, "First")

@@ -20,6 +20,8 @@ ERROR_AUTH = "auth"
 ERROR_MODEL_NOT_FOUND = "model_not_found"
 ERROR_RATE_LIMIT = "rate_limit"
 ERROR_BAD_REQUEST = "bad_request"
+# The key belongs to no workspace, and the request named none
+ERROR_WORKSPACE = "workspace"
 ERROR_UNAVAILABLE = "unavailable"
 ERROR_NETWORK = "network"
 # The provider was reached and did not answer in time
@@ -42,6 +44,8 @@ class ProviderConfig:
     model: str
     api_key: str = dataclasses.field(default="", repr=False)
     base_url: str = ""
+    # The workspace a Claude key that is not scoped to one works in
+    workspace_id: str = ""
     max_output_tokens: int = 0
     effort: str = ""
     refusal_fallback: bool = False

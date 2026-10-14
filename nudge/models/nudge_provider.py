@@ -49,6 +49,12 @@ class NudgeProvider(models.Model):
              "Leave empty for Anthropic to use the official endpoint.",
     )
     api_key = fields.Char(string="API Key", groups="base.group_system", copy=False)
+    workspace_id = fields.Char(
+        string="Workspace ID", groups="base.group_system", copy=False,
+        help="Needed only with a key that is not scoped to a workspace, such as a user key "
+             "(sk-ant-usr-...): the workspace its requests are made in. It starts with "
+             "\"wrkspc_\", and is found in the Console under Settings ‣ Workspaces.",
+    )
     has_api_key = fields.Boolean(
         string="API Key Set", compute="_compute_has_api_key", compute_sudo=True)
     requires_api_key = fields.Boolean(
@@ -314,6 +320,7 @@ class NudgeProvider(models.Model):
             model=self.model_name or "",
             api_key=(self.api_key or "").strip(),
             base_url=(self.base_url or "").strip(),
+            workspace_id=(self.workspace_id or "").strip(),
             max_output_tokens=self.max_output_tokens,
             effort=self.effort or "",
             refusal_fallback=self.refusal_fallback,
@@ -366,6 +373,9 @@ class NudgeProvider(models.Model):
     def _error_message(self, error):
         messages = {
             base.ERROR_AUTH: _("The provider rejected the API key."),
+            base.ERROR_WORKSPACE: _(
+                "This API key is not scoped to a workspace: fill in the Workspace ID, which starts "
+                "with wrkspc_ and is found in the Console under Settings ‣ Workspaces."),
             base.ERROR_MODEL_NOT_FOUND: _("The provider does not know this model."),
             base.ERROR_RATE_LIMIT: _("The provider's rate limit is reached. Try again in a minute."),
             base.ERROR_NETWORK: _("The provider could not be reached."),

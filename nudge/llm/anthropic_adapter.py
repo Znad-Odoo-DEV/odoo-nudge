@@ -114,6 +114,10 @@ class AnthropicAdapter(base.BaseAdapter):
             kwargs["api_key"] = self.config.api_key
         if self.config.base_url:
             kwargs["base_url"] = self.config.base_url
+        if self.config.workspace_id:
+            # A key that is not scoped to a workspace (a user key) names one
+            # on every request, or is refused with a 400
+            kwargs["default_headers"] = {"anthropic-workspace-id": self.config.workspace_id}
         return anthropic.Anthropic(**kwargs)
 
     # ------------------------------------------------------------------
@@ -296,6 +300,10 @@ class AnthropicAdapter(base.BaseAdapter):
         if isinstance(exc, anthropic.APIStatusError):
             if exc.status_code >= 500:
                 return base.ERROR_UNAVAILABLE, detail
+            if "anthropic-workspace-id" in detail:
+                # "This API key is not scoped to a workspace, so this request
+                # must include the anthropic-workspace-id header"
+                return base.ERROR_WORKSPACE, detail
             return base.ERROR_BAD_REQUEST, detail
         timeout_error = getattr(anthropic, "APITimeoutError", None)
         if timeout_error is not None and isinstance(exc, timeout_error):
