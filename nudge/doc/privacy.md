@@ -53,4 +53,4 @@ OpenAI-compatible server), for business data. With a local model nothing leaves 
 
 Deleting a conversation deletes its messages, screens and images. Archiving a user keeps
 their conversations for the managers; delete them as you would any record. The usage ledger
-is kept for the budgets and the bills and is never edited.
+is kept for the budgets and the bills and cannot be edited from the interface.
