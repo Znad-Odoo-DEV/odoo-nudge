@@ -182,8 +182,15 @@ class NudgeRun(models.Model):
                 ("role", "=", "assistant"),
                 ("content", "!=", False),
             ], order="id desc", limit=1)
+            changed = []
             if kind != "progress":
                 run.is_unseen = True
+                # What was written in the background: the screen in front shows it
+                changed = [
+                    {"model": step.res_model, "ids": step.res_ids or []}
+                    for step in run.step_ids
+                    if step.state == "done" and step.kind in CHANGES and step.res_model
+                ]
             run.user_id._bus_send("nudge.run", {
                 "kind": kind,
                 "run_id": run.id,
@@ -193,6 +200,7 @@ class NudgeRun(models.Model):
                 "progress": run.progress or "",
                 "text": (answer.content or "")[:EXCERPT_CHARS] if kind != "progress" else "",
                 "card": card,
+                "changed": changed,
             })
 
     def _as_person(self):
@@ -486,7 +494,8 @@ class NudgeStep(models.Model):
         """Write back what a step wrote, as the person who said yes to it;
         a record changed since is left as it is.
 
-        :return: ``{"message", "card"}``
+        :return: ``{"message", "card", "changed"}``, changed: the records
+            written back, ``[{"model", "ids"}]``, for the screen to show them
         """
         from ..tools.plans import undo_changes  # noqa: PLC0415
 
@@ -496,7 +505,8 @@ class NudgeStep(models.Model):
         values = step.values if isinstance(step.values, dict) else {}
         if step.state != "done" or not step._undo_data() or values.get("undone"):
             raise UserError(self.env._("There is nothing to undo here."))
-        restored, kept = undo_changes(self.env, step._undo_data())
+        undo = step._undo_data()
+        restored, kept = undo_changes(self.env, undo)
         step.values = dict(values, undone=True)
         message = self.env._("%s records are back as they were.", restored)
         if kept:
@@ -504,7 +514,9 @@ class NudgeStep(models.Model):
                 f"{name} ({why})" for name, why in kept[:10]))
         _logger.info("Nudge: step %s undone by user %s: %s back, %s left", step.id, self.env.uid,
                      restored, len(kept))
-        return {"message": message, "card": step._get_card()}
+        changed = [{"model": model, "ids": [int(record_id) for record_id in entries]}
+                   for model, entries in undo.items()]
+        return {"message": message, "card": step._get_card(), "changed": changed}
 
     @api.model
     def get_cards(self, conversation_id):

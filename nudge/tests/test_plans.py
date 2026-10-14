@@ -102,6 +102,9 @@ class TestPlans(BackgroundCase, TransactionCase):
         self.assertEqual(few[0].function, "Manager")
         self.assertIn("3", undone["message"])
         self.assertFalse(undone["card"]["can_undo"])
+        # The screen behind is read again: the records written back are named
+        self.assertEqual([(entry["model"], sorted(entry["ids"])) for entry in undone["changed"]],
+                         [("res.partner", sorted(few.ids))])
         with self.assertRaises(UserError):
             Step.undo_changes(step.id)
 
