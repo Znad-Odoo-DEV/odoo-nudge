@@ -7,10 +7,12 @@ those who may act in every company, since a query knows no company rule.
 An administrator switches it on in Settings ‣ Nudge: it is off by default.
 
 What a query may do is bounded all the same: one SELECT, no comment, no
-word that changes or locks anything, no table outside the models the
-administrator may read, none of the tables that hold secrets (users,
-parameters, providers), at most 50 rows, 10 seconds, in a savepoint that
-is rolled back when it ends. Every query is in the log, with who asked it.
+word that changes or locks anything, no function beyond those of a report,
+no table outside the models the administrator may read, none of the tables
+that hold secrets (users, parameters, providers), at most 50 rows, 10
+seconds. Reading only is not left to the words of the query: it runs in a
+savepoint the database itself keeps read-only, and the savepoint is rolled
+back when it ends. Every query is in the log, with who asked it.
 """
 import datetime
 import decimal
@@ -39,6 +41,41 @@ FOR_LOCK = re.compile(r"\bfor\s+(update|share|no\s+key\s+update|key\s+share)\b",
 COMMENT = re.compile(r"--|/\*|\*/")
 WORD = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 IDENTIFIER = re.compile(r"\b(pg_[a-z_]+|information_schema)\b", re.IGNORECASE)
+# The functions of a report: what counts, sums, rounds, cuts, formats or
+# ranks, and the types a value is cast to. Every other function is refused
+# by name, whatever it is: one that runs a query of its own (query_to_xml,
+# dblink), reads a file (pg_read_file), or builds a name (chr) reads what
+# the rule on tables keeps closed
+ALLOWED_FUNCTIONS = frozenset({
+    "count", "sum", "avg", "min", "max", "coalesce", "nullif", "round", "abs", "floor", "ceil",
+    "ceiling", "trunc", "mod", "sign", "power", "sqrt", "date_trunc", "date_part", "extract",
+    "now", "current_date", "current_timestamp", "age", "date", "to_char", "to_date",
+    "to_timestamp", "make_date", "lower", "upper", "initcap", "length", "char_length",
+    "substr", "substring", "left", "right", "concat", "concat_ws", "trim", "ltrim", "rtrim",
+    "btrim", "replace", "split_part", "position", "strpos", "greatest", "least", "string_agg",
+    "array_agg", "bool_and", "bool_or", "every", "array_length", "cardinality", "unnest",
+    "row_number", "rank", "dense_rank", "lag", "lead", "first_value", "last_value",
+    "percentile_cont", "percentile_disc", "json_agg", "jsonb_agg", "json_build_object",
+    "jsonb_build_object", "generate_series",
+    "numeric", "decimal", "int", "integer", "bigint", "float", "text", "varchar", "char",
+    "character", "boolean", "timestamp", "timestamptz", "time", "interval",
+})
+# Words that stand before a parenthesis without calling anything
+NOT_A_FUNCTION = frozenset({
+    "select", "from", "where", "in", "not", "and", "or", "exists", "on", "as", "join", "values",
+    "over", "filter", "within", "by", "any", "all", "some", "when", "then", "else", "case",
+    "cast", "between", "like", "ilike", "similar", "is", "using", "having", "union",
+    "intersect", "except", "distinct", "lateral", "row", "array", "with", "order", "group",
+    "partition", "limit", "offset",
+})
+CALLED = re.compile(r"\b([A-Za-z_][A-Za-z0-9_.]*)\s*\(")
+STRING = re.compile(r"'(?:[^']|'')*'")
+# A text joined to another with ||: how a name is built out of pieces no rule reads
+BUILT_STRING = re.compile(r"'(?:[^']|'')*'\s*\|\||\|\|\s*'")
+QUOTED = re.compile(r'"((?:[^"]|"")*)"')
+PLAIN_NAME = re.compile(r"[a-z_][a-z0-9_]*")
+# A value that is a key or a hash, whatever its column is called
+KEY_VALUE = re.compile(r"\bsk-|\bAIza|\bgsk_|\$pbkdf2|\$2[aby]\$")
 
 
 def _tables_of(env):
@@ -76,6 +113,21 @@ def check_query(env, query):
         raise Refused("The query may not lock rows.")
     if IDENTIFIER.search(text):
         raise Refused("The catalog of Postgres is not for the query: the tables of Odoo only.")
+    # Only the functions of a report are called: looked for outside the
+    # strings, where a parenthesis is text
+    for match in CALLED.finditer(STRING.sub("''", text)):
+        name = match.group(1).lower()
+        if name not in NOT_A_FUNCTION and name not in ALLOWED_FUNCTIONS:
+            raise Refused(
+                f"The query may not call {name}(): the functions of a report only, such as "
+                "count, sum, avg, round, coalesce, date_trunc, to_char, lower, string_agg.")
+    if BUILT_STRING.search(text):
+        raise Refused("No text built with ||: name tables and columns plainly.")
+    # A quoted name is read as a plain word, like every other name: it cannot
+    # hide a table in another spelling
+    for match in QUOTED.finditer(text):
+        if not PLAIN_NAME.fullmatch(match.group(1)):
+            raise Refused("A quoted name must be a plain lowercase name, as Odoo names its tables and columns.")
     # Every word of the query that is the name of a table of the database
     # must be a table this administrator may read: wherever it stands, after
     # FROM, after a comma, in a subquery or a WITH
@@ -94,6 +146,28 @@ def check_query(env, query):
     return text
 
 
+def read_only(cr, statement):
+    """:return: the columns and the rows of ``statement``, run where the
+        database itself keeps the transaction read-only and stops it after
+        TIMEOUT_MS: whatever the words of a query hide from check_query, a
+        write fails in Postgres. The savepoint is rolled back once the rows
+        are read, and the settings go with it: the transaction of the
+        request writes again"""
+    columns = rows = None
+    try:
+        with cr.savepoint():
+            cr.execute("SET LOCAL transaction_read_only = on")
+            cr.execute("SET LOCAL statement_timeout = %s", (TIMEOUT_MS,))
+            cr.execute(statement)
+            columns = [column.name for column in cr.description]
+            rows = cr.fetchall()
+            # Nothing is kept, whatever the statement did
+            raise _Done()
+    except _Done:
+        pass
+    return columns, rows
+
+
 def _cell(column, value):
     if SENSITIVE_NAME.search(column):
         return HIDDEN
@@ -105,9 +179,12 @@ def _cell(column, value):
         return value.isoformat()
     if isinstance(value, (bytes, memoryview)):
         return HIDDEN
-    if isinstance(value, (list, dict)):
-        return cut(base.dump(value), MAX_CELL_CHARS)
-    return cut(str(value), MAX_CELL_CHARS)
+    text = base.dump(value) if isinstance(value, (list, dict)) else str(value)
+    # A key or a hash is hidden whatever its column is called: a query may
+    # have given it any name, or wrapped it in a text
+    if KEY_VALUE.search(text):
+        return HIDDEN
+    return cut(text, MAX_CELL_CHARS)
 
 
 @base.register
@@ -120,10 +197,12 @@ class RunSql(base.Tool):
         "Read the database with one SELECT, for an administrator, when a join or a report is "
         "beyond search_records and aggregate_records. Tables are named after their model with "
         "underscores (sale_order, sale_order_line, res_partner); many2one columns hold ids; "
-        "states are their technical values. Reading only: no change, no lock, no comment, one "
-        "statement, the tables of Odoo this administrator may read, at most 50 rows and 10 "
-        "seconds. The tables of users, parameters and providers are closed. Prefer the other "
-        "tools when they can answer: they see the records as the person does."
+        "states are their technical values. Reading only, enforced by the database: no change, "
+        "no lock, no comment, one statement, the functions of a report only (count, sum, round, "
+        "date_trunc, to_char, string_agg...), the tables of Odoo this administrator may read, "
+        "at most 50 rows and 10 seconds. The tables of users, parameters and providers are "
+        "closed. Prefer the other tools when they can answer: they see the records as the "
+        "person does."
     )
     input_schema = {
         "type": "object",
@@ -159,17 +238,8 @@ class RunSql(base.Tool):
         if not self._in_every_company(env):
             raise Refused("This person is not allowed in every company: no SQL for them.")
         query = check_query(env, arguments["query"])
-        cr = env.cr
         try:
-            with cr.savepoint():
-                cr.execute("SET LOCAL statement_timeout = %s", (TIMEOUT_MS,))
-                cr.execute(f"SELECT * FROM ({query}) AS nudge_query LIMIT {MAX_ROWS + 1}")
-                columns = [column.name for column in cr.description]
-                rows = cr.fetchall()
-                # Nothing is kept, whatever the query did
-                raise _Done()
-        except _Done:
-            pass
+            columns, rows = read_only(env.cr, f"SELECT * FROM ({query}) AS nudge_query LIMIT {MAX_ROWS + 1}")
         except Exception as error:  # noqa: BLE001
             message = cut(str(error).split("\n")[0], MAX_CELL_CHARS)
             raise Refused(f"Postgres refused the query: {message}") from None
