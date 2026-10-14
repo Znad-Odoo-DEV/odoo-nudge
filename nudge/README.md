@@ -57,10 +57,10 @@ without it; **Test Connection** on the provider says when it is missing, and wha
 
 ## Editions
 
-- **Community and Enterprise**: Nudge, Nudge: Emails, Nudge: Discuss and Nudge Spreadsheets.
+- **Community and Enterprise**: Nudge, Nudge: Emails, Nudge: Discuss and Nudge: Spreadsheets.
   Everything in the table above works on Community: the pointer, Agent mode, Developer mode, the
   commands, the tasks, the spreadsheets.
-- **Enterprise only**: Nudge: Studio (`web_studio`), Nudge: Odoo AI (`ai`) and Nudge Spreadsheets
+- **Enterprise only**: Nudge: Studio (`web_studio`), Nudge: Odoo AI (`ai`) and Nudge: Spreadsheets
   in Documents (`documents_spreadsheet`), since the apps they bridge are Enterprise; and dark
   mode, which Community does not have.
 

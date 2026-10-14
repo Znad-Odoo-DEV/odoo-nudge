@@ -1,6 +1,6 @@
 {
     "name": "Nudge: Discuss",
-    "summary": "@Nudge in the chatter of any record and in the channels of Discuss: answered as an internal note",
+    "summary": "@Nudge in the chatter and in Discuss, answered as a note",
     "description": """
 Write @Nudge in the chatter of any record, or in a channel of Discuss, and ask:
 "@Nudge summarise this", "@Nudge who has to approve it?". Nudge answers there,
@@ -17,8 +17,9 @@ Installed from Apps by an administrator who wants it, with Nudge and Discuss;
 never by itself.
 """,
     "category": "Productivity",
-    "version": "18.0.1.0.5",
+    "version": "18.0.1.0.6",
     "author": "Ibrahim Elzenad",
+    "website": "https://znad-odoo-dev.github.io",
     "license": "OPL-1",
     "images": ["static/description/banner.png"],
     "depends": ["nudge", "mail"],

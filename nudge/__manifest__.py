@@ -1,6 +1,6 @@
 {
     "name": "Nudge",
-    "version": "18.0.1.56.38",
+    "version": "18.0.1.56.39",
     "category": "Productivity",
     "summary": "An AI companion that lives in the Odoo web client",
     "description": """
@@ -24,6 +24,7 @@ Works with any OpenAI-compatible AI provider (Gemini, Groq, OpenRouter, a local
 Ollama) and with Anthropic Claude.
 """,
     "author": "Ibrahim Elzenad",
+    "website": "https://znad-odoo-dev.github.io",
     "license": "OPL-1",
     "images": ["static/description/banner.png"],
     "depends": ["web", "bus"],
