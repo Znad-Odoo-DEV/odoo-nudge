@@ -667,6 +667,15 @@ class TestActing(AgentCase, TransactionCase):
         self.assertEqual(pending["method"], "create_company")
         self.assertEqual(
             pending["preview"]["records"], [{"id": self.carol.id, "name": self.carol.display_name}])
+        # The card reads the button, its method and the records from what is
+        # about to be done, whatever the model said of it
+        self.assertEqual(pending["preview"]["lines"], [
+            {"label": "Button", "value": "Create"},
+            {"label": "Method", "value": "create_company"},
+            {"label": "Records", "value": "1 × Contact"},
+        ])
+        card = self.step("call_method", pending)._get_card()
+        self.assertIn({"label": "Method", "value": "create_company"}, card["lines"])
 
         result = self.execute("call_method", pending)
         self.assertFalse(result.is_error, result.content)

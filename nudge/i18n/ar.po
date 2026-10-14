@@ -2586,6 +2586,12 @@ msgid "Messages"
 msgstr "الرسائل"
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/actions.py:0
+msgid "Method"
+msgstr "الدالة"
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_source__mimetype
 msgid "Mimetype"
 msgstr "نوع الملف"
@@ -6218,6 +6224,12 @@ msgstr "قائمة الإجراءات في %s"
 #: code:addons/nudge/tools/reports.py:0
 msgid "the Print menu of %s"
 msgstr "قائمة الطباعة في %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/developer.py:0
+msgid "the system user"
+msgstr "مستخدم النظام"
 
 #. module: nudge
 #. odoo-python
