@@ -64,6 +64,13 @@ class NudgeEmailReview(models.TransientModel):
         partner_ids = template._render_field("partner_to", record.ids).get(record.id) or ""
         partners = self.env["res.partner"].sudo().browse(
             int(part) for part in re.split(r"[,\s]+", partner_ids) if part.strip().isdigit()).exists()
+        if (not partners and not values["email_to"] and template.use_default_to
+                and hasattr(record, "_message_get_default_recipients")):
+            # A template of Odoo names nobody: it goes to the recipients of the
+            # record, the customer of a quotation, as the record's own Send has it
+            recipients = record.sudo()._message_get_default_recipients().get(record.id) or {}
+            partners = self.env["res.partner"].sudo().browse(recipients.get("partner_ids") or []).exists()
+            values["email_to"] = recipients.get("email_to") or False
         addresses = [partner.email_formatted for partner in partners if partner.email]
         values["email_to"] = ", ".join(filter(None, [values["email_to"] or ""] + addresses))
         return values
