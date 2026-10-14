@@ -499,7 +499,9 @@ class TestAnthropicAdapter(BaseCase):
         self.assertEqual(stop["usage"], {
             "input_tokens": 10, "output_tokens": 20, "cache_read_tokens": 300, "cache_write_tokens": 40,
         })
-        self.assertEqual(self.client_arguments, {"api_key": "sk-ant-test", "timeout": 60.0, "max_retries": 2})
+        self.assertEqual(self.client_arguments, {
+            "api_key": "sk-ant-test", "timeout": 60.0, "max_retries": 2,
+            "default_headers": {"Accept-Encoding": "gzip, deflate"}})
 
     def test_request(self):
         list(self.adapter(max_output_tokens=2000).stream_chat(SYSTEM, TURNS))
@@ -666,9 +668,10 @@ class TestAnthropicAdapter(BaseCase):
         # A user key (sk-ant-usr-...) belongs to no workspace: every request
         # names one, or is answered with a 400
         list(self.adapter().stream_chat(SYSTEM, TURNS))
-        self.assertNotIn("default_headers", self.client_arguments, "Nothing is sent when none is set")
+        self.assertNotIn("anthropic-workspace-id", self.client_arguments["default_headers"],
+                         "Nothing is sent when none is set")
         list(self.adapter(workspace_id="wrkspc_01abc").stream_chat(SYSTEM, TURNS))
-        self.assertEqual(self.client_arguments["default_headers"], {"anthropic-workspace-id": "wrkspc_01abc"})
+        self.assertEqual(self.client_arguments["default_headers"]["anthropic-workspace-id"], "wrkspc_01abc")
 
         error = FakeAPIStatusError(400)
         error.message = (
@@ -677,6 +680,15 @@ class TestAnthropicAdapter(BaseCase):
         self.stream = FakeStream([], FINAL, error=error)
         events = list(self.adapter().stream_chat(SYSTEM, TURNS))
         self.assertEqual(events[-1], base.error_event(base.ERROR_WORKSPACE, error.message))
+
+    def test_answers_never_in_brotli(self):
+        # The brotli of many servers predates the keyword the SDK's HTTP client
+        # decodes with: every answer that came back compressed with it failed
+        list(self.adapter().stream_chat(SYSTEM, TURNS))
+        self.assertEqual(self.client_arguments["default_headers"]["Accept-Encoding"], "gzip, deflate")
+        list(self.adapter(workspace_id="wrkspc_01abc").stream_chat(SYSTEM, TURNS))
+        self.assertEqual(self.client_arguments["default_headers"]["Accept-Encoding"], "gzip, deflate",
+                         "Also next to a workspace")
 
     def test_check_asks_the_model(self):
         # Test Connection only looked the model up: a key that could not ask
