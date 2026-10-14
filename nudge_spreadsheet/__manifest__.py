@@ -1,5 +1,5 @@
 {
-    "name": "Nudge Spreadsheets",
+    "name": "Nudge: Spreadsheets",
     "summary": "Reports by Nudge as spreadsheets; installs with Spreadsheet",
     "description": """
 Ask Nudge for a comparison or a report and choose a spreadsheet: it builds one
@@ -7,8 +7,9 @@ from what it read, with a formatted table, totals and a chart, and opens it.
 Installed by itself when Nudge and the Spreadsheet module are both there.
 """,
     "category": "Productivity",
-    "version": "19.0.1.0.7",
+    "version": "19.0.1.0.8",
     "author": "Ibrahim Elzenad",
+    "website": "https://znad-odoo-dev.github.io",
     "license": "OPL-1",
     "images": ["static/description/banner.png"],
     "depends": ["nudge", "spreadsheet"],

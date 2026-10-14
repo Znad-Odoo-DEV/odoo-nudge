@@ -1,6 +1,6 @@
 {
     "name": "Nudge: Odoo AI (Enterprise)",
-    "version": "19.0.1.0.7",
+    "version": "19.0.1.0.8",
     "category": "Productivity",
     "summary": "AI app sources, agents, keys; installs itself (Enterprise)",
     "description": """
@@ -21,6 +21,7 @@ A bridge between Nudge and the AI app of Odoo Enterprise.
 Installs itself where both Nudge and the AI app are installed.
 """,
     "author": "Ibrahim Elzenad",
+    "website": "https://znad-odoo-dev.github.io",
     "license": "OPL-1",
     "images": ["static/description/banner.png"],
     "depends": ["nudge", "ai"],

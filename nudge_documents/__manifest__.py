@@ -1,5 +1,5 @@
 {
-    "name": "Nudge Spreadsheets in Documents (Enterprise)",
+    "name": "Nudge: Spreadsheets in Documents (Enterprise)",
     "summary": "Nudge sheets in Documents; installs itself (Enterprise)",
     "description": """
 Requires Odoo Enterprise (documents_spreadsheet).
@@ -7,11 +7,12 @@ Requires Odoo Enterprise (documents_spreadsheet).
 With the Documents app and its spreadsheets installed, a report Nudge makes as
 a spreadsheet is kept in the person's Documents and opened in the Documents
 spreadsheet editor: collaborative, versioned, shareable, downloadable.
-Installed by itself when Nudge Spreadsheets and Documents Spreadsheet are both there.
+Installed by itself when Nudge: Spreadsheets and Documents Spreadsheet are both there.
 """,
     "category": "Productivity",
-    "version": "19.0.1.0.5",
+    "version": "19.0.1.0.6",
     "author": "Ibrahim Elzenad",
+    "website": "https://znad-odoo-dev.github.io",
     "license": "OPL-1",
     "images": ["static/description/banner.png"],
     "depends": ["nudge_spreadsheet", "documents_spreadsheet"],

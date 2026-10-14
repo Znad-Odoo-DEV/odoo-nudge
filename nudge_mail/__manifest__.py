@@ -1,6 +1,6 @@
 {
     "name": "Nudge: Emails",
-    "summary": "Designed emails in four styles, and emails read before they go from a button, built by Nudge",
+    "summary": "Designed emails in four styles, read before they are sent",
     "description": """
 In Developer mode, Nudge makes emails that look made by a designer: one of
 four styles (classic, modern, minimal, formal), the company's colour, the
@@ -19,8 +19,9 @@ Installed from Apps by an administrator who wants it, with Nudge and Discuss;
 never by itself.
 """,
     "category": "Productivity",
-    "version": "19.0.1.0.9",
+    "version": "19.0.1.0.10",
     "author": "Ibrahim Elzenad",
+    "website": "https://znad-odoo-dev.github.io",
     "license": "OPL-1",
     "images": ["static/description/banner.png"],
     "depends": ["nudge", "mail"],
