@@ -12,6 +12,7 @@ import { writeInField } from "../context/form_writer";
 import { holdable } from "./hold";
 import { DEFAULT_DICTATION_HOTKEY, DEFAULT_HOTKEY, NO_HOTKEY } from "./hotkeys";
 import { DEFAULT_THEME, readPosition, THEMES } from "./looks";
+import { renderMarkdown } from "./markdown";
 import { streamChat, streamDecision } from "./stream_client";
 
 const HISTORY_LIMIT = 30;
@@ -639,7 +640,8 @@ function isReadable(file) {
                 return;
             }
             const sticky = payload.kind === "waiting";
-            notification.add(payload.text || payload.request, {
+            // What Nudge answered reads as in the chat: bold, lists, links, not their marks
+            notification.add(payload.text ? renderMarkdown(payload.text) : payload.request, {
                 title: outcomeOf(payload),
                 type: payload.kind === "failed" ? "warning" : "info",
                 sticky,
