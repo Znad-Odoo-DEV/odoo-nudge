@@ -295,3 +295,8 @@ class AnthropicAdapter(base.BaseAdapter):
 
     def check(self):
         self.fetch_capabilities()
+        # The model looked up is not the model asked: counting the words of a
+        # request is free, and refused for the key or the model a request
+        # would be refused for
+        self._call(lambda client: client.messages.count_tokens(
+            model=self.config.model, messages=[{"role": "user", "content": "ping"}]))

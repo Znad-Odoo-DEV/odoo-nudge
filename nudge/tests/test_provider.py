@@ -1,3 +1,7 @@
+import sys
+import types
+from unittest.mock import patch
+
 from odoo.exceptions import UserError
 from odoo.tests import TransactionCase, tagged
 
@@ -6,6 +10,7 @@ from odoo.addons.nudge.llm.anthropic_adapter import AnthropicAdapter
 from odoo.addons.nudge.llm.openai_compat_adapter import OpenAICompatAdapter
 
 from .common import NudgeCase
+from .test_adapters import FakeMessage, FakePermissionDeniedError, fake_sdk
 
 
 @tagged("post_install", "-at_install")
@@ -83,6 +88,29 @@ class TestProvider(NudgeCase, TransactionCase):
         self.assertTrue(line.is_selected)
 
     def test_test_connection(self):
+        # Claude: the model is asked as a request asks it, counted and not
+        # answered; looked up only, it passed with a key that could not ask it
+        self.provider.write({"kind": "anthropic", "model_name": "claude-opus-5-5"})
+        counted, refusal = [], []
+
+        def count_tokens(**params):
+            counted.append(params)
+            if refusal:
+                raise refusal[0]
+
+        client = types.SimpleNamespace(
+            models=types.SimpleNamespace(retrieve=lambda model: FakeMessage({"capabilities": {}})),
+            messages=types.SimpleNamespace(count_tokens=count_tokens),
+        )
+        with patch.dict(sys.modules, {"anthropic": fake_sdk(lambda **kwargs: client)}):
+            action = self.provider.action_test_connection()
+            self.assertEqual(action["params"]["type"], "success")
+            self.assertEqual(counted[0]["model"], "claude-opus-5-5")
+            refusal.append(FakePermissionDeniedError(403))
+            with self.assertRaisesRegex(UserError, "rejected the API key"):
+                self.provider.action_test_connection()
+        self.provider.write({"kind": "openai_compatible", "model_name": "test-model"})
+
         adapter = self.use_adapter()
         action = self.provider.action_test_connection()
         self.assertEqual(action["params"]["type"], "success")

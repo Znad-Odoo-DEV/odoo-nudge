@@ -420,6 +420,24 @@ CAPABILITIES = {
     "thinking": {"supported": True, "types": {"adaptive": {"supported": True}}},
     "effort": {"supported": True, "low": {"supported": True}, "max": {"supported": False}},
 }
+
+
+def fake_sdk(make_client):
+    """:return: a stand-in for the ``anthropic`` module, whose clients are
+    made by ``make_client``"""
+    sdk = types.ModuleType("anthropic")
+    sdk.Anthropic = make_client
+    sdk.APIError = FakeAPIError
+    sdk.APIStatusError = FakeAPIStatusError
+    sdk.AuthenticationError = FakeAuthenticationError
+    sdk.PermissionDeniedError = FakePermissionDeniedError
+    sdk.NotFoundError = FakeNotFoundError
+    sdk.RateLimitError = FakeRateLimitError
+    sdk.APIConnectionError = FakeAPIConnectionError
+    sdk.APITimeoutError = FakeAPITimeoutError
+    return sdk
+
+
 BINDING_BETA = "thinking-binding-controls-2026-08-01"
 # A replayed thinking block whose prefix changed is dropped, not refused
 THINKING = {"type": "adaptive", "block_binding": {"prefix_mismatch_behavior": "drop_block"}}
@@ -440,25 +458,28 @@ class TestAnthropicAdapter(BaseCase):
             return call
 
         self.client_arguments = {}
+        self.checked = []
+        self.check_error = None
+
+        def retrieve(model):
+            self.checked.append(("retrieve", model))
+            return FakeMessage({"capabilities": CAPABILITIES})
+
+        def count_tokens(**params):
+            self.checked.append(("count_tokens", params))
+            if self.check_error:
+                raise self.check_error
+            return types.SimpleNamespace(input_tokens=8)
 
         def make_client(**kwargs):
             self.client_arguments.update(kwargs)
             return types.SimpleNamespace(
-                messages=types.SimpleNamespace(stream=record("stable")),
+                messages=types.SimpleNamespace(stream=record("stable"), count_tokens=count_tokens),
                 beta=types.SimpleNamespace(messages=types.SimpleNamespace(stream=record("beta"))),
+                models=types.SimpleNamespace(retrieve=retrieve),
             )
 
-        sdk = types.ModuleType("anthropic")
-        sdk.Anthropic = make_client
-        sdk.APIError = FakeAPIError
-        sdk.APIStatusError = FakeAPIStatusError
-        sdk.AuthenticationError = FakeAuthenticationError
-        sdk.PermissionDeniedError = FakePermissionDeniedError
-        sdk.NotFoundError = FakeNotFoundError
-        sdk.RateLimitError = FakeRateLimitError
-        sdk.APIConnectionError = FakeAPIConnectionError
-        sdk.APITimeoutError = FakeAPITimeoutError
-        patcher = patch.dict(sys.modules, {"anthropic": sdk})
+        patcher = patch.dict(sys.modules, {"anthropic": fake_sdk(make_client)})
         patcher.start()
         self.addCleanup(patcher.stop)
 
@@ -610,6 +631,22 @@ class TestAnthropicAdapter(BaseCase):
             events = list(self.adapter().stream_chat(SYSTEM, TURNS))
             self.assertEqual([event["type"] for event in events], ["text", "error"])
             self.assertEqual(events[-1]["code"], code)
+
+    def test_check_asks_the_model(self):
+        # Test Connection only looked the model up: a key that could not ask
+        # it anything passed
+        self.adapter().check()
+        self.assertEqual(self.checked, [
+            ("retrieve", "claude-opus-5-5"),
+            ("count_tokens", {"model": "claude-opus-5-5", "messages": [{"role": "user", "content": "ping"}]}),
+        ])
+        self.assertFalse(self.calls, "Counted, not answered: nothing is paid")
+        for error, code in ((FakePermissionDeniedError(403), base.ERROR_AUTH),
+                            (FakeNotFoundError(404), base.ERROR_MODEL_NOT_FOUND)):
+            self.check_error = error
+            with self.assertRaises(base.AdapterError) as caught:
+                self.adapter().check()
+            self.assertEqual(caught.exception.code, code)
 
     def test_key_from_the_environment(self):
         list(self.adapter(api_key="").stream_chat(SYSTEM, TURNS))

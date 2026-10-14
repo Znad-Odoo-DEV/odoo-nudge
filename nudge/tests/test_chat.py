@@ -175,6 +175,18 @@ class TestChat(NudgeCase, TransactionCase):
             self.assertFalse(answer.sudo().content_blocks, "Only a complete answer is replayed as blocks")
             self.assertEqual(bool(result["message"]), state == "refused")
 
+    def test_a_refusal_midway_is_no_answer(self):
+        # Declined after a few words: they read as a finished answer
+        self.use_adapter(events=[
+            base.text_event("To get around the "), base.stop_event(base.STOP_REFUSAL)])
+        conversation, result = self.ask(self.user_a, "Hello")
+        answer = conversation.message_ids[-1]
+        self.assertEqual(result["type"], "done")
+        self.assertEqual(result["state"], "refused")
+        self.assertEqual(result["message"], "Nudge cannot help with this request.")
+        self.assertFalse(answer.content, "What was written before is not kept")
+        self.assertEqual(answer.sudo().error_message, "Nudge cannot help with this request.")
+
     def test_empty_answer_is_an_error(self):
         self.use_adapter(events=[base.stop_event(base.STOP_END)])
         conversation, result = self.ask(self.user_a, "Hello")
