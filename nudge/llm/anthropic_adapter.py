@@ -108,7 +108,11 @@ class AnthropicAdapter(base.BaseAdapter):
         return anthropic
 
     def _client(self, anthropic):
-        kwargs = {"timeout": float(self.config.timeout), "max_retries": 2}
+        # Answers come gzipped, never in brotli: the SDK's HTTP client calls
+        # brotli with a keyword the brotli of many servers predates, and every
+        # answer that came back failed with "process() takes no keyword arguments"
+        headers = {"Accept-Encoding": "gzip, deflate"}
+        kwargs = {"timeout": float(self.config.timeout), "max_retries": 2, "default_headers": headers}
         # Without a stored key the SDK resolves credentials from the environment
         if self.config.api_key:
             kwargs["api_key"] = self.config.api_key
@@ -117,7 +121,7 @@ class AnthropicAdapter(base.BaseAdapter):
         if self.config.workspace_id:
             # A key that is not scoped to a workspace (a user key) names one
             # on every request, or is refused with a 400
-            kwargs["default_headers"] = {"anthropic-workspace-id": self.config.workspace_id}
+            headers["anthropic-workspace-id"] = self.config.workspace_id
         return anthropic.Anthropic(**kwargs)
 
     # ------------------------------------------------------------------
