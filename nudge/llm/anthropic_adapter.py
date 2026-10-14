@@ -21,6 +21,12 @@ FALLBACK_MODELS = frozenset({
     "claude-sonnet-5-5",
 })
 FALLBACK_BETA = "server-side-fallback-2026-07-01"
+# A thinking block is bound to everything before it: the system prompt, the
+# tools and the messages. Nudge rebuilds the first two and its notes between
+# two requests, and a block bound to what changed is answered with a 400 on
+# the accounts made since 2026-08-31; with this beta the API drops it instead
+BINDING_BETA = "thinking-binding-controls-2026-08-01"
+THINKING = {"type": "adaptive", "block_binding": {"prefix_mismatch_behavior": "drop_block"}}
 # A forced call (tool_choice "any" or "tool") is refused with a 400 by the
 # models of now: when a tool must be called, it is asked for in words, the way
 # the loop asks for the answer of the last round
@@ -176,10 +182,16 @@ class AnthropicAdapter(base.BaseAdapter):
             params["tool_choice"] = {"type": "none"}
         capabilities = config.capabilities or {}
         if _supported(capabilities, "thinking", "types", "adaptive"):
-            # Before a call as before an answer: nothing forced is ever sent
-            params["thinking"] = {"type": "adaptive"}
+            # Before a call as before an answer: nothing forced is ever sent.
+            # The blocks of the turns before are replayed; the API drops those
+            # whose prefix changed
+            params["thinking"] = dict(THINKING)
         if config.effort and _supported(capabilities, "effort", config.effort):
             params["output_config"] = {"effort": config.effort}
+        params["betas"] = [BINDING_BETA]
+        if config.refusal_fallback and config.model in FALLBACK_MODELS:
+            params["betas"].append(FALLBACK_BETA)
+            params["fallbacks"] = "default"
         return params
 
     # ------------------------------------------------------------------
@@ -194,11 +206,9 @@ class AnthropicAdapter(base.BaseAdapter):
         params = self._build_params(system, turns, tools, tool_choice)
         try:
             client = self._client(anthropic)
-            if self.config.refusal_fallback and self.config.model in FALLBACK_MODELS:
-                manager = client.beta.messages.stream(
-                    betas=[FALLBACK_BETA], fallbacks="default", **params)
-            else:
-                manager = client.messages.stream(**params)
+            # Every request goes through the beta namespace, where the
+            # binding of the thinking blocks is controlled
+            manager = client.beta.messages.stream(**params)
             # The SDK raises ValueError for tool arguments it cannot read at all
             with manager as stream:
                 for event in stream:
