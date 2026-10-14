@@ -40,6 +40,26 @@ class TestMenuPath(NudgeCase, TransactionCase):
         self.assertEqual(steps[2]["text"], "Click “Nudge Partner Report”.", "A step without text names its menu")
         self.assertIn("3 step(s)", result.content)
 
+    def test_a_heading_is_no_step(self):
+        """In the list a section opens, a menu that holds others is a heading:
+        the pointer goes from the section straight to the screen under it."""
+        Menu = self.env["ir.ui.menu"]
+        heading = Menu.create({"name": "Nudge Warehouse Management", "parent_id": self.section.id})
+        leaf = Menu.create({
+            "name": "Nudge Warehouses",
+            "parent_id": heading.id,
+            "action": f"ir.actions.act_window,{self.env.ref('base.action_partner_form').id}",
+        })
+        result = self.show({"menu_id": leaf.id, "texts": ["App", "Section", "Heading", "Screen"]})
+        self.assertFalse(result.is_error, result.content)
+        steps = result.event["steps"]
+        self.assertEqual([step["target"]["name"] for step in steps],
+                         [str(self.app.id), str(self.section.id), str(leaf.id)])
+        self.assertEqual(steps[2]["target"]["parent"], str(self.section.id))
+        self.assertEqual(steps[2]["target"]["parent_label"], "Nudge Reports")
+        self.assertEqual([step["text"] for step in steps], ["App", "Section", "Screen"])
+        self.assertIn("3 step(s)", result.content)
+
     def test_by_words(self):
         result = self.show({"words": "nudge partner report"})
         self.assertFalse(result.is_error, result.content)
