@@ -191,7 +191,13 @@ def error_text(error, what, uid):
     user ``uid``: the words of a refusal of Odoo or of a mistake in the arguments, which they can
     act on; for a database error or a fault only its kind, since its text may hold SQL, names and
     values. The whole of it goes to the log."""
-    if isinstance(error, (UserError, ValueError, KeyError, TypeError)):
+    # Written for the model or the person: a refusal of a tool, a file that cannot be read, a
+    # provider's answer (its key already taken out); imported here, those modules import this one
+    from ..llm.attachments import Unreadable  # noqa: PLC0415
+    from ..llm.base import AdapterError  # noqa: PLC0415
+    from .records import Refused  # noqa: PLC0415
+    told = (Refused, Unreadable, AdapterError, UserError, ValueError, KeyError, TypeError)
+    if isinstance(error, told):
         _logger.info("Nudge: %s failed for user %s: %s", what, uid, error)
         return f"{type(error).__name__}: {error}"
     _logger.warning("Nudge: %s failed for user %s", what, uid, exc_info=error)
