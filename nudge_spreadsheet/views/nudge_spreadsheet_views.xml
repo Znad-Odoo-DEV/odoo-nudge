@@ -44,5 +44,5 @@
     </record>
 
     <menuitem id="nudge_menu_spreadsheets" name="Spreadsheets" parent="nudge.nudge_menu_root"
-              action="nudge_spreadsheet_action" sequence="25"/>
+              action="nudge_spreadsheet_action" sequence="25" groups="nudge.group_nudge_manager"/>
 </odoo>

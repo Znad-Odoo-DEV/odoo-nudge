@@ -7183,11 +7183,15 @@ msgid "My Conversations"
 msgstr ""
 
 #. module: nudge
+#: model:ir.ui.menu,name:nudge.nudge_menu_home
+msgid "Home"
+msgstr ""
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/home/nudge_home.xml:0
 #: model:ir.actions.client,name:nudge.nudge_home_action
 #: model:ir.model,name:nudge.model_nudge_home
-#: model:ir.ui.menu,name:nudge.nudge_menu_home
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
 msgid "My Nudge Home"
 msgstr ""

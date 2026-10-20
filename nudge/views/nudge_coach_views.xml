@@ -125,7 +125,8 @@
     </record>
 
     <menuitem id="nudge_menu_coach" name="Training" sequence="40"
-              parent="nudge_menu_root" action="nudge_coach_action"/>
+              parent="nudge_menu_root" action="nudge_coach_action"
+              groups="nudge.group_nudge_manager"/>
     <menuitem id="nudge_menu_coach_screens" name="Key Screens" sequence="35"
               parent="nudge_menu_configuration" action="nudge_coach_screen_action"/>
 </odoo>
