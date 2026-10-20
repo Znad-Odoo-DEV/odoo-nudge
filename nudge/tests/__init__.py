@@ -75,3 +75,4 @@ from . import test_debugger
 from . import test_scaffold
 from . import test_meeting
 from . import test_mobile
+from . import test_nudge_app

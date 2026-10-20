@@ -1,6 +1,6 @@
 {
     "name": "Nudge",
-    "version": "17.0.1.57.26",
+    "version": "17.0.1.57.27",
     "category": "Productivity",
     "summary": "An AI companion that lives in the Odoo web client",
     "description": """
