@@ -117,6 +117,29 @@ class TestBuilder(NudgeCase, TransactionCase):
             [("url", "like", "%user_color_palette.scss%"), ("url", "like", "/_custom/%")], limit=1)
         self.assertIn(palette["primary"].lower(), asset.raw.decode().lower())
 
+    def test_theme_colours_are_written_unquoted_and_the_frontend_compiles(self):
+        import re
+        site = self.site()
+        site.action_preview()
+        site._apply_template(library.load("generic"))
+        attachments = self.env["ir.attachment"].sudo().search(
+            [("url", "like", "/_custom/%"), "|", ("url", "like", "%user_color_palette.scss%"),
+             ("url", "like", "%user_theme_color_palette.scss%")])
+        self.assertTrue(attachments)
+        content = "\n".join(a.raw.decode() for a in attachments)
+        for name in ("o-color-1", "o-color-2", "o-color-3", "o-color-4", "o-color-5", "info"):
+            self.assertRegex(content, r"%s['\"]?\s*:\s*#[0-9a-fA-F]{6}\s*[,)\n]" % name)
+        self.assertNotRegex(content, r"['\"]#[0-9a-fA-F]{3,8}['\"]")
+        values = self.env["ir.attachment"].sudo().search([("url", "like", "/_custom/%user_values.scss%")])
+        text = "\n".join(a.raw.decode() for a in values)
+        self.assertRegex(text, r"font['\"]?\s*:\s*'")  # font names stay quoted
+        self.assertIsNone(re.search(r"o-color-\d['\"]?\s*:\s*'", text))
+        bundle = self.env["ir.qweb"]._get_asset_bundle(
+            "web.assets_frontend", assets_params={"website_id": self.website.id})
+        bundle.css()  # a quoted colour makes Sass fail and the bundle say "Style error"
+        for attachment in bundle.get_attachments("css"):
+            self.assertNotIn("Style error", (attachment.raw or b"").decode("utf-8", "ignore"))
+
     # ---------------------------------------------------------------- build (no provider)
     def build(self, **values):
         self.no_provider()
