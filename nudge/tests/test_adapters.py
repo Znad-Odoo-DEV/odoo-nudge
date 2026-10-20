@@ -803,3 +803,11 @@ class TestOneShot(BaseCase):
         adapter = AnthropicAdapter.__new__(AnthropicAdapter)
         blocks = adapter._build_system(["Translate for Raghad.", " ", ""])
         self.assertEqual([block["text"] for block in blocks], ["Translate for Raghad."])
+
+    def test_every_adapter_reads_a_system_prompt_given_as_one_text_whole(self):
+        # as the document reader, the digest and the provider's own one-off calls give it
+        self.assertEqual(base.system_texts("Read Raghad's bill."), ["Read Raghad's bill."])
+        self.assertEqual(base.system_texts(["A", "B"]), ["A", "B"])
+        adapter = OpenAICompatAdapter.__new__(OpenAICompatAdapter)
+        messages = adapter._build_messages(base.system_texts("Read Ebrahim's bill."), [])
+        self.assertEqual(messages[0], {"role": "system", "content": "Read Ebrahim's bill."})

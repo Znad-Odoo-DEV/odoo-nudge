@@ -160,6 +160,12 @@ class BaseAdapter:
         raise AdapterError(ERROR_UNSUPPORTED, "This provider does not turn speech into text.")
 
 
+def system_texts(system):
+    """:return: the system prompt as the list of texts the adapters read: a text alone is one
+    text, never read letter by letter (Claude refuses the blank ones, the others get it scrambled)"""
+    return [system] if isinstance(system, str) else list(system or [])
+
+
 class AdapterError(Exception):
     def __init__(self, code, detail=""):
         super().__init__(detail or code)
