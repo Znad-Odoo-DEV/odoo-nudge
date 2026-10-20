@@ -349,7 +349,8 @@ class NudgeTask(models.Model):
             if not task.user_id.active:
                 task.write(dict(values, active=False, last_result=_("Stopped: the owner is archived.")))
                 return
-            return task._start_rule(env, now, values)
+            # In the owner's environment: its texts are in their language, on 17 and 18 too
+            return task.with_env(env)._start_rule(env, now, values)
         if task.engine == "digest":
             if not task.user_id.active:
                 task.write(dict(values, active=False, last_result=_("Stopped: the owner is archived.")))
@@ -489,7 +490,8 @@ class NudgeTask(models.Model):
         """Measure, decide whether it is worth reporting, and say it where the
         tasks of the AI say theirs."""
         self.ensure_one()
-        task = self
+        # Written as the cron writes; worded as the owner reads
+        task = self.sudo()
         try:
             measured = task.with_env(env)._rule_measure()
         except Exception as error:  # noqa: BLE001
