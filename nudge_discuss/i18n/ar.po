@@ -152,3 +152,32 @@ msgstr "هذه القناة لم تعد موجودة."
 #: model:ir.model.fields.selection,name:nudge_discuss.selection__nudge_mention__state__queued
 msgid "Waiting"
 msgstr "بالانتظار"
+
+#. module: nudge_discuss
+msgid ""
+"To edit it and send it, open Nudge on this record and press Draft a reply. "
+"It is sent only when you press Send."
+msgstr ""
+"لتعديله وإرساله، افتح نودج على هذا السجل واضغط اكتب مسودة رد. لا يُرسل إلا "
+"عندما تضغط إرسال."
+
+#. module: nudge_discuss
+msgid "Copy it into your reply: Nudge never sends it."
+msgstr "انسخه إلى ردك: نودج لا يرسله أبداً."
+
+#. module: nudge_discuss
+msgid "**Draft of a reply, not sent**"
+msgstr "**مسودة رد، لم تُرسل**"
+
+#. module: nudge_discuss
+msgid "To: %(to)s"
+msgstr "إلى: %(to)s"
+
+#. module: nudge_discuss
+msgid "Subject: %(subject)s"
+msgstr "الموضوع: %(subject)s"
+
+#. module: nudge_discuss
+#: model:ir.model,name:nudge_discuss.model_discuss_channel
+msgid "Discussion Channel"
+msgstr "قناة النقاش"

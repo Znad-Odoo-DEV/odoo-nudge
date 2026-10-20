@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="nudge_builder.Run">
+        <div class="o_nudge_builder_run p-4 mx-auto" style="max-width: 720px;">
+            <h2>Building your website</h2>
+            <div class="progress my-3" role="progressbar" t-att-aria-valuenow="state.progress">
+                <div class="progress-bar" t-att-style="'width:' + state.progress + '%'">
+                    <t t-esc="Math.round(state.progress)"/>%
+                </div>
+            </div>
+            <p class="o_nudge_builder_text text-muted"><t t-esc="state.text"/></p>
+            <button t-if="!state.done and !state.stopped and !state.error" class="btn btn-secondary o_nudge_builder_stop"
+                    t-on-click="stop">Stop</button>
+            <div t-if="state.error" class="alert alert-danger" role="alert"><t t-esc="state.error"/></div>
+            <div t-if="state.stopped and !state.done" class="alert alert-warning" role="status">
+                Stopped. What is built stays, unpublished; you can continue from the site.
+            </div>
+            <div t-if="state.private" class="alert alert-info" role="status">
+                No AI wrote text or pictures: the pages use the sample copy of the template and placeholder pictures.
+            </div>
+            <div t-if="state.pages.length" class="o_nudge_builder_card card mt-3">
+                <div class="card-header">Pages built (none is published yet)</div>
+                <ul class="list-group list-group-flush">
+                    <li t-foreach="state.pages" t-as="page" t-key="page.id"
+                        class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><t t-esc="page.name"/> <small class="text-muted"><t t-esc="page.url"/></small></span>
+                        <button class="btn btn-sm btn-primary o_nudge_builder_open" t-on-click="() => this.openEditor(page)">Open in editor</button>
+                    </li>
+                </ul>
+            </div>
+            <button t-if="state.done or state.stopped or state.error" class="btn btn-link mt-3" t-on-click="openSite">Back to the site</button>
+        </div>
+    </t>
+</templates>

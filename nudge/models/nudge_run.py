@@ -1,3 +1,4 @@
+import datetime
 import json
 import logging
 import time
@@ -7,6 +8,8 @@ from odoo.exceptions import AccessError, UserError
 from odoo.tools import config
 
 from ..llm import loop
+from ..tools import deadline as worker_time
+from ..tools.bus import notify_user
 
 _logger = logging.getLogger(__name__)
 
@@ -53,6 +56,19 @@ PIECE_SAFETY_MARGIN = 25
 MAX_PIECES = 12
 STOPPED = "The person stopped this request. Nothing more is done for it."
 EXCERPT_CHARS = 300
+# A run "working" that nobody touched for this long lost its worker
+STALE_SECONDS = 600
+# Work that is not a conversation (a recording, the terms of a module, the pages of a site) is
+# registered here by the module that owns it: kind -> (model, method). The method is called on
+# the record ``job_args["id"]`` as the person, ``method(run, deadline)``, and answers whether it is
+# all done; what it did is committed by it, batch by batch, so the next piece goes on from there.
+JOBS = {}
+MAX_JOB_PIECES = 400
+JOB_CONVERSATION = "Background work"
+
+
+def register_job(kind, model, method):
+    JOBS[kind] = (model, method)
 
 
 class NudgeLog(models.AbstractModel):
@@ -109,6 +125,8 @@ class NudgeRun(models.Model):
         string="In the Background",
         help="Worked on while the person does something else. They are told when it is "
              "done, and when their answer is needed.")
+    job = fields.Char(string="Kind of Work", index=True, help="Work of a module in the background (see JOBS).")
+    job_args = fields.Json(string="Work Arguments")
     pieces = fields.Integer(string="Times Taken Up")
     progress = fields.Char(help="What Nudge was doing when it was last heard of.")
     is_unseen = fields.Boolean(
@@ -191,7 +209,7 @@ class NudgeRun(models.Model):
                     for step in run.step_ids
                     if step.state == "done" and step.kind in CHANGES and step.res_model
                 ]
-            run.env["bus.bus"]._sendone(run.user_id.partner_id, "nudge.run", {
+            notify_user(run.user_id, "nudge.run", {
                 "kind": kind,
                 "run_id": run.id,
                 "conversation_id": run.conversation_id.id,
@@ -201,7 +219,19 @@ class NudgeRun(models.Model):
                 "text": (answer.content or "")[:EXCERPT_CHARS] if kind != "progress" else "",
                 "card": card,
                 "changed": changed,
+                "list": run._bulk_list() if kind == "done" else False,
             })
+
+    def _bulk_list(self):
+        """:return: the records an AI over a list wrote in, for the person to
+        look at them as a list, or False"""
+        self.ensure_one()
+        step = self.sudo().step_ids.filtered(lambda step: step.tool == "bulk_apply" and step.state == "done")[-1:]
+        undo = step._undo_data() if step else {}
+        for model_name, entries in undo.items():
+            return {"model": model_name, "ids": [int(record_id) for record_id in entries][:1000],
+                    "name": step.summary or ""}
+        return False
 
     def _as_person(self):
         """:return: the conversation of the run, in the environment of the
@@ -231,6 +261,8 @@ class NudgeRun(models.Model):
         run = self.sudo()
         if run.state != "queued" or not run.is_background:
             return
+        if run.job:
+            return run._work_job()
         if run.pieces >= MAX_PIECES:
             run.conversation_id._agent_give_up(run)
             return
@@ -270,6 +302,90 @@ class NudgeRun(models.Model):
             "Nudge: run %s of user %s worked on for %.1f s in the background, now %s",
             run.id, run.user_id.id, time.monotonic() - started, run.state)
 
+    @api.model
+    def _start_job(self, kind, name, args, user=None):
+        """Queue work for the scheduled action and tell the person when it is done.
+
+        :param kind: a key of :data:`JOBS`
+        :param name: what the person asked for, in their words
+        :param args: ``{"id": the record the method is called on, ...}``
+        :return: the run"""
+        user = user or self.env.user
+        conversation = args.get("conversation_id") or self._job_conversation(user).id
+        run = self.sudo().create({
+            "name": name[:200], "conversation_id": conversation, "user_id": user.id,
+            "company_id": self.env.company.id, "state": "queued",
+            "is_background": True, "job": kind, "job_args": args})
+        self.env.ref("nudge.cron_agent_runs").sudo()._trigger()
+        return run
+
+    @api.model
+    def _job_conversation(self, user):
+        """:return: the archived conversation that holds the background work of ``user``"""
+        Conversation = self.env["nudge.conversation"].sudo().with_context(active_test=False)
+        return Conversation.search([("user_id", "=", user.id), ("name", "=", JOB_CONVERSATION)], limit=1) or             Conversation.create({"user_id": user.id, "name": JOB_CONVERSATION, "active": False})
+
+    def _say(self, text):
+        """Write ``text`` in the conversation of the run, where the person looks for what became of it"""
+        self.ensure_one()
+        self.env["nudge.message"].sudo().create({
+            "conversation_id": self.conversation_id.id, "role": "assistant", "content": text,
+            "state": "complete", "mode": "agent"})
+
+    def _job_latest(self, kind, record_id):
+        """:return: the newest run of ``kind`` for the record ``record_id``, if any"""
+        return self.sudo().search([("job", "=", kind)], order="id desc", limit=50).filtered(
+            lambda run: (run.job_args or {}).get("id") == record_id)[:1]
+
+    def _job_open(self, kind, record_id):
+        """:return: the open run of ``kind`` for the record ``record_id``, if any"""
+        return self.sudo().search([("job", "=", kind), ("state", "in", ("queued", "running"))]).filtered(
+            lambda run: (run.job_args or {}).get("id") == record_id)[:1]
+
+    def _work_job(self):
+        """One piece of work of a module: ``method(run, deadline)`` until the time of a piece is up"""
+        self.ensure_one()
+        run = self.sudo()
+        handler = JOBS.get(run.job)
+        if not handler or run.pieces >= MAX_JOB_PIECES:
+            run._end("failed")
+            self._commit()
+            return
+        run.write({"state": "running", "pieces": run.pieces + 1})
+        self._commit()
+        started = time.monotonic()
+        try:
+            with worker_time.window():
+                env = run._as_person().env
+                record = env[handler[0]].browse((run.job_args or {}).get("id")).exists()
+                if not record:
+                    raise UserError(_("What this work was for does not exist any more."))
+                finished = getattr(record, handler[1])(run, worker_time.until(self._get_piece_seconds()))
+        except Exception as error:  # noqa: BLE001 - the person is told, the log keeps the cause
+            _logger.exception("Nudge: the work %s of run %s failed", run.job, run.id)
+            self.env.cr.rollback()
+            self.env.invalidate_all()
+            run = self.sudo().browse(run.id)
+            run._say(str(error) if isinstance(error, UserError) else _(
+                "Nudge had to stop before it was done. Ask it again."))
+            run._end("failed")
+            self._commit()
+            return
+        run.invalidate_recordset()
+        if run.state == "running":
+            if finished:
+                run._end("done")
+            else:
+                run._queue()
+        self._commit()
+        _logger.info("Nudge: work %s of run %s took %.1f s, now %s", run.job, run.id, time.monotonic() - started, run.state)
+
+    def _job_stopped(self):
+        """:return: whether the person stopped the run (read again from the database)"""
+        self.ensure_one()
+        self.invalidate_recordset(["state"])
+        return self.sudo().state != "running"
+
     def _work_plan(self, step, conversation):
         """Do a piece of a plan the person said yes to.
 
@@ -290,7 +406,30 @@ class NudgeRun(models.Model):
             run._tell("progress")
             self._commit()
 
-        result = tools.base.guarded(env, step.tool, lambda: tool.execute(env, step, deadline=deadline, save=save))
+        def stopped():
+            run.invalidate_recordset(["state"])
+            return run.state != "running"
+
+        # Not in guarded(): it holds a savepoint, and a commit made inside one
+        # ends the transaction under it. Each record has its savepoint in
+        # execute(), the batches are committed outside any, and the progress
+        # committed with them is where the next piece begins.
+        try:
+            result = tool.execute(env, step, deadline=deadline, save=save, stop=stopped)
+        except Exception as error:  # noqa: BLE001
+            _logger.info("Nudge: plan of run %s failed: %s", run.id, error)
+            self.env.cr.rollback()
+            self.env.invalidate_all()
+            result = tools.base.ToolResult(f"{type(error).__name__}: {error}", is_error=True)
+        if result is None and stopped():
+            # The person stopped it: what went through stays, and can be undone
+            card = step._get_card()
+            conversation.sudo()._agent_settle(step, "done", tools.base.ToolResult(
+                DONE_NOT_FINISHED % _(
+                    "Stopped by the person after %(done)s records.", done=card["done_count"]),
+                unfinished=True))
+            self._commit()
+            return False
         if result is None:
             save()
             run._queue()
@@ -305,10 +444,28 @@ class NudgeRun(models.Model):
         return True
 
     @api.model
+    def _requeue_stale(self):
+        """A worker that died in the middle of a plan leaves its run "working"
+        for ever. What it committed is kept with the progress, so the next
+        piece goes on from there and does nothing twice."""
+        limit = fields.Datetime.now() - datetime.timedelta(seconds=STALE_SECONDS)
+        stale = self.sudo().search([
+            ("state", "=", "running"), ("is_background", "=", True), ("write_date", "<", limit)])
+        stale = stale.filtered(
+            lambda run: run.job or run.step_ids.filtered(lambda step: step.state == "working"))
+        if stale:
+            self.env.cr.execute("SELECT id FROM nudge_run WHERE id IN %s FOR UPDATE SKIP LOCKED", (tuple(stale.ids),))
+            stale = stale.browse([row[0] for row in self.env.cr.fetchall()])
+        if stale:
+            stale._queue()
+            self._commit()
+        return stale
+
+    @api.model
     def _nudge_commit_progress(self, started):
         """Odoo 18 has no ir.cron._commit_progress: commit what was done and
         say how many seconds the scheduled action has left"""
-        self.env.cr.commit()
+        self.env["ir.cron"]._commit_progress(1)  # commits, except inside a test (see nudge_cron_compat)
         limit = config.get("limit_time_real_cron") or -1
         if limit <= 0:
             limit = config.get("limit_time_real") or 120
@@ -319,6 +476,7 @@ class NudgeRun(models.Model):
         """Take up the runs that wait for their turn, one piece each."""
         started = time.monotonic()
         seconds = self._get_piece_seconds()
+        self._requeue_stale()
         while True:
             runs = self.sudo().search(
                 [("state", "=", "queued"), ("is_background", "=", True)], order="write_date, id")
@@ -445,6 +603,28 @@ class NudgeStep(models.Model):
     preview_text = fields.Text(string="Shown to the Person", compute="_compute_texts")
 
     @api.depends("res_ids", "arguments", "values", "preview")
+    def _list_link(self):
+        """:return: the address that opens the list this step looked at, filtered"""
+        self.ensure_one()
+        base = (self.env["ir.config_parameter"].sudo().get_param("web.base.url") or "").rstrip("/")
+        return f"{base}/nudge/step/{self.id}/open"
+
+    def action_open_list(self):
+        """:return: the list the step looked at, filtered the same, for the one who opens it"""
+        self.ensure_one()
+        from ..tools.records import build_domain, get_model  # noqa: PLC0415
+        arguments = self.arguments or {}
+        model = get_model(self.env, arguments["model"])
+        domain = build_domain(model, arguments.get("conditions") or [], arguments.get("match"))
+        return {
+            "type": "ir.actions.act_window",
+            "name": model._description,
+            "res_model": model._name,
+            "view_mode": "list,form",
+            "views": [(False, "list"), (False, "form")],
+            "domain": [list(part) if isinstance(part, tuple) else part for part in domain],
+        }
+
     def _compute_texts(self):
         def write(value):
             if not value:
@@ -525,7 +705,10 @@ class NudgeStep(models.Model):
         undo = step._undo_data()
         restored, kept = undo_changes(self.env, undo)
         step.values = dict(values, undone=True)
-        message = _("%s records are back as they were.", restored)
+        if any(entry.get("created") for entries in undo.values() for entry in entries.values()):
+            message = _("%s drafts were archived or cancelled; none was deleted.", restored)
+        else:
+            message = _("%s records are back as they were.", restored)
         if kept:
             message += " " + _("Left as they are: %s", "; ".join(
                 f"{name} ({why})" for name, why in kept[:10]))

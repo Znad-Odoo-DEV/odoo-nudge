@@ -32,6 +32,28 @@
                         </setting>
                     </block>
                     <block title="Privacy" name="nudge_privacy_container">
+                        <setting help="Nothing is sent to an AI provider that does not run on your own server (tick it on the provider). Quick search, the slash commands, the recorded tours, the explanations that need no AI, remembered answers and providers on your own server keep working. A lock shows in the panel.">
+                            <field name="nudge_private_mode"/>
+                            <div class="text-muted" invisible="not nudge_private_mode">
+                                A provider on your own server listens to the voice. Without one, voice stays off.
+                            </div>
+                            <div class="content-group mt8" invisible="not nudge_private_mode">
+                                <field name="nudge_private_browser_speech"/>
+                                <div class="text-muted">
+                                    Lets the speech of the browser be used when no provider on your own server listens,
+                                    for talking, dictating and reading answers aloud. Chrome and Edge may send the sound
+                                    to their maker, and Nudge cannot prevent it. Off by default.
+                                </div>
+                            </div>
+                            <div class="content-group mt8" invisible="not nudge_private_mode">
+                                <field name="nudge_allow_recipe_index"/>
+                                <div class="text-muted">
+                                    Lets the marketplace read recipe indexes and download recipe files (HTTPS only,
+                                    each file checked against its index). It is not an AI call, but the site that
+                                    hosts the index sees the address of this server. Off by default.
+                                </div>
+                            </div>
+                        </setting>
                         <setting help="People can let Nudge see the screen they are on. The record, its fields and their values are then sent to the AI provider with the question. Nothing is sent in the background.">
                             <field name="nudge_screen_sharing"/>
                         </setting>
@@ -44,6 +66,49 @@
                                     Chrome, Edge and Safari send the sound to the servers of their maker.
                                     The AI provider receives it where it receives the questions.
                                 </div>
+                            </div>
+                        </setting>
+                    </block>
+                    <block title="First Setup" name="nudge_setup_container" invisible="not nudge_agent">
+                        <setting help="Nudge asks for the company, its country, currency, languages, apps, warehouses and users, one step at a time, and shows a card with the exact changes before each one. Nothing is done before your yes; most steps can be undone. The fiscal localisation module is named on its card. The outgoing mail server is never configured by Nudge.">
+                            <div class="content-group">
+                                <button name="action_nudge_setup" type="object"
+                                        string="Set up this database with me" icon="oi-arrow-right" class="btn-link"/>
+                            </div>
+                        </setting>
+                    </block>
+                    <block title="Unusual Figures" name="nudge_outliers_container">
+                        <setting help="The health check and the tasks of the kind Outliers look for payslips, bills, invoices, stock moves, expenses, discounts, purchase prices and attendance far from the usual of their group. No AI is used; only what the person may read is looked at.">
+                            <field name="nudge_outlier_sensitivity"/>
+                        </setting>
+                    </block>
+                    <block title="Warnings While Typing" name="nudge_validator_container">
+                        <setting help="A small strip under the title of a form warns about a mistake while the person fills it in, before they save. Nothing is blocked: the person decides. No AI is used, except when someone clicks Ask Nudge about this. Each person can mute a warning for themselves.">
+                            <div class="content-group">
+                                <div class="mt8"><field name="nudge_validate_partner_duplicate"/></div>
+                                <div class="mt8"><field name="nudge_validate_product_duplicate"/></div>
+                                <div class="mt8"><field name="nudge_validate_vat_format"/></div>
+                                <div class="mt8"><field name="nudge_validate_bill_number_reuse"/></div>
+                                <div class="mt8"><field name="nudge_validate_phone_format"/></div>
+                                <div class="mt8"><field name="nudge_validate_email_syntax"/></div>
+                                <div class="mt8"><field name="nudge_validate_price_below_cost"/></div>
+                                <div class="mt8"><field name="nudge_validate_price_above_last_purchase"/></div>
+                                <div class="mt8"><field name="nudge_validate_quantity_far_above"/></div>
+                                <div class="mt8"><field name="nudge_validate_date_in_the_past"/></div>
+                                <div class="mt8"><field name="nudge_validate_policy_required"/></div>
+                                <button name="%(nudge_validator_policy_action)d" type="action"
+                                        string="Fields the Company Requires" icon="oi-arrow-right" class="btn-link"/>
+                            </div>
+                        </setting>
+                    </block>
+                    <block title="Mobile quick actions" name="nudge_mobile_container">
+                        <setting help="On a phone, the panel opens full screen with these big tiles for people in the field. They are chosen for each company. A tile of an app that is not installed is not shown.">
+                            <div class="content-group">
+                                <div><field name="nudge_mobile_tile_clock"/> <label for="nudge_mobile_tile_clock"/></div>
+                                <div><field name="nudge_mobile_tile_photo"/> <label for="nudge_mobile_tile_photo"/></div>
+                                <div><field name="nudge_mobile_tile_tasks"/> <label for="nudge_mobile_tile_tasks"/></div>
+                                <div><field name="nudge_mobile_tile_record"/> <label for="nudge_mobile_tile_record"/></div>
+                                <div><field name="nudge_mobile_tile_note"/> <label for="nudge_mobile_tile_note"/></div>
                             </div>
                         </setting>
                     </block>
@@ -101,6 +166,73 @@
                             </div>
                         </setting>
                     </block>
+                    <block title="Common Requests" name="nudge_noai_container">
+                        <setting help="Open a screen, find a record, filter a list, count, create, change a field or press a button are understood by rules, in Arabic and English, without calling the AI provider: no token is spent, and every change still waits for a yes. What is not understood goes to the AI as before.">
+                            <field name="nudge_noai_first"/>
+                        </setting>
+                    </block>
+                    <block title="Local Search Model" name="nudge_embedding_container">
+                        <setting string="Search by Meaning"
+                                 help="A small model (multilingual-e5-small, about 135 MB in the filestore, downloaded from https://huggingface.co/Xenova/multilingual-e5-small) that runs on the CPU of this server. It re-ranks the documentation, the company files and the remembered answers by meaning, and finds an English page for a question in Arabic. No AI provider is involved and nothing leaves the server, so private mode does not stop it. It needs the Python packages onnxruntime and tokenizers. Not covered: the records of other models. Memory: while it is loaded, each Odoo process that answered a question holds about 450 MB (the model and its vocabulary), and the process that indexes about 600 MB; plan 0.5 GB per worker that serves searches. The model is loaded at the first question, shared by all the databases of a process, and dropped after the idle time below.">
+                            <div class="content-group">
+                                <field name="nudge_embedding_summary" readonly="1" nolabel="1"/>
+                                <div class="mt8">
+                                    <button name="action_nudge_embedding_download" type="object"
+                                            string="Download" icon="fa-download" class="btn-link"/>
+                                    <button name="action_nudge_embedding_reindex" type="object"
+                                            string="Re-index" icon="fa-refresh" class="btn-link"/>
+                                    <button name="action_nudge_embedding_remove" type="object"
+                                            string="Remove" icon="fa-trash" class="btn-link"
+                                            confirm="Delete the model files and the vectors?"/>
+                                </div>
+                                <div class="mt8 row">
+                                    <label for="nudge_embedding_model" class="col-lg-3 o_light_label"/>
+                                    <field name="nudge_embedding_model" placeholder="multilingual-e5-small"/>
+                                </div>
+                                <div class="row">
+                                    <label for="nudge_embedding_path" class="col-lg-3 o_light_label"/>
+                                    <field name="nudge_embedding_path"/>
+                                </div>
+                                <div class="row">
+                                    <label for="nudge_embedding_idle" class="col-lg-3 o_light_label"/>
+                                    <field name="nudge_embedding_idle"/>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                    <block title="Answer Memory" name="nudge_memory_container">
+                        <setting help="A thumbs-up on an explanation keeps it for a manager to approve; an approved answer then answers the same question of the others at once, without the AI provider and without cost. Nothing that changed data or showed values of the database is kept.">
+                            <field name="nudge_answer_memory"/>
+                            <div class="content-group" invisible="not nudge_answer_memory">
+                                <div class="row mt8">
+                                    <label for="nudge_memory_threshold" class="col-lg-6 o_light_label"/>
+                                    <field name="nudge_memory_threshold" class="col-lg-6"/>
+                                </div>
+                                <div class="mt8">
+                                    <button name="%(nudge_memory_action)d" type="action"
+                                            string="Remembered Answers" icon="oi-arrow-right" class="btn-link"/>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                    <block title="Recurring Questions" name="nudge_recurring_container">
+                        <setting help="Nudge counts how often the same question is asked, in any dialect, without keeping who asked, and proposes to the managers the ones that have no remembered answer and no tour. No AI provider is called.">
+                            <div class="content-group">
+                                <div class="row mt8">
+                                    <label for="nudge_recurring_min_count" class="col-lg-6 o_light_label"/>
+                                    <field name="nudge_recurring_min_count" class="col-lg-6"/>
+                                </div>
+                                <div class="row">
+                                    <label for="nudge_recurring_retention_days" class="col-lg-6 o_light_label"/>
+                                    <field name="nudge_recurring_retention_days" class="col-lg-6"/>
+                                </div>
+                                <div class="mt8">
+                                    <button name="%(nudge_question_action)d" type="action"
+                                            string="Recurring Questions" icon="oi-arrow-right" class="btn-link"/>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
                     <block title="Budgets" name="nudge_budget_container">
                         <setting help="What Nudge may spend at the AI provider, counted in tokens and in the prices set on the provider. 0 is no limit. Past a limit, Nudge answers that it must wait.">
                             <div class="row">
@@ -126,6 +258,33 @@
                         </setting>
                         <setting help="One answer holds one worker of the server while it streams; a few at once leave none for the screens of everyone else. 0 is automatic: the workers of the server less two, at least one. Past the limit, Nudge asks the person to try again in a moment. Work in the background does not count.">
                             <field name="nudge_max_streams"/>
+                        </setting>
+                    </block>
+                    <block title="Your First Week" name="nudge_coach_container">
+                        <setting help="A card in the panel shows a new person (in their first 14 days, or put in training by a manager) how many of the key screens of their role they opened and the tours left to take. No AI is used and only the screens opened are kept. Switched off, nobody is followed.">
+                            <field name="nudge_coach_enabled"/>
+                        </setting>
+                    </block>
+                    <block title="Health Check" name="nudge_health_container">
+                        <setting help="The weekly health check of this company runs as this Nudge manager and looks at what they may read. Empty: no weekly check. The check, the compliance checklists (a checklist, not legal advice) and the check before an upgrade are run by a manager from Nudge, Health Check; none of them uses AI or changes anything.">
+                            <field name="nudge_health_user_id" options="{'no_create': True, 'no_open': True}"/>
+                        </setting>
+                    </block>
+                    <block title="My Nudge Home and Meetings" name="nudge_home_container">
+                        <setting string="My Nudge Home"
+                                 help="Each person has a page with the numbers of the apps they may use, with the trend against last week and Show me. It is counted as the person every five minutes, with no AI, and is there for everyone who has Nudge.">
+                        </setting>
+                        <setting string="Meeting audio"
+                                 help="A recording attached or made in the panel is summarised and then forgotten: the file is removed within one hour. The transcript is kept nowhere. Needs a provider that accepts audio, and ffmpeg on the server for voice notes.">
+                        </setting>
+                        <setting string="Module scaffold"
+                                 help="In Developer mode an administrator can ask for a whole Odoo module for 17, 18 or 19. It is shown as a spec card first, checked in memory and given as a ZIP; nothing is installed or written on the server.">
+                        </setting>
+                    </block>
+                    <block title="Translations" name="nudge_translation_container">
+                        <setting help="Translate a module into any language with the AI, review every term, then write them into the database and download the .po file.">
+                            <button name="%(nudge_translation_action)d" type="action"
+                                    string="Translate a Module" icon="oi-arrow-right" class="btn-link"/>
                         </setting>
                     </block>
                     <block title="Access" name="nudge_access_container">

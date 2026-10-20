@@ -1,3 +1,5 @@
+import unittest
+
 from odoo.tests import new_test_user as odoo_new_test_user
 
 
@@ -14,6 +16,14 @@ from odoo.addons.nudge.llm.fake_adapter import FakeAdapter
 
 def _no_server(*args, **kwargs):
     raise requests.exceptions.ConnectionError("no server in tests")
+
+
+def require_modules(cls, *names):
+    """Skip the whole class when an app it builds its data on is not installed in this database."""
+    found = cls.env["ir.module.module"].sudo().search([("name", "in", names), ("state", "=", "installed")])
+    missing = sorted(set(names) - set(found.mapped("name")))
+    if missing:
+        raise unittest.SkipTest("needs " + ", ".join(missing))
 
 
 class NudgeCase:

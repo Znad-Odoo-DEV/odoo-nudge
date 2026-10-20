@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Preferences: link a phone -->
+    <record id="view_users_form_simple_modif_nudge_messaging" model="ir.ui.view">
+        <field name="name">res.users.preferences.form.nudge.messaging</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Nudge Messaging" name="nudge_messaging"
+                      groups="nudge.group_nudge_user">
+                    <div class="text-muted mb-3">
+                        Ask Nudge from WhatsApp or Telegram. Press the button, then send the code from your
+                        phone within 10 minutes. Nudge answers your questions there; a change it prepares
+                        waits for your yes in Odoo.
+                    </div>
+                    <button name="action_nudge_msg_code" type="object" string="Get a Linking Code"
+                            class="btn-primary"/>
+                    <field name="nudge_msg_link_ids" class="mt-3">
+                        <tree create="0" delete="0" edit="0">
+                            <field name="channel"/>
+                            <field name="sender_hint"/>
+                            <field name="create_date" string="Linked On"/>
+                            <button name="action_revoke" type="object" string="Unlink" icon="fa-unlink"
+                                    confirm="Unlink this phone? Nudge will stop answering it."/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- The step prepared from a phone: yes or no in Odoo -->
+    <record id="nudge_step_view_form_messaging" model="ir.ui.view">
+        <field name="name">nudge.step.view.form.messaging</field>
+        <field name="model">nudge.step</field>
+        <field name="inherit_id" ref="nudge.nudge_step_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_messaging_apply" type="object" string="Yes, make this change"
+                        class="btn-primary"
+                        invisible="state != 'pending' or origin not in ('WhatsApp', 'Telegram')"/>
+                <button name="action_messaging_refuse" type="object" string="No"
+                        invisible="state != 'pending' or origin not in ('WhatsApp', 'Telegram')"/>
+            </xpath>
+            <!-- The yes of an external assistant (MCP) is another one: not for a phone -->
+            <xpath expr="//button[@name='action_mcp_approve']" position="attributes">
+                <attribute name="invisible">state != 'pending' or not origin or origin in ('WhatsApp', 'Telegram')</attribute>
+            </xpath>
+            <xpath expr="//button[@name='action_mcp_refuse']" position="attributes">
+                <attribute name="invisible">state != 'pending' or not origin or origin in ('WhatsApp', 'Telegram')</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="nudge_step_action_messaging_approvals" model="ir.actions.act_window">
+        <field name="name">Changes Asked From a Phone</field>
+        <field name="res_model">nudge.step</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state', '=', 'pending'), ('origin', 'in', ['WhatsApp', 'Telegram']), ('user_id', '=', uid)]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Nothing waits for you</p>
+            <p>When you ask Nudge for a change on WhatsApp or Telegram, it waits here until you say yes.</p>
+        </field>
+    </record>
+
+    <menuitem id="nudge_messaging_menu_approvals" name="Phone Approvals" parent="nudge.nudge_menu_root"
+              action="nudge_step_action_messaging_approvals" sequence="112"
+              groups="nudge.group_nudge_agent"/>
+
+    <!-- The linked phones, for the manager -->
+    <record id="nudge_messaging_link_view_list" model="ir.ui.view">
+        <field name="name">nudge.messaging.link.view.list</field>
+        <field name="model">nudge.messaging.link</field>
+        <field name="arch" type="xml">
+            <tree create="0" edit="0" delete="0">
+                <field name="user_id"/>
+                <field name="channel"/>
+                <field name="sender_hint"/>
+                <field name="create_date" string="Linked On"/>
+                <button name="action_revoke" type="object" string="Unlink" icon="fa-unlink"
+                        confirm="Unlink this phone?"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="nudge_messaging_link_action" model="ir.actions.act_window">
+        <field name="name">Linked Phones</field>
+        <field name="res_model">nudge.messaging.link</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+    <menuitem id="nudge_messaging_menu_links" name="Linked Phones" parent="nudge.nudge_menu_root"
+              action="nudge_messaging_link_action" sequence="113"
+              groups="nudge.group_nudge_manager"/>
+</odoo>

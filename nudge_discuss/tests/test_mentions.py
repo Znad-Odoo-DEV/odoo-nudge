@@ -1,3 +1,5 @@
+from unittest import mock
+
 from odoo import Command
 from odoo.tests import TransactionCase, tagged
 
@@ -20,7 +22,7 @@ class TestMentions(NudgeCase, TransactionCase):
         })
         cls.Mention = cls.env["nudge.mention"].with_context(nudge_keep_transaction=True)
 
-    def mention(self, user, text="@Nudge summarise this", record=None, partners=None, **kwargs):
+    def mention(self, user, text="@Nudge what does this company sell?", record=None, partners=None, **kwargs):
         record = record or self.acme
         return record.with_user(user).message_post(
             body=text, message_type="comment", subtype_xmlid=kwargs.pop("subtype", "mail.mt_note"),
@@ -51,8 +53,76 @@ class TestMentions(NudgeCase, TransactionCase):
         self.assertIn("<nudge_record>", sent)
         self.assertIn("Supplier of tiles", sent)
         self.assertIn("Nudge Mention Acme", sent)
-        self.assertEqual(call["turns"][-1]["text"], "summarise this")
+        self.assertEqual(call["turns"][-1]["text"], "what does this company sell?")
         self.assertEqual(len(call["turns"]), 1, "Nothing else of any conversation")
+
+    def test_summarise_is_the_history_of_the_record_as_an_internal_note(self):
+        from odoo.addons.nudge.tests.test_history import EchoAdapter
+        adapter = self.use_adapter()
+        adapter.__class__ = EchoAdapter
+        child = self.env["res.partner"].create({"name": "Ebrahim", "parent_id": self.acme.id})
+        self.acme.message_post(body="<p>Raghad wants 40 tiles</p>", message_type="comment",
+                               subtype_xmlid="mail.mt_comment")
+        question = self.mention(self.user_contacts, text="@Nudge summarize")
+        self.Mention._cron_answer()
+        mention = self.Mention.search([("message_id", "=", question.id)])
+        self.assertEqual(mention.state, "done")
+        answer = self.answers()
+        self.assertEqual(len(answer), 1)
+        self.assertTrue(answer.subtype_id.internal, "A note: read by employees, never sent out")
+        self.assertEqual(adapter.calls[0]["system"], [prompt.FOCUS_PERSONA, prompt.FOCUS_BRIEFS["history"]])
+        self.assertIn("40 tiles", adapter.calls[0]["turns"][-1]["context"])
+        self.assertIn(f'<a href="/web#model=res.partner&amp;id={child.id}&amp;view_type=form">Show me</a>', answer.body)
+        # The same words in Arabic, and in a longer sentence that is a question like any other
+        self.mention(self.user_contacts, text="@Nudge لخص لي")
+        self.Mention._cron_answer()
+        self.assertEqual(len(adapter.calls), 1, "Kept for 15 minutes: the chatter did not change")
+        self.mention(self.user_contacts, text="@Nudge summarize the quality of this supplier")
+        self.Mention._cron_answer()
+        self.assertEqual(adapter.calls[-1]["system"], [prompt.FOCUS_PERSONA, prompt.FOCUS_BRIEFS["mention"]])
+
+    def test_draft_a_reply_is_posted_as_a_note_and_never_sent(self):
+        adapter = self.use_adapter(reply="Dear Raghad,\n\nOur tiles come in 5 days.\n\nBest regards")
+        customer = self.env["res.partner"].create({"name": "Raghad", "email": "raghad@customer.example"})
+        self.acme.message_post(
+            body="<p>When do my tiles come?</p>", subject="Tiles", message_type="email",
+            subtype_xmlid="mail.mt_comment", author_id=customer.id)
+        self.mention(self.user_contacts, text="@Nudge draft a formal reply")
+        self.Mention._cron_answer()
+        self.assertFalse(self.env["mail.mail"].search([("recipient_ids", "in", customer.id)]), "The customer gets nothing")
+        self.assertFalse(self.env["mail.mail"].search([("email_to", "ilike", "customer.example")]))
+        answer = self.answers()
+        self.assertEqual(len(answer), 1)
+        self.assertTrue(answer.subtype_id.internal)
+        self.assertIn("Our tiles come in 5 days.", answer.body)
+        self.assertIn("raghad@customer.example", answer.body)
+        self.assertIn("Re: Tiles", answer.body)
+        self.assertEqual(adapter.calls[0]["system"], [prompt.FOCUS_PERSONA, prompt.FOCUS_BRIEFS["reply"]])
+        self.assertIn("Tone: formal", adapter.calls[0]["turns"][-1]["text"])
+        # A note of Nudge is internal: the next draft does not quote it
+        self.mention(self.user_contacts, text="@Nudge draft a reply")
+        self.Mention._cron_answer()
+        self.assertNotIn("Our tiles come in 5 days.", adapter.calls[-1]["turns"][-1]["context"])
+
+    def test_nothing_to_answer_is_said_in_the_chatter(self):
+        self.use_adapter()
+        self.mention(self.user_contacts, text="@Nudge draft a reply")
+        self.Mention._cron_answer()
+        self.assertIn("could not answer", self.answers().body)
+
+    def test_how_a_request_in_a_few_words_is_told_from_a_question(self):
+        from odoo.addons.nudge_discuss.models.nudge_mention import asked_for
+        self.assertEqual(asked_for("@Nudge Summarise"), ("history", None))
+        self.assertEqual(asked_for("@Nudge please summarize this."), ("history", None))
+        self.assertEqual(asked_for("@Nudge لخص"), ("history", None))
+        self.assertEqual(asked_for("@Nudge draft a reply"), ("reply", "friendly"))
+        self.assertEqual(asked_for("@Nudge draft a short reply to this"), ("reply", "short"))
+        self.assertEqual(asked_for("@Nudge write me a formal response"), ("reply", "formal"))
+        self.assertEqual(asked_for("@Nudge reply"), ("reply", "friendly"))
+        self.assertEqual(asked_for("@Nudge اكتب لي رد رسمي"), ("reply", "formal"))
+        for question in ("@Nudge summarise the contract terms of Acme", "@Nudge who should reply to this?",
+                         "@Nudge draft a reply that offers a 10 percent discount", "@Nudge", "@Nudge hello"):
+            self.assertEqual(asked_for(question), (None, None), question)
 
     def test_what_some_readers_cannot_see_is_not_sent(self):
         adapter = self.use_adapter()
@@ -151,3 +221,32 @@ class TestMentions(NudgeCase, TransactionCase):
         # And the number is kept in the message posted
         message = self.acme.message_post(body=html, message_type="comment", subtype_xmlid="mail.mt_note")
         self.assertIn('<ol start="2">', message.body)
+
+    def test_an_answer_cut_short_goes_back_to_the_queue_and_does_not_block_it(self):
+        self.use_adapter(reply="Acme sells tiles.")
+        self.mention(self.user_contacts)
+        mention = self.Mention.search([("res_id", "=", self.acme.id)])
+        # A worker killed in the middle of the answer left it "answering"
+        mention.state = "answering"
+        self.Mention._cron_answer()
+        self.assertEqual(mention.state, "answering", "Recent: another worker may be on it")
+        self.env.cr.execute(
+            "UPDATE nudge_mention SET write_date = now() at time zone 'utc' - interval '1 hour' WHERE id = %s",
+            (mention.id,))
+        mention.invalidate_recordset()
+        self.Mention._cron_answer()
+        self.assertEqual(mention.state, "done")
+
+    def test_a_pass_that_runs_long_leaves_the_rest_for_the_next(self):
+        from odoo.addons.nudge_discuss.models import nudge_mention  # noqa: PLC0415
+        self.use_adapter(reply="Acme sells tiles.")
+        self.mention(self.user_contacts)
+        self.mention(self.user_contacts, text="@Nudge and what else?")
+        mentions = self.Mention.search([("res_id", "=", self.acme.id)], order="id")
+        with mock.patch.object(nudge_mention, "CRON_SECONDS", -1), \
+                mock.patch.object(type(self.env["ir.cron"]), "_trigger") as trigger:
+            self.Mention._cron_answer()
+            self.assertEqual(mentions.mapped("state"), ["done", "queued"])
+            trigger.assert_called()
+        self.Mention._cron_answer()
+        self.assertEqual(mentions.mapped("state"), ["done", "done"])

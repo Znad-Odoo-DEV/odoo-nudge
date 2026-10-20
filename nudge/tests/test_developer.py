@@ -11,7 +11,7 @@ from odoo.addons.nudge.tools import developer
 from odoo.addons.nudge.tools.developer import compile_code
 from odoo.addons.nudge.tools.records import Refused
 
-from .common import NudgeCase
+from .common import NudgeCase, require_modules
 
 
 @tagged("post_install", "-at_install")
@@ -21,6 +21,7 @@ class TestDeveloper(NudgeCase, TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        require_modules(cls, "base_automation")
         cls.admin = new_test_user(
             cls.env, login="nudge_dev_admin",
             groups="nudge.group_nudge_agent,base.group_system,base.group_partner_manager")

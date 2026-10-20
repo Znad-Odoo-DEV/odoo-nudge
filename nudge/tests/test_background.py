@@ -24,6 +24,8 @@ class BackgroundCase(AgentCase):
         self.last_bus_id = max(self.env["bus.bus"].sudo().search([], order="id desc", limit=1).ids or [0])
         # Tests run in one transaction, which they undo: nothing is committed
         self.Run = self.env["nudge.run"].with_context(nudge_keep_transaction=True)
+        # The crons commit after each piece of work; a test is one transaction it undoes
+        self.patch(type(self.Run), "_nudge_commit_progress", lambda run, started: 10 ** 6)
 
     def leave(self, user, text, conversation_id=None):
         """Ask for the work to be done in the background, the way the controller does.

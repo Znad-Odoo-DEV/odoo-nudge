@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_validator_policy_list" model="ir.ui.view">
+        <field name="name">nudge.validator.policy.list</field>
+        <field name="model">nudge.validator.policy</field>
+        <field name="arch" type="xml">
+            <tree string="Fields the Company Requires" editable="bottom">
+                <field name="model_id" options="{'no_create': True, 'no_open': True}"/>
+                <field name="field_id" options="{'no_create': True, 'no_open': True}"
+                       domain="[('model_id', '=', model_id), ('store', '=', True)]"/>
+                <field name="message" placeholder="Fill in the cost centre before saving"/>
+                <field name="exempt_group_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="nudge_validator_policy_action" model="ir.actions.act_window">
+        <field name="name">Fields the Company Requires</field>
+        <field name="res_model">nudge.validator.policy</field>
+        <field name="view_mode">tree</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Name a field people must not forget</p>
+            <p>
+                While someone fills in the form you choose, a small strip under its title reminds them
+                when this field is empty. Nothing is blocked, and the groups you list are never reminded.
+            </p>
+        </field>
+    </record>
+</odoo>

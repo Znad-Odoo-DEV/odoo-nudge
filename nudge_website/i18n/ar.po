@@ -1,0 +1,565 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* nudge_website
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-17 17:02+0000\n"
+"PO-Revision-Date: 2026-10-17 17:02+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+
+#. module: nudge_website
+#. odoo-python
+#: code:addons/nudge_website/models/res_config_settings.py:0
+msgid "%s pages are known to the assistant."
+msgstr "%s صفحة معروفة للمساعد."
+
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.assistant_bubble
+msgid ""
+"<span class=\"o_nudge_web_failed\" hidden=\"hidden\">Sorry, something went "
+"wrong. Please try again.</span>"
+msgstr ""
+"<span class=\"o_nudge_web_failed\" hidden=\"hidden\">عذراً، حدث خطأ ما. يرجى"
+" المحاولة مرة أخرى.</span>"
+
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.assistant_bubble
+msgid "<span>Attach this conversation to my request</span>"
+msgstr "<span>أرفق هذه المحادثة بطلبي</span>"
+
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.assistant_bubble
+msgid "<strong>Assistant</strong>"
+msgstr "<strong>المساعد</strong>"
+
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.res_config_settings_view_form_website
+msgid ""
+"A chat bubble on the website and in the portal. Visitors with no login are "
+"answered only from the published products, the company files marked public "
+"and the published pages. Customers who are logged in are also answered about"
+" their own orders and invoices."
+msgstr ""
+"فقاعة محادثة على الموقع وفي البوابة. يُجاب الزائر الذي لم يسجّل الدخول من "
+"المنتجات المنشورة وملفات الشركة المعلَّمة كعامة والصفحات المنشورة فقط. "
+"ويُجاب العميل المسجّل الدخول أيضاً عن طلباته وفواتيره الخاصة."
+
+#. module: nudge_website
+#. odoo-python
+#: code:addons/nudge_website/tools/assistant.py:0
+msgid "A person can also answer you: %s"
+msgstr "يمكن لشخص أيضًا أن يجيبك: %s"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_web_message__active
+msgid "Active"
+msgstr "نشط"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_source__public_url
+msgid "Address"
+msgstr "العنوان"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_web_message__answer
+msgid "Answer"
+msgstr "الإجابة"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_web_message__answered
+msgid "Answered"
+msgstr "تمت الإجابة"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_res_config_settings__nudge_web_max_ai
+msgid "Answers of the AI at Once"
+msgstr "إجابات الذكاء الاصطناعي في الوقت نفسه"
+
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.assistant_bubble
+msgid "Ask a question"
+msgstr "اطرح سؤالاً"
+
+#. module: nudge_website
+#. odoo-python
+#: code:addons/nudge_website/controllers/main.py:0
+#: model_terms:ir.ui.view,arch_db:nudge_website.assistant_bubble
+msgid "Assistant"
+msgstr "المساعد"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_res_config_settings__nudge_assistant
+#: model:ir.model.fields,field_description:nudge_website.field_website__nudge_assistant
+msgid "Assistant Bubble"
+msgstr "فقاعة المساعد"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_res_config_settings__nudge_lang_ids
+#: model:ir.model.fields,field_description:nudge_website.field_website__nudge_lang_ids
+msgid "Assistant Languages"
+msgstr "لغات المساعد"
+
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.assistant_bubble
+msgid "Close"
+msgstr "إغلاق"
+
+#. module: nudge_website
+#: model:ir.model,name:nudge_website.model_res_company
+msgid "Companies"
+msgstr "الشركات"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_web_message__company_id
+msgid "Company"
+msgstr "الشركة"
+
+#. module: nudge_website
+#: model:ir.model,name:nudge_website.model_res_config_settings
+msgid "Config Settings"
+msgstr "تهيئة الإعدادات"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_web_message__create_uid
+msgid "Created by"
+msgstr "أنشئ بواسطة"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_web_message__create_date
+msgid "Created on"
+msgstr "أنشئ في"
+
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.nudge_web_message_view_search
+msgid "Day"
+msgstr "اليوم"
+
+#. module: nudge_website
+#. odoo-python
+#: code:addons/nudge_website/tools/assistant.py:0
+msgid "Delivery %(name)s: %(state)s"
+msgstr "التسليم %(name)s: %(state)s"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_source__display_name
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_usage__display_name
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_web_message__display_name
+#: model:ir.model.fields,field_description:nudge_website.field_res_company__display_name
+#: model:ir.model.fields,field_description:nudge_website.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:nudge_website.field_website__display_name
+msgid "Display Name"
+msgstr "اسم العرض"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_res_config_settings__nudge_greeting
+#: model:ir.model.fields,field_description:nudge_website.field_website__nudge_greeting
+msgid "Greeting"
+msgstr "التحية"
+
+#. module: nudge_website
+#. odoo-python
+#: code:addons/nudge_website/models/website.py:0
+msgid ""
+"Hello! I can help with our products, our published information and, if you "
+"are logged in, your own orders and invoices."
+msgstr ""
+"مرحباً! يمكنني مساعدتك في منتجاتنا ومعلوماتنا المنشورة، وفي طلباتك وفواتيرك "
+"الخاصة إذا كنت مسجّلاً الدخول."
+
+#. module: nudge_website
+#: model:ir.model.fields,help:nudge_website.field_res_config_settings__nudge_rate_messages
+msgid "How many messages one address may send in the time below."
+msgstr "عدد الرسائل التي يجوز لعنوان واحد إرسالها خلال المدة أدناه."
+
+#. module: nudge_website
+#: model:ir.model.fields,help:nudge_website.field_res_config_settings__nudge_web_max_ai
+msgid ""
+"How many visitors may be answered by the AI at the same moment. 0: the "
+"workers of the server less three, at least one. Past it, visitors get the "
+"products and files alone."
+msgstr ""
+"كم زائرًا يُجاب في اللحظة نفسها بالذكاء الاصطناعي. 0: عمّال الخادم ناقص "
+"ثلاثة، واحد على الأقل. وبعد ذلك يحصل الزوار على المنتجات والملفات وحدها."
+
+#. module: nudge_website
+#. odoo-python
+#: code:addons/nudge_website/tools/assistant.py:0
+msgid ""
+"I can only help with our products, our published information and, once you "
+"are logged in, your own orders and invoices. For anything else, please "
+"contact us: %s"
+msgstr ""
+"لا يمكنني المساعدة إلا في منتجاتنا ومعلوماتنا المنشورة، وبعد تسجيل دخولك في "
+"طلباتك وفواتيرك الخاصة. لأي أمر آخر يرجى التواصل معنا: %s"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_source__id
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_usage__id
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_web_message__id
+#: model:ir.model.fields,field_description:nudge_website.field_res_company__id
+#: model:ir.model.fields,field_description:nudge_website.field_res_config_settings__id
+#: model:ir.model.fields,field_description:nudge_website.field_website__id
+msgid "ID"
+msgstr "المعرف"
+
+#. module: nudge_website
+#. odoo-python
+#: code:addons/nudge_website/tools/assistant.py:0
+msgid "In stock"
+msgstr "متوفر"
+
+#. module: nudge_website
+#. odoo-python
+#: code:addons/nudge_website/tools/assistant.py:0
+msgid "Invoice %(name)s: %(left)s left, due %(due)s"
+msgstr "الفاتورة %(name)s: المتبقي %(left)s، الاستحقاق %(due)s"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_web_message__ip_hash
+msgid "Ip Hash"
+msgstr "بصمة IP"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_res_company__nudge_web_keep_days
+#: model:ir.model.fields,field_description:nudge_website.field_res_config_settings__nudge_web_keep_days
+msgid "Keep Visitor Messages (days)"
+msgstr "إبقاء رسائل الزوار (أيام)"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_web_message__kind
+msgid "Kind"
+msgstr "النوع"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_web_message__write_uid
+msgid "Last Updated by"
+msgstr "آخر تحديث بواسطة"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_web_message__write_date
+msgid "Last Updated on"
+msgstr "آخر تحديث في"
+
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.assistant_bubble
+msgid "Leave your details and someone will write to you."
+msgstr "اترك بياناتك وسيكتب إليك أحد الزملاء."
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_res_config_settings__nudge_rate_messages
+msgid "Messages per Visitor"
+msgstr "الرسائل لكل زائر"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_res_config_settings__nudge_rate_minutes
+msgid "Minutes"
+msgstr "دقائق"
+
+#. module: nudge_website
+#: model:ir.model,name:nudge_website.model_nudge_source
+msgid "Nudge Company File"
+msgstr "ملف شركة Nudge"
+
+#. module: nudge_website
+#: model:ir.model,name:nudge_website.model_nudge_usage
+msgid "Nudge Usage"
+msgstr "استهلاك Nudge"
+
+#. module: nudge_website
+#: model:ir.model,name:nudge_website.model_nudge_web_message
+msgid "Nudge Visitor Question"
+msgstr "سؤال زائر لـ Nudge"
+
+#. module: nudge_website
+#: model:ir.actions.server,name:nudge_website.cron_archive_visitor_lines_ir_actions_server
+msgid "Nudge: archive old visitor messages of the website assistant"
+msgstr "Nudge: أرشفة رسائل الزوار القديمة لمساعد الموقع"
+
+#. module: nudge_website
+#: model:ir.actions.server,name:nudge_website.cron_read_pages_ir_actions_server
+msgid "Nudge: read the published pages for the website assistant"
+msgstr "Nudge: قراءة الصفحات المنشورة لمساعد الموقع"
+
+#. module: nudge_website
+#. odoo-python
+#: code:addons/nudge_website/tools/assistant.py:0
+msgid "Order %(name)s (%(state)s), %(total)s"
+msgstr "الطلب %(name)s (%(state)s)، %(total)s"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_usage__origin
+msgid "Origin"
+msgstr "المصدر"
+
+#. module: nudge_website
+#. odoo-python
+#: code:addons/nudge_website/tools/assistant.py:0
+msgid "Out of stock"
+msgstr "غير متوفر"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_source__page_hash
+msgid "Page Hash"
+msgstr "بصمة الصفحة"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_source__website_page_id
+msgid "Page of the Website"
+msgstr "صفحة من الموقع"
+
+#. module: nudge_website
+#. odoo-python
+#: code:addons/nudge_website/controllers/main.py:0
+msgid "Please write your question."
+msgstr "يرجى كتابة سؤالك."
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_source__is_public
+msgid "Public on the Website"
+msgstr "عام على الموقع"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_web_message__question
+#: model:ir.model.fields.selection,name:nudge_website.selection__nudge_web_message__kind__ask
+msgid "Question"
+msgstr "سؤال"
+
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.res_config_settings_view_form_website
+msgid "Read the published pages now"
+msgstr "اقرأ الصفحات المنشورة الآن"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_res_config_settings__nudge_web_handover_max
+msgid "Requests for a Person per Hour"
+msgstr "طلبات شخص في الساعة"
+
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.assistant_bubble
+msgid "Send"
+msgstr "إرسال"
+
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.assistant_bubble
+msgid "Send to the team"
+msgstr "أرسل إلى الفريق"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_web_message__session_hash
+msgid "Session Hash"
+msgstr "معرّف الجلسة (Hash)"
+
+#. module: nudge_website
+#: model:ir.model.fields,help:nudge_website.field_res_config_settings__nudge_assistant
+#: model:ir.model.fields,help:nudge_website.field_website__nudge_assistant
+msgid "Show the chat bubble to the visitors of this website."
+msgstr "أظهر فقاعة المحادثة لزوار هذا الموقع."
+
+#. module: nudge_website
+#: model:ir.model.fields.selection,name:nudge_website.selection__nudge_web_message__kind__handover
+#: model_terms:ir.ui.view,arch_db:nudge_website.nudge_web_message_view_search
+msgid "Talk to a Person"
+msgstr "التحدث إلى شخص"
+
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.assistant_bubble
+msgid "Talk to a person"
+msgstr "التحدث إلى شخص"
+
+#. module: nudge_website
+#. odoo-python
+#: code:addons/nudge_website/controllers/main.py:0
+msgid "Thank you. Someone will write to you soon."
+msgstr "شكراً لك. سيكتب إليك أحد الزملاء قريباً."
+
+#. module: nudge_website
+#. odoo-python
+#: code:addons/nudge_website/controllers/main.py:0
+msgid "The assistant is not available."
+msgstr "المساعد غير متاح."
+
+#. module: nudge_website
+#: model:ir.model.fields,help:nudge_website.field_nudge_source__is_public
+msgid ""
+"The assistant of the website answers visitors from this file, with no login."
+" Off: the file stays for the people who work here."
+msgstr ""
+"يجيب مساعد الموقع الزوار من هذا الملف دون تسجيل دخول. إذا أُوقف: يبقى الملف "
+"للعاملين هنا فقط."
+
+#. module: nudge_website
+#: model:ir.model.fields,help:nudge_website.field_res_config_settings__nudge_lang_ids
+#: model:ir.model.fields,help:nudge_website.field_website__nudge_lang_ids
+msgid ""
+"The bubble shows only in these languages of the website. Empty: in all of "
+"them."
+msgstr "تظهر الفقاعة بهذه اللغات فقط من لغات الموقع. فارغ: بجميعها."
+
+#. module: nudge_website
+#: model:ir.model.fields,help:nudge_website.field_res_config_settings__nudge_greeting
+#: model:ir.model.fields,help:nudge_website.field_website__nudge_greeting
+msgid ""
+"The first line of the bubble. Empty: a line that says what it can answer."
+msgstr "السطر الأول في الفقاعة. فارغ: سطر يقول بما يمكنها أن تجيب."
+
+#. module: nudge_website
+#: model:ir.model.fields,help:nudge_website.field_nudge_source__website_id
+msgid "The website the page belongs to. Empty: all of them."
+msgstr "الموقع الذي تنتمي إليه الصفحة. فارغ: جميع المواقع."
+
+#. module: nudge_website
+#. odoo-python
+#: code:addons/nudge_website/tools/assistant.py:0
+msgid "Ticket %(name)s: %(state)s"
+msgstr "التذكرة %(name)s: %(state)s"
+
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.nudge_web_message_view_search
+msgid "Unanswered"
+msgstr "بلا إجابة"
+
+#. module: nudge_website
+#. odoo-python
+#: code:addons/nudge_website/tools/assistant.py:0
+msgid "Unpaid invoices: %(count)s, %(total)s in all."
+msgstr "فواتير غير مدفوعة: %(count)s، بإجمالي %(total)s."
+
+#. module: nudge_website
+#: model:ir.ui.menu,name:nudge_website.nudge_menu_website_usage
+msgid "Usage"
+msgstr "الاستخدام"
+
+#. module: nudge_website
+#. odoo-python
+#: code:addons/nudge_website/controllers/main.py:0
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_web_message__user_id
+msgid "Visitor"
+msgstr "الزائر"
+
+#. module: nudge_website
+#: model:ir.actions.act_window,name:nudge_website.nudge_web_message_action
+#: model:ir.ui.menu,name:nudge_website.nudge_menu_website_questions
+#: model_terms:ir.ui.view,arch_db:nudge_website.nudge_web_message_view_list
+msgid "Visitor Questions"
+msgstr "أسئلة الزوار"
+
+#. module: nudge_website
+#: model:ir.model,name:nudge_website.model_website
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_source__website_id
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_web_message__website_id
+#: model_terms:ir.ui.view,arch_db:nudge_website.nudge_web_message_view_search
+msgid "Website"
+msgstr "الموقع"
+
+#. module: nudge_website
+#: model:ir.model.fields.selection,name:nudge_website.selection__nudge_usage__origin__website
+#: model:ir.ui.menu,name:nudge_website.nudge_menu_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.res_config_settings_view_form_website
+msgid "Website Assistant"
+msgstr "مساعد الموقع"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_res_company__nudge_public_budget
+#: model:ir.model.fields,field_description:nudge_website.field_res_config_settings__nudge_public_budget
+msgid "Website Assistant Tokens per Day"
+msgstr "رموز مساعد الموقع في اليوم"
+
+#. module: nudge_website
+#: model:ir.actions.act_window,name:nudge_website.nudge_usage_website_action
+msgid "Website Assistant Usage"
+msgstr "استخدام مساعد الموقع"
+
+#. module: nudge_website
+#. odoo-python
+#: code:addons/nudge_website/models/res_config_settings.py:0
+msgid "Website assistant"
+msgstr "مساعد الموقع"
+
+#. module: nudge_website
+#. odoo-python
+#: code:addons/nudge_website/controllers/main.py:0
+msgid "Website assistant: %s"
+msgstr "مساعد الموقع: %s"
+
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.res_config_settings_view_form_website
+msgid ""
+"What the AI may spend each day on visitors, in tokens, and how many messages"
+" one visitor may send. Past the budget, visitors are still answered, from "
+"the products and files alone, with no AI. 0 tokens: never the AI."
+msgstr ""
+"ما يجوز للذكاء الاصطناعي إنفاقه كل يوم على الزوار بالرموز، وعدد الرسائل التي"
+" يجوز للزائر إرسالها. بعد تجاوز الميزانية يظل الزوار يُجابون من المنتجات "
+"والملفات وحدها دون ذكاء اصطناعي. 0 رمز: لا ذكاء اصطناعي أبداً."
+
+#. module: nudge_website
+#: model:ir.model.fields,help:nudge_website.field_res_company__nudge_public_budget
+#: model:ir.model.fields,help:nudge_website.field_res_config_settings__nudge_public_budget
+msgid ""
+"What the AI may spend each day writing answers to visitors of the website, "
+"in tokens. Past it, visitors are still answered, from the products and files"
+" alone, without the AI. 0: visitors are never answered by the AI."
+msgstr ""
+"ما يجوز للذكاء الاصطناعي إنفاقه كل يوم في كتابة إجابات لزوار الموقع، "
+"بالرموز. بعد تجاوزه يظل الزوار يُجابون من المنتجات والملفات وحدها دون الذكاء"
+" الاصطناعي. 0: لا يجيب الذكاء الاصطناعي الزوار أبداً."
+
+#. module: nudge_website
+#: model:ir.model.fields,help:nudge_website.field_nudge_web_message__answer
+msgid "What the assistant said; it builds the conversation of a request."
+msgstr "ما قاله المساعد؛ يبني محادثة الطلب."
+
+#. module: nudge_website
+#: model:ir.model.fields,help:nudge_website.field_res_company__nudge_web_keep_days
+#: model:ir.model.fields,help:nudge_website.field_res_config_settings__nudge_web_keep_days
+msgid ""
+"What visitors typed in the website assistant, and what it answered, stays "
+"this many days. After that the lines are archived (not deleted) by a daily "
+"job; archived lines are no more listed or counted. 0: they are kept."
+msgstr ""
+"ما كتبه الزوار في مساعد الموقع وما أجاب به يبقى هذا العدد من الأيام. بعدها "
+"تُؤرشَف الأسطر (لا تُحذف) بمهمة يومية؛ والأسطر المؤرشفة لا تُسرد ولا تُحسب. "
+"0: تبقى محفوظة."
+
+#. module: nudge_website
+#: model:ir.model.fields,help:nudge_website.field_nudge_usage__origin
+msgid "Where the call came from, when it was not a person working in Odoo."
+msgstr "من أين جاء الاستدعاء حين لا يكون شخصاً يعمل في أودو."
+
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.assistant_bubble
+msgid "Write your question"
+msgstr "اكتب سؤالك"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_nudge_web_message__used_ai
+msgid "Written by the AI"
+msgstr "كتبه الذكاء الاصطناعي"
+
+#. module: nudge_website
+#. odoo-python
+#: code:addons/nudge_website/controllers/main.py:0
+msgid ""
+"You have asked a lot in a short time. Please wait a few minutes and try "
+"again."
+msgstr ""
+"سألت كثيراً في وقت قصير. يرجى الانتظار بضع دقائق ثم المحاولة مرة أخرى."
+
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.assistant_bubble
+msgid "Your email"
+msgstr "بريدك الإلكتروني"
+
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.assistant_bubble
+msgid "Your name"
+msgstr "اسمك"

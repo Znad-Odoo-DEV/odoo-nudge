@@ -5,6 +5,7 @@ import { Component, useEffect, useRef, useState } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 
 import { renderMarkdown } from "../core/markdown";
+import { NudgeChart } from "./nudge_chart";
 
 /**
  * Receives plain values rather than the message object: the answer grows
@@ -12,6 +13,7 @@ import { renderMarkdown } from "../core/markdown";
  */
 export class NudgeMessage extends Component {
     static template = "nudge.Message";
+    static components = { NudgeChart };
     static props = {
         role: String,
         content: String,
@@ -31,6 +33,9 @@ export class NudgeMessage extends Component {
         // Said by the person about the answer: "up", "down" or nothing yet
         feedback: { type: String, optional: true },
         ratable: { type: Boolean, optional: true },
+        // Answered from the memory of answers, with no AI; the AI can be asked instead
+        remembered: { type: Boolean, optional: true },
+        onAskAi: { type: Function, optional: true },
         onRate: { type: Function, optional: true },
         // What Nudge is about to do, or did: shown before anything is done
         card: { type: [Object, { value: null }], optional: true },
@@ -50,6 +55,11 @@ export class NudgeMessage extends Component {
         onOpenProduct: { type: Function, optional: true },
         // What a command of the message box found without any AI
         found: { type: [Object, { value: null }], optional: true },
+        // A chart drawn from the figures of the business
+        chart: { type: [Object, { value: null }], optional: true },
+        // Who changed a record: the changes, each with a button to put the old value back
+        changes: { type: [Object, { value: null }], optional: true },
+        onRestore: { type: Function, optional: true },
         onFound: { type: Function, optional: true },
     };
 

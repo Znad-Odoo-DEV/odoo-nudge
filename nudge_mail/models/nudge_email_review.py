@@ -3,8 +3,11 @@ import re
 from markupsafe import Markup
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
 from odoo.tools import email_split
+
+from odoo.addons.nudge.models.nudge_reply import text_to_html
+from odoo.addons.nudge.tools.records import Refused, get_model, get_records
 
 from .nudge_email_flow import check_method
 
@@ -21,7 +24,9 @@ class NudgeEmailReview(models.TransientModel):
     _name = "nudge.email.review"
     _description = "Email to Read Before It Goes"
 
-    flow_id = fields.Many2one("nudge.email.flow", required=True, readonly=True, ondelete="cascade")
+    # Empty for a reply Nudge drafted: there is no button behind it, and no template
+    flow_id = fields.Many2one("nudge.email.flow", readonly=True, ondelete="cascade")
+    res_model = fields.Char(string="Kind of Record", readonly=True)
     res_id = fields.Integer(string="Record", required=True, readonly=True)
     record_name = fields.Char(string="For", readonly=True)
     email_from = fields.Char(string="From", readonly=True)
@@ -82,10 +87,35 @@ class NudgeEmailReview(models.TransientModel):
 
     def _record(self):
         self.ensure_one()
-        record = self.env[self.flow_id.model].browse(self.res_id).exists()
+        model = self.flow_id.model or self.res_model
+        record = self.env[model].browse(self.res_id).exists() if model in self.env else None
         if not record:
             raise UserError(_("The record of this email is gone."))
         return record
+
+    def _check_open_to(self, record):
+        """Checked at Send, not only when the window opened: the window comes from the browser.
+        :raise UserError: when the person may not send this email for ``record``"""
+        if self.flow_id:
+            self.flow_id.check_open_to(record)
+            return
+        # A reply: any record the person may read, for a person who has Nudge
+        if not self.env.user.has_group("nudge.group_nudge_user"):
+            raise UserError(_("You may not answer on this record."))
+        if self.res_model != record._name:
+            raise UserError(_("This email is not for this record."))
+        if record._name == "nudge.mail.proposal":
+            # A mail the mail agent proposed: it is not a model Nudge opens to the panel, and only a
+            # manager, who decides on that mail, answers it
+            if not self.env.user.has_group("nudge.group_nudge_manager"):
+                raise UserError(_("You may not answer on this record."))
+            record._nudge_check_access("read")
+            return
+        try:
+            get_model(self.env, record._name)
+            record._nudge_check_access("read")
+        except (Refused, AccessError) as error:
+            raise UserError(_("You may not answer on this record.")) from error
 
     def _missing_labels(self):
         if not self.flow_id or not self.res_id:
@@ -131,11 +161,10 @@ class NudgeEmailReview(models.TransientModel):
 
     def action_send(self):
         self.ensure_one()
-        flow = self.flow_id
         record = self._record()
         # Checked here, not only when the window opened: flow_id and res_id
         # come from the browser, and a window made by hand names any record
-        flow.check_open_to(record)
+        self._check_open_to(record)
         sender = self.env.user
         if not sender.email:
             raise UserError(_(
@@ -160,7 +189,19 @@ class NudgeEmailReview(models.TransientModel):
         # may read go with the email and onto the record
         self.attachment_ids._nudge_check_access("read")
         files = self.attachment_ids.sudo()
-        files.write({"res_model": record._name, "res_id": record.id})
+        # Re-pointing a file at the record needs the right to write the record, and only a
+        # file the person made themselves (or this window holds) moves; a file that belongs to
+        # another record is copied, so that it stays where it is for those who read it there
+        if files and record._nudge_has_access("write"):
+            moving = files.filtered(lambda file: file.create_uid == self.env.user
+                                    and file.res_model in (self._name, False))
+            copied = files - moving
+            moving.write({"res_model": record._name, "res_id": record.id})
+            if copied:
+                files = moving | self.env["ir.attachment"].sudo().create([{
+                    "name": file.name, "datas": file.datas, "mimetype": file.mimetype,
+                    "res_model": record._name, "res_id": record.id,
+                } for file in copied])
         header = Markup("<p><strong>%s</strong><br/>%s %s<br/>%s %s</p>") % (
             _("Email sent: %s", self.subject),
             _("To:"), ", ".join(to),
@@ -199,3 +240,47 @@ class NudgeEmailReview(models.TransientModel):
         opened = self._run_button(record)
         self._note(record, _("%s, without the email.", flow.method_label or flow.name))
         return opened or {"type": "ir.actions.act_window_close"}
+
+    # ----------------------------------------------------------- a drafted reply
+    @api.model
+    def _footer(self):
+        """:return: the company under the signature, as the emails of this person carry it"""
+        company = self.env.company
+        parts = [company.name, company.phone, company.email, company.website]
+        return Markup("<p>%s</p>") % " | ".join(part for part in parts if part)
+
+    @api.model
+    def action_draft_reply(self, model, res_id, tone="friendly", refresh=False):
+        """What the button "Draft a reply" of the panel runs: Nudge writes the reply to the last
+        message of the customer, from the thread, and the window of the emails opens with it. It
+        is sent only when the person presses Send: signature and company under it as in their
+        own emails, the notes between employees never quoted.
+        :return: the window"""
+        record = get_records(get_model(self.env, model), [res_id])
+        return self._reply_window(record, tone, refresh)
+
+    @api.model
+    def _reply_window(self, record, tone="friendly", refresh=False):
+        """The window of the reply to the last message of the customer on ``record``, filled in.
+        :return: the action that opens it"""
+        draft = self.env["nudge.reply"]._draft(record, tone, refresh)
+        user = self.env.user
+        body = text_to_html(draft["text"]) + Markup("<br/>") + Markup(user.signature or "") + self._footer()
+        review = self.create({
+            "res_model": record._name,
+            "res_id": record.id,
+            "record_name": record.display_name,
+            "email_from": user.email_formatted or "",
+            "email_to": draft["to"],
+            "subject": draft["subject"],
+            "body": body,
+        })
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Reply"),
+            "res_model": self._name,
+            "res_id": review.id,
+            "view_mode": "form",
+            "views": [(False, "form")],
+            "target": "new",
+        }

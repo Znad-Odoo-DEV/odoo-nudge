@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_mcp" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.nudge.mcp</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="91"/>
+        <field name="inherit_id" ref="nudge.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='nudge_access_container']" position="after">
+                <block title="External Assistants (MCP)" name="nudge_mcp_container">
+                    <setting help="Claude Desktop, ChatGPT and other assistants that speak MCP can use the tools of Nudge, as the person whose key they hold: with that person's rights, record rules and companies. Each person of the group External Assistant makes a key of their own. Everything they do is kept in What Nudge Did.">
+                        <field name="nudge_mcp_enabled"/>
+                        <div class="content-group mt8" invisible="not nudge_mcp_enabled">
+                            <div class="row mt8">
+                                <label for="nudge_mcp_exposure" class="col-lg-4"/>
+                                <field name="nudge_mcp_exposure" class="col-lg-6"/>
+                            </div>
+                            <div class="text-muted">
+                                The tools for developers are never offered. A change is never made at once:
+                                the assistant gets a token, the person is asked in Odoo (Nudge, Assistant
+                                Approvals) and sees what will change, and the assistant can confirm with the
+                                token only after the person has approved it there.
+                            </div>
+                            <button name="action_nudge_mcp_help" type="object" icon="oi-arrow-right"
+                                    string="How to Connect an Assistant" class="btn-link"/>
+                        </div>
+                    </setting>
+                    <setting invisible="not nudge_mcp_enabled or nudge_mcp_exposure != 'write'"
+                             help="Changes from assistants also need the group Agent User for the person and Agent Mode above. Set for the company in use.">
+                        <field name="nudge_mcp_allow_writes"/>
+                    </setting>
+                    <setting invisible="not nudge_mcp_enabled or nudge_mcp_exposure != 'write' or not nudge_mcp_allow_writes"
+                             help="Unsafe: the assistant would confirm what it prepared without asking the person. Post, validate, pay, confirm orders and changes to users and rights still wait for the person.">
+                        <field name="nudge_mcp_self_confirm"/>
+                    </setting>
+                    <setting invisible="not nudge_mcp_enabled"
+                             help="With Private Mode on, assistants are refused unless they run on your own server.">
+                        <field name="nudge_mcp_assistant_is_local"/>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

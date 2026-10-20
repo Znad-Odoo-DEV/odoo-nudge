@@ -8,6 +8,7 @@
                 <field name="date"/>
                 <field name="user_id" widget="many2one_avatar"/>
                 <field name="kind"/>
+                <field name="intent" optional="show"/>
                 <field name="model_name" optional="show"/>
                 <field name="conversation_id" optional="hide"/>
                 <field name="input_tokens" sum="Input" optional="hide"/>
@@ -34,6 +35,8 @@
                 <separator/>
                 <filter name="chat" string="Conversations" domain="[('kind', '=', 'chat')]"/>
                 <filter name="speech" string="Speech to Text" domain="[('kind', '=', 'speech')]"/>
+                <filter name="memory" string="Remembered Answers" domain="[('kind', '=', 'memory')]"/>
+                <filter name="noai" string="Understood Without AI" domain="[('kind', '=', 'noai')]"/>
                 <separator/>
                 <filter name="date" string="Date" date="date"/>
                 <group>

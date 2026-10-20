@@ -1,0 +1,1186 @@
+{
+ "schema": 1,
+ "key": "electronics_shop",
+ "sector": "electronics",
+ "shop": {
+  "categories": [
+   {
+    "name": {
+     "en": "Phones and tablets",
+     "ar": "جوالات وأجهزة لوحية"
+    },
+    "keywords": [
+     "phone",
+     "tablet",
+     "جوال"
+    ],
+    "children": [
+     {
+      "name": {
+       "en": "Smartphones",
+       "ar": "هواتف ذكية"
+      },
+      "keywords": [
+       "smartphone",
+       "هاتف"
+      ],
+      "children": []
+     },
+     {
+      "name": {
+       "en": "Tablets",
+       "ar": "أجهزة لوحية"
+      },
+      "keywords": [
+       "tablet",
+       "لوحي"
+      ],
+      "children": []
+     },
+     {
+      "name": {
+       "en": "Cases and chargers",
+       "ar": "أغطية وشواحن"
+      },
+      "keywords": [
+       "case",
+       "charger",
+       "شاحن"
+      ],
+      "children": []
+     }
+    ]
+   },
+   {
+    "name": {
+     "en": "Computers",
+     "ar": "حواسيب"
+    },
+    "keywords": [
+     "laptop",
+     "computer",
+     "حاسوب"
+    ],
+    "children": [
+     {
+      "name": {
+       "en": "Laptops",
+       "ar": "لابتوبات"
+      },
+      "keywords": [
+       "laptop",
+       "لابتوب"
+      ],
+      "children": []
+     },
+     {
+      "name": {
+       "en": "Monitors",
+       "ar": "شاشات"
+      },
+      "keywords": [
+       "monitor",
+       "شاشة"
+      ],
+      "children": []
+     },
+     {
+      "name": {
+       "en": "Keyboards and mice",
+       "ar": "لوحات مفاتيح وفأرات"
+      },
+      "keywords": [
+       "keyboard",
+       "mouse"
+      ],
+      "children": []
+     }
+    ]
+   },
+   {
+    "name": {
+     "en": "Smart home",
+     "ar": "المنزل الذكي"
+    },
+    "keywords": [
+     "smart",
+     "ذكي"
+    ],
+    "children": [
+     {
+      "name": {
+       "en": "Cameras",
+       "ar": "كاميرات"
+      },
+      "keywords": [
+       "camera",
+       "كاميرا"
+      ],
+      "children": []
+     },
+     {
+      "name": {
+       "en": "Lighting",
+       "ar": "إضاءة"
+      },
+      "keywords": [
+       "light",
+       "إضاءة"
+      ],
+      "children": []
+     }
+    ]
+   },
+   {
+    "name": {
+     "en": "Audio",
+     "ar": "الصوتيات"
+    },
+    "keywords": [
+     "audio",
+     "headphone",
+     "سماعة"
+    ],
+    "children": []
+   }
+  ],
+  "banners": [
+   {
+    "title": {
+     "en": "Back to school laptops",
+     "ar": "لابتوبات العودة للمدارس"
+    },
+    "text": {
+     "en": "Student deals with a free bag.",
+     "ar": "عروض للطلاب مع حقيبة مجانية."
+    },
+    "button": {
+     "en": "See laptops",
+     "ar": "شاهد اللابتوبات"
+    }
+   },
+   {
+    "title": {
+     "en": "Trade in your phone",
+     "ar": "استبدل جوالك القديم"
+    },
+    "text": {
+     "en": "Get credit towards your next device.",
+     "ar": "احصل على رصيد لجهازك القادم."
+    },
+    "button": {
+     "en": "Learn more",
+     "ar": "اعرف المزيد"
+    }
+   },
+   {
+    "title": {
+     "en": "Smart home week",
+     "ar": "أسبوع المنزل الذكي"
+    },
+    "text": {
+     "en": "Up to 30% off cameras and lights.",
+     "ar": "خصم حتى 30% على الكاميرات والإضاءة."
+    },
+    "button": {
+     "en": "Shop now",
+     "ar": "تسوّق الآن"
+    }
+   }
+  ],
+  "menu": [
+   {
+    "name": {
+     "en": "Shop",
+     "ar": "المتجر"
+    },
+    "url": "/shop"
+   }
+  ],
+  "layout": {
+   "shop_ppg": 20,
+   "shop_ppr": 3,
+   "product_page_image_layout": "grid",
+   "add_to_cart_action": "stay"
+  },
+  "filters": [
+   {
+    "name": {
+     "en": "Brand",
+     "ar": "الماركة"
+    },
+    "type": "attribute"
+   },
+   {
+    "name": {
+     "en": "Price",
+     "ar": "السعر"
+    },
+    "type": "range"
+   },
+   {
+    "name": {
+     "en": "Storage",
+     "ar": "السعة"
+    },
+    "type": "attribute"
+   },
+   {
+    "name": {
+     "en": "Screen size",
+     "ar": "حجم الشاشة"
+    },
+    "type": "attribute"
+   },
+   {
+    "name": {
+     "en": "In stock",
+     "ar": "متوفر"
+    },
+    "type": "flag"
+   }
+  ],
+  "product_page": {
+   "layout": {
+    "en": "Specification table directly under the price, warranty badge, compare button and installment calculator beside the add-to-cart button.",
+    "ar": "جدول المواصفات أسفل السعر مباشرة، وشارة الضمان وزر المقارنة وحاسبة التقسيط بجانب زر الإضافة للسلة."
+   },
+   "sections": [
+    "spec_table",
+    "warranty_badge",
+    "compare",
+    "reviews",
+    "accessories",
+    "related_products"
+   ]
+  },
+  "cart_checkout": {
+   "notes": {
+    "en": "Show warranty and delivery date per line, offer installments and card payment, and require a phone number for the courier.",
+    "ar": "اعرض الضمان وموعد التوصيل لكل بند، وفعّل التقسيط والدفع بالبطاقة، واطلب رقم الهاتف لمندوب التوصيل."
+   },
+   "options": [
+    "card",
+    "installments",
+    "cod",
+    "phone_required"
+   ]
+  },
+  "sample_products": [
+   {
+    "name": {
+     "en": "Smartphone 256 GB",
+     "ar": "هاتف ذكي 256 جيجا"
+    },
+    "description": {
+     "en": "6.5-inch display, 50 MP camera, 2-year warranty.",
+     "ar": "شاشة 6.5 بوصة وكاميرا 50 ميجا وضمان سنتين."
+    },
+    "price": {
+     "en": "AED 1,899",
+     "ar": "1,899 د.إ"
+    }
+   },
+   {
+    "name": {
+     "en": "Ultrabook 14-inch",
+     "ar": "لابتوب نحيف 14 بوصة"
+    },
+    "description": {
+     "en": "16 GB memory, all-day battery.",
+     "ar": "ذاكرة 16 جيجا وبطارية تدوم طوال اليوم."
+    },
+    "price": {
+     "en": "AED 3,450",
+     "ar": "3,450 د.إ"
+    }
+   },
+   {
+    "name": {
+     "en": "Wireless earbuds",
+     "ar": "سماعات لاسلكية"
+    },
+    "description": {
+     "en": "Noise cancelling with a charging case.",
+     "ar": "عزل ضوضاء مع علبة شحن."
+    },
+    "price": {
+     "en": "AED 349",
+     "ar": "349 د.إ"
+    }
+   },
+   {
+    "name": {
+     "en": "Wi-Fi security camera",
+     "ar": "كاميرا مراقبة واي فاي"
+    },
+    "description": {
+     "en": "Night vision and phone alerts.",
+     "ar": "رؤية ليلية وتنبيهات على الجوال."
+    },
+    "price": {
+     "en": "AED 279",
+     "ar": "279 د.إ"
+    }
+   }
+  ]
+ },
+ "name": {
+  "en": "Electronics shop",
+  "ar": "متجر إلكترونيات"
+ },
+ "brand": {
+  "en": "Volt Electronics",
+  "ar": "فولت للإلكترونيات"
+ },
+ "suggest": [
+  "electronics",
+  "mobile",
+  "laptop",
+  "gadgets",
+  "إلكترونيات",
+  "جوالات",
+  "حواسيب"
+ ],
+ "palette": {
+  "primary": "#0b1f3a",
+  "secondary": "#00a8e8",
+  "accent": "#ff6b35",
+  "light": "#f2f6fa",
+  "dark": "#050d1a"
+ },
+ "fonts": {
+  "heading": "Montserrat",
+  "body": "Tajawal"
+ },
+ "fonts_ar": {
+  "heading": "Tajawal",
+  "body": "Tajawal"
+ },
+ "hero_image": "static/img/templates/electronics_shop.webp",
+ "thumbnail": "static/img/templates/electronics_shop_thumb.webp",
+ "menu": [
+  "home",
+  "products",
+  "about",
+  "projects",
+  "contact",
+  "faq"
+ ],
+ "pages": [
+  {
+   "key": "home",
+   "kind": "home",
+   "name": {
+    "en": "Home",
+    "ar": "الرئيسية"
+   },
+   "blocks": [
+    {
+     "snippet": "s_cover",
+     "copy": {
+      "en": {
+       "title": "Tech you can trust",
+       "text": "Phones, laptops and smart-home devices with an official warranty and fast delivery.",
+       "button": "Shop deals",
+       "button_url": "/shop"
+      },
+      "ar": {
+       "title": "تقنية تثق بها",
+       "text": "جوالات وحواسيب وأجهزة منزل ذكي بضمان رسمي وتوصيل سريع.",
+       "button": "تصفّح العروض",
+       "button_url": "/shop"
+      }
+     },
+     "image": "tech",
+     "image_prompt": "wide photo of a laptop, phone and earbuds on a dark desk with blue light, no text"
+    },
+    {
+     "snippet": "s_product_list",
+     "copy": {
+      "en": {
+       "title": "New arrivals"
+      },
+      "ar": {
+       "title": "وصل حديثاً"
+      }
+     }
+    },
+    {
+     "snippet": "s_banner",
+     "copy": {
+      "en": {
+       "title": "Back to school laptops",
+       "text": "Student deals with a free bag.",
+       "button": "See laptops",
+       "button_url": "/shop"
+      },
+      "ar": {
+       "title": "لابتوبات العودة للمدارس",
+       "text": "عروض للطلاب مع حقيبة مجانية.",
+       "button": "شاهد اللابتوبات",
+       "button_url": "/shop"
+      }
+     },
+     "image": "tech"
+    },
+    {
+     "snippet": "s_three_columns",
+     "copy": {
+      "en": {
+       "title": "Why shop with Volt Electronics",
+       "items": [
+        {
+         "title": "Official warranty",
+         "text": "Every device is covered by the brand's local warranty."
+        },
+        {
+         "title": "Price match",
+         "text": "Found it cheaper locally? We match it."
+        },
+        {
+         "title": "Installments",
+         "text": "Spread the cost over twelve months with selected cards."
+        }
+       ]
+      },
+      "ar": {
+       "title": "لماذا تتسوّق من فولت للإلكترونيات",
+       "items": [
+        {
+         "title": "ضمان رسمي",
+         "text": "كل جهاز مشمول بضمان الوكيل المحلي."
+        },
+        {
+         "title": "مطابقة الأسعار",
+         "text": "وجدته أرخص محلياً؟ نطابق السعر."
+        },
+        {
+         "title": "التقسيط",
+         "text": "قسّط المبلغ على اثني عشر شهراً ببطاقات مختارة."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_product_list",
+     "copy": {
+      "en": {
+       "title": "Best sellers"
+      },
+      "ar": {
+       "title": "الأكثر مبيعاً"
+      }
+     }
+    },
+    {
+     "snippet": "s_banner",
+     "copy": {
+      "en": {
+       "title": "Trade in your phone",
+       "text": "Get credit towards your next device.",
+       "button": "Learn more",
+       "button_url": "/shop"
+      },
+      "ar": {
+       "title": "استبدل جوالك القديم",
+       "text": "احصل على رصيد لجهازك القادم.",
+       "button": "اعرف المزيد",
+       "button_url": "/shop"
+      }
+     }
+    },
+    {
+     "snippet": "s_banner",
+     "copy": {
+      "en": {
+       "title": "Smart home week",
+       "text": "Up to 30% off cameras and lights.",
+       "button": "Shop now",
+       "button_url": "/shop"
+      },
+      "ar": {
+       "title": "أسبوع المنزل الذكي",
+       "text": "خصم حتى 30% على الكاميرات والإضاءة.",
+       "button": "تسوّق الآن",
+       "button_url": "/shop"
+      }
+     }
+    },
+    {
+     "snippet": "s_call_to_action",
+     "copy": {
+      "en": {
+       "title": "Not sure which one to pick?",
+       "text": "Tell us your budget and what you do, and we will suggest three options.",
+       "button": "Ask an expert",
+       "button_url": "/contactus"
+      },
+      "ar": {
+       "title": "لست متأكداً أيها تختار؟",
+       "text": "أخبرنا بميزانيتك واستخدامك وسنقترح عليك ثلاثة خيارات.",
+       "button": "اسأل خبيراً",
+       "button_url": "/contactus"
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Electronics store | Phones, laptops and smart home",
+     "ar": "متجر إلكترونيات | جوالات وحواسيب ومنزل ذكي"
+    },
+    "description": {
+     "en": "Buy original phones, laptops and smart-home devices with warranty, installments and fast delivery.",
+     "ar": "اشترِ جوالات وحواسيب وأجهزة منزل ذكي أصلية بضمان وتقسيط وتوصيل سريع."
+    }
+   },
+   "url": "/"
+  },
+  {
+   "key": "about",
+   "kind": "about",
+   "name": {
+    "en": "About us",
+    "ar": "من نحن"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "About Volt Electronics"
+      },
+      "ar": {
+       "title": "عن فولت للإلكترونيات"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Honest tech advice since 2012",
+       "text": "We sell only what we would use ourselves. Every device is sealed, covered by the official warranty, and our staff will tell you plainly when a cheaper model is enough."
+      },
+      "ar": {
+       "title": "نصائح تقنية صادقة منذ 2012",
+       "text": "لا نبيع إلا ما نستخدمه بأنفسنا. كل جهاز مغلق ومشمول بالضمان الرسمي، وسيخبرك فريقنا بصراحة متى يكفيك طراز أرخص."
+      }
+     },
+     "image": "tech"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Official warranty",
+       "text": "Every device is covered by the brand's local warranty."
+      },
+      "ar": {
+       "title": "ضمان رسمي",
+       "text": "كل جهاز مشمول بضمان الوكيل المحلي."
+      }
+     },
+     "image": "tech"
+    },
+    {
+     "snippet": "s_numbers",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "number": "25,000",
+         "label": "Devices sold"
+        },
+        {
+         "number": "2",
+         "label": "Years warranty"
+        },
+        {
+         "number": "12",
+         "label": "Months installments"
+        },
+        {
+         "number": "24",
+         "label": "Hour delivery"
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "number": "25,000",
+         "label": "جهازاً مباعاً"
+        },
+        {
+         "number": "2",
+         "label": "سنتا ضمان"
+        },
+        {
+         "number": "12",
+         "label": "شهراً تقسيط"
+        },
+        {
+         "number": "24",
+         "label": "ساعة للتوصيل"
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "About Volt Electronics",
+     "ar": "عن فولت للإلكترونيات"
+    },
+    "description": {
+     "en": "We sell only what we would use ourselves. Every device is sealed, covered by the official warranty, and our staff will tell you plainly when a cheaper",
+     "ar": "لا نبيع إلا ما نستخدمه بأنفسنا. كل جهاز مغلق ومشمول بالضمان الرسمي، وسيخبرك فريقنا بصراحة متى يكفيك طراز أرخص."
+    }
+   }
+  },
+  {
+   "key": "products",
+   "kind": "services",
+   "name": {
+    "en": "Collections",
+    "ar": "المجموعات"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Our collections",
+       "text": "Phones, laptops and smart-home devices with an official warranty and fast delivery."
+      },
+      "ar": {
+       "title": "مجموعاتنا",
+       "text": "جوالات وحواسيب وأجهزة منزل ذكي بضمان رسمي وتوصيل سريع."
+      }
+     }
+    },
+    {
+     "snippet": "s_product_catalog",
+     "copy": {
+      "en": {
+       "title": "Popular products",
+       "items": [
+        {
+         "title": "Smartphone 256 GB",
+         "text": "6.5-inch display, 50 MP camera, 2-year warranty. - AED 1,899"
+        },
+        {
+         "title": "Ultrabook 14-inch",
+         "text": "16 GB memory, all-day battery. - AED 3,450"
+        },
+        {
+         "title": "Wireless earbuds",
+         "text": "Noise cancelling with a charging case. - AED 349"
+        },
+        {
+         "title": "Wi-Fi security camera",
+         "text": "Night vision and phone alerts. - AED 279"
+        }
+       ]
+      },
+      "ar": {
+       "title": "منتجات رائجة",
+       "items": [
+        {
+         "title": "هاتف ذكي 256 جيجا",
+         "text": "شاشة 6.5 بوصة وكاميرا 50 ميجا وضمان سنتين. - 1,899 د.إ"
+        },
+        {
+         "title": "لابتوب نحيف 14 بوصة",
+         "text": "ذاكرة 16 جيجا وبطارية تدوم طوال اليوم. - 3,450 د.إ"
+        },
+        {
+         "title": "سماعات لاسلكية",
+         "text": "عزل ضوضاء مع علبة شحن. - 349 د.إ"
+        },
+        {
+         "title": "كاميرا مراقبة واي فاي",
+         "text": "رؤية ليلية وتنبيهات على الجوال. - 279 د.إ"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_call_to_action",
+     "copy": {
+      "en": {
+       "title": "Not sure which one to pick?",
+       "text": "Tell us your budget and what you do, and we will suggest three options.",
+       "button": "Ask an expert",
+       "button_url": "/shop"
+      },
+      "ar": {
+       "title": "لست متأكداً أيها تختار؟",
+       "text": "أخبرنا بميزانيتك واستخدامك وسنقترح عليك ثلاثة خيارات.",
+       "button": "اسأل خبيراً",
+       "button_url": "/shop"
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Electronics shop collections",
+     "ar": "مجموعات متجر إلكترونيات"
+    },
+    "description": {
+     "en": "Buy original phones, laptops and smart-home devices with warranty, installments and fast delivery.",
+     "ar": "اشترِ جوالات وحواسيب وأجهزة منزل ذكي أصلية بضمان وتقسيط وتوصيل سريع."
+    }
+   },
+   "url": "/collections"
+  },
+  {
+   "key": "projects",
+   "kind": "projects",
+   "name": {
+    "en": "Gallery",
+    "ar": "المعرض"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Gallery"
+      },
+      "ar": {
+       "title": "المعرض"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Our showroom",
+       "text": "Try every device before you buy."
+      },
+      "ar": {
+       "title": "صالة العرض",
+       "text": "جرّب كل جهاز قبل الشراء."
+      }
+     },
+     "image": "tech"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Service desk",
+       "text": "Set-up and data transfer for free."
+      },
+      "ar": {
+       "title": "مكتب الخدمة",
+       "text": "تجهيز ونقل بيانات مجاني."
+      }
+     },
+     "image": "tech"
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Gaming corner",
+       "text": "Test consoles and monitors."
+      },
+      "ar": {
+       "title": "ركن الألعاب",
+       "text": "جرّب الأجهزة والشاشات."
+      }
+     },
+     "image": "tech"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Delivery fleet",
+       "text": "Same-day delivery in the city."
+      },
+      "ar": {
+       "title": "أسطول التوصيل",
+       "text": "توصيل في اليوم نفسه داخل المدينة."
+      }
+     },
+     "image": "tech"
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Volt Electronics gallery",
+     "ar": "معرض فولت للإلكترونيات"
+    },
+    "description": {
+     "en": "Buy original phones, laptops and smart-home devices with warranty, installments and fast delivery.",
+     "ar": "اشترِ جوالات وحواسيب وأجهزة منزل ذكي أصلية بضمان وتقسيط وتوصيل سريع."
+    }
+   },
+   "url": "/gallery"
+  },
+  {
+   "key": "team",
+   "kind": "team",
+   "name": {
+    "en": "Our team",
+    "ar": "فريقنا"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Meet the team"
+      },
+      "ar": {
+       "title": "تعرّف على فريقنا"
+      }
+     }
+    },
+    {
+     "snippet": "s_company_team",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "name": "Raghad",
+         "role": "Store manager"
+        },
+        {
+         "name": "Ebrahim",
+         "role": "Mobile specialist"
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "name": "رغد",
+         "role": "مدير المتجر"
+        },
+        {
+         "name": "إبراهيم",
+         "role": "مختص جوالات"
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Our team | Volt Electronics",
+     "ar": "فريقنا | فولت للإلكترونيات"
+    },
+    "description": {
+     "en": "The people behind Volt Electronics.",
+     "ar": "الأشخاص الذين يقفون خلف فولت للإلكترونيات."
+    }
+   }
+  },
+  {
+   "key": "contact",
+   "kind": "contact",
+   "name": {
+    "en": "Contact us",
+    "ar": "اتصل بنا"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Contact us",
+       "text": "We reply within one working day."
+      },
+      "ar": {
+       "title": "اتصل بنا",
+       "text": "نردّ خلال يوم عمل واحد."
+      }
+     }
+    },
+    {
+     "snippet": "s_contact_info",
+     "copy": {
+      "en": {
+       "title": "Find us",
+       "items": [
+        {
+         "title": "Address",
+         "text": "Al Fahidi Street, Dubai"
+        },
+        {
+         "title": "Opening hours",
+         "text": "Daily 10:00-23:00"
+        },
+        {
+         "title": "Phone",
+         "text": "+971 4 000 0000"
+        },
+        {
+         "title": "Email",
+         "text": "hello@example.com"
+        }
+       ]
+      },
+      "ar": {
+       "title": "تجدنا هنا",
+       "items": [
+        {
+         "title": "العنوان",
+         "text": "شارع الفهيدي، دبي"
+        },
+        {
+         "title": "ساعات العمل",
+         "text": "يومياً 10:00 - 23:00"
+        },
+        {
+         "title": "الهاتف",
+         "text": "+971 4 000 0000"
+        },
+        {
+         "title": "البريد الإلكتروني",
+         "text": "hello@example.com"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Not sure which one to pick?",
+       "text": "Tell us your budget and what you do, and we will suggest three options."
+      },
+      "ar": {
+       "title": "لست متأكداً أيها تختار؟",
+       "text": "أخبرنا بميزانيتك واستخدامك وسنقترح عليك ثلاثة خيارات."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Contact Volt Electronics",
+     "ar": "تواصل مع فولت للإلكترونيات"
+    },
+    "description": {
+     "en": "Call, write or visit us: Al Fahidi Street, Dubai.",
+     "ar": "اتصل بنا أو راسلنا أو زرنا: شارع الفهيدي، دبي."
+    }
+   },
+   "url": "/contactus"
+  },
+  {
+   "key": "faq",
+   "kind": "faq",
+   "name": {
+    "en": "FAQ",
+    "ar": "الأسئلة الشائعة"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Frequently asked questions"
+      },
+      "ar": {
+       "title": "الأسئلة الشائعة"
+      }
+     }
+    },
+    {
+     "snippet": "s_faq_collapse",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "title": "Are the devices original?",
+         "text": "Yes, sealed and sold with the official local warranty."
+        },
+        {
+         "title": "Can I return a device?",
+         "text": "Within seven days if it is unopened or faulty."
+        },
+        {
+         "title": "Do you offer installments?",
+         "text": "Yes, up to twelve months on selected bank cards."
+        },
+        {
+         "title": "How is delivery handled?",
+         "text": "Same day inside the city for orders before 2 pm, otherwise next day."
+        },
+        {
+         "title": "Do you repair devices?",
+         "text": "We handle warranty claims and paid repairs for most brands."
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "title": "هل الأجهزة أصلية؟",
+         "text": "نعم، مغلقة وتُباع بالضمان المحلي الرسمي."
+        },
+        {
+         "title": "هل يمكن إرجاع جهاز؟",
+         "text": "خلال سبعة أيام إذا كان غير مفتوح أو معيباً."
+        },
+        {
+         "title": "هل تقدمون التقسيط؟",
+         "text": "نعم، حتى اثني عشر شهراً على بطاقات بنكية مختارة."
+        },
+        {
+         "title": "كيف يتم التوصيل؟",
+         "text": "في اليوم نفسه داخل المدينة للطلبات قبل الثانية ظهراً وإلا فاليوم التالي."
+        },
+        {
+         "title": "هل تصلحون الأجهزة؟",
+         "text": "نتولى مطالبات الضمان والإصلاح المدفوع لمعظم الماركات."
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "FAQ | Volt Electronics",
+     "ar": "الأسئلة الشائعة | فولت للإلكترونيات"
+    },
+    "description": {
+     "en": "Answers to the questions we hear most.",
+     "ar": "إجابات عن الأسئلة التي نسمعها أكثر من غيرها."
+    }
+   }
+  },
+  {
+   "key": "legal_privacy",
+   "kind": "legal",
+   "name": {
+    "en": "Privacy policy",
+    "ar": "سياسة الخصوصية"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Privacy policy"
+      },
+      "ar": {
+       "title": "سياسة الخصوصية"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "What we collect",
+       "text": "Volt Electronics collects only the details you give us through forms, orders or calls: your name, phone, email and the content of your request. We use them to answer you and to deliver what you asked for."
+      },
+      "ar": {
+       "title": "ما الذي نجمعه",
+       "text": "تجمع فولت للإلكترونيات فقط البيانات التي تقدّمها عبر النماذج أو الطلبات أو المكالمات: اسمك وهاتفك وبريدك ومضمون طلبك. نستخدمها للرد عليك وتنفيذ ما طلبته."
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Your rights",
+       "text": "We never sell your data. You may ask us to show, correct or delete it at any time by writing to the address on the contact page."
+      },
+      "ar": {
+       "title": "حقوقك",
+       "text": "لا نبيع بياناتك أبداً. ويمكنك أن تطلب منا الاطلاع عليها أو تصحيحها أو حذفها في أي وقت بمراسلتنا على العنوان المذكور في صفحة التواصل."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Privacy policy",
+     "ar": "سياسة الخصوصية"
+    },
+    "description": {
+     "en": "How we collect, use and protect your personal data.",
+     "ar": "كيف نجمع بياناتك الشخصية ونستخدمها ونحميها."
+    }
+   },
+   "url": "/privacy"
+  },
+  {
+   "key": "legal_terms",
+   "kind": "legal",
+   "name": {
+    "en": "Terms and conditions",
+    "ar": "الشروط والأحكام"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Terms and conditions"
+      },
+      "ar": {
+       "title": "الشروط والأحكام"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Using this website",
+       "text": "The content of this website is provided for information. Prices, availability and timelines are confirmed in writing before any agreement starts."
+      },
+      "ar": {
+       "title": "استخدام الموقع",
+       "text": "المحتوى المنشور في هذا الموقع للاطلاع. وتُؤكَّد الأسعار والتوفر والمواعيد كتابةً قبل بدء أي اتفاق."
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Responsibility",
+       "text": "We do our best to keep the website accurate. We are not liable for decisions taken only on the basis of the sample information shown here."
+      },
+      "ar": {
+       "title": "المسؤولية",
+       "text": "نحرص على دقة المعلومات في الموقع، ولا نتحمل مسؤولية قرارات بُنيت على المعلومات التوضيحية المعروضة هنا فقط."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Terms and conditions",
+     "ar": "الشروط والأحكام"
+    },
+    "description": {
+     "en": "The terms that apply when you use our website and services.",
+     "ar": "الشروط المطبقة عند استخدام موقعنا وخدماتنا."
+    }
+   },
+   "url": "/terms"
+  }
+ ]
+}

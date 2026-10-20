@@ -23,6 +23,8 @@ IMAGE_TYPES = ("image/png", "image/jpeg", "image/webp", "image/gif")
 TEXT_EXTENSIONS = (".txt", ".csv", ".md", ".json", ".xml", ".tsv", ".log")
 SHEET_TYPES = ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",)
 SHEET_EXTENSIONS = (".xlsx",)
+# A recording of a meeting: never read here, only by the tool that listens to it
+AUDIO_EXTENSIONS = (".m4a", ".mp3", ".ogg", ".oga", ".opus", ".wav", ".webm", ".aac", ".mp4a")
 MAX_SHEETS = 5
 MAX_SHEET_ROWS = 60
 MAX_SHEET_COLUMNS = 30
@@ -30,6 +32,8 @@ MAX_SHEET_COLUMNS = 30
 # Told to the person, by the controller before the file is read in full and
 # here when it was read
 TOO_LARGE = "The file is too large. The limit is %s MB."
+TOO_LARGE_AUDIO = (
+    "The recording is too large. The limit is %s MB: split the file into shorter parts and send them one by one.")
 WRONG_KIND = "Only PDF, text, CSV, Excel (.xlsx) and image files can be read."
 
 
@@ -137,9 +141,11 @@ def sheet_text(data):
 
 
 def kind_of(name, mimetype):
-    """:return: "pdf", "text", "sheet", "image" or None"""
+    """:return: "pdf", "text", "sheet", "image", "audio" or None"""
     lowered = (name or "").lower()
     mimetype = (mimetype or "").lower()
+    if mimetype.startswith("audio/") or lowered.endswith(AUDIO_EXTENSIONS):
+        return "audio"
     if mimetype in PDF_TYPES or lowered.endswith(".pdf"):
         return "pdf"
     if mimetype in SHEET_TYPES or lowered.endswith(SHEET_EXTENSIONS):
@@ -161,14 +167,18 @@ def read_attachment(name, data, mimetype):
     name = " ".join((name or "file").split())[:MAX_NAME]
     if not data:
         raise Unreadable("The file is empty.")
-    if len(data) > MAX_BYTES:
-        raise Unreadable(TOO_LARGE % (MAX_BYTES // (1024 * 1024)))
     kind = kind_of(name, mimetype)
+    if len(data) > MAX_BYTES:
+        raise Unreadable((TOO_LARGE_AUDIO if kind == "audio" else TOO_LARGE) % (MAX_BYTES // (1024 * 1024)))
     if kind is None:
         raise Unreadable(WRONG_KIND)
     found = {"name": name, "kind": kind, "size": len(data), "text": "", "truncated": False,
              "pages": 0, "note": "", "image": None}
-    if kind == "pdf":
+    if kind == "audio":
+        found["note"] = (
+            "A recording. It is not read here: summarize_meeting listens to it when the person asks for "
+            "the summary of a meeting.")
+    elif kind == "pdf":
         text, pages, read = pdf_text(data)
         found["text"], found["truncated"] = _cut(text)
         found["pages"] = pages

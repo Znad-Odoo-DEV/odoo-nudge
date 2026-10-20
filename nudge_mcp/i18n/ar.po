@@ -1,0 +1,695 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* nudge_mcp
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-17 08:06+0000\n"
+"PO-Revision-Date: 2026-10-17 08:06+0000\n"
+"Last-Translator: \n"
+"Language-Team: Arabic\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+
+#. module: nudge_mcp
+#: model:ir.model.fields.selection,name:nudge_mcp.selection__nudge_mcp_key__duration__30
+msgid "1 Month"
+msgstr "شهر واحد"
+
+#. module: nudge_mcp
+#: model:ir.model.fields.selection,name:nudge_mcp.selection__nudge_mcp_key__duration__365
+msgid "1 Year"
+msgstr "سنة واحدة"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid "1. Make your key"
+msgstr "1. أنشئ مفتاحك"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid "2. Tell the assistant"
+msgstr "2. أخبر المساعد"
+
+#. module: nudge_mcp
+#: model:ir.model.fields.selection,name:nudge_mcp.selection__nudge_mcp_key__duration__90
+msgid "3 Months"
+msgstr "3 أشهر"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid "3. Test"
+msgstr "3. اختبر"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid "A tool call needs a name and its arguments as an object."
+msgstr "يحتاج استدعاء الأداة إلى اسم ووسائطها ككائن."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_res_company__nudge_mcp_allow_writes
+#: model:ir.model.fields,field_description:nudge_mcp.field_res_config_settings__nudge_mcp_allow_writes
+msgid "Allow Changes from External Assistants"
+msgstr "السماح بالتعديلات من المساعدين الخارجيين"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_help.py:0
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid "Ask an administrator to add you to the group External Assistant."
+msgstr "اطلب من المسؤول إضافتك إلى مجموعة المساعد الخارجي."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid ""
+"Assistants that connect to a server by address (ChatGPT, others): the address\n"
+"                        above, and the header Authorization: Bearer with your key. Or, in a configuration file:"
+msgstr ""
+"المساعدون الذين يتصلون بخادم عبر عنوانه (ChatGPT وغيره): العنوان أعلاه، "
+"والترويسة Authorization: Bearer مع مفتاحك. أو في ملف إعداد:"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_help__can_create_key
+msgid "Can Create Key"
+msgstr "يمكنه إنشاء مفتاح"
+
+#. module: nudge_mcp
+#: model:res.groups,comment:nudge_mcp.group_nudge_mcp
+msgid ""
+"Can make a key for an assistant outside Odoo (Claude Desktop, ChatGPT) that "
+"uses Nudge's tools with their rights."
+msgstr ""
+"يمكنه إنشاء مفتاح لمساعد خارج أودو (Claude Desktop أو ChatGPT) يستخدم أدوات "
+"Nudge بصلاحياته."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.res_config_settings_view_form_mcp
+msgid ""
+"Changes from assistants also need the group Agent User for the person and "
+"Agent Mode above. Set for the company in use."
+msgstr ""
+"تحتاج تعديلات المساعدين أيضاً إلى مجموعة مستخدم الوكيل للشخص وإلى وضع الوكيل"
+" أعلاه. تُضبط للشركة المستخدمة."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_help__curl_example
+msgid "Check from a Terminal"
+msgstr "التحقق من الطرفية"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_help__claude_config
+msgid "Claude Desktop"
+msgstr "Claude Desktop"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid ""
+"Claude Desktop (file claude_desktop_config.json; needs Node.js, for npx and mcp-remote).\n"
+"                        Replace YOUR_NUDGE_KEY with your key."
+msgstr ""
+"Claude Desktop (الملف claude_desktop_config.json؛ يحتاج إلى Node.js من أجل "
+"npx وmcp-remote). استبدل YOUR_NUDGE_KEY بمفتاحك."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid ""
+"Claude Desktop, ChatGPT and other assistants that speak MCP can then look up\n"
+"                        records and the documentation, and prepare changes, as you: with your rights,\n"
+"                        your record rules and your companies. A change is made only after you have seen\n"
+"                        it and the assistant calls confirm with its token."
+msgstr ""
+"يمكن لـ Claude Desktop وChatGPT وغيرهما من المساعدين الذين يتحدثون MCP "
+"عندئذٍ البحث في السجلات والتوثيق وتجهيز التعديلات بصفتك أنت: بصلاحياتك "
+"وقواعد سجلاتك وشركاتك. لا يُجرى التعديل إلا بعد أن تراه ويستدعي المساعد "
+"confirm برمزه."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,help:nudge_mcp.field_res_config_settings__nudge_mcp_enabled
+msgid ""
+"Claude Desktop, ChatGPT and other assistants that speak MCP can use the "
+"tools of Nudge, as the person whose key they hold."
+msgstr ""
+"يمكن لـ Claude Desktop وChatGPT وغيرهما من المساعدين الذين يتحدثون MCP "
+"استخدام أدوات Nudge بصفة صاحب المفتاح الذي يحملونه."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.res_config_settings_view_form_mcp
+msgid ""
+"Claude Desktop, ChatGPT and other assistants that speak MCP can use the "
+"tools of Nudge, as the person whose key they hold: with that person's "
+"rights, record rules and companies. Each person of the group External "
+"Assistant makes a key of their own. Everything they do is kept in What Nudge"
+" Did."
+msgstr ""
+"يمكن لـ Claude Desktop وChatGPT وغيرهما من المساعدين الذين يتحدثون MCP "
+"استخدام أدوات Nudge بصفة صاحب المفتاح الذي يحملونه: بصلاحياته وقواعد سجلاته "
+"وشركاته. ينشئ كل شخص من مجموعة المساعد الخارجي مفتاحه الخاص. وكل ما يفعلونه "
+"محفوظ في «ما فعله Nudge»."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_key_view_form
+msgid "Close"
+msgstr "إغلاق"
+
+#. module: nudge_mcp
+#: model:ir.model,name:nudge_mcp.model_res_company
+msgid "Companies"
+msgstr "الشركات"
+
+#. module: nudge_mcp
+#: model:ir.model,name:nudge_mcp.model_res_config_settings
+msgid "Config Settings"
+msgstr "إعدادات التهيئة"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid "Connect an assistant to Nudge"
+msgstr "اربط مساعداً بـ Nudge"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_key_view_form
+msgid ""
+"Copy the key now: it is not shown again. Anyone who holds it can use Nudge "
+"as you."
+msgstr ""
+"انسخ المفتاح الآن: لن يظهر مرة أخرى. كل من يحمله يستطيع استخدام Nudge بصفتك."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_help__create_uid
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_key__create_uid
+msgid "Created by"
+msgstr "أنشئ بواسطة"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_help__create_date
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_key__create_date
+msgid "Created on"
+msgstr "أنشئ في"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp__display_name
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_help__display_name
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_key__display_name
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_run__display_name
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_step__display_name
+#: model:ir.model.fields,field_description:nudge_mcp.field_res_company__display_name
+#: model:ir.model.fields,field_description:nudge_mcp.field_res_config_settings__display_name
+msgid "Display Name"
+msgstr "الاسم المعروض"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid "Done. %s"
+msgstr "تم. %s"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid ""
+"Drop a change the person did not agree to. Give the token the prepare tool "
+"returned."
+msgstr ""
+"أسقط تعديلاً لم يوافق عليه الشخص. أعطِ الرمز الذي أرجعته أداة التجهيز."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid "Dropped. Nothing was changed."
+msgstr "أُسقط. لم يتغير شيء."
+
+#. module: nudge_mcp
+#: model:res.groups,name:nudge_mcp.group_nudge_mcp
+msgid "External Assistant"
+msgstr "مساعد خارجي"
+
+#. module: nudge_mcp
+#: model:ir.ui.menu,name:nudge_mcp.nudge_mcp_menu_help
+msgid "External Assistants"
+msgstr "المساعدون الخارجيون"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_help.py:0
+#: model:ir.actions.server,name:nudge_mcp.nudge_mcp_help_action
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.res_config_settings_view_form_mcp
+msgid "External Assistants (MCP)"
+msgstr "المساعدون الخارجيون (MCP)"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_run_view_search_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_step_view_search_mcp
+msgid "From External Assistants"
+msgstr "من المساعدين الخارجيين"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.res_config_settings_view_form_mcp
+msgid "How to Connect an Assistant"
+msgstr "كيف تربط مساعداً"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp__id
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_help__id
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_key__id
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_run__id
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_step__id
+#: model:ir.model.fields,field_description:nudge_mcp.field_res_company__id
+#: model:ir.model.fields,field_description:nudge_mcp.field_res_config_settings__id
+msgid "ID"
+msgstr "المعرف"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_help__is_enabled
+msgid "Is Enabled"
+msgstr "مفعّل"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_help.py:0
+msgid ""
+"It works. %(server)s answered, protocol %(protocol)s, as %(user)s. %(count)s"
+" tools are offered to this person."
+msgstr ""
+"يعمل. أجاب %(server)s، البروتوكول %(protocol)s، بصفة %(user)s. تُعرض "
+"%(count)s أداة لهذا الشخص."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_help__test_key
+msgid "Key to Test"
+msgstr "المفتاح المراد اختباره"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_help__write_uid
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_key__write_uid
+msgid "Last Updated by"
+msgstr "آخر تحديث بواسطة"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_help__write_date
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_key__write_date
+msgid "Last Updated on"
+msgstr "آخر تحديث في"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,help:nudge_mcp.field_res_company__nudge_mcp_allow_writes
+#: model:ir.model.fields,help:nudge_mcp.field_res_config_settings__nudge_mcp_allow_writes
+msgid ""
+"Let the assistants that connect through MCP prepare changes in this company."
+" Each change still waits for the person to approve it."
+msgstr ""
+"اسمح للمساعدين المتصلين عبر MCP بتجهيز تعديلات في هذه الشركة. يبقى كل تعديل "
+"بانتظار موافقة الشخص."
+
+#. module: nudge_mcp
+#: model:ir.model.fields.selection,name:nudge_mcp.selection__res_config_settings__nudge_mcp_exposure__read
+msgid "Look up and read only"
+msgstr "البحث والقراءة فقط"
+
+#. module: nudge_mcp
+#: model:ir.model.fields.selection,name:nudge_mcp.selection__res_config_settings__nudge_mcp_exposure__write
+msgid "Look up, read, and prepare changes"
+msgstr "البحث والقراءة وتجهيز التعديلات"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid "Make a Key"
+msgstr "أنشئ مفتاحاً"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_key_view_form
+msgid "Make the Key"
+msgstr "أنشئ المفتاح"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid ""
+"Make the change a prepare tool described, after the person has seen it and "
+"agreed. Give the token the prepare tool returned. Nothing is changed before "
+"this."
+msgstr ""
+"نفّذ التعديل الذي وصفته أداة التجهيز، بعد أن يراه الشخص ويوافق عليه. أعطِ "
+"الرمز الذي أرجعته أداة التجهيز. لا يتغير شيء قبل هذا."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_key__name
+msgid "Name"
+msgstr "الاسم"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_help.py:0
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_key_view_form
+msgid "New Key for an Assistant"
+msgstr "مفتاح جديد لمساعد"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid "Nothing answers to %s."
+msgstr "لا شيء يجيب على %s."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid ""
+"Nothing has been changed yet. This is what would change:\n"
+"%(lines)s\n"
+"\n"
+"Show it to the person. If they agree, call confirm with the token %(token)s ; if they do not, call decline with it. The token is good for %(minutes)s minutes."
+msgstr ""
+"لم يتغير شيء بعد. هذا ما سيتغير:\n"
+"%(lines)s\n"
+"\n"
+"أره للشخص. إن وافق، استدعِ confirm بالرمز %(token)s ؛ وإن لم يوافق، استدعِ decline به. الرمز صالح لمدة %(minutes)s دقيقة."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid ""
+"Nothing is changed by this call: it returns a token and what will change. "
+"Show it to the person, then call confirm with the token."
+msgstr ""
+"لا يتغير شيء بهذا الاستدعاء: يرجع رمزاً وما سيتغير. أره للشخص ثم استدعِ "
+"confirm بالرمز."
+
+#. module: nudge_mcp
+#: model:ir.model,name:nudge_mcp.model_nudge_run
+msgid "Nudge Agent Run"
+msgstr "طلب وكيل Nudge"
+
+#. module: nudge_mcp
+#: model:ir.model,name:nudge_mcp.model_nudge_step
+msgid "Nudge Agent Step"
+msgstr "خطوة وكيل Nudge"
+
+#. module: nudge_mcp
+#: model:ir.model,name:nudge_mcp.model_nudge_mcp_key
+msgid "Nudge MCP Key"
+msgstr "مفتاح Nudge MCP"
+
+#. module: nudge_mcp
+#: model:ir.model,name:nudge_mcp.model_nudge_mcp
+msgid "Nudge MCP Server"
+msgstr "خادم Nudge MCP"
+
+#. module: nudge_mcp
+#: model:ir.model,name:nudge_mcp.model_nudge_mcp_help
+msgid "Nudge MCP Setup"
+msgstr "إعداد Nudge MCP"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid "Nudge is answering other people right now. Try again in a moment."
+msgstr "يجيب Nudge أشخاصاً آخرين الآن. حاول مرة أخرى بعد لحظة."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid ""
+"Nudge is closed to external assistants. An administrator turns it on in\n"
+"                        Settings, Nudge, External Assistants (MCP)."
+msgstr ""
+"Nudge مغلق أمام المساعدين الخارجيين. يفتحه المسؤول من الإعدادات، Nudge، "
+"المساعدون الخارجيون (MCP)."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/controllers/mcp.py:0
+msgid ""
+"Nudge is closed to external assistants. An administrator turns it on in "
+"Settings, Nudge."
+msgstr ""
+"Nudge مغلق أمام المساعدين الخارجيين. يفتحه المسؤول من الإعدادات، Nudge."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_help.py:0
+msgid ""
+"Nudge is closed to external assistants: an administrator turns it on in "
+"Settings."
+msgstr "Nudge مغلق أمام المساعدين الخارجيين: يفتحه المسؤول من الإعدادات."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_help.py:0
+msgid "Nudge is closed to external assistants: turn it on in Settings, Nudge."
+msgstr "Nudge مغلق أمام المساعدين الخارجيين: افتحه من الإعدادات، Nudge."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid ""
+"Nudge works inside Odoo as the person whose key you hold: it sees only what "
+"they may see. Look up records and documentation freely. A change is never "
+"made at once: the prepare tools return a token and what will change; show it"
+" to the person, and call confirm with the token only when they agree."
+msgstr ""
+"يعمل Nudge داخل أودو بصفة صاحب المفتاح الذي تحمله: لا يرى إلا ما يحق له "
+"رؤيته. ابحث في السجلات والتوثيق بحرية. لا يُجرى تعديل دفعة واحدة: ترجع أدوات"
+" التجهيز رمزاً وما سيتغير؛ أره للشخص، ولا تستدعِ confirm بالرمز إلا عندما "
+"يوافق."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_res_config_settings__nudge_mcp_enabled
+msgid "Open Nudge to External Assistants"
+msgstr "افتح Nudge للمساعدين الخارجيين"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_run__origin
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_step__origin
+msgid "Origin"
+msgstr "المصدر"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_help__generic_config
+msgid "Other Assistants"
+msgstr "مساعدون آخرون"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_help.py:0
+msgid "Paste a key first."
+msgstr "الصق مفتاحاً أولاً."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,help:nudge_mcp.field_nudge_mcp_help__test_key
+msgid "Paste a key here to see that it works. It is not kept."
+msgstr "الصق مفتاحاً هنا لترى أنه يعمل. لا يُحفظ."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid ""
+"Paste your key and press Test: Nudge calls initialize with it, as an "
+"assistant does."
+msgstr ""
+"الصق مفتاحك واضغط اختبار: يستدعي Nudge التابع initialize به كما يفعل "
+"المساعد."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid ""
+"Private mode is on: this tool needs an AI provider, and nothing is sent to "
+"one that does not run on your own server."
+msgstr ""
+"الوضع الخاص مفعّل: تحتاج هذه الأداة إلى مزوّد ذكاء اصطناعي، ولا يُرسل شيء "
+"إلى مزوّد لا يعمل على خادمك."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,help:nudge_mcp.field_res_config_settings__nudge_mcp_exposure
+msgid ""
+"Reading: records, screens, the documentation, the company files. Changes "
+"also need the group Agent User for the person and the switch of the company "
+"below. The tools for developers are never offered."
+msgstr ""
+"القراءة: السجلات والشاشات والتوثيق وملفات الشركة. وتحتاج التعديلات أيضاً إلى"
+" مجموعة مستخدم الوكيل للشخص ومفتاح الشركة أدناه. أدوات المطورين لا تُعرض "
+"أبداً."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_help__server_url
+msgid "Server Url"
+msgstr "عنوان الخادم"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/controllers/mcp.py:0
+msgid "Something went wrong on the server."
+msgstr "حدث خطأ في الخادم."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid "Test"
+msgstr "اختبار"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_help__test_result
+msgid "Test Result"
+msgstr "نتيجة الاختبار"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/controllers/mcp.py:0
+msgid "The batch is empty."
+msgstr "الدفعة فارغة."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid "The cursor is not one of ours."
+msgstr "المؤشر ليس من مؤشراتنا."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/controllers/mcp.py:0
+msgid "The key is missing or not valid."
+msgstr "المفتاح مفقود أو غير صالح."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid ""
+"The key is shown once. You can see your keys, and delete them, in your\n"
+"                        preferences, Account Security. Only people of the group External Assistant\n"
+"                        can make one."
+msgstr ""
+"يظهر المفتاح مرة واحدة. يمكنك رؤية مفاتيحك وحذفها من تفضيلاتك، أمان الحساب. "
+"لا ينشئ مفتاحاً إلا أفراد مجموعة المساعد الخارجي."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/controllers/mcp.py:0
+msgid "The message is not JSON."
+msgstr "الرسالة ليست JSON."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/controllers/mcp.py:0
+msgid "The message is too large."
+msgstr "الرسالة كبيرة جداً."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid "The method is missing."
+msgstr "التابع مفقود."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid "The parameters must be an object."
+msgstr "يجب أن تكون المعاملات كائناً."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.res_config_settings_view_form_mcp
+msgid ""
+"The tools for developers are never offered. A change is never made at once:\n"
+"                                the assistant gets a token, the person sees what will change, and the change\n"
+"                                is made when the assistant confirms with the token."
+msgstr ""
+"أدوات المطورين لا تُعرض أبداً. ولا يُجرى تعديل دفعة واحدة: يحصل المساعد على "
+"رمز، ويرى الشخص ما سيتغير، ويُجرى التعديل عندما يؤكد المساعد بالرمز."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid "There is no resource %s."
+msgstr "لا يوجد مورد %s."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid "There is no tool named %s."
+msgstr "لا توجد أداة اسمها %s."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid "This can no longer be done. Nothing was changed."
+msgstr "لم يعد ممكناً تنفيذ هذا. لم يتغير شيء."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid "This is being done already."
+msgstr "يجري تنفيذ هذا بالفعل."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid "This is not a JSON-RPC 2.0 message."
+msgstr "هذه ليست رسالة JSON-RPC 2.0."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_help.py:0
+msgid "This key belongs to somebody else."
+msgstr "هذا المفتاح يخص شخصاً آخر."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_help.py:0
+msgid ""
+"This key is not valid: it is unknown, it expired, or its owner may no longer"
+" make keys for assistants."
+msgstr ""
+"هذا المفتاح غير صالح: إما أنه غير معروف أو انتهت صلاحيته أو لم يعد لصاحبه "
+"الحق في إنشاء مفاتيح للمساعدين."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid "This token has expired. Nothing was changed. Prepare the change again."
+msgstr "انتهت صلاحية هذا الرمز. لم يتغير شيء. جهّز التعديل من جديد."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid "This token is not valid, or it was used already. Nothing was changed."
+msgstr "هذا الرمز غير صالح أو استُخدم من قبل. لم يتغير شيء."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid "To look from a terminal:"
+msgstr "للتحقق من الطرفية:"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/controllers/mcp.py:0
+msgid "Too many wrong keys. Wait a minute."
+msgstr "مفاتيح خاطئة كثيرة. انتظر دقيقة."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_key__duration
+msgid "Valid For"
+msgstr "صالح لمدة"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_res_config_settings__nudge_mcp_exposure
+msgid "What They May Use"
+msgstr "ما يحق لهم استخدامه"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,help:nudge_mcp.field_nudge_mcp_key__name
+msgid "What the key is for: the assistant that will hold it."
+msgstr "ما يُستخدم له المفتاح: المساعد الذي سيحمله."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,help:nudge_mcp.field_nudge_run__origin
+#: model:ir.model.fields,help:nudge_mcp.field_nudge_step__origin
+msgid ""
+"Where the request came from when it was not the chat of Nudge: MCP and the "
+"name of the assistant."
+msgstr "من أين جاء الطلب إن لم يكن من محادثة Nudge: MCP واسم المساعد."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_key__key
+msgid "Your Key"
+msgstr "مفتاحك"

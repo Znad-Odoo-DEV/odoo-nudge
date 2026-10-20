@@ -9,6 +9,7 @@ access_nudge_provider_model_system,nudge.provider.model system,model_nudge_provi
 access_nudge_profile_manager,nudge.profile manager,model_nudge_profile,group_nudge_manager,1,1,0,0
 access_nudge_profile_slice_manager,nudge.profile.slice manager,model_nudge_profile_slice,group_nudge_manager,1,1,0,0
 access_nudge_note_manager,nudge.note manager,model_nudge_note,group_nudge_manager,1,1,1,1
+access_nudge_memory_manager,nudge.memory manager,model_nudge_memory,group_nudge_manager,1,1,1,1
 access_nudge_source_user,nudge.source user,model_nudge_source,group_nudge_user,1,0,0,0
 access_nudge_source_manager,nudge.source manager,model_nudge_source,group_nudge_manager,1,1,1,1
 access_nudge_source_passage_user,nudge.source.passage user,model_nudge_source_passage,group_nudge_user,1,0,0,0
@@ -16,5 +17,38 @@ access_nudge_doc_page_user,nudge.doc.page user,model_nudge_doc_page,group_nudge_
 access_nudge_doc_passage_user,nudge.doc.passage user,model_nudge_doc_passage,group_nudge_user,1,0,0,0
 access_nudge_run_agent,nudge.run agent,model_nudge_run,group_nudge_agent,1,0,0,0
 access_nudge_step_agent,nudge.step agent,model_nudge_step,group_nudge_agent,1,0,0,0
+access_nudge_digest_link_user,nudge.digest.link user,model_nudge_digest_link,group_nudge_user,1,1,0,0
 access_nudge_task_agent,nudge.task agent,model_nudge_task,group_nudge_agent,1,1,1,1
 access_nudge_usage_manager,nudge.usage manager,model_nudge_usage,group_nudge_manager,1,0,0,0
+access_ir_model_nudge_agent,ir.model nudge agent,base.model_ir_model,group_nudge_agent,1,0,0,0
+access_ir_model_fields_nudge_agent,ir.model.fields nudge agent,base.model_ir_model_fields,group_nudge_agent,1,0,0,0
+access_nudge_tour_user,nudge.tour user,model_nudge_tour,group_nudge_user,1,0,0,0
+access_nudge_tour_manager,nudge.tour manager,model_nudge_tour,group_nudge_manager,1,1,1,1
+access_nudge_tour_step_user,nudge.tour.step user,model_nudge_tour_step,group_nudge_user,1,0,0,0
+access_nudge_tour_step_manager,nudge.tour.step manager,model_nudge_tour_step,group_nudge_manager,1,1,1,1
+access_nudge_health_report_manager,nudge.health.report manager,model_nudge_health_report,group_nudge_manager,1,1,1,1
+access_nudge_health_finding_manager,nudge.health.finding manager,model_nudge_health_finding,group_nudge_manager,1,1,1,1
+access_nudge_compliance_pack_manager,nudge.compliance.pack manager,model_nudge_compliance_pack,group_nudge_manager,1,1,1,1
+access_nudge_embedding_manager,nudge.embedding manager,model_nudge_embedding,group_nudge_manager,1,0,0,0
+access_nudge_history_user,nudge.history user,model_nudge_history,group_nudge_user,1,0,0,0
+access_nudge_lexicon_entry_user,nudge.lexicon.entry user,model_nudge_lexicon_entry,group_nudge_user,1,0,0,0
+access_nudge_lexicon_entry_manager,nudge.lexicon.entry manager,model_nudge_lexicon_entry,group_nudge_manager,1,1,1,1
+access_nudge_recipe_export_manager,nudge.recipe.export manager,model_nudge_recipe_export,group_nudge_manager,1,1,1,1
+access_nudge_recipe_import_manager,nudge.recipe.import manager,model_nudge_recipe_import,group_nudge_manager,1,1,1,1
+access_nudge_recipe_import_line_manager,nudge.recipe.import.line manager,model_nudge_recipe_import_line,group_nudge_manager,1,1,1,1
+access_nudge_translation_system,nudge.translation system,model_nudge_translation,base.group_system,1,1,1,1
+access_nudge_translation_line_system,nudge.translation.line system,model_nudge_translation_line,base.group_system,1,1,1,1
+access_nudge_question_manager,nudge.question manager,model_nudge_question,group_nudge_manager,1,1,1,0
+access_nudge_validator_policy_manager,nudge.validator.policy manager,model_nudge_validator_policy,group_nudge_manager,1,1,1,1
+access_nudge_validator_policy_user,nudge.validator.policy user,model_nudge_validator_policy,group_nudge_user,1,0,0,0
+access_nudge_coach_user,nudge.coach user,model_nudge_coach,group_nudge_user,1,0,0,0
+access_nudge_coach_manager,nudge.coach manager,model_nudge_coach,group_nudge_manager,1,1,1,1
+access_nudge_coach_screen_user,nudge.coach.screen user,model_nudge_coach_screen,group_nudge_user,1,0,0,0
+access_nudge_coach_screen_manager,nudge.coach.screen manager,model_nudge_coach_screen,group_nudge_manager,1,1,1,1
+access_nudge_coach_assign_manager,nudge.coach.assign manager,model_nudge_coach_assign,group_nudge_manager,1,1,1,1
+access_nudge_upgrade_wizard_manager,nudge.upgrade.wizard manager,model_nudge_upgrade_wizard,group_nudge_manager,1,1,1,1
+access_nudge_report_user,nudge.report user,model_nudge_report,group_nudge_user,1,1,1,0
+access_nudge_recipe_source_manager,nudge.recipe.source manager,model_nudge_recipe_source,group_nudge_manager,1,1,1,0
+access_nudge_recipe_entry_manager,nudge.recipe.entry manager,model_nudge_recipe_entry,group_nudge_manager,1,1,1,0
+access_nudge_recipe_installed_manager,nudge.recipe.installed manager,model_nudge_recipe_installed,group_nudge_manager,1,1,1,0
+access_nudge_recipe_publish_manager,nudge.recipe.publish manager,model_nudge_recipe_publish,group_nudge_manager,1,1,1,1

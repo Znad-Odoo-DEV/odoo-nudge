@@ -363,6 +363,11 @@ class PrepareButton(Building):
                 "maxLength": 200,
                 "description": "When it is hidden, as a condition on the fields: state != 'draft'.",
             },
+            "groups": {
+                "type": "array", "maxItems": 6,
+                "items": {"type": "string", "pattern": r"[a-z_][a-z0-9_]*\.[a-z_][a-z0-9_]*"},
+                "description": "External ids of the groups that see the button; everyone else does not.",
+            },
             "view_id": {"type": "integer", "minimum": 1},
         },
     }
@@ -381,6 +386,14 @@ class PrepareButton(Building):
             attributes += ' class="oe_highlight"'
         if (arguments.get("invisible") or "").strip():
             attributes += f" invisible={_quote(arguments['invisible'].strip())}"
+        seen_by = []
+        for xmlid in arguments.get("groups") or []:
+            group = env.ref(xmlid, raise_if_not_found=False)
+            if not group or group._name != "res.groups":
+                raise Refused(f"{xmlid} is not a group: groups are given by external id, such as base.group_system.")
+            seen_by.append(group.display_name)
+        if seen_by:
+            attributes += f" groups={_quote(','.join(arguments['groups']))}"
         button = f"<button {attributes}/>"
         tree = etree.fromstring(arch_before.encode("utf-8"))
         if tree.find(".//header") is not None:
@@ -407,6 +420,7 @@ class PrepareButton(Building):
             {"label": _("Button"), "value": label},
             {"label": _("Runs"), "value": f"{action.name} (#{action.id}, {action.state})"},
             {"label": _("Shown"), "value": shown},
+        ] + ([{"label": _("Shown to"), "value": ", ".join(seen_by)}] if seen_by else []) + [
             {"label": _("Result"), "value": "\n".join(diff) or _("No visible difference"), "code": True},
         ]
         return base.ToolResult(
@@ -521,6 +535,44 @@ def form_field(tree, model, env, wanted):
     return None
 
 
+def title_block(tree, name):
+    """:return: the element of the form that holds the field ``name`` as a title
+    (an h1, a div.oe_title, a label + field pair out of a group), or None when it
+    sits in a group, where a sibling gets its label"""
+    node = tree.find(f".//field[@name='{name}']")
+    if node is None:
+        return None
+    block = None
+    for parent in node.iterancestors():
+        if parent.tag == "h1" or "oe_title" in (parent.get("class") or "").split():
+            block = parent
+    if block is not None:
+        return block
+    parent = node.getparent()
+    alone = node.get("nolabel") == "1" or "oe_inline" in (node.get("class") or "").split()
+    labelled = any(label.get("for") == name for label in parent.iter("label")) if parent is not None else False
+    if parent is not None and parent.tag in ("div", "span") and (alone or labelled):
+        return parent
+    return None
+
+
+def after_title(tree, block, name):
+    """:return: (xpath, position, snippet) putting the field ``name`` right after
+    the title ``block``: first in the group that follows it, else in a new group"""
+    path = tree.getroottree().getpath(block)
+    following = block.getnext()
+    while following is not None and not isinstance(following.tag, str):
+        following = following.getnext()
+    field = f'<field name="{name}"/>'
+    if following is not None and following.tag == "group":
+        first = next((child for child in following if isinstance(child.tag, str)), None)
+        group = tree.getroottree().getpath(following)
+        if first is not None:
+            return tree.getroottree().getpath(first), "before", field
+        return group, "inside", field
+    return path, "after", f"<group>{field}</group>"
+
+
 @base.register
 class PrepareField(Building):
     name = "prepare_field"
@@ -550,6 +602,7 @@ class PrepareField(Building):
             "help": {"type": "string", "maxLength": 400},
             "required": {"type": "boolean"},
             "readonly": {"type": "boolean"},
+            "copy": {"type": "boolean", "description": "Copied when the record is duplicated (default: yes)."},
             "relation": {"type": "string", "pattern": MODEL_PATTERN, "description": "For many2one and many2many: the model pointed to."},
             "selection": {
                 "type": "array",
@@ -597,7 +650,7 @@ class PrepareField(Building):
             "required": bool(arguments.get("required")),
             "readonly": bool(arguments.get("readonly")),
             "store": True,
-            "copied": True,
+            "copied": bool(arguments.get("copy", True)),
         }
         lines = [
             {"label": _("Model"), "value": model_label(model)},
@@ -659,9 +712,15 @@ class PrepareField(Building):
             after = (arguments.get("after") or "").strip()
             # Named by its label, or not on the form: the card says where it goes
             after = after and form_field(tree, model, env, after)
+            snippet = f'<field name="{name}"/>'
             if after:
                 shown = field_label(model._fields[after], env) if after in model._fields else after
                 xpath, position, where = f"//field[@name='{after}']", "after", _("after %s", shown)
+                block = title_block(tree, after)
+                if block is not None:
+                    # Beside a title the field has no label: it goes in a group below
+                    xpath, position, snippet = after_title(tree, block, name)
+                    where = _("below %s, in a group", shown)
             elif tree.find(".//sheet//group") is not None:
                 xpath, position, where = "//sheet//group[1]", "inside", _("in the first group of the form")
             elif tree.find(".//sheet") is not None:
@@ -676,7 +735,7 @@ class PrepareField(Building):
                 "inherit_id": root.id,
                 "mode": "extension",
                 "priority": 99,
-                "arch_db": inheritance_arch(xpath, position, f'<field name="{name}"/>'),
+                "arch_db": inheritance_arch(xpath, position, snippet),
             }
             lines.append({"label": _("On the form"), "value": f"{where} ({root.name})"})
         else:

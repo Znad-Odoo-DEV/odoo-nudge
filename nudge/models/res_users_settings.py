@@ -18,6 +18,9 @@ class ResUsersSettings(models.Model):
         ],
         string="Nudge Shortcut", required=True, default=DEFAULT_HOTKEY,
     )
+    # The home page as it was counted, for a few minutes (see tools/home.py): in the database, not in the
+    # memory of a worker, so the workers of a server agree
+    nudge_home_cache = fields.Json(copy=False, groups="base.group_user")
     nudge_share_screen = fields.Boolean(string="Share Screen with Nudge", default=True)
     # Switched by each person from their own menu: off, the avatar, the button
     # of the top bar and the shortcuts are gone until it is switched on again
@@ -34,7 +37,14 @@ class ResUsersSettings(models.Model):
         [
             ("auto", "Language of the interface"),
             ("ar", "Arabic"),
+            ("ar-SA", "Arabic (Saudi Arabia)"), ("ar-EG", "Arabic (Egypt)"), ("ar-AE", "Arabic (UAE)"),
+            ("ar-SY", "Arabic (Syria)"), ("ar-IQ", "Arabic (Iraq)"), ("ar-JO", "Arabic (Jordan)"),
+            ("ar-LB", "Arabic (Lebanon)"), ("ar-PS", "Arabic (Palestine)"), ("ar-KW", "Arabic (Kuwait)"),
+            ("ar-QA", "Arabic (Qatar)"), ("ar-BH", "Arabic (Bahrain)"), ("ar-OM", "Arabic (Oman)"),
+            ("ar-YE", "Arabic (Yemen)"), ("ar-SD", "Arabic (Sudan)"), ("ar-MA", "Arabic (Morocco)"),
+            ("ar-DZ", "Arabic (Algeria)"), ("ar-TN", "Arabic (Tunisia)"),
             ("en", "English"),
+            ("en-US", "English (United States)"), ("en-GB", "English (United Kingdom)"),
         ],
         string="Language Spoken to Nudge", required=True, default="auto",
     )
@@ -70,3 +80,6 @@ class ResUsersSettings(models.Model):
         help="Where the avatar was put on the screen, as fractions of its width and height. "
              "Empty puts it in the corner.",
     )
+    nudge_validator_muted = fields.Char(
+        string="Entry Warnings Muted",
+        help="The checks of the warnings at entry time this person asked not to see, by key.")

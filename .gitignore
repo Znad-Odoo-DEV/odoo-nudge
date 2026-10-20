@@ -3,3 +3,7 @@ __pycache__/
 *.log
 *.bak*
 *.orig
+*.mp3
+*.mp4
+*.wav
+/*/static/description/trial/

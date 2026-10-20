@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- The bubble: on every page of a website that turned it on, in the portal too. It is
+         a button and a hidden panel; bubble.js only wires them. -->
+    <template id="assistant_bubble" inherit_id="website.layout" name="Nudge Website Assistant">
+        <xpath expr="//div[@id='wrapwrap']" position="inside">
+            <div t-if="website and not editable and not translatable and website.nudge_assistant_on(request.env.lang)"
+                 id="nudge_web_root" class="o_nudge_web">
+                <button type="button" class="o_nudge_web_open btn btn-primary rounded-circle shadow"
+                        aria-label="Ask a question" title="Ask a question">
+                    <i class="fa fa-comments" role="img"/>
+                </button>
+                <span class="o_nudge_web_failed" hidden="hidden">Sorry, something went wrong. Please try again.</span>
+                <section class="o_nudge_web_panel shadow" role="dialog" aria-label="Assistant" hidden="hidden">
+                    <header class="o_nudge_web_header">
+                        <strong>Assistant</strong>
+                        <button type="button" class="o_nudge_web_close btn btn-sm btn-link" aria-label="Close">
+                            <i class="fa fa-times" role="img"/>
+                        </button>
+                    </header>
+                    <div class="o_nudge_web_log" aria-live="polite">
+                        <p class="o_nudge_web_bot" t-out="website.nudge_greeting or website.nudge_default_greeting()"/>
+                    </div>
+                    <form class="o_nudge_web_form" autocomplete="off">
+                        <input type="text" name="message" maxlength="400" class="form-control"
+                               placeholder="Write your question" aria-label="Write your question" required="required"/>
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </form>
+                    <footer class="o_nudge_web_footer">
+                        <button type="button" class="o_nudge_web_person btn btn-sm btn-link">Talk to a person</button>
+                    </footer>
+                    <form class="o_nudge_web_handover" hidden="hidden">
+                        <p>Leave your details and someone will write to you.</p>
+                        <input type="text" name="name" maxlength="100" class="form-control" placeholder="Your name" aria-label="Your name"/>
+                        <input type="email" name="email" maxlength="200" class="form-control" placeholder="Your email" aria-label="Your email"/>
+                        <label class="form-check">
+                            <input type="checkbox" name="consent" class="form-check-input"/>
+                            <span>Attach this conversation to my request</span>
+                        </label>
+                        <button type="submit" class="btn btn-primary">Send to the team</button>
+                    </form>
+                </section>
+            </div>
+        </xpath>
+    </template>
+</odoo>

@@ -2,13 +2,18 @@
 <templates xml:space="preserve">
 
     <t t-name="nudge.Panel">
-        <section class="o_nudge_panel" role="dialog" aria-label="Nudge" t-on-keydown="onKeydown">
-            <header class="o_nudge_header">
+        <section class="o_nudge_panel" t-att-class="{ o_nudge_sheet: state.isMobile }" role="dialog" aria-label="Nudge"
+                 t-on-keydown="onKeydown">
+            <header class="o_nudge_header" t-on-touchstart="onSwipeStart" t-on-touchend="onSwipeEnd">
+                <span t-if="state.isMobile" class="o_nudge_grabber" aria-hidden="true"/>
                 <NudgeFace isThinking="state.isStreaming"/>
                 <span t-if="state.view === 'history'" class="o_nudge_title">History</span>
                 <span t-elif="state.view === 'settings'" class="o_nudge_title">Preferences</span>
                 <span t-elif="state.title" class="o_nudge_title" dir="auto" t-esc="state.title"/>
                 <span t-else="" class="o_nudge_title">Nudge</span>
+                <i t-if="state.isPrivate" class="fa fa-lock o_nudge_private" role="img"
+                   title="Private mode: nothing is sent to an AI provider outside your own server"
+                   aria-label="Private mode: nothing is sent to an AI provider outside your own server"/>
                 <button t-if="voiceState.isSpeaking" type="button" class="o_nudge_icon_button o_nudge_quiet"
                         title="Stop reading" aria-label="Stop reading"
                         t-on-click="() => this.voice.stopSpeaking()">
@@ -62,6 +67,19 @@
                             t-on-click="openTasks">
                         <i class="fa fa-calendar-check-o"/> My scheduled tasks
                     </button>
+                    <div class="o_nudge_setting o_nudge_digest">
+                        <span class="o_nudge_setting_label">My morning digest</span>
+                        <div class="d-flex gap-1 flex-wrap align-items-center">
+                            <select class="o_nudge_digest_hour form-select w-auto" t-model="digest.hour">
+                                <option t-foreach="digestHours" t-as="option" t-key="option.value"
+                                        t-att-value="option.value" t-esc="option.label"/>
+                            </select>
+                            <button type="button" class="btn btn-sm btn-primary o_nudge_digest_setup"
+                                    t-att-disabled="digest.busy" t-on-click="setupDigest">Set up my digest</button>
+                            <button type="button" class="btn btn-sm btn-light o_nudge_digest_preview"
+                                    t-att-disabled="digest.busy" t-on-click="previewDigest">Preview</button>
+                        </div>
+                    </div>
                     <label class="o_nudge_setting">
                         <span class="o_nudge_setting_label">Shortcut to call Nudge</span>
                         <select class="o_nudge_hotkey form-select"
@@ -71,6 +89,11 @@
                                     t-esc="option.label"/>
                         </select>
                     </label>
+                    <div class="o_nudge_setting">
+                        <span class="o_nudge_setting_label">Warnings while I fill in forms</span>
+                        <button type="button" class="btn btn-sm btn-light o_nudge_unmute_warnings"
+                                t-on-click="showMutedWarnings">Show the ones I muted again</button>
+                    </div>
                     <label class="o_nudge_setting">
                         <span class="o_nudge_setting_label">Colour</span>
                         <select class="o_nudge_theme form-select"
@@ -139,7 +162,7 @@
                         </p>
                     </t>
                     <p class="o_nudge_empty_text o_nudge_voice_note" t-esc="voiceNote"/>
-                    <t t-if="voiceState.isAllowed">
+                    <t t-if="voiceState.isAllowed and voiceState.canUseBrowserSpeech">
                         <label class="o_nudge_setting o_nudge_setting_inline">
                             <input type="checkbox" class="o_nudge_speak form-check-input"
                                    t-att-checked="voiceState.speakAnswers"
@@ -152,7 +175,7 @@
                         </p>
                     </t>
                 </div>
-                <div t-elif="!state.isConfigured" class="o_nudge_empty">
+                <div t-elif="!canCompose" class="o_nudge_empty">
                     <NudgeFace/>
                     <p class="o_nudge_empty_title">Nudge needs an AI provider</p>
                     <p t-if="state.isManager" class="o_nudge_empty_text">
@@ -174,6 +197,31 @@
                             </button>
                         </div>
                     </form>
+                    <div t-if="quick.action and !quick.isSearching" class="o_nudge_found_list o_nudge_quick_action">
+                        <button type="button" class="o_nudge_suggestion o_nudge_noai_do" title="Understood without AI: nothing is spent"
+                                t-on-click="doQuickAction">
+                            <i class="fa fa-bolt"/> <strong t-esc="quick.action.label"/>
+                        </button>
+                    </div>
+                    <div t-if="quick.memory and !quick.isSearching" class="o_nudge_quick_results o_nudge_quick_memory">
+                        <NudgeMessage role="'assistant'" content="quick.memory.answer" state="'complete'"
+                                      remembered="true"/>
+                    </div>
+                    <div class="o_nudge_import_entry">
+                        <input type="file" class="d-none" t-ref="importFile" accept=".csv,.tsv,.xlsx,.xls"
+                               t-on-change="onImportFileChosen"/>
+                        <button type="button" class="btn btn-sm btn-light o_nudge_noai_import" t-on-click="pickImportFile">
+                            <i class="fa fa-table"/> Check a CSV or Excel file, without AI
+                        </button>
+                        <NudgeImportCard/>
+                    </div>
+                    <div t-if="screenCommands.length" class="o_nudge_found_list o_nudge_noai">
+                        <button t-foreach="screenCommands" t-as="command" t-key="command.name" type="button"
+                                class="o_nudge_suggestion o_nudge_noai_command"
+                                t-on-click="() => this.useQuickFound('command', command)">
+                            <strong t-esc="command.hint"/>
+                        </button>
+                    </div>
                     <div t-if="quick.isSearching" class="o_nudge_quick_busy">
                         <i class="fa fa-circle-o-notch fa-spin"/>
                     </div>
@@ -203,6 +251,14 @@
                                 <span t-if="setting.help" class="o_nudge_quick_text" t-esc="setting.help"/>
                             </button>
                         </t>
+                        <t t-if="quick.results.tours and quick.results.tours.length">
+                            <p class="o_nudge_quick_head">Tours</p>
+                            <button t-foreach="quick.results.tours" t-as="tour" t-key="tour.id" type="button"
+                                    class="o_nudge_suggestion o_nudge_quick_tour" title="Show me, step by step"
+                                    t-on-click="() => this.nudge.useFound('tour', tour)">
+                                <i class="fa fa-map-signs"/> <strong t-esc="tour.name"/>
+                            </button>
+                        </t>
                         <t t-if="quick.results.products and quick.results.products.length">
                             <p class="o_nudge_quick_head">Products</p>
                             <button t-foreach="quick.results.products" t-as="product" t-key="product.id" type="button"
@@ -230,6 +286,7 @@
                 <div t-elif="!state.messages.length" class="o_nudge_empty">
                     <NudgeFace/>
                     <p class="o_nudge_empty_title" t-esc="greeting"/>
+                    <NudgeCoachCard/>
                     <p t-if="isDev" class="o_nudge_empty_text o_nudge_dev_text">
                         Tell me what to build. I explain first; nothing is made before you say yes.
                     </p>
@@ -244,6 +301,21 @@
                         Ask me about what is on your screen.
                     </p>
                     <p t-else="" class="o_nudge_empty_text">Ask me anything about Odoo.</p>
+                    <button t-if="canSeeChanges" type="button" class="btn btn-sm btn-light o_nudge_changes_open"
+                            t-on-click="() => this.nudge.showChanges()">
+                        <i class="fa fa-history"/> Who changed this and undo it
+                    </button>
+                    <div t-if="state.isMobile and mobileTiles.length" class="o_nudge_tiles" role="group"
+                         aria-label="Quick actions">
+                        <button t-foreach="mobileTiles" t-as="tile" t-key="tile.id" type="button"
+                                t-attf-class="o_nudge_tile o_nudge_tile_{{ tile.id }}"
+                                t-on-click="() => this.onTile(tile.id)">
+                            <i t-attf-class="fa {{ tile.icon }}" aria-hidden="true"/>
+                            <span class="o_nudge_tile_label" t-esc="tile.label"/>
+                        </button>
+                        <input type="file" class="d-none" t-ref="photo" accept="image/*" capture="environment"
+                               t-on-change="onPhotoChosen"/>
+                    </div>
                     <div class="o_nudge_suggestions">
                         <button t-foreach="suggestions" t-as="suggestion" t-key="suggestion_index"
                                 type="button" class="o_nudge_suggestion" dir="auto"
@@ -263,6 +335,8 @@
                                   state="message.state" error="message.error" screen="message.screen"
                                   guidance="message.guidance" spoken="message.spoken"
                                   attachment="message.attachment"
+                                  remembered="message.remembered"
+                                  onAskAi="message.canAskAi ? () => this.nudge.askAiInstead(message.id) : undefined"
                                   feedback="message.feedback" ratable="typeof message.id === 'number'"
                                   onRate="(value, note) => this.nudge.rate(message.id, value, note)"
                                   card="message.card"
@@ -279,6 +353,9 @@
                                   products="message.products"
                                   onOpenProduct="(productId) => this.nudge.openProduct(productId)"
                                   found="message.found"
+                                  chart="message.chart"
+                                  changes="message.changes"
+                                  onRestore="(spec) => this.nudge.restoreChange(spec)"
                                   onFound="(kind, item) => this.nudge.useFound(kind, item)"/>
                     <!-- Theirs to say first: on the screen, or in writing -->
                     <div t-if="state.asking" class="o_nudge_message o_nudge_message_assistant o_nudge_ask" role="status">
@@ -322,10 +399,64 @@
                             </div>
                         </div>
                     </div>
+                    <NudgeImportCard/>
                 </t>
             </div>
 
-            <div t-if="state.isConfigured and state.view === 'chat' and (state.canShareScreen or state.canUseAgent)"
+            <div t-if="canCompose and state.view === 'chat' and bulkTarget" class="o_nudge_bulk">
+                <button type="button" class="o_nudge_suggestion o_nudge_bulk_open" t-att-disabled="state.isStreaming"
+                        title="Have the AI do the same work on the records selected in the list"
+                        t-on-click="openBulk">
+                    <i class="fa fa-magic"/> Do this for the <span t-esc="bulkCount"/> selected
+                </button>
+                <div t-if="bulk.open and bulk.options" class="o_nudge_bulk_form">
+                    <p t-if="!bulk.options.available" class="o_nudge_bulk_note">
+                        <t t-esc="bulk.options.reason"/>
+                    </p>
+                    <t t-else="">
+                        <label class="o_nudge_bulk_label">What to do
+                            <select class="form-select form-select-sm o_nudge_bulk_operation"
+                                    t-on-change="(ev) => this.chooseBulkOperation(ev.target.value)">
+                                <option t-if="bulk.options.classify.length" value="classify"
+                                        t-att-selected="bulk.operation === 'classify'">Classify into a field of values</option>
+                                <option t-if="bulk.options.text.length" value="summarise"
+                                        t-att-selected="bulk.operation === 'summarise'">Summarise into a text field</option>
+                                <option t-if="bulk.options.text.length" value="translate"
+                                        t-att-selected="bulk.operation === 'translate'">Translate into a language</option>
+                                <option t-if="bulk.options.fill.length" value="fill"
+                                        t-att-selected="bulk.operation === 'fill'">Fill a field from the other fields</option>
+                            </select>
+                        </label>
+                        <label class="o_nudge_bulk_label">Field to write
+                            <select class="form-select form-select-sm o_nudge_bulk_field" t-model="bulk.field">
+                                <option t-foreach="bulkFields" t-as="entry" t-key="entry.name"
+                                        t-att-value="entry.name" t-esc="entry.label"/>
+                            </select>
+                        </label>
+                        <label t-if="bulk.operation === 'translate'" class="o_nudge_bulk_label">Language
+                            <input type="text" class="form-control form-control-sm o_nudge_bulk_language"
+                                   maxlength="60" placeholder="Arabic" t-model="bulk.language"/>
+                        </label>
+                        <label t-if="bulk.operation === 'fill'" class="o_nudge_bulk_label">What to write
+                            <input type="text" class="form-control form-control-sm o_nudge_bulk_instruction"
+                                   maxlength="500" t-model="bulk.instruction"/>
+                        </label>
+                        <label t-if="bulk.operation === 'classify'" class="o_nudge_bulk_label">How to choose (optional)
+                            <input type="text" class="form-control form-control-sm o_nudge_bulk_instruction"
+                                   maxlength="500" t-model="bulk.instruction"/>
+                        </label>
+                        <label t-if="bulkTarget.everything" class="o_nudge_bulk_all">
+                            <input type="checkbox" class="o_nudge_bulk_everything" t-model="bulk.everything"/>
+                            All <span t-esc="bulkTarget.total"/> records that match the filter
+                        </label>
+                        <p class="o_nudge_bulk_note">Nudge first tries five records and shows you what it proposes and what the rest costs. Nothing is written before your yes.</p>
+                        <button type="button" class="btn btn-primary btn-sm o_nudge_bulk_go"
+                                t-att-disabled="!canStartBulk" t-on-click="startBulk">Show me a sample</button>
+                    </t>
+                </div>
+            </div>
+
+            <div t-if="canCompose and state.view === 'chat' and (state.canShareScreen or state.canUseAgent)"
                  class="o_nudge_screen" t-att-class="{ o_nudge_screen_off: !state.shareScreen }">
                 <t t-if="state.canShareScreen">
                     <button type="button" class="o_nudge_eye"
@@ -365,7 +496,7 @@
                 </div>
             </div>
 
-            <div t-if="state.isConfigured and state.view === 'chat' and canTalk and (isListening or voiceState.error)"
+            <div t-if="canCompose and state.view === 'chat' and canTalk and (isListening or voiceState.error)"
                  class="o_nudge_voice" role="status"
                  t-att-class="{ o_nudge_voice_error: !isListening }">
                 <t t-if="isTranscribing">
@@ -385,15 +516,36 @@
                     <i class="fa fa-times"/>
                 </button>
             </div>
-            <form t-if="state.isConfigured and state.view === 'chat'" class="o_nudge_composer"
+            <div t-if="state.reply and state.view === 'chat'" class="o_nudge_reply d-flex align-items-center gap-2 px-3 py-2">
+                <button type="button" class="btn btn-sm btn-light o_nudge_reply_draft" t-att-disabled="state.replyBusy"
+                        title="Write a reply to the customer's last message. You read it in the email window first: nothing is sent before you press Send."
+                        t-on-click="() => this.nudge.draftReply()">
+                    <i t-attf-class="fa {{ state.replyBusy ? 'fa-circle-o-notch fa-spin' : 'fa-envelope-o' }}"/> Draft a reply
+                </button>
+                <select class="form-select form-select-sm w-auto o_nudge_reply_tone" aria-label="Tone of the reply"
+                        t-on-change="(ev) => this.nudge.setReplyTone(ev.target.value)">
+                    <option value="formal" t-att-selected="state.replyTone === 'formal'">Formal</option>
+                    <option value="friendly" t-att-selected="state.replyTone === 'friendly'">Friendly</option>
+                    <option value="short" t-att-selected="state.replyTone === 'short'">Short</option>
+                </select>
+            </div>
+            <form t-if="canCompose and state.view === 'chat'" class="o_nudge_composer"
                   t-on-submit.prevent="onSubmit">
                 <input type="file" class="d-none" t-ref="file"
-                       accept=".pdf,.txt,.csv,.xlsx,.md,.json,.xml,image/png,image/jpeg,image/webp,image/gif"
+                       accept=".pdf,.txt,.csv,.xlsx,.md,.json,.xml,image/png,image/jpeg,image/webp,image/gif,audio/*,.m4a,.mp3,.ogg,.wav,.webm"
                        t-on-change="onFileChosen"/>
                 <button t-if="!state.isStreaming" type="button" class="o_nudge_attach"
-                        title="Send a file with the question: a PDF, a text, an image"
+                        title="Send a file with the question: a PDF, a text, an image, a recording"
                         aria-label="Send a file" t-on-click="pickFile">
                     <i class="fa fa-paperclip"/>
+                </button>
+                <button t-if="canRecordMeeting or meeting.on" type="button" class="o_nudge_attach o_nudge_meeting"
+                        t-att-class="{ o_nudge_meeting_on: meeting.on }"
+                        t-att-aria-pressed="meeting.on ? 'true' : 'false'"
+                        title="Record a meeting to summarise it" aria-label="Record a meeting"
+                        t-on-click="toggleMeeting">
+                    <i class="fa" t-att-class="meeting.on ? 'fa-stop-circle' : 'fa-circle'"/>
+                    <span t-if="meeting.on" class="o_nudge_meeting_time" t-esc="meetingTime"/>
                 </button>
                 <ul t-if="commandChoices.length" class="o_nudge_commands" role="listbox"
                     aria-label="Commands">
@@ -423,6 +575,17 @@
                         <i class="fa" t-att-class="isListening ? 'fa-stop' : 'fa-microphone'"/>
                     </button>
                 </t>
+                <t t-elif="voiceState.blockedReason and !state.isStreaming">
+                    <span t-if="voiceState.isBlockedHidden" class="o_nudge_mic_missing text-muted"
+                          t-att-title="voiceState.blockedReason" t-att-aria-label="voiceState.blockedReason">
+                        <i class="fa fa-microphone-slash"/>
+                    </span>
+                    <button t-else="" type="button" class="o_nudge_mic o_nudge_mic_off" aria-disabled="true"
+                            t-att-title="voiceState.blockedReason" t-att-aria-label="voiceState.blockedReason"
+                            t-on-click="() => this.voice.explain()">
+                        <i class="fa fa-microphone-slash"/>
+                    </button>
+                </t>
                 <button t-if="isAgent and !state.isStreaming" type="button" class="o_nudge_later"
                         title="Do it in the background: I'll tell you when it is done"
                         aria-label="Do it in the background"
@@ -438,6 +601,23 @@
                     <i class="fa fa-arrow-up"/>
                 </button>
             </form>
+            <!-- On a phone: the big button under the message box; held, it listens -->
+            <div t-if="state.isMobile and canCompose and state.view === 'chat' and canTalk and !state.isStreaming"
+                 class="o_nudge_holdbar">
+                <button type="button" class="o_nudge_holdtalk"
+                        t-att-class="{ o_nudge_holdtalk_on: isListening }"
+                        t-att-aria-pressed="isListening ? 'true' : 'false'"
+                        title="Hold to talk to Nudge" aria-label="Hold to talk to Nudge"
+                        t-on-pointerdown.prevent="onHoldStart" t-on-pointerup="onHoldEnd"
+                        t-on-pointercancel="onHoldEnd" t-on-contextmenu.prevent="onHoldMenu"
+                        t-on-keydown="onHoldKey" t-on-keyup="onHoldKey">
+                    <i class="fa" t-att-class="isListening ? 'fa-stop' : 'fa-microphone'" aria-hidden="true"/>
+                    <span class="o_nudge_holdtalk_label">
+                        <t t-if="isListening">Let go when you are done</t>
+                        <t t-else="">Hold to talk</t>
+                    </span>
+                </button>
+            </div>
         </section>
     </t>
 

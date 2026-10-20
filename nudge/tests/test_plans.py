@@ -1,3 +1,7 @@
+from contextlib import contextmanager
+from datetime import timedelta
+
+from odoo import fields
 from odoo.exceptions import AccessError, UserError
 from odoo.tests import TransactionCase, tagged
 
@@ -165,3 +169,135 @@ class TestPlans(BackgroundCase, TransactionCase):
         self.assertIn("prepare_plan", names)
         self.assertIn("prepare_plan", tools.base.ESSENTIAL_TOOLS)
         self.assertNotIn("prepare_plan", [tool.name for tool in tools.base.available(self.env(user=self.user_a), "talk")])
+
+
+@tagged("post_install", "-at_install")
+class TestBigPlansInTheBackground(BackgroundCase, TransactionCase):
+    """A plan of many records is committed batch by batch, never inside a savepoint."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.partners = cls.env["res.partner"].create([
+            {"name": f"Nudge Big {index:02d}", "function": "Clerk"} for index in range(65)])
+
+    def start(self):
+        conversation = self.asked_plan()
+        step = conversation.sudo().waiting_step_id
+        self.decide(conversation)
+        return step, step.run_id
+
+    def asked_plan(self):
+        self.use_adapter(script=[
+            asking(call("prepare_plan", {"title": "Make them buyers", "steps": [
+                writing("res.partner", conditions=[{"field": "name", "operator": "contains", "value": "Nudge Big"}],
+                        function="Buyer")]})),
+            saying("Done."),
+        ])
+        conversation, _events = self.order(self.agent, "Make them all buyers")
+        return conversation
+
+    def watch_commits(self, on_commit=None):
+        """Remember how many savepoints were open at each commit of the run"""
+        depths, open_ = [], [0]
+        cr = self.env.cr
+        original = cr.savepoint
+
+        @contextmanager
+        def counted(*args, **kwargs):
+            open_[0] += 1
+            try:
+                with original(*args, **kwargs) as savepoint:
+                    yield savepoint
+            finally:
+                open_[0] -= 1
+
+        self.patch(cr, "savepoint", counted)
+        Run = type(self.env["nudge.run"])
+        commit = Run._commit
+
+        def watching(run):
+            depths.append(open_[0])
+            if on_commit:
+                on_commit(len(depths), run)
+            return commit(run)
+
+        self.patch(Run, "_commit", watching)
+        return depths
+
+    def test_batches_are_committed_outside_any_savepoint(self):
+        step, run = self.start()
+        depths = self.watch_commits()
+        self.work(run)
+        step.invalidate_recordset()
+        self.assertEqual(step.state, "done")
+        self.assertEqual(set(self.partners.mapped("function")), {"Buyer"})
+        self.assertEqual(step._get_card()["done_count"], 65)
+        self.assertGreaterEqual(len(depths), 3, "A commit per batch of 25 records, and the last")
+        self.assertEqual(set(depths), {0}, "A commit inside a savepoint ends the transaction under it")
+        self.assertEqual(run.state, "done")
+
+    def test_progress_rows_are_told(self):
+        _step, run = self.start()
+        self.told()
+        self.work(run)
+        kinds = [payload["kind"] for _channel, payload in self.told()]
+        self.assertEqual(kinds.count("progress"), 2)
+        self.assertIn(run.progress, ("25 done, 0 did not go through", "50 done, 0 did not go through",
+                                     "65 done, 0 did not go through", False))
+
+    def test_stopped_between_batches(self):
+        step, run = self.start()
+
+        def stop_after_first(count, current):
+            if count == 1:
+                current.with_user(self.agent).action_stop()
+
+        self.watch_commits(stop_after_first)
+        self.work(run)
+        step.invalidate_recordset()
+        self.assertEqual(run.state, "stopped")
+        self.assertEqual(step.state, "done")
+        self.assertEqual(step._get_card()["done_count"], 25)
+        self.assertEqual(len(self.partners.filtered(lambda partner: partner.function == "Buyer")), 25)
+        self.assertTrue(step._get_card()["can_undo"], "What went through can be taken back")
+        self.work(run)
+        self.assertEqual(len(self.partners.filtered(lambda partner: partner.function == "Buyer")), 25)
+
+    def test_a_worker_that_died_is_replaced_and_nothing_is_done_twice(self):
+        step, run = self.start()
+        written = []
+        Partner = type(self.env["res.partner"])
+        write = Partner.write
+
+        def counting(records, values):
+            if values.get("function") == "Buyer":
+                written.extend(records.ids)
+            return write(records, values)
+
+        self.patch(Partner, "write", counting)
+        clock = iter([0] * 31 + [10 ** 9] * 500)
+        self.patch(plans, "now", lambda: next(clock))
+        self.work(run)
+        step.invalidate_recordset()
+        first = step._get_card()["done_count"]
+        self.assertTrue(0 < first < 65, first)
+        # The worker died after taking the run up again: it stays "working", untouched
+        run.write({"state": "running"})
+        self.env.flush_all()
+        self.env.cr.execute("UPDATE nudge_run SET write_date = %s WHERE id = %s",
+                            [fields.Datetime.now() - timedelta(hours=1), run.id])
+        run.invalidate_recordset()
+        self.assertEqual(self.env["nudge.run"].with_context(nudge_keep_transaction=True)._requeue_stale(), run)
+        self.assertEqual(run.state, "queued")
+        self.patch(plans, "now", lambda: 0)
+        self.work(run)
+        step.invalidate_recordset()
+        self.assertEqual(step.state, "done")
+        self.assertEqual(step._get_card()["done_count"], 65)
+        self.assertEqual(sorted(written), sorted(self.partners.ids), "Every record written once")
+
+    def test_a_fresh_run_is_not_taken_for_a_dead_one(self):
+        _step, run = self.start()
+        run.write({"state": "running"})
+        self.assertFalse(self.env["nudge.run"].with_context(nudge_keep_transaction=True)._requeue_stale())

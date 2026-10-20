@@ -5,7 +5,11 @@
         <field name="model">nudge.task</field>
         <field name="arch" type="xml">
             <tree string="Scheduled Tasks" decoration-muted="not active">
+                <header>
+                    <button name="action_export_recipe" type="object" string="Export as a recipe" display="always" groups="nudge.group_nudge_manager"/>
+                </header>
                 <field name="name"/>
+                <field name="engine" optional="show"/>
                 <field name="kind"/>
                 <field name="model_name" optional="show"/>
                 <field name="user_id" groups="nudge.group_nudge_manager" optional="show"/>
@@ -26,6 +30,8 @@
                 <header>
                     <button name="action_run_now" type="object" string="Run Now" class="btn-primary"
                             invisible="not active"/>
+                    <button name="action_open_records" type="object" string="Show the Records"
+                            invisible="engine != 'rule' or not model_name"/>
                     <button name="action_open_conversation" type="object" string="Answers"
                             invisible="not conversation_id"/>
                 </header>
@@ -35,7 +41,10 @@
                         <h1><field name="name" placeholder="Overdue invoices every morning"/></h1>
                     </div>
                     <group>
-                        <field name="instruction" placeholder="List the customer invoices overdue by more than 7 days, with the amount and the salesperson"/>
+                        <field name="engine" widget="radio"/>
+                    </group>
+                    <group invisible="engine in ('rule', 'digest', 'outliers')">
+                        <field name="instruction" required="engine not in ('rule', 'digest', 'outliers')" placeholder="List the customer invoices overdue by more than 7 days, with the amount and the salesperson"/>
                     </group>
                     <group>
                         <group string="When">
@@ -51,10 +60,33 @@
                             <field name="active" widget="boolean_toggle"/>
                         </group>
                         <group string="Records">
-                            <field name="model_name" required="kind == 'watch'"/>
-                            <field name="conditions_text"/>
-                            <field name="match" invisible="not conditions"/>
+                            <field name="model_name" required="kind == 'watch'" invisible="engine in ('rule', 'digest', 'outliers')"/>
+                            <field name="available_model_ids" invisible="1"/>
+                            <field name="rule_model_id" required="engine == 'rule'" invisible="engine != 'rule'"
+                                   options="{'no_create': True, 'no_open': True}"/>
+                            <field name="conditions_text" invisible="engine in ('rule', 'digest', 'outliers')"/>
+                            <field name="match" invisible="not conditions or engine in ('rule', 'digest', 'outliers')"/>
                             <field name="conditions" invisible="1"/>
+                        </group>
+                    </group>
+                    <group string="Unusual Figures" invisible="engine != 'outliers'">
+                        <field name="outlier_family" required="engine == 'outliers'"/>
+                        <field name="outlier_sensitivity" required="engine == 'outliers'"/>
+                    </group>
+                    <group string="Rule" invisible="engine != 'rule'">
+                        <group>
+                            <field name="rule_domain" widget="domain" options="{'model': 'model_name'}"
+                                   invisible="not rule_model_id"/>
+                            <field name="rule_measure"/>
+                            <field name="rule_field_id" invisible="rule_measure == 'count'"
+                                   required="engine == 'rule' and rule_measure != 'count'"
+                                   options="{'no_create': True}"/>
+                            <field name="rule_groupby_id" options="{'no_create': True}"/>
+                        </group>
+                        <group>
+                            <field name="rule_condition"/>
+                            <field name="rule_threshold"
+                                   invisible="rule_condition not in ('above', 'below')"/>
                         </group>
                     </group>
                     <group string="Runs">
@@ -78,10 +110,41 @@
             <search>
                 <field name="name"/>
                 <field name="instruction"/>
+                <filter name="rules" string="Rules (no AI)" domain="[('engine', '=', 'rule')]"/>
+                <filter name="digests" string="Digests" domain="[('engine', '=', 'digest')]"/>
+                <filter name="outliers" string="Unusual Figures" domain="[('engine', '=', 'outliers')]"/>
                 <filter name="paused" string="Paused" domain="[('active', '=', False)]"/>
                 <filter name="mine" string="Mine" domain="[('user_id', '=', uid)]"/>
             </search>
         </field>
+    </record>
+
+    <!-- The link in the answer of a rule: /odoo/<task>/action-<this action> -->
+    <record id="nudge_task_records_action" model="ir.actions.server">
+        <field name="name">Records of a Rule</field>
+        <field name="model_id" ref="model_nudge_task"/>
+        <field name="state">code</field>
+        <field name="code">action = model.browse(env.context.get('active_id')).action_open_records()</field>
+    </record>
+
+    <!-- The "Show me" link of a line of the digest: /odoo/<link>/action-<this action> -->
+    <record id="nudge_digest_link_action" model="ir.actions.server">
+        <field name="name">Records of the Digest</field>
+        <field name="model_id" ref="model_nudge_digest_link"/>
+        <field name="state">code</field>
+        <field name="code">action = model.browse(env.context.get('active_id')).action_open()</field>
+    </record>
+
+    <!-- The link under the list an AI task delivers: /odoo/<step>/action-<this action>.
+         It builds the window action when run, so nothing is stored per step. The step is read
+         as the person, whose rights and record rules apply, not as the superuser a server action
+         runs as; it is bound to res.partner only because Odoo asks write access on the model of an
+         action, which every user has there. -->
+    <record id="nudge_step_list_action" model="ir.actions.server">
+        <field name="name">List of a Step</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="state">code</field>
+        <field name="code">action = env['nudge.step'].browse(env.context.get('active_id')).with_user(env.user).action_open_list()</field>
     </record>
 
     <record id="nudge_task_action" model="ir.actions.act_window">

@@ -1,12 +1,30 @@
 import logging
+import os
 
-from odoo import models
+from odoo import api, models, tools
+from odoo.modules.module import get_module_path
 
 _logger = logging.getLogger(__name__)
 
 
 class IrModuleModule(models.Model):
     _inherit = "ir.module.module"
+
+    @api.model
+    @tools.ormcache()
+    def _nudge_pack_folders(self):
+        """:return: the folders of the compliance packs of the installed modules, looked for once for
+        the registry (an install or a removal builds a new one)"""
+        from ..tools.compliance import PACKS_OF_MODULES  # noqa: PLC0415
+        folders = []
+        for module in self.sudo().search([("state", "=", "installed")]).mapped("name"):
+            if module == "nudge":
+                continue
+            path = get_module_path(module)
+            folder = os.path.join(path, PACKS_OF_MODULES) if path else None
+            if folder and os.path.isdir(folder):
+                folders.append(folder)
+        return folders
 
     def _button_immediate_function(self, function):
         """Installing, upgrading or removing a module changes what the

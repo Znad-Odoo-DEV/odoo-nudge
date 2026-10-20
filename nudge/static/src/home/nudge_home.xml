@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="nudge.NudgeSparkline">
+        <span class="o_nudge_home_spark" t-att-title="props.label">
+            <canvas t-ref="canvas" width="96" height="32" t-att-class="{ 'd-none': !state.drawn }"/>
+            <span t-if="!state.drawn" class="o_nudge_home_bars">
+                <span t-foreach="bars" t-as="bar" t-key="bar_index" class="o_nudge_home_bar"
+                      t-attf-style="height: #{bar.height}%"/>
+            </span>
+        </span>
+    </t>
+
+    <t t-name="nudge.NudgeHome">
+        <div class="o_nudge_home o_action overflow-auto p-3">
+            <div class="d-flex align-items-center flex-wrap gap-3 mb-3">
+                <h2 class="m-0 me-auto">My Nudge Home</h2>
+                <label class="form-check m-0 o_nudge_home_login">
+                    <input type="checkbox" class="form-check-input" t-att-checked="state.loginHome"
+                           t-on-change="toggleLoginHome"/>
+                    <span class="form-check-label">Open this page when I log in</span>
+                </label>
+                <button class="btn btn-secondary o_nudge_home_refresh" t-on-click="refresh">Refresh</button>
+            </div>
+
+            <div t-if="state.says.length" class="o_nudge_home_says mb-3">
+                <div class="fw-bold mb-1">Nudge says</div>
+                <button t-foreach="state.says" t-as="item" t-key="item_index"
+                        class="o_nudge_home_say btn btn-light d-block text-start w-100 mb-1"
+                        t-on-click="() => this.openSaid(item)">
+                    <span class="badge text-bg-secondary me-2" t-out="kindLabel(item)"/>
+                    <span t-out="item.text"/>
+                </button>
+            </div>
+
+            <div t-if="state.loading" class="text-muted">Loading...</div>
+            <div t-elif="!hasTiles" class="text-muted o_nudge_home_empty">
+                Nothing to count here yet: the apps you work in will show their numbers.
+            </div>
+
+            <section t-foreach="state.sections" t-as="section" t-key="section.key"
+                     class="o_nudge_home_section mb-4" t-att-data-section="section.key">
+                <h4 t-out="section.title"/>
+                <div class="o_nudge_home_tiles">
+                    <div t-foreach="visibleTiles(section)" t-as="tile" t-key="tile.key"
+                         class="o_nudge_home_tile card p-3" draggable="true"
+                         t-att-data-key="tile.key"
+                         t-on-dragstart="(ev) => this.dragStart(ev, tile)"
+                         t-on-dragover="dragOver"
+                         t-on-drop="(ev) => this.drop(ev, tile, section)">
+                        <div class="d-flex align-items-start">
+                            <span class="o_nudge_home_label text-muted me-auto" t-out="tile.label"/>
+                            <button class="btn btn-sm btn-link p-0 o_nudge_home_earlier" title="Earlier"
+                                    t-on-click="() => this.move(tile, section, -1)">&#8249;</button>
+                            <button class="btn btn-sm btn-link p-0 o_nudge_home_later" title="Later"
+                                    t-on-click="() => this.move(tile, section, 1)">&#8250;</button>
+                            <button class="btn btn-sm btn-link p-0 o_nudge_home_hide" title="Hide this tile"
+                                    t-on-click="() => this.hide(tile)">&#215;</button>
+                        </div>
+                        <div class="d-flex align-items-end justify-content-between mt-2">
+                            <div>
+                                <div class="o_nudge_home_count" t-out="tile.count"/>
+                                <div t-if="tile.amount" class="o_nudge_home_amount text-muted" t-out="tile.amount"/>
+                                <div t-if="trendText(tile)" t-att-class="'o_nudge_home_trend ' + trendClass(tile)"
+                                     t-out="trendText(tile)" title="This week against the week before"/>
+                            </div>
+                            <NudgeSparkline series="tile.series" label="tile.name"/>
+                        </div>
+                        <button class="btn btn-sm btn-primary mt-2 o_nudge_home_show" t-on-click="() => this.show(tile)">
+                            Show me
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <div t-if="hiddenTiles.length" class="o_nudge_home_hidden">
+                <button class="btn btn-link p-0" t-on-click="() => state.showHidden = !state.showHidden">
+                    Hidden tiles (<t t-out="hiddenTiles.length"/>)
+                </button>
+                <div t-if="state.showHidden" class="mt-2">
+                    <button t-foreach="hiddenTiles" t-as="tile" t-key="tile.key"
+                            class="btn btn-sm btn-outline-secondary me-2 mb-2 o_nudge_home_unhide"
+                            t-on-click="() => this.unhide(tile)">
+                        <t t-out="tile.label"/> +
+                    </button>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

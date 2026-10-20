@@ -1,5 +1,6 @@
 from types import SimpleNamespace
 
+from lxml import etree
 from odoo.tests import TransactionCase, new_test_user, tagged
 
 from odoo.addons.nudge import tools
@@ -164,6 +165,29 @@ class TestBuilding(NudgeCase, TransactionCase):
             "model": "res.partner", "label": "Nudge Other", "type": "char", "after": "zzz_unknown"})
         self.assertFalse(nowhere.is_error, "Not on the form: in the first group, as the card says")
 
+    def test_a_field_after_the_title_goes_in_a_group_with_its_label(self):
+        # After the name, which sits in the title block, it had no label there
+        result = self.run_tool("prepare_field", {
+            "model": "res.partner", "label": "Nudge Badge", "type": "char", "after": "name"})
+        self.assertFalse(result.is_error, result.content)
+        done = self.do("prepare_field", result)
+        self.assertFalse(done.is_error, done.content)
+        self.assertIn("Added to the form", done.content)
+        tree = etree.fromstring(self.form_arch().encode())
+        node = tree.find(".//field[@name='x_nudge_badge']")
+        self.assertIsNotNone(node)
+        self.assertEqual(node.getparent().tag, "group", "In a group, where a field has its label")
+        self.assertIsNone(node.get("nolabel"))
+        for parent in node.iterancestors():
+            self.assertNotEqual(parent.tag, "h1")
+            self.assertNotIn("oe_title", (parent.get("class") or "").split())
+        # Taking the field away takes the view with it
+        field = self.env["ir.model.fields"].search([("model", "=", "res.partner"), ("name", "=", "x_nudge_badge")])
+        gone = self.run_tool("prepare_delete", {"model": "ir.model.fields", "ids": [field.id]})
+        self.assertFalse(gone.is_error, gone.content)
+        self.do("prepare_delete", gone)
+        self.assertNotIn("x_nudge_badge", self.form_arch())
+
     def test_a_view_id_of_another_model_is_let_go(self):
         # A small model wrote view_id 1, a view of ir.demo
         other = self.env["ir.ui.view"].search([("model", "!=", "res.partner")], limit=1)
@@ -245,3 +269,30 @@ class TestBuilding(NudgeCase, TransactionCase):
                 "model": "res.partner", "xpath": "//sheet", "position": "inside",
                 "change": f'<a href="{value}">x</a>'})
             self.assertTrue(refused.is_error, value)
+
+    def test_a_plain_user_cannot_build_anything(self):
+        env = self.env(user=self.outsider, context={"nudge_mode": "dev"})
+        for name, arguments in (
+                ("prepare_field", {"model": "res.partner", "label": "Raghad Score", "type": "integer"}),
+                ("prepare_button", {"model": "res.partner", "label": "Ebrahim", "action_id": 1}),
+                ("prepare_view_change", {
+                    "model": "res.partner", "name": "Raghad note", "xpath": "//field[@name='function']",
+                    "position": "after", "change": "<div>x</div>"}),
+                ("read_view", {"model": "res.partner"})):
+            result = tools.base.call(env, name, arguments, None, "dev")
+            self.assertTrue(result.is_error, name)
+            self.assertIn("no tool named", result.content, name)
+        self.assertFalse(self.env["ir.model.fields"].search([("name", "=", "x_raghad_score")]))
+        self.assertFalse(self.env["ir.ui.view"].search([("name", "=", "Raghad note")]))
+
+    def test_a_developer_without_the_right_to_write_views_is_refused(self):
+        # The right to write a screen is taken from everyone: the tool must not make it with a back door
+        self.env["ir.model.access"].search([("model_id.model", "=", "ir.ui.view")]).sudo().write(
+            {"perm_write": False, "perm_create": False, "perm_unlink": False})
+        result = self.run_tool("prepare_view_change", {
+            "model": "res.partner", "name": "Ebrahim without rights",
+            "xpath": "//field[@name='function']", "position": "after", "change": "<div>x</div>"})
+        if not result.is_error:
+            with self.assertRaises(Exception):  # noqa: B017,PT011
+                self.do("prepare_view_change", result)
+        self.assertFalse(self.env["ir.ui.view"].sudo().search([("name", "=", "Ebrahim without rights")]))

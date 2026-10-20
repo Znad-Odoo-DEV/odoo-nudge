@@ -1,0 +1,66 @@
+{
+  "id": "eg",
+  "name": {"en": "Egypt", "ar": "مصر"},
+  "countries": ["EG"],
+  "reference": {
+    "en": "Value Added Tax Law No. (67) of 2016 and the e-invoicing system of the Egyptian Tax Authority (ETA). Check the current text with the ETA before you rely on it. This is a checklist, not legal advice; confirm with the authority.",
+    "ar": "قانون الضريبة على القيمة المضافة رقم (67) لسنة 2016 ونظام الفاتورة الإلكترونية لمصلحة الضرائب المصرية. راجع النص الحالي لدى المصلحة قبل الاعتماد عليه. هذه قائمة فحص وليست استشارة قانونية؛ تأكد لدى الجهة المختصة."
+  },
+  "checks": [
+    {
+      "key": "vat_tax_14",
+      "check": "tax_rate",
+      "severity": "critical",
+      "params": {"rate": 14.0, "use": "sale", "modules": ["account"]},
+      "title": {"en": "A 14% sales VAT is set up", "ar": "ضريبة مبيعات بنسبة 14% معرّفة"},
+      "explanation": {
+        "en": "The standard rate of VAT in Egypt is 14%. The Egyptian chart of accounts (module l10n_eg) brings the taxes.",
+        "ar": "السعر الأساسي لضريبة القيمة المضافة في مصر 14%. يأتي بالضرائب دليل حسابات مصر (الوحدة l10n_eg)."
+      }
+    },
+    {
+      "key": "company_vat",
+      "check": "company_field",
+      "severity": "critical",
+      "params": {"fields": ["vat"], "pattern": "\\d{9}"},
+      "title": {"en": "The company has its tax registration number of 9 digits", "ar": "للشركة رقم التسجيل الضريبي من 9 أرقام"},
+      "explanation": {
+        "en": "The tax registration number of the ETA has 9 digits and appears on the invoices and in the e-invoice. Enter it in Tax ID on the company.",
+        "ar": "رقم التسجيل الضريبي لدى المصلحة من 9 أرقام ويظهر على الفواتير وفي الفاتورة الإلكترونية. أدخله في الرقم الضريبي للشركة."
+      }
+    },
+    {
+      "key": "company_registry",
+      "check": "company_field",
+      "severity": "warning",
+      "params": {"fields": ["company_registry"]},
+      "title": {"en": "The company has its commercial register number", "ar": "للشركة رقم السجل التجاري"},
+      "explanation": {
+        "en": "The e-invoice names the commercial register number of the issuer. Enter it in Company ID.",
+        "ar": "تذكر الفاتورة الإلكترونية رقم السجل التجاري للمُصدِر. أدخله في حقل معرّف الشركة."
+      }
+    },
+    {
+      "key": "edi_module",
+      "check": "module_installed",
+      "severity": "warning",
+      "params": {"modules": ["l10n_eg_edi_eta", "l10n_eg_edi"]},
+      "title": {"en": "The e-invoicing module of the Egyptian Tax Authority is installed", "ar": "وحدة الفاتورة الإلكترونية لمصلحة الضرائب المصرية مثبَّتة"},
+      "explanation": {
+        "en": "Invoices are issued electronically through the ETA platform, signed and sent for validation. The module l10n_eg_edi_eta does the document, the signature and the connection.",
+        "ar": "تُصدر الفواتير إلكترونياً عبر منصة المصلحة موقّعة ومرسلة للاعتماد. تتولى الوحدة l10n_eg_edi_eta المستند والتوقيع والاتصال."
+      }
+    },
+    {
+      "key": "arabic_language",
+      "check": "language_active",
+      "severity": "info",
+      "params": {"prefix": "ar"},
+      "title": {"en": "Arabic is active, for invoices and contracts", "ar": "اللغة العربية مفعّلة للفواتير والعقود"},
+      "explanation": {
+        "en": "Documents addressed to authorities and to customers in Egypt are customarily issued in Arabic. Activate Arabic and set it on the customers who ask for it.",
+        "ar": "تُصدر المستندات الموجهة إلى الجهات الرسمية والعملاء في مصر عادةً بالعربية. فعّل العربية واضبطها على العملاء الذين يطلبونها."
+      }
+    }
+  ]
+}

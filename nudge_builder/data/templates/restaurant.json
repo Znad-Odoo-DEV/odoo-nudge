@@ -1,0 +1,926 @@
+{
+ "schema": 1,
+ "key": "restaurant",
+ "sector": "restaurant",
+ "shop": false,
+ "name": {
+  "en": "Restaurant",
+  "ar": "مطعم"
+ },
+ "brand": {
+  "en": "Sufra Restaurant",
+  "ar": "مطعم سفرة"
+ },
+ "suggest": [
+  "restaurant",
+  "restaurant",
+  "مطعم"
+ ],
+ "palette": {
+  "primary": "#7a1f1f",
+  "secondary": "#d9a441",
+  "accent": "#2f5d50",
+  "light": "#fff8ec",
+  "dark": "#2a1a14"
+ },
+ "fonts": {
+  "heading": "Montserrat",
+  "body": "Open Sans"
+ },
+ "fonts_ar": {
+  "heading": "Tajawal",
+  "body": "Tajawal"
+ },
+ "hero_image": "static/img/templates/restaurant.webp",
+ "thumbnail": "static/img/templates/restaurant_thumb.webp",
+ "menu": [
+  "home",
+  "about",
+  "services",
+  "projects",
+  "team",
+  "contact",
+  "faq"
+ ],
+ "pages": [
+  {
+   "key": "home",
+   "kind": "home",
+   "name": {
+    "en": "Home",
+    "ar": "الرئيسية"
+   },
+   "blocks": [
+    {
+     "snippet": "s_cover",
+     "copy": {
+      "en": {
+       "title": "A table set for you",
+       "text": "Home-style Levantine and Gulf dishes, cooked every morning from fresh ingredients.",
+       "button": "Reserve a table",
+       "button_url": "/contactus"
+      },
+      "ar": {
+       "title": "سفرة جاهزة من أجلك",
+       "text": "أطباق شامية وخليجية بنكهة البيت، تُطبخ كل صباح من مكونات طازجة.",
+       "button": "احجز طاولة",
+       "button_url": "/contactus"
+      }
+     },
+     "image": "food",
+     "image_prompt": "wide photo of a laid table with Levantine mezze and grilled meat, warm light, no text"
+    },
+    {
+     "snippet": "s_three_columns",
+     "copy": {
+      "en": {
+       "title": "Why Sufra Restaurant",
+       "items": [
+        {
+         "title": "Fresh daily",
+         "text": "Meat, vegetables and bread arrive and are prepared the same day."
+        },
+        {
+         "title": "Family portions",
+         "text": "Generous trays made for sharing."
+        },
+        {
+         "title": "Fast delivery",
+         "text": "Hot to your door in thirty minutes inside the city."
+        }
+       ]
+      },
+      "ar": {
+       "title": "لماذا مطعم سفرة",
+       "items": [
+        {
+         "title": "طازج كل يوم",
+         "text": "اللحوم والخضار والخبز تصل وتُحضّر في اليوم نفسه."
+        },
+        {
+         "title": "حصص عائلية",
+         "text": "صواني سخية للمشاركة."
+        },
+        {
+         "title": "توصيل سريع",
+         "text": "ساخن إلى بابك خلال ثلاثين دقيقة داخل المدينة."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_features",
+     "copy": {
+      "en": {
+       "title": "What we do",
+       "items": [
+        {
+         "title": "Grills",
+         "text": "Lamb, chicken and kofta over charcoal."
+        },
+        {
+         "title": "Mezze and salads",
+         "text": "Hummus, moutabal, tabbouleh and warm bread."
+        },
+        {
+         "title": "Rice and stews",
+         "text": "Mandi, kabsa and slow-cooked stews."
+        },
+        {
+         "title": "Sweets",
+         "text": "Kunafa, luqaimat and Arabic coffee."
+        }
+       ]
+      },
+      "ar": {
+       "title": "ما نقدّمه",
+       "items": [
+        {
+         "title": "المشويات",
+         "text": "لحم ودجاج وكفتة على الفحم."
+        },
+        {
+         "title": "المقبلات والسلطات",
+         "text": "حمص ومتبل وتبولة وخبز ساخن."
+        },
+        {
+         "title": "الأرز والطواجن",
+         "text": "مندي وكبسة وطواجن بطيئة الطهي."
+        },
+        {
+         "title": "الحلويات",
+         "text": "كنافة ولقيمات وقهوة عربية."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_numbers",
+     "copy": {
+      "en": {
+       "title": "In numbers",
+       "items": [
+        {
+         "number": "40",
+         "label": "Dishes on the menu"
+        },
+        {
+         "number": "12",
+         "label": "Years serving"
+        },
+        {
+         "number": "300",
+         "label": "Seats"
+        },
+        {
+         "number": "4.7/5",
+         "label": "Guest rating"
+        }
+       ]
+      },
+      "ar": {
+       "title": "بالأرقام",
+       "items": [
+        {
+         "number": "40",
+         "label": "طبقاً في القائمة"
+        },
+        {
+         "number": "12",
+         "label": "عاماً من الخدمة"
+        },
+        {
+         "number": "300",
+         "label": "مقعد"
+        },
+        {
+         "number": "4.7/5",
+         "label": "تقييم الضيوف"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Cooking the way grandmothers did",
+       "text": "Our recipes come from family kitchens. We bake bread in the morning, grill over charcoal and never reheat yesterday's food.",
+       "button": "About us",
+       "button_url": "/about"
+      },
+      "ar": {
+       "title": "طبخ كما كانت تفعل الجدّات",
+       "text": "وصفاتنا من مطابخ العائلة. نخبز الخبز كل صباح ونشوي على الفحم ولا نعيد تسخين طعام الأمس.",
+       "button": "من نحن",
+       "button_url": "/about"
+      }
+     },
+     "image": "food"
+    },
+    {
+     "snippet": "s_call_to_action",
+     "copy": {
+      "en": {
+       "title": "Hungry already?",
+       "text": "Order online and we will have it ready or at your door.",
+       "button": "Order now",
+       "button_url": "/contactus"
+      },
+      "ar": {
+       "title": "هل جعت؟",
+       "text": "اطلب عبر الموقع ونجهّزه لك أو نوصله إلى بابك.",
+       "button": "اطلب الآن",
+       "button_url": "/contactus"
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Arabic restaurant | Grills, mezze and mandi",
+     "ar": "مطعم عربي | مشويات ومقبلات ومندي"
+    },
+    "description": {
+     "en": "Reserve a table or order delivery of freshly cooked Levantine and Gulf dishes.",
+     "ar": "احجز طاولة أو اطلب توصيل أطباق شامية وخليجية طازجة."
+    }
+   },
+   "url": "/"
+  },
+  {
+   "key": "about",
+   "kind": "about",
+   "name": {
+    "en": "About us",
+    "ar": "من نحن"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "About Sufra Restaurant"
+      },
+      "ar": {
+       "title": "عن مطعم سفرة"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Cooking the way grandmothers did",
+       "text": "Our recipes come from family kitchens. We bake bread in the morning, grill over charcoal and never reheat yesterday's food."
+      },
+      "ar": {
+       "title": "طبخ كما كانت تفعل الجدّات",
+       "text": "وصفاتنا من مطابخ العائلة. نخبز الخبز كل صباح ونشوي على الفحم ولا نعيد تسخين طعام الأمس."
+      }
+     },
+     "image": "food"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Fresh daily",
+       "text": "Meat, vegetables and bread arrive and are prepared the same day."
+      },
+      "ar": {
+       "title": "طازج كل يوم",
+       "text": "اللحوم والخضار والخبز تصل وتُحضّر في اليوم نفسه."
+      }
+     },
+     "image": "food"
+    },
+    {
+     "snippet": "s_numbers",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "number": "40",
+         "label": "Dishes on the menu"
+        },
+        {
+         "number": "12",
+         "label": "Years serving"
+        },
+        {
+         "number": "300",
+         "label": "Seats"
+        },
+        {
+         "number": "4.7/5",
+         "label": "Guest rating"
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "number": "40",
+         "label": "طبقاً في القائمة"
+        },
+        {
+         "number": "12",
+         "label": "عاماً من الخدمة"
+        },
+        {
+         "number": "300",
+         "label": "مقعد"
+        },
+        {
+         "number": "4.7/5",
+         "label": "تقييم الضيوف"
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "About Sufra Restaurant",
+     "ar": "عن مطعم سفرة"
+    },
+    "description": {
+     "en": "Our recipes come from family kitchens. We bake bread in the morning, grill over charcoal and never reheat yesterday's food.",
+     "ar": "وصفاتنا من مطابخ العائلة. نخبز الخبز كل صباح ونشوي على الفحم ولا نعيد تسخين طعام الأمس."
+    }
+   }
+  },
+  {
+   "key": "services",
+   "kind": "services",
+   "name": {
+    "en": "Services",
+    "ar": "الخدمات"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Our services",
+       "text": "Home-style Levantine and Gulf dishes, cooked every morning from fresh ingredients."
+      },
+      "ar": {
+       "title": "خدماتنا",
+       "text": "أطباق شامية وخليجية بنكهة البيت، تُطبخ كل صباح من مكونات طازجة."
+      }
+     }
+    },
+    {
+     "snippet": "s_features",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "title": "Grills",
+         "text": "Lamb, chicken and kofta over charcoal."
+        },
+        {
+         "title": "Mezze and salads",
+         "text": "Hummus, moutabal, tabbouleh and warm bread."
+        },
+        {
+         "title": "Rice and stews",
+         "text": "Mandi, kabsa and slow-cooked stews."
+        },
+        {
+         "title": "Sweets",
+         "text": "Kunafa, luqaimat and Arabic coffee."
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "title": "المشويات",
+         "text": "لحم ودجاج وكفتة على الفحم."
+        },
+        {
+         "title": "المقبلات والسلطات",
+         "text": "حمص ومتبل وتبولة وخبز ساخن."
+        },
+        {
+         "title": "الأرز والطواجن",
+         "text": "مندي وكبسة وطواجن بطيئة الطهي."
+        },
+        {
+         "title": "الحلويات",
+         "text": "كنافة ولقيمات وقهوة عربية."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_three_columns",
+     "copy": {
+      "en": {
+       "title": "How we work",
+       "items": [
+        {
+         "title": "Fresh daily",
+         "text": "Meat, vegetables and bread arrive and are prepared the same day."
+        },
+        {
+         "title": "Family portions",
+         "text": "Generous trays made for sharing."
+        },
+        {
+         "title": "Fast delivery",
+         "text": "Hot to your door in thirty minutes inside the city."
+        }
+       ]
+      },
+      "ar": {
+       "title": "كيف نعمل",
+       "items": [
+        {
+         "title": "طازج كل يوم",
+         "text": "اللحوم والخضار والخبز تصل وتُحضّر في اليوم نفسه."
+        },
+        {
+         "title": "حصص عائلية",
+         "text": "صواني سخية للمشاركة."
+        },
+        {
+         "title": "توصيل سريع",
+         "text": "ساخن إلى بابك خلال ثلاثين دقيقة داخل المدينة."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_call_to_action",
+     "copy": {
+      "en": {
+       "title": "Hungry already?",
+       "text": "Order online and we will have it ready or at your door.",
+       "button": "Order now",
+       "button_url": "/contactus"
+      },
+      "ar": {
+       "title": "هل جعت؟",
+       "text": "اطلب عبر الموقع ونجهّزه لك أو نوصله إلى بابك.",
+       "button": "اطلب الآن",
+       "button_url": "/contactus"
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Restaurant services",
+     "ar": "خدمات مطعم"
+    },
+    "description": {
+     "en": "Reserve a table or order delivery of freshly cooked Levantine and Gulf dishes.",
+     "ar": "احجز طاولة أو اطلب توصيل أطباق شامية وخليجية طازجة."
+    }
+   }
+  },
+  {
+   "key": "projects",
+   "kind": "projects",
+   "name": {
+    "en": "Projects",
+    "ar": "المشاريع"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Our work"
+      },
+      "ar": {
+       "title": "أعمالنا"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "The family hall",
+       "text": "Seats up to 60 for birthdays and gatherings."
+      },
+      "ar": {
+       "title": "القاعة العائلية",
+       "text": "تتسع لستين ضيفاً للمناسبات والتجمعات."
+      }
+     },
+     "image": "food"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "The charcoal grill",
+       "text": "Visible from the dining room."
+      },
+      "ar": {
+       "title": "شواية الفحم",
+       "text": "ظاهرة من قاعة الطعام."
+      }
+     },
+     "image": "food"
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Ramadan tent",
+       "text": "Iftar buffet every evening of the month."
+      },
+      "ar": {
+       "title": "خيمة رمضان",
+       "text": "بوفيه إفطار كل مساء طوال الشهر."
+      }
+     },
+     "image": "food"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Catering trays",
+       "text": "Orders for offices and weddings."
+      },
+      "ar": {
+       "title": "صواني التموين",
+       "text": "طلبات للمكاتب وحفلات الزفاف."
+      }
+     },
+     "image": "food"
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Restaurant projects",
+     "ar": "أعمال مطعم"
+    },
+    "description": {
+     "en": "Reserve a table or order delivery of freshly cooked Levantine and Gulf dishes.",
+     "ar": "احجز طاولة أو اطلب توصيل أطباق شامية وخليجية طازجة."
+    }
+   }
+  },
+  {
+   "key": "team",
+   "kind": "team",
+   "name": {
+    "en": "Our team",
+    "ar": "فريقنا"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Meet the team"
+      },
+      "ar": {
+       "title": "تعرّف على فريقنا"
+      }
+     }
+    },
+    {
+     "snippet": "s_company_team",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "name": "Raghad",
+         "role": "Owner"
+        },
+        {
+         "name": "Ebrahim",
+         "role": "Head chef"
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "name": "رغد",
+         "role": "المالكة"
+        },
+        {
+         "name": "إبراهيم",
+         "role": "الشيف الرئيسي"
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Our team | Sufra Restaurant",
+     "ar": "فريقنا | مطعم سفرة"
+    },
+    "description": {
+     "en": "The people behind Sufra Restaurant.",
+     "ar": "الأشخاص الذين يقفون خلف مطعم سفرة."
+    }
+   }
+  },
+  {
+   "key": "contact",
+   "kind": "contact",
+   "name": {
+    "en": "Contact us",
+    "ar": "اتصل بنا"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Contact us",
+       "text": "We reply within one working day."
+      },
+      "ar": {
+       "title": "اتصل بنا",
+       "text": "نردّ خلال يوم عمل واحد."
+      }
+     }
+    },
+    {
+     "snippet": "s_contact_info",
+     "copy": {
+      "en": {
+       "title": "Find us",
+       "items": [
+        {
+         "title": "Address",
+         "text": "Souq Street, Sharjah"
+        },
+        {
+         "title": "Opening hours",
+         "text": "Daily 11:00-24:00"
+        },
+        {
+         "title": "Phone",
+         "text": "+971 4 000 0000"
+        },
+        {
+         "title": "Email",
+         "text": "hello@example.com"
+        }
+       ]
+      },
+      "ar": {
+       "title": "تجدنا هنا",
+       "items": [
+        {
+         "title": "العنوان",
+         "text": "شارع السوق، الشارقة"
+        },
+        {
+         "title": "ساعات العمل",
+         "text": "يومياً 11:00 - 24:00"
+        },
+        {
+         "title": "الهاتف",
+         "text": "+971 4 000 0000"
+        },
+        {
+         "title": "البريد الإلكتروني",
+         "text": "hello@example.com"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Hungry already?",
+       "text": "Order online and we will have it ready or at your door."
+      },
+      "ar": {
+       "title": "هل جعت؟",
+       "text": "اطلب عبر الموقع ونجهّزه لك أو نوصله إلى بابك."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Contact Sufra Restaurant",
+     "ar": "تواصل مع مطعم سفرة"
+    },
+    "description": {
+     "en": "Call, write or visit us: Souq Street, Sharjah.",
+     "ar": "اتصل بنا أو راسلنا أو زرنا: شارع السوق، الشارقة."
+    }
+   },
+   "url": "/contactus"
+  },
+  {
+   "key": "faq",
+   "kind": "faq",
+   "name": {
+    "en": "FAQ",
+    "ar": "الأسئلة الشائعة"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Frequently asked questions"
+      },
+      "ar": {
+       "title": "الأسئلة الشائعة"
+      }
+     }
+    },
+    {
+     "snippet": "s_faq_collapse",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "title": "Do I need to reserve?",
+         "text": "Only on weekends and for groups above eight."
+        },
+        {
+         "title": "Is the meat halal?",
+         "text": "Yes, all meat is halal and certified."
+        },
+        {
+         "title": "Do you have vegetarian dishes?",
+         "text": "Many of our mezze and rice dishes are vegetarian."
+        },
+        {
+         "title": "Can you cater an event?",
+         "text": "Yes, from ten to five hundred guests, with notice of two days."
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "title": "هل يلزم الحجز؟",
+         "text": "فقط في عطلة نهاية الأسبوع وللمجموعات فوق ثمانية أشخاص."
+        },
+        {
+         "title": "هل اللحوم حلال؟",
+         "text": "نعم، جميع اللحوم حلال ومعتمدة."
+        },
+        {
+         "title": "هل لديكم أطباق نباتية؟",
+         "text": "كثير من المقبلات وأطباق الأرز نباتية."
+        },
+        {
+         "title": "هل تغطّون المناسبات؟",
+         "text": "نعم، من عشرة إلى خمسمئة ضيف بإشعار مسبق قبل يومين."
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "FAQ | Sufra Restaurant",
+     "ar": "الأسئلة الشائعة | مطعم سفرة"
+    },
+    "description": {
+     "en": "Answers to the questions we hear most.",
+     "ar": "إجابات عن الأسئلة التي نسمعها أكثر من غيرها."
+    }
+   }
+  },
+  {
+   "key": "legal_privacy",
+   "kind": "legal",
+   "name": {
+    "en": "Privacy policy",
+    "ar": "سياسة الخصوصية"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Privacy policy"
+      },
+      "ar": {
+       "title": "سياسة الخصوصية"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "What we collect",
+       "text": "Sufra Restaurant collects only the details you give us through forms, orders or calls: your name, phone, email and the content of your request. We use them to answer you and to deliver what you asked for."
+      },
+      "ar": {
+       "title": "ما الذي نجمعه",
+       "text": "تجمع مطعم سفرة فقط البيانات التي تقدّمها عبر النماذج أو الطلبات أو المكالمات: اسمك وهاتفك وبريدك ومضمون طلبك. نستخدمها للرد عليك وتنفيذ ما طلبته."
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Your rights",
+       "text": "We never sell your data. You may ask us to show, correct or delete it at any time by writing to the address on the contact page."
+      },
+      "ar": {
+       "title": "حقوقك",
+       "text": "لا نبيع بياناتك أبداً. ويمكنك أن تطلب منا الاطلاع عليها أو تصحيحها أو حذفها في أي وقت بمراسلتنا على العنوان المذكور في صفحة التواصل."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Privacy policy",
+     "ar": "سياسة الخصوصية"
+    },
+    "description": {
+     "en": "How we collect, use and protect your personal data.",
+     "ar": "كيف نجمع بياناتك الشخصية ونستخدمها ونحميها."
+    }
+   },
+   "url": "/privacy"
+  },
+  {
+   "key": "legal_terms",
+   "kind": "legal",
+   "name": {
+    "en": "Terms and conditions",
+    "ar": "الشروط والأحكام"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Terms and conditions"
+      },
+      "ar": {
+       "title": "الشروط والأحكام"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Using this website",
+       "text": "The content of this website is provided for information. Prices, availability and timelines are confirmed in writing before any agreement starts."
+      },
+      "ar": {
+       "title": "استخدام الموقع",
+       "text": "المحتوى المنشور في هذا الموقع للاطلاع. وتُؤكَّد الأسعار والتوفر والمواعيد كتابةً قبل بدء أي اتفاق."
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Responsibility",
+       "text": "We do our best to keep the website accurate. We are not liable for decisions taken only on the basis of the sample information shown here."
+      },
+      "ar": {
+       "title": "المسؤولية",
+       "text": "نحرص على دقة المعلومات في الموقع، ولا نتحمل مسؤولية قرارات بُنيت على المعلومات التوضيحية المعروضة هنا فقط."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Terms and conditions",
+     "ar": "الشروط والأحكام"
+    },
+    "description": {
+     "en": "The terms that apply when you use our website and services.",
+     "ar": "الشروط المطبقة عند استخدام موقعنا وخدماتنا."
+    }
+   },
+   "url": "/terms"
+  }
+ ]
+}

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_builder_site_view_form" model="ir.ui.view">
+        <field name="name">nudge.builder.site.form</field>
+        <field name="model">nudge.builder.site</field>
+        <field name="arch" type="xml">
+            <form string="Website Builder">
+                <header>
+                    <button name="action_preview" type="object" string="Show me three directions" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_preview" type="object" string="Redraw the directions"
+                            invisible="state != 'previewed'"/>
+                    <button name="action_build" type="object" string="Build this website" class="btn-primary"
+                            invisible="state != 'previewed'"/>
+                    <button name="action_continue" type="object" string="Continue the build" class="btn-primary"
+                            invisible="not stopped or state == 'published'"/>
+                    <button name="action_open_editor" type="object" string="Open the home page in the editor"
+                            invisible="state not in ('built', 'published')"/>
+                    <button name="action_publish" type="object" string="Publish all pages"
+                            invisible="state != 'built'"
+                            confirm="Every page of this site becomes visible to everybody, and its home page becomes the home page of the website. Continue?"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,previewed,built,published"/>
+                </header>
+                <sheet>
+                    <div class="alert alert-info" role="status" invisible="not private">
+                        No AI writes text or pictures here (no provider, or Private Mode is on): the pages are built from the sample copy of the template and the bundled placeholder pictures.
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="state != 'draft'"/></h1>
+                    </div>
+                    <group invisible="state not in ('draft', 'previewed')">
+                        <group string="1. Your business">
+                            <field name="website_id" readonly="state != 'draft'"/>
+                            <field name="kind" placeholder="Contracting, clinic, restaurant, shop..." readonly="state != 'draft'"/>
+                            <field name="template_key" readonly="state != 'draft'"/>
+                        </group>
+                        <group string="2. Languages">
+                            <field name="lang_ids" widget="many2many_tags" options="{'no_create': True}" readonly="state != 'draft'"/>
+                        </group>
+                        <group string="3. Colours and fonts">
+                            <field name="color_primary" widget="color" readonly="state != 'draft'"/>
+                            <field name="color_secondary" widget="color" readonly="state != 'draft'"/>
+                            <field name="color_accent" widget="color" readonly="state != 'draft'"/>
+                            <field name="color_light" widget="color" readonly="state != 'draft'"/>
+                            <field name="color_dark" widget="color" readonly="state != 'draft'"/>
+                            <field name="font_heading" readonly="state != 'draft'"/>
+                            <field name="font_body" readonly="state != 'draft'"/>
+                            <field name="colors_from_logo" invisible="not colors_from_logo"/>
+                        </group>
+                        <group string="4. Pages wanted">
+                            <field name="kind_ids" widget="many2many_checkboxes" readonly="state != 'draft'"/>
+                            <field name="allow_projects" readonly="state != 'draft'"/>
+                            <field name="allow_team" readonly="state != 'draft'"/>
+                        </group>
+                        <group string="5. Online shop" invisible="not shop_available">
+                            <field name="shop_available" invisible="1"/>
+                            <field name="shop" readonly="state != 'draft'"/>
+                        </group>
+                        <group string="6. Tone">
+                            <field name="tone" widget="radio" readonly="state != 'draft'"/>
+                        </group>
+                    </group>
+                    <group invisible="state != 'previewed'" string="Pick a direction">
+                        <field name="direction" widget="radio" options="{'horizontal': true}"/>
+                        <field name="preview_html" nolabel="1" colspan="2"/>
+                    </group>
+                    <group invisible="state not in ('built', 'published')" string="Pages built">
+                        <field name="page_ids" nolabel="1" colspan="2">
+                            <tree create="0" delete="0">
+                                <field name="name"/>
+                                <field name="url"/>
+                                <field name="snippet_keys"/>
+                                <field name="is_published" widget="boolean"/>
+                                <button name="action_open_editor" type="object" string="Open in editor" icon="fa-pencil"/>
+                            </tree>
+                        </field>
+                    </group>
+                    <field name="log" readonly="1" invisible="not log"/>
+                    <field name="private" invisible="1"/>
+                    <field name="stopped" invisible="1"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_builder_site_view_list" model="ir.ui.view">
+        <field name="name">nudge.builder.site.list</field>
+        <field name="model">nudge.builder.site</field>
+        <field name="arch" type="xml">
+            <tree string="Websites">
+                <field name="name"/>
+                <field name="website_id"/>
+                <field name="kind"/>
+                <field name="state"/>
+                <field name="create_date"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="nudge_builder_action_new" model="ir.actions.act_window">
+        <field name="name">New site</field>
+        <field name="res_model">nudge.builder.site</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+
+    <record id="nudge_builder_action_sites" model="ir.actions.act_window">
+        <field name="name">Sites built</field>
+        <field name="res_model">nudge.builder.site</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="nudge_builder_shop_confirm_view_form" model="ir.ui.view">
+        <field name="name">nudge.builder.shop.confirm.form</field>
+        <field name="model">nudge.builder.shop.confirm</field>
+        <field name="arch" type="xml">
+            <form>
+                <h2>Arrange the shop too?</h2>
+                <p>Nudge will make exactly these changes, as you. It fills what is empty and adds unpublished
+                   drafts; nothing is deleted or published.</p>
+                <field name="lines" readonly="1" nolabel="1"/>
+                <footer>
+                    <button name="action_yes" type="object" string="Yes, arrange the shop" class="btn-primary"/>
+                    <button name="action_no" type="object" string="No, build the pages only"/>
+                    <button string="Cancel" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <menuitem id="menu_nudge_builder" name="Website Builder" parent="nudge.nudge_menu_root" sequence="10"
+              groups="website.group_website_designer"/>
+    <menuitem id="menu_nudge_builder_new" name="New site" parent="menu_nudge_builder" sequence="10"
+              action="nudge_builder_action_new"/>
+    <menuitem id="menu_nudge_builder_sites" name="Sites built" parent="menu_nudge_builder" sequence="20"
+              action="nudge_builder_action_sites"/>
+</odoo>

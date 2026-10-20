@@ -148,10 +148,10 @@ class BaseAdapter:
         """Send a minimal request. :raise AdapterError: when it fails"""
         raise NotImplementedError
 
-    def transcribe(self, audio, language="", hints=(), deadline=None):
+    def transcribe(self, audio, language="", hints=(), deadline=None, audio_format="wav"):
         """Turn a recording into text.
 
-        :param bytes audio: a WAV file
+        :param bytes audio: a WAV file, or a recording of ``audio_format``
         :param str language: ISO 639-1 code of the language most likely spoken
         :param hints: words the speaker may be saying
         :return: dict with ``text``, ``usage`` and ``model``

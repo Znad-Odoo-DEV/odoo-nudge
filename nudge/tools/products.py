@@ -86,16 +86,19 @@ def _quantities(product, warehouses):
     """:return: what is in stock of ``product``, as the person sees it"""
     if "qty_available" not in product._fields:
         return {}
-    found = {
-        "on_hand": product.qty_available,
-        "free": product.free_qty if "free_qty" in product._fields else product.qty_available,
-        "unit": product.uom_id.name if "uom_id" in product._fields else "",
-    }
-    if warehouses:
-        found["by_warehouse"] = {
-            warehouse.name: product.with_context(warehouse_id=warehouse.id).qty_available
-            for warehouse in warehouses
+    try:
+        found = {
+            "on_hand": product.qty_available,
+            "free": product.free_qty if "free_qty" in product._fields else product.qty_available,
+            "unit": product.uom_id.name if "uom_id" in product._fields else "",
         }
+        if warehouses:
+            found["by_warehouse"] = {
+                warehouse.name: product.with_context(warehouse_id=warehouse.id).qty_available
+                for warehouse in warehouses
+            }
+    except AccessError:
+        return {}  # no right on the stock: no figures, and no error
     return found
 
 

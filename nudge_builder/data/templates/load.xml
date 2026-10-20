@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- noupdate is off on purpose: the JSON files are the source, every module update re-reads them. -->
+    <record id="access_nudge_builder_template_designer" model="ir.model.access">
+        <field name="name">nudge.builder.template designer</field>
+        <field name="model_id" ref="model_nudge_builder_template"/>
+        <field name="group_id" ref="website.group_website_designer"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="access_nudge_builder_template_admin" model="ir.model.access">
+        <field name="name">nudge.builder.template admin</field>
+        <field name="model_id" ref="model_nudge_builder_template"/>
+        <field name="group_id" ref="base.group_system"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+    <function model="nudge.builder.template" name="_load_library"/>
+</odoo>

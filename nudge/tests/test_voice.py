@@ -371,7 +371,8 @@ class TestVoice(NudgeCase, TransactionCase):
         self.assertTrue(self.Voice._is_allowed(), "Allowed unless said otherwise")
         self.assertEqual(self.Voice._get_engine(), "auto")
         self.assertEqual(self.Voice.with_user(self.user_a)._get_session_info(), {
-            "can_use_voice": True, "voice_engine": "auto", "can_transcribe": True})
+            "can_use_voice": True, "voice_engine": "auto", "can_transcribe": True,
+            "voice_private": False, "voice_blocked_reason": "", "browser_speech_ok": True})
 
         settings = self.env["res.config.settings"].create({})
         self.assertTrue(settings.nudge_voice)
@@ -382,7 +383,8 @@ class TestVoice(NudgeCase, TransactionCase):
         self.assertFalse(self.Voice._is_allowed())
         self.assertFalse(self.env["res.config.settings"].create({}).nudge_voice)
         self.assertEqual(self.Voice.with_user(self.user_a)._get_session_info(), {
-            "can_use_voice": False, "voice_engine": "auto", "can_transcribe": False})
+            "can_use_voice": False, "voice_engine": "auto", "can_transcribe": False,
+            "voice_private": False, "voice_blocked_reason": "", "browser_speech_ok": True})
         self.refused("turned this off")
         self.assertEqual(adapter.recordings, [])
 
@@ -394,7 +396,8 @@ class TestVoice(NudgeCase, TransactionCase):
 
         self.assertEqual(self.env["res.config.settings"].create({}).nudge_voice_engine, "browser")
         self.assertEqual(self.Voice.with_user(self.user_a)._get_session_info(), {
-            "can_use_voice": True, "voice_engine": "browser", "can_transcribe": False})
+            "can_use_voice": True, "voice_engine": "browser", "can_transcribe": False,
+            "voice_private": False, "voice_blocked_reason": "", "browser_speech_ok": True})
         self.refused("turned this off")
         self.assertEqual(adapter.recordings, [], "No sound goes to the provider")
 

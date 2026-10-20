@@ -74,6 +74,7 @@ export function streamChat({
     explain,
     file,
     report,
+    fresh,
     signal,
     onEvent,
 }) {
@@ -90,6 +91,34 @@ export function streamChat({
             explain: explain || null,
             file: file || null,
             report: report || null,
+            // Ask the provider, not the memory of answers
+            fresh: Boolean(fresh),
+        },
+        { signal, onEvent }
+    );
+}
+
+/**
+ * Put the same AI work on the records selected in a list before the person,
+ * as a card, and report what comes of it.
+ *
+ * @param {Object} params
+ * @param {number|null} [params.conversationId]
+ * @param {Object} params.work model, operation, field, and the records: ids,
+ *   or the domain of the list
+ */
+export function streamBulk({ conversationId, work, signal, onEvent }) {
+    return streamRequest(
+        "/nudge/bulk/start",
+        {
+            conversation_id: conversationId,
+            model: work.model,
+            operation: work.operation,
+            field: work.field,
+            ids: work.ids?.length ? JSON.stringify(work.ids) : null,
+            domain: work.domain ? JSON.stringify(work.domain) : null,
+            instruction: work.instruction || null,
+            language: work.language || null,
         },
         { signal, onEvent }
     );

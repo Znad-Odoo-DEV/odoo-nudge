@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Ready-made tours for the apps of Odoo Community. Each is only offered where its app is installed. -->
+    <record id="tour_create_quotation" model="nudge.tour">
+        <field name="name">Create a quotation</field>
+        <field name="phrases_en">create a quotation
+new quotation
+new quote
+make a quote</field>
+        <field name="phrases_ar">انشاء عرض سعر
+عرض سعر جديد
+كيف اعمل عرض سعر</field>
+        <field name="action_xmlid">sale.action_quotations_with_onboarding</field>
+        <field name="module_name">sale</field>
+        <field name="is_library" eval="True"/>
+    </record>
+    <record id="tour_create_quotation_1" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_create_quotation"/>
+        <field name="sequence">10</field>
+        <field name="kind">control</field>
+        <field name="name">new</field>
+        <field name="label">New</field>
+        <field name="note">Press New to start a quotation.</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_type">list</field>
+    </record>
+    <record id="tour_create_quotation_2" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_create_quotation"/>
+        <field name="sequence">20</field>
+        <field name="kind">field</field>
+        <field name="name">partner_id</field>
+        <field name="label">Customer</field>
+        <field name="note">Choose the customer the quotation is for.</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_type">form</field>
+    </record>
+    <record id="tour_create_quotation_3" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_create_quotation"/>
+        <field name="sequence">30</field>
+        <field name="kind">field</field>
+        <field name="name">order_line</field>
+        <field name="label">Order Lines</field>
+        <field name="note">Add the products: press Add a product, choose it and set the quantity.</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_type">form</field>
+    </record>
+    <record id="tour_create_quotation_4" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_create_quotation"/>
+        <field name="sequence">40</field>
+        <field name="kind">control</field>
+        <field name="name">save</field>
+        <field name="label">Save</field>
+        <field name="note">Save the quotation.</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_type">form</field>
+    </record>
+    <record id="tour_confirm_sales_order" model="nudge.tour">
+        <field name="name">Confirm a sales order</field>
+        <field name="phrases_en">confirm a sales order
+confirm a quotation
+confirm an order
+confirm sale</field>
+        <field name="phrases_ar">تأكيد أمر بيع
+تأكيد عرض السعر
+كيف اأكد طلب بيع</field>
+        <field name="action_xmlid">sale.action_quotations_with_onboarding</field>
+        <field name="module_name">sale</field>
+        <field name="is_library" eval="True"/>
+    </record>
+    <record id="tour_confirm_sales_order_1" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_confirm_sales_order"/>
+        <field name="sequence">10</field>
+        <field name="kind">control</field>
+        <field name="name">search</field>
+        <field name="label">Search</field>
+        <field name="note">Find the quotation by its number or the name of the customer.</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_type">list</field>
+    </record>
+    <record id="tour_confirm_sales_order_2" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_confirm_sales_order"/>
+        <field name="sequence">20</field>
+        <field name="kind">button</field>
+        <field name="name">action_confirm</field>
+        <field name="label">Confirm</field>
+        <field name="note">Open the quotation and press Confirm: it becomes a sales order.</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_type">form</field>
+    </record>
+    <record id="tour_create_contact" model="nudge.tour">
+        <field name="name">Create a contact</field>
+        <field name="phrases_en">create a contact
+new contact
+add a contact
+new customer
+new vendor</field>
+        <field name="phrases_ar">انشاء جهة اتصال
+جهة اتصال جديدة
+اضافة عميل
+اضافة مورد</field>
+        <field name="action_xmlid">base.action_partner_form</field>
+        <field name="module_name">base</field>
+        <field name="is_library" eval="True"/>
+    </record>
+    <record id="tour_create_contact_1" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_create_contact"/>
+        <field name="sequence">10</field>
+        <field name="kind">control</field>
+        <field name="name">new</field>
+        <field name="label">New</field>
+        <field name="note">Press New to add a contact.</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_type">list</field>
+    </record>
+    <record id="tour_create_contact_2" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_create_contact"/>
+        <field name="sequence">20</field>
+        <field name="kind">field</field>
+        <field name="name">name</field>
+        <field name="label">Name</field>
+        <field name="note">Write the name of the person or the company.</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_type">form</field>
+    </record>
+    <record id="tour_create_contact_3" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_create_contact"/>
+        <field name="sequence">30</field>
+        <field name="kind">field</field>
+        <field name="name">phone</field>
+        <field name="label">Phone</field>
+        <field name="note">Add a phone number so that people can be reached.</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_type">form</field>
+    </record>
+    <record id="tour_create_contact_4" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_create_contact"/>
+        <field name="sequence">40</field>
+        <field name="kind">field</field>
+        <field name="name">email</field>
+        <field name="label">Email</field>
+        <field name="note">Add the email address: quotations and invoices are sent to it.</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_type">form</field>
+    </record>
+    <record id="tour_create_contact_5" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_create_contact"/>
+        <field name="sequence">50</field>
+        <field name="kind">control</field>
+        <field name="name">save</field>
+        <field name="label">Save</field>
+        <field name="note">Save the contact.</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_type">form</field>
+    </record>
+    <record id="tour_create_product" model="nudge.tour">
+        <field name="name">Create a product</field>
+        <field name="phrases_en">create a product
+new product
+add a product</field>
+        <field name="phrases_ar">انشاء منتج
+منتج جديد
+اضافة منتج</field>
+        <field name="action_xmlid">product.product_template_action</field>
+        <field name="module_name">product</field>
+        <field name="is_library" eval="True"/>
+    </record>
+    <record id="tour_create_product_1" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_create_product"/>
+        <field name="sequence">10</field>
+        <field name="kind">control</field>
+        <field name="name">new</field>
+        <field name="label">New</field>
+        <field name="note">Press New to add a product.</field>
+        <field name="res_model">product.template</field>
+        <field name="view_type">kanban</field>
+    </record>
+    <record id="tour_create_product_2" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_create_product"/>
+        <field name="sequence">20</field>
+        <field name="kind">field</field>
+        <field name="name">name</field>
+        <field name="label">Product Name</field>
+        <field name="note">Write the name of the product as people will see it.</field>
+        <field name="res_model">product.template</field>
+        <field name="view_type">form</field>
+    </record>
+    <record id="tour_create_product_3" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_create_product"/>
+        <field name="sequence">30</field>
+        <field name="kind">field</field>
+        <field name="name">list_price</field>
+        <field name="label">Sales Price</field>
+        <field name="note">Set the price it is sold at.</field>
+        <field name="res_model">product.template</field>
+        <field name="view_type">form</field>
+    </record>
+    <record id="tour_create_product_4" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_create_product"/>
+        <field name="sequence">40</field>
+        <field name="kind">field</field>
+        <field name="name">standard_price</field>
+        <field name="label">Cost</field>
+        <field name="note">Set what it costs you.</field>
+        <field name="res_model">product.template</field>
+        <field name="view_type">form</field>
+    </record>
+    <record id="tour_create_product_5" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_create_product"/>
+        <field name="sequence">50</field>
+        <field name="kind">control</field>
+        <field name="name">save</field>
+        <field name="label">Save</field>
+        <field name="note">Save the product.</field>
+        <field name="res_model">product.template</field>
+        <field name="view_type">form</field>
+    </record>
+    <record id="tour_receive_purchase_order" model="nudge.tour">
+        <field name="name">Receive a purchase order</field>
+        <field name="phrases_en">receive a purchase order
+receive goods
+receive a purchase
+receipt of a purchase order</field>
+        <field name="phrases_ar">استلام أمر شراء
+استلام بضاعة
+استلام المشتريات</field>
+        <field name="action_xmlid">purchase.purchase_form_action</field>
+        <field name="module_name">purchase_stock</field>
+        <field name="is_library" eval="True"/>
+    </record>
+    <record id="tour_receive_purchase_order_1" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_receive_purchase_order"/>
+        <field name="sequence">10</field>
+        <field name="kind">control</field>
+        <field name="name">search</field>
+        <field name="label">Search</field>
+        <field name="note">Find the purchase order by its number or the vendor.</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_type">list</field>
+    </record>
+    <record id="tour_receive_purchase_order_2" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_receive_purchase_order"/>
+        <field name="sequence">20</field>
+        <field name="kind">button</field>
+        <field name="name">action_view_picking</field>
+        <field name="label">Receipt</field>
+        <field name="note">Open the order and press the Receipt button: it is the delivery note of the vendor.</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_type">form</field>
+    </record>
+    <record id="tour_receive_purchase_order_3" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_receive_purchase_order"/>
+        <field name="sequence">30</field>
+        <field name="kind">button</field>
+        <field name="name">button_validate</field>
+        <field name="label">Validate</field>
+        <field name="note">Check the quantities received and press Validate: the stock goes up.</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_type">form</field>
+    </record>
+    <record id="tour_validate_delivery" model="nudge.tour">
+        <field name="name">Validate a delivery</field>
+        <field name="phrases_en">validate a delivery
+deliver an order
+validate a transfer
+ship an order</field>
+        <field name="phrases_ar">اعتماد تسليم
+تسليم طلب
+تحقق من التسليم</field>
+        <field name="action_xmlid">stock.action_picking_tree_all</field>
+        <field name="module_name">stock</field>
+        <field name="is_library" eval="True"/>
+    </record>
+    <record id="tour_validate_delivery_1" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_validate_delivery"/>
+        <field name="sequence">10</field>
+        <field name="kind">control</field>
+        <field name="name">search</field>
+        <field name="label">Search</field>
+        <field name="note">Find the delivery by its number, the customer or the product.</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_type">list</field>
+    </record>
+    <record id="tour_validate_delivery_2" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_validate_delivery"/>
+        <field name="sequence">20</field>
+        <field name="kind">button</field>
+        <field name="name">button_validate</field>
+        <field name="label">Validate</field>
+        <field name="note">Open the delivery, check the quantities and press Validate: the stock goes down.</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_type">form</field>
+    </record>
+    <record id="tour_register_vendor_bill" model="nudge.tour">
+        <field name="name">Register a vendor bill</field>
+        <field name="phrases_en">register a vendor bill
+new vendor bill
+enter a bill
+record a supplier invoice</field>
+        <field name="phrases_ar">تسجيل فاتورة مورد
+فاتورة مورد جديدة
+ادخال فاتورة مورد</field>
+        <field name="action_xmlid">account.action_move_in_invoice_type</field>
+        <field name="module_name">account</field>
+        <field name="is_library" eval="True"/>
+    </record>
+    <record id="tour_register_vendor_bill_1" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_register_vendor_bill"/>
+        <field name="sequence">10</field>
+        <field name="kind">control</field>
+        <field name="name">new</field>
+        <field name="label">New</field>
+        <field name="note">Press New to enter a vendor bill.</field>
+        <field name="res_model">account.move</field>
+        <field name="view_type">list</field>
+    </record>
+    <record id="tour_register_vendor_bill_2" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_register_vendor_bill"/>
+        <field name="sequence">20</field>
+        <field name="kind">field</field>
+        <field name="name">partner_id</field>
+        <field name="label">Vendor</field>
+        <field name="note">Choose the vendor who sent the bill.</field>
+        <field name="res_model">account.move</field>
+        <field name="view_type">form</field>
+    </record>
+    <record id="tour_register_vendor_bill_3" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_register_vendor_bill"/>
+        <field name="sequence">30</field>
+        <field name="kind">field</field>
+        <field name="name">invoice_date</field>
+        <field name="label">Bill Date</field>
+        <field name="note">Write the date printed on the bill.</field>
+        <field name="res_model">account.move</field>
+        <field name="view_type">form</field>
+    </record>
+    <record id="tour_register_vendor_bill_4" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_register_vendor_bill"/>
+        <field name="sequence">40</field>
+        <field name="kind">tab</field>
+        <field name="name">invoice_tab</field>
+        <field name="label">Invoice Lines</field>
+        <field name="note">Open the tab of the lines.</field>
+        <field name="res_model">account.move</field>
+        <field name="view_type">form</field>
+    </record>
+    <record id="tour_register_vendor_bill_5" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_register_vendor_bill"/>
+        <field name="sequence">50</field>
+        <field name="kind">field</field>
+        <field name="name">invoice_line_ids</field>
+        <field name="label">Invoice Lines</field>
+        <field name="note">Add a line for each product or expense on the bill.</field>
+        <field name="res_model">account.move</field>
+        <field name="view_type">form</field>
+    </record>
+    <record id="tour_register_vendor_bill_6" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_register_vendor_bill"/>
+        <field name="sequence">60</field>
+        <field name="kind">button</field>
+        <field name="name">action_post</field>
+        <field name="label">Confirm</field>
+        <field name="note">Press Confirm to post the bill.</field>
+        <field name="res_model">account.move</field>
+        <field name="view_type">form</field>
+    </record>
+    <record id="tour_register_payment" model="nudge.tour">
+        <field name="name">Register a payment</field>
+        <field name="phrases_en">register a payment
+pay an invoice
+record a payment
+customer payment</field>
+        <field name="phrases_ar">تسجيل دفعة
+دفع فاتورة
+تسجيل سداد</field>
+        <field name="action_xmlid">account.action_move_out_invoice_type</field>
+        <field name="module_name">account</field>
+        <field name="is_library" eval="True"/>
+    </record>
+    <record id="tour_register_payment_1" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_register_payment"/>
+        <field name="sequence">10</field>
+        <field name="kind">control</field>
+        <field name="name">search</field>
+        <field name="label">Search</field>
+        <field name="note">Find the invoice by its number or the customer.</field>
+        <field name="res_model">account.move</field>
+        <field name="view_type">list</field>
+    </record>
+    <record id="tour_register_payment_2" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_register_payment"/>
+        <field name="sequence">20</field>
+        <field name="kind">button</field>
+        <field name="name">action_register_payment</field>
+        <field name="label">Pay</field>
+        <field name="note">Open the posted invoice and press Pay (Register Payment).</field>
+        <field name="res_model">account.move</field>
+        <field name="view_type">form</field>
+    </record>
+    <record id="tour_register_payment_3" model="nudge.tour.step">
+        <field name="tour_id" ref="tour_register_payment"/>
+        <field name="sequence">30</field>
+        <field name="kind">button</field>
+        <field name="name">action_create_payments</field>
+        <field name="label">Create Payment</field>
+        <field name="note">Check the journal, the amount and the date, then press Create Payment: the invoice is marked paid.</field>
+        <field name="res_model">account.payment.register</field>
+        <field name="view_type">form</field>
+    </record>
+</odoo>

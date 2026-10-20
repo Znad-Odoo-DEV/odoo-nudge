@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_translation_view_form" model="ir.ui.view">
+        <field name="name">nudge.translation.form</field>
+        <field name="model">nudge.translation</field>
+        <field name="arch" type="xml">
+            <form string="Translate a Module" create="0" delete="0">
+                <header>
+                    <button name="action_list" type="object" string="List the Untranslated Terms"
+                            class="btn-primary" invisible="state != 'setup'"/>
+                    <button name="action_translate" type="object" string="Translate"
+                            class="btn-primary" invisible="state != 'listed' or not todo_count"/>
+                    <button name="action_accept_all" type="object" string="Accept All"
+                            invisible="state != 'listed' or not proposed_count"/>
+                    <button name="action_apply" type="object" string="Write the Accepted Terms"
+                            class="btn-primary" invisible="state != 'listed' or not accepted_count"/>
+                    <button name="action_download" type="object" string="Download the .po File"
+                            invisible="state != 'listed'"/>
+                </header>
+                <sheet>
+                    <field name="state" invisible="1"/>
+                    <div class="alert alert-info" role="alert" invisible="not note">
+                        <field name="note" nolabel="1"/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="module_id" options="{'no_create': True}" readonly="state != 'setup'"/>
+                            <field name="lang_id" options="{'no_create': True}" readonly="state != 'setup'"/>
+                        </group>
+                        <group>
+                            <field name="glossary" placeholder="Raghad Trading&#10;Ebrahim Cars"/>
+                        </group>
+                    </group>
+                    <group invisible="state != 'listed'">
+                        <group>
+                            <field name="estimate_text" string="Cost"/>
+                        </group>
+                        <group>
+                            <field name="total_count" string="Terms"/>
+                            <field name="todo_count" string="To translate"/>
+                            <field name="proposed_count" string="Proposed"/>
+                            <field name="accepted_count" string="Accepted"/>
+                            <field name="applied_count" string="Written"/>
+                        </group>
+                    </group>
+                    <field name="line_ids" nolabel="1" invisible="state != 'listed'">
+                        <tree editable="bottom" create="0" delete="0" decoration-success="state in ('accepted', 'applied')"
+                              decoration-danger="state == 'rejected'" decoration-muted="state == 'todo'">
+                            <field name="source"/>
+                            <field name="translation" readonly="state in ('applied',)"/>
+                            <field name="kind" optional="show"/>
+                            <field name="issue"/>
+                            <field name="state" widget="badge"/>
+                            <button name="action_accept" type="object" icon="fa-check" string="Accept"
+                                    invisible="state in ('todo', 'accepted', 'applied')"/>
+                            <button name="action_reject" type="object" icon="fa-times" string="Reject"
+                                    invisible="state in ('todo', 'rejected', 'applied')"/>
+                        </tree>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_translation_action" model="ir.actions.act_window">
+        <field name="name">Translations</field>
+        <field name="res_model">nudge.translation</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+</odoo>

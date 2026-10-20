@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_question_view_list" model="ir.ui.view">
+        <field name="name">nudge.question.view.list</field>
+        <field name="model">nudge.question</field>
+        <field name="arch" type="xml">
+            <tree string="Recurring Questions" create="0" delete="0" edit="0"
+                  decoration-muted="status in ('muted', 'covered')" decoration-warning="status == 'proposed'">
+                <field name="sample"/>
+                <field name="recent_count"/>
+                <field name="count" optional="show"/>
+                <field name="last_asked" optional="show"/>
+                <field name="status" widget="badge" decoration-warning="status == 'proposed'"
+                       decoration-success="status == 'covered'"/>
+                <field name="covered_by" optional="show"/>
+                <field name="company_id" optional="show" groups="base.group_multi_company"/>
+                <button name="action_keep_answer" type="object" string="Keep an answer" icon="fa-comment"
+                        class="btn-link" invisible="status in ('covered', 'muted')"/>
+                <button name="action_record_tour" type="object" string="Record a tour" icon="fa-video-camera"
+                        class="btn-link" invisible="status in ('covered', 'muted')"/>
+                <button name="action_ignore" type="object" string="Ignore" icon="fa-bell-slash"
+                        class="btn-link text-danger" invisible="status == 'muted'"/>
+                <button name="action_watch" type="object" string="Watch again" icon="fa-eye"
+                        class="btn-link" invisible="status != 'muted'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="nudge_question_view_search" model="ir.ui.view">
+        <field name="name">nudge.question.view.search</field>
+        <field name="model">nudge.question</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="sample"/>
+                <filter name="proposed" string="To Decide" domain="[('status', '=', 'proposed')]"/>
+                <filter name="covered" string="Covered" domain="[('status', '=', 'covered')]"/>
+                <filter name="muted" string="Ignored" domain="[('status', '=', 'muted')]"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_question_action" model="ir.actions.act_window">
+        <field name="name">Recurring Questions</field>
+        <field name="res_model">nudge.question</field>
+        <field name="view_mode">tree</field>
+        <field name="context">{'search_default_proposed': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No question keeps coming back yet</p>
+            <p>
+                Nudge counts how often the same question is asked, in any dialect, without keeping who
+                asked. Once a week, or when you press Find Recurring Questions, the ones asked often
+                that have no remembered answer and no tour wait here: keep an answer, record a tour or
+                ignore them. No AI provider is called.
+            </p>
+        </field>
+    </record>
+
+    <!-- Looks for them now, as the manager who clicks, and opens the list -->
+    <record id="nudge_question_find_action" model="ir.actions.server">
+        <field name="name">Find Recurring Questions</field>
+        <field name="model_id" ref="model_nudge_question"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_find()</field>
+    </record>
+</odoo>

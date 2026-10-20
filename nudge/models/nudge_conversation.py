@@ -1,4 +1,5 @@
 import base64
+import json
 import logging
 import time
 from datetime import timedelta
@@ -80,6 +81,8 @@ DONE = (
 # A yes to one step of what was asked: told "tell them what was done", a small
 # model said a button was on the form when only its action was made
 DONE_NOT_FINISHED = "The person said yes, and this step is done. %s"
+# Tools that do one thing on many records, with one yes: worked on in pieces
+PLAN_TOOLS = ("prepare_plan", "bulk_apply")
 FAILED = "The person said yes, but it did not work, and nothing was changed. %s"
 DECLINED = (
     "The person said no. Nothing was done. Do not try to reach the same result another way: "
@@ -110,6 +113,10 @@ def is_product_command(text):
     return command is not None and command.name == "product"
 
 
+# Marks the recording of a meeting among the files of the messages
+MEETING_AUDIO = "meeting-audio"
+MEETING_AUDIO_HOURS = 1
+
 class NudgeConversation(models.Model):
     _name = "nudge.conversation"
     _description = "Nudge Conversation"
@@ -134,7 +141,10 @@ class NudgeConversation(models.Model):
     input_tokens = fields.Integer(compute="_compute_totals", store=True)
     output_tokens = fields.Integer(compute="_compute_totals", store=True)
     cost = fields.Float(compute="_compute_totals", store=True, digits=(12, 6))
-    stream_started_at = fields.Datetime(string="Answering Since", copy=False)
+    stream_started_at = fields.Datetime(string="Answering Since", copy=False, index="btree_not_null")
+    # What the model read of a document the person sent, kept with the conversation (not in the
+    # memory of one worker) so that the answer to its question finds it: {key: [when, data]}
+    document_kept = fields.Json(copy=False, groups="base.group_system")
     # The request being worked on in Agent mode, and the step of it that
     # waits for the person
     run_id = fields.Many2one("nudge.run", string="Current Run", copy=False, ondelete="set null")
@@ -144,6 +154,8 @@ class NudgeConversation(models.Model):
     # The groups of tools a small model asked for, given for the rest of the
     # conversation (tools/groups.py)
     tool_groups = fields.Char(copy=False)
+    # The first-setup assistant when no AI reads the answers: the step asked, the steps done or skipped
+    setup_state = fields.Json(copy=False)
 
     @api.depends("message_ids.input_tokens", "message_ids.output_tokens",
                  "message_ids.cache_read_tokens", "message_ids.cache_write_tokens",
@@ -428,7 +440,9 @@ class NudgeConversation(models.Model):
             question = self.env["nudge.message"].sudo().search([
                 ("conversation_id", "=", self.id), ("role", "=", "user")], order="id desc", limit=1)
             extra = tools.groups.offered(self, question.content or "")
-        return [tool.definition() for tool in tools.base.available(self.env, mode, tool_set, extra)]
+        background = bool(self.sudo().run_id.is_background)
+        return [tool.definition() for tool in tools.base.available(
+            self.env, mode, tool_set, extra, background=background)]
 
     def _chat_job(self, provider, mode, rounds):
         """:return: everything the stream needs, as plain data: the
@@ -448,7 +462,8 @@ class NudgeConversation(models.Model):
                 "mode": mode,
                 "adapter": provider._get_adapter(),
                 "system": prompt.build_system_blocks(focus=focus),
-                "tools": [tool.definition() for tool in tools.base.available(self.env, mode, tool_set)
+                "tools": [tool.definition() for tool in tools.base.available(
+                    self.env, mode, tool_set, background=bool(conversation.run_id.is_background))
                           if tool.name in offered],
                 "turns": conversation._chat_build_turns(),
                 "seconds": self._get_stream_seconds(),
@@ -468,6 +483,7 @@ class NudgeConversation(models.Model):
                 is_administrator=self.env.user.has_group("base.group_system"),
                 # A small model reads the short instructions
                 compact=tool_set == "essential",
+                background=bool(conversation.run_id.is_background),
                 work="\n\n".join(block for block in (
                     self._chat_where_the_work_is(), self.env["nudge.source"]._get_text()) if block)),
             "tools": self._chat_tools(mode, tool_set),
@@ -481,7 +497,7 @@ class NudgeConversation(models.Model):
 
     def _chat_prepare(self, text, snapshot=None, spoken=False, read_aloud=False, mode=MODE_TALK,
                       background=False, explain=None, attachment=None, report=None, focus=None,
-                      extra=None):
+                      extra=None, fresh=False, answer_in=None):
         """Validate the message, store it and gather everything the stream
         needs.
 
@@ -497,6 +513,7 @@ class NudgeConversation(models.Model):
             question, read here and carried to the model as data
         :param report: "sheet" or "chat": how the person wants a comparison
             or a report this time; None leaves it to the model
+        :param answer_in: the language the answer is written in, when it is not that of ``text``
         :return: dict describing the job; with ``queued`` when the work is
             left to the background and there is nothing to stream
         """
@@ -533,12 +550,24 @@ class NudgeConversation(models.Model):
             raise UserError(_("Agent mode is not open to you. Ask your administrator."))
         mode = mode if mode in (MODE_AGENT, MODE_DEV) else MODE_TALK
         background = bool(background) and mode != MODE_TALK
+        if mode == MODE_TALK and not focus and not found:
+            # Counted by the meaning of the words, for the recurring questions: nobody is kept with it
+            self.env["nudge.question"]._record(text)
+        served = self.env["nudge.memory"]._chat_serve(
+            self, text, mode, focus, found, explain, background, fresh=fresh)
+        if served:
+            return served
         self._chat_check_not_busy()
         self._chat_check_not_at_work()
-        self.env["nudge.usage"]._check_budget()
         limit = AGENT_MAX_MESSAGES if self.sudo().run_ids else MAX_MESSAGES
         if self.message_count >= limit:
             raise UserError(_("This conversation is getting long. Start a new one."))
+        # A common request is understood by rules: no token, same cards, same rights
+        understood = self.env["nudge.noai"]._chat_serve(
+            self, text, mode, focus, found, explain, background, snapshot, fresh=fresh)
+        if understood:
+            return understood
+        self.env["nudge.usage"]._check_budget()
         provider = self._chat_provider(mode)
         if found and found["image"] and not provider._can_see_pictures():
             # A model of the server that sees reads it; without one, said
@@ -583,7 +612,7 @@ class NudgeConversation(models.Model):
             explain=explain, attachment=found, report=report,
             # Every model drifts into the language of what it reads: the
             # database here may be described in another one
-            answer_in=tools.commands.language_of(text)))
+            answer_in=answer_in or tools.commands.language_of(text)))
         if screen_text:
             context_text = "\n".join((context_text, screen_text))
         if found and found["text"]:
@@ -654,8 +683,19 @@ class NudgeConversation(models.Model):
                 "res_model": "nudge.message",
                 "res_id": message.id,
             })
-        elif found and found["kind"] in ("sheet", "text"):
-            # A file to import is tried later, as it was sent
+        elif found and found["kind"] == "audio":
+            # Kept only until the summary is done with: the hourly cleaning removes it
+            _name, raw, mimetype = attachment
+            message.attachment_id = self.env["ir.attachment"].sudo().create({
+                "name": found["name"],
+                "datas": base64.b64encode(raw),
+                "mimetype": mimetype or "audio/mpeg",
+                "res_model": "nudge.message",
+                "res_id": message.id,
+                "description": MEETING_AUDIO,
+            })
+        elif found and found["kind"] in ("sheet", "text", "pdf"):
+            # A file to import is tried later, as it was sent; a document to enter, copied to the record
             _name, raw, mimetype = attachment
             message.attachment_id = self.env["ir.attachment"].sudo().create({
                 "name": found["name"],
@@ -706,6 +746,15 @@ class NudgeConversation(models.Model):
         # ORM: the images sent with them would be left behind
         self.sudo().message_ids.attachment_id.unlink()
         return super().unlink()
+
+    @api.model
+    def _cron_forget_meeting_audio(self):
+        """Recordings of meetings are never kept: whatever the summary left behind goes within the hour."""
+        limit = fields.Datetime.subtract(fields.Datetime.now(), hours=MEETING_AUDIO_HOURS)
+        self.env["ir.attachment"].sudo().search([
+            ("description", "in", (MEETING_AUDIO, "meeting-kept-text", "meeting-kept-summary")),
+            ("res_model", "in", ("nudge.message", "nudge.conversation")),
+            ("create_date", "<", limit)]).unlink()
 
     def _chat_read_attachment(self, attachment):
         """:return: what ``llm.attachments.read_attachment`` found, or None
@@ -843,8 +892,14 @@ class NudgeConversation(models.Model):
             "read_automations": _("Read what runs by itself"),
             "check_python_code": _("Checked code"),
             "try_automation": _("Tried it on a dummy record"),
+            "diagnose_failure": _("Looked for why it failed"),
+            "prepare_module_scaffold": _("Drafted a module"),
             "test_import": _("Tried the import"),
+            "match_import_columns": _("Matched the columns of the file"),
+            "document_to_record": _("Read a document"),
             "read_view": _("Read a screen's definition"),
+            "summarize_record_history": _("Summarised the history of: %s"),
+            "record_changes": _("Looked at who changed: %s"),
         }
         text = words.get(call["name"]) or (tool and tool.summary and _(tool.summary)) or call["name"]
         if "%s" in text:
@@ -914,7 +969,9 @@ class NudgeConversation(models.Model):
             else:
                 # A tool may tie what it makes to this conversation, and
                 # what it may reach depends on the mode
-                env = self.with_context(nudge_conversation_id=self.id, nudge_mode=mode).env
+                env = self.with_context(
+                    nudge_conversation_id=self.id, nudge_mode=mode,
+                    nudge_background=bool(run and run.is_background)).env
                 result = tools.base.call(env, call["name"], call["input"], snapshot, mode)
             duration_ms = int((time.monotonic() - started) * 1000)
             entry = {"id": call["id"], "name": call["name"]}
@@ -934,10 +991,54 @@ class NudgeConversation(models.Model):
                 must_read = True
             if result.event:
                 events.append(result.event)
-            # What was read is framed as data; what went wrong is Nudge's own words
-            content = result.content if result.is_error else tools.base.as_data(call["name"], result.content)
+            # Everything a tool says is framed as data, errors included: they quote what people wrote
+            content = tools.base.as_data(call["name"], result.content, result.is_error)
             results.append(dict(entry, content=content, is_error=result.is_error))
         return results, events, must_read, waiting
+
+    def _chat_list_step(self, run):
+        """:return: the last look of a background run at records (a search, or
+        the filter it wanted to show), the one the list of the answer opens"""
+        if run.sudo().step_ids.filtered(lambda step: step.kind not in ("read", "show")):
+            # A run that made something answers about what it made, not about a list
+            return run.sudo().step_ids.browse()
+        steps = run.sudo().step_ids.filtered(
+            lambda step: step.tool in ("search_records", "filter_screen")
+            and (step.arguments or {}).get("model") and (step.arguments or {}).get("conditions"))
+        return steps[-1:]
+
+    def _chat_background_link(self, run, text):
+        """:return: the answer with the link that opens the list it is about"""
+        step = self._chat_list_step(run)
+        link = step._list_link() if step else False
+        if not link or "/action-" in text or "action_open_list" in text:
+            return text
+        return text + "\n\n" + _("Open the list: %s", link)
+
+    def _chat_background_answer(self, run, limit=15):
+        """:return: the rows the run found as a table with the link, for a model
+        that ended without a word; empty when it found nothing"""
+        steps = run.sudo().step_ids.filtered(lambda step: step.tool == "search_records" and step.state == "done")
+        if not steps:
+            return ""
+        try:
+            data = json.loads(steps[-1].result or "")
+        except ValueError:
+            return ""
+        rows = data.get("records") or []
+        if not rows:
+            return ""
+        columns = [key for key in rows[0] if key != "id"][:6] or ["id"]
+
+        def cell(value):
+            return str(value if value not in (None, False) else "").replace("|", "/").replace("\n", " ")[:60]
+
+        lines = ["| " + " | ".join(columns) + " |", "|" + "---|" * len(columns)]
+        lines += ["| " + " | ".join(cell(row.get(key)) for key in columns) + " |" for row in rows[:limit]]
+        more = (data.get("total") or len(rows)) - len(rows[:limit])
+        if more > 0:
+            lines.append(_("%s more", more))
+        return self._chat_background_link(run, "\n".join(lines))
 
     def _chat_error_message(self, code, provider=None):
         messages = {
@@ -1035,6 +1136,14 @@ class NudgeConversation(models.Model):
             must_read and not waiting and not again and run.is_background
             and state == "complete" and run.state == "running")
 
+        if (run and run.is_background and state == "complete" and not again and not later
+                and not waiting and not calls):
+            # Never an empty answer: what was found is delivered, with the link to the list
+            if text:
+                text = self._chat_background_link(run, text)
+            else:
+                text = self._chat_background_answer(run)
+
         error_message = False
         if error:
             error_message = self._chat_error_message(error["code"], provider)
@@ -1087,7 +1196,7 @@ class NudgeConversation(models.Model):
         if run:
             run._add_usage(message)
             run.step_ids.filtered(lambda step: not step.message_id).message_id = message
-        if stop or error:
+        if (stop or error) and not outcome.get("noai"):
             # The call was made: written down whatever came of it
             self.env["nudge.usage"]._add(
                 "chat", usage, message.cost, conversation.user_id, conversation.company_id,
@@ -1176,7 +1285,8 @@ class NudgeConversation(models.Model):
             if entry.get("step_id") == step.id:
                 entry = {
                     "id": entry["id"], "name": entry["name"],
-                    "content": result.content, "is_error": state == "failed",
+                    "content": tools.base.as_data(entry["name"], result.content, state == "failed"),
+                    "is_error": state == "failed",
                 }
             elif "content" not in entry:
                 entry = dict(entry, content=ONE_AT_A_TIME, is_error=True)
@@ -1217,6 +1327,16 @@ class NudgeConversation(models.Model):
         self.sudo().stream_started_at = False
         run._end("failed")
 
+    def _setup_follow_up(self, step, state):
+        """:return: what the first-setup assistant says after the person's answer to one of its cards, when no AI
+        reads the answers: the next question"""
+        if step.tool != "prepare_setup_step" or not (self.sudo().setup_state or {}).get("active"):
+            return ""
+        env = self.with_context(nudge_conversation_id=self.id, nudge_mode=self._chat_mode()).env
+        if state == "done":
+            return tools.setup.after_yes(env, self)
+        return _("Nothing was changed. Tell me what should be different, or say “skip”.")
+
     def _agent_decide(self, step_id, decision):
         """Do what the person said yes to, or leave what they said no to, and
         gather what the stream needs to let the model go on.
@@ -1245,19 +1365,22 @@ class NudgeConversation(models.Model):
         if step.state != "pending":
             raise UserError(_("This is no longer waiting for you."))
         self._chat_check_not_busy()
-        # What follows the yes is a call to the model
-        self.env["nudge.usage"]._check_budget()
-        provider = self._chat_provider(self._chat_mode())
+        # What was understood without AI needs no model after the yes
+        noai = bool(step.message_id.noai_intent)
+        provider = None
+        if not noai:
+            # What follows the yes is a call to the model
+            self.env["nudge.usage"]._check_budget()
+            provider = self._chat_provider(self._chat_mode())
 
         events = []
         tool = tools.base.TOOLS.get(step.tool)
-        is_plan = step.tool == "prepare_plan" and isinstance(step.values, dict) and "plan" in step.values
+        is_plan = step.tool in PLAN_TOOLS and isinstance(step.values, dict) and "plan" in step.values
         if decision == PASSING and not is_plan:
             raise UserError(_("Say yes or no."))
         if is_plan and decision != DECLINE:
             step.values = dict(step.values, choice=decision)
-            if tool and tool.is_available(self.env, self._chat_mode()) and (
-                    tools.plans.total_of(step.values["plan"]) > tools.plans.INLINE_RECORDS):
+            if tool and tool.is_available(self.env, self._chat_mode()) and tool.in_background(step.values):
                 # Many records: worked on in the background, by pieces, as the person
                 step.write({"state": "working", "decided_at": fields.Datetime.now()})
                 run = step.run_id
@@ -1293,6 +1416,21 @@ class NudgeConversation(models.Model):
         self._agent_settle(step, state, result, events)
         run = step.run_id
         first_events = [dict(step._get_card(), type="decided"), *events]
+        if noai:
+            run._end("done")
+            conversation.stream_started_at = False
+            follow = self._setup_follow_up(step, state)
+            if follow:
+                first_events.append({"type": "delta", "text": follow})
+                step.message_id.content = ((step.message_id.content or "") + "\n\n" + follow).strip()
+            return {
+                "conversation_id": self.id,
+                "user_message_id": False,
+                "title": conversation.name,
+                "mode": self._chat_mode(),
+                "first_events": first_events,
+                "answered": {"type": "done", "message_id": step.message_id.id, "state": "complete", "message": ""},
+            }
         if run.is_background:
             # What comes next is worked on as what came before: while the
             # person does something else

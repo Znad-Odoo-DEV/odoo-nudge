@@ -13,7 +13,8 @@ import { holdable } from "./hold";
 import { DEFAULT_DICTATION_HOTKEY, DEFAULT_HOTKEY, NO_HOTKEY } from "./hotkeys";
 import { DEFAULT_THEME, readPosition, THEMES } from "./looks";
 import { renderMarkdown } from "./markdown";
-import { streamChat, streamDecision } from "./stream_client";
+import { asksWithoutAi, isSpreadsheet } from "../import/import_service";
+import { streamBulk, streamChat, streamDecision } from "./stream_client";
 
 const HISTORY_LIMIT = 30;
 // A change of the settings is read in a new page: menus and rights change with it
@@ -21,6 +22,25 @@ const SETTINGS_MODEL = "res.config.settings";
 const MAX_HINTS = 40;
 // Buttons first: their names are what people say in the middle of a sentence
 const HINT_SOURCES = ["buttons", "tabs", "fields", "columns"];
+
+// A phone: the panel is a sheet over the whole screen
+export const MOBILE_MAX_WIDTH = 600;
+const MOBILE_APP = /Odoo ?Mobile|OdooApp/i;
+
+/** @returns {boolean} whether the panel is the full-screen sheet: a narrow window, ?mobile=1, the Odoo app */
+export function detectMobile() {
+    let asked = false;
+    try {
+        asked = new URLSearchParams(browser.location.search).get("mobile") === "1";
+    } catch {
+        // an address nobody can read is not asking
+    }
+    return (
+        asked ||
+        MOBILE_APP.test(browser.navigator?.userAgent || "") ||
+        browser.innerWidth <= MOBILE_MAX_WIDTH
+    );
+}
 
 export const MODE_TALK = "talk";
 export const MODE_AGENT = "agent";
@@ -148,9 +168,14 @@ export const nudgeService = {
             canMakeSpreadsheet: Boolean(config?.can_make_spreadsheet) && canUseAgent,
             isManager: Boolean(config?.is_manager),
             isConfigured: Boolean(config?.is_configured),
+            // Common requests are understood by rules: the panel works with no provider
+            canWorkWithoutAi: Boolean(config?.can_work_without_ai),
             // The commands of the message box this person may type: /screen, /find...
             commands: Array.isArray(config?.commands) ? config.commands : [],
             isOpen: false,
+            // On a phone the panel is a sheet over the whole screen, with these big tiles
+            isMobile: detectMobile(),
+            mobileTiles: Array.isArray(config?.mobile_tiles) ? config.mobile_tiles : [],
             view: "chat",
             conversationId: null,
             title: "",
@@ -167,8 +192,12 @@ export const nudgeService = {
             screenHasView: false,
             // Talk: Nudge explains and shows. Agent: Nudge does the work.
             canUseAgent,
+            // The company asks that nothing goes to an AI provider outside its own server
+            isPrivate: Boolean(config?.is_private),
             // Developer: Nudge builds, for an administrator the switch is on for
             canDevelop,
+            // A database nobody has set up yet: the first thing offered is to do it together
+            setupOffer: canUseAgent && Boolean(config?.setup_offer),
             mode: allowedMode(settings.nudge_mode),
             // How the person wants the answer to a question asked with their
             // screen: asked each time, on the screen, or in writing
@@ -187,6 +216,10 @@ export const nudgeService = {
             news: [],
             // Changes each time the message box must take the focus
             focusRequest: 0,
+            // The record on the screen has a message of a customer to answer: {model, resId}
+            reply: null,
+            replyTone: "friendly",
+            replyBusy: false,
         });
         let abortController = null;
         let localId = 0;
@@ -196,6 +229,7 @@ export const nudgeService = {
             const status = await orm.call("nudge.conversation", "get_status", []);
             state.isManager = Boolean(status.is_manager);
             state.isConfigured = Boolean(status.is_configured);
+            state.canWorkWithoutAi = Boolean(status.can_work_without_ai);
         }
 
         function isSharing() {
@@ -214,8 +248,9 @@ export const nudgeService = {
         const EXPLAIN_DO = "do";
 // As the server reads them (llm/attachments.py)
 const MAX_ATTACHMENT_BYTES = 10 * 1048576;
-const READABLE_TYPES = /^(application\/(x-)?pdf|text\/|application\/(json|csv|xml)|image\/(png|jpeg|webp|gif))/;
-const READABLE_EXTENSIONS = /\.(pdf|txt|csv|md|json|xml|tsv|log|png|jpe?g|webp|gif)$/i;
+const READABLE_TYPES = /^(application\/(x-)?pdf|text\/|application\/(json|csv|xml)|image\/(png|jpeg|webp|gif)|audio\/)/;
+const AUDIO_FILE = /^audio\/|\.(m4a|mp3|ogg|oga|opus|wav|webm|aac)$/i;
+const READABLE_EXTENSIONS = /\.(pdf|txt|csv|md|json|xml|tsv|log|xlsx|xls|png|jpe?g|webp|gif|m4a|mp3|ogg|oga|opus|wav|webm|aac)$/i;
 
 function isReadable(file) {
     return READABLE_TYPES.test(file.type || "") || READABLE_EXTENSIONS.test(file.name || "");
@@ -226,7 +261,65 @@ function isReadable(file) {
             const capture = isSharing() ? context.capture() : null;
             state.screenSummary = capture?.summary || "";
             state.screenHasView = Boolean(capture?.snapshot?.view_type || capture?.snapshot?.record);
+            refreshReply(capture?.snapshot);
             return capture?.snapshot || null;
+        }
+
+        /**
+         * Whether the record on the screen has a message of a customer to
+         * answer: then "Draft a reply" is offered. The server decides, as the
+         * person: what they cannot read is not there.
+         */
+        let replyAsked = null;
+        async function refreshReply(snapshot) {
+            const model = snapshot?.model;
+            const resId = snapshot?.record?.id;
+            if (!config?.can_draft_reply || !model || !resId) {
+                state.reply = null;
+                replyAsked = null;
+                return;
+            }
+            if (replyAsked === `${model},${resId}`) {
+                // Asked already while the panel is open: the screen has not moved
+                return;
+            }
+            replyAsked = `${model},${resId}`;
+            state.reply = null;
+            try {
+                const result = await orm.call("nudge.reply", "state", [model, resId]);
+                // The person may have gone elsewhere while the server answered
+                const now = state.isOpen ? context.capture()?.snapshot : null;
+                if (result?.can && now?.model === model && now?.record?.id === resId) {
+                    state.reply = { model, resId };
+                }
+            } catch {
+                state.reply = null;
+            }
+        }
+
+        function setReplyTone(tone) {
+            state.replyTone = ["formal", "friendly", "short"].includes(tone) ? tone : "friendly";
+        }
+
+        /**
+         * The reply, drafted from the thread, opens in the window of the
+         * emails to read: it is sent only when the person presses Send there.
+         */
+        async function draftReply() {
+            if (!state.reply || state.replyBusy) {
+                return;
+            }
+            state.replyBusy = true;
+            try {
+                const window = await orm.call("nudge.email.review", "action_draft_reply", [
+                    state.reply.model,
+                    state.reply.resId,
+                    state.replyTone,
+                ]);
+                await action.doAction(window);
+            } finally {
+                state.replyBusy = false;
+            }
         }
 
         /**
@@ -264,6 +357,7 @@ function isReadable(file) {
             }
             voice.stopSpeaking();
             state.isOpen = false;
+            replyAsked = null;
         }
 
         function toggle() {
@@ -307,6 +401,38 @@ function isReadable(file) {
             state.mode = allowedMode(mode);
             state.focusRequest++;
             return saveSetting("nudge_mode", state.mode);
+        }
+
+        /**
+         * Who changed the record on the screen, and the buttons to put a field back: asked in Agent mode,
+         * understood by the server without any AI.
+         */
+        function showChanges() {
+            if (state.canUseAgent) {
+                setMode(MODE_AGENT);
+            }
+            return send("/changes");
+        }
+
+        /**
+         * Put back the old value of one change (kind "change") or of all the fields of one message of the
+         * chatter (kind "message"). The card shows what is written; nothing is changed before a yes.
+         *
+         * @param {{ kind: "change"|"message", id: number }} spec
+         */
+        function restoreChange(spec) {
+            if (state.canUseAgent) {
+                setMode(MODE_AGENT);
+            }
+            return send(`/restore ${spec.kind === "message" ? "message" : "change"} ${Number(spec.id)}`);
+        }
+
+        /** @returns {{ model: string, resId: number }|null} the saved record of the form on the screen */
+        function changesTarget() {
+            const props = action.currentController?.props;
+            return props?.type === "form" && props.resId && props.resModel
+                ? { model: props.resModel, resId: props.resId }
+                : null;
         }
 
         function setExplain(value) {
@@ -649,10 +775,82 @@ function isReadable(file) {
                     {
                         name: _t("Show me"),
                         primary: true,
-                        onClick: () => show(payload.conversation_id),
+                        onClick: () =>
+                            payload.list?.ids?.length
+                                ? openBulkList(payload.list)
+                                : show(payload.conversation_id),
                     },
                 ],
             });
+        }
+
+        /**
+         * @returns {Object|null} the list in front when records are selected in
+         *   it: {model, ids, domain, total}; null when there is nothing to work on
+         */
+        function bulkTarget() {
+            if (!state.canUseAgent) {
+                return null;
+            }
+            const view = context.frontView();
+            const root = view?.controller?.model?.root;
+            if (!view || view.type !== "list" || !root || root.isGrouped || !root.resModel) {
+                return null;
+            }
+            const ids = (root.selection || []).map((record) => record.resId).filter(Boolean);
+            if (!ids.length) {
+                return null;
+            }
+            // "Select all": every record the filter matches, not only the page
+            const everything = Boolean(root.isDomainSelected);
+            return {
+                model: root.resModel,
+                ids,
+                domain: root.domain || [],
+                total: everything ? root.count : ids.length,
+                everything,
+            };
+        }
+
+        /**
+         * The same AI work on the records selected in a list: the sample it
+         * proposes for and what the rest costs come back as a card.
+         */
+        async function startBulk(work, label) {
+            if (state.isStreaming) {
+                return;
+            }
+            setMode(MODE_AGENT);
+            state.view = "chat";
+            state.messages.push({
+                id: `local_${++localId}`, role: "user", content: label, state: "complete", error: "",
+                screen: "", spoken: false, attachment: "",
+            });
+            const answer = addAnswer();
+            await receive(answer, (params) =>
+                streamBulk({ conversationId: state.conversationId, work, ...params })
+            );
+        }
+
+        /**
+         * The records an AI over a list wrote in, as a list, for the person to look at.
+         */
+        async function openBulkList(listing) {
+            try {
+                await action.doAction({
+                    type: "ir.actions.act_window",
+                    name: listing.name || _t("Records"),
+                    res_model: listing.model,
+                    domain: [["id", "in", listing.ids]],
+                    views: [
+                        [false, "list"],
+                        [false, "form"],
+                    ],
+                    target: "current",
+                });
+            } catch {
+                // The conversation tells it all the same
+            }
         }
 
         /**
@@ -677,6 +875,8 @@ function isReadable(file) {
             const shown = events.find((event) => event.type === "guidance");
             const products = events.find((event) => event.type === "products");
             const screens = events.find((event) => event.type === "found");
+            const chart = events.find((event) => event.type === "chart");
+            const changes = events.find((event) => event.type === "changes");
             const told = events
                 .filter((event) =>
                     ["navigate", "write", "open", "filter", "open_action"].includes(event.type)
@@ -691,11 +891,14 @@ function isReadable(file) {
                 guidance: shown?.steps || [],
                 products: products?.items || null,
                 productQuery: products?.query || "",
-                found: screens ? { menus: screens.menus || [] } : null,
+                found: screens ? { menus: screens.menus || [], records: screens.records || [] } : null,
+                chart: chart ? (({ type, ...drawn }) => drawn)(chart) : null,
+                changes: changes ? (({ type, ...listed }) => listed)(changes) : null,
                 choice: "",
                 spoken: Boolean(message.is_spoken),
                 attachment: message.attachment_name || "",
                 feedback: message.feedback || "",
+                remembered: Boolean(message.is_remembered),
                 card: cards[message.id] || null,
                 runId: null,
                 progress: "",
@@ -739,7 +942,7 @@ function isReadable(file) {
                         ["role", "in", ["user", "assistant"]],
                     ],
                     ["role", "content", "state", "error_message", "screen_events", "is_spoken",
-                     "attachment_name", "feedback"],
+                     "attachment_name", "feedback", "is_remembered"],
                     { order: "id" }
                 ),
                 // What Nudge did, or is waiting to do, in this conversation
@@ -821,7 +1024,12 @@ function isReadable(file) {
                 error: "", found: null, products: null,
             };
             try {
-                const result = await orm.call("nudge.quick", "run_command", [text, screenModel()]);
+                // The commands that read the screen (/why, /field, /here) take it with them
+                const reads = parseCommand(text)?.command.at_once;
+                const snapshot = reads ? context.capture()?.snapshot || null : null;
+                const result = await orm.call("nudge.quick", "run_command", [
+                    text, screenModel(), snapshot,
+                ]);
                 answer.products = result.products || null;
                 answer.found = result;
                 answer.content = result.content || "";
@@ -866,9 +1074,46 @@ function isReadable(file) {
             if (kind === "record") {
                 return openRecord({ model: item.model, id: item.id });
             }
+            if (kind === "show") {
+                // A field of an explanation, shown with the pointer
+                return showGuidance([
+                    { target: { type: "field", name: item.field }, text: item.text, advance: "manual" },
+                ]);
+            }
+            if (kind === "explain") {
+                return send(`/field ${item.field}`);
+            }
+            if (kind === "command" && item.at_once) {
+                return send(item.words[0]);
+            }
+            // Recorded tours (nudge_tours): replayed or recorded without any AI
+            if (kind === "tour") {
+                return env.services.nudge_tours.play(item.id);
+            }
+            // The health check: a list of what was found, or the whole report
+            if (kind === "finding") {
+                return openAction("nudge.health.finding", "action_show", item.id);
+            }
+            if (kind === "health_report") {
+                return openAction("nudge.health.report", "action_open", item.report_id);
+            }
+            if (kind === "record_tour") {
+                return env.services.nudge_tours.start();
+            }
             if (kind === "command") {
                 state.draft = `${item.words[0]} `;
                 state.focusRequest++;
+            }
+        }
+
+        /**
+         * The AI is not there or did not answer: what Nudge can say of the
+         * screen without it is offered in place of the error alone.
+         */
+        function offerScreenCommands(answer) {
+            const offered = state.commands.filter((command) => command.at_once);
+            if (offered.length && !answer.found) {
+                answer.found = { commands: offered };
             }
         }
 
@@ -910,6 +1155,16 @@ function isReadable(file) {
             }
         }
 
+        /** Opens what a method of a record answers: a list filtered, a form */
+        async function openAction(model, method, id) {
+            try {
+                close();
+                await action.doAction(await orm.call(model, method, [[id]]));
+            } catch {
+                // Told in the answer all the same
+            }
+        }
+
         function openProduct(productId) {
             return action.doAction({
                 type: "ir.actions.act_window",
@@ -920,11 +1175,74 @@ function isReadable(file) {
             });
         }
 
+        /**
+         * The same question asked again, to the AI provider and not to the memory.
+         *
+         * @param {number|string} messageId a remembered answer of the chat
+         */
+        async function askAiInstead(messageId) {
+            const index = state.messages.findIndex((message) => message.id === messageId);
+            const answer = state.messages[index];
+            const question = state.messages
+                .slice(0, index)
+                .reverse()
+                .find((message) => message.role === "user");
+            if (!answer || !question || state.isStreaming) {
+                return;
+            }
+            answer.canAskAi = false;
+            await dispatch(question.content, {
+                spoken: false,
+                background: false,
+                snapshot: null,
+                explain: state.mode === MODE_TALK ? EXPLAIN_TEXT : null,
+                fresh: true,
+            });
+        }
+
+        /**
+         * With no AI provider: the remembered answer that best fits the words, or false.
+         */
+        /**
+         * The request the words make, understood without any AI, or false: offered as the
+         * first suggestion of the quick search.
+         */
+        async function quickAction(words) {
+            try {
+                return await orm.call("nudge.noai", "suggest", [
+                    words,
+                    context.capture()?.snapshot || null,
+                ]);
+            } catch {
+                return false;
+            }
+        }
+
+        /**
+         * With no AI provider: the request typed in the quick search is done as it would be
+         * in Agent mode, by the rules that understand it, and shown in the chat.
+         */
+        async function sendWithoutAi(text) {
+            state.view = "chat";
+            if (state.canUseAgent && state.mode !== MODE_AGENT) {
+                await setMode(MODE_AGENT);
+            }
+            return send(text);
+        }
+
+        async function quickRemembered(words) {
+            try {
+                return await orm.call("nudge.memory", "suggest", [words]);
+            } catch {
+                return false;
+            }
+        }
+
         async function quickFind(words) {
             try {
                 return await orm.call("nudge.quick", "find", [words]);
             } catch {
-                return { menus: [], settings: [], pages: [], products: [] };
+                return { menus: [], settings: [], pages: [], products: [], tours: [] };
             }
         }
 
@@ -1193,9 +1511,19 @@ function isReadable(file) {
                     answer.products = event.items || [];
                     answer.productQuery = event.query || "";
                     break;
+                case "chart": {
+                    const { type, ...drawn } = event;
+                    answer.chart = drawn;
+                    break;
+                }
+                case "changes": {
+                    const { type, ...listed } = event;
+                    answer.changes = listed;
+                    break;
+                }
                 case "found":
                     // Screens Nudge found itself: the pointer to each, or Open
-                    answer.found = { menus: event.menus || [] };
+                    answer.found = { menus: event.menus || [], records: event.records || [] };
                     break;
                 case "filter":
                     answer.content = join(answer.content, event.text);
@@ -1243,6 +1571,11 @@ function isReadable(file) {
                     answer.id = event.message_id;
                     answer.state = event.state;
                     answer.error = event.message || "";
+                    // Answered from the memory of answers: the AI can still be asked
+                    if (event.memory) {
+                        answer.remembered = true;
+                        answer.canAskAi = true;
+                    }
                     if (!answer.content && !answer.error && !answer.guidance?.length && !answer.card &&
                         !answer.products?.length && !answer.wrote) {
                         // Never an empty bubble: say that nothing came
@@ -1257,6 +1590,7 @@ function isReadable(file) {
                     answer.error =
                         [event.message, event.detail].filter(Boolean).join("\n") ||
                         _t("Something went wrong while answering.");
+                    offerScreenCommands(answer);
                     break;
             }
         }
@@ -1305,6 +1639,7 @@ function isReadable(file) {
                 } else {
                     answer.state = "error";
                     answer.error = _t("Nudge could not be reached. Check your connection and try again.");
+                    offerScreenCommands(answer);
                 }
             } finally {
                 state.isStreaming = false;
@@ -1329,13 +1664,44 @@ function isReadable(file) {
                 return "";
             }
             if (file.size > MAX_ATTACHMENT_BYTES) {
+                if (AUDIO_FILE.test(file.type || "") || AUDIO_FILE.test(file.name || "")) {
+                    return _t(
+                        "The recording is too large. The limit is %s MB: split the file into shorter parts and send them one by one.",
+                        MAX_ATTACHMENT_BYTES / 1048576
+                    );
+                }
                 return _t("The file is too large. The limit is %s MB.", MAX_ATTACHMENT_BYTES / 1048576);
             }
             if (!isReadable(file)) {
-                return _t("Only PDF, text, CSV and image files can be read.");
+                return _t("Only PDF, text, CSV, image and audio files can be read.");
             }
             state.attachment = { file, name: file.name, size: file.size };
             return "";
+        }
+
+        /**
+         * @param {string} text what was typed
+         * @returns {boolean} whether a CSV or Excel file sent with it is matched
+         *   to fields without the AI: asked for with /import or "without AI",
+         *   or there is no AI to ask (no provider, or the company's private mode)
+         */
+        function matchesWithoutAi(text) {
+            return (
+                parseCommand(text)?.command.name === "import" ||
+                asksWithoutAi(text) ||
+                !state.isConfigured ||
+                state.isPrivate
+            );
+        }
+
+        /** The columns of the file matched to the fields of a model, shown as a card */
+        async function matchImport(text, file, spoken) {
+            state.view = "chat";
+            state.messages.push({
+                id: `local_${++localId}`, role: "user", content: text, state: "complete",
+                error: "", screen: "", spoken, attachment: file.name,
+            });
+            await env.services.nudge_import.start(file);
         }
 
         async function send(
@@ -1354,6 +1720,9 @@ function isReadable(file) {
             voice.stopSpeaking();
             // A question still waiting for its how is replaced by this one
             cancelExplain({ keep: false });
+            if (isSpreadsheet(attachment?.file) && matchesWithoutAi(text)) {
+                return matchImport(text, attachment.file, spoken);
+            }
             const productQuery = productCommand(text);
             if (productQuery !== null && !isPicture(attachment)) {
                 // Found at once, without any AI: the words are enough
@@ -1448,7 +1817,7 @@ function isReadable(file) {
          */
         async function dispatch(
             text,
-            { spoken, background, snapshot, explain, file = null, report = null }
+            { spoken, background, snapshot, explain, file = null, report = null, fresh = false }
         ) {
             const answer = addAnswer();
             answer.explain = explain || "";
@@ -1458,12 +1827,14 @@ function isReadable(file) {
                     conversationId: state.conversationId,
                     snapshot,
                     spoken,
-                    readAloud: voice.state.isAllowed && voice.state.speakAnswers,
+                    readAloud:
+                        voice.state.isAllowed && voice.state.canUseBrowserSpeech && voice.state.speakAnswers,
                     mode: state.mode,
                     background: background && state.mode !== MODE_TALK,
                     explain: explain || null,
                     file,
                     report,
+                    fresh,
                     ...params,
                 })
             );
@@ -1627,6 +1998,9 @@ function isReadable(file) {
                     .catch(() => {});
             }
             registerHotkeys();
+            browser.addEventListener("resize", () => {
+                state.isMobile = detectMobile();
+            });
             if (state.canUseAgent) {
                 bus.subscribe("nudge.run", onNews);
                 bus.start();
@@ -1652,8 +2026,14 @@ function isReadable(file) {
             answerCommand,
             useFound,
             send,
+            showChanges,
+            restoreChange,
+            changesTarget,
             decide,
             undoStep,
+            bulkTarget,
+            startBulk,
+            openBulkList,
             stop,
             newConversation,
             openConversation,
@@ -1668,7 +2048,13 @@ function isReadable(file) {
             setHotkey,
             setDictationHotkey,
             showGuidance,
+            draftReply,
+            setReplyTone,
             quickFind,
+            quickRemembered,
+            quickAction,
+            sendWithoutAi,
+            askAiInstead,
             quickGuide,
             chooseGuidance,
             setExplain,

@@ -1,0 +1,1180 @@
+{
+ "schema": 1,
+ "key": "food_products_shop",
+ "sector": "food",
+ "shop": {
+  "categories": [
+   {
+    "name": {
+     "en": "Dates and sweets",
+     "ar": "التمور والحلويات"
+    },
+    "keywords": [
+     "dates",
+     "sweets",
+     "تمور"
+    ],
+    "children": [
+     {
+      "name": {
+       "en": "Premium dates",
+       "ar": "تمور فاخرة"
+      },
+      "keywords": [
+       "dates",
+       "تمر"
+      ],
+      "children": []
+     },
+     {
+      "name": {
+       "en": "Date paste and syrup",
+       "ar": "عجوة ودبس"
+      },
+      "keywords": [
+       "syrup",
+       "دبس"
+      ],
+      "children": []
+     },
+     {
+      "name": {
+       "en": "Nuts and dried fruit",
+       "ar": "مكسرات وفواكه مجففة"
+      },
+      "keywords": [
+       "nuts",
+       "مكسرات"
+      ],
+      "children": []
+     }
+    ]
+   },
+   {
+    "name": {
+     "en": "Honey and oils",
+     "ar": "العسل والزيوت"
+    },
+    "keywords": [
+     "honey",
+     "oil",
+     "عسل",
+     "زيت"
+    ],
+    "children": [
+     {
+      "name": {
+       "en": "Honey",
+       "ar": "عسل"
+      },
+      "keywords": [
+       "honey",
+       "عسل"
+      ],
+      "children": []
+     },
+     {
+      "name": {
+       "en": "Olive oil",
+       "ar": "زيت زيتون"
+      },
+      "keywords": [
+       "olive",
+       "زيتون"
+      ],
+      "children": []
+     }
+    ]
+   },
+   {
+    "name": {
+     "en": "Spices and grains",
+     "ar": "البهارات والحبوب"
+    },
+    "keywords": [
+     "spice",
+     "rice",
+     "بهارات",
+     "أرز"
+    ],
+    "children": [
+     {
+      "name": {
+       "en": "Spices",
+       "ar": "بهارات"
+      },
+      "keywords": [
+       "spice",
+       "بهار"
+      ],
+      "children": []
+     },
+     {
+      "name": {
+       "en": "Rice and lentils",
+       "ar": "أرز وعدس"
+      },
+      "keywords": [
+       "rice",
+       "lentil",
+       "أرز"
+      ],
+      "children": []
+     }
+    ]
+   },
+   {
+    "name": {
+     "en": "Gift boxes",
+     "ar": "علب الهدايا"
+    },
+    "keywords": [
+     "gift",
+     "هدايا"
+    ],
+    "children": []
+   }
+  ],
+  "banners": [
+   {
+    "title": {
+     "en": "Harvest season",
+     "ar": "موسم الحصاد"
+    },
+    "text": {
+     "en": "New-crop dates have arrived.",
+     "ar": "وصل محصول التمور الجديد."
+    },
+    "button": {
+     "en": "Taste now",
+     "ar": "تذوّق الآن"
+    }
+   },
+   {
+    "title": {
+     "en": "Gift boxes for every occasion",
+     "ar": "علب هدايا لكل مناسبة"
+    },
+    "text": {
+     "en": "Dates, nuts and honey, wrapped for you.",
+     "ar": "تمور ومكسرات وعسل مغلّفة من أجلك."
+    },
+    "button": {
+     "en": "Choose a box",
+     "ar": "اختر علبة"
+    }
+   },
+   {
+    "title": {
+     "en": "Subscribe and save 10%",
+     "ar": "اشترك ووفّر 10%"
+    },
+    "text": {
+     "en": "A pantry box delivered every month.",
+     "ar": "علبة مؤونة تصلك كل شهر."
+    },
+    "button": {
+     "en": "Subscribe",
+     "ar": "اشترك"
+    }
+   }
+  ],
+  "menu": [
+   {
+    "name": {
+     "en": "Shop",
+     "ar": "المتجر"
+    },
+    "url": "/shop"
+   }
+  ],
+  "layout": {
+   "shop_ppg": 20,
+   "shop_ppr": 3,
+   "product_page_image_layout": "carousel",
+   "add_to_cart_action": "stay"
+  },
+  "filters": [
+   {
+    "name": {
+     "en": "Origin",
+     "ar": "المصدر"
+    },
+    "type": "attribute"
+   },
+   {
+    "name": {
+     "en": "Weight",
+     "ar": "الوزن"
+    },
+    "type": "attribute"
+   },
+   {
+    "name": {
+     "en": "Organic",
+     "ar": "عضوي"
+    },
+    "type": "flag"
+   },
+   {
+    "name": {
+     "en": "Price",
+     "ar": "السعر"
+    },
+    "type": "range"
+   },
+   {
+    "name": {
+     "en": "Dietary",
+     "ar": "النظام الغذائي"
+    },
+    "type": "attribute"
+   }
+  ],
+  "product_page": {
+   "layout": {
+    "en": "Origin map and harvest date beside the price, ingredients and storage tabs, and a gift-wrap option before the add-to-cart button.",
+    "ar": "خريطة المصدر وتاريخ الحصاد بجانب السعر، وتبويبات المكونات والتخزين، وخيار تغليف الهدية قبل زر الإضافة للسلة."
+   },
+   "sections": [
+    "origin",
+    "ingredients",
+    "storage",
+    "gift_wrap",
+    "reviews",
+    "related_products"
+   ]
+  },
+  "cart_checkout": {
+   "notes": {
+    "en": "Offer a delivery date picker, chilled delivery notes and a gift message field; free delivery above a stated amount.",
+    "ar": "اعرض اختيار موعد التوصيل وملاحظات التوصيل المبرّد وحقل رسالة الهدية، مع توصيل مجاني فوق مبلغ معلن."
+   },
+   "options": [
+    "cod",
+    "card",
+    "delivery_date",
+    "gift_message",
+    "guest_checkout"
+   ]
+  },
+  "sample_products": [
+   {
+    "name": {
+     "en": "Khalas dates, 1 kg",
+     "ar": "تمر خلاص، 1 كجم"
+    },
+    "description": {
+     "en": "Soft and caramel-sweet, from Al Ahsa.",
+     "ar": "طري بحلاوة الكراميل من الأحساء."
+    },
+    "price": {
+     "en": "AED 48",
+     "ar": "48 د.إ"
+    }
+   },
+   {
+    "name": {
+     "en": "Sidr honey, 500 g",
+     "ar": "عسل سدر، 500 غرام"
+    },
+    "description": {
+     "en": "Raw and unheated, from mountain hives.",
+     "ar": "خام غير مسخّن من خلايا جبلية."
+    },
+    "price": {
+     "en": "AED 165",
+     "ar": "165 د.إ"
+    }
+   },
+   {
+    "name": {
+     "en": "Cold-pressed olive oil, 1 L",
+     "ar": "زيت زيتون بكر، 1 لتر"
+    },
+    "description": {
+     "en": "Single estate, harvested this autumn.",
+     "ar": "من مزرعة واحدة وحصاد هذا الخريف."
+    },
+    "price": {
+     "en": "AED 72",
+     "ar": "72 د.إ"
+    }
+   },
+   {
+    "name": {
+     "en": "Seven-spice blend",
+     "ar": "بهارات سبعة"
+    },
+    "description": {
+     "en": "Ground weekly in small batches.",
+     "ar": "تُطحن أسبوعياً بدفعات صغيرة."
+    },
+    "price": {
+     "en": "AED 22",
+     "ar": "22 د.إ"
+    }
+   }
+  ]
+ },
+ "name": {
+  "en": "Food products shop",
+  "ar": "متجر منتجات غذائية"
+ },
+ "brand": {
+  "en": "Barakah Pantry",
+  "ar": "مؤونة بركة"
+ },
+ "suggest": [
+  "food",
+  "grocery",
+  "dates",
+  "honey",
+  "spices",
+  "غذائية",
+  "بقالة",
+  "تمور",
+  "عسل"
+ ],
+ "palette": {
+  "primary": "#386641",
+  "secondary": "#bc4749",
+  "accent": "#f2a541",
+  "light": "#fdf8ee",
+  "dark": "#2b2118"
+ },
+ "fonts": {
+  "heading": "Raleway",
+  "body": "Tajawal"
+ },
+ "fonts_ar": {
+  "heading": "Tajawal",
+  "body": "Tajawal"
+ },
+ "hero_image": "static/img/templates/food_products_shop.webp",
+ "thumbnail": "static/img/templates/food_products_shop_thumb.webp",
+ "menu": [
+  "home",
+  "products",
+  "about",
+  "projects",
+  "contact",
+  "faq"
+ ],
+ "pages": [
+  {
+   "key": "home",
+   "kind": "home",
+   "name": {
+    "en": "Home",
+    "ar": "الرئيسية"
+   },
+   "blocks": [
+    {
+     "snippet": "s_cover",
+     "copy": {
+      "en": {
+       "title": "From our farms to your pantry",
+       "text": "Dates, honey, spices and olive oil from trusted growers, packed and shipped within a day.",
+       "button": "Shop pantry",
+       "button_url": "/shop"
+      },
+      "ar": {
+       "title": "من مزارعنا إلى مؤونتك",
+       "text": "تمور وعسل وبهارات وزيت زيتون من مزارعين موثوقين، تُعبّأ وتُشحن خلال يوم.",
+       "button": "تسوّق المؤونة",
+       "button_url": "/shop"
+      }
+     },
+     "image": "food",
+     "image_prompt": "wide photo of dates, honey jars, spices and olive oil on a wooden table, warm light, no text"
+    },
+    {
+     "snippet": "s_product_list",
+     "copy": {
+      "en": {
+       "title": "New arrivals"
+      },
+      "ar": {
+       "title": "وصل حديثاً"
+      }
+     }
+    },
+    {
+     "snippet": "s_banner",
+     "copy": {
+      "en": {
+       "title": "Harvest season",
+       "text": "New-crop dates have arrived.",
+       "button": "Taste now",
+       "button_url": "/shop"
+      },
+      "ar": {
+       "title": "موسم الحصاد",
+       "text": "وصل محصول التمور الجديد.",
+       "button": "تذوّق الآن",
+       "button_url": "/shop"
+      }
+     },
+     "image": "food"
+    },
+    {
+     "snippet": "s_three_columns",
+     "copy": {
+      "en": {
+       "title": "Why shop with Barakah Pantry",
+       "items": [
+        {
+         "title": "Traceable origin",
+         "text": "Every product names its farm and harvest."
+        },
+        {
+         "title": "Packed fresh",
+         "text": "Packed to order, never from a warehouse shelf."
+        },
+        {
+         "title": "Cold delivery",
+         "text": "Chilled vans for dairy and fresh items."
+        }
+       ]
+      },
+      "ar": {
+       "title": "لماذا تتسوّق من مؤونة بركة",
+       "items": [
+        {
+         "title": "مصدر معروف",
+         "text": "كل منتج يحمل اسم مزرعته وموسم حصاده."
+        },
+        {
+         "title": "تعبئة طازجة",
+         "text": "تُعبّأ عند الطلب وليس من رفوف المخازن."
+        },
+        {
+         "title": "توصيل مبرّد",
+         "text": "سيارات مبردة للألبان والأصناف الطازجة."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_product_list",
+     "copy": {
+      "en": {
+       "title": "Best sellers"
+      },
+      "ar": {
+       "title": "الأكثر مبيعاً"
+      }
+     }
+    },
+    {
+     "snippet": "s_banner",
+     "copy": {
+      "en": {
+       "title": "Gift boxes for every occasion",
+       "text": "Dates, nuts and honey, wrapped for you.",
+       "button": "Choose a box",
+       "button_url": "/shop"
+      },
+      "ar": {
+       "title": "علب هدايا لكل مناسبة",
+       "text": "تمور ومكسرات وعسل مغلّفة من أجلك.",
+       "button": "اختر علبة",
+       "button_url": "/shop"
+      }
+     }
+    },
+    {
+     "snippet": "s_banner",
+     "copy": {
+      "en": {
+       "title": "Subscribe and save 10%",
+       "text": "A pantry box delivered every month.",
+       "button": "Subscribe",
+       "button_url": "/shop"
+      },
+      "ar": {
+       "title": "اشترك ووفّر 10%",
+       "text": "علبة مؤونة تصلك كل شهر.",
+       "button": "اشترك",
+       "button_url": "/shop"
+      }
+     }
+    },
+    {
+     "snippet": "s_call_to_action",
+     "copy": {
+      "en": {
+       "title": "Taste before you commit",
+       "text": "Try the sampler box with six of our best sellers.",
+       "button": "Order the sampler",
+       "button_url": "/contactus"
+      },
+      "ar": {
+       "title": "تذوّق قبل أن تلتزم",
+       "text": "جرّب علبة التذوق بستة من أكثر منتجاتنا مبيعاً.",
+       "button": "اطلب علبة التذوق",
+       "button_url": "/contactus"
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Gulf pantry | Dates, honey, spices and olive oil",
+     "ar": "مؤونة خليجية | تمور وعسل وبهارات وزيت زيتون"
+    },
+    "description": {
+     "en": "Order dates, honey, spices and olive oil direct from growers, packed fresh and delivered fast.",
+     "ar": "اطلب التمور والعسل والبهارات وزيت الزيتون مباشرة من المزارعين مع تعبئة طازجة وتوصيل سريع."
+    }
+   },
+   "url": "/"
+  },
+  {
+   "key": "about",
+   "kind": "about",
+   "name": {
+    "en": "About us",
+    "ar": "من نحن"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "About Barakah Pantry"
+      },
+      "ar": {
+       "title": "عن مؤونة بركة"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Honest food, traceable to the farm",
+       "text": "We work directly with growers and cooperatives, pay them fairly, and put the harvest date on every jar. If you do not love it, we refund it."
+      },
+      "ar": {
+       "title": "غذاء صادق يمكن تتبعه إلى المزرعة",
+       "text": "نتعامل مباشرة مع المزارعين والتعاونيات وندفع لهم بإنصاف ونضع تاريخ الحصاد على كل عبوة. وإن لم تعجبك استرجعنا ثمنها."
+      }
+     },
+     "image": "food"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Traceable origin",
+       "text": "Every product names its farm and harvest."
+      },
+      "ar": {
+       "title": "مصدر معروف",
+       "text": "كل منتج يحمل اسم مزرعته وموسم حصاده."
+      }
+     },
+     "image": "food"
+    },
+    {
+     "snippet": "s_numbers",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "number": "40",
+         "label": "Partner farms"
+        },
+        {
+         "number": "120",
+         "label": "Products"
+        },
+        {
+         "number": "24",
+         "label": "Hours to ship"
+        },
+        {
+         "number": "4.9/5",
+         "label": "Customer review"
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "number": "40",
+         "label": "مزرعة شريكة"
+        },
+        {
+         "number": "120",
+         "label": "منتجاً"
+        },
+        {
+         "number": "24",
+         "label": "ساعة للشحن"
+        },
+        {
+         "number": "4.9/5",
+         "label": "تقييم العملاء"
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "About Barakah Pantry",
+     "ar": "عن مؤونة بركة"
+    },
+    "description": {
+     "en": "We work directly with growers and cooperatives, pay them fairly, and put the harvest date on every jar. If you do not love it, we refund it.",
+     "ar": "نتعامل مباشرة مع المزارعين والتعاونيات وندفع لهم بإنصاف ونضع تاريخ الحصاد على كل عبوة. وإن لم تعجبك استرجعنا ثمنها."
+    }
+   }
+  },
+  {
+   "key": "products",
+   "kind": "services",
+   "name": {
+    "en": "Collections",
+    "ar": "المجموعات"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Our collections",
+       "text": "Dates, honey, spices and olive oil from trusted growers, packed and shipped within a day."
+      },
+      "ar": {
+       "title": "مجموعاتنا",
+       "text": "تمور وعسل وبهارات وزيت زيتون من مزارعين موثوقين، تُعبّأ وتُشحن خلال يوم."
+      }
+     }
+    },
+    {
+     "snippet": "s_product_catalog",
+     "copy": {
+      "en": {
+       "title": "Popular products",
+       "items": [
+        {
+         "title": "Khalas dates, 1 kg",
+         "text": "Soft and caramel-sweet, from Al Ahsa. - AED 48"
+        },
+        {
+         "title": "Sidr honey, 500 g",
+         "text": "Raw and unheated, from mountain hives. - AED 165"
+        },
+        {
+         "title": "Cold-pressed olive oil, 1 L",
+         "text": "Single estate, harvested this autumn. - AED 72"
+        },
+        {
+         "title": "Seven-spice blend",
+         "text": "Ground weekly in small batches. - AED 22"
+        }
+       ]
+      },
+      "ar": {
+       "title": "منتجات رائجة",
+       "items": [
+        {
+         "title": "تمر خلاص، 1 كجم",
+         "text": "طري بحلاوة الكراميل من الأحساء. - 48 د.إ"
+        },
+        {
+         "title": "عسل سدر، 500 غرام",
+         "text": "خام غير مسخّن من خلايا جبلية. - 165 د.إ"
+        },
+        {
+         "title": "زيت زيتون بكر، 1 لتر",
+         "text": "من مزرعة واحدة وحصاد هذا الخريف. - 72 د.إ"
+        },
+        {
+         "title": "بهارات سبعة",
+         "text": "تُطحن أسبوعياً بدفعات صغيرة. - 22 د.إ"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_call_to_action",
+     "copy": {
+      "en": {
+       "title": "Taste before you commit",
+       "text": "Try the sampler box with six of our best sellers.",
+       "button": "Order the sampler",
+       "button_url": "/shop"
+      },
+      "ar": {
+       "title": "تذوّق قبل أن تلتزم",
+       "text": "جرّب علبة التذوق بستة من أكثر منتجاتنا مبيعاً.",
+       "button": "اطلب علبة التذوق",
+       "button_url": "/shop"
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Food products shop collections",
+     "ar": "مجموعات متجر منتجات غذائية"
+    },
+    "description": {
+     "en": "Order dates, honey, spices and olive oil direct from growers, packed fresh and delivered fast.",
+     "ar": "اطلب التمور والعسل والبهارات وزيت الزيتون مباشرة من المزارعين مع تعبئة طازجة وتوصيل سريع."
+    }
+   },
+   "url": "/collections"
+  },
+  {
+   "key": "projects",
+   "kind": "projects",
+   "name": {
+    "en": "Gallery",
+    "ar": "المعرض"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Gallery"
+      },
+      "ar": {
+       "title": "المعرض"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "The date farm",
+       "text": "Harvested by hand every September."
+      },
+      "ar": {
+       "title": "مزرعة التمر",
+       "text": "تُحصد يدوياً كل سبتمبر."
+      }
+     },
+     "image": "food"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Packing room",
+       "text": "Clean, cool and packed to order."
+      },
+      "ar": {
+       "title": "غرفة التعبئة",
+       "text": "نظيفة وباردة والتعبئة عند الطلب."
+      }
+     },
+     "image": "food"
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Beekeepers",
+       "text": "Mountain hives visited weekly."
+      },
+      "ar": {
+       "title": "مربّو النحل",
+       "text": "خلايا جبلية تُزار أسبوعياً."
+      }
+     },
+     "image": "food"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Gift boxes",
+       "text": "Wrapped with a handwritten card."
+      },
+      "ar": {
+       "title": "علب الهدايا",
+       "text": "مغلّفة ببطاقة مكتوبة بخط اليد."
+      }
+     },
+     "image": "food"
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Barakah Pantry gallery",
+     "ar": "معرض مؤونة بركة"
+    },
+    "description": {
+     "en": "Order dates, honey, spices and olive oil direct from growers, packed fresh and delivered fast.",
+     "ar": "اطلب التمور والعسل والبهارات وزيت الزيتون مباشرة من المزارعين مع تعبئة طازجة وتوصيل سريع."
+    }
+   },
+   "url": "/gallery"
+  },
+  {
+   "key": "team",
+   "kind": "team",
+   "name": {
+    "en": "Our team",
+    "ar": "فريقنا"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Meet the team"
+      },
+      "ar": {
+       "title": "تعرّف على فريقنا"
+      }
+     }
+    },
+    {
+     "snippet": "s_company_team",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "name": "Raghad",
+         "role": "Founder"
+        },
+        {
+         "name": "Ebrahim",
+         "role": "Sourcing manager"
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "name": "رغد",
+         "role": "المؤسس"
+        },
+        {
+         "name": "إبراهيم",
+         "role": "مسؤولة التوريد"
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Our team | Barakah Pantry",
+     "ar": "فريقنا | مؤونة بركة"
+    },
+    "description": {
+     "en": "The people behind Barakah Pantry.",
+     "ar": "الأشخاص الذين يقفون خلف مؤونة بركة."
+    }
+   }
+  },
+  {
+   "key": "contact",
+   "kind": "contact",
+   "name": {
+    "en": "Contact us",
+    "ar": "اتصل بنا"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Contact us",
+       "text": "We reply within one working day."
+      },
+      "ar": {
+       "title": "اتصل بنا",
+       "text": "نردّ خلال يوم عمل واحد."
+      }
+     }
+    },
+    {
+     "snippet": "s_contact_info",
+     "copy": {
+      "en": {
+       "title": "Find us",
+       "items": [
+        {
+         "title": "Address",
+         "text": "Al Qusais, Dubai"
+        },
+        {
+         "title": "Opening hours",
+         "text": "Daily 9:00-21:00"
+        },
+        {
+         "title": "Phone",
+         "text": "+971 4 000 0000"
+        },
+        {
+         "title": "Email",
+         "text": "hello@example.com"
+        }
+       ]
+      },
+      "ar": {
+       "title": "تجدنا هنا",
+       "items": [
+        {
+         "title": "العنوان",
+         "text": "القصيص، دبي"
+        },
+        {
+         "title": "ساعات العمل",
+         "text": "يومياً 9:00 - 21:00"
+        },
+        {
+         "title": "الهاتف",
+         "text": "+971 4 000 0000"
+        },
+        {
+         "title": "البريد الإلكتروني",
+         "text": "hello@example.com"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Taste before you commit",
+       "text": "Try the sampler box with six of our best sellers."
+      },
+      "ar": {
+       "title": "تذوّق قبل أن تلتزم",
+       "text": "جرّب علبة التذوق بستة من أكثر منتجاتنا مبيعاً."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Contact Barakah Pantry",
+     "ar": "تواصل مع مؤونة بركة"
+    },
+    "description": {
+     "en": "Call, write or visit us: Al Qusais, Dubai.",
+     "ar": "اتصل بنا أو راسلنا أو زرنا: القصيص، دبي."
+    }
+   },
+   "url": "/contactus"
+  },
+  {
+   "key": "faq",
+   "kind": "faq",
+   "name": {
+    "en": "FAQ",
+    "ar": "الأسئلة الشائعة"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Frequently asked questions"
+      },
+      "ar": {
+       "title": "الأسئلة الشائعة"
+      }
+     }
+    },
+    {
+     "snippet": "s_faq_collapse",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "title": "How fresh are the products?",
+         "text": "Packed to order and shipped within one working day; the harvest date is on each pack."
+        },
+        {
+         "title": "Is the honey pure?",
+         "text": "Yes, raw and unheated, with a lab report on request."
+        },
+        {
+         "title": "Do you ship abroad?",
+         "text": "To all Gulf countries; dairy and fresh items are local only."
+        },
+        {
+         "title": "What if something arrives damaged?",
+         "text": "Send us a photo and we replace or refund it the same day."
+        },
+        {
+         "title": "Do you make custom gift boxes?",
+         "text": "Yes, for companies and weddings from twenty boxes."
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "title": "ما مدى طزاجة المنتجات؟",
+         "text": "تُعبّأ عند الطلب وتُشحن خلال يوم عمل وتاريخ الحصاد على كل عبوة."
+        },
+        {
+         "title": "هل العسل طبيعي؟",
+         "text": "نعم، خام وغير مسخّن ويتوفر تقرير مخبري عند الطلب."
+        },
+        {
+         "title": "هل تشحنون إلى الخارج؟",
+         "text": "إلى دول الخليج كلها؛ الألبان والأصناف الطازجة للتوصيل المحلي فقط."
+        },
+        {
+         "title": "ماذا لو وصل منتج تالفاً؟",
+         "text": "أرسل لنا صورة ونبدّله أو نعيد المبلغ في اليوم نفسه."
+        },
+        {
+         "title": "هل تجهزون علب هدايا مخصصة؟",
+         "text": "نعم، للشركات والأفراح ابتداءً من عشرين علبة."
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "FAQ | Barakah Pantry",
+     "ar": "الأسئلة الشائعة | مؤونة بركة"
+    },
+    "description": {
+     "en": "Answers to the questions we hear most.",
+     "ar": "إجابات عن الأسئلة التي نسمعها أكثر من غيرها."
+    }
+   }
+  },
+  {
+   "key": "legal_privacy",
+   "kind": "legal",
+   "name": {
+    "en": "Privacy policy",
+    "ar": "سياسة الخصوصية"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Privacy policy"
+      },
+      "ar": {
+       "title": "سياسة الخصوصية"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "What we collect",
+       "text": "Barakah Pantry collects only the details you give us through forms, orders or calls: your name, phone, email and the content of your request. We use them to answer you and to deliver what you asked for."
+      },
+      "ar": {
+       "title": "ما الذي نجمعه",
+       "text": "تجمع مؤونة بركة فقط البيانات التي تقدّمها عبر النماذج أو الطلبات أو المكالمات: اسمك وهاتفك وبريدك ومضمون طلبك. نستخدمها للرد عليك وتنفيذ ما طلبته."
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Your rights",
+       "text": "We never sell your data. You may ask us to show, correct or delete it at any time by writing to the address on the contact page."
+      },
+      "ar": {
+       "title": "حقوقك",
+       "text": "لا نبيع بياناتك أبداً. ويمكنك أن تطلب منا الاطلاع عليها أو تصحيحها أو حذفها في أي وقت بمراسلتنا على العنوان المذكور في صفحة التواصل."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Privacy policy",
+     "ar": "سياسة الخصوصية"
+    },
+    "description": {
+     "en": "How we collect, use and protect your personal data.",
+     "ar": "كيف نجمع بياناتك الشخصية ونستخدمها ونحميها."
+    }
+   },
+   "url": "/privacy"
+  },
+  {
+   "key": "legal_terms",
+   "kind": "legal",
+   "name": {
+    "en": "Terms and conditions",
+    "ar": "الشروط والأحكام"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Terms and conditions"
+      },
+      "ar": {
+       "title": "الشروط والأحكام"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Using this website",
+       "text": "The content of this website is provided for information. Prices, availability and timelines are confirmed in writing before any agreement starts."
+      },
+      "ar": {
+       "title": "استخدام الموقع",
+       "text": "المحتوى المنشور في هذا الموقع للاطلاع. وتُؤكَّد الأسعار والتوفر والمواعيد كتابةً قبل بدء أي اتفاق."
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Responsibility",
+       "text": "We do our best to keep the website accurate. We are not liable for decisions taken only on the basis of the sample information shown here."
+      },
+      "ar": {
+       "title": "المسؤولية",
+       "text": "نحرص على دقة المعلومات في الموقع، ولا نتحمل مسؤولية قرارات بُنيت على المعلومات التوضيحية المعروضة هنا فقط."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Terms and conditions",
+     "ar": "الشروط والأحكام"
+    },
+    "description": {
+     "en": "The terms that apply when you use our website and services.",
+     "ar": "الشروط المطبقة عند استخدام موقعنا وخدماتنا."
+    }
+   },
+   "url": "/terms"
+  }
+ ]
+}

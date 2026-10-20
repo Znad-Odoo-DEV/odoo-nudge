@@ -371,6 +371,12 @@ $o-nudge-radius: 18px;
     white-space: pre-wrap;
 }
 
+.o_nudge_remembered {
+    margin-top: 0.4rem;
+    font-size: 0.85em;
+    opacity: 0.8;
+}
+
 .o_nudge_rate {
     display: flex;
     align-items: center;
@@ -426,6 +432,16 @@ $o-nudge-radius: 18px;
     background: none;
     color: $o-nudge-text-muted;
     padding: 0 6px;
+}
+
+.o_nudge_meeting_on {
+    color: #dc3545;
+}
+
+.o_nudge_meeting_time {
+    margin-inline-start: 4px;
+    font-size: 0.8em;
+    font-variant-numeric: tabular-nums;
 }
 
 .o_nudge_outdated {
@@ -597,6 +613,29 @@ $o-nudge-radius: 18px;
 // ---------------------------------------------------------------------
 // What Nudge sees
 // ---------------------------------------------------------------------
+
+.o_nudge_bulk {
+    padding: 6px 12px 0;
+    font-size: 0.9em;
+
+    .o_nudge_bulk_form {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 6px;
+    }
+
+    .o_nudge_bulk_label {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .o_nudge_bulk_note {
+        margin: 0;
+        color: $o-nudge-text-muted;
+    }
+}
 
 .o_nudge_screen {
     display: flex;
@@ -1286,6 +1325,11 @@ $o-nudge-radius: 18px;
     overflow-wrap: anywhere;
 }
 
+.o_nudge_mic_missing {
+    flex: 0 0 auto;
+    cursor: help;
+}
+
 .o_nudge_mic,
 .o_nudge_language {
     flex: 0 0 auto;
@@ -1304,6 +1348,11 @@ $o-nudge-radius: 18px;
 .o_nudge_mic {
     width: 34px;
     border-radius: 50%;
+
+    &.o_nudge_mic_off {
+        opacity: 0.55;
+        cursor: help;
+    }
 
     &.o_nudge_mic_on {
         border-color: $o-nudge-danger;
@@ -1598,6 +1647,35 @@ $o-nudge-radius: 18px;
     font-size: 0.75rem;
 }
 
+// The screen explained without any AI: a short list, each line with a way to show it
+.o_nudge_found_items {
+    margin: 0 0 8px;
+    padding: 0;
+    list-style: none;
+}
+
+.o_nudge_found_item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0;
+    border-bottom: 1px solid $o-nudge-border;
+
+    > span {
+        flex: 1 1 12rem;
+    }
+}
+
+.o_nudge_found_head {
+    margin: 6px 0 0;
+    font-weight: 600;
+}
+
+.o_nudge_noai {
+    margin-top: 8px;
+}
+
 .o_nudge_found_passage {
     margin: 0;
     padding: 6px 10px;
@@ -1666,4 +1744,258 @@ $o-nudge-radius: 18px;
     font-size: 0.8rem;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.o_nudge_private {
+    opacity: .8;
+    margin: 0 .25rem;
+}
+
+// A chart in a message
+.o_nudge_chart {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+    width: 100%;
+    color: var(--body-color, inherit);
+
+    .o_nudge_chart_title {
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .o_nudge_chart_canvas {
+        position: relative;
+        height: 220px;
+        width: 100%;
+    }
+
+    .o_nudge_chart_note {
+        font-size: 0.75rem;
+    }
+
+    .o_nudge_chart_actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+}
+
+// ---------------------------------------------------------------------
+// On a phone: the panel is a sheet over the whole screen. A window of
+// 600 px or less, ?mobile=1 or the Odoo app switch it on (o_nudge_mobile).
+// Logical properties only: right-to-left mirrors it on its own.
+// ---------------------------------------------------------------------
+
+.o_nudge_mobile {
+    &.o_nudge_open {
+        inset: 0;
+        width: 100%;
+        max-width: none;
+        gap: 0;
+        align-items: stretch;
+        // The sheet is above the dialogs, and the keyboard shortens it, not covers it
+        height: 100dvh;
+    }
+
+    // The sheet closes with its own button or a swipe: the avatar would sit on the message box
+    &.o_nudge_open .o_nudge_avatar {
+        display: none;
+    }
+
+    .o_nudge_panel {
+        flex: 1 1 auto;
+        width: 100%;
+        height: 100%;
+        max-width: none;
+        max-height: none;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        animation: o-nudge-sheet 0.2s ease-out;
+        padding-block-end: env(safe-area-inset-bottom, 0px);
+    }
+
+    .o_nudge_header {
+        position: relative;
+        padding-block-start: calc(14px + env(safe-area-inset-top, 0px));
+        padding-inline: calc(12px + env(safe-area-inset-left, 0px)) calc(12px + env(safe-area-inset-right, 0px));
+        gap: 6px;
+        // A finger moves on this bar: the page does not scroll under it
+        touch-action: pan-x;
+    }
+
+    .o_nudge_grabber {
+        position: absolute;
+        inset-block-start: calc(6px + env(safe-area-inset-top, 0px));
+        inset-inline-start: 50%;
+        width: 44px;
+        height: 4px;
+        border-radius: 2px;
+        background: rgba(255, 255, 255, 0.55);
+        transform: translateX(-50%);
+    }
+
+    &[dir="rtl"] .o_nudge_grabber {
+        transform: translateX(50%);
+    }
+
+    .o_nudge_icon_button {
+        width: 44px;
+        height: 44px;
+        font-size: 1.15rem;
+    }
+
+    .o_nudge_body {
+        padding-inline: calc(14px + env(safe-area-inset-left, 0px)) calc(14px + env(safe-area-inset-right, 0px));
+        overscroll-behavior: contain;
+    }
+
+    // Answers in large type
+    .o_nudge_message .o_nudge_bubble {
+        font-size: 1.125rem;
+        line-height: 1.5;
+        max-width: 100%;
+    }
+
+    // What waits for a yes: the buttons fill the width
+    .o_nudge_card {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .o_nudge_card_actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        .btn {
+            width: 100%;
+            min-height: 48px;
+            font-size: 1.05rem;
+            border-radius: 12px;
+        }
+    }
+
+    // The mode switch is a segmented control over the full width
+    .o_nudge_screen {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding-inline: calc(12px + env(safe-area-inset-left, 0px)) calc(12px + env(safe-area-inset-right, 0px));
+    }
+
+    .o_nudge_modes {
+        order: -1;
+        flex: 1 0 100%;
+        margin-inline-start: 0;
+        padding: 3px;
+        border-radius: 12px;
+    }
+
+    .o_nudge_mode {
+        flex: 1 1 0;
+        min-height: 44px;
+        border-radius: 10px;
+        font-size: 1rem;
+        text-align: center;
+    }
+
+    // The microphone of the box is the big button underneath
+    .o_nudge_composer {
+        padding-inline: calc(10px + env(safe-area-inset-left, 0px)) calc(10px + env(safe-area-inset-right, 0px));
+
+        .o_nudge_mic,
+        .o_nudge_language,
+        .o_nudge_mic_missing {
+            display: none;
+        }
+
+        .o_nudge_input {
+            min-height: 48px;
+            font-size: 1.05rem;
+            border-radius: 14px;
+        }
+
+        .o_nudge_attach,
+        .o_nudge_send,
+        .o_nudge_later {
+            min-width: 44px;
+            min-height: 44px;
+        }
+    }
+}
+
+// The big quick actions
+.o_nudge_tiles {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    width: 100%;
+    margin-block: 12px;
+}
+
+.o_nudge_tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 104px;
+    padding: 12px;
+    border: 1px solid $o-nudge-border;
+    border-radius: 16px;
+    background: $o-nudge-surface-muted;
+    color: $o-nudge-text;
+    font-size: 1.05rem;
+    font-weight: 600;
+    text-align: center;
+
+    .fa {
+        font-size: 1.9rem;
+        color: var(--nudge-accent);
+    }
+
+    &:active {
+        background: rgba(var(--nudge-accent-rgb), 0.16);
+    }
+}
+
+// Under the message box: held, it listens
+.o_nudge_holdbar {
+    flex: 0 0 auto;
+    padding: 6px calc(14px + env(safe-area-inset-right, 0px)) 12px calc(14px + env(safe-area-inset-left, 0px));
+}
+
+.o_nudge_holdtalk {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 72px;
+    border: 0;
+    border-radius: 36px;
+    background: var(--nudge-accent);
+    color: $o-nudge-on-accent;
+    font-size: 1.2rem;
+    font-weight: 700;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+
+    .fa {
+        font-size: 1.6rem;
+    }
+
+    &.o_nudge_holdtalk_on {
+        background: $o-nudge-danger;
+        box-shadow: 0 0 0 6px rgba(220, 53, 69, 0.25);
+    }
+}
+
+@keyframes o-nudge-sheet {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: none; }
 }

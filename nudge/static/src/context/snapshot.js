@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
+import { formatMonetary } from "@web/views/fields/formatters";
 
 /**
  * Describes the screen as structured data: what the view is, which record it
@@ -15,8 +16,8 @@ export const LIMITS = {
     fields: 80,
     buttons: 40,
     rows: 10,
-    lineRows: 5,
-    lineColumns: 6,
+    lineRows: 50,
+    lineColumns: 8,
     names: 5,
     text: 160,
     notices: 5,
@@ -58,7 +59,7 @@ function isShown(element) {
  * @param {any} value value held by the record
  * @returns {any} value as plain data, or undefined when it is not described
  */
-export function formatValue(field, value) {
+export function formatValue(field, value, data) {
     if (SKIPPED_TYPES.has(field.type)) {
         return undefined;
     }
@@ -70,8 +71,9 @@ export function formatValue(field, value) {
             return Boolean(value);
         case "integer":
         case "float":
-        case "monetary":
             return typeof value === "number" ? value : null;
+        case "monetary":
+            return typeof value === "number" ? money(value, field, data) : null;
         case "date":
             return value.toISODate ? value.toISODate() : truncate(value);
         case "datetime":
@@ -96,12 +98,93 @@ export function formatValue(field, value) {
     }
 }
 
+/**
+ * An amount as the person reads it, with its currency symbol; the bare number
+ * when the currency of the record is not known.
+ */
+function money(value, field, data, currencyId) {
+    try {
+        const text = formatMonetary(value, { data, field, currencyId });
+        return text ? truncate(text, 40) : value;
+    } catch {
+        return value;
+    }
+}
+
+/**
+ * The totals box of an invoice or an order (widget account-tax-totals-field):
+ * the total, the untaxed amount and the taxes, as shown on screen. Odoo 17 and
+ * 18 hold them as amount_total / amount_untaxed, 19 as *_amount_currency.
+ */
+export function describeTaxTotals(totals, field, data) {
+    if (!totals || typeof totals !== "object") {
+        return null;
+    }
+    const currencyId = totals.currency_id ?? totals.currency?.id;
+    const show = (formatted, ...values) => {
+        const value = values.find((item) => typeof item === "number");
+        if (typeof formatted === "string" && formatted) {
+            return truncate(formatted, 40);
+        }
+        return value === undefined ? undefined : money(value, field, data, currencyId);
+    };
+    const result = {};
+    const total = show(
+        totals.formatted_amount_total,
+        totals.total_amount_currency,
+        totals.amount_total
+    );
+    const untaxed = show(
+        totals.formatted_amount_untaxed,
+        totals.base_amount_currency,
+        totals.amount_untaxed
+    );
+    if (total !== undefined) {
+        result.total = total;
+    }
+    if (untaxed !== undefined) {
+        result.untaxed = untaxed;
+    }
+    const taxValue = typeof totals.tax_amount_currency === "number"
+        ? totals.tax_amount_currency
+        : typeof totals.amount_total === "number" && typeof totals.amount_untaxed === "number"
+          ? totals.amount_total - totals.amount_untaxed
+          : undefined;
+    const tax = show(undefined, taxValue);
+    if (tax !== undefined) {
+        result.tax = tax;
+    }
+    const groups = [];
+    const lists = Array.isArray(totals.subtotals) ? totals.subtotals : [];
+    for (const subtotal of lists) {
+        for (const group of subtotal.tax_groups || []) {
+            const amount = show(
+                group.formatted_tax_group_amount,
+                group.tax_amount_currency,
+                group.tax_group_amount
+            );
+            const name = group.group_name ?? group.tax_group_name;
+            if (name && amount !== undefined) {
+                groups.push({ name: truncate(String(name), 60), amount });
+            }
+        }
+    }
+    if (groups.length) {
+        result.taxes = groups.slice(0, LIMITS.notices);
+    }
+    return Object.keys(result).length ? result : null;
+}
+
 function formatList(list) {
     const records = list.records || [];
-    const result = { count: list.count ?? records.length };
+    const count = list.count ?? records.length;
+    const result = { count };
     const rows = records.slice(0, LIMITS.lineRows).map((record) => describeRow(record));
     if (rows.length) {
         result.rows = rows;
+    }
+    if (count > rows.length && rows.length) {
+        result.more = count - rows.length;
     }
     return result;
 }
@@ -122,7 +205,7 @@ function describeRow(record, names) {
         const isRelation = field.type === "one2many" || field.type === "many2many";
         const value = isRelation
             ? { count: record.data[name]?.count ?? 0 }
-            : formatValue(field, record.data[name]);
+            : formatValue(field, record.data[name], record.data);
         if (value === undefined || value === null || value === "") {
             continue;
         }
@@ -155,6 +238,23 @@ function pageOf(node) {
     return page ? page.getAttribute("string") || page.getAttribute("name") || "" : "";
 }
 
+/** A condition written in the view (not a plain true or false), kept short */
+function conditionOf(expression) {
+    if (typeof expression !== "string" || !expression || /^(true|1|false|0)$/i.test(expression)) {
+        return "";
+    }
+    return truncate(expression, 200);
+}
+
+// The field the person was last in: asked about with no name, it is the one meant
+let lastFocusedField = "";
+document.addEventListener("focusin", (event) => {
+    const widget = event.target?.closest?.(".o_field_widget[name]");
+    if (widget && !widget.closest(".o_nudge")) {
+        lastFocusedField = widget.getAttribute("name");
+    }
+});
+
 function describeFormFields(controller, record, root) {
     const context = record.evalContextWithVirtualIds;
     const fields = [];
@@ -165,14 +265,17 @@ function describeFormFields(controller, record, root) {
         }
         const info = controller.archInfo.fieldNodes[node.getAttribute("field_id")];
         const field = info && record.fields[info.name];
-        if (!field || seen.has(info.name) || SKIPPED_TYPES.has(field.type)) {
+        const isTotals = info?.widget === "account-tax-totals-field";
+        if (!field || seen.has(info.name) || (SKIPPED_TYPES.has(field.type) && !isTotals)) {
             continue;
         }
         if (isTrue(info.invisible, context) || isHiddenByArch(node, context)) {
             continue;
         }
         seen.add(info.name);
-        const value = formatValue(field, record.data[info.name]);
+        const value = isTotals
+            ? describeTaxTotals(record.data[info.name], field, record.data)
+            : formatValue(field, record.data[info.name], record.data);
         if (value === undefined) {
             continue;
         }
@@ -193,6 +296,20 @@ function describeFormFields(controller, record, root) {
         }
         if (isTrue(info.readonly, context)) {
             entry.readonly = true;
+        }
+        // Why, for the explanations that need no AI: the condition of the view and the record linked
+        const required = conditionOf(info.required);
+        if (required) {
+            entry.required_expr = required;
+        }
+        const readonly = conditionOf(info.readonly);
+        if (readonly) {
+            entry.readonly_expr = readonly;
+        }
+        const linked = record.data[info.name];
+        const linkedId = Array.isArray(linked) ? linked[0] : linked?.id;
+        if (field.type === "many2one" && Number.isInteger(linkedId)) {
+            entry.rid = linkedId;
         }
         if (record.isFieldInvalid(info.name)) {
             entry.invalid = true;
@@ -222,6 +339,10 @@ function describeButtons(xmlDoc, context, root) {
         }
         const element = root?.querySelector(`button[name="${CSS.escape(name)}"]`);
         entry.on_screen = isShown(element);
+        const tooltip = node.getAttribute("title") || node.getAttribute("help") || "";
+        if (tooltip) {
+            entry.help = truncate(tooltip, 160);
+        }
         buttons.push(entry);
         if (buttons.length >= LIMITS.buttons) {
             break;
@@ -271,6 +392,9 @@ export function describeForm(controller) {
     const name = record.data.display_name || record.data.name;
     if (typeof name === "string" && name) {
         description.record.name = truncate(name, 80);
+    }
+    if (description.fields.some((field) => field.name === lastFocusedField)) {
+        description.focused_field = lastFocusedField;
     }
     const invalid = description.fields.filter((field) => field.invalid).map((field) => field.name);
     if (invalid.length) {
@@ -553,6 +677,10 @@ export function takeSnapshot({ action, views }) {
     const dialogTitles = texts(".modal:not(.o_inactive_modal) .modal-title", 2);
     if (dialogTitles.length) {
         snapshot.dialog_title = dialogTitles.at(-1);
+    }
+    const errors = texts(".o_notification.border-danger, .o_error_dialog .modal-body", 1);
+    if (errors.length) {
+        snapshot.error = errors[0];
     }
     const notices = texts(".o_notification_manager .o_notification, .o_form_view .alert");
     if (notices.length) {

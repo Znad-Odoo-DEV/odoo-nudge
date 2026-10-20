@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_recipe_installed_rule_company" model="ir.rule">
+        <field name="name">Nudge Installed Recipe: the companies of the person</field>
+        <field name="model_id" ref="model_nudge_recipe_installed"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <!-- The catalogue: one card per recipe -->
+    <record id="nudge_recipe_entry_view_kanban" model="ir.ui.view">
+        <field name="name">nudge.recipe.entry.kanban</field>
+        <field name="model">nudge.recipe.entry</field>
+        <field name="arch" type="xml">
+            <kanban create="0" edit="0" delete="0" group_create="0" records_draggable="0">
+                <field name="title"/>
+                <field name="summary"/>
+                <field name="kind"/>
+                <field name="apps"/>
+                <field name="apps_missing"/>
+                <field name="compatible"/>
+                <field name="odoo_versions"/>
+                <field name="state"/>
+                <field name="installed_version"/>
+                <field name="author"/>
+                <field name="updated"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="fw-bold fs-4"><field name="title"/></div>
+                        <div class="text-muted"><field name="kind" widget="badge"/> <field name="author"/></div>
+                        <div class="mt-2"><field name="summary"/></div>
+                        <div class="mt-2" t-if="record.apps.raw_value">
+                            <span>Apps:</span> <field name="apps"/>
+                        </div>
+                        <div class="mt-1 text-danger" t-if="record.apps_missing.raw_value">
+                            <span>Missing here:</span> <field name="apps_missing"/>
+                        </div>
+                        <div class="mt-1 text-danger" t-if="!record.compatible.raw_value">
+                            <span>Not for this version of Odoo; made for</span> <field name="odoo_versions"/>
+                        </div>
+                        <div class="mt-1 text-success" t-if="record.state.raw_value == 'installed'">
+                            <span>Installed</span> <field name="installed_version"/>
+                        </div>
+                        <div class="mt-1 text-warning" t-if="record.state.raw_value == 'update'">
+                            <span>Update available</span>: <field name="updated"/>
+                        </div>
+                        <footer class="pt-2">
+                            <button name="action_install" type="object" class="btn btn-primary btn-sm"
+                                    invisible="state == 'installed' or not compatible">Install</button>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="nudge_recipe_entry_view_search" model="ir.ui.view">
+        <field name="name">nudge.recipe.entry.search</field>
+        <field name="model">nudge.recipe.entry</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name_en" string="Name" filter_domain="['|', ('name_en', 'ilike', self), ('name_ar', 'ilike', self)]"/>
+                <field name="apps"/>
+                <filter name="updates" string="Update Available" domain="[('state', '=', 'update')]"/>
+                <filter name="installed" string="Installed" domain="[('state', '=', 'installed')]"/>
+                <group>
+                    <filter name="by_kind" string="Kind" context="{'group_by': 'kind'}"/>
+                    <filter name="by_source" string="Source" context="{'group_by': 'source_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_recipe_entry_action" model="ir.actions.act_window">
+        <field name="name">Marketplace</field>
+        <field name="res_model">nudge.recipe.entry</field>
+        <field name="view_mode">kanban</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No recipes listed yet</p>
+            <p>Open Recipe Sources and press Refresh to read an index. If the site has none yet, nothing is wrong: try again later.</p>
+        </field>
+    </record>
+
+    <!-- Sources -->
+    <record id="nudge_recipe_source_view_list" model="ir.ui.view">
+        <field name="name">nudge.recipe.source.list</field>
+        <field name="model">nudge.recipe.source</field>
+        <field name="arch" type="xml">
+            <tree string="Recipe Sources">
+                <header>
+                    <button name="action_refresh" type="object" string="Refresh" display="always"/>
+                </header>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="url"/>
+                <field name="enabled" widget="boolean_toggle"/>
+                <field name="weekly" widget="boolean_toggle"/>
+                <field name="trusted"/>
+                <field name="entry_count"/>
+                <field name="last_fetched"/>
+                <field name="last_message"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="nudge_recipe_source_view_form" model="ir.ui.view">
+        <field name="name">nudge.recipe.source.form</field>
+        <field name="model">nudge.recipe.source</field>
+        <field name="arch" type="xml">
+            <form string="Recipe Source">
+                <header>
+                    <button name="action_refresh" type="object" string="Refresh" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="url"/>
+                        <field name="enabled"/>
+                        <field name="weekly"/>
+                        <field name="trusted"/>
+                    </group>
+                    <group>
+                        <field name="last_fetched"/>
+                        <field name="last_message"/>
+                        <field name="index_checksum"/>
+                    </group>
+                    <div class="text-muted">
+                        An index is a JSON file of recipes, hosted by anyone on a static site. Nudge only reads it,
+                        over HTTPS, with a limit of 10 seconds and 2 MB, and checks every recipe file against the
+                        checksum in the index before it is offered for import.
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_recipe_source_action" model="ir.actions.act_window">
+        <field name="name">Recipe Sources</field>
+        <field name="res_model">nudge.recipe.source</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Installed -->
+    <record id="nudge_recipe_installed_view_list" model="ir.ui.view">
+        <field name="name">nudge.recipe.installed.list</field>
+        <field name="model">nudge.recipe.installed</field>
+        <field name="arch" type="xml">
+            <tree string="Installed Recipes" create="0" edit="0" delete="0">
+                <field name="name"/>
+                <field name="source_id"/>
+                <field name="entry_key"/>
+                <field name="version"/>
+                <field name="installed_on"/>
+                <field name="user_id"/>
+                <field name="active" column_invisible="True"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="nudge_recipe_installed_action" model="ir.actions.act_window">
+        <field name="name">Installed Recipes</field>
+        <field name="res_model">nudge.recipe.installed</field>
+        <field name="view_mode">tree</field>
+        <field name="context">{'active_test': False}</field>
+    </record>
+
+    <!-- Publish ours -->
+    <record id="nudge_recipe_publish_view_form" model="ir.ui.view">
+        <field name="name">nudge.recipe.publish.form</field>
+        <field name="model">nudge.recipe.publish</field>
+        <field name="arch" type="xml">
+            <form string="Publish our recipes">
+                <field name="state" invisible="1"/>
+                <group invisible="state != 'choose'">
+                    <group string="The recipe">
+                        <field name="key" placeholder="raghad-sales-tours"/>
+                        <field name="name_en"/>
+                        <field name="name_ar"/>
+                        <field name="description_en"/>
+                        <field name="description_ar"/>
+                        <field name="author"/>
+                        <field name="licence"/>
+                        <field name="apps" placeholder="sale, purchase"/>
+                        <field name="base_url" placeholder="https://example.com/nudge/"/>
+                    </group>
+                    <group string="What goes in">
+                        <field name="split"/>
+                        <field name="with_tours"/>
+                        <field name="with_rules"/>
+                        <field name="with_presets"/>
+                        <field name="with_health"/>
+                        <field name="with_lexicon"/>
+                        <field name="with_memories"/>
+                        <field name="with_files"/>
+                        <field name="with_screens"/>
+                        <field name="include_files" invisible="not with_files"/>
+                    </group>
+                </group>
+                <div class="text-muted" invisible="state != 'choose'">
+                    You get one ZIP with an index.json and the recipe files. Put them on any static site; Nudge
+                    uploads nothing. Another company points a source at the address of your index.json.
+                </div>
+                <group invisible="state != 'done'">
+                    <field name="recipe_count"/>
+                    <field name="file" filename="file_name"/>
+                    <field name="file_name" invisible="1"/>
+                </group>
+                <footer>
+                    <button name="action_publish" type="object" string="Make the ZIP" class="btn-primary"
+                            invisible="state != 'choose'"/>
+                    <button special="cancel" string="Close"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_recipe_publish_action" model="ir.actions.act_window">
+        <field name="name">Publish our recipes</field>
+        <field name="res_model">nudge.recipe.publish</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="nudge_menu_recipe_market" name="Marketplace" sequence="5"
+              parent="nudge_menu_recipes" action="nudge_recipe_entry_action"/>
+    <menuitem id="nudge_menu_recipe_installed" name="Installed Recipes" sequence="6"
+              parent="nudge_menu_recipes" action="nudge_recipe_installed_action"/>
+    <menuitem id="nudge_menu_recipe_sources" name="Recipe Sources" sequence="7"
+              parent="nudge_menu_recipes" action="nudge_recipe_source_action"/>
+    <menuitem id="nudge_menu_recipe_publish" name="Publish" sequence="25"
+              parent="nudge_menu_recipes" action="nudge_recipe_publish_action"/>
+</odoo>

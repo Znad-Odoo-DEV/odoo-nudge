@@ -7,7 +7,11 @@
         <field name="arch" type="xml">
             <form string="Email">
                 <field name="flow_id" invisible="1"/>
+                <field name="res_model" invisible="1"/>
                 <field name="res_id" invisible="1"/>
+                <div class="alert alert-info mb-3" role="alert" invisible="flow_id">
+                    A reply written by Nudge from the thread. Read it, change it, then press Send: nothing goes before.
+                </div>
                 <field name="without_email" invisible="1"/>
                 <div class="alert alert-warning mb-3" role="alert" invisible="not missing">
                     <strong>Fill in on the record first:</strong>

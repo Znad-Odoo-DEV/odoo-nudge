@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_memory_view_list" model="ir.ui.view">
+        <field name="name">nudge.memory.view.list</field>
+        <field name="model">nudge.memory</field>
+        <field name="arch" type="xml">
+            <tree string="Remembered Answers" decoration-info="state == 'proposed'" decoration-muted="state == 'refused'">
+                <header>
+                    <button name="action_export_recipe" type="object" string="Export as a recipe" display="always" groups="nudge.group_nudge_manager"/>
+                </header>
+                <field name="question"/>
+                <field name="answer" optional="show"/>
+                <field name="language" optional="show"/>
+                <field name="company_id" optional="show" groups="base.group_multi_company"/>
+                <field name="group_ids" widget="many2many_tags" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'approved'" decoration-info="state == 'proposed'"/>
+                <field name="uses"/>
+                <field name="last_used" optional="show"/>
+                <field name="proposed_by" optional="hide"/>
+                <button name="action_approve" type="object" string="Approve" icon="fa-check"
+                        class="btn-link text-success" invisible="state == 'approved'"/>
+                <button name="action_refuse" type="object" string="Refuse" icon="fa-times"
+                        class="btn-link text-danger" invisible="state == 'refused'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="nudge_memory_view_form" model="ir.ui.view">
+        <field name="name">nudge.memory.view.form</field>
+        <field name="model">nudge.memory</field>
+        <field name="arch" type="xml">
+            <form string="Remembered Answer">
+                <header>
+                    <button name="action_approve" type="object" string="Approve" class="btn-primary"
+                            invisible="state == 'approved'"/>
+                    <button name="action_refuse" type="object" string="Refuse" invisible="state == 'refused'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="proposed,approved"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="question"/>
+                        <field name="answer"/>
+                        <field name="company_id" groups="base.group_multi_company"/>
+                        <field name="group_ids" widget="many2many_tags"/>
+                        <field name="active"/>
+                    </group>
+                    <group>
+                        <field name="language"/>
+                        <field name="uses"/>
+                        <field name="last_used"/>
+                        <field name="proposed_by"/>
+                        <field name="approved_by"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_memory_view_search" model="ir.ui.view">
+        <field name="name">nudge.memory.view.search</field>
+        <field name="model">nudge.memory</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="question"/>
+                <field name="answer"/>
+                <filter name="proposed" string="Waiting for Approval" domain="[('state', '=', 'proposed')]"/>
+                <filter name="approved" string="Approved" domain="[('state', '=', 'approved')]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_memory_action" model="ir.actions.act_window">
+        <field name="name">Remembered Answers</field>
+        <field name="res_model">nudge.memory</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_proposed': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No answer is remembered yet</p>
+            <p>
+                When someone finds an explanation useful, it waits here for your yes. Once approved,
+                the same question is answered from here at once, without the AI provider. You can
+                also write one yourself.
+            </p>
+        </field>
+    </record>
+</odoo>

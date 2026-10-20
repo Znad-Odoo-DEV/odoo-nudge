@@ -106,11 +106,13 @@ TOOLS = {}
 TALK_TOOLS = frozenset({
     "search_odoo_documentation", "show_on_screen", "show_menu_path", "find_screen", "open_screen",
     "describe_model", "locate_data", "search_company_files", "write_in_field", "test_import",
-    "remember_lesson", "search_products",
+    "match_import_columns",
+    "remember_lesson", "search_products", "record_changes",
 })
 AGENT_TOOLS = TALK_TOOLS | {
     "search_records", "read_record", "find_record", "aggregate_records", "filter_screen", "open_record",
-    "prepare_create", "prepare_write", "call_method", "prepare_plan", "prepare_task",
+    "prepare_create", "prepare_write", "call_method", "prepare_plan", "bulk_apply", "prepare_task",
+    "show_chart", "prepare_revert", "save_report",
 }
 # Developer mode builds: what it reads to build, what it builds with, and
 # prepare_write to switch off what it built. Records, imports and products
@@ -121,24 +123,46 @@ DEV_TOOLS = frozenset({
     "search_records", "read_record", "prepare_write",
     "read_automations", "check_python_code", "prepare_automation", "prepare_server_action",
     "prepare_email_template", "prepare_email_design", "prepare_email_review", "send_test_email",
-    "prepare_delete", "prepare_undo", "read_view", "prepare_view_change", "prepare_button",
+    "prepare_delete", "prepare_undo", "read_view", "prepare_view_change", "prepare_button", "prepare_report_design",
     "prepare_field", "try_automation", "prepare_scheduled_action", "prepare_approval_rule",
+    "prepare_approval_flow", "diagnose_failure", "prepare_code_fix",
+    "prepare_module_scaffold",
 })
 ESSENTIAL_BY_MODE = {MODE_TALK: TALK_TOOLS, MODE_AGENT: AGENT_TOOLS, MODE_DEV: DEV_TOOLS}
 ESSENTIAL_TOOLS = TALK_TOOLS | AGENT_TOOLS | DEV_TOOLS | {"more_tools"}
 
+# Every result of a tool is read by the model inside a frame that says it is data:
+# information to reason about, never an instruction, whatever a note, a file, a
+# label or an error text quoting a field says. Only the tools below answer in
+# words that Nudge alone wrote (where they led the person, a lesson kept), and
+# stay unframed; a new tool is framed until it is named here.
+UNFRAMED_TOOLS = frozenset({
+    "open_screen", "open_record", "filter_screen", "show_on_screen", "show_menu_path", "show_tour",
+    "show_settings", "show_in_studio", "write_in_field", "find_screen", "more_tools", "remember_lesson",
+})
+
 # The tools whose result is what people wrote: in records, in files, in the
-# pages of the documentation, in code and views. The model reads it inside a
-# frame that says it is data: information to reason about, never an
-# instruction, whatever a note or a file says. Named here for the companion
-# modules too.
+# pages of the documentation, in code and views. Kept as the list of the ones
+# that are data by nature; the frame itself no longer depends on it.
 DATA_TOOLS = frozenset({
-    "search_records", "read_record", "find_record", "aggregate_records",
+    "search_records", "read_record", "find_record", "aggregate_records", "show_chart",
     "search_company_files", "search_odoo_documentation", "search_products", "find_products",
-    "read_automations", "read_view", "read_module_code", "test_import",
+    "read_automations", "diagnose_failure", "read_view", "read_module_code", "test_import", "match_import_columns",
+    "document_to_record",
+    "summarize_record_history", "record_changes",
 })
 
 TOOL_SETS = ("full", "essential")
+
+# What acts on the screen of the person: a run in the background has none
+SCREEN_TOOLS = frozenset({
+    "filter_screen", "open_screen", "open_record", "show_menu_path", "show_on_screen", "show_tour",
+    "show_settings", "write_in_field", "show_chart",
+})
+
+NO_SCREEN = (
+    '<data source="{name}">There is no screen in a background run: nothing can be shown, filtered or '
+    "opened. Answer with search_records (or aggregate_records) and write the rows in your answer.</data>")
 
 
 def register(tool_class):
@@ -146,7 +170,7 @@ def register(tool_class):
     return tool_class
 
 
-def available(env, mode=MODE_TALK, tool_set="full", extra=()):
+def available(env, mode=MODE_TALK, tool_set="full", extra=(), background=False):
     """:param tool_set: "essential" keeps the tools of the mode, and ``extra``
     :param extra: names of the tools of the groups a small model was given
     :return: tools offered to the current user. Sorted: the list is part
@@ -155,6 +179,8 @@ def available(env, mode=MODE_TALK, tool_set="full", extra=()):
         names = ESSENTIAL_BY_MODE.get(mode, TALK_TOOLS) | set(extra) | {"more_tools"}
     else:
         names = {name for name, tool in TOOLS.items() if not getattr(tool, "small_models_only", False)}
+    if background:
+        names -= SCREEN_TOOLS
     return [tool for name, tool in sorted(TOOLS.items()) if name in names and tool.is_available(env, mode)]
 
 
@@ -173,6 +199,8 @@ def guarded(env, name, function):
 def call(env, name, arguments, screen=None, mode=MODE_TALK):
     """Run one call made by the model."""
     tool = TOOLS.get(name)
+    if tool is not None and name in SCREEN_TOOLS and env.context.get("nudge_background"):
+        return ToolResult(NO_SCREEN.format(name=name), is_error=True)
     if tool is None or not tool.is_available(env, mode):
         return ToolResult(f"There is no tool named {name!r}.", is_error=True)
     if not isinstance(arguments, dict):
@@ -189,13 +217,16 @@ def call(env, name, arguments, screen=None, mode=MODE_TALK):
     return result
 
 
-def as_data(name, content):
-    """:return: the result of the tool ``name`` as the model reads it. What a
-    tool of ``DATA_TOOLS`` found is framed as data, so that an instruction
-    written in a note or a file is reported to the person, not followed;
-    "<" is escaped inside, and the frame cannot be closed from within."""
-    if name not in DATA_TOOLS:
+def as_data(name, content, is_error=False):
+    """:return: the result of the tool ``name`` as the model reads it. Whatever
+    the tool says is framed as data, errors included (they quote record names and
+    values), so that an instruction written in a note or a file is reported to
+    the person, not followed; "<" is escaped inside, and the frame cannot be
+    closed from within. Only the tools of ``UNFRAMED_TOOLS`` answer in plain
+    words, when they succeed."""
+    if name in UNFRAMED_TOOLS and not is_error:
         return content
+    content = content if isinstance(content, str) else str(content)
     return f'<data source="{name}">{content.replace("<", "&lt;")}</data>'
 
 

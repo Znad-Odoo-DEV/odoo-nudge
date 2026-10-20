@@ -11,7 +11,7 @@ import { _t } from "@web/core/l10n/translation";
  * selector.
  */
 
-const CONTROLS = {
+export const CONTROLS = {
     new: ".o_form_button_create, .o_list_button_add, .o-kanban-button-new",
     save: ".o_form_button_save",
     discard: ".o_form_button_cancel",

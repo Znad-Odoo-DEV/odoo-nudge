@@ -6,10 +6,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-11 06:09+0000\n"
-"PO-Revision-Date: 2026-10-11 06:09+0000\n"
+"POT-Creation-Date: 2026-10-17 17:02+0000\n"
+"PO-Revision-Date: 2026-10-17 17:02+0000\n"
 "Last-Translator: \n"
-"Language-Team: Arabic\n"
+"Language-Team: \n"
 "Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -43,12 +43,77 @@ msgid "%s, without the email."
 msgstr "%s، بدون البريد."
 
 #. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
+msgid "(no subject)"
+msgstr "(بلا عنوان)"
+
+#. module: nudge_mail
 #: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_email_review_view_form
 msgid "<strong>Fill in on the record first:</strong>"
 msgstr "<strong>املأ في السجل أولاً:</strong>"
 
 #. module: nudge_mail
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_proposal__source__rule
+msgid "A Rule You Taught"
+msgstr "قاعدة علّمتها"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
+msgid "A customer asks something"
+msgstr "عميل يسأل عن شيء"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
+msgid "A customer wrote"
+msgstr "عميل كتب"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
+msgid "A document with an invoice in the subject"
+msgstr "مستند وفي العنوان فاتورة"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
+msgid "A reply to %s, written by Nudge for you to read and send."
+msgstr "رد على %s، كتبه نودج لتقرأه وترسله."
+
+#. module: nudge_mail
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_email_review_view_form
+msgid ""
+"A reply written by Nudge from the thread. Read it, change it, then press "
+"Send: nothing goes before."
+msgstr ""
+"رد كتبه نودج من سلسلة الرسائل. اقرأه وعدّله ثم اضغط إرسال: لا يُرسل شيء قبل "
+"ذلك."
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
+msgid ""
+"A vendor bill in draft, read from the attached document when you approve "
+"(nothing is posted)."
+msgstr ""
+"فاتورة مورّد مسودة، تُقرأ من المستند المرفق عند موافقتك (لا شيء يُرحَّل)."
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
+msgid "A vendor sent a bill"
+msgstr "مورّد أرسل فاتورة"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__message_needaction
+msgid "Action Needed"
+msgstr "إجراء مطلوب"
+
+#. module: nudge_mail
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__active
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_rule__active
 msgid "Active"
 msgstr "نشط"
 
@@ -65,6 +130,17 @@ msgstr "عناوين مفصولة بفواصل"
 
 #. module: nudge_mail
 #. odoo-python
+#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
+msgid "An automatic or bulk message"
+msgstr "رسالة آلية أو جماعية"
+
+#. module: nudge_mail
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_proposal__state__approved
+msgid "Approved"
+msgstr "موافق عليه"
+
+#. module: nudge_mail
+#. odoo-python
 #: code:addons/nudge_mail/tools/emails.py:0
 msgid "As %s reads it"
 msgstr "كما يقرؤه %s"
@@ -75,7 +151,13 @@ msgid "Attach a File"
 msgstr "إرفاق ملف"
 
 #. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__message_attachment_count
+msgid "Attachment Count"
+msgstr "عدد المرفقات"
+
+#. module: nudge_mail
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__attachment_ids
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__attachment_names
 msgid "Attachments"
 msgstr "المرفقات"
 
@@ -129,6 +211,27 @@ msgid ""
 msgstr "كلاسيكي: شريط ملوّن فيه العنوان، وجدول مرتّب، وزر مربّع"
 
 #. module: nudge_mail
+#: model:ir.model,name:nudge_mail.model_res_company
+msgid "Companies"
+msgstr "الشركات"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__company_id
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_rule__company_id
+msgid "Company"
+msgstr "الشركة"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__confidence
+msgid "Confidence"
+msgstr "درجة الثقة"
+
+#. module: nudge_mail
+#: model:ir.model,name:nudge_mail.model_res_config_settings
+msgid "Config Settings"
+msgstr "إعدادات التهيئة"
+
+#. module: nudge_mail
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__body
 msgid "Contents"
 msgstr "المحتوى"
@@ -140,16 +243,52 @@ msgid "Create: email “%s”"
 msgstr "إنشاء: البريد «%s»"
 
 #. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__created_id
+msgid "Created"
+msgstr "تاريخ الإنشاء"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__created_model
+msgid "Created Model"
+msgstr "النموذج المُنشأ"
+
+#. module: nudge_mail
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__create_uid
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__create_uid
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__create_uid
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_rule__create_uid
 msgid "Created by"
 msgstr "أنشئ بواسطة"
 
 #. module: nudge_mail
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__create_date
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__create_date
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__create_date
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_rule__create_date
 msgid "Created on"
 msgstr "أنشئ في"
+
+#. module: nudge_mail
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_proposal__kind__question
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_proposal__taught_kind__question
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_rule__kind__question
+msgid "Customer Question"
+msgstr "سؤال عميل"
+
+#. module: nudge_mail
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_mail_proposal_view_search
+msgid "Decided"
+msgstr "تم البتّ فيه"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__decided_at
+msgid "Decided At"
+msgstr "تاريخ القرار"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__decided_by
+msgid "Decided By"
+msgstr "قرّره"
 
 #. module: nudge_mail
 #: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_email_review_view_form
@@ -159,8 +298,22 @@ msgstr "تجاهل"
 #. module: nudge_mail
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__display_name
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__display_name
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__display_name
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_rule__display_name
+#: model:ir.model.fields,field_description:nudge_mail.field_res_company__display_name
+#: model:ir.model.fields,field_description:nudge_mail.field_res_config_settings__display_name
 msgid "Display Name"
 msgstr "الاسم المعروض"
+
+#. module: nudge_mail
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_rule__match__domain
+msgid "Domain"
+msgstr "النطاق"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__draft
+msgid "Draft"
+msgstr "مسودة"
 
 #. module: nudge_mail
 #: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_email_review_view_form
@@ -219,11 +372,26 @@ msgid "Flow"
 msgstr "الإعداد"
 
 #. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__message_follower_ids
+msgid "Followers"
+msgstr "المتابعون"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "المتابعون (الشركاء)"
+
+#. module: nudge_mail
 #. odoo-python
 #: code:addons/nudge_mail/tools/emails.py:0
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__record_name
 msgid "For"
 msgstr "لـ"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__teach_domain
+msgid "For the Whole Domain"
+msgstr "للنطاق كله"
 
 #. module: nudge_mail
 #. odoo-python
@@ -235,6 +403,7 @@ msgstr "رسمي: رسالة، الشعار في الأعلى، وسطر مرج�
 
 #. module: nudge_mail
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__email_from
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__email_from
 msgid "From"
 msgstr "من"
 
@@ -254,10 +423,34 @@ msgid "Groups of the Button"
 msgstr "مجموعات الزر"
 
 #. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__has_message
+msgid "Has Message"
+msgstr "لديه رسالة"
+
+#. module: nudge_mail
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__id
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__id
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__id
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_rule__id
+#: model:ir.model.fields,field_description:nudge_mail.field_res_company__id
+#: model:ir.model.fields,field_description:nudge_mail.field_res_config_settings__id
 msgid "ID"
 msgstr "المعرف"
+
+#. module: nudge_mail
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_mail_proposal_view_form
+msgid "If You Say No, or It Is Something Else"
+msgstr "إن قلت لا، أو كان شيئاً آخر"
+
+#. module: nudge_mail
+#: model:ir.model.fields,help:nudge_mail.field_nudge_mail_proposal__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr "إذا كان محددًا، فهناك رسائل جديدة تتطلب انتباهك."
+
+#. module: nudge_mail
+#: model:ir.model.fields,help:nudge_mail.field_nudge_mail_proposal__message_has_error
+msgid "If checked, some messages have a delivery error."
+msgstr "إذا كان محددًا، فهناك رسائل بها خطأ في التسليم."
 
 #. module: nudge_mail
 #: model_terms:ir.actions.act_window,help:nudge_mail.nudge_email_flow_action
@@ -267,16 +460,76 @@ msgid ""
 msgstr "في وضع المطوّر، اطلب من Nudge زراً يفتح بريداً تقرؤه قبل إرساله."
 
 #. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__message_is_follower
+msgid "Is Follower"
+msgstr "متابِع"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__taught_kind
+msgid "It Is Rather"
+msgstr "هو بالأحرى"
+
+#. module: nudge_mail
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_mail_proposal_view_form
+msgid "It Is Rather... (Learn)"
+msgstr "هو بالأحرى... (تعلَّم)"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
+msgid "It asks for a quotation or prices"
+msgstr "يطلب عرض سعر أو أسعاراً"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
+msgid "It describes a problem"
+msgstr "يصف مشكلة"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_rule__kind
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_mail_proposal_view_search
+msgid "Kind"
+msgstr "النوع"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__res_model
+msgid "Kind of Record"
+msgstr "نوع السجل"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__partner_id
+msgid "Known Contact"
+msgstr "جهة اتصال معروفة"
+
+#. module: nudge_mail
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__write_uid
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__write_uid
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__write_uid
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_rule__write_uid
 msgid "Last Updated by"
 msgstr "آخر تحديث بواسطة"
 
 #. module: nudge_mail
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__write_date
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__write_date
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__write_date
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_rule__write_date
 msgid "Last Updated on"
 msgstr "آخر تحديث في"
+
+#. module: nudge_mail
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_proposal__kind__lead
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_proposal__taught_kind__lead
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_rule__kind__lead
+msgid "Lead / Opportunity"
+msgstr "عميل محتمل / فرصة"
+
+#. module: nudge_mail
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_proposal__state__ignored
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_mail_proposal_view_search
+msgid "Left Alone"
+msgstr "تُرك كما هو"
 
 #. module: nudge_mail
 #: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_email_flow_view_form
@@ -284,10 +537,60 @@ msgid "Made With It"
 msgstr "ما صُنع معه"
 
 #. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_res_company__nudge_mail_agent_on
+#: model:ir.model.fields,field_description:nudge_mail.field_res_config_settings__nudge_mail_agent_on
+#: model_terms:ir.ui.view,arch_db:nudge_mail.res_config_settings_view_form_mail_agent
+msgid "Mail Agent"
+msgstr "وكيل البريد"
+
+#. module: nudge_mail
+#: model:ir.ui.menu,name:nudge_mail.nudge_mail_menu_rules
+msgid "Mail Agent Rules"
+msgstr "قواعد وكيل البريد"
+
+#. module: nudge_mail
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_mail_proposal_view_form
+msgid "Mail Proposal"
+msgstr "اقتراح بريد"
+
+#. module: nudge_mail
+#: model:ir.actions.act_window,name:nudge_mail.nudge_mail_proposal_action
+#: model:ir.ui.menu,name:nudge_mail.nudge_mail_menu_proposals
+msgid "Mail Proposals"
+msgstr "اقتراحات البريد"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_res_company__nudge_mail_agent_alias
+#: model:ir.model.fields,field_description:nudge_mail.field_res_config_settings__nudge_mail_agent_alias
+msgid "Mailbox Alias"
+msgstr "اسم مستعار لصندوق البريد"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_rule__match
+msgid "Match"
+msgstr "المطابقة"
+
+#. module: nudge_mail
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__without_email
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__without_email
 msgid "May Be Done Without the Email"
 msgstr "يمكن تنفيذه بدون البريد"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__description
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_mail_proposal_view_form
+msgid "Message"
+msgstr "الرسالة"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__message_has_error
+msgid "Message Delivery error"
+msgstr "خطأ في تسليم الرسالة"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__message_ids
+msgid "Messages"
+msgstr "الرسائل"
 
 #. module: nudge_mail
 #. odoo-python
@@ -320,15 +623,36 @@ msgid "No %s yet: the email is shown for the first one."
 msgstr "لا يوجد %s بعد: سيُعرض البريد لأول سجل."
 
 #. module: nudge_mail
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_proposal__source__none
+msgid "No Clear Sign"
+msgstr "لا علامة واضحة"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
+msgid "No clear sign"
+msgstr "لا علامة واضحة"
+
+#. module: nudge_mail
 #: model_terms:ir.actions.act_window,help:nudge_mail.nudge_email_flow_action
 msgid "No email with review yet"
 msgstr "لا يوجد بريد مع مراجعة بعد"
+
+#. module: nudge_mail
+#: model_terms:ir.actions.act_window,help:nudge_mail.nudge_mail_proposal_action
+msgid "No mail waits for you"
+msgstr "لا بريد ينتظرك"
 
 #. module: nudge_mail
 #. odoo-python
 #: code:addons/nudge_mail/tools/emails.py:0
 msgid "No visible difference"
 msgstr "لا فرق ظاهر"
+
+#. module: nudge_mail
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_mail_proposal_view_form
+msgid "No, and Learn"
+msgstr "لا، وتعلَّم"
 
 #. module: nudge_mail
 #. odoo-python
@@ -343,9 +667,108 @@ msgid "Nothing: no logo, no company name"
 msgstr "لا شيء: بدون شعار ولا اسم شركة"
 
 #. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_res_company__nudge_mail_agent_alias_id
+msgid "Nudge Mail Agent Alias"
+msgstr "اسم مستعار لوكيل بريد نودج"
+
+#. module: nudge_mail
+#: model:ir.model,name:nudge_mail.model_nudge_mail_proposal
+msgid "Nudge Mail Proposal"
+msgstr "اقتراح بريد من نودج"
+
+#. module: nudge_mail
+#: model:ir.model,name:nudge_mail.model_nudge_mail_rule
+msgid "Nudge Mail Rule"
+msgstr "قاعدة بريد نودج"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__kind
+msgid "Nudge Thinks It Is"
+msgstr "نودج يرى أنه"
+
+#. module: nudge_mail
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_mail_proposal_view_form
+msgid "Nudge makes this as you, in draft. Nothing is sent or posted."
+msgstr "ينشئ نودج هذا باسمك كمسودة. لا يُرسل ولا يُرحَّل شيء."
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
+msgid ""
+"Nudge needs a choice before it can prepare this. Open the message in the "
+"Nudge panel."
+msgstr "يحتاج نودج إلى اختيارك قبل أن يجهّز هذا. افتح الرسالة في لوحة نودج."
+
+#. module: nudge_mail
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_mail_proposal_view_form
+msgid "Nudge proposes; nothing is made and nothing is sent until you say yes."
+msgstr "يقترح نودج؛ لا يُنشأ شيء ولا يُرسل شيء حتى تقول نعم."
+
+#. module: nudge_mail
+#: model_terms:ir.ui.view,arch_db:nudge_mail.res_config_settings_view_form_mail_agent
+msgid ""
+"Nudge reads the new messages of a shared mailbox and proposes what to make "
+"of each: a lead, a ticket, a vendor bill, a reply. Managers say yes or no in"
+" Nudge, Mail Proposals. Nothing is made or sent by itself. Off by default; "
+"set for the company in use."
+msgstr ""
+"يقرأ نودج الرسائل الجديدة لصندوق بريد مشترك ويقترح ما يُصنع من كل واحدة: "
+"عميل محتمل أو تذكرة أو فاتورة مورّد أو رد. يقول المديرون نعم أو لا في نودج "
+"ثم اقتراحات البريد. لا يُنشأ شيء ولا يُرسل شيء من تلقاء نفسه. مغلق "
+"افتراضياً؛ يُضبط للشركة المستخدمة."
+
+#. module: nudge_mail
+#: model:ir.model.fields,help:nudge_mail.field_res_company__nudge_mail_agent_on
+#: model:ir.model.fields,help:nudge_mail.field_res_config_settings__nudge_mail_agent_on
+msgid ""
+"Nudge reads the new messages of a shared mailbox and proposes what to make "
+"of each: a lead, a ticket, a vendor bill, a reply. Nothing is made or sent "
+"before a manager says yes."
+msgstr ""
+"يقرأ نودج الرسائل الجديدة لصندوق بريد مشترك ويقترح ما يُصنع من كل واحدة: "
+"عميل محتمل أو تذكرة أو فاتورة مورّد أو رد. لا يُنشأ شيء ولا يُرسل شيء قبل أن"
+" يقول مدير نعم."
+
+#. module: nudge_mail
+#: model:ir.actions.server,name:nudge_mail.ir_cron_nudge_mail_classify_ir_actions_server
+msgid "Nudge: sort the mail that waited for the AI"
+msgstr "نودج: فرز البريد الذي انتظر الذكاء الاصطناعي"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__message_needaction_counter
+msgid "Number of Actions"
+msgstr "عدد الإجراءات"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__message_has_error_counter
+msgid "Number of errors"
+msgstr "عدد الأخطاء"
+
+#. module: nudge_mail
+#: model:ir.model.fields,help:nudge_mail.field_nudge_mail_proposal__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr "عدد الرسائل التي تتطلب إجراء"
+
+#. module: nudge_mail
+#: model:ir.model.fields,help:nudge_mail.field_nudge_mail_proposal__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "عدد الرسائل التي بها خطأ في التسليم"
+
+#. module: nudge_mail
 #: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_email_flow_view_form
 msgid "Off"
 msgstr "متوقف"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
+msgid "Only a Nudge manager decides on the mail."
+msgstr "مدير نودج وحده يبتّ في البريد."
+
+#. module: nudge_mail
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_mail_proposal_view_form
+msgid "Open What Was Made"
+msgstr "افتح ما أُنشئ"
 
 #. module: nudge_mail
 #. odoo-python
@@ -360,15 +783,44 @@ msgid "Opens"
 msgstr "يفتح"
 
 #. module: nudge_mail
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_proposal__kind__other
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_proposal__taught_kind__other
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_rule__kind__other
+msgid "Other"
+msgstr "أخرى"
+
+#. module: nudge_mail
 #. odoo-python
 #: code:addons/nudge_mail/tools/emails.py:0
 msgid "Preview"
 msgstr "المعاينة"
 
 #. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_res_company__nudge_mail_agent_project
+#: model:ir.model.fields,field_description:nudge_mail.field_res_config_settings__nudge_mail_agent_project
+msgid "Project for Tickets"
+msgstr "مشروع التذاكر"
+
+#. module: nudge_mail
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_mail_proposal_view_list
+msgid "Received"
+msgstr "المستلمة"
+
+#. module: nudge_mail
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__res_id
 msgid "Record"
 msgstr "السجل"
+
+#. module: nudge_mail
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_proposal__state__rejected
+msgid "Rejected"
+msgstr "مرفوض"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_email_review.py:0
+msgid "Reply"
+msgstr "رد"
 
 #. module: nudge_mail
 #. odoo-python
@@ -395,9 +847,37 @@ msgid "Send is refused while one of these fields of the record is empty."
 msgstr "يُرفض الإرسال ما دام أحد هذه الحقول في السجل فارغاً."
 
 #. module: nudge_mail
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_rule__match__sender
+msgid "Sender"
+msgstr "المرسِل"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__sender
+msgid "Sender Address"
+msgstr "عنوان المرسِل"
+
+#. module: nudge_mail
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__action_id
 msgid "Server Action"
 msgstr "إجراء الخادم"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__source
+msgid "Source"
+msgstr "المصدر"
+
+#. module: nudge_mail
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_proposal__kind__spam
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_proposal__taught_kind__spam
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_rule__kind__spam
+msgid "Spam"
+msgstr "بريد مزعج"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__state
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_mail_proposal_view_search
+msgid "State"
+msgstr "الحالة"
 
 #. module: nudge_mail
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__missing
@@ -414,13 +894,49 @@ msgstr "النمط"
 #. odoo-python
 #: code:addons/nudge_mail/tools/emails.py:0
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__subject
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__name
 msgid "Subject"
 msgstr "الموضوع"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
+msgid "Taught: %s"
+msgstr "مُعلَّم: %s"
 
 #. module: nudge_mail
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__model
 msgid "Technical Model"
 msgstr "النموذج التقني"
+
+#. module: nudge_mail
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_proposal__source__ai
+msgid "The AI Provider"
+msgstr "مزوّد الذكاء الاصطناعي"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
+msgid "The AI provider read it"
+msgstr "قرأه مزوّد الذكاء الاصطناعي"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__draft_text
+msgid "The Draft Record"
+msgstr "السجل المسودة"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
+msgid "The app for this is not installed"
+msgstr "التطبيق الخاص بهذا غير مثبّت"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
+msgid ""
+"The document of this mail is not there. Open the message and attach it."
+msgstr "مستند هذا البريد غير موجود. افتح الرسالة وأرفقه."
 
 #. module: nudge_mail
 #. odoo-python
@@ -444,6 +960,15 @@ msgstr ""
 "النافذة."
 
 #. module: nudge_mail
+#: model_terms:ir.ui.view,arch_db:nudge_mail.res_config_settings_view_form_mail_agent
+msgid ""
+"The incoming mail server of Odoo (Settings, Technical, Incoming Mail Servers)\n"
+"                                must deliver the mailbox, and the alias domain must be set."
+msgstr ""
+"يجب أن يسلّم خادم البريد الوارد في أودو (الإعدادات ثم التقنية ثم خوادم "
+"البريد الوارد) صندوق البريد، ويجب ضبط نطاق الاسم المستعار."
+
+#. module: nudge_mail
 #. odoo-python
 #: code:addons/nudge_mail/tools/emails.py:0
 msgid "The logo and the name of the company"
@@ -457,6 +982,17 @@ msgid ""
 msgstr ""
 "تابع الزر الذي يرافقه البريد: الإرسال ينفّذه قبل خروج البريد. فارغ: الزر "
 "يرسل البريد فقط."
+
+#. module: nudge_mail
+#: model:ir.model.fields,help:nudge_mail.field_res_company__nudge_mail_agent_alias
+#: model:ir.model.fields,help:nudge_mail.field_res_config_settings__nudge_mail_agent_alias
+msgid ""
+"The part before the @ of the address that receives the mail to sort, for "
+"example inbox. The incoming mail server of Odoo must deliver the mailbox to "
+"it."
+msgstr ""
+"الجزء الذي قبل @ من العنوان الذي يستقبل البريد المراد فرزه، مثل inbox. يجب "
+"أن يسلّم خادم البريد الوارد في أودو الصندوق إليه."
 
 #. module: nudge_mail
 #. odoo-python
@@ -485,9 +1021,28 @@ msgstr "لا يمكن تخطي هذا البريد."
 
 #. module: nudge_mail
 #. odoo-python
+#: code:addons/nudge_mail/models/nudge_email_review.py:0
+msgid "This email is not for this record."
+msgstr "هذا البريد ليس لهذا السجل."
+
+#. module: nudge_mail
+#. odoo-python
 #: code:addons/nudge_mail/models/nudge_email_flow.py:0
 msgid "This email is switched off."
 msgstr "هذا البريد متوقف."
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
+msgid "This proposal was decided already."
+msgstr "تم البتّ في هذا الاقتراح من قبل."
+
+#. module: nudge_mail
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_proposal__kind__ticket
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_proposal__taught_kind__ticket
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_rule__kind__ticket
+msgid "Ticket / Task"
+msgstr "تذكرة / مهمة"
 
 #. module: nudge_mail
 #. odoo-python
@@ -496,6 +1051,11 @@ msgstr "هذا البريد متوقف."
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__email_to
 msgid "To"
 msgstr "إلى"
+
+#. module: nudge_mail
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_proposal__state__new
+msgid "To Classify"
+msgstr "للتصنيف"
 
 #. module: nudge_mail
 #. odoo-python
@@ -510,6 +1070,71 @@ msgid "Under it"
 msgstr "في أسفله"
 
 #. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_rule__value
+msgid "Value"
+msgstr "القيمة"
+
+#. module: nudge_mail
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_proposal__kind__bill
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_proposal__taught_kind__bill
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_rule__kind__bill
+msgid "Vendor Bill"
+msgstr "فاتورة مورّد"
+
+#. module: nudge_mail
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_proposal__state__pending
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_mail_proposal_view_search
+msgid "Waiting for a Manager"
+msgstr "ينتظر مديراً"
+
+#. module: nudge_mail
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_mail_proposal_view_form
+msgid "What Nudge Would Make"
+msgstr "ما كان نودج سينشئه"
+
+#. module: nudge_mail
+#: model:ir.actions.act_window,name:nudge_mail.nudge_mail_rule_action
+msgid "What the Mail Agent Learned"
+msgstr "ما تعلّمه وكيل البريد"
+
+#. module: nudge_mail
+#: model_terms:ir.actions.act_window,help:nudge_mail.nudge_mail_proposal_action
+msgid ""
+"When the mail agent is on (Settings, Nudge), the new messages of the shared mailbox are sorted\n"
+"               here: Nudge says what each one is and what it would make, and you say yes or no."
+msgstr ""
+"عندما يكون وكيل البريد مفعّلاً (الإعدادات ثم نودج)، تُفرز هنا الرسائل "
+"الجديدة لصندوق البريد المشترك: يقول نودج ما هي وما كان سينشئه، وتقول أنت نعم"
+" أو لا."
+
+#. module: nudge_mail
+#: model:ir.model.fields,help:nudge_mail.field_nudge_mail_proposal__taught_kind
+msgid ""
+"When you reject, Nudge learns that this sender (or domain) is this kind, and"
+" never asks the AI again."
+msgstr ""
+"عندما ترفض، يتعلّم نودج أن هذا المرسِل (أو النطاق) من هذا النوع، ولا يسأل "
+"الذكاء الاصطناعي بعد ذلك."
+
+#. module: nudge_mail
+#: model:ir.model.fields,help:nudge_mail.field_res_company__nudge_mail_agent_project
+#: model:ir.model.fields,help:nudge_mail.field_res_config_settings__nudge_mail_agent_project
+msgid ""
+"Where a ticket is made as a task when the Helpdesk app is not installed."
+msgstr ""
+"المكان الذي تُنشأ فيه التذكرة كمهمة عندما لا يكون تطبيق Helpdesk مثبتاً."
+
+#. module: nudge_mail
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_proposal__source__known
+msgid "Who Wrote"
+msgstr "من كتب"
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__reason
+msgid "Why"
+msgstr "السبب"
+
+#. module: nudge_mail
 #: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_email_review_view_form
 msgid "Without the Email"
 msgstr "بدون البريد"
@@ -519,6 +1144,28 @@ msgstr "بدون البريد"
 #: code:addons/nudge_mail/tools/emails.py:0
 msgid "Without the email"
 msgstr "بدون البريد"
+
+#. module: nudge_mail
+#: model:ir.model.fields.selection,name:nudge_mail.selection__nudge_mail_proposal__source__words
+msgid "Words and Attachments"
+msgstr "الكلمات والمرفقات"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
+msgid "Written by a colleague"
+msgstr "كتبه زميل"
+
+#. module: nudge_mail
+#: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_mail_proposal_view_form
+msgid "Yes, Make It"
+msgstr "نعم، أنشئه"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_email_review.py:0
+msgid "You may not answer on this record."
+msgstr "لا يحق لك الرد على هذا السجل."
 
 #. module: nudge_mail
 #. odoo-python
@@ -540,6 +1187,11 @@ msgstr "ينفّذ ما يفعله «%s» ثم يرسل البريد"
 #: code:addons/nudge_mail/tools/emails.py:0
 msgid "hidden: the new button takes its place"
 msgstr "مخفي: الزر الجديد يحل محله"
+
+#. module: nudge_mail
+#: model_terms:ir.ui.view,arch_db:nudge_mail.res_config_settings_view_form_mail_agent
+msgid "inbox"
+msgstr "inbox"
 
 #. module: nudge_mail
 #. odoo-python
@@ -582,3 +1234,40 @@ msgstr "البريد «%s»، للقراءة والتعديل"
 #: code:addons/nudge_mail/tools/emails.py:0
 msgid "“%s”"
 msgstr "«%s»"
+
+#. module: nudge_mail
+#: model:ir.model,name:nudge_mail.model_mail_thread
+msgid "Email Thread"
+msgstr "محادثة البريد"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
+msgid "It could not be classified"
+msgstr "تعذّر تصنيفه"
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
+msgid "Mail reaches the agent through the mailbox only."
+msgstr "يصل البريد إلى الوكيل عبر صندوق البريد فقط."
+
+#. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__sender_verified
+msgid "Sender Verified"
+msgstr "المرسل موثّق"
+
+#. module: nudge_mail
+#: model:ir.model.fields,help:nudge_mail.field_nudge_mail_proposal__sender_verified
+msgid ""
+"The receiving server vouched for the sender (DKIM, SPF or DMARC). Without it"
+" anybody can write any name in the From line."
+msgstr ""
+"خادم الاستقبال زكّى المرسل (DKIM أو SPF أو DMARC). وبدونه يستطيع أي شخص "
+"كتابة أي اسم في سطر المرسل."
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
+msgid "sender not verified"
+msgstr "المرسل غير موثّق"

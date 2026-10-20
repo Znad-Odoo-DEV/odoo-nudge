@@ -50,6 +50,13 @@
                             <field name="api_key" password="True" invisible="not requires_api_key"/>
                             <field name="workspace_id" placeholder="wrkspc_..." invisible="kind != 'anthropic'"/>
                             <field name="timeout"/>
+                            <field name="runs_locally" groups="base.group_system"/>
+                            <div class="text-muted" colspan="2" groups="base.group_system"
+                                 invisible="runs_locally or not looks_local">
+                                The address looks like this machine or a private network. If the
+                                model runs on your own server, tick Runs on Our Own Server.
+                            </div>
+                            <field name="looks_local" invisible="1"/>
                             <field name="is_ollama" invisible="not is_ollama"/>
                             <field name="ollama_version" invisible="not is_ollama"/>
                         </group>

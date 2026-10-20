@@ -26,7 +26,10 @@ class NudgeUsage(models.Model):
     company_id = fields.Many2one("res.company", index=True, ondelete="cascade")
     date = fields.Date(required=True, index=True)
     kind = fields.Selection(
-        [("chat", "Conversation"), ("speech", "Speech to Text")], required=True, default="chat")
+        [("chat", "Conversation"), ("speech", "Speech to Text"), ("memory", "Remembered Answer"),
+         ("noai", "Understood Without AI"), ("bulk", "AI over a List"),
+         ("translation", "Module Translation")], required=True, default="chat")
+    intent = fields.Char(string="Understood As", help="For a request understood without any AI: what it asked (open, find, filter...).")
     conversation_id = fields.Many2one("nudge.conversation", ondelete="set null")
     message_id = fields.Many2one("nudge.message", ondelete="set null")
     provider_id = fields.Many2one("nudge.provider", ondelete="set null")
@@ -82,6 +85,28 @@ class NudgeUsage(models.Model):
         """:return: (tokens, cost) of the calls that match"""
         [(tokens, cost)] = self.sudo()._read_group(domain, [], ["tokens:sum", "cost:sum"])
         return tokens or 0, cost or 0.0
+
+    @api.model
+    def _headroom(self):
+        """:return: ``(tokens, cost)`` the person and the company may still
+        spend, the least of the limits that apply; None where there is no limit"""
+        budgets = self._get_budgets()
+        today = fields.Date.context_today(self)
+        tokens, cost = [], []
+        if budgets["user_tokens"] or budgets["user_cost"]:
+            spent_tokens, spent_cost = self._spent([("user_id", "=", self.env.uid), ("date", "=", today)])
+            if budgets["user_tokens"]:
+                tokens.append(budgets["user_tokens"] - spent_tokens)
+            if budgets["user_cost"]:
+                cost.append(budgets["user_cost"] - spent_cost)
+        if budgets["company_tokens"] or budgets["company_cost"]:
+            spent_tokens, spent_cost = self._spent([
+                ("company_id", "=", self.env.company.id), ("date", ">=", today.replace(day=1))])
+            if budgets["company_tokens"]:
+                tokens.append(budgets["company_tokens"] - spent_tokens)
+            if budgets["company_cost"]:
+                cost.append(budgets["company_cost"] - spent_cost)
+        return (min(tokens) if tokens else None), (min(cost) if cost else None)
 
     @api.model
     def _check_budget(self):
