@@ -14,6 +14,7 @@ import {
 
 import { NudgeChart, formatChartValue } from "@nudge/components/nudge_chart";
 import { NudgeMessage } from "@nudge/components/nudge_message";
+import { isEmptyAnswer } from "@nudge/core/nudge_service";
 
 preloadBundle("web.chartjs_lib");
 before(() => {
@@ -139,4 +140,12 @@ test("a message shows its chart", async () => {
     await animationFrame();
     expect(".o_nudge_message .o_nudge_chart canvas").toHaveCount(1);
     expect(".o_nudge_chart_open").toHaveCount(1);
+});
+
+test("an answer that is only a chart is not told that no answer came", () => {
+    expect(isEmptyAnswer({ chart: chart() })).toBe(false);
+    expect(isEmptyAnswer({ changes: [{ field: "Sales Price" }] })).toBe(false);
+    expect(isEmptyAnswer({ found: { menus: [], records: [{ name: "Raghad" }] } })).toBe(false);
+    expect(isEmptyAnswer({ content: "", found: [] })).toBe(true);
+    expect(isEmptyAnswer({})).toBe(true);
 });
