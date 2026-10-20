@@ -83,7 +83,7 @@ def reason_of(error):
     elif isinstance(error, AccessError):
         text = "This person may not do it on this record."
     else:
-        text = f"{type(error).__name__}: {error}"
+        text = base.error_text(error, "a record of a plan", None)
     return cut(" ".join(text.split()), MAX_REASON_CHARS)
 
 

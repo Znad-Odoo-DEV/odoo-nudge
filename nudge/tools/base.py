@@ -186,6 +186,18 @@ def available(env, mode=MODE_TALK, tool_set="full", extra=(), background=False):
     return [tool for name, tool in sorted(TOOLS.items()) if name in names and tool.is_available(env, mode)]
 
 
+def error_text(error, what, uid):
+    """:return: what the model and the person are told of ``error``, raised by ``what`` for the
+    user ``uid``: the words of a refusal of Odoo or of a mistake in the arguments, which they can
+    act on; for a database error or a fault only its kind, since its text may hold SQL, names and
+    values. The whole of it goes to the log."""
+    if isinstance(error, (UserError, ValueError, KeyError, TypeError)):
+        _logger.info("Nudge: %s failed for user %s: %s", what, uid, error)
+        return f"{type(error).__name__}: {error}"
+    _logger.warning("Nudge: %s failed for user %s", what, uid, exc_info=error)
+    return f"{type(error).__name__}: the action failed on the server. Try another way."
+
+
 def guarded(env, name, function):
     """Run ``function`` for the tool ``name``. Whatever goes wrong is told
     to the model as the result, and what was done before it went wrong is
@@ -194,15 +206,7 @@ def guarded(env, name, function):
         with env.cr.savepoint():
             return function()
     except Exception as error:  # noqa: BLE001
-        if isinstance(error, (UserError, ValueError, KeyError, TypeError)):
-            # What the model can act on: a refusal of Odoo, a mistake in the arguments
-            _logger.info("Nudge: tool %s failed for user %s: %s", name, env.uid, error)
-            return ToolResult(f"{type(error).__name__}: {error}", is_error=True)
-        # A database error or a fault: the text may hold SQL, names and values
-        _logger.warning("Nudge: tool %s failed for user %s", name, env.uid, exc_info=True)
-        return ToolResult(
-            f"{type(error).__name__}: the action failed on the server. Try another way.",
-            is_error=True)
+        return ToolResult(error_text(error, f"tool {name}", env.uid), is_error=True)
 
 
 def call(env, name, arguments, screen=None, mode=MODE_TALK):
