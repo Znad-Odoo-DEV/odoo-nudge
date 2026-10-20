@@ -479,14 +479,14 @@ class OpenAICompatAdapter(base.BaseAdapter):
             raise base.AdapterError(base.ERROR_BAD_REQUEST, "Unexpected response")
         return body
 
-    def transcribe(self, audio, language="", hints=(), deadline=None):
+    def transcribe(self, audio, language="", hints=(), deadline=None, audio_format="wav"):
         if self.config.stt_mode == base.STT_CHAT:
-            return self._transcribe_by_chat(audio, language, hints, deadline)
+            return self._transcribe_by_chat(audio, language, hints, deadline, audio_format)
         if self.config.stt_mode == base.STT_ENDPOINT:
-            return self._transcribe_by_endpoint(audio, language, hints, deadline)
-        return super().transcribe(audio, language, hints, deadline)
+            return self._transcribe_by_endpoint(audio, language, hints, deadline, audio_format)
+        return super().transcribe(audio, language, hints, deadline, audio_format)
 
-    def _transcribe_by_chat(self, audio, language, hints, deadline):
+    def _transcribe_by_chat(self, audio, language, hints, deadline, audio_format="wav"):
         model = self.config.stt_model or self.config.model
         payload = {
             "model": model,
@@ -494,7 +494,7 @@ class OpenAICompatAdapter(base.BaseAdapter):
                 {"role": "system", "content": transcription.build_instruction(language, hints)},
                 {"role": "user", "content": [{
                     "type": "input_audio",
-                    "input_audio": {"data": base64.b64encode(audio).decode(), "format": "wav"},
+                    "input_audio": {"data": base64.b64encode(audio).decode(), "format": audio_format},
                 }]},
             ],
         }
@@ -514,7 +514,7 @@ class OpenAICompatAdapter(base.BaseAdapter):
             "model": body.get("model") or model,
         }
 
-    def _transcribe_by_endpoint(self, audio, language, hints, deadline):
+    def _transcribe_by_endpoint(self, audio, language, hints, deadline, audio_format="wav"):
         model = self.config.stt_model
         if not model:
             raise base.AdapterError(base.ERROR_MODEL_NOT_FOUND, "No model is set for speech.")
@@ -533,7 +533,7 @@ class OpenAICompatAdapter(base.BaseAdapter):
             return requests.post(
                 url,
                 data=data,
-                files={"file": ("speech.wav", audio, "audio/wav")},
+                files={"file": (f"speech.{audio_format}", audio, "audio/" + ("mpeg" if audio_format == "mp3" else audio_format))},
                 headers=headers,
                 timeout=(CONNECT_TIMEOUT, base.remaining(deadline, self.config.timeout)),
             )

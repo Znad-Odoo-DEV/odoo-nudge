@@ -1,0 +1,38 @@
+.o_nudge_home {
+    .o_nudge_home_tiles {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 12px;
+    }
+    .o_nudge_home_tile {
+        cursor: grab;
+        background: var(--bs-body-bg);
+        color: var(--bs-body-color);
+    }
+    .o_nudge_home_count {
+        font-size: 2rem;
+        font-weight: 600;
+        line-height: 1;
+    }
+    .o_nudge_home_up { color: var(--bs-success); }
+    .o_nudge_home_down { color: var(--bs-danger); }
+    .o_nudge_home_spark {
+        display: inline-block;
+        width: 96px;
+        height: 32px;
+        color: #6c4df6;
+        canvas { display: block; }
+    }
+    .o_nudge_home_bars {
+        display: flex;
+        align-items: flex-end;
+        gap: 3px;
+        height: 100%;
+    }
+    .o_nudge_home_bar {
+        flex: 1 1 0;
+        min-height: 2px;
+        background: currentColor;
+        border-radius: 2px;
+    }
+}

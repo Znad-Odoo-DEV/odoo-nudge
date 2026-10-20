@@ -90,6 +90,7 @@ class NudgeDocPage(models.Model):
             return False
         Page = self.sudo()
         Page.search([]).unlink()
+        self.env["nudge.embedding"]._bump()
         count = 0
         batch = []
         with gzip.open(self._corpus_path(), "rt", encoding="utf-8") as corpus:
@@ -250,9 +251,29 @@ class NudgeDocPassage(models.Model):
             LIMIT %s
         """, params)
         rows = self.env.cr.fetchall()
+        marks = [f" {module} " for module in (modules or [])]
+        # By meaning too, when the local search model is there: the keyword hits
+        # are re-ranked, and when they are few (none, for a question in Arabic)
+        # the passages whose vector is near that of the question are added
+        top = max((row[1] for row in rows), default=0) or 1.0
+        scan = None
+        if len(rows) < limit * 3:
+            scan = ("SELECT p.id FROM nudge_doc_passage p JOIN nudge_doc_page g ON g.id = p.page_id "
+                    f"WHERE TRUE {app_filter}", [app, app] if app else [])
+        blended = self.env["nudge.embedding"]._blend(
+            self._name, query, {row[0]: row[1] / top for row in rows}, scan=scan)
+        if blended is not None:
+            known = {row[0]: row[2] for row in rows}
+            for passage in self.sudo().browse([key for key in blended if key not in known]).exists():
+                known[passage.id] = passage.modules
+
+            def blended_score(item):
+                boost = 2.0 if any(mark in (known.get(item[0]) or "") for mark in marks) else 1.0
+                return (-item[1] * boost, item[0])
+
+            return self.browse([key for key, _score in sorted(blended.items(), key=blended_score)[:limit]]).exists()
         if not rows:
             return self.browse()
-        marks = [f" {module} " for module in (modules or [])]
 
         def score(row):
             passage_id, rank, page_modules = row
@@ -261,6 +282,14 @@ class NudgeDocPassage(models.Model):
 
         rows.sort(key=score)
         return self.browse([row[0] for row in rows[:limit]])
+
+    def unlink(self):
+        self.env["nudge.embedding"]._bump()
+        return super().unlink()
+
+    def _embedding_text(self):
+        self.ensure_one()
+        return f"{self.title or ''}. {self.heading or ''}. {self.body or ''}"[:1500]
 
     def _source(self):
         self.ensure_one()

@@ -76,6 +76,8 @@
                                 t-on-click="() => props.onOpenProduct(product.id)">Open</button>
                     </div>
                 </div>
+                <NudgeChart t-if="props.chart" chart="props.chart"/>
+                <t t-if="props.changes" t-call="nudge.Changes"/>
                 <t t-if="props.found" t-call="nudge.Found">
                     <t t-set="found" t-value="props.found"/>
                 </t>
@@ -92,7 +94,13 @@
                         <i class="fa fa-stop"/> Stop
                     </button>
                 </div>
-                <div t-if="canRate" class="o_nudge_rate" dir="auto">
+                <div t-if="props.remembered" class="o_nudge_remembered" dir="auto">
+                    <i class="fa fa-bookmark-o"/>
+                    <span>A remembered answer: no AI was asked.</span>
+                    <button t-if="props.onAskAi" type="button" class="btn btn-sm btn-link o_nudge_remembered_ask"
+                            t-on-click="props.onAskAi">Ask the AI instead</button>
+                </div>
+                <div t-if="canRate and !props.remembered" class="o_nudge_rate" dir="auto">
                     <t t-if="!props.feedback">
                         <span class="o_nudge_rate_ask">Was this helpful?</span>
                         <button type="button" class="o_nudge_rate_up" title="Yes" aria-label="Yes"
@@ -117,18 +125,71 @@
         </div>
     </t>
 
+    <!-- Who changed a record: newest first, each change with its button -->
+    <t t-name="nudge.Changes">
+        <div class="o_nudge_changes">
+            <p t-if="props.changes.note" class="o_nudge_changes_note" t-esc="props.changes.note"/>
+            <ul t-if="props.changes.items.length" class="o_nudge_changes_list list-unstyled mb-1">
+                <li t-foreach="props.changes.items" t-as="item" t-key="item.change_id" class="o_nudge_change mb-2">
+                    <div class="o_nudge_change_head">
+                        <span class="o_nudge_change_date" t-esc="item.date"/>
+                        · <strong class="o_nudge_change_who" t-esc="item.who"/>
+                    </div>
+                    <div class="o_nudge_change_what" dir="auto">
+                        <span t-esc="item.label"/>:
+                        <span class="o_nudge_change_old" t-esc="item.old"/> →
+                        <span class="o_nudge_change_new" t-esc="item.new"/>
+                    </div>
+                    <div class="o_nudge_change_actions">
+                        <button t-if="item.restorable and props.changes.can_write and props.onRestore" type="button"
+                                class="btn btn-sm btn-light o_nudge_change_restore"
+                                t-on-click="() => props.onRestore({ kind: 'change', id: item.change_id })">
+                            <i class="fa fa-undo"/> Restore the old value
+                        </button>
+                        <button t-if="item.restorable and props.changes.can_write and props.onRestore" type="button"
+                                class="btn btn-sm btn-link o_nudge_change_restore_all"
+                                t-on-click="() => props.onRestore({ kind: 'message', id: item.message_id })">
+                            Restore this record as it was at <t t-esc="item.date"/>
+                        </button>
+                        <span t-if="!item.restorable" class="o_nudge_change_why text-muted" t-esc="item.reason"/>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </t>
+
     <!-- What a command of the message box found, without any AI -->
     <t t-name="nudge.Found">
         <div class="o_nudge_found">
             <div t-if="found.commands and found.commands.length" class="o_nudge_found_list">
                 <button t-foreach="found.commands" t-as="command" t-key="command.name" type="button"
-                        class="o_nudge_suggestion o_nudge_found_command" title="Put it in the message box"
+                        class="o_nudge_suggestion o_nudge_found_command"
+                        t-att-title="command.at_once ? 'Answer now' : 'Put it in the message box'"
                         t-on-click="() => props.onFound and props.onFound('command', command)">
                     <strong t-esc="command.words.join(' · ')"/>
                     <span t-if="command.kind === 'focused'" class="badge text-bg-info o_nudge_found_ai">AI</span>
                     <span class="o_nudge_quick_text" t-esc="command.hint"/>
                     <code class="o_nudge_found_example" t-esc="command.example"/>
                 </button>
+            </div>
+            <div t-if="found.explain" class="o_nudge_found_explain">
+                <p class="o_nudge_quick_head" t-esc="found.explain.title"/>
+                <t t-foreach="found.explain.sections" t-as="section" t-key="section_index">
+                    <p t-if="section.head" class="o_nudge_quick_text o_nudge_found_head" t-esc="section.head"/>
+                    <ul class="o_nudge_found_items">
+                        <li t-foreach="section.items" t-as="item" t-key="item_index"
+                            t-attf-class="o_nudge_found_item o_nudge_found_{{ item.kind }}">
+                            <span t-esc="item.text"/>
+                            <t t-if="item.field and props.onFound">
+                                <button type="button" class="btn btn-sm btn-light o_nudge_found_show"
+                                        t-on-click="() => props.onFound('show', item)">Show me</button>
+                                <button t-if="item.kind !== 'info'" type="button"
+                                        class="btn btn-sm btn-light o_nudge_found_what"
+                                        t-on-click="() => props.onFound('explain', item)">What is it?</button>
+                            </t>
+                        </li>
+                    </ul>
+                </t>
             </div>
             <div t-if="found.menus and found.menus.length" class="o_nudge_found_list">
                 <div t-foreach="found.menus" t-as="menu" t-key="menu.id" class="o_nudge_found_row">
@@ -139,6 +200,36 @@
                     <button type="button" class="btn btn-sm btn-light o_nudge_found_open" title="Open it"
                             t-on-click="() => props.onFound and props.onFound('open_menu', menu)">Open</button>
                 </div>
+            </div>
+            <div t-if="found.tours and found.tours.length" class="o_nudge_found_list">
+                <button t-foreach="found.tours" t-as="tour" t-key="tour.id" type="button"
+                        class="o_nudge_suggestion o_nudge_found_tour" title="Show me, step by step"
+                        t-on-click="() => props.onFound and props.onFound('tour', tour)">
+                    <i class="fa fa-map-signs"/> <strong t-esc="tour.name"/>
+                    <span class="o_nudge_quick_app" t-esc="' · ' + tour.steps"/>
+                </button>
+            </div>
+            <div t-if="found.health" class="o_nudge_found_list o_nudge_found_health">
+                <div t-foreach="found.health.findings" t-as="finding" t-key="finding.id"
+                     t-attf-class="o_nudge_found_row o_nudge_found_finding o_nudge_finding_{{ finding.severity }}">
+                    <div class="o_nudge_found_body">
+                        <strong t-esc="finding.count"/>
+                        <span class="o_nudge_quick_text" t-esc="finding.message"/>
+                        <span t-if="finding.is_new" class="badge text-bg-danger">New</span>
+                    </div>
+                    <button t-if="finding.can_show" type="button" class="btn btn-sm btn-light o_nudge_found_open"
+                            t-on-click="() => props.onFound and props.onFound('finding', finding)">Show me</button>
+                </div>
+                <button type="button" class="btn btn-sm btn-light o_nudge_found_report"
+                        t-on-click="() => props.onFound and props.onFound('health_report', found.health)">
+                    <i class="fa fa-heartbeat"/> Open the report
+                </button>
+            </div>
+            <div t-if="found.can_record" class="o_nudge_found_list">
+                <button type="button" class="btn btn-sm btn-light o_nudge_found_record_tour"
+                        t-on-click="() => props.onFound and props.onFound('record_tour', {})">
+                    <i class="fa fa-circle text-danger"/> Record a tour
+                </button>
             </div>
             <div t-if="found.settings and found.settings.length" class="o_nudge_found_list">
                 <button t-foreach="found.settings" t-as="setting" t-key="setting.app + setting.field" type="button"

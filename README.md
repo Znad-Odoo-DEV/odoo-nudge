@@ -28,26 +28,79 @@ What is left is listed under [What is not there yet](#what-is-not-there-yet). A 
 | **Points at things** | A question asked with the screen shared asks first: on the screen, or in writing (each time, or once for all in the preferences). On the screen, its pointer goes to the button, field or tab to use and presses it, for show; a box with a short text opens, and the rest of the screen is blurred and dimmed, the element clear. Step by step: the next step comes when you have done the current one. A field hidden in a closed tab is reached through the tab. |
 | **Finds products** | `/product` and a name, a description, a code or a size, in any trade: the names, codes, barcodes, descriptions, variants, categories and supplier names of the products the person may see; sizes read with their units and compared across units, a misspelt word still found by its letters. Cards with the picture, the price, the cost and the stock where the person may see them, and why each came. Needs no AI; a picture with it is described by the model. |
 | **Commands: where to look** | A word after a slash says where to look; typing `/` lists those open to the person. Without any AI, before a provider too: `/screen`, `/setting`, `/doc`, `/file`, `/find` (any record by name or reference), `/product`, `/stock`, `/rules` (Developer mode), `/sql`, `/help`, each in English and in Arabic. With the AI, a few tools and a short brief only, without the rest of the conversation: `/count` for a number, `/explain` for a field, a term or the screen. |
-| **Many records, one yes** | "Confirm all the draft quotations of Acme": one plan, one card. Tried first in a savepoint and undone, so the card says how many records go through and why the others do not; yes to all, yes to those that go through, or no. Each record in a savepoint of its own; beyond 20 records, in the background by pieces. 200 records per plan by default, set by the administrator, 1000 at most. Undo writes back what was written, unless a record was changed since; what a button did is not taken back, and the card says so. |
+| **Many records, one yes** | "Confirm all the draft quotations of Raghad": one plan, one card. Tried first in a savepoint and undone, so the card says how many records go through and why the others do not; yes to all, yes to those that go through, or no. Each record in a savepoint of its own; beyond 20 records, in the background by pieces. 200 records per plan by default, set by the administrator, 1000 at most. Undo writes back what was written, unless a record was changed since; what a button did is not taken back, and the card says so. |
 | **Works by itself** | Scheduled tasks, asked for in words: "every morning at 8, the overdue invoices", "when a purchase order above 50,000 is created, compare its prices". Shown on a card first. Run as their owner, in the background, reading only: a change they find needed waits for the owner's yes. The records are counted first, so nothing is spent when nothing matches or nothing is new. Answers in the top bar, the task's conversation and by email. 5 tasks per person by default, set by the administrator. |
+| **Morning digest** | One click in the preferences ("Set up my digest") makes a daily task per person, at the hour and in the time zone they choose. The numbers are counted by Odoo with their own rights, only for the apps installed and the groups they belong to: sales (new leads, quotations, orders to deliver, the week against the week before), purchases, accounting (overdue invoices, payments, bank lines), inventory, projects, people, and an overview first for managers. The AI, when there is one, only writes a few sentences around the numbers in their language; without it, or in private mode, the same numbers arrive alone with the same "Show me" links. Top bar and email like any task; a preview button reads today's now. |
+| **Website assistant** (companion module `nudge_website`) | A chat bubble on the website and in the portal: visitors with no login are answered only from the published products, the company files marked public and the published pages; customers who are logged in also about their own orders and invoices, with their own rights. Rate limit per visitor, a daily budget, private mode obeyed, no AI needed for products and files, and unanswered questions reach the Business Notes. |
 | **@Nudge in the chatter** | With Nudge: Discuss installed from Apps, "@Nudge summarise this" in the chatter of any record or in a channel: answered as an internal note, as the person who asked, from the fields every reader sees, the records it links to and the last messages, nothing looked up elsewhere, nothing changed. |
+| **Without an AI provider** | These work before any key is set up, and with private mode on: remembered answers, explanations of the screen, rule tasks, private mode itself, recorded tours, the health check, the compliance checklists, the first setup, the import matcher, common requests, search by meaning, and, new in release 2, the first-week coach, undoing a change, the check before an upgrade, shared recipes and the marketplace, recurring questions, My Nudge Home, unusual figures, warnings before saving and the debugger. See [Works without an AI provider](#works-without-an-ai-provider). |
+| **Your Odoo in Claude Desktop** | With Nudge: MCP Server, Claude Desktop, ChatGPT and other MCP assistants look up records and the documentation as the person who holds the key, and prepare changes that are made only after the assistant confirms with a token. Off until an administrator turns it on. |
+| **Your Odoo on WhatsApp and Telegram** (companion module `nudge_messaging`) | Link your phone with a one-time code from your preferences, then ask from WhatsApp or Telegram: questions are answered in the chat with an Open in Odoo link, and a change is only prepared (a quotation, a task, a photographed bill): the reply carries a link and you say yes inside Odoo. Voice notes when the provider can listen, private mode and budgets obeyed, every message a request in What Nudge Did. Installs Nudge: MCP Server too (switched off); voice notes need `ffmpeg` on the server. Off until an administrator turns it on; Odoo 18 for now. |
+| **Document to draft record** | Attach a PDF, a picture, an Excel or CSV file, or paste an email, and ask for a vendor bill, a customer invoice, a quotation, a purchase order, a lead or a contact. The AI reads the file once; Odoo finds the contact, products, taxes and currency and computes the totals again. The card shows the whole draft and its differences; a yes creates it as a draft, never posted, with the file attached. Undo archives the record, or cancels the draft, and never deletes. A scanned PDF is refused with a word about it; a picture needs a provider that can read images (another provider copies it out first when the chosen one cannot). |
+| **Summary of a record's history** | "Summarise this record" in the panel, or `@Nudge summarize` in the chatter (Nudge: Discuss). It reads the chatter, activities, files and the records around it, as the person, and answers with a dated timeline, open points, money, last contact and next step, with Show me links. Kept 15 minutes, unless the chatter changes. |
+| **Draft a reply** | On a record that has a customer's message, **Draft a reply** (tone Formal, Friendly or Short) or `@Nudge draft a reply` in the chatter. The reply is written in the customer's language from the messages the customer can read, the record and the company files, and opens in the email window (Nudge: Emails) with the signature of the person. They read it, change it and press Send: Nudge never sends it. |
+| **The AI over a selected list** | Select records in a list: **Do this for the N selected**. Classify into a field of values, summarise into a text field, translate, or fill a field from the others. Nudge tries a sample of five, shows what it proposes and what the rest costs; one yes sends the others to the background in batches, **Stop** keeps what went through, and one undo takes it all back. |
+| **Website and portal assistant** | With Nudge: Website Assistant, a bubble on the website answers visitors from the published products, the files marked "Public on the Website" and the published pages, and logged-in customers also about their own orders and invoices. A limit per visitor, a daily budget, a hand-over to Live Chat or the contact form. |
+| **Browser speech in private mode** | The company switch **Allow Browser Speech in Private Mode** (off by default) lets the browser dictate and read aloud when no provider on your own server listens. Chrome and Edge may send the sound to their maker; Nudge cannot prevent it. |
+| **Translate a module** | An administrator picks an installed module and a language (**Settings ‣ Nudge ‣ Translations**). Nudge lists the untranslated terms, asks the provider in batches that keep placeholders and the words of the company glossary, and shows a grid to accept or reject each term before anything is saved. |
+| **Charts in the chat** | Bars, a line or a pie drawn from the figures the person may read, asked for in words of any dialect or chosen by the AI, with **Open as report** and **Download PNG**. |
+| **Designed reports** | In Developer mode, the printed quotation, invoice, delivery slip and payslip take the company identity, as an extension view of the standard template shown with its difference before saving and undone in one step. |
+| **Approval flows from a sentence** | "A purchase order above 50,000 needs the finance manager" (or the same in Arabic) becomes, after one yes in Developer mode, the fields, the rule that stops the confirmation, the buttons and the activity for the approvers. Works on Community; with Studio installed its approval rules are used instead. |
+| **Website Builder** (companion module `nudge_builder`) | Six questions, three directions of the home page to compare, then unpublished pages made of Odoo's own snippets, with 12 sector templates in Arabic and English, an optional shop part and a Site Check. Nothing is published or deleted until you say so. Needs Website; Odoo 18 for now. |
+| **Mail agent** (companion module `nudge_mail`, Nudge: Emails) | Sorts the mail of a shared mailbox into proposals a manager approves (a lead, a ticket, a vendor bill, a reply); a rejection teaches a rule that is used afterwards without AI. Off per company until switched on. |
+| **Report in any shape** | A chart, a pivot or a list asked for in words of any dialect, shown on a card and, on yes, kept in **Nudge ‣ My Reports**, a menu only its owner sees. The period moves with the day (this month, last 30 days). |
+| **Meeting audio summary** | Attach or record a meeting (m4a, mp3, ogg, wav, webm, up to 10 MB) and ask for the summary. Nudge writes the summary, decisions and action items; tasks, activities, calendar events and notes are offered as drafts, each with its own yes. The recording is forgotten after one hour and the transcript is kept nowhere. Needs a provider that accepts audio, or the words the browser heard while recording when that is allowed. |
+| **Module scaffold** | In Developer mode, a complete Odoo module for 17, 18 or 19 from a described need: a spec card first, checked in memory after the yes, downloaded as a ZIP. Nothing is written on the server or installed. |
+| **Mobile-first panel** | Under 600 px, with `?mobile=1` or in the Odoo app, the panel is a full-screen sheet with a hold-to-talk button and up to five quick tiles (clock, photo of a bill, my tasks, ask about this record, record a note) that the company can switch off in Settings. A tile of an app that is not installed is not shown. |
 | **Goes away when asked** | Nudge: On / Off in the person's own menu: the avatar, the button and the shortcuts, for them only. |
 | **Takes you there** | "Take me to the quotations" opens the screen, among the menus you can open. |
 | **Knows this database** | Which modules are custom and what they are for, which fields they add to standard screens, how deliveries, approvals and other options are set. Read again when modules change. |
 | **Listens** | Hold the shortcut and ask, or press the microphone. In Arabic and in English, names of buttons in the middle of an Arabic sentence included. |
 | **Types what you dictate** | Click in a text field, press the dictation shortcut, talk: the words go where your cursor is. Or tell Nudge what to write in which field. Nothing is saved until you save. |
 | **Reads its answers** | To those who ask for it, when the device has a voice for the language. Off unless turned on. |
-| **Does the work** | In Agent mode: "Create a quotation for Acme with 3 office chairs, then confirm it." Nudge finds the customer and the product, shows what it is about to create, and waits for your yes. Then the same for the confirmation. |
+| **Does the work** | In Agent mode: "Create a quotation for Raghad with 3 office chairs, then confirm it." Nudge finds the customer and the product, shows what it is about to create, and waits for your yes. Then the same for the confirmation. |
 | **Works while you are away** | Press the clock instead of Send: the request is worked on by the server while you do something else. A message tells you when Nudge needs your yes, and when it is done, from any screen. |
 | **Follows your words** | Business notes written by your managers ("we call quotations offers") open every conversation. |
 | **Speaks your language** | Arabic and English, right to left, whatever the language of the interface. |
 | **Stays where you put it** | Drag the avatar anywhere; pick its colour in the preferences. |
 | **Stays within budget** | Tokens and cost per person and per day, per company and per month, set by the administrator. Every call to the provider, speech included, is in the ledger. |
 
+## Works without an AI provider
+
+These do not call an AI provider, so they work before a key is set up, when the provider fails,
+and in private mode. Nothing is spent, and every change still waits for a yes on the usual card.
+
+| Feature | What the person does, and what happens |
+|---|---|
+| **Answer memory** | Press the thumbs-up on an explanation. A manager approves it in **Nudge ‣ What Nudge Knows ‣ Remembered Answers**. From then on the same question of someone else, who may see what it is about, is answered at once, marked as a remembered answer, with a button **Ask the AI instead**. The usage report shows it with zero tokens and zero cost. An answer that changed data or quoted values of the database is never kept. With no provider, the best remembered answer above the floor is offered above the search. **Settings ‣ Nudge ‣ Answer Memory** switches it off and sets **Confidence Required** (0.75 by default). |
+| **Explainers** | `/why` (`/لماذا`): why this form cannot be saved: the required fields, including the conditional ones, the refused values, the last message, locked fields, missing rights, the company. `/field customer` (`/حقل`): what a field is, in words. `/here` (`/هنا`): what this screen is, its state and its buttons. Each line is shown with the pointer. They are read from Odoo's own metadata and the form as it is, with what was typed, and they are offered in place of the error when there is no provider or it fails. |
+| **Rule tasks** | **Nudge ‣ What Nudge Did ‣ Scheduled Tasks**, **Done By: Rule (no AI)**. Pick the record type (a model you may read), a filter, **Measure** (Count, Sum or Average of a number field), an optional grouping, and when to report: **Always**, **Above a Threshold**, **Below a Threshold** or **Changed Since the Last Run**. It runs read-only as its owner and answers in the top bar and by email, with a link that opens the filtered list. It counts in the same limit of tasks per person. |
+| **Private mode** | **Settings ‣ Nudge ‣ Privacy ‣ Private Mode: Never Send Data to an External AI Provider**, per company, and the tick **Runs on Our Own Server** on a provider (Ollama on your own machine, for instance). The server refuses every call to a provider that is not ticked, before anything leaves: answers, pictures, voice, connection tests and the embeddings of Nudge: Odoo AI. Providers on your own server are preferred, and a lock shows in the panel. Quick search, slash commands, tours and remembered answers keep working. Voice typing by the browser still sends the sound to the maker of the browser: choose the AI provider as the engine of the voice. |
+| **Recorded tours** | A Nudge manager chooses **Record a tour** in the user menu, goes through the task by clicking, and each step is named by its menu, button, field or tab, never by its place on the page. Anyone replays it with the pointer: `/tour create a quotation` (`/جولة`), or from the search of the panel. A step this database does not have is skipped with a note. Tours are edited under **Nudge ‣ Configuration ‣ Tours**. Eight come ready: Create a quotation, Confirm a sales order, Create a contact, Create a product, Receive a purchase order, Validate a delivery, Register a vendor bill, Register a payment; each shows only where its app is installed. The AI may show a stored tour instead of improvising steps. |
+| **Health check** | A Nudge manager types `/health` (`/فحص`), or opens **Nudge ‣ Health Check ‣ Check the Database**. Eleven small checks run as that person and change nothing: duplicate contacts, duplicate products, product data, accounting setup, taxes, negative stock, users and rights, records of the wrong company, scheduled actions that fail, the email queue, orphan files. The report gives each finding a severity, a count and a **Show me** button, and says what changed since the last report. It also runs every week as the manager who asked; the last ten reports of a company are kept, under **Reports**. |
+| **Compliance checklist** | **Nudge ‣ Health Check ‣ Compliance** lists the checklists for the country of the company, each with a **Run**: United Arab Emirates, Saudi Arabia, Qatar, Kuwait, Bahrain, Oman and Egypt. Deterministic checks, no AI, nothing changed: VAT taxes at the rate of the country and on the products, tax numbers (TRN, VAT) on the company and the customers, the invoice layout, e-invoicing modules and fields (ZATCA, ETA), Arabic, WPS readiness and employee fields. Each finding has a severity, an explanation with the official reference in English and Arabic, and **Show me**; results are kept with the health reports. It is a checklist, not legal advice: confirm with the authority (it says so on the screen, in every pack and on every finding). A country is a JSON file (`data/compliance`, or `data/nudge_compliance` in any module), refused at load with a clear error if it names an unknown check. |
+| **First setup** | On a database nobody has set up (one company with the default name, no chart of accounts, few users) an administrator is offered **Set up this database with me**, also under **Settings ‣ Nudge ‣ First Setup** and by sentence in English or any Arabic dialect. Nudge asks one thing at a time (company, country, currency, languages, time zone, logo, apps for the kind of business, other companies, warehouses, users with a role, fiscal year, number formats) and shows a card with the exact changes before each; the country card names the fiscal localisation module (`l10n_ae`, `l10n_sa`, `l10n_eg`...) that Odoo loads its chart of accounts with. Users get an invitation email only if you ask; what was made is archived by Undo, never deleted; the outgoing mail server is only pointed at. With no provider the answers are read by rules. |
+| **Import matcher** | Attach a CSV or Excel file and type `/import` (`/استيراد`), or press **Check a CSV or Excel file, without AI**. The columns are matched to the fields of a model by name, label, usual names, spelling and what the values look like. Correct the matching on the card; Nudge tries the file with the dry run of Odoo's import and lists the errors by row and column; nothing is saved. Then it hands you a corrected CSV for the standard Import screen. |
+| **Common requests** | Open a screen, find a record, filter a list, count and sum, create a contact, product, quotation, purchase order, task, lead, ticket or time off, change one field, press a button: understood by rules in Arabic, any dialect (Modern Standard, Gulf, Egyptian, Iraqi, Levantine, Maghrebi, Sudanese, Yemeni), Arabizi and English. Usage rows are labelled **Understood Without AI**, with zero tokens. A name that fits several records is a choice, never a guess. **Settings ‣ Nudge ‣ Common Requests ‣ Try to understand common requests without AI first**, on by default. |
+| **Search by meaning** | **Settings ‣ Nudge ‣ Local Search Model ‣ Download** fetches multilingual-e5-small (about 135 MB, into the filestore) to run on the CPU of the server; it needs `onnxruntime` and `tokenizers`. The documentation, the company files and the remembered answers are then found by meaning as well as by words, so a question in Arabic finds an English page. It does not search the records of other models (partners, products...), and it answers nothing: it only finds. Nothing leaves the server. |
+| **Your first week** | A card in the panel shows a new person (first 14 days, or put in training by a manager) how many of the key screens of their role they opened and the tours still to take; **Nudge ‣ Training** shows the managers who is where. Only the screens opened are kept. A company switch in Settings turns the coach off. |
+| **Who changed this, and undo it** | `/changes` (or "who changed this price?" in any dialect) lists the tracked changes of a record, newest first. **Restore the old value** puts one field back, with your rights, after a yes; nothing is deleted. A state, a posted entry or a done stock move is never put back, and the answer says why. The restore tools themselves are in Agent mode. |
+| **Check before an upgrade** | **Nudge ‣ Health Check ‣ Before an Upgrade**: an administrator picks the series (17 to 18, 18 to 19, 19 to 20) and gets a read-only report of what will break or needs a decision: Studio objects and the logic they hide, renamed or removed fields, `attrs`/`states`, custom modules without a migration. Some entries say "confirm on staging"; the 20.0 list holds generic checks only. |
+| **Shared recipes** | A manager exports tours, rule tasks, presets, command words and approved answers as one checksummed file (**Nudge ‣ Configuration ‣ Recipes**) and imports it, after a review step, on another database. |
+| **Recipe marketplace** | **Nudge ‣ Configuration ‣ Recipes ‣ Marketplace** lists the recipes of public `index.json` indexes (format in `doc/recipes-index.md`), HTTPS only, each download checked against the checksum of the index. It is not an AI call: the only thing the index sees is your server's address. The default source is off and no index is fetched by itself until an administrator enables a source and, for the weekly refresh, ticks it. |
+| **Questions that keep coming back** | Questions asked are counted by meaning, in any dialect, with no AI and no person kept. Every week the managers are offered the ones asked often that no remembered answer or tour covers: keep an answer, record a tour or ignore (a short message on the bus, three lines at most). |
+| **My Nudge Home** | A page for each person: the numbers of the apps they may use (sales, purchases, accounting, inventory, projects, people), each with its trend against last week and **Show me**, counted as the person every five minutes. Community and Enterprise. |
+| **Unusual figures** | The health check and a daily task kind find payslips, bills, invoices, stock moves, expenses, discounts, purchase prices and attendance far from the median of their group, with robust statistics. The sensitivity is in **Settings ‣ Nudge ‣ Unusual Figures**; the comparison is told in words, with **Show me**. |
+| **Warnings before saving** | A small strip under the title of a form warns, without blocking, about duplicate contacts and products, tax-number and phone formats, email syntax, a price under cost, a bill number already used, a deadline in the past, and the fields the company requires. Each warning is switched per company in Settings and muted per person; **Ask Nudge about this** is the only part that uses AI. On by default: duplicates, the tax-number format, a bill number already used and the required fields. |
+| **Why did it fail?** | In Developer mode, `/debug` reads an automation, a server action or a scheduled action: its definition, its logged errors, the missing fields and models and the rights. With a provider Nudge proposes the fix as a card showing the difference on the code; the original is kept and put back on request. |
+| **Charts without AI** | A chart asked for in words of any dialect ("sales by month as a chart") is understood by rules, drawn from the figures the person may read and opened as a report, with no provider. |
+
 ## Install
 
 Requirements: Odoo 18 (Community or Enterprise); Nudge exists for Odoo 17 and 18 too, each on its
-own branch. No extra Python package, unless you use the
+own branch (the 18 branch has no Nudge: Odoo AI; the 17 branch has neither it nor Nudge: Studio and the two
+spreadsheet companions). No Python package is required. Some are optional (see [Optional packages](#optional-packages)): `anthropic` for the
+Anthropic provider, `onnxruntime`, `tokenizers` and `numpy` for the search by meaning, `phonenumbers` for the phone check, and `ffmpeg` for audio. For the
 Anthropic provider: Claude needs the `anthropic` Python package on the server (`pip install anthropic`;
 on Odoo.sh, a line `anthropic` in the `requirements.txt` at the root of the repository). Nudge installs
 without it; **Test Connection** on the provider says when it is missing, and what to do.
@@ -55,14 +108,41 @@ without it; **Test Connection** on the provider says when it is missing, and wha
 1. Add this folder to the `addons_path` of Odoo.
 2. Update the apps list and install **Nudge**.
 
+## Optional packages
+
+Nothing below is required to install Nudge, and none is declared as an `external_dependencies`: without a
+package the feature that needs it says what is missing and the rest works.
+
+| Package | Enables | Without it |
+|---|---|---|
+| `anthropic` | The Claude (Anthropic) provider | **Test Connection** on the provider says it is missing |
+| `onnxruntime`, `tokenizers`, `numpy` | Search by meaning on the server's own CPU | Search falls back to words |
+| `phonenumbers` (with Odoo's phone validation) | The phone-format warning before saving | The check says it cannot tell and does nothing |
+| `ffmpeg` (a program on the server) | Voice notes and meeting audio in formats other than WAV | The audio is refused with the reason |
+
+## What is on and what is off
+
+- **On after install**: remembered answers (nothing is served until a manager approves one, and a use costs zero tokens), common requests understood by rules before the AI, warnings before saving (duplicates, tax-number format, a bill number already used, the required fields), the new-user coach for the first 14 days (a company switch turns it off), and the weekly count of recurring questions (no AI, a short message to the managers).
+- **Off until someone turns it on**: the weekly health check (until a company names the manager who runs it), the Mail agent, WhatsApp and Telegram, the MCP server, private-mode speech, the Website Builder (a module of its own), the default marketplace source and the weekly refresh of any source.
+- **Only when someone asks**: unusual figures, the compliance checklists, the check before an upgrade, the module scaffold, meeting audio (the recording is forgotten after one hour).
+- **No schedule calls an AI provider on its own**: scheduled work is what people created (a task, a digest) or runs on the server without a provider (the search index, the recurring questions, the marketplace).
+
 ## Editions
 
-- **Community and Enterprise**: Nudge, Nudge: Emails, Nudge: Discuss and Nudge: Spreadsheets.
-  Everything in the table above works on Community: the pointer, Agent mode, Developer mode, the
-  commands, the tasks, the spreadsheets.
+- **Community and Enterprise**: Nudge, Nudge: Emails, Nudge: Discuss, Nudge: Spreadsheets, Nudge: MCP Server,
+  Nudge: WhatsApp and Telegram and Nudge: Website Assistant. Everything in the table above, except what is marked Enterprise below, works on
+  Community: the pointer, Agent mode, Developer mode, the commands, the tasks, the spreadsheets.
 - **Enterprise only**: Nudge: Studio (`web_studio`), Nudge: Odoo AI (`ai`) and Nudge: Spreadsheets
   in Documents (`documents_spreadsheet`), since the apps they bridge are Enterprise; and dark
   mode, which Community does not have.
+- **Companion**: Nudge: MCP Server (`nudge_mcp`, Community and Enterprise) lets Claude Desktop, ChatGPT and other
+  MCP assistants use the tools of Nudge with the rights of the person whose key they hold; see its README.
+- **Companion**: Nudge: Website Assistant (`nudge_website`, Community and Enterprise, needs Website and Portal) puts a
+  chat bubble on the website and in the portal; see its README. Both companions are off until an administrator
+  turns them on, and exist for Odoo 17, 18 and 19.
+- **Companion**: Nudge: Website Builder (`nudge_builder`, Community and Enterprise, needs Website) interviews the person and builds
+  unpublished pages from 12 sector templates; see its README. Nudge: WhatsApp and Telegram (`nudge_messaging`) answers from
+  linked phones and installs Nudge: MCP Server with it (switched off); see its README. Both are for Odoo 18 for now.
 
 ## Security
 
@@ -145,6 +225,20 @@ person can open, the settings of the apps (for administrators) and the official 
 by a few words; the pointer shows the way to a screen or a setting found. No AI is asked, and
 nothing leaves the database. The conversation takes over the moment a provider is ready.
 
+### Search by meaning, on your own server (optional)
+
+An administrator may turn on a small model that runs on the CPU of the Odoo server, with no AI
+provider: Settings > Nudge > Local Search Model > Download. It needs the Python packages
+`onnxruntime` and `tokenizers` (`pip install onnxruntime tokenizers`; on Odoo.sh, in
+`requirements.txt`); torch is not needed. The model, multilingual-e5-small (int8, MIT licence), is
+downloaded from https://huggingface.co/Xenova/multilingual-e5-small into the filestore of the
+database (about 135 MB, checked by size and SHA-256), never into the module. A scheduled action
+then indexes the documentation, the company files and the remembered answers, a few minutes at a
+time, and goes on where it stopped. The searches then re-rank their keyword hits by meaning, and
+find a page when the question shares no word with it (a question in Arabic about an English page).
+Without the packages or the model nothing changes. Nothing leaves the server, so private mode does
+not stop it. The records of other models (partners, products...) are not searched by meaning.
+
 ### Voice and providers
 
 Chrome, Edge and Safari turn speech into text themselves. For the other browsers, and when the
@@ -176,7 +270,7 @@ is ready and can listen.
 For the people of the group **Nudge / Agent User**. Under the message box, choose **Agent**; or
 say "Nudge, do it" after it explained how.
 
-- **Ask for what you want done**: "Create a contact for Sara Khalil at Acme", "Set the customer
+- **Ask for what you want done**: "Create a contact for Raghad at your company", "Set the customer
   reference of this quotation to PO-7788", "Confirm this order", "Which of my quotations are
   still waiting?"
 - **Read what Nudge shows before it changes anything**: what it is about to create, the fields
@@ -193,6 +287,21 @@ have on the form cannot be pressed. It never deletes, whoever asks. Users, group
 companies and the settings of Odoo are closed by default; an administrator can switch on **Nudge for
 Administrators** (Settings ‣ Nudge), and from then on those changes go through the same yes-cards,
 for administrators, one at a time.
+
+### Common requests without AI
+
+Before the AI provider is asked, Agent mode tries to understand the usual requests by rules: open a
+screen, find a record, filter the list on screen, count and sum, create a contact, a product, a
+quotation, a purchase order, a task, a lead, a ticket or a time off, change one field of a record,
+press a button of the record on screen. It reads Modern Standard Arabic, the Gulf, Egyptian, Iraqi,
+Levantine, Maghrebi, Sudanese and Yemeni dialects, Arabizi and English, with Arabic-Indic or Latin
+digits and dates such as today, last month or a month name. No token is spent, and every change
+still waits for a yes on the same card, with the same rights, log and undo. A name that fits several
+records is a choice, never a guess. What is not understood goes to the AI as before; with no
+provider, or in private mode, Nudge says what it understood and what it can do without AI. The
+setting “Try to understand common requests without AI first” (on by default) turns it off, and the
+usage report counts these requests with no tokens. The words are in `tools/noai_commands/lexicon/`,
+one file per group of dialects, easy to extend.
 
 ### In the background
 
@@ -279,6 +388,20 @@ They are stored as plain text, which is how Odoo stores its own secrets: protect
 accordingly. The Anthropic provider can instead read `ANTHROPIC_API_KEY` from the environment of
 the server.
 
+## Fixed
+
+- A field added after the name, or after another field of the title block, now shows in a group right below the title, with its label.
+- In Talk mode with the screen shared, Nudge reads the total of an order or invoice: the totals box and the first 50 lines.
+- A list asked for in a scheduled task that runs in the background is answered in the message, as a table with an **Open the list** link, not on a screen that is not there.
+- A plan on more than 20 records in the background saves its progress batch by batch, goes on after a worker died, and ends where the person stopped it, keeping what went through.
+
+## Uninstall
+
+Approval flows, automations, tours and reports that Nudge made for a company stay by design: they belong to
+the company (list them under Settings ‣ Technical ‣ External Identifiers, module `nudge_custom`). The menus of
+saved reports go with the Nudge menu; their window actions, the search vectors and the model downloaded for
+the search by meaning (about 135 MB in the filestore) are not removed with the module, and can be deleted by hand.
+
 ## Tests
 
 ```bash
@@ -298,8 +421,8 @@ rewritten into a file path.
 ## What is not there yet
 
 - Acting without asking: every change waits for your yes. There is no mode that skips it.
-- Deleting, printing reports, sending emails: Nudge archives or cancels instead of deleting,
-  and a window opened by a button is opened on your screen for you to go on from there.
+- Deleting and sending emails by itself: Nudge archives or cancels instead of deleting, and a window opened by a
+  button is opened on your screen for you to go on from there. (Designed printed reports and the Mail agent exist now; a mail is never sent without a yes.)
 - A scanned PDF holds no text: Nudge asks for a photo of it, which a provider that sees images
   can read.
 - Screens other than forms, lists and kanbans are seen by their name only.

@@ -1,0 +1,926 @@
+{
+ "schema": 1,
+ "key": "contracting",
+ "sector": "contracting",
+ "shop": false,
+ "name": {
+  "en": "Contracting company",
+  "ar": "شركة مقاولات"
+ },
+ "brand": {
+  "en": "Your Company",
+  "ar": "شركتك"
+ },
+ "suggest": [
+  "contracting",
+  "contracting",
+  "شركة مقاولات"
+ ],
+ "palette": {
+  "primary": "#1f3a5f",
+  "secondary": "#f2a900",
+  "accent": "#e4572e",
+  "light": "#f5f6f8",
+  "dark": "#1b1f27"
+ },
+ "fonts": {
+  "heading": "Oswald",
+  "body": "Open Sans"
+ },
+ "fonts_ar": {
+  "heading": "Tajawal",
+  "body": "Tajawal"
+ },
+ "hero_image": "static/img/templates/contracting.webp",
+ "thumbnail": "static/img/templates/contracting_thumb.webp",
+ "menu": [
+  "home",
+  "about",
+  "services",
+  "projects",
+  "team",
+  "contact",
+  "faq"
+ ],
+ "pages": [
+  {
+   "key": "home",
+   "kind": "home",
+   "name": {
+    "en": "Home",
+    "ar": "الرئيسية"
+   },
+   "blocks": [
+    {
+     "snippet": "s_cover",
+     "copy": {
+      "en": {
+       "title": "We build what lasts",
+       "text": "Villas, towers and infrastructure delivered on time and on budget.",
+       "button": "Request a quote",
+       "button_url": "/contactus"
+      },
+      "ar": {
+       "title": "نبني ما يبقى",
+       "text": "فلل وأبراج ومشاريع بنية تحتية نسلّمها في موعدها وضمن الميزانية المتفق عليها.",
+       "button": "اطلب عرض سعر",
+       "button_url": "/contactus"
+      }
+     },
+     "image": "building",
+     "image_prompt": "wide photo of a modern villa under construction at golden hour, cranes, no text, no people close up"
+    },
+    {
+     "snippet": "s_three_columns",
+     "copy": {
+      "en": {
+       "title": "Why Your Company",
+       "items": [
+        {
+         "title": "Fixed programme",
+         "text": "A weekly progress report against the signed schedule."
+        },
+        {
+         "title": "Clear costs",
+         "text": "Bills of quantities and variation orders approved before work starts."
+        },
+        {
+         "title": "Safe sites",
+         "text": "Daily toolbox talks and an independent HSE audit every month."
+        }
+       ]
+      },
+      "ar": {
+       "title": "لماذا شركتك",
+       "items": [
+        {
+         "title": "برنامج زمني ملزم",
+         "text": "تقرير أسبوعي عن التقدّم مقارنةً بالجدول الموقّع."
+        },
+        {
+         "title": "تكاليف واضحة",
+         "text": "جداول كميات وأوامر تغيير تُعتمد قبل بدء التنفيذ."
+        },
+        {
+         "title": "مواقع آمنة",
+         "text": "اجتماعات سلامة يومية وتدقيق مستقل شهري في الصحة والسلامة."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_features",
+     "copy": {
+      "en": {
+       "title": "What we do",
+       "items": [
+        {
+         "title": "Residential buildings",
+         "text": "Villas, compounds and mid-rise apartment blocks."
+        },
+        {
+         "title": "Commercial and industrial",
+         "text": "Offices, warehouses and factory shells."
+        },
+        {
+         "title": "Fit-out and finishing",
+         "text": "Interior fit-out, joinery and MEP finishing."
+        },
+        {
+         "title": "Maintenance contracts",
+         "text": "Annual maintenance with a guaranteed response time."
+        }
+       ]
+      },
+      "ar": {
+       "title": "ما نقدّمه",
+       "items": [
+        {
+         "title": "المباني السكنية",
+         "text": "فلل ومجمعات سكنية وعمارات متوسطة الارتفاع."
+        },
+        {
+         "title": "المشاريع التجارية والصناعية",
+         "text": "مكاتب ومستودعات وهياكل مصانع."
+        },
+        {
+         "title": "التشطيبات والديكور",
+         "text": "تشطيب داخلي ونجارة وتمديدات كهروميكانيكية."
+        },
+        {
+         "title": "عقود الصيانة",
+         "text": "صيانة سنوية مع التزام بزمن الاستجابة."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_numbers",
+     "copy": {
+      "en": {
+       "title": "In numbers",
+       "items": [
+        {
+         "number": "250+",
+         "label": "Projects delivered"
+        },
+        {
+         "number": "20",
+         "label": "Years of experience"
+        },
+        {
+         "number": "400",
+         "label": "Skilled workers"
+        },
+        {
+         "number": "98%",
+         "label": "On-time handover"
+        }
+       ]
+      },
+      "ar": {
+       "title": "بالأرقام",
+       "items": [
+        {
+         "number": "250+",
+         "label": "مشروعاً منجزاً"
+        },
+        {
+         "number": "20",
+         "label": "سنة خبرة"
+        },
+        {
+         "number": "400",
+         "label": "عامل ماهر"
+        },
+        {
+         "number": "98%",
+         "label": "تسليم في الموعد"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Two decades of delivered projects",
+       "text": "We are a licensed main contractor with in-house engineers, site supervisors and a safety-first culture. Every project has one accountable manager from handover of the site to final snag list.",
+       "button": "About us",
+       "button_url": "/about"
+      },
+      "ar": {
+       "title": "عقدان من المشاريع المنجزة",
+       "text": "نحن مقاول رئيسي مرخّص لدينا مهندسون ومشرفو مواقع ثقافة سلامة راسخة. لكل مشروع مدير مسؤول واحد من استلام الموقع حتى إغلاق ملاحظات التسليم.",
+       "button": "من نحن",
+       "button_url": "/about"
+      }
+     },
+     "image": "building"
+    },
+    {
+     "snippet": "s_call_to_action",
+     "copy": {
+      "en": {
+       "title": "Have a plan on paper?",
+       "text": "Send us the drawings and receive a priced proposal in five working days.",
+       "button": "Send drawings",
+       "button_url": "/contactus"
+      },
+      "ar": {
+       "title": "هل لديك مخطط على الورق؟",
+       "text": "أرسل لنا المخططات ويصلك عرض مسعّر خلال خمسة أيام عمل.",
+       "button": "أرسل المخططات",
+       "button_url": "/contactus"
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "General contractor | Villas, towers and fit-out",
+     "ar": "مقاول عام | فلل وأبراج وتشطيبات"
+    },
+    "description": {
+     "en": "Licensed main contractor delivering villas, warehouses and fit-out on time and on budget.",
+     "ar": "مقاول رئيسي مرخّص ينفذ الفلل والمستودعات والتشطيبات في الموعد وضمن الميزانية."
+    }
+   },
+   "url": "/"
+  },
+  {
+   "key": "about",
+   "kind": "about",
+   "name": {
+    "en": "About us",
+    "ar": "من نحن"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "About Your Company"
+      },
+      "ar": {
+       "title": "عن شركتك"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Two decades of delivered projects",
+       "text": "We are a licensed main contractor with in-house engineers, site supervisors and a safety-first culture. Every project has one accountable manager from handover of the site to final snag list."
+      },
+      "ar": {
+       "title": "عقدان من المشاريع المنجزة",
+       "text": "نحن مقاول رئيسي مرخّص لدينا مهندسون ومشرفو مواقع ثقافة سلامة راسخة. لكل مشروع مدير مسؤول واحد من استلام الموقع حتى إغلاق ملاحظات التسليم."
+      }
+     },
+     "image": "building"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Fixed programme",
+       "text": "A weekly progress report against the signed schedule."
+      },
+      "ar": {
+       "title": "برنامج زمني ملزم",
+       "text": "تقرير أسبوعي عن التقدّم مقارنةً بالجدول الموقّع."
+      }
+     },
+     "image": "building"
+    },
+    {
+     "snippet": "s_numbers",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "number": "250+",
+         "label": "Projects delivered"
+        },
+        {
+         "number": "20",
+         "label": "Years of experience"
+        },
+        {
+         "number": "400",
+         "label": "Skilled workers"
+        },
+        {
+         "number": "98%",
+         "label": "On-time handover"
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "number": "250+",
+         "label": "مشروعاً منجزاً"
+        },
+        {
+         "number": "20",
+         "label": "سنة خبرة"
+        },
+        {
+         "number": "400",
+         "label": "عامل ماهر"
+        },
+        {
+         "number": "98%",
+         "label": "تسليم في الموعد"
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "About Your Company",
+     "ar": "عن شركتك"
+    },
+    "description": {
+     "en": "We are a licensed main contractor with in-house engineers, site supervisors and a safety-first culture. Every project has one accountable manager from",
+     "ar": "نحن مقاول رئيسي مرخّص لدينا مهندسون ومشرفو مواقع ثقافة سلامة راسخة. لكل مشروع مدير مسؤول واحد من استلام الموقع حتى إغلاق ملاحظات التسليم."
+    }
+   }
+  },
+  {
+   "key": "services",
+   "kind": "services",
+   "name": {
+    "en": "Services",
+    "ar": "الخدمات"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Our services",
+       "text": "Villas, towers and infrastructure delivered on time and on budget."
+      },
+      "ar": {
+       "title": "خدماتنا",
+       "text": "فلل وأبراج ومشاريع بنية تحتية نسلّمها في موعدها وضمن الميزانية المتفق عليها."
+      }
+     }
+    },
+    {
+     "snippet": "s_features",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "title": "Residential buildings",
+         "text": "Villas, compounds and mid-rise apartment blocks."
+        },
+        {
+         "title": "Commercial and industrial",
+         "text": "Offices, warehouses and factory shells."
+        },
+        {
+         "title": "Fit-out and finishing",
+         "text": "Interior fit-out, joinery and MEP finishing."
+        },
+        {
+         "title": "Maintenance contracts",
+         "text": "Annual maintenance with a guaranteed response time."
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "title": "المباني السكنية",
+         "text": "فلل ومجمعات سكنية وعمارات متوسطة الارتفاع."
+        },
+        {
+         "title": "المشاريع التجارية والصناعية",
+         "text": "مكاتب ومستودعات وهياكل مصانع."
+        },
+        {
+         "title": "التشطيبات والديكور",
+         "text": "تشطيب داخلي ونجارة وتمديدات كهروميكانيكية."
+        },
+        {
+         "title": "عقود الصيانة",
+         "text": "صيانة سنوية مع التزام بزمن الاستجابة."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_three_columns",
+     "copy": {
+      "en": {
+       "title": "How we work",
+       "items": [
+        {
+         "title": "Fixed programme",
+         "text": "A weekly progress report against the signed schedule."
+        },
+        {
+         "title": "Clear costs",
+         "text": "Bills of quantities and variation orders approved before work starts."
+        },
+        {
+         "title": "Safe sites",
+         "text": "Daily toolbox talks and an independent HSE audit every month."
+        }
+       ]
+      },
+      "ar": {
+       "title": "كيف نعمل",
+       "items": [
+        {
+         "title": "برنامج زمني ملزم",
+         "text": "تقرير أسبوعي عن التقدّم مقارنةً بالجدول الموقّع."
+        },
+        {
+         "title": "تكاليف واضحة",
+         "text": "جداول كميات وأوامر تغيير تُعتمد قبل بدء التنفيذ."
+        },
+        {
+         "title": "مواقع آمنة",
+         "text": "اجتماعات سلامة يومية وتدقيق مستقل شهري في الصحة والسلامة."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_call_to_action",
+     "copy": {
+      "en": {
+       "title": "Have a plan on paper?",
+       "text": "Send us the drawings and receive a priced proposal in five working days.",
+       "button": "Send drawings",
+       "button_url": "/contactus"
+      },
+      "ar": {
+       "title": "هل لديك مخطط على الورق؟",
+       "text": "أرسل لنا المخططات ويصلك عرض مسعّر خلال خمسة أيام عمل.",
+       "button": "أرسل المخططات",
+       "button_url": "/contactus"
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Contracting company services",
+     "ar": "خدمات شركة مقاولات"
+    },
+    "description": {
+     "en": "Licensed main contractor delivering villas, warehouses and fit-out on time and on budget.",
+     "ar": "مقاول رئيسي مرخّص ينفذ الفلل والمستودعات والتشطيبات في الموعد وضمن الميزانية."
+    }
+   }
+  },
+  {
+   "key": "projects",
+   "kind": "projects",
+   "name": {
+    "en": "Projects",
+    "ar": "المشاريع"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Our work"
+      },
+      "ar": {
+       "title": "أعمالنا"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Family villa, Al Barsha",
+       "text": "Three floors, 6 bedrooms, completed in 11 months."
+      },
+      "ar": {
+       "title": "فيلا عائلية في البرشاء",
+       "text": "ثلاثة طوابق وست غرف نوم، اكتملت في 11 شهراً."
+      }
+     },
+     "image": "building"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Logistics warehouse",
+       "text": "12,000 square metres of steel-frame storage."
+      },
+      "ar": {
+       "title": "مستودع لوجستي",
+       "text": "اثنا عشر ألف متر مربع من التخزين بهيكل معدني."
+      }
+     },
+     "image": "building"
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Office tower fit-out",
+       "text": "Eight floors fitted out while the tenants stayed in."
+      },
+      "ar": {
+       "title": "تشطيب برج مكاتب",
+       "text": "تشطيب ثمانية طوابق مع بقاء المستأجرين فيها."
+      }
+     },
+     "image": "building"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Retail centre",
+       "text": "A neighbourhood centre with 24 units and parking."
+      },
+      "ar": {
+       "title": "مركز تجاري",
+       "text": "مركز حيّ يضم 24 وحدة ومواقف سيارات."
+      }
+     },
+     "image": "building"
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Contracting company projects",
+     "ar": "أعمال شركة مقاولات"
+    },
+    "description": {
+     "en": "Licensed main contractor delivering villas, warehouses and fit-out on time and on budget.",
+     "ar": "مقاول رئيسي مرخّص ينفذ الفلل والمستودعات والتشطيبات في الموعد وضمن الميزانية."
+    }
+   }
+  },
+  {
+   "key": "team",
+   "kind": "team",
+   "name": {
+    "en": "Our team",
+    "ar": "فريقنا"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Meet the team"
+      },
+      "ar": {
+       "title": "تعرّف على فريقنا"
+      }
+     }
+    },
+    {
+     "snippet": "s_company_team",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "name": "Raghad",
+         "role": "Managing director"
+        },
+        {
+         "name": "Ebrahim",
+         "role": "Project manager"
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "name": "رغد",
+         "role": "المدير العام"
+        },
+        {
+         "name": "إبراهيم",
+         "role": "مدير المشاريع"
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Our team | Your Company",
+     "ar": "فريقنا | شركتك"
+    },
+    "description": {
+     "en": "The people behind Your Company.",
+     "ar": "الأشخاص الذين يقفون خلف شركتك."
+    }
+   }
+  },
+  {
+   "key": "contact",
+   "kind": "contact",
+   "name": {
+    "en": "Contact us",
+    "ar": "اتصل بنا"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Contact us",
+       "text": "We reply within one working day."
+      },
+      "ar": {
+       "title": "اتصل بنا",
+       "text": "نردّ خلال يوم عمل واحد."
+      }
+     }
+    },
+    {
+     "snippet": "s_contact_info",
+     "copy": {
+      "en": {
+       "title": "Find us",
+       "items": [
+        {
+         "title": "Address",
+         "text": "Industrial Area 4, Sharjah"
+        },
+        {
+         "title": "Opening hours",
+         "text": "Sun-Thu 8:00-17:00"
+        },
+        {
+         "title": "Phone",
+         "text": "+971 4 000 0000"
+        },
+        {
+         "title": "Email",
+         "text": "hello@example.com"
+        }
+       ]
+      },
+      "ar": {
+       "title": "تجدنا هنا",
+       "items": [
+        {
+         "title": "العنوان",
+         "text": "المنطقة الصناعية 4، الشارقة"
+        },
+        {
+         "title": "ساعات العمل",
+         "text": "الأحد - الخميس 8:00 - 17:00"
+        },
+        {
+         "title": "الهاتف",
+         "text": "+971 4 000 0000"
+        },
+        {
+         "title": "البريد الإلكتروني",
+         "text": "hello@example.com"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Have a plan on paper?",
+       "text": "Send us the drawings and receive a priced proposal in five working days."
+      },
+      "ar": {
+       "title": "هل لديك مخطط على الورق؟",
+       "text": "أرسل لنا المخططات ويصلك عرض مسعّر خلال خمسة أيام عمل."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Contact Your Company",
+     "ar": "تواصل مع شركتك"
+    },
+    "description": {
+     "en": "Call, write or visit us: Industrial Area 4, Sharjah.",
+     "ar": "اتصل بنا أو راسلنا أو زرنا: المنطقة الصناعية 4، الشارقة."
+    }
+   },
+   "url": "/contactus"
+  },
+  {
+   "key": "faq",
+   "kind": "faq",
+   "name": {
+    "en": "FAQ",
+    "ar": "الأسئلة الشائعة"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Frequently asked questions"
+      },
+      "ar": {
+       "title": "الأسئلة الشائعة"
+      }
+     }
+    },
+    {
+     "snippet": "s_faq_collapse",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "title": "Do you give a fixed price?",
+         "text": "Yes, after a site visit and agreed drawings we give a lump-sum or a measured price."
+        },
+        {
+         "title": "Who handles the permits?",
+         "text": "We prepare and follow up the municipality and civil defence approvals."
+        },
+        {
+         "title": "What warranty do I get?",
+         "text": "A ten-year structural warranty and one year on finishing works."
+        },
+        {
+         "title": "Can you work with my consultant?",
+         "text": "Of course, we follow the consultant's drawings and inspection requests."
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "title": "هل تقدّمون سعراً ثابتاً؟",
+         "text": "نعم، بعد زيارة الموقع واعتماد المخططات نقدّم سعراً مقطوعاً أو سعراً بالمقايسة."
+        },
+        {
+         "title": "من يتولى التراخيص؟",
+         "text": "نعدّ ونتابع موافقات البلدية والدفاع المدني."
+        },
+        {
+         "title": "ما الضمان الذي أحصل عليه؟",
+         "text": "ضمان عشر سنوات على الهيكل الإنشائي وسنة على أعمال التشطيب."
+        },
+        {
+         "title": "هل تعملون مع الاستشاري الخاص بي؟",
+         "text": "بالتأكيد، نلتزم بمخططات الاستشاري وطلبات الفحص."
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "FAQ | Your Company",
+     "ar": "الأسئلة الشائعة | شركتك"
+    },
+    "description": {
+     "en": "Answers to the questions we hear most.",
+     "ar": "إجابات عن الأسئلة التي نسمعها أكثر من غيرها."
+    }
+   }
+  },
+  {
+   "key": "legal_privacy",
+   "kind": "legal",
+   "name": {
+    "en": "Privacy policy",
+    "ar": "سياسة الخصوصية"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Privacy policy"
+      },
+      "ar": {
+       "title": "سياسة الخصوصية"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "What we collect",
+       "text": "Your Company collects only the details you give us through forms, orders or calls: your name, phone, email and the content of your request. We use them to answer you and to deliver what you asked for."
+      },
+      "ar": {
+       "title": "ما الذي نجمعه",
+       "text": "تجمع شركتك فقط البيانات التي تقدّمها عبر النماذج أو الطلبات أو المكالمات: اسمك وهاتفك وبريدك ومضمون طلبك. نستخدمها للرد عليك وتنفيذ ما طلبته."
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Your rights",
+       "text": "We never sell your data. You may ask us to show, correct or delete it at any time by writing to the address on the contact page."
+      },
+      "ar": {
+       "title": "حقوقك",
+       "text": "لا نبيع بياناتك أبداً. ويمكنك أن تطلب منا الاطلاع عليها أو تصحيحها أو حذفها في أي وقت بمراسلتنا على العنوان المذكور في صفحة التواصل."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Privacy policy",
+     "ar": "سياسة الخصوصية"
+    },
+    "description": {
+     "en": "How we collect, use and protect your personal data.",
+     "ar": "كيف نجمع بياناتك الشخصية ونستخدمها ونحميها."
+    }
+   },
+   "url": "/privacy"
+  },
+  {
+   "key": "legal_terms",
+   "kind": "legal",
+   "name": {
+    "en": "Terms and conditions",
+    "ar": "الشروط والأحكام"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Terms and conditions"
+      },
+      "ar": {
+       "title": "الشروط والأحكام"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Using this website",
+       "text": "The content of this website is provided for information. Prices, availability and timelines are confirmed in writing before any agreement starts."
+      },
+      "ar": {
+       "title": "استخدام الموقع",
+       "text": "المحتوى المنشور في هذا الموقع للاطلاع. وتُؤكَّد الأسعار والتوفر والمواعيد كتابةً قبل بدء أي اتفاق."
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Responsibility",
+       "text": "We do our best to keep the website accurate. We are not liable for decisions taken only on the basis of the sample information shown here."
+      },
+      "ar": {
+       "title": "المسؤولية",
+       "text": "نحرص على دقة المعلومات في الموقع، ولا نتحمل مسؤولية قرارات بُنيت على المعلومات التوضيحية المعروضة هنا فقط."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Terms and conditions",
+     "ar": "الشروط والأحكام"
+    },
+    "description": {
+     "en": "The terms that apply when you use our website and services.",
+     "ar": "الشروط المطبقة عند استخدام موقعنا وخدماتنا."
+    }
+   },
+   "url": "/terms"
+  }
+ ]
+}

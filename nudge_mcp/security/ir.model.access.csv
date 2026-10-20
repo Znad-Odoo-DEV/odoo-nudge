@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_nudge_mcp_help,nudge.mcp.help,model_nudge_mcp_help,base.group_user,1,1,1,1
+access_nudge_mcp_key,nudge.mcp.key,model_nudge_mcp_key,base.group_user,1,1,1,1

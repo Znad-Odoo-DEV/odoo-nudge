@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="group_nudge_mcp" model="res.groups">
+        <field name="name">External Assistant</field>
+        <field name="category_id" ref="nudge.module_category_nudge"/>
+        <field name="comment">Can make a key for an assistant outside Odoo (Claude Desktop, ChatGPT) that uses Nudge's tools with their rights.</field>
+        <field name="implied_ids" eval="[Command.link(ref('nudge.group_nudge_user'))]"/>
+    </record>
+</odoo>

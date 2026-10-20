@@ -38,6 +38,15 @@ def column_letter(index):
     return letters
 
 
+FORMULA_STARTS = ("=", "+", "-", "@")
+
+
+def _safe_text(text):
+    """:return: ``text`` that cannot be taken for a formula: a text that starts with ``=``,
+    ``+``, ``-`` or ``@`` (a name typed by a stranger, an AI answer) gets a space in front of it"""
+    return " " + text if text.lstrip().startswith(FORMULA_STARTS) else text
+
+
 def _cell_content(value, kind):
     if value is None or value == "":
         return None
@@ -50,9 +59,9 @@ def _cell_content(value, kind):
         try:
             float(text.rstrip("%"))
         except ValueError:
-            return str(value)
+            return _safe_text(str(value))
         return text
-    return str(value)
+    return _safe_text(str(value))
 
 
 def is_whole(content):
@@ -73,7 +82,7 @@ def build_sheet(spec, number, format_ids):
     rows = rows[:MAX_ROWS]
     cells, styles, formats, cols = {}, {}, {}, {}
     for index, column in enumerate(columns):
-        cells[f"{column_letter(index)}1"] = {"content": str(column["label"])}
+        cells[f"{column_letter(index)}1"] = {"content": _safe_text(str(column["label"]))}
         styles[f"{column_letter(index)}1"] = HEADER_STYLE
         cols[str(index)] = {"size": COLUMN_WIDTH}
     contents = [

@@ -1,0 +1,926 @@
+{
+ "schema": 1,
+ "key": "services_company",
+ "sector": "services_company",
+ "shop": false,
+ "name": {
+  "en": "Services company",
+  "ar": "شركة خدمات"
+ },
+ "brand": {
+  "en": "Tamkeen Business Services",
+  "ar": "تمكين لخدمات الأعمال"
+ },
+ "suggest": [
+  "services company",
+  "services company",
+  "شركة خدمات"
+ ],
+ "palette": {
+  "primary": "#2b2d42",
+  "secondary": "#2a9d8f",
+  "accent": "#e9c46a",
+  "light": "#f8f9fa",
+  "dark": "#1a1b2e"
+ },
+ "fonts": {
+  "heading": "Montserrat",
+  "body": "Open Sans"
+ },
+ "fonts_ar": {
+  "heading": "Tajawal",
+  "body": "Tajawal"
+ },
+ "hero_image": "static/img/templates/services_company.webp",
+ "thumbnail": "static/img/templates/services_company_thumb.webp",
+ "menu": [
+  "home",
+  "about",
+  "services",
+  "projects",
+  "team",
+  "contact",
+  "faq"
+ ],
+ "pages": [
+  {
+   "key": "home",
+   "kind": "home",
+   "name": {
+    "en": "Home",
+    "ar": "الرئيسية"
+   },
+   "blocks": [
+    {
+     "snippet": "s_cover",
+     "copy": {
+      "en": {
+       "title": "The back office your business deserves",
+       "text": "Accounting, licensing and HR support so you can focus on your customers.",
+       "button": "Get a proposal",
+       "button_url": "/contactus"
+      },
+      "ar": {
+       "title": "الإدارة الخلفية التي يستحقها عملك",
+       "text": "محاسبة وتراخيص وموارد بشرية لتتفرغ لعملائك.",
+       "button": "احصل على عرض",
+       "button_url": "/contactus"
+      }
+     },
+     "image": "office",
+     "image_prompt": "wide photo of a bright open-plan office with desks and laptops, no text"
+    },
+    {
+     "snippet": "s_three_columns",
+     "copy": {
+      "en": {
+       "title": "Why Tamkeen Business Services",
+       "items": [
+        {
+         "title": "One monthly fee",
+         "text": "Predictable cost with no surprises."
+        },
+        {
+         "title": "Dedicated contact",
+         "text": "One person who knows your company."
+        },
+        {
+         "title": "Deadlines met",
+         "text": "Renewals and filings are never late."
+        }
+       ]
+      },
+      "ar": {
+       "title": "لماذا تمكين لخدمات الأعمال",
+       "items": [
+        {
+         "title": "رسم شهري واحد",
+         "text": "تكلفة معروفة دون مفاجآت."
+        },
+        {
+         "title": "مسؤول مخصص",
+         "text": "شخص واحد يعرف شركتك."
+        },
+        {
+         "title": "التزام بالمواعيد",
+         "text": "التجديدات والإقرارات لا تتأخر أبداً."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_features",
+     "copy": {
+      "en": {
+       "title": "What we do",
+       "items": [
+        {
+         "title": "Bookkeeping and VAT",
+         "text": "Monthly books, VAT returns and management reports."
+        },
+        {
+         "title": "Company licensing",
+         "text": "Formation, renewals and amendments."
+        },
+        {
+         "title": "Payroll and HR",
+         "text": "Contracts, visas and wage protection files."
+        },
+        {
+         "title": "Business consulting",
+         "text": "Budgeting, pricing and growth planning."
+        }
+       ]
+      },
+      "ar": {
+       "title": "ما نقدّمه",
+       "items": [
+        {
+         "title": "مسك الدفاتر وضريبة القيمة المضافة",
+         "text": "دفاتر شهرية وإقرارات ضريبية وتقارير إدارية."
+        },
+        {
+         "title": "تراخيص الشركات",
+         "text": "التأسيس والتجديد والتعديلات."
+        },
+        {
+         "title": "الرواتب والموارد البشرية",
+         "text": "العقود والتأشيرات وملفات حماية الأجور."
+        },
+        {
+         "title": "استشارات الأعمال",
+         "text": "إعداد الموازنات والتسعير وخطط النمو."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_numbers",
+     "copy": {
+      "en": {
+       "title": "In numbers",
+       "items": [
+        {
+         "number": "320",
+         "label": "Active clients"
+        },
+        {
+         "number": "14",
+         "label": "Specialists"
+        },
+        {
+         "number": "99%",
+         "label": "Filings on time"
+        },
+        {
+         "number": "9",
+         "label": "Years in business"
+        }
+       ]
+      },
+      "ar": {
+       "title": "بالأرقام",
+       "items": [
+        {
+         "number": "320",
+         "label": "عميلاً نشطاً"
+        },
+        {
+         "number": "14",
+         "label": "مختصاً"
+        },
+        {
+         "number": "99%",
+         "label": "إقرارات في موعدها"
+        },
+        {
+         "number": "9",
+         "label": "سنوات في السوق"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Your business, our paperwork",
+       "text": "We are a team of accountants, PROs and HR officers serving small and medium companies. One monthly fee, one contact person, no hidden extras.",
+       "button": "About us",
+       "button_url": "/about"
+      },
+      "ar": {
+       "title": "عملك وأوراقنا",
+       "text": "فريق من المحاسبين ومعقّبي المعاملات وموظفي الموارد البشرية يخدم الشركات الصغيرة والمتوسطة. رسم شهري واحد وجهة اتصال واحدة بلا تكاليف مخفية.",
+       "button": "من نحن",
+       "button_url": "/about"
+      }
+     },
+     "image": "office"
+    },
+    {
+     "snippet": "s_call_to_action",
+     "copy": {
+      "en": {
+       "title": "Ready to hand over the paperwork?",
+       "text": "Tell us about your company and get a proposal within one day.",
+       "button": "Request a proposal",
+       "button_url": "/contactus"
+      },
+      "ar": {
+       "title": "جاهز لتسليمنا الأوراق؟",
+       "text": "حدثنا عن شركتك ويصلك عرض خلال يوم.",
+       "button": "اطلب عرضاً",
+       "button_url": "/contactus"
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Business services | Accounting, licensing and HR",
+     "ar": "خدمات أعمال | محاسبة وتراخيص وموارد بشرية"
+    },
+    "description": {
+     "en": "Outsourced accounting, VAT, company licensing and HR for small and medium businesses.",
+     "ar": "محاسبة وضريبة وتراخيص وموارد بشرية للشركات الصغيرة والمتوسطة."
+    }
+   },
+   "url": "/"
+  },
+  {
+   "key": "about",
+   "kind": "about",
+   "name": {
+    "en": "About us",
+    "ar": "من نحن"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "About Tamkeen Business Services"
+      },
+      "ar": {
+       "title": "عن تمكين لخدمات الأعمال"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Your business, our paperwork",
+       "text": "We are a team of accountants, PROs and HR officers serving small and medium companies. One monthly fee, one contact person, no hidden extras."
+      },
+      "ar": {
+       "title": "عملك وأوراقنا",
+       "text": "فريق من المحاسبين ومعقّبي المعاملات وموظفي الموارد البشرية يخدم الشركات الصغيرة والمتوسطة. رسم شهري واحد وجهة اتصال واحدة بلا تكاليف مخفية."
+      }
+     },
+     "image": "office"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "One monthly fee",
+       "text": "Predictable cost with no surprises."
+      },
+      "ar": {
+       "title": "رسم شهري واحد",
+       "text": "تكلفة معروفة دون مفاجآت."
+      }
+     },
+     "image": "office"
+    },
+    {
+     "snippet": "s_numbers",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "number": "320",
+         "label": "Active clients"
+        },
+        {
+         "number": "14",
+         "label": "Specialists"
+        },
+        {
+         "number": "99%",
+         "label": "Filings on time"
+        },
+        {
+         "number": "9",
+         "label": "Years in business"
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "number": "320",
+         "label": "عميلاً نشطاً"
+        },
+        {
+         "number": "14",
+         "label": "مختصاً"
+        },
+        {
+         "number": "99%",
+         "label": "إقرارات في موعدها"
+        },
+        {
+         "number": "9",
+         "label": "سنوات في السوق"
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "About Tamkeen Business Services",
+     "ar": "عن تمكين لخدمات الأعمال"
+    },
+    "description": {
+     "en": "We are a team of accountants, PROs and HR officers serving small and medium companies. One monthly fee, one contact person, no hidden extras.",
+     "ar": "فريق من المحاسبين ومعقّبي المعاملات وموظفي الموارد البشرية يخدم الشركات الصغيرة والمتوسطة. رسم شهري واحد وجهة اتصال واحدة بلا تكاليف مخفية."
+    }
+   }
+  },
+  {
+   "key": "services",
+   "kind": "services",
+   "name": {
+    "en": "Services",
+    "ar": "الخدمات"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Our services",
+       "text": "Accounting, licensing and HR support so you can focus on your customers."
+      },
+      "ar": {
+       "title": "خدماتنا",
+       "text": "محاسبة وتراخيص وموارد بشرية لتتفرغ لعملائك."
+      }
+     }
+    },
+    {
+     "snippet": "s_features",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "title": "Bookkeeping and VAT",
+         "text": "Monthly books, VAT returns and management reports."
+        },
+        {
+         "title": "Company licensing",
+         "text": "Formation, renewals and amendments."
+        },
+        {
+         "title": "Payroll and HR",
+         "text": "Contracts, visas and wage protection files."
+        },
+        {
+         "title": "Business consulting",
+         "text": "Budgeting, pricing and growth planning."
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "title": "مسك الدفاتر وضريبة القيمة المضافة",
+         "text": "دفاتر شهرية وإقرارات ضريبية وتقارير إدارية."
+        },
+        {
+         "title": "تراخيص الشركات",
+         "text": "التأسيس والتجديد والتعديلات."
+        },
+        {
+         "title": "الرواتب والموارد البشرية",
+         "text": "العقود والتأشيرات وملفات حماية الأجور."
+        },
+        {
+         "title": "استشارات الأعمال",
+         "text": "إعداد الموازنات والتسعير وخطط النمو."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_three_columns",
+     "copy": {
+      "en": {
+       "title": "How we work",
+       "items": [
+        {
+         "title": "One monthly fee",
+         "text": "Predictable cost with no surprises."
+        },
+        {
+         "title": "Dedicated contact",
+         "text": "One person who knows your company."
+        },
+        {
+         "title": "Deadlines met",
+         "text": "Renewals and filings are never late."
+        }
+       ]
+      },
+      "ar": {
+       "title": "كيف نعمل",
+       "items": [
+        {
+         "title": "رسم شهري واحد",
+         "text": "تكلفة معروفة دون مفاجآت."
+        },
+        {
+         "title": "مسؤول مخصص",
+         "text": "شخص واحد يعرف شركتك."
+        },
+        {
+         "title": "التزام بالمواعيد",
+         "text": "التجديدات والإقرارات لا تتأخر أبداً."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_call_to_action",
+     "copy": {
+      "en": {
+       "title": "Ready to hand over the paperwork?",
+       "text": "Tell us about your company and get a proposal within one day.",
+       "button": "Request a proposal",
+       "button_url": "/contactus"
+      },
+      "ar": {
+       "title": "جاهز لتسليمنا الأوراق؟",
+       "text": "حدثنا عن شركتك ويصلك عرض خلال يوم.",
+       "button": "اطلب عرضاً",
+       "button_url": "/contactus"
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Services company services",
+     "ar": "خدمات شركة خدمات"
+    },
+    "description": {
+     "en": "Outsourced accounting, VAT, company licensing and HR for small and medium businesses.",
+     "ar": "محاسبة وضريبة وتراخيص وموارد بشرية للشركات الصغيرة والمتوسطة."
+    }
+   }
+  },
+  {
+   "key": "projects",
+   "kind": "projects",
+   "name": {
+    "en": "Projects",
+    "ar": "المشاريع"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Our work"
+      },
+      "ar": {
+       "title": "أعمالنا"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Retail chain bookkeeping",
+       "text": "Eight branches consolidated into one monthly report."
+      },
+      "ar": {
+       "title": "محاسبة سلسلة متاجر",
+       "text": "توحيد ثمانية فروع في تقرير شهري واحد."
+      }
+     },
+     "image": "office"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Start-up licensing",
+       "text": "Licence, bank account and visas in ten days."
+      },
+      "ar": {
+       "title": "ترخيص شركة ناشئة",
+       "text": "رخصة وحساب بنكي وتأشيرات في عشرة أيام."
+      }
+     },
+     "image": "office"
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Payroll migration",
+       "text": "200 employees moved to a clean payroll process."
+      },
+      "ar": {
+       "title": "نقل نظام الرواتب",
+       "text": "نقل مئتي موظف إلى عملية رواتب منظمة."
+      }
+     },
+     "image": "office"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "VAT clean-up",
+       "text": "Two years of returns reviewed and corrected."
+      },
+      "ar": {
+       "title": "تسوية ضريبية",
+       "text": "مراجعة وتصحيح إقرارات عامين."
+      }
+     },
+     "image": "office"
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Services company projects",
+     "ar": "أعمال شركة خدمات"
+    },
+    "description": {
+     "en": "Outsourced accounting, VAT, company licensing and HR for small and medium businesses.",
+     "ar": "محاسبة وضريبة وتراخيص وموارد بشرية للشركات الصغيرة والمتوسطة."
+    }
+   }
+  },
+  {
+   "key": "team",
+   "kind": "team",
+   "name": {
+    "en": "Our team",
+    "ar": "فريقنا"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Meet the team"
+      },
+      "ar": {
+       "title": "تعرّف على فريقنا"
+      }
+     }
+    },
+    {
+     "snippet": "s_company_team",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "name": "Raghad",
+         "role": "General manager"
+        },
+        {
+         "name": "Ebrahim",
+         "role": "Chief accountant"
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "name": "رغد",
+         "role": "المدير العام"
+        },
+        {
+         "name": "إبراهيم",
+         "role": "كبيرة المحاسبين"
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Our team | Tamkeen Business Services",
+     "ar": "فريقنا | تمكين لخدمات الأعمال"
+    },
+    "description": {
+     "en": "The people behind Tamkeen Business Services.",
+     "ar": "الأشخاص الذين يقفون خلف تمكين لخدمات الأعمال."
+    }
+   }
+  },
+  {
+   "key": "contact",
+   "kind": "contact",
+   "name": {
+    "en": "Contact us",
+    "ar": "اتصل بنا"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Contact us",
+       "text": "We reply within one working day."
+      },
+      "ar": {
+       "title": "اتصل بنا",
+       "text": "نردّ خلال يوم عمل واحد."
+      }
+     }
+    },
+    {
+     "snippet": "s_contact_info",
+     "copy": {
+      "en": {
+       "title": "Find us",
+       "items": [
+        {
+         "title": "Address",
+         "text": "Deira, Dubai"
+        },
+        {
+         "title": "Opening hours",
+         "text": "Sun-Thu 8:30-17:30"
+        },
+        {
+         "title": "Phone",
+         "text": "+971 4 000 0000"
+        },
+        {
+         "title": "Email",
+         "text": "hello@example.com"
+        }
+       ]
+      },
+      "ar": {
+       "title": "تجدنا هنا",
+       "items": [
+        {
+         "title": "العنوان",
+         "text": "ديرة، دبي"
+        },
+        {
+         "title": "ساعات العمل",
+         "text": "الأحد - الخميس 8:30 - 17:30"
+        },
+        {
+         "title": "الهاتف",
+         "text": "+971 4 000 0000"
+        },
+        {
+         "title": "البريد الإلكتروني",
+         "text": "hello@example.com"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Ready to hand over the paperwork?",
+       "text": "Tell us about your company and get a proposal within one day."
+      },
+      "ar": {
+       "title": "جاهز لتسليمنا الأوراق؟",
+       "text": "حدثنا عن شركتك ويصلك عرض خلال يوم."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Contact Tamkeen Business Services",
+     "ar": "تواصل مع تمكين لخدمات الأعمال"
+    },
+    "description": {
+     "en": "Call, write or visit us: Deira, Dubai.",
+     "ar": "اتصل بنا أو راسلنا أو زرنا: ديرة، دبي."
+    }
+   },
+   "url": "/contactus"
+  },
+  {
+   "key": "faq",
+   "kind": "faq",
+   "name": {
+    "en": "FAQ",
+    "ar": "الأسئلة الشائعة"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Frequently asked questions"
+      },
+      "ar": {
+       "title": "الأسئلة الشائعة"
+      }
+     }
+    },
+    {
+     "snippet": "s_faq_collapse",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "title": "What does the monthly fee include?",
+         "text": "A fixed scope agreed in writing, with extra work quoted separately."
+        },
+        {
+         "title": "Can you take over my books mid-year?",
+         "text": "Yes, we review the opening balances and carry on from there."
+        },
+        {
+         "title": "Do you keep my documents safe?",
+         "text": "Documents are scanned and stored encrypted."
+        },
+        {
+         "title": "How fast can you start?",
+         "text": "Usually within three working days of signing."
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "title": "ماذا يشمل الرسم الشهري؟",
+         "text": "نطاق ثابت متفق عليه كتابةً وأي عمل إضافي يُسعّر على حدة."
+        },
+        {
+         "title": "هل تستلمون دفاتري في منتصف السنة؟",
+         "text": "نعم، نراجع الأرصدة الافتتاحية ونكمل من حيث توقفتم."
+        },
+        {
+         "title": "هل تحفظون مستنداتي بأمان؟",
+         "text": "تُمسح المستندات ضوئياً وتُخزّن مشفّرة."
+        },
+        {
+         "title": "متى تبدؤون العمل؟",
+         "text": "عادةً خلال ثلاثة أيام عمل من التوقيع."
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "FAQ | Tamkeen Business Services",
+     "ar": "الأسئلة الشائعة | تمكين لخدمات الأعمال"
+    },
+    "description": {
+     "en": "Answers to the questions we hear most.",
+     "ar": "إجابات عن الأسئلة التي نسمعها أكثر من غيرها."
+    }
+   }
+  },
+  {
+   "key": "legal_privacy",
+   "kind": "legal",
+   "name": {
+    "en": "Privacy policy",
+    "ar": "سياسة الخصوصية"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Privacy policy"
+      },
+      "ar": {
+       "title": "سياسة الخصوصية"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "What we collect",
+       "text": "Tamkeen Business Services collects only the details you give us through forms, orders or calls: your name, phone, email and the content of your request. We use them to answer you and to deliver what you asked for."
+      },
+      "ar": {
+       "title": "ما الذي نجمعه",
+       "text": "تجمع تمكين لخدمات الأعمال فقط البيانات التي تقدّمها عبر النماذج أو الطلبات أو المكالمات: اسمك وهاتفك وبريدك ومضمون طلبك. نستخدمها للرد عليك وتنفيذ ما طلبته."
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Your rights",
+       "text": "We never sell your data. You may ask us to show, correct or delete it at any time by writing to the address on the contact page."
+      },
+      "ar": {
+       "title": "حقوقك",
+       "text": "لا نبيع بياناتك أبداً. ويمكنك أن تطلب منا الاطلاع عليها أو تصحيحها أو حذفها في أي وقت بمراسلتنا على العنوان المذكور في صفحة التواصل."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Privacy policy",
+     "ar": "سياسة الخصوصية"
+    },
+    "description": {
+     "en": "How we collect, use and protect your personal data.",
+     "ar": "كيف نجمع بياناتك الشخصية ونستخدمها ونحميها."
+    }
+   },
+   "url": "/privacy"
+  },
+  {
+   "key": "legal_terms",
+   "kind": "legal",
+   "name": {
+    "en": "Terms and conditions",
+    "ar": "الشروط والأحكام"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Terms and conditions"
+      },
+      "ar": {
+       "title": "الشروط والأحكام"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Using this website",
+       "text": "The content of this website is provided for information. Prices, availability and timelines are confirmed in writing before any agreement starts."
+      },
+      "ar": {
+       "title": "استخدام الموقع",
+       "text": "المحتوى المنشور في هذا الموقع للاطلاع. وتُؤكَّد الأسعار والتوفر والمواعيد كتابةً قبل بدء أي اتفاق."
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Responsibility",
+       "text": "We do our best to keep the website accurate. We are not liable for decisions taken only on the basis of the sample information shown here."
+      },
+      "ar": {
+       "title": "المسؤولية",
+       "text": "نحرص على دقة المعلومات في الموقع، ولا نتحمل مسؤولية قرارات بُنيت على المعلومات التوضيحية المعروضة هنا فقط."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Terms and conditions",
+     "ar": "الشروط والأحكام"
+    },
+    "description": {
+     "en": "The terms that apply when you use our website and services.",
+     "ar": "الشروط المطبقة عند استخدام موقعنا وخدماتنا."
+    }
+   },
+   "url": "/terms"
+  }
+ ]
+}

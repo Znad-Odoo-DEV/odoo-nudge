@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "key": "generic",
+  "name": {"en": "General business", "ar": "نشاط تجاري عام"},
+  "suggest": ["business", "company", "شركة", "مؤسسة"],
+  "palette": {"primary": "#1f3a5f", "secondary": "#c9a227", "accent": "#e07a1f", "light": "#f6f4ef", "dark": "#14213d"},
+  "fonts": {"heading": "Montserrat", "body": "Montserrat"},
+  "menu": ["home", "about", "services", "projects", "team", "faq", "contact"],
+  "pages": [
+    {
+      "key": "home", "kind": "home", "url": "/home",
+      "name": {"en": "Home", "ar": "الرئيسية"},
+      "blocks": [
+        {"snippet": "s_cover", "image": "abstract", "image_prompt": "wide abstract business background in calm blue and gold, no text",
+         "copy": {
+           "en": {"title": "A company you can rely on", "text": "We do careful work, on time, and we stand behind it.", "button": "Contact us"},
+           "ar": {"title": "شركة تعتمد عليها", "text": "نعمل بإتقان وفي الموعد ونقف خلف عملنا.", "button": "تواصل معنا"}}},
+        {"snippet": "s_features", "copy": {
+           "en": {"title": "Why work with us", "text": "Three things our customers tell us.", "items": [
+             {"title": "Experience", "text": "Years of work in our field, done properly."},
+             {"title": "Clear prices", "text": "You know the cost before we start."},
+             {"title": "Support", "text": "We answer, and we follow up after delivery."}]},
+           "ar": {"title": "لماذا تعمل معنا", "text": "ثلاثة أمور يقولها عملاؤنا.", "items": [
+             {"title": "الخبرة", "text": "سنوات من العمل في مجالنا بإتقان."},
+             {"title": "أسعار واضحة", "text": "تعرف التكلفة قبل أن نبدأ."},
+             {"title": "دعم", "text": "نرد عليك ونتابع معك بعد التسليم."}]}}},
+        {"snippet": "s_numbers", "copy": {
+           "en": {"title": "In numbers", "text": "What we have done so far.", "items": [
+             {"number": "10+", "label": "Years"}, {"number": "200+", "label": "Customers"}, {"number": "98%", "label": "Satisfied"}]},
+           "ar": {"title": "بالأرقام", "text": "ما أنجزناه حتى اليوم.", "items": [
+             {"number": "+10", "label": "سنوات"}, {"number": "+200", "label": "عميل"}, {"number": "%98", "label": "راضون"}]}}},
+        {"snippet": "s_call_to_action", "copy": {
+           "en": {"title": "Ready to start?", "text": "Tell us what you need and we will answer within a day.", "button": "Contact us"},
+           "ar": {"title": "هل أنت مستعد للبدء؟", "text": "أخبرنا بما تحتاجه ونرد عليك خلال يوم.", "button": "تواصل معنا"}}}
+      ]
+    },
+    {
+      "key": "about", "kind": "about", "url": "/about",
+      "name": {"en": "About us", "ar": "من نحن"},
+      "blocks": [
+        {"snippet": "s_text_image", "image": "office", "copy": {
+           "en": {"title": "Who we are", "text": "We are a team that cares about the work and the people we do it for.\nOur way is simple: listen first, then do it well.", "button": "Contact us"},
+           "ar": {"title": "من نحن", "text": "نحن فريق يهتم بالعمل وبالناس الذين نعمل لأجلهم.\nطريقتنا بسيطة: نصغي أولا ثم نتقن.", "button": "تواصل معنا"}}},
+        {"snippet": "s_features", "copy": {
+           "en": {"title": "What we believe", "text": "", "items": [
+             {"title": "Honesty", "text": "We say what we can and cannot do."},
+             {"title": "Quality", "text": "We check our work before you do."},
+             {"title": "Respect", "text": "For your time, your budget and your people."}]},
+           "ar": {"title": "ما نؤمن به", "text": "", "items": [
+             {"title": "الصدق", "text": "نقول ما نستطيع وما لا نستطيع."},
+             {"title": "الجودة", "text": "نراجع عملنا قبلك."},
+             {"title": "الاحترام", "text": "لوقتك وميزانيتك وفريقك."}]}}}
+      ]
+    },
+    {
+      "key": "services", "kind": "services", "url": "/services",
+      "name": {"en": "Services", "ar": "الخدمات"},
+      "blocks": [
+        {"snippet": "s_title", "copy": {"en": {"title": "Our services"}, "ar": {"title": "خدماتنا"}}},
+        {"snippet": "s_features", "copy": {
+           "en": {"title": "What we offer", "text": "Each one is explained and priced before we start.", "items": [
+             {"title": "Consulting", "text": "We study your need and propose the right solution."},
+             {"title": "Delivery", "text": "We carry out the work to the agreed plan."},
+             {"title": "After-sales support", "text": "We stay available when the work is finished."}]},
+           "ar": {"title": "ما نقدمه", "text": "كل خدمة تشرح وتسعّر قبل أن نبدأ.", "items": [
+             {"title": "الاستشارات", "text": "ندرس حاجتك ونقترح الحل المناسب."},
+             {"title": "التنفيذ", "text": "ننفذ العمل وفق الخطة المتفق عليها."},
+             {"title": "الدعم بعد التسليم", "text": "نبقى متاحين بعد انتهاء العمل."}]}}},
+        {"snippet": "s_call_to_action", "copy": {
+           "en": {"title": "Need something else?", "text": "Ask us. We often do what is not on this list.", "button": "Ask us"},
+           "ar": {"title": "تحتاج شيئا آخر؟", "text": "اسألنا. كثيرا ما ننفذ ما ليس في هذه القائمة.", "button": "اسألنا"}}}
+      ]
+    },
+    {
+      "key": "projects", "kind": "projects", "url": "/projects",
+      "name": {"en": "Projects", "ar": "المشاريع"},
+      "blocks": [
+        {"snippet": "s_title", "copy": {"en": {"title": "Our projects"}, "ar": {"title": "مشاريعنا"}}},
+        {"snippet": "s_text_image", "image": "building", "copy": {
+           "en": {"title": "Recent work", "text": "A few of the jobs we are proud of.", "button": "Talk about yours"},
+           "ar": {"title": "أعمال حديثة", "text": "بعض الأعمال التي نفخر بها.", "button": "حدثنا عن مشروعك"}}},
+        {"snippet": "s_references", "copy": {
+           "en": {"title": "They trusted us", "text": "Companies we have worked with."},
+           "ar": {"title": "وثقوا بنا", "text": "شركات عملنا معها."}}}
+      ]
+    },
+    {
+      "key": "team", "kind": "team", "url": "/team",
+      "name": {"en": "Our team", "ar": "فريقنا"},
+      "blocks": [
+        {"snippet": "s_company_team", "copy": {
+           "en": {"title": "Meet the team", "text": "The people you will talk to.", "items": [
+             {"title": "Raghad", "role": "General Manager", "text": "Leads the company and every important decision."},
+             {"title": "Ebrahim", "role": "Operations", "text": "Makes sure the work is done as promised."}]},
+           "ar": {"title": "تعرف على الفريق", "text": "الأشخاص الذين ستتحدث معهم.", "items": [
+             {"title": "رغد", "role": "المدير العام", "text": "تقود الشركة وكل قرار مهم."},
+             {"title": "إبراهيم", "role": "العمليات", "text": "يضمن إنجاز العمل كما وعدنا."}]}}}
+      ]
+    },
+    {
+      "key": "faq", "kind": "faq", "url": "/faq",
+      "name": {"en": "FAQ", "ar": "الأسئلة الشائعة"},
+      "blocks": [
+        {"snippet": "s_faq_collapse", "copy": {
+           "en": {"title": "Frequently asked questions", "text": "If yours is not here, write to us.", "items": [
+             {"question": "How do I get a quote?", "answer": "Send us a message with what you need. We reply within one working day."},
+             {"question": "How long does it take?", "answer": "It depends on the work. We give a date with the quote."},
+             {"question": "Do you offer support afterwards?", "answer": "Yes. We stay in touch after delivery."}]},
+           "ar": {"title": "الأسئلة الشائعة", "text": "إن لم تجد سؤالك هنا فراسلنا.", "items": [
+             {"question": "كيف أحصل على عرض سعر؟", "answer": "أرسل لنا ما تحتاجه ونرد خلال يوم عمل."},
+             {"question": "كم يستغرق العمل؟", "answer": "يعتمد على العمل. نحدد تاريخا مع عرض السعر."},
+             {"question": "هل تقدمون دعما بعد ذلك؟", "answer": "نعم. نبقى على تواصل بعد التسليم."}]}}}
+      ]
+    },
+    {
+      "key": "contact", "kind": "contact", "url": "/contact",
+      "name": {"en": "Contact", "ar": "اتصل بنا"},
+      "blocks": [
+        {"snippet": "s_contact_info", "copy": {
+           "en": {"title": "Contact us", "text": "We would love to hear from you."},
+           "ar": {"title": "اتصل بنا", "text": "يسعدنا أن نسمع منك."}}},
+        {"snippet": "s_map", "copy": {"en": {}, "ar": {}}}
+      ]
+    },
+    {
+      "key": "blog", "kind": "blog", "url": "/news",
+      "name": {"en": "News", "ar": "الأخبار"},
+      "blocks": [
+        {"snippet": "s_title", "copy": {"en": {"title": "News and articles"}, "ar": {"title": "الأخبار والمقالات"}}},
+        {"snippet": "s_text_block", "copy": {
+           "en": {"title": "Coming soon", "text": "We will publish our news here."},
+           "ar": {"title": "قريبا", "text": "سننشر أخبارنا هنا."}}}
+      ]
+    }
+  ]
+}

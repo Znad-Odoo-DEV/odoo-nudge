@@ -1,0 +1,145 @@
+{
+  "id": "ae",
+  "name": {"en": "United Arab Emirates", "ar": "الإمارات العربية المتحدة"},
+  "countries": ["AE"],
+  "reference": {
+    "en": "Federal Decree-Law No. (8) of 2017 on Value Added Tax and its Executive Regulation (Cabinet Decision No. (52) of 2017), Federal Tax Authority (FTA). Check the current text with the FTA before you rely on it. This is a checklist, not legal advice; confirm with the authority.",
+    "ar": "المرسوم بقانون اتحادي رقم (8) لسنة 2017 بشأن ضريبة القيمة المضافة ولائحته التنفيذية (قرار مجلس الوزراء رقم (52) لسنة 2017)، الهيئة الاتحادية للضرائب. راجع النص الحالي لدى الهيئة قبل الاعتماد عليه. هذه قائمة فحص وليست استشارة قانونية؛ تأكد لدى الجهة المختصة."
+  },
+  "checks": [
+    {
+      "key": "vat_tax_5",
+      "check": "tax_rate",
+      "severity": "critical",
+      "params": {"rate": 5.0, "use": "sale", "modules": ["account"]},
+      "title": {"en": "A 5% sales VAT is set up", "ar": "ضريبة مبيعات بنسبة 5% معرّفة"},
+      "explanation": {
+        "en": "The standard rate of VAT in the UAE is 5%. Without a 5% sales tax, invoices cannot show the VAT as the law asks. The UAE chart of accounts (module l10n_ae) brings it.",
+        "ar": "السعر الأساسي لضريبة القيمة المضافة في الإمارات 5%. من دون ضريبة مبيعات بهذه النسبة لا تُظهر الفواتير الضريبة كما يطلب القانون. يأتي بها دليل حسابات الإمارات (الوحدة l10n_ae)."
+      },
+      "reference": {
+        "en": "Federal Decree-Law No. (8) of 2017, standard rate of 5% on taxable supplies.",
+        "ar": "المرسوم بقانون اتحادي رقم (8) لسنة 2017، السعر الأساسي 5% على التوريدات الخاضعة للضريبة."
+      }
+    },
+    {
+      "key": "vat_on_products",
+      "check": "tax_on_products",
+      "severity": "warning",
+      "params": {"rate": 5.0},
+      "title": {"en": "Products that are sold carry the 5% VAT", "ar": "المنتجات المباعة عليها ضريبة 5%"},
+      "explanation": {
+        "en": "These products can be sold but do not carry the 5% sales tax: their invoices would show no VAT. Zero-rated or exempt supplies need a tax of their own, not an empty field.",
+        "ar": "هذه المنتجات قابلة للبيع لكن ليس عليها ضريبة المبيعات 5%: فواتيرها لن تُظهر ضريبة. التوريدات ذات النسبة الصفرية أو المعفاة تحتاج ضريبة خاصة بها وليس حقلاً فارغاً."
+      }
+    },
+    {
+      "key": "company_trn",
+      "check": "company_field",
+      "severity": "critical",
+      "params": {"fields": ["vat"], "pattern": "\\d{15}"},
+      "title": {"en": "The company has its Tax Registration Number (TRN) of 15 digits", "ar": "للشركة رقم التسجيل الضريبي (TRN) من 15 رقماً"},
+      "explanation": {
+        "en": "The TRN is the 15-digit number the FTA gives to each registrant. It must appear on every tax invoice and credit note. Enter it in Tax ID on the company, digits only.",
+        "ar": "رقم التسجيل الضريبي من 15 رقماً تمنحه الهيئة الاتحادية للضرائب لكل مسجَّل، ويجب أن يظهر على كل فاتورة ضريبية وإشعار دائن. أدخله في الرقم الضريبي للشركة، أرقاماً فقط."
+      },
+      "reference": {
+        "en": "Executive Regulation (Cabinet Decision No. (52) of 2017), content of the tax invoice: the TRN of the supplier.",
+        "ar": "اللائحة التنفيذية (قرار مجلس الوزراء رقم (52) لسنة 2017)، بيانات الفاتورة الضريبية: رقم التسجيل الضريبي للمورّد."
+      }
+    },
+    {
+      "key": "partner_trn",
+      "check": "partner_field",
+      "severity": "warning",
+      "params": {"field": "vat", "pattern": "\\d{15}", "customers_only": true},
+      "title": {"en": "Customers in the UAE have a TRN of 15 digits", "ar": "عملاء الإمارات لديهم رقم تسجيل ضريبي من 15 رقماً"},
+      "explanation": {
+        "en": "A tax invoice to a registered customer shows the customer's TRN. These companies, customers in the UAE, have none or one that is not 15 digits. A customer that is not registered needs none: leave it out of the list by correcting the country or the type of the contact.",
+        "ar": "الفاتورة الضريبية لعميل مسجَّل تُظهر رقمه الضريبي. هذه الشركات، وهي عملاء في الإمارات، ليس لديها رقم أو رقمها ليس من 15 رقماً. العميل غير المسجَّل لا يحتاج رقماً: صحّح بلد جهة الاتصال أو نوعها."
+      },
+      "reference": {
+        "en": "Executive Regulation, content of the tax invoice: the TRN of the recipient when registered.",
+        "ar": "اللائحة التنفيذية، بيانات الفاتورة الضريبية: رقم التسجيل الضريبي للمتلقي إن كان مسجَّلاً."
+      }
+    },
+    {
+      "key": "invoice_layout",
+      "check": "invoice_template",
+      "severity": "warning",
+      "params": {"terms": ["o.invoice_date", "o.name", "partner_id.vat", "amount_tax"]},
+      "title": {"en": "The printed invoice shows what a tax invoice must show", "ar": "الفاتورة المطبوعة تُظهر ما يجب أن تُظهره الفاتورة الضريبية"},
+      "explanation": {
+        "en": "A tax invoice shows the word 'Tax Invoice', the TRN of the supplier and of the customer, the date, a sequential number, and the amount of VAT. The standard Odoo invoice has the date, the number, the customer's tax ID and the tax amounts; one of these is no longer in the printed template, probably removed by a customisation.",
+        "ar": "تُظهر الفاتورة الضريبية عبارة «فاتورة ضريبية» والرقم الضريبي للمورّد والعميل والتاريخ ورقماً تسلسلياً ومبلغ الضريبة. فاتورة أودو القياسية فيها التاريخ والرقم والرقم الضريبي للعميل ومبالغ الضريبة؛ أحد هذه لم يعد في القالب المطبوع، غالباً بسبب تخصيص."
+      },
+      "reference": {
+        "en": "Executive Regulation (Cabinet Decision No. (52) of 2017), tax invoices.",
+        "ar": "اللائحة التنفيذية (قرار مجلس الوزراء رقم (52) لسنة 2017)، الفواتير الضريبية."
+      }
+    },
+    {
+      "key": "currency_aed",
+      "check": "company_currency",
+      "severity": "warning",
+      "params": {"code": "AED"},
+      "title": {"en": "The company keeps its books in AED", "ar": "الشركة تمسك دفاترها بالدرهم الإماراتي"},
+      "explanation": {
+        "en": "The VAT amount of an invoice issued in another currency must also be shown in AED, and the returns are filed in AED. A company in another currency can still comply, but the conversion must be shown on each invoice.",
+        "ar": "يجب إظهار مبلغ الضريبة بالدرهم أيضاً في الفاتورة الصادرة بعملة أخرى، والإقرارات تُقدَّم بالدرهم. الشركة بعملة أخرى يمكنها الالتزام لكن يجب إظهار التحويل في كل فاتورة."
+      }
+    },
+    {
+      "key": "wps_bank",
+      "check": "employee_field",
+      "severity": "warning",
+      "params": {"fields": ["bank_account_ids", "bank_account_id"], "modules": ["hr"]},
+      "title": {"en": "Employees have a bank account (IBAN) for the Wages Protection System", "ar": "للموظفين حساب بنكي (IBAN) لنظام حماية الأجور"},
+      "explanation": {
+        "en": "Salaries are paid through an authorised bank or exchange house and reported in the WPS file. Each employee needs a bank account with an IBAN, and the bank a routing code. These employees have none.",
+        "ar": "تُدفع الرواتب عبر بنك أو شركة صرافة معتمدة وتُبلَّغ في ملف نظام حماية الأجور. يحتاج كل موظف إلى حساب بنكي برقم IBAN ويحتاج البنك إلى رمز توجيه. هؤلاء الموظفون ليس لديهم حساب."
+      },
+      "reference": {
+        "en": "Wages Protection System (WPS) of the Ministry of Human Resources and Emiratisation (MOHRE) with the Central Bank of the UAE.",
+        "ar": "نظام حماية الأجور (WPS) لوزارة الموارد البشرية والتوطين بالتعاون مع مصرف الإمارات العربية المتحدة المركزي."
+      }
+    },
+    {
+      "key": "wps_ids",
+      "check": "employee_field",
+      "severity": "warning",
+      "params": {"fields": ["identification_id"], "modules": ["hr"]},
+      "title": {"en": "Employees have their ID for the Wages Protection System", "ar": "للموظفين رقم هويتهم لنظام حماية الأجور"},
+      "explanation": {
+        "en": "The WPS file identifies each employee by a number (Identification No in Odoo). These employees have none, so their line in the file cannot be made.",
+        "ar": "يعرّف ملف نظام حماية الأجور كل موظف برقم (رقم التعريف في أودو). هؤلاء الموظفون ليس لديهم رقم، فلا يمكن إنشاء سطرهم في الملف."
+      }
+    },
+    {
+      "key": "wps_company",
+      "check": "company_fields_all",
+      "severity": "warning",
+      "params": {"fields": ["l10n_ae_employer_code", "l10n_ae_bank_account_id"], "modules": ["l10n_ae_hr_payroll"], "needs": ["hr_payroll"]},
+      "title": {"en": "The company has its employer code and salaries bank account for the WPS file", "ar": "للشركة رمز صاحب العمل وحساب الرواتب البنكي لملف حماية الأجور"},
+      "explanation": {
+        "en": "The WPS file starts with the employer unique ID (MOL / establishment number) and the bank account the salaries leave from. They are set in Payroll > Configuration > Settings, in the Emirati localisation.",
+        "ar": "يبدأ ملف حماية الأجور بالرقم الفريد لصاحب العمل (رقم المنشأة في وزارة الموارد البشرية) والحساب البنكي الذي تخرج منه الرواتب. يُضبطان في الرواتب > الإعدادات، ضمن التوطين الإماراتي."
+      }
+    },
+    {
+      "key": "corporate_tax",
+      "check": "company_custom_field",
+      "severity": "info",
+      "params": {"field": "l10n_ae_corporate_tax_number"},
+      "title": {"en": "The Corporate Tax registration number is recorded", "ar": "رقم التسجيل في ضريبة الشركات مسجَّل"},
+      "explanation": {
+        "en": "Businesses with taxable income register with the FTA for Corporate Tax and receive a registration number. Odoo has no field for it: a company field named l10n_ae_corporate_tax_number is looked for, and if it exists it must be filled.",
+        "ar": "تسجّل الأعمال الخاضعة لضريبة الشركات لدى الهيئة الاتحادية للضرائب وتحصل على رقم تسجيل. ليس في أودو حقل له: يُبحث عن حقل في الشركة اسمه l10n_ae_corporate_tax_number وإن وُجد يجب أن يكون معبّأً."
+      },
+      "reference": {
+        "en": "Federal Decree-Law No. (47) of 2022 on the Taxation of Corporations and Businesses.",
+        "ar": "المرسوم بقانون اتحادي رقم (47) لسنة 2022 في شأن الضريبة على الشركات والأعمال."
+      }
+    }
+  ]
+}

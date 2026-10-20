@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="nudge.FormStrip">
+        <div t-if="state.warnings.length or state.muted.length" class="o_nudge_strip" role="status">
+            <div t-foreach="state.warnings" t-as="warning" t-key="warning.key"
+                 class="o_nudge_strip_item" t-att-class="'o_nudge_strip_' + warning.severity"
+                 t-att-data-check="warning.check">
+                <div class="o_nudge_strip_text">
+                    <span class="o_nudge_strip_label" t-esc="warning.label"/>
+                    <span class="o_nudge_strip_message" t-esc="warning.message"/>
+                </div>
+                <div class="o_nudge_strip_actions">
+                    <button t-if="warning.ids.length and warning.model" type="button"
+                            class="btn btn-link btn-sm o_nudge_strip_show" t-on-click="() => this.show(warning)">Show me</button>
+                    <button type="button" class="btn btn-link btn-sm o_nudge_strip_ask"
+                            t-att-disabled="state.asking === warning.key"
+                            t-on-click="() => this.ask(warning)">Ask Nudge about this</button>
+                    <button type="button" class="btn btn-link btn-sm o_nudge_strip_mute"
+                            t-on-click="() => this.mute(warning)">Do not warn me about this</button>
+                </div>
+                <div t-if="state.answers[warning.key]" class="o_nudge_strip_answer" t-esc="state.answers[warning.key]"/>
+                <div t-elif="state.answers[warning.key] === ''" class="o_nudge_strip_answer text-muted">
+                    Nudge cannot answer now: no AI provider is set up, private mode is on, or a limit was reached. The warning stands on its own.
+                </div>
+            </div>
+            <div t-foreach="state.muted" t-as="item" t-key="item.check" class="o_nudge_strip_muted">
+                <span>You muted: <t t-esc="item.label"/>.</span>
+                <button type="button" class="btn btn-link btn-sm o_nudge_strip_unmute"
+                        t-on-click="() => this.unmute(item)">Warn me again</button>
+            </div>
+        </div>
+    </t>
+
+    <t t-inherit="web.FormView" t-inherit-mode="extension">
+        <xpath expr="//t[@t-component='props.Renderer'][@translateAlert]" position="before">
+            <NudgeFormStrip record="model.root"/>
+        </xpath>
+    </t>
+
+</templates>

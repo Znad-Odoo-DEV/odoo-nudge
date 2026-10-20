@@ -1,10 +1,14 @@
+import ipaddress
 import logging
 import os
+import time
+from urllib.parse import urlparse
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 from ..llm import base, ollama
+from ..tools.deadline import until
 
 _logger = logging.getLogger(__name__)
 
@@ -25,6 +29,18 @@ OLLAMA_TIMEOUT = 180
 AGENT_PROVIDER_PARAM = "nudge.agent_provider_id"
 DEVELOPER_PROVIDER_PARAM = "nudge.developer_provider_id"
 MODE_PROVIDER_PARAMS = {"agent": AGENT_PROVIDER_PARAM, "dev": DEVELOPER_PROVIDER_PARAM}
+
+
+def _is_private_address(url):
+    """:return: whether the host of ``url`` is this machine or a private network"""
+    host = urlparse(url if "//" in url else f"//{url}").hostname or ""
+    if host == "localhost" or host.endswith((".local", ".internal", ".lan")):
+        return True
+    try:
+        address = ipaddress.ip_address(host)
+    except ValueError:
+        return False
+    return address.is_loopback or address.is_private
 
 
 class NudgeProvider(models.Model):
@@ -48,6 +64,14 @@ class NudgeProvider(models.Model):
         help="Address of the API, without the final /chat/completions. "
              "Leave empty for Anthropic to use the official endpoint.",
     )
+    runs_locally = fields.Boolean(
+        string="Runs on Our Own Server", default=False,
+        help="Tick it only when this provider, the address of its speech service included, runs "
+             "on a server of yours: nothing leaves your own network. With Private Mode on "
+             "(Settings, Nudge), a provider without it is never asked anything.")
+    looks_local = fields.Boolean(
+        string="Address Looks Local", compute="_compute_looks_local",
+        help="The address is this machine or a private network. Only a hint: the administrator confirms.")
     api_key = fields.Char(string="API Key", groups="base.group_system", copy=False)
     workspace_id = fields.Char(
         string="Workspace ID", groups="base.group_system", copy=False,
@@ -282,11 +306,15 @@ class NudgeProvider(models.Model):
         """:return: the provider answering new conversations, possibly empty.
         Must be called in sudo: it is infrastructure, users have no access to providers."""
         param = self.env["ir.config_parameter"].sudo().get_param(DEFAULT_PROVIDER_PARAM)
+        private = self._is_private_mode()
         if param and param.isdigit():
             provider = self.browse(int(param)).exists()
-            if provider.active and provider.is_configured:
+            if provider.active and provider.is_configured and (provider.runs_locally or not private):
                 return provider
-        return self.search([]).filtered("is_configured")[:1]
+        providers = self.search([]).filtered("is_configured")
+        # In private mode the ones on our own server come first: the others are refused
+        return (providers.filtered("runs_locally") if private else self.browse()).sorted("sequence")[:1] \
+            or providers[:1]
 
     @api.model
     def _get_for_mode(self, mode):
@@ -309,9 +337,11 @@ class NudgeProvider(models.Model):
         one of the conversations when it can, otherwise the first that can.
         Must be called in sudo, as :meth:`_get_default`."""
         default = self._get_default()
-        if default.can_transcribe:
+        if default.can_transcribe and (default.runs_locally or not self._is_private_mode()):
             return default
-        return self.search([]).filtered("can_transcribe")[:1]
+        able = self.search([]).filtered("can_transcribe")
+        # Private mode: the voice goes only to a provider on our own server
+        return (able.filtered("runs_locally") if self._is_private_mode() else able)[:1]
 
     def _get_config(self):
         self.ensure_one()
@@ -331,8 +361,81 @@ class NudgeProvider(models.Model):
             stt_url=(self.stt_url or "").strip(),
         )
 
+    @api.depends("base_url", "stt_url")
+    def _compute_looks_local(self):
+        for provider in self:
+            addresses = [url for url in (provider.base_url, provider.stt_url) if url]
+            provider.looks_local = bool(addresses) and all(_is_private_address(url) for url in addresses)
+
+    @api.model
+    def _is_private_mode(self):
+        """:return: whether the company in use asks that no data goes to an
+        AI provider outside its own server"""
+        # sudo: the setting is the company's; everybody who asks must obey it
+        return bool(self.env.company.sudo().nudge_private_mode)
+
+    def _check_private(self):
+        """The one check every call to a provider goes through, on the server,
+        before anything is sent: the answer, the picture, the voice, the key
+        test. A provider that is not marked as running on our own server is
+        refused while Private Mode is on.
+
+        :raise UserError: when it is refused"""
+        if self._is_private_mode():
+            for provider in self.filtered(lambda provider: not provider.runs_locally):
+                raise UserError(self.env._(
+                    "Private mode is on: nothing is sent to %s, which does not run on your own "
+                    "server. Ask an administrator for a provider that does (Settings, Nudge), "
+                    "or use quick search and the slash commands, which need no AI.",
+                    provider.name))
+
+    @api.model
+    def _complete(self, system, prompt, user, company, timeout=40, check_budget=True, **links):
+        """One short answer of the provider in use, outside any conversation:
+        the narrative of a digest, the sentence of a website assistant.
+        Never raises; the call is written in the ledger of usage.
+
+        :param str system: the instructions
+        :param str prompt: what is asked, already framed as data where it holds data
+        .. note:: ``check_budget`` False: the caller has a budget of its own.
+
+        :param user: who the call is made for, and whose budget it counts against
+        :param links: more values of the line of usage (``origin``...)
+        :return: the text, or "" when no provider can answer (none set up,
+            private mode, a limit reached, a failure): the caller then has the numbers"""
+        provider = self.sudo()._get_for_mode("agent") or self.sudo()._get_default()
+        if not provider or not provider.is_configured or not provider.active:
+            return ""
+        try:
+            provider._check_private()
+            adapter = provider._get_adapter()
+            if check_budget:
+                self.with_user(user.id).env["nudge.usage"]._check_budget()
+        except UserError:
+            return ""
+        turns = [{"role": "user", "text": prompt, "context": ""}]
+        deadline = until(timeout)
+        text, usage = [], None
+        try:
+            for event in adapter.stream_chat(system, turns, deadline=deadline):
+                if event["type"] == "text":
+                    text.append(event["text"])
+                elif event["type"] == "stop":
+                    usage = event.get("usage")
+                elif event["type"] == "error":
+                    return ""
+        except Exception:  # noqa: BLE001
+            _logger.info("Nudge: a short answer could not be had", exc_info=True)
+            return ""
+        usage = base.normalize_usage(usage)
+        self.env["nudge.usage"]._add(
+            "chat", usage, provider._compute_cost(usage), user, company,
+            provider_id=provider.id, model_name=provider.model_name, **links)
+        return "".join(text).strip()
+
     def _get_adapter(self):
         self.ensure_one()
+        self._check_private()
         return base.get_adapter(self._get_config())
 
     def _compute_cost(self, usage):
@@ -394,6 +497,7 @@ class NudgeProvider(models.Model):
 
     def _check_ready(self):
         self.ensure_one()
+        self._check_private()
         if not self.model_name:
             raise UserError(self.env._("Set a model first."))
         if not self._has_credentials():
@@ -419,6 +523,7 @@ class NudgeProvider(models.Model):
         the essential tools are chosen, which a model of a laptop needs.
         :return: the lines to tell"""
         self.ensure_one()
+        self._check_private()
         found = ollama.version(self.base_url, self.api_key or "")
         told = []
         if found and not self.is_ollama:
@@ -476,6 +581,7 @@ class NudgeProvider(models.Model):
         """:return: whether the model in use reads pictures; True when it is not
         known, and the provider says so itself"""
         self.ensure_one()
+        self._check_private()
         if not self.is_ollama:
             return True
         line = self.model_ids.filtered(lambda line: line.name == self.model_name)[:1]
@@ -493,6 +599,7 @@ class NudgeProvider(models.Model):
         :return: what the picture model of this server read in it
         :raise UserError: when there is none, or it could not"""
         self.ensure_one()
+        self._check_private()
         model = model or self.picture_model
         if not model:
             raise UserError(self.env._(
@@ -510,6 +617,32 @@ class NudgeProvider(models.Model):
             "chat", base.normalize_usage(usage), 0.0, self.env.user, self.env.company,
             provider_id=self.id, model_name=model)
         return text
+
+    def _complete_once(self, system, text, images=None):
+        """One question and one answer, with no tools: a document read into JSON.
+
+        :param images: ``[{"media_type", "data" in base64}]`` to look at
+        :return: the words of the answer
+        :raise UserError: when the provider is refused (Private Mode) or fails"""
+        self.ensure_one()
+        adapter = self._get_adapter()
+        turns = [{"role": "user", "text": text, "images": images or []}]
+        answer, usage, failed = "", None, None
+        deadline = until(max(self.timeout or 0, 60))
+        for event in adapter.stream_chat(system, turns, deadline=deadline):
+            if event["type"] == "text":
+                answer += event["text"]
+            elif event["type"] == "stop":
+                usage = event["usage"]
+            elif event["type"] == "error":
+                failed = base.AdapterError(event["code"], event.get("detail", ""))
+        if usage:
+            self.env["nudge.usage"]._add(
+                "chat", usage, self._compute_cost(usage), self.env.user, self.env.company,
+                provider_id=self.id, model_name=self.model_name)
+        if failed and not answer:
+            raise UserError(self._error_message(failed))
+        return answer
 
     def action_ollama_prepare(self):
         """Make a copy of the model in use with the context Nudge needs, and

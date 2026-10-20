@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_mail_proposal_rule_company" model="ir.rule">
+        <field name="name">Nudge Mail Proposal: my companies</field>
+        <field name="model_id" ref="model_nudge_mail_proposal"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[Command.link(ref('nudge.group_nudge_manager'))]"/>
+    </record>
+    <record id="nudge_mail_rule_rule_company" model="ir.rule">
+        <field name="name">Nudge Mail Rule: my companies</field>
+        <field name="model_id" ref="model_nudge_mail_rule"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[Command.link(ref('nudge.group_nudge_manager'))]"/>
+    </record>
+</odoo>

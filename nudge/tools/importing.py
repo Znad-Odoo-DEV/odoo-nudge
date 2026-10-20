@@ -64,6 +64,147 @@ def describe_message(message, headers, fields, has_headers):
     return line
 
 
+def read_options(has_headers=True, sheet=""):
+    """:return: the options of Odoo's own importer for a file read as it comes"""
+    return {
+        "has_headers": has_headers, "advanced": True, "keep_matches": False,
+        "quoting": '"', "separator": "", "encoding": "",
+        "date_format": "", "datetime_format": "",
+        "float_thousand_separator": ",", "float_decimal_separator": ".",
+        "sheet": sheet or "", "skip": 0,
+    }
+
+
+def _column_matches(preview, headers):
+    """:return: the path the importer matched to each header, or False"""
+    matches = preview.get("matches") or {}
+    fields = []
+    for index in range(len(headers)):
+        match = matches.get(index) if index in matches else matches.get(str(index))
+        fields.append("/".join(match) if match else False)
+    return fields
+
+
+def read_columns(env, model, name, data, mimetype, sheet="", has_headers=True, with_rows=False):
+    """The file as Odoo's importer reads it, without trying anything.
+
+    :return: ``{"headers", "samples" (up to 5 values per column), "fields"
+        (the importer's own match, a path or False, per column), "options",
+        "count", "rows" (every row, when asked)}``
+    :raise Refused: when the file cannot be read
+    Nothing is kept: the transient record of the importer is rolled back."""
+    if "base_import.import" not in env:
+        raise Refused("The Import app (base_import) is not installed here: nothing can be tried.")
+    options = read_options(has_headers, sheet)
+    found = {}
+    try:
+        with env.cr.savepoint():
+            record = env["base_import.import"].create({
+                "res_model": model._name, "file": data, "file_name": name, "file_type": mimetype})
+            preview = record.parse_preview(dict(options))
+            if preview.get("error"):
+                raise Refused(f"The file could not be read: {cut(str(preview['error']), 400)}")
+            samples = list(preview.get("preview") or [])
+            headers = list(preview.get("headers") or [])
+            if not headers:
+                headers = [f"Column {index + 1}" for index in range(len(samples))]
+            options.update(preview.get("options") or {})
+            count, rows = None, None
+            try:
+                count, rows = record._read_file(dict(options))
+                rows = [list(row) for row in rows] if with_rows else None
+            except Exception:  # noqa: BLE001
+                rows = None
+            found = {"headers": headers, "samples": samples, "fields": _column_matches(preview, headers),
+                     "options": options, "count": count, "rows": rows}
+            raise DryRun()
+    except DryRun:
+        pass
+    finally:
+        env.invalidate_all()
+    return found
+
+
+def dry_run(env, model, name, data, mimetype, mapping=None, sheet="", has_headers=True):
+    """Try the file into ``model`` the way the Test button does: every row is
+    read and checked, nothing is saved. The one engine of the AI tool and of
+    the check without AI.
+
+    :param mapping: ``[{"column": header, "field": path or ""}]`` over what
+        Odoo's importer matched by itself
+    :return: ``{"report": lines, "headers", "fields", "problems" (one line
+        each), "errors", "count", "ids" (records that would be made), "sheet"}``
+    :raise Refused: for a file or a mapping that cannot be used"""
+    if "base_import.import" not in env:
+        raise Refused("The Import app (base_import) is not installed here: nothing can be tried.")
+    options = read_options(has_headers, sheet)
+    report, problems = [], []
+    result = {"report": report, "problems": problems, "errors": 0, "ids": 0}
+    try:
+        with env.cr.savepoint():
+            record = env["base_import.import"].create({
+                "res_model": model._name, "file": data, "file_name": name, "file_type": mimetype})
+            preview = record.parse_preview(dict(options))
+            if preview.get("error"):
+                raise Refused(f"The file could not be read: {cut(str(preview['error']), 400)}")
+            rows = preview.get("preview") or []
+            headers = list(preview.get("headers") or [])
+            if not headers:
+                headers = [f"Column {index + 1}" for index in range(len(rows))]
+            fields = _column_matches(preview, headers)
+            for entry in mapping or []:
+                path = entry["field"].strip()
+                if isinstance(entry.get("index"), int) and 0 <= entry["index"] < len(fields):
+                    # A column by its place, for headers that repeat
+                    fields[entry["index"]] = path or False
+                    continue
+                column = entry["column"].strip()
+                lowered = [header.strip().casefold() for header in headers]
+                if column.casefold() not in lowered:
+                    raise Refused(f"No column {column!r} in the file. Its columns: {', '.join(headers)}.")
+                if path and path.split("/")[0] not in model._fields:
+                    raise Refused(f"{model._name} has no field {path.split('/')[0]!r}. describe_model lists them.")
+                fields[lowered.index(column.casefold())] = path or False
+            matched = [f"{header} → {path}" for header, path in zip(headers, fields) if path]
+            ignored = [header for header, path in zip(headers, fields) if not path]
+            try:
+                count, _rows = record._read_file(dict(options, **(preview.get("options") or {})))
+            except Exception:  # noqa: BLE001
+                count = None
+            sheet_name = (preview.get("options") or {}).get("sheet")
+            report.append(
+                f"Tried {name!r}" + (f", sheet {sheet_name!r}" if sheet_name else "") + f" into {model._description} ({model._name})"
+                + (f": {count - (1 if has_headers else 0)} data row(s)" if isinstance(count, int) else "") + ".")
+            report.append("Columns matched: " + ("; ".join(matched) if matched else "none"))
+            if ignored:
+                report.append("Columns matched to no field, ignored: " + ", ".join(ignored)
+                              + ". Name them in mapping if they hold data to import.")
+            options.update(preview.get("options") or {})
+            outcome = record.execute_import(fields, headers, dict(options), dryrun=True)
+            messages = [message for message in (outcome.get("messages") or []) if isinstance(message, dict)]
+            result.update(headers=headers, fields=fields, count=count, sheet=sheet_name,
+                          ids=len(outcome.get("ids") or []))
+            if not messages:
+                report.append(f"No problem: {len(outcome.get('ids') or [])} record(s) would be imported.")
+            else:
+                errors = sum(1 for message in messages if message.get("type", "error") == "error")
+                result["errors"] = errors
+                report.append(f"{len(messages)} problem(s), {errors} of them errors that stop the import:")
+                for message in messages[:MAX_MESSAGES]:
+                    problems.append(describe_message(message, headers, fields, has_headers))
+                report.extend(problems)
+                if len(messages) > MAX_MESSAGES:
+                    report.append(f"… and {len(messages) - MAX_MESSAGES} more.")
+            raise DryRun()
+    except DryRun:
+        pass
+    finally:
+        # What the trial read is gone from the database: gone from the cache too
+        env.invalidate_all()
+    report.append("Nothing was saved.")
+    return result
+
+
 @base.register
 class TestImport(base.Tool):
     name = "test_import"
@@ -112,74 +253,8 @@ class TestImport(base.Tool):
 
     @refusing
     def run(self, env, arguments, screen):
-        if "base_import.import" not in env:
-            raise Refused("The Import app (base_import) is not installed here: nothing can be tried.")
         model = get_model(env, arguments["model"], "create")
         name, data, mimetype = attached_file(env)
-        has_headers = arguments.get("has_headers", True)
-        options = {
-            "has_headers": has_headers, "advanced": True, "keep_matches": False,
-            "quoting": '"', "separator": "", "encoding": "",
-            "date_format": "", "datetime_format": "",
-            "float_thousand_separator": ",", "float_decimal_separator": ".",
-            "sheet": arguments.get("sheet") or "", "skip": 0,
-        }
-        report = []
-        try:
-            with env.cr.savepoint():
-                record = env["base_import.import"].create({
-                    "res_model": model._name, "file": data, "file_name": name, "file_type": mimetype})
-                preview = record.parse_preview(dict(options))
-                if preview.get("error"):
-                    raise Refused(f"The file could not be read: {cut(str(preview['error']), 400)}")
-                rows = preview.get("preview") or []
-                headers = list(preview.get("headers") or [])
-                if not headers:
-                    headers = [f"Column {index + 1}" for index in range(len(rows[0]) if rows else 0)]
-                matches = preview.get("matches") or {}
-                fields = []
-                for index in range(len(headers)):
-                    match = matches.get(index) if index in matches else matches.get(str(index))
-                    fields.append("/".join(match) if match else False)
-                for entry in arguments.get("mapping") or []:
-                    column, path = entry["column"].strip(), entry["field"].strip()
-                    lowered = [header.strip().casefold() for header in headers]
-                    if column.casefold() not in lowered:
-                        raise Refused(f"No column {column!r} in the file. Its columns: {', '.join(headers)}.")
-                    if path and path.split("/")[0] not in model._fields:
-                        raise Refused(f"{model._name} has no field {path.split('/')[0]!r}. describe_model lists them.")
-                    fields[lowered.index(column.casefold())] = path or False
-                matched = [f"{header} → {path}" for header, path in zip(headers, fields) if path]
-                ignored = [header for header, path in zip(headers, fields) if not path]
-                try:
-                    count, _rows = record._read_file(dict(options, **(preview.get("options") or {})))
-                except Exception:  # noqa: BLE001
-                    count = None
-                sheet = (preview.get("options") or {}).get("sheet")
-                report.append(
-                    f"Tried {name!r}" + (f", sheet {sheet!r}" if sheet else "") + f" into {model._description} ({model._name})"
-                    + (f": {count - (1 if has_headers else 0)} data row(s)" if isinstance(count, int) else "") + ".")
-                report.append("Columns matched: " + ("; ".join(matched) if matched else "none"))
-                if ignored:
-                    report.append("Columns matched to no field, ignored: " + ", ".join(ignored)
-                                  + ". Name them in mapping if they hold data to import.")
-                options.update(preview.get("options") or {})
-                result = record.execute_import(fields, headers, dict(options), dryrun=True)
-                messages = [message for message in (result.get("messages") or []) if isinstance(message, dict)]
-                if not messages:
-                    report.append(f"No problem: {len(result.get('ids') or [])} record(s) would be imported.")
-                else:
-                    errors = sum(1 for message in messages if message.get("type", "error") == "error")
-                    report.append(f"{len(messages)} problem(s), {errors} of them errors that stop the import:")
-                    for message in messages[:MAX_MESSAGES]:
-                        report.append(describe_message(message, headers, fields, has_headers))
-                    if len(messages) > MAX_MESSAGES:
-                        report.append(f"… and {len(messages) - MAX_MESSAGES} more.")
-                raise DryRun()
-        except DryRun:
-            pass
-        finally:
-            # What the trial read is gone from the database: gone from the cache too
-            env.invalidate_all()
-        report.append("Nothing was saved.")
-        return base.ToolResult("\n".join(report))
+        result = dry_run(env, model, name, data, mimetype, arguments.get("mapping"),
+                         arguments.get("sheet"), arguments.get("has_headers", True))
+        return base.ToolResult("\n".join(result["report"]))

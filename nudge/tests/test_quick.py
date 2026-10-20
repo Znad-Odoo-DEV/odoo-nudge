@@ -41,7 +41,7 @@ class TestQuick(NudgeCase, TransactionCase):
 
     def test_too_little_is_not_searched(self):
         self.assertEqual(self.quick(self.user_a).find(" a "),
-                         {"menus": [], "settings": [], "pages": [], "products": []})
+                         {"menus": [], "settings": [], "pages": [], "products": [], "tours": []})
 
     def test_the_way_is_shown_by_the_pointer(self):
         menu = self.env.ref("nudge.nudge_menu_providers")

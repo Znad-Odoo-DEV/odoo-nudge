@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_home_action" model="ir.actions.client">
+        <field name="name">My Nudge Home</field>
+        <field name="tag">nudge_home</field>
+    </record>
+
+    <menuitem id="nudge_menu_home" name="My Nudge Home" sequence="249"
+              web_icon="nudge,static/description/icon.png"
+              action="nudge_home_action" groups="base.group_user"/>
+</odoo>

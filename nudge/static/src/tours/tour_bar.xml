@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="nudge.TourBar">
+        <div t-if="state.isRecording" class="o_nudge_tour_bar" role="region" aria-label="Recording a tour">
+            <div class="o_nudge_tour_head">
+                <span class="o_nudge_tour_dot" aria-hidden="true"/>
+                <strong class="o_nudge_tour_title">Recording a tour</strong>
+                <span class="o_nudge_tour_count" t-esc="state.steps.length"/>
+            </div>
+            <t t-if="state.stage === 'recording'">
+                <p t-if="!state.steps.length" class="o_nudge_tour_hint">
+                    Click through the task as you would do it: every menu, button, tab and field becomes a step.
+                </p>
+                <ol class="o_nudge_tour_steps">
+                    <li t-foreach="state.steps" t-as="step" t-key="step_index" class="o_nudge_tour_step">
+                        <i t-attf-class="fa #{icon(step.kind)}" aria-hidden="true"/>
+                        <span class="o_nudge_tour_label" t-esc="step.label || step.name || step.xmlid"/>
+                        <input type="text" class="form-control form-control-sm o_nudge_tour_note" maxlength="400"
+                               placeholder="What to say at this step"
+                               t-att-value="step.note" t-on-change="(ev) => this.tours.setNote(step_index, ev.target.value)"/>
+                        <button type="button" class="btn btn-sm btn-link o_nudge_tour_remove" title="Delete this step"
+                                aria-label="Delete this step" t-on-click="() => this.tours.removeStep(step_index)">
+                            <i class="fa fa-trash-o"/>
+                        </button>
+                    </li>
+                </ol>
+                <div class="o_nudge_tour_actions">
+                    <button type="button" class="btn btn-sm btn-link o_nudge_tour_discard" t-on-click="() => this.tours.finish()">Cancel</button>
+                    <button type="button" class="btn btn-sm btn-primary o_nudge_tour_stop" t-on-click="() => this.tours.stop()">Stop</button>
+                </div>
+            </t>
+            <t t-else="">
+                <div class="o_nudge_tour_form">
+                    <label class="o_nudge_tour_field">
+                        <span>Name of the tour</span>
+                        <input type="text" class="form-control form-control-sm o_nudge_tour_name" maxlength="120"
+                               placeholder="Create a quotation" t-model="state.name"/>
+                    </label>
+                    <label class="o_nudge_tour_field">
+                        <span>Phrases in English, one per line</span>
+                        <textarea class="form-control form-control-sm o_nudge_tour_phrases_en" rows="2" maxlength="1000"
+                                  t-model="state.phrasesEn"/>
+                    </label>
+                    <label class="o_nudge_tour_field">
+                        <span>Phrases in Arabic, one per line</span>
+                        <textarea class="form-control form-control-sm o_nudge_tour_phrases_ar" dir="rtl" rows="2" maxlength="1000"
+                                  t-model="state.phrasesAr"/>
+                    </label>
+                </div>
+                <div class="o_nudge_tour_actions">
+                    <button type="button" class="btn btn-sm btn-link o_nudge_tour_discard" t-on-click="() => this.tours.finish()">Discard</button>
+                    <button type="button" class="btn btn-sm btn-secondary o_nudge_tour_back" t-on-click="() => this.tours.resume()">Back</button>
+                    <button type="button" class="btn btn-sm btn-primary o_nudge_tour_save"
+                            t-att-disabled="!canSave" t-on-click="() => this.tours.save()">Save</button>
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>

@@ -77,6 +77,10 @@ def run(job, record):
     }
     # What was done before the model is called: a decision of the person
     yield from job.get("first_events") or []
+    if job.get("answered"):
+        # Answered from the memory of answers: no provider is called
+        yield job["answered"]
+        return
     if job.get("queued"):
         # The work is left to the background: nothing to wait for here
         yield {"type": "queued", "run_id": job["queued"], "state": "queued", "message": ""}

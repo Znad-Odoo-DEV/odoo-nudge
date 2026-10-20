@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_messaging" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.nudge.messaging</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="92"/>
+        <field name="inherit_id" ref="nudge.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='nudge_access_container']" position="after">
+                <block title="Messaging Assistants" name="nudge_messaging_container">
+                    <setting help="People who linked their phone can ask Nudge on WhatsApp or Telegram. A question is answered in the chat; a change is never made there: Nudge sends a link and the person says yes in Odoo. Each person links their own phone with a code from their Preferences.">
+                        <field name="nudge_msg_enabled"/>
+                    </setting>
+                    <setting invisible="not nudge_msg_enabled"
+                             help="In private mode no company data goes to outside AI. A chat answer still travels through WhatsApp or Telegram, so by default the channel is closed while private mode is on.">
+                        <field name="nudge_msg_allow_private"/>
+                    </setting>
+                    <setting invisible="not nudge_msg_enabled"
+                             help="WhatsApp Business Cloud API. In the Meta app, set the callback address below and the verify token; the app secret signs every message, the access token sends the answers. Both are kept and never shown again: leave them blank to keep what is stored.">
+                        <div class="o_form_label">WhatsApp</div>
+                        <div class="content-group mt8">
+                            <div class="row mt8">
+                                <label for="nudge_msg_whatsapp_url" class="col-lg-4"/>
+                                <field name="nudge_msg_whatsapp_url" class="col-lg-8" readonly="1" widget="CopyClipboardChar"/>
+                            </div>
+                            <div class="row mt8">
+                                <label for="nudge_msg_whatsapp_phone_id" class="col-lg-4"/>
+                                <field name="nudge_msg_whatsapp_phone_id" class="col-lg-6"/>
+                            </div>
+                            <div class="row mt8">
+                                <label for="nudge_msg_whatsapp_verify_token" class="col-lg-4"/>
+                                <field name="nudge_msg_whatsapp_verify_token" class="col-lg-6"/>
+                            </div>
+                            <div class="row mt8">
+                                <label for="nudge_msg_whatsapp_app_secret" class="col-lg-4"/>
+                                <field name="nudge_msg_whatsapp_app_secret" class="col-lg-6" password="True"
+                                       placeholder="Stored, not shown" autocomplete="new-password"/>
+                            </div>
+                            <div class="row mt8">
+                                <label for="nudge_msg_whatsapp_access_token" class="col-lg-4"/>
+                                <field name="nudge_msg_whatsapp_access_token" class="col-lg-6" password="True"
+                                       placeholder="Stored, not shown" autocomplete="new-password"/>
+                            </div>
+                            <div class="text-muted" invisible="not nudge_msg_whatsapp_keys_set">
+                                The app secret and the access token are stored.
+                            </div>
+                        </div>
+                    </setting>
+                    <setting invisible="not nudge_msg_enabled"
+                             help="Telegram Bot API. Make a bot with BotFather, paste its token, choose a webhook secret, save, then press Register the Webhook. The token and the secret are kept and never shown again.">
+                        <div class="o_form_label">Telegram</div>
+                        <div class="content-group mt8">
+                            <div class="row mt8">
+                                <label for="nudge_msg_telegram_url" class="col-lg-4"/>
+                                <field name="nudge_msg_telegram_url" class="col-lg-8" readonly="1" widget="CopyClipboardChar"/>
+                            </div>
+                            <div class="row mt8">
+                                <label for="nudge_msg_telegram_bot_token" class="col-lg-4"/>
+                                <field name="nudge_msg_telegram_bot_token" class="col-lg-6" password="True"
+                                       placeholder="Stored, not shown" autocomplete="new-password"/>
+                            </div>
+                            <div class="row mt8">
+                                <label for="nudge_msg_telegram_webhook_secret" class="col-lg-4"/>
+                                <field name="nudge_msg_telegram_webhook_secret" class="col-lg-6" password="True"
+                                       placeholder="Stored, not shown" autocomplete="new-password"/>
+                            </div>
+                            <div class="text-muted" invisible="not nudge_msg_telegram_keys_set">
+                                The bot token and the webhook secret are stored.
+                            </div>
+                            <button name="action_nudge_msg_telegram_register" type="object" icon="oi-arrow-right"
+                                    string="Register the Webhook" class="btn-link"
+                                    invisible="not nudge_msg_telegram_keys_set"/>
+                        </div>
+                    </setting>
+                    <setting invisible="not nudge_msg_enabled"
+                             help="Older lines of the log of received messages are deleted. The limit per sender and the check against a repeated message need only a few hours of it.">
+                        <field name="nudge_msg_retention_days"/>
+                    </setting>
+                    <setting invisible="not nudge_msg_enabled"
+                             help="Remove the stored keys of both channels when you save.">
+                        <field name="nudge_msg_forget_keys"/>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

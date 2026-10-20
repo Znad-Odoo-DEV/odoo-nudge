@@ -1,0 +1,1918 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* nudge_builder
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-17 17:02+0000\n"
+"PO-Revision-Date: 2026-10-17 17:02+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "%(count)s pages are not translated into %(lang)s."
+msgstr "%(count)s صفحات غير مترجمة إلى %(lang)s."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "%(count)s to create: %(names)s"
+msgstr "%(count)s ستُنشأ: %(names)s"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_check.py:0
+msgid "%(critical)s critical, %(warning)s to look at, %(info)s to know"
+msgstr "%(critical)s حرجة، %(warning)s تستحق النظر، %(info)s للعلم"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "%(page)s: alt text for %(count)s images (%(names)s)"
+msgstr "%(page)s: نص بديل لـ %(count)s صور (%(names)s)"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "%(page)s: “%(text)s”"
+msgstr "%(page)s: «%(text)s»"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "%(step)s failed: %(error)s"
+msgstr "%(step)s فشلت: %(error)s"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_check.py:0
+msgid "%s changes were made. Check the site again to see the result."
+msgstr "تم إجراء %s تغييرات. افحص الموقع مرة أخرى لترى النتيجة."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "%s colour pairs of the palette are hard to read (contrast under 4.5)."
+msgstr "%s أزواج ألوان في لوحة الألوان يصعب قراءتها (التباين أقل من 4.5)."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "%s created"
+msgstr "تم إنشاء %s"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "%s external links did not answer."
+msgstr "%s روابط خارجية لم تستجب."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "%s external links were not visited (only 50 are)."
+msgstr "%s روابط خارجية لم تُزَر (تُزار 50 فقط)."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "%s images weigh more than 500 KB."
+msgstr "%s صور يزيد حجمها على 500 كيلوبايت."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "%s internal links lead nowhere."
+msgstr "%s روابط داخلية لا تؤدي إلى أي مكان."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "%s legal pages are not linked in the footer."
+msgstr "%s صفحات قانونية غير مرتبطة في تذييل الموقع."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "%s more are left for a next run."
+msgstr "بقي %s أخرى لمرة قادمة."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid ""
+"%s pages have a meta description shorter than 50 or longer than 160 "
+"characters."
+msgstr "%s صفحات وصفها التعريفي أقصر من 50 حرفًا أو أطول من 160."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "%s pages have a title shorter than 10 or longer than 60 characters."
+msgstr "%s صفحات عنوانها أقصر من 10 أحرف أو أطول من 60."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "%s pages have form fields without a label."
+msgstr "%s صفحات فيها حقول نماذج بلا تسمية."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "%s pages have images without a text alternative (alt)."
+msgstr "%s صفحات فيها صور بلا نص بديل (alt)."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "%s pages have more than one main heading (H1)."
+msgstr "%s صفحات فيها أكثر من عنوان رئيسي واحد (H1)."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "%s pages have no main heading (H1)."
+msgstr "%s صفحات بلا عنوان رئيسي (H1)."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "%s pages have no meta description."
+msgstr "%s صفحات بلا وصف تعريفي."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "%s pages have no title."
+msgstr "%s صفحات بلا عنوان."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "%s pages hold a script written inside the page."
+msgstr "%s صفحات تحتوي على سكربت مكتوب داخل الصفحة."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "%s pages hold more than 20 blocks."
+msgstr "%s صفحات تحتوي على أكثر من 20 كتلة."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "%s pages share their title with another page."
+msgstr "%s صفحات تشترك في عنوانها مع صفحة أخرى."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "%s products got no text from the provider; run it again for them."
+msgstr "%s منتجات لم يكتب لها المزود نصًا؛ شغّله مرة أخرى لها."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid ""
+"%s products have no website description; Nudge writes them in batches of 20,"
+" from the name, attributes and internal description. Existing texts are "
+"never touched."
+msgstr ""
+"%s منتجات بلا وصف على الموقع؛ يكتبها Nudge على دفعات من 20 اعتمادًا على "
+"الاسم والخصائص والوصف الداخلي. النصوص الموجودة لا تُمس أبدًا."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "%s products without a shop category are placed in one."
+msgstr "%s منتجات بلا فئة في المتجر ستوضع في فئة."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "%s published products have no description."
+msgstr "%s منتجات منشورة بلا وصف."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "%s published products have no image."
+msgstr "%s منتجات منشورة بلا صورة."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "%s published products have no price."
+msgstr "%s منتجات منشورة بلا سعر."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid ""
+"%s respects your privacy. This page explains which personal data we collect "
+"on this website, why, and how long we keep it."
+msgstr ""
+"تحترم %s خصوصيتك. توضح هذه الصفحة أي بيانات شخصية نجمعها على هذا الموقع "
+"ولماذا ولكم من الوقت نحتفظ بها."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "%s shop categories hold no product."
+msgstr "%s فئات في المتجر لا تحتوي على أي منتج."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "%s unpublished pages: %s"
+msgstr "%s صفحات غير منشورة: %s"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_check.py:0
+msgid "... and %s more"
+msgstr "... و%s أخرى"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "1. Your business"
+msgstr "1. نشاطك"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "2. Languages"
+msgstr "2. اللغات"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "3 unpublished pages: %s"
+msgstr "3 صفحات غير منشورة: %s"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "3. Colours and fonts"
+msgstr "3. الألوان والخطوط"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "4. Pages wanted"
+msgstr "4. الصفحات المطلوبة"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "5. Online shop"
+msgstr "5. المتجر الإلكتروني"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "6. Tone"
+msgstr "6. الأسلوب"
+
+#. module: nudge_builder
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_site__direction__a
+msgid "A"
+msgstr "أ"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "A - Classic"
+msgstr "أ - كلاسيكي"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "A delivery method is available"
+msgstr "توجد طريقة توصيل متاحة"
+
+#. module: nudge_builder
+#: model:ir.model.constraint,message:nudge_builder.constraint_nudge_builder_page_kind_key_unique
+msgid "A page kind has one key."
+msgstr "لكل نوع صفحة مفتاح واحد."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "A payment provider is enabled"
+msgstr "يوجد مزود دفع مفعّل"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "A pricelist serves the website"
+msgstr "توجد قائمة أسعار تخدم الموقع"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "A selection of products at the best price."
+msgstr "مجموعة منتجات مختارة بأفضل سعر."
+
+#. module: nudge_builder
+#: model:ir.model.fields,help:nudge_builder.field_nudge_builder_site__template_json
+msgid "A template given by code; the library is used when empty."
+msgstr "قالب معطى بالكود؛ تُستخدم المكتبة عندما يكون فارغا."
+
+#. module: nudge_builder
+#: model:ir.model.constraint,message:nudge_builder.constraint_nudge_builder_template_key_uniq
+msgid "A template key must be unique."
+msgstr "يجب أن يكون مفتاح القالب فريدًا."
+
+#. module: nudge_builder
+#: model:nudge.builder.page.kind,name:nudge_builder.kind_about
+msgid "About us"
+msgstr "من نحن"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_check_finding__check_group__accessibility
+msgid "Accessibility"
+msgstr "سهولة الوصول"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Already as proposed."
+msgstr "كما هو مقترح بالفعل."
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_run__external
+msgid "Also check external links"
+msgstr "افحص الروابط الخارجية أيضًا"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_check_fix_view_form
+msgid "Apply"
+msgstr "تطبيق"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__group_label
+msgid "Area"
+msgstr "المجال"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Arrange the shop of %s"
+msgstr "ترتيب متجر %s"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_shop_confirm_view_form
+msgid "Arrange the shop too?"
+msgstr "هل أرتّب المتجر أيضًا؟"
+
+#. module: nudge_builder
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_site__direction__b
+msgid "B"
+msgstr "ب"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "B - Bold"
+msgstr "ب - جريء"
+
+#. module: nudge_builder
+#. odoo-javascript
+#: code:addons/nudge_builder/static/src/xml/run.xml:0
+msgid "Back to the site"
+msgstr "العودة إلى الموقع"
+
+#. module: nudge_builder
+#: model:nudge.builder.page.kind,name:nudge_builder.kind_blog
+msgid "Blog / News"
+msgstr "المدونة / الأخبار"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "Build the site first."
+msgstr "ابنِ الموقع أولا."
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "Build this website"
+msgstr "ابنِ هذا الموقع"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "Building a website needs the Website Designer right."
+msgstr "بناء موقع يحتاج صلاحية مصمم المواقع."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "Building the website"
+msgstr "جارٍ بناء الموقع"
+
+#. module: nudge_builder
+#. odoo-javascript
+#: code:addons/nudge_builder/static/src/xml/run.xml:0
+msgid "Building your website"
+msgstr "جارٍ بناء موقعك"
+
+#. module: nudge_builder
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_site__state__built
+msgid "Built"
+msgstr "مبني"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid ""
+"By using this website you accept these terms. The website belongs to %s."
+msgstr "باستخدامك هذا الموقع فإنك توافق على هذه الشروط. الموقع ملك لـ %s."
+
+#. module: nudge_builder
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_site__direction__c
+msgid "C"
+msgstr "ج"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "C - Soft"
+msgstr "ج - هادئ"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_check_fix_view_form
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_check_run_view_form
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_shop_confirm_view_form
+msgid "Cancel"
+msgstr "إلغاء"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_fix__lines
+msgid "Changes"
+msgstr "التغييرات"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_fix__changes_json
+msgid "Changes Json"
+msgstr "التغييرات (JSON)"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "Changes made"
+msgstr "التغييرات المنفذة"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__check_group
+msgid "Check"
+msgstr "الفحص"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_check_run_view_form
+msgid "Check the site"
+msgstr "افحص الموقع"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "Checks"
+msgstr "الفحوصات"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_check_run_view_form
+msgid ""
+"Checks the website for search engines, links, translations, speed, accessibility, legal\n"
+"                   pages and the shop. Nothing is changed by the check."
+msgstr ""
+"يفحص الموقع من حيث محركات البحث والروابط والترجمات والسرعة وسهولة الوصول "
+"والصفحات القانونية والمتجر. الفحص لا يغيّر شيئًا."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "Choose at least one page."
+msgstr "اختر صفحة واحدة على الأقل."
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__template_key
+msgid "Closest template"
+msgstr "أقرب قالب"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__color_accent
+msgid "Color Accent"
+msgstr "اللون المميز"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__color_dark
+msgid "Color Dark"
+msgstr "اللون الداكن"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__color_light
+msgid "Color Light"
+msgstr "اللون الفاتح"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__color_primary
+msgid "Color Primary"
+msgstr "اللون الأساسي"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__color_secondary
+msgid "Color Secondary"
+msgstr "اللون الثانوي"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__colors_from_logo
+msgid "Colors From Logo"
+msgstr "ألوان من الشعار"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check__company_id
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__company_id
+msgid "Company"
+msgstr "الشركة"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check__previous_id
+msgid "Compared With"
+msgstr "قورن مع"
+
+#. module: nudge_builder
+#: model:nudge.builder.page.kind,name:nudge_builder.kind_contact
+msgid "Contact"
+msgstr "اتصل بنا"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "Continue the build"
+msgstr "تابع البناء"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "Contracting, clinic, restaurant, shop..."
+msgstr "مقاولات، عيادة، مطعم، متجر..."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid ""
+"Copy the sales description into the website description of the products"
+msgstr "نسخ وصف المبيعات إلى وصف المنتجات على الموقع"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__count
+msgid "Count"
+msgstr "العدد"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "Create the missing legal pages as unpublished drafts"
+msgstr "إنشاء الصفحات القانونية الناقصة كمسودات غير منشورة"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check__create_uid
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__create_uid
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_fix__create_uid
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_run__create_uid
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__create_uid
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page_kind__create_uid
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_shop_confirm__create_uid
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__create_uid
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_template__create_uid
+msgid "Created by"
+msgstr "أنشئ بواسطة"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check__create_date
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__create_date
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_fix__create_date
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_run__create_date
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__create_date
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page_kind__create_date
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_shop_confirm__create_date
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__create_date
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_template__create_date
+msgid "Created on"
+msgstr "أنشئ في"
+
+#. module: nudge_builder
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_check_finding__severity__critical
+msgid "Critical"
+msgstr "حرج"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check__critical_count
+msgid "Critical Count"
+msgstr "عدد الحرجة"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_template__data
+msgid "Data"
+msgstr "البيانات"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check__date
+msgid "Date"
+msgstr "التاريخ"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Descriptions"
+msgstr "الأوصاف"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Descriptions skipped: %s"
+msgstr "تم تخطي الأوصاف: %s"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Descriptions stopped: %s"
+msgstr "توقفت كتابة الأوصاف: %s"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Descriptions written"
+msgstr "الأوصاف المكتوبة"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__direction
+msgid "Direction"
+msgstr "الاتجاه"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__directions
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_site__state__previewed
+msgid "Directions"
+msgstr "الاتجاهات"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Discover what just arrived in our shop."
+msgstr "اكتشف ما وصل حديثًا إلى متجرنا."
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check__display_name
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__display_name
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_fix__display_name
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_run__display_name
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__display_name
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page_kind__display_name
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_shop_confirm__display_name
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__display_name
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_template__display_name
+msgid "Display Name"
+msgstr "الاسم المعروض"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_check.py:0
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_fix__done
+msgid "Done"
+msgstr "تم"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "Done: nothing is published yet."
+msgstr "تم: لم يُنشر شيء بعد."
+
+#. module: nudge_builder
+#: model:ir.model.fields,help:nudge_builder.field_nudge_builder_page__lang_id
+msgid ""
+"Empty when the page is translated in place into every language of the site."
+msgstr "فارغ عندما تُترجم الصفحة نفسها إلى كل لغات الموقع."
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid ""
+"Every page of this site becomes visible to everybody, and its home page "
+"becomes the home page of the website. Continue?"
+msgstr ""
+"ستصبح كل صفحات هذا الموقع ظاهرة للجميع وتصبح صفحته الرئيسية هي الصفحة "
+"الرئيسية للموقع. هل تتابع؟"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check__external
+msgid "External Links Visited"
+msgstr "الروابط الخارجية المزارة"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__extra_json
+msgid "Extra Json"
+msgstr "معلومات إضافية (JSON)"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__extra_lang
+msgid "Extra Lang"
+msgstr "اللغة"
+
+#. module: nudge_builder
+#: model:nudge.builder.page.kind,name:nudge_builder.kind_faq
+msgid "FAQ"
+msgstr "الأسئلة الشائعة"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "Fill the missing alt text from the image names"
+msgstr "ملء النص البديل الناقص من أسماء الصور"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Filters"
+msgstr "عوامل التصفية"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Filters shown"
+msgstr "عوامل التصفية المعروضة"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__text
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_fix__finding_id
+msgid "Finding"
+msgstr "النتيجة"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check__finding_ids
+msgid "Findings"
+msgstr "النتائج"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__fix
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_fix__fix
+msgid "Fix"
+msgstr "الإصلاح"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__fix_title
+msgid "Fix Title"
+msgstr "عنوان الإصلاح"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_check_view_form
+msgid "Fix it"
+msgstr "أصلحه"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__font_body
+msgid "Font Body"
+msgstr "خط النص"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__font_heading
+msgid "Font Heading"
+msgstr "خط العناوين"
+
+#. module: nudge_builder
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_site__tone__formal
+msgid "Formal"
+msgstr "رسمي"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Free delivery on your first order"
+msgstr "توصيل مجاني لطلبك الأول"
+
+#. module: nudge_builder
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_site__tone__friendly
+msgid "Friendly"
+msgstr "ودود"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_template__hero_image
+msgid "Hero Image"
+msgstr "صورة البطل"
+
+#. module: nudge_builder
+#: model:nudge.builder.page.kind,name:nudge_builder.kind_home
+msgid "Home"
+msgstr "الرئيسية"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "Home page changed from %(old)s to %(new)s."
+msgstr "تغيرت الصفحة الرئيسية من %(old)s إلى %(new)s."
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check__id
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__id
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_fix__id
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_run__id
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__id
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page_kind__id
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_shop_confirm__id
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__id
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_template__id
+msgid "ID"
+msgstr "المعرف"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__ids_json
+msgid "Ids Json"
+msgstr "المعرفات (JSON)"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check__info_count
+msgid "Info Count"
+msgstr "عدد المعلومات"
+
+#. module: nudge_builder
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_site__state__draft
+msgid "Interview"
+msgstr "المقابلة"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__is_legal
+msgid "Is Legal"
+msgstr "صفحة قانونية"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__is_shop
+msgid "Is Shop"
+msgstr "صفحة متجر"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__key
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__key
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page_kind__key
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_template__key
+msgid "Key"
+msgstr "المفتاح"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__kind
+msgid "Kind"
+msgstr "النوع"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__lang_id
+msgid "Language"
+msgstr "اللغة"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__lang_ids
+msgid "Languages"
+msgstr "اللغات"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check__write_uid
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__write_uid
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_fix__write_uid
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_run__write_uid
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__write_uid
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page_kind__write_uid
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_shop_confirm__write_uid
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__write_uid
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_template__write_uid
+msgid "Last Updated by"
+msgstr "آخر تحديث بواسطة"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check__write_date
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__write_date
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_fix__write_date
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_run__write_date
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__write_date
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page_kind__write_date
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_shop_confirm__write_date
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__write_date
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_template__write_date
+msgid "Last Updated on"
+msgstr "آخر تحديث في"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Layout"
+msgstr "التخطيط"
+
+#. module: nudge_builder
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_check_finding__check_group__legal
+msgid "Legal"
+msgstr "قانوني"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "Legal pages"
+msgstr "الصفحات القانونية"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_check_finding__check_group__links
+msgid "Links"
+msgstr "الروابط"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__log
+msgid "Log"
+msgstr "السجل"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_shop_confirm.py:0
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "Look at the three directions first."
+msgstr "اطلع على الاتجاهات الثلاثة أولا."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+#: code:addons/nudge_builder/tools/shop.py:0
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__menu_id
+msgid "Menu"
+msgstr "القائمة"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Menu entries"
+msgstr "عناصر القائمة"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid ""
+"Missing: %s. Nudge never configures payment; Show me opens each setting."
+msgstr "ناقص: %s. لا يضبط Nudge الدفع أبدًا؛ «أرني» يفتح كل إعداد."
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__model_name
+msgid "Model Name"
+msgstr "اسم النموذج"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__name
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page_kind__name
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__name
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_template__name
+msgid "Name"
+msgstr "الاسم"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_template__name_ar
+msgid "Name (Arabic)"
+msgstr "الاسم (بالعربية)"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_template__name_en
+msgid "Name (English)"
+msgstr "الاسم (بالإنجليزية)"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__is_new
+msgid "New"
+msgstr "جديد"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "New arrivals"
+msgstr "وصل حديثًا"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+#: model:ir.actions.act_window,name:nudge_builder.nudge_builder_action_new
+#: model:ir.ui.menu,name:nudge_builder.menu_nudge_builder_new
+msgid "New site"
+msgstr "موقع جديد"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "New unpublished page %(url)s: %(name)s"
+msgstr "صفحة جديدة غير منشورة %(url)s: %(name)s"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid ""
+"No AI writes text or pictures here (no provider, or Private Mode is on): the"
+" pages are built from the sample copy of the template and the bundled "
+"placeholder pictures."
+msgstr ""
+"لا يكتب الذكاء الاصطناعي نصوصا أو صورا هنا (لا يوجد مزود، أو الوضع الخاص "
+"مفعّل): تُبنى الصفحات من النص التجريبي للقالب ومن الصور البديلة المرفقة."
+
+#. module: nudge_builder
+#. odoo-javascript
+#: code:addons/nudge_builder/static/src/xml/run.xml:0
+msgid ""
+"No AI wrote text or pictures: the pages use the sample copy of the template "
+"and placeholder pictures."
+msgstr ""
+"لم يكتب الذكاء الاصطناعي نصوصا أو صورا: تستخدم الصفحات النص التجريبي للقالب "
+"والصور البديلة."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "No finding: the website is in good shape."
+msgstr "لا توجد نتائج: الموقع بحالة جيدة."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid ""
+"No payment provider is enabled: customers cannot pay online. Choose one in "
+"Payment Providers."
+msgstr ""
+"لا يوجد مزود دفع مفعّل: لا يستطيع العملاء الدفع عبر الإنترنت. اختر واحدًا في"
+" مزودي الدفع."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "No pricelist for this website: add one in Pricelists."
+msgstr "لا توجد قائمة أسعار لهذا الموقع: أضف واحدة في قوائم الأسعار."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid ""
+"No provider can be used now (private mode or none set up): this step is "
+"skipped."
+msgstr ""
+"لا يمكن استخدام أي مزود الآن (الوضع الخاص أو لم يُضبط أي مزود): ستُتخطى هذه "
+"الخطوة."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid ""
+"No published delivery method: orders of goods cannot be shipped. Add one in "
+"Shipping Methods."
+msgstr ""
+"لا توجد طريقة توصيل منشورة: لا يمكن شحن طلبات البضائع. أضف واحدة في طرق "
+"الشحن."
+
+#. module: nudge_builder
+#: model:ir.model.fields,help:nudge_builder.field_nudge_builder_site__private
+msgid "No text or picture is written by an AI."
+msgstr "لا يكتب الذكاء الاصطناعي أي نص أو صورة."
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_shop_confirm_view_form
+msgid "No, build the pages only"
+msgstr "لا، ابنِ الصفحات فقط"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check__skipped_text
+msgid "Not Checked"
+msgstr "لم يُفحص"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Not set: choose whether prices include tax."
+msgstr "غير محدد: اختر هل تشمل الأسعار الضريبة."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Nothing to add."
+msgstr "لا شيء للإضافة."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Nothing to change."
+msgstr "لا شيء للتغيير."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Nothing to create: the categories exist."
+msgstr "لا شيء للإنشاء: الفئات موجودة."
+
+#. module: nudge_builder
+#: model:ir.model,name:nudge_builder.model_nudge_builder_page
+msgid "Nudge Builder Page"
+msgstr "صفحة منشئ المواقع"
+
+#. module: nudge_builder
+#: model:ir.model,name:nudge_builder.model_nudge_builder_page_kind
+msgid "Nudge Builder Page Kind"
+msgstr "نوع صفحة منشئ المواقع"
+
+#. module: nudge_builder
+#: model:ir.model,name:nudge_builder.model_nudge_builder_site
+msgid "Nudge Website Builder"
+msgstr "منشئ مواقع Nudge"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_shop_confirm_view_form
+msgid ""
+"Nudge will make exactly these changes, as you. It fills what is empty and adds unpublished\n"
+"                   drafts; nothing is deleted or published."
+msgstr ""
+"سيُجري Nudge هذه التغييرات بالضبط، بصفتك. يملأ ما هو فارغ ويضيف مسودات غير "
+"منشورة؛ ولا يُحذف شيء ولا يُنشر."
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_check_fix_view_form
+msgid ""
+"Nudge will make exactly these changes, as you. It only fills what is empty or adds an\n"
+"                   unpublished draft; nothing is deleted or published."
+msgstr ""
+"سيجري Nudge هذه التغييرات بالضبط، باسمك. هو يملأ ما هو فارغ فقط أو يضيف "
+"مسودة غير منشورة؛ لا شيء يُحذف أو يُنشر."
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__shop
+msgid "Online shop"
+msgstr "متجر إلكتروني"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "Only a website designer may check or fix a website."
+msgstr "مصمم الموقع وحده يستطيع فحص الموقع أو إصلاحه."
+
+#. module: nudge_builder
+#. odoo-javascript
+#: code:addons/nudge_builder/static/src/xml/run.xml:0
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "Open in editor"
+msgstr "افتح في المحرر"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "Open the home page in the editor"
+msgstr "افتح الصفحة الرئيسية في المحرر"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Order today and we bring it to your door."
+msgstr "اطلب اليوم ونوصله إلى بابك."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Our best offers"
+msgstr "أفضل عروضنا"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_template__page_count
+msgid "Page Count"
+msgstr "عدد الصفحات"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "Page: %s"
+msgstr "صفحة: %s"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__page_ids
+msgid "Pages"
+msgstr "الصفحات"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "Pages built"
+msgstr "الصفحات المبنية"
+
+#. module: nudge_builder
+#. odoo-javascript
+#: code:addons/nudge_builder/static/src/xml/run.xml:0
+msgid "Pages built (none is published yet)"
+msgstr "الصفحات المبنية (لم تُنشر أي منها بعد)"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__kind_ids
+msgid "Pages wanted"
+msgstr "الصفحات المطلوبة"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Payment, delivery, tax display and pricelist are set."
+msgstr "الدفع والتوصيل وعرض الضريبة وقائمة الأسعار مضبوطة."
+
+#. module: nudge_builder
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_check_finding__check_group__performance
+msgid "Performance"
+msgstr "الأداء"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "Pick a direction"
+msgstr "اختر اتجاها"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_shop_confirm__plan_json
+msgid "Plan Json"
+msgstr "خطة JSON"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__preview_html
+msgid "Preview Html"
+msgstr "معاينة"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Prices show with or without tax"
+msgstr "الأسعار تظهر مع الضريبة أو بدونها"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "Privacy Policy"
+msgstr "سياسة الخصوصية"
+
+#. module: nudge_builder
+#: model:nudge.builder.page.kind,name:nudge_builder.kind_legal
+msgid "Privacy and terms"
+msgstr "الخصوصية والشروط"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__private
+msgid "Private"
+msgstr "خاص"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Products placed"
+msgstr "المنتجات الموضوعة في فئات"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__progress
+msgid "Progress"
+msgstr "التقدم"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__progress_text
+msgid "Progress Text"
+msgstr "نص التقدم"
+
+#. module: nudge_builder
+#: model:nudge.builder.page.kind,name:nudge_builder.kind_projects
+msgid "Projects / Portfolio"
+msgstr "المشاريع / الأعمال"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Promo banners"
+msgstr "بانرات ترويجية"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "Publish all pages"
+msgstr "انشر كل الصفحات"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__is_published
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_site__state__published
+msgid "Published"
+msgstr "منشور"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Ready to sell?"
+msgstr "هل المتجر جاهز للبيع؟"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "Redraw the directions"
+msgstr "أعد رسم الاتجاهات"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__report_id
+msgid "Report"
+msgstr "التقرير"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check__user_id
+msgid "Run By"
+msgstr "شغّله"
+
+#. module: nudge_builder
+#: model:ir.model.fields,help:nudge_builder.field_nudge_builder_site__kind
+msgid "Say it in your own words, in any language."
+msgstr "قلها بكلماتك، بأي لغة."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "Search engines (SEO)"
+msgstr "محركات البحث (SEO)"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_template__sector
+msgid "Sector"
+msgstr "القطاع"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "See the offers"
+msgstr "شاهد العروض"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "See what is new"
+msgstr "شاهد الجديد"
+
+#. module: nudge_builder
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_check_finding__check_group__seo
+msgid "Seo"
+msgstr "SEO"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__sequence
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page_kind__sequence
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_template__sequence
+msgid "Sequence"
+msgstr "التسلسل"
+
+#. module: nudge_builder
+#: model:nudge.builder.page.kind,name:nudge_builder.kind_services
+msgid "Services / Products"
+msgstr "الخدمات / المنتجات"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Settings"
+msgstr "الإعدادات"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__severity
+msgid "Severity"
+msgstr "الأهمية"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__severity_rank
+msgid "Severity Rank"
+msgstr "ترتيب الأهمية"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+#: code:addons/nudge_builder/tools/checks.py:0
+#: code:addons/nudge_builder/tools/shop.py:0
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_check_finding__check_group__shop
+msgid "Shop"
+msgstr "المتجر"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__shop_available
+msgid "Shop Available"
+msgstr "المتجر متاح"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__shop_plan
+msgid "Shop Plan"
+msgstr "خطة المتجر"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Shop categories"
+msgstr "فئات المتجر"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Shop now"
+msgstr "تسوّق الآن"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_template__shop
+msgid "Shop template"
+msgstr "قالب متجر"
+
+#. module: nudge_builder
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_site__tone__short
+msgid "Short"
+msgstr "مختصر"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_check_view_form
+msgid "Show me"
+msgstr "أرني"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "Show me three directions"
+msgstr "أرني ثلاثة اتجاهات"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__allow_projects
+msgid "Show our project names"
+msgstr "أظهر أسماء مشاريعنا"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__allow_team
+msgid "Show our team"
+msgstr "أظهر فريقنا"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Shown as filters: %s"
+msgstr "تظهر كعوامل تصفية: %s"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__delta
+msgid "Since Last Time"
+msgstr "منذ المرة الماضية"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__site_id
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_shop_confirm__site_id
+msgid "Site"
+msgstr "الموقع"
+
+#. module: nudge_builder
+#: model:ir.actions.act_window,name:nudge_builder.nudge_builder_check_run_action
+#: model:ir.model,name:nudge_builder.model_nudge_builder_check_run
+#: model:ir.ui.menu,name:nudge_builder.menu_nudge_builder_check_run
+msgid "Site Check"
+msgstr "فحص الموقع"
+
+#. module: nudge_builder
+#: model:ir.actions.act_window,name:nudge_builder.nudge_builder_check_action
+#: model:ir.ui.menu,name:nudge_builder.menu_nudge_builder_check_reports
+msgid "Site Check Reports"
+msgstr "تقارير فحص الموقع"
+
+#. module: nudge_builder
+#: model:ir.actions.act_window,name:nudge_builder.nudge_builder_action_sites
+#: model:ir.ui.menu,name:nudge_builder.menu_nudge_builder_sites
+msgid "Sites built"
+msgstr "المواقع المبنية"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check__skipped_json
+msgid "Skipped Json"
+msgstr "المتخطى (JSON)"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__snippet_keys
+msgid "Snippet Keys"
+msgstr "مفاتيح المقاطع"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "Speed"
+msgstr "السرعة"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__state
+msgid "State"
+msgstr "الحالة"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__step_index
+msgid "Step Index"
+msgstr "رقم الخطوة"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__steps
+msgid "Steps"
+msgstr "الخطوات"
+
+#. module: nudge_builder
+#. odoo-javascript
+#: code:addons/nudge_builder/static/src/xml/run.xml:0
+msgid "Stop"
+msgstr "إيقاف"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__stopped
+msgid "Stopped"
+msgstr "متوقف"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "Stopped by the person at step %s."
+msgstr "أوقفه المستخدم عند الخطوة %s."
+
+#. module: nudge_builder
+#. odoo-javascript
+#: code:addons/nudge_builder/static/src/xml/run.xml:0
+msgid ""
+"Stopped. What is built stays, unpublished; you can continue from the site."
+msgstr "تم الإيقاف. ما بُني يبقى دون نشر؛ يمكنك المتابعة من صفحة الموقع."
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check__summary
+msgid "Summary"
+msgstr "الملخص"
+
+#. module: nudge_builder
+#: model:nudge.builder.page.kind,name:nudge_builder.kind_team
+msgid "Team"
+msgstr "الفريق"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__template_json
+msgid "Template Json"
+msgstr "قالب JSON"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "Terms and Conditions"
+msgstr "الشروط والأحكام"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "The Delivery app is not installed."
+msgstr "تطبيق التوصيل غير مثبّت."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "The Payment app is not installed."
+msgstr "تطبيق الدفع غير مثبّت."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid ""
+"The Website Sale app (eCommerce) is not installed: there is no shop to "
+"arrange."
+msgstr ""
+"تطبيق المبيعات عبر الموقع (التجارة الإلكترونية) غير مثبّت: لا يوجد متجر "
+"لترتيبه."
+
+#. module: nudge_builder
+#: model:ir.model.fields,help:nudge_builder.field_nudge_builder_site__colors_from_logo
+msgid "The colours were read from the company logo."
+msgstr "قُرئت الألوان من شعار الشركة."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid ""
+"The content is provided for information. Prices, availability and delivery "
+"times are confirmed when the order is accepted."
+msgstr ""
+"المحتوى مقدّم للاطلاع. تُؤكَّد الأسعار والتوفر ومواعيد التوصيل عند قبول "
+"الطلب."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "The header and footer layout was left as it is."
+msgstr "تُرك تخطيط الترويسة والتذييل كما هو."
+
+#. module: nudge_builder
+#: model:ir.model.fields,help:nudge_builder.field_nudge_builder_site__allow_projects
+msgid "The names of the projects are sent to the writer."
+msgstr "تُرسل أسماء المشاريع إلى الكاتب."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "The provider failed: %s"
+msgstr "فشل المزود: %s"
+
+#. module: nudge_builder
+#: model:ir.model.fields,help:nudge_builder.field_nudge_builder_site__allow_team
+msgid "The public name and job title of employees are sent to the writer."
+msgstr "يُرسل الاسم العام والمسمى الوظيفي للموظفين إلى الكاتب."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_shop_confirm.py:0
+msgid "The shop"
+msgstr "المتجر"
+
+#. module: nudge_builder
+#: model:ir.model.fields,help:nudge_builder.field_nudge_builder_site__shop_plan
+msgid ""
+"The shop plan the person confirmed; the shop is built only when it is set."
+msgstr "خطة المتجر التي أكّدها الشخص؛ لا يُبنى المتجر إلا عند تحديدها."
+
+#. module: nudge_builder
+#: model:ir.model.fields,help:nudge_builder.field_nudge_builder_page__snippet_keys
+msgid "The snippets of the page in order, separated by commas."
+msgstr "مقاطع الصفحة بالترتيب، مفصولة بفواصل."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "The website has no %s page."
+msgstr "ليس في الموقع صفحة %s."
+
+#. module: nudge_builder
+#: model:ir.model.fields,help:nudge_builder.field_nudge_builder_template__data
+msgid "The whole template as read from its file."
+msgstr "القالب كله كما قُرئ من ملفه."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "Theme: colours and fonts"
+msgstr "القالب: الألوان والخطوط"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "There is no website."
+msgstr "لا يوجد موقع."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_check.py:0
+msgid "There is nothing left to change for this fix."
+msgstr "لم يبقَ ما يُغيَّر لهذا الإصلاح."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_check.py:0
+msgid "There is nothing to open for this finding."
+msgstr "لا يوجد ما يُفتح لهذه النتيجة."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_check.py:0
+msgid "This fix was applied already."
+msgstr "تم تطبيق هذا الإصلاح مسبقًا."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "This is a draft: have it reviewed before publishing."
+msgstr "هذه مسودة: اطلب مراجعتها قبل النشر."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "This version of Odoo has no website description on products."
+msgstr "هذا الإصدار من Odoo ليس فيه وصف للموقع على المنتجات."
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_template__thumbnail
+msgid "Thumbnail"
+msgstr "الصورة المصغرة"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_fix__title
+msgid "Title"
+msgstr "العنوان"
+
+#. module: nudge_builder
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_check_finding__severity__info
+msgid "To Know"
+msgstr "للعلم"
+
+#. module: nudge_builder
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_check_finding__severity__warning
+msgid "To Look At"
+msgstr "تستحق النظر"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid ""
+"To exercise your rights, write to us: %s. This is a draft: have it reviewed "
+"before publishing."
+msgstr "لممارسة حقوقك راسلنا على: %s. هذه مسودة: اطلب مراجعتها قبل النشر."
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__tone
+msgid "Tone"
+msgstr "الأسلوب"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_check_finding__check_group__translations
+msgid "Translations"
+msgstr "الترجمات"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "Unknown direction."
+msgstr "اتجاه غير معروف."
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__url
+msgid "Url"
+msgstr "الرابط"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__urls_json
+msgid "Urls Json"
+msgstr "الروابط (JSON)"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__view_id
+msgid "View"
+msgstr "العرض"
+
+#. module: nudge_builder
+#: model:ir.model.fields,help:nudge_builder.field_nudge_builder_check_run__external
+msgid ""
+"Visits each external link once (5 seconds at most, 50 links at most). Off by"
+" default: it is slow."
+msgstr ""
+"يزور كل رابط خارجي مرة واحدة (5 ثوانٍ كحد أقصى و50 رابطًا كحد أقصى). متوقف "
+"افتراضيًا لأنه بطيء."
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check__warning_count
+msgid "Warning Count"
+msgstr "عدد التحذيرات"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid ""
+"We collect only what you give us (for example in a form) and what the "
+"website needs to work. We do not sell it. You may ask to see, correct or "
+"erase your data at any time."
+msgstr ""
+"نجمع فقط ما تقدمه لنا (مثلًا في نموذج) وما يحتاجه الموقع ليعمل. لا نبيعه. "
+"يمكنك في أي وقت أن تطلب الاطلاع على بياناتك أو تصحيحها أو محوها."
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check__website_id
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__website_id
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_fix__website_id
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_run__website_id
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__website_id
+msgid "Website"
+msgstr "الموقع الإلكتروني"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/builder_tool.py:0
+#: model:ir.ui.menu,name:nudge_builder.menu_nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "Website Builder"
+msgstr "منشئ المواقع"
+
+#. module: nudge_builder
+#: model:ir.model,name:nudge_builder.model_nudge_builder_shop_confirm
+msgid "Website Builder: shop plan card"
+msgstr "منشئ المواقع: بطاقة خطة المتجر"
+
+#. module: nudge_builder
+#: model:ir.model,name:nudge_builder.model_nudge_builder_check_finding
+msgid "Website Check Finding"
+msgstr "نتيجة فحص الموقع"
+
+#. module: nudge_builder
+#: model:ir.model,name:nudge_builder.model_nudge_builder_check_fix
+msgid "Website Check Fix"
+msgstr "إصلاح فحص الموقع"
+
+#. module: nudge_builder
+#: model:ir.model,name:nudge_builder.model_nudge_builder_check
+msgid "Website Check Report"
+msgstr "تقرير فحص الموقع"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__page_id
+msgid "Website Page"
+msgstr "صفحة الموقع"
+
+#. module: nudge_builder
+#: model:ir.model,name:nudge_builder.model_nudge_builder_template
+msgid "Website builder template"
+msgstr "قالب منشئ المواقع"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "Website of %s"
+msgstr "موقع %s"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_list
+msgid "Websites"
+msgstr "المواقع"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_shop_confirm__lines
+msgid "What Nudge would do"
+msgstr "ما الذي سيفعله Nudge"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__kind
+msgid "What is your business?"
+msgstr "ما هو نشاطك؟"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "Write the missing meta description from the first paragraph"
+msgstr "كتابة الوصف التعريفي الناقص من الفقرة الأولى"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_shop_confirm_view_form
+msgid "Yes, arrange the shop"
+msgstr "نعم، رتّب المتجر"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "Your rights do not let you see this: ask an administrator."
+msgstr "صلاحياتك لا تسمح لك برؤية هذا: اطلب من المدير."
+
+#. module: nudge_builder
+#: model:ir.model.fields,help:nudge_builder.field_nudge_builder_page__key
+msgid "home, about, services... legal_privacy, legal_terms, shop..."
+msgstr "home, about, services... legal_privacy, legal_terms, shop..."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_check.py:0
+msgid "it could not run"
+msgstr "تعذّر تشغيله"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "privacy"
+msgstr "الخصوصية"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/checks.py:0
+msgid "terms"
+msgstr "الشروط"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/shop.py:0
+msgid "unchanged"
+msgstr "بلا تغيير"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "%s must be a colour like #1f3a5f."
+msgstr "يجب أن يكون %s لونًا مثل #1f3a5f."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "%s must be a font name: letters, digits, spaces."
+msgstr "يجب أن يكون %s اسم خط: أحرف وأرقام ومسافات."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "Another site is being built on this website. Wait until it is done."
+msgstr "يجري بناء موقع آخر على هذا الموقع الإلكتروني. انتظر حتى ينتهي."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "Build the website %s"
+msgstr "بناء الموقع الإلكتروني %s"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "The build stopped on an error: look at the log of the site."
+msgstr "توقف البناء بسبب خطأ: انظر إلى سجل الموقع."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "The website %s is built. Nothing is published yet."
+msgstr "تم بناء الموقع الإلكتروني %s. لم يُنشر شيء بعد."

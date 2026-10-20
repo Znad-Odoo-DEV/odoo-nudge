@@ -1,0 +1,66 @@
+{
+  "id": "bh",
+  "name": {"en": "Bahrain", "ar": "البحرين"},
+  "countries": ["BH"],
+  "reference": {
+    "en": "VAT Decree-Law No. (48) of 2018, National Bureau for Revenue (NBR) of Bahrain: standard rate of 10% since 1 January 2022. Check the current text with the NBR before you rely on it. This is a checklist, not legal advice; confirm with the authority.",
+    "ar": "المرسوم بقانون رقم (48) لسنة 2018 بإصدار قانون ضريبة القيمة المضافة، الجهاز الوطني للإيرادات في البحرين: السعر الأساسي 10% منذ 1 يناير 2022. راجع النص الحالي لدى الجهاز قبل الاعتماد عليه. هذه قائمة فحص وليست استشارة قانونية؛ تأكد لدى الجهة المختصة."
+  },
+  "checks": [
+    {
+      "key": "vat_tax_10",
+      "check": "tax_rate",
+      "severity": "critical",
+      "params": {"rate": 10.0, "use": "sale", "modules": ["account"]},
+      "title": {"en": "A 10% sales VAT is set up", "ar": "ضريبة مبيعات بنسبة 10% معرّفة"},
+      "explanation": {
+        "en": "The standard rate of VAT in Bahrain is 10% since 1 January 2022 (it was 5% before). The Bahraini chart of accounts (module l10n_bh) brings the taxes.",
+        "ar": "السعر الأساسي لضريبة القيمة المضافة في البحرين 10% منذ 1 يناير 2022 (كان 5% قبلها). يأتي بالضرائب دليل حسابات البحرين (الوحدة l10n_bh)."
+      }
+    },
+    {
+      "key": "vat_on_products",
+      "check": "tax_on_products",
+      "severity": "warning",
+      "params": {"rate": 10.0},
+      "title": {"en": "Products that are sold carry the 10% VAT", "ar": "المنتجات المباعة عليها ضريبة 10%"},
+      "explanation": {
+        "en": "These products can be sold but do not carry the 10% sales tax: their invoices would show no VAT. Zero-rated or exempt supplies need a tax of their own.",
+        "ar": "هذه المنتجات قابلة للبيع لكن ليس عليها ضريبة المبيعات 10%: فواتيرها لن تُظهر ضريبة. التوريدات ذات النسبة الصفرية أو المعفاة تحتاج ضريبة خاصة بها."
+      }
+    },
+    {
+      "key": "company_vat",
+      "check": "company_field",
+      "severity": "critical",
+      "params": {"fields": ["vat"]},
+      "title": {"en": "The company has its VAT account number", "ar": "للشركة رقم حساب ضريبة القيمة المضافة"},
+      "explanation": {
+        "en": "A registered business shows its VAT account number on its tax invoices. Enter it in Tax ID on the company.",
+        "ar": "تُظهر المنشأة المسجَّلة رقم حسابها الضريبي على فواتيرها الضريبية. أدخله في الرقم الضريبي للشركة."
+      }
+    },
+    {
+      "key": "company_registry",
+      "check": "company_field",
+      "severity": "warning",
+      "params": {"fields": ["company_registry"]},
+      "title": {"en": "The company has its commercial registration (CR) number", "ar": "للشركة رقم السجل التجاري"},
+      "explanation": {
+        "en": "Commercial documents name the commercial registration number issued by the Ministry of Industry and Commerce. Enter it in Company ID.",
+        "ar": "تذكر المستندات التجارية رقم السجل التجاري الصادر عن وزارة الصناعة والتجارة. أدخله في حقل معرّف الشركة."
+      }
+    },
+    {
+      "key": "arabic_language",
+      "check": "language_active",
+      "severity": "info",
+      "params": {"prefix": "ar"},
+      "title": {"en": "Arabic is active, for invoices and contracts", "ar": "اللغة العربية مفعّلة للفواتير والعقود"},
+      "explanation": {
+        "en": "Tax invoices in Bahrain are issued in Arabic or in both Arabic and English. Activate Arabic and set it on the customers who ask for it.",
+        "ar": "تُصدر الفواتير الضريبية في البحرين بالعربية أو بالعربية والإنجليزية معاً. فعّل العربية واضبطها على العملاء الذين يطلبونها."
+      }
+    }
+  ]
+}

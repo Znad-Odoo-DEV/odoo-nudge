@@ -1,6 +1,6 @@
 import unittest
 
-from odoo.tests import BaseCase, TransactionCase, tagged
+from odoo.tests import BaseCase, TransactionCase, new_test_user, tagged
 
 from odoo.addons.nudge import tools
 from odoo.addons.nudge.models.nudge_conversation import is_product_command
@@ -124,8 +124,21 @@ class TestFinding(NudgeCase, TransactionCase):
         self.assertIn("price", item)
         may_read_cost = product_search._readable(self.bolt_8.with_user(self.user_a), "standard_price")
         self.assertEqual("cost" in item, may_read_cost)
-        if "stock.warehouse" in self.env:
-            self.assertIn("on_hand", item)
+
+    def test_a_card_has_no_stock_figures_for_a_user_without_inventory_rights(self):
+        if "stock.warehouse" not in self.env:
+            self.skipTest("Inventory is not installed")
+        plain = new_test_user(self.env, login="nudge_no_stock", groups="nudge.group_nudge_user")
+        plain.groups_id -= self.env["res.groups"].search([("id", "in", [
+            self.env.ref(xmlid).id for xmlid in ("stock.group_stock_user", "stock.group_stock_manager")
+            if self.env.ref(xmlid, raise_if_not_found=False)])])
+        self.assertFalse(self.env(user=plain)["stock.move"].has_access("read"), "The user is built without stock rights")
+        found = self.find("HB-8", user=plain)["items"]
+        self.assertTrue(found)
+        self.assertNotIn("on_hand", found[0])
+        self.assertNotIn("by_warehouse", found[0])
+        stocker = new_test_user(self.env, login="nudge_with_stock", groups="nudge.group_nudge_user,stock.group_stock_user")
+        self.assertIn("on_hand", self.find("HB-8", user=stocker)["items"][0])
 
     def test_archived_products_are_not_found(self):
         self.bolt_10.active = False

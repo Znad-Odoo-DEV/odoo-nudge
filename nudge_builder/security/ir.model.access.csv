@@ -1,0 +1,14 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_nudge_builder_site_designer,nudge.builder.site designer,model_nudge_builder_site,website.group_website_designer,1,1,1,0
+access_nudge_builder_site_system,nudge.builder.site system,model_nudge_builder_site,base.group_system,1,1,1,1
+access_nudge_builder_page_designer,nudge.builder.page designer,model_nudge_builder_page,website.group_website_designer,1,1,1,0
+access_nudge_builder_page_system,nudge.builder.page system,model_nudge_builder_page,base.group_system,1,1,1,1
+access_nudge_builder_page_kind_designer,nudge.builder.page.kind designer,model_nudge_builder_page_kind,website.group_website_designer,1,0,0,0
+access_nudge_builder_page_kind_system,nudge.builder.page.kind system,model_nudge_builder_page_kind,base.group_system,1,1,1,1
+access_nudge_builder_shop_confirm_designer,nudge.builder.shop.confirm designer,model_nudge_builder_shop_confirm,website.group_website_designer,1,1,1,1
+access_nudge_builder_check_designer,nudge.builder.check designer,model_nudge_builder_check,website.group_website_designer,1,1,1,0
+access_nudge_builder_check_system,nudge.builder.check system,model_nudge_builder_check,base.group_system,1,1,1,1
+access_nudge_builder_check_finding_designer,nudge.builder.check.finding designer,model_nudge_builder_check_finding,website.group_website_designer,1,1,1,0
+access_nudge_builder_check_finding_system,nudge.builder.check.finding system,model_nudge_builder_check_finding,base.group_system,1,1,1,1
+access_nudge_builder_template_designer,nudge.builder.template designer,model_nudge_builder_template,website.group_website_designer,1,0,0,0
+access_nudge_builder_template_system,nudge.builder.template system,model_nudge_builder_template,base.group_system,1,1,1,1

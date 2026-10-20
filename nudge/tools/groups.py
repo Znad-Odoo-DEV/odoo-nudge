@@ -18,9 +18,10 @@ GROUPS = {
     },
     "data": {
         "about": "SQL queries, spreadsheets of figures, Python run on the database, its profile",
-        "tools": ("run_sql", "make_spreadsheet", "run_python", "search_database_profile", "aggregate_records"),
-        "words": ("sql", "query", "spreadsheet", "excel", "sheet", "python", "script", "report", "chart",
-                  "استعلام", "جدول", "اكسل", "بايثون", "سكربت", "تقرير", "مخطط", "رسم بياني"),
+        "tools": ("run_sql", "make_spreadsheet", "run_python", "search_database_profile", "aggregate_records",
+                  "show_chart", "save_report"),
+        "words": ("sql", "query", "spreadsheet", "excel", "sheet", "python", "script", "report", "chart", "graph", "plot", "pivot", "my reports",
+                  "استعلام", "جدول", "اكسل", "بايثون", "سكربت", "تقرير", "مخطط", "رسم بياني", "احفظ", "خزن", "محوري"),
     },
     "reports": {
         "about": "a PDF report printed from a record, with the company's header",
@@ -45,14 +46,49 @@ GROUPS = {
     },
     "import": {
         "about": "check a file before importing it",
-        "tools": ("test_import",),
+        "tools": ("test_import", "match_import_columns"),
         "words": ("import", "csv", "xlsx", "استيراد", "استورد", "ملف"),
+    },
+    "meetings": {
+        "about": "summarise a recorded meeting and make tasks, activities, events and a note from it",
+        "tools": ("summarize_meeting", "meeting_to_records", "search_records", "find_record"),
+        "words": ("meeting", "minutes", "recording", "audio", "voice note", "action item", "اجتماع", "محضر",
+                  "تسجيل", "تسجيل صوتي", "ملخص", "لخص", "خلاصة", "خلاصه", "الاجتماع", "جلسة", "اجتماعنا"),
+    },
+    "documents": {
+        "about": "make a draft vendor bill, invoice, quotation, purchase order, lead or contact from a PDF, "
+                 "picture, Excel file or email",
+        "tools": ("document_to_record", "find_record", "search_records"),
+        "words": ("invoice", "bill", "receipt", "quotation", "purchase order", "from this file", "from this email",
+                  "from this pdf", "enter this", "فاتورة", "فواتير", "عرض سعر", "امر شراء", "ايصال", "ادخل"),
     },
     "records": {
         "about": "find, read, create and change records, press their buttons, plans of many records",
         "tools": ("search_records", "read_record", "find_record", "aggregate_records", "filter_screen",
-                  "open_record", "prepare_create", "prepare_write", "call_method", "prepare_plan"),
+                  "open_record", "prepare_create", "prepare_write", "call_method", "prepare_plan", "bulk_apply",
+                  "show_chart", "save_report"),
         "words": (),
+    },
+    "history": {
+        "about": "what happened with a customer, an order, a project or a ticket: its history summarised",
+        "tools": ("summarize_record_history",),
+        "words": ("summar", "history", "what happened", "recap", "catch me up", "where are we",
+                  "ملخص", "لخص", "تلخيص", "تاريخ", "ايش صار", "شو صار", "وين وصلنا"),
+    },
+    "setup": {
+        "about": "set up a new database step by step: company, country and fiscal localisation, currency, "
+                 "languages, apps, warehouses, users, fiscal year",
+        "tools": ("read_setup", "prepare_setup_step"),
+        "words": ("set up this database", "first setup", "setup assistant", "set up the database", "set this up",
+                  "new database", "جهز قاعده", "جهز النظام", "تهيئه", "الاعداد الاولي", "اعداد اولي", "قاعده جديده",
+                  "جهزلي", "جهز الداتابيس"),
+    },
+    "changes": {
+        "about": "who changed a record and what, and putting a tracked field back as it was",
+        "tools": ("record_changes", "prepare_revert"),
+        "words": ("who changed", "who edited", "revert", "restore", "roll back", "rollback", "old value",
+                  "previous value", "change back", "put back",
+                  "مين غير", "مين عدل", "منو غير", "رجع", "ارجع", "استرجع", "استعاد", "القديم", "السابق", "تراجع"),
     },
     "screen": {
         "about": "show the steps on the person's screen with the pointer, write in a field of it",

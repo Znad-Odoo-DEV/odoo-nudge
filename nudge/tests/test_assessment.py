@@ -33,9 +33,11 @@ class TestAssessment(NudgeCase, TransactionCase):
         enterprise_only = {entry["module"] for entry in found.get("enterprise_only", [])}
         self.assertEqual(set(installed) | set(missing) | enterprise_only,
                          {module for module, _why, _words in assessment.BUSINESSES["contracting"]["needs"]})
-        self.assertNotIn("project", installed, "Not installed on this test database")
-        self.assertIn("project", missing)
-        self.assertIn("for", missing["project"])
+        has_project = bool(self.env["ir.module.module"].sudo().search_count(
+            [("name", "=", "project"), ("state", "=", "installed")]))
+        self.assertEqual("project" in installed, has_project)
+        self.assertEqual("project" in missing, not has_project)
+        self.assertIn("for", (installed if has_project else missing)["project"])
         pages = [entry["documentation"] for entry in found["installed"] + found["missing"] if "documentation" in entry]
         self.assertTrue(pages, "The official documentation is cited")
         self.assertTrue(all(page["url"].startswith("https://") for page in pages))

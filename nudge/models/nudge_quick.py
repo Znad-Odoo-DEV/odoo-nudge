@@ -204,11 +204,12 @@ class NudgeQuick(models.AbstractModel):
         return commands.listed(self.env)
 
     @api.model
-    def run_command(self, text, model_name=None):
+    def run_command(self, text, model_name=None, snapshot=None):
         """A command typed in the message box, answered without any AI.
 
         :param text: the message, starting with the command
         :param model_name: model of the screen the person is on, for /rules
+        :param snapshot: the screen as the browser describes it, for /why, /field, /here
         :return: ``{"command", "query", "focused", "content", ...}`` with what
             was found: ``menus``, ``settings``, ``pages``, ``records``,
             ``passages``, ``products``, ``code``, ``table``, ``commands``;
@@ -226,7 +227,9 @@ class NudgeQuick(models.AbstractModel):
             return answer
         if command.kind == commands.FOCUSED:
             return answer
-        needs_words = command.name not in ("help", "rules")
+        needs_words = command.name not in ("help", "rules", "tour", "health", "import") + commands.SCREEN_COMMANDS
+        if snapshot:
+            self = self.with_context(nudge_snapshot=snapshot)
         if needs_words and len(rest) < 2:
             example = commands.texts(self.env)[command.name][1]
             answer["content"] = self.env._(
@@ -236,7 +239,7 @@ class NudgeQuick(models.AbstractModel):
         getattr(self, f"_command_{command.name}")(rest, answer, model_name)
         if not answer["content"] and not any(
                 answer.get(key) for key in ("menus", "settings", "pages", "records", "passages",
-                                            "products", "code", "table", "commands")):
+                                            "products", "code", "table", "commands", "explain", "tours", "health")):
             answer["content"] = self.env._("Nothing found for “%s”. Try other words.", rest)
         return answer
 
@@ -663,6 +666,25 @@ class NudgeQuick(models.AbstractModel):
         if not answer["products"]:
             answer["content"] = self.env._("No product kept in stock looks like “%s”.", rest)
 
+    def _command_health(self, rest, answer, model_name):
+        """Run the health check as the person, and show what it found"""
+        report = self.env["nudge.health.report"].run_check()
+        answer["health"] = {
+            "report_id": report.id,
+            "summary": report.summary,
+            "findings": [{
+                "id": finding.id,
+                "severity": finding.severity,
+                "message": finding.message,
+                "count": finding.count_text,
+                "is_new": finding.is_new,
+                "delta": finding.delta,
+                "can_show": bool(finding.model_name),
+            } for finding in report.finding_ids],
+        }
+        answer["content"] = (report.summary if report.finding_ids
+                             else self.env._("Nothing to report: the checks found nothing wrong."))
+
     def _command_rules(self, rest, answer, model_name):
         arguments = self._rules_target(rest or model_name or "")
         if not arguments:
@@ -675,6 +697,11 @@ class NudgeQuick(models.AbstractModel):
             answer["content"] = result.content
         else:
             answer["code"] = result.content
+
+    def _command_debug(self, rest, answer, model_name):
+        env = self.with_context(nudge_mode=base.MODE_DEV).env
+        result = base.call(env, "diagnose_failure", {"words": rest[:200]}, None, base.MODE_DEV)
+        answer["code"] = result.content
 
     def _rules_target(self, text):
         """:return: the arguments of read_automations for ``text``: a model

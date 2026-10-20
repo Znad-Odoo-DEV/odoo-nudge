@@ -7,6 +7,7 @@ managers of Nudge.
 """
 import re
 
+from ..llm import arabic
 from . import activity
 
 MAX_RESULTS = 6
@@ -16,12 +17,6 @@ MAX_AT_WORK = 15
 # Between two pieces that match as well, the one that tells the most comes first
 KINDS = ("overview", "module", "configuration", "model", "automation", "security", "activity")
 WORD = re.compile(r"[\w.]+", re.UNICODE)
-# Arabic is written in many ways: the same word with or without its
-# vowels, its hamza, its article
-ARABIC_MARKS = re.compile("[\u064b-\u0652\u0640]")
-ARABIC_LETTERS = str.maketrans({"أ": "ا", "إ": "ا", "آ": "ا", "ة": "ه", "ى": "ي",
-                                "ؤ": "و", "ئ": "ي"})
-ARABIC_ARTICLES = ("وال", "بال", "فال", "كال", "لل", "ال")
 
 
 def can_read(env, piece):
@@ -37,11 +32,9 @@ def can_read(env, piece):
 
 
 def _fold(word):
-    word = ARABIC_MARKS.sub("", word).translate(ARABIC_LETTERS)
-    for article in ARABIC_ARTICLES:
-        if word.startswith(article) and len(word) - len(article) >= 3:
-            return word[len(article):]
-    return word
+    # Arabic is written in many ways: the same word with or without its vowels, its hamza,
+    # its article
+    return arabic.strip_article(arabic.simplify(word))
 
 
 def _words(text):

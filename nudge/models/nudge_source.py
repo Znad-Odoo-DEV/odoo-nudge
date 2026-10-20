@@ -56,6 +56,7 @@ def split_passages(pages):
 
 class NudgeSource(models.Model):
     _name = "nudge.source"
+    _inherit = ["nudge.recipe.mixin"]
     _description = "Nudge Company File"
     _order = "name"
 
@@ -205,6 +206,15 @@ class NudgeSourcePassage(models.Model):
             LIMIT %s
         """, (query, tuple(sources.ids), limit * 3))
         rows = self.env.cr.fetchall()
+        # By meaning too, when the local search model is there. The files this
+        # person may read decide what can be found: ``sources`` is theirs
+        top = max((row[1] for row in rows), default=0) or 1.0
+        blended = self.env["nudge.embedding"]._blend(
+            self._name, query, {row[0]: row[1] / top for row in rows},
+            scan=("SELECT id FROM nudge_source_passage WHERE source_id IN %s", [tuple(sources.ids)]))
+        if blended:
+            return self.browse([key for key, _score in sorted(
+                blended.items(), key=lambda item: (-item[1], item[0]))[:limit]]).exists()
         if not rows:
             # Words written another way: the start of a word, any language
             # Any of them, the passages holding most of them first: a word of
@@ -219,6 +229,14 @@ class NudgeSourcePassage(models.Model):
                 return self.browse([passage.id for passage in ranked[:limit]])
             return self.browse()
         return self.browse([row[0] for row in rows[:limit]])
+
+    def unlink(self):
+        self.env["nudge.embedding"]._bump()
+        return super().unlink()
+
+    def _embedding_text(self):
+        self.ensure_one()
+        return f"{self.source_id.name}. {self.body or ''}"[:1500]
 
     def _render(self, max_chars=MAX_CHARS):
         parts, size = [], 0

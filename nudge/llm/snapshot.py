@@ -27,6 +27,7 @@ SENSITIVE_NAME = re.compile(
 CONTROL_CHARS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 
 # Dropped one after the other until the snapshot fits, least useful first
+KEPT_LINES = 5
 TRIMMED_KEYS = ("rows", "cards", "groups", "notices", "buttons", "tabs", "search")
 
 
@@ -89,6 +90,12 @@ def _trim(snapshot):
         snapshot["fields"] = [
             field for field in fields if isinstance(field, dict) and field.get("on_screen")
         ]
+    # The lines of an order go down to a few before the fields themselves are cut
+    for field in snapshot.get("fields") or []:
+        value = field.get("value") if isinstance(field, dict) else None
+        if isinstance(value, dict) and isinstance(value.get("rows"), list) and len(value["rows"]) > KEPT_LINES:
+            value["more"] = value.get("count", 0) - KEPT_LINES
+            del value["rows"][KEPT_LINES:]
     for key in TRIMMED_KEYS:
         if _fits(snapshot):
             return snapshot

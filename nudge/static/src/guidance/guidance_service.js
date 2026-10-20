@@ -42,6 +42,8 @@ export const nudgeGuidanceService = {
         let watched = null;
         let stopWatching = null;
         let fieldValue = null;
+        // Called when the person reaches the end of the steps (not when they close the guide)
+        let onFinish = null;
 
         function currentStep() {
             return state.steps[state.index] || null;
@@ -161,6 +163,7 @@ export const nudgeGuidanceService = {
             showing++;
             browser.clearInterval(timer);
             timer = null;
+            onFinish = null;
             Object.assign(state, {
                 steps: [],
                 index: 0,
@@ -177,7 +180,9 @@ export const nudgeGuidanceService = {
                 return;
             }
             if (state.index + 1 >= state.steps.length) {
+                const finished = onFinish;
                 stop();
+                finished?.();
             } else {
                 show(state.index + 1);
             }
@@ -256,7 +261,7 @@ export const nudgeGuidanceService = {
             return steps;
         }
 
-        function begin(steps) {
+        function begin(steps, whenFinished = null) {
             stop();
             if (!Array.isArray(steps) || !steps.length) {
                 return;
@@ -264,6 +269,7 @@ export const nudgeGuidanceService = {
             steps = fromWhereTheyAre(steps);
             state.steps = steps;
             state.isActive = true;
+            onFinish = typeof whenFinished === "function" ? whenFinished : null;
             // The screen moves under the steps: tabs open, dialogs come and go
             timer = browser.setInterval(look, WATCH_DELAY);
             show(0);

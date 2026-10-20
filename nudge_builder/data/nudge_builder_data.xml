@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="kind_home" model="nudge.builder.page.kind"><field name="key">home</field><field name="name">Home</field><field name="sequence">10</field></record>
+    <record id="kind_about" model="nudge.builder.page.kind"><field name="key">about</field><field name="name">About us</field><field name="sequence">20</field></record>
+    <record id="kind_services" model="nudge.builder.page.kind"><field name="key">services</field><field name="name">Services / Products</field><field name="sequence">30</field></record>
+    <record id="kind_projects" model="nudge.builder.page.kind"><field name="key">projects</field><field name="name">Projects / Portfolio</field><field name="sequence">40</field></record>
+    <record id="kind_team" model="nudge.builder.page.kind"><field name="key">team</field><field name="name">Team</field><field name="sequence">50</field></record>
+    <record id="kind_contact" model="nudge.builder.page.kind"><field name="key">contact</field><field name="name">Contact</field><field name="sequence">60</field></record>
+    <record id="kind_blog" model="nudge.builder.page.kind"><field name="key">blog</field><field name="name">Blog / News</field><field name="sequence">70</field></record>
+    <record id="kind_faq" model="nudge.builder.page.kind"><field name="key">faq</field><field name="name">FAQ</field><field name="sequence">80</field></record>
+    <record id="kind_legal" model="nudge.builder.page.kind"><field name="key">legal</field><field name="name">Privacy and terms</field><field name="sequence">90</field></record>
+</odoo>

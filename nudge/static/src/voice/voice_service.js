@@ -86,6 +86,14 @@ export const nudgeVoiceService = {
             isSpeaking: false,
             // The field a dictation is typed in
             target: null,
+            // Private mode of the company, and whether it lets the browser speak and listen
+            isPrivate: Boolean(config.voice_private),
+            canUseBrowserSpeech: config.browser_speech_ok !== false,
+            // A provider turns a recording into text: a meeting is sent as sound
+            canTranscribe: Boolean(config.can_transcribe),
+            // Why there is no microphone, when the person should be told; hidden: the browser cannot at all
+            blockedReason: "",
+            isBlockedHidden: false,
         });
         let current = null;
         // A language switched to by hand is kept, whatever is written next
@@ -100,9 +108,33 @@ export const nudgeVoiceService = {
             });
         }
 
+        /** Why nobody can listen here, when there is something to tell the person */
+        function updateBlocked() {
+            let reason = "";
+            let isHidden = false;
+            if (state.isAllowed && !state.engine) {
+                if (!speechApi.getRecognition() && (config.voice_engine === "browser" || state.isPrivate)) {
+                    reason = _t(
+                        "This browser cannot listen by itself. Chrome, Edge and Safari can; Firefox cannot."
+                    );
+                    isHidden = !config.voice_blocked_reason;
+                }
+                reason = config.voice_blocked_reason || reason;
+            }
+            Object.assign(state, { blockedReason: reason, isBlockedHidden: isHidden });
+        }
+
         /** Look again at what this browser can do */
         function refresh() {
             state.engine = pickEngine();
+            updateBlocked();
+        }
+
+        /** Tell the person why the microphone does not work */
+        function explain() {
+            if (state.blockedReason) {
+                notification.add(state.blockedReason, { type: "info" });
+            }
         }
 
         function saveSetting(name, value) {
@@ -158,7 +190,7 @@ export const nudgeVoiceService = {
             listening.engine.start({
                 language: {
                     code: state.language,
-                    tag: speechTag(state.language, speechApi.getLanguages()),
+                    tag: speechTag(state.language, speechApi.getLanguages(), state.languageSetting),
                 },
                 continuous: params.continuous,
                 hints: params.hints || [],
@@ -285,7 +317,13 @@ export const nudgeVoiceService = {
          */
         function speak(text, { replace = false } = {}) {
             const synthesis = speechApi.getSynthesis();
-            if (!state.isAllowed || !state.speakAnswers || !synthesis || current) {
+            if (
+                !state.isAllowed ||
+                !state.canUseBrowserSpeech ||
+                !state.speakAnswers ||
+                !synthesis ||
+                current
+            ) {
                 return false;
             }
             const spoken = toSpokenText(text);
@@ -328,6 +366,7 @@ export const nudgeVoiceService = {
                 return false;
             }
             if (!pickEngine()) {
+                explain();
                 return false;
             }
             if (!isEditable(element)) {
@@ -353,12 +392,14 @@ export const nudgeVoiceService = {
 
         applyLanguage();
         state.engine = pickEngine();
+        updateBlocked();
         // Browsers load their voices when first asked for them
         speechApi.getSynthesis()?.getVoices();
 
         return {
             state,
             refresh,
+            explain,
             listen,
             stop,
             cancel,

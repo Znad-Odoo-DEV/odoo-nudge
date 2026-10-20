@@ -1,0 +1,139 @@
+{
+  "id": "sa",
+  "name": {"en": "Saudi Arabia", "ar": "المملكة العربية السعودية"},
+  "countries": ["SA"],
+  "reference": {
+    "en": "VAT Law (Royal Decree No. M/113 of 1438H) and its Implementing Regulations, and the E-Invoicing Regulation, Zakat, Tax and Customs Authority (ZATCA). Check the current text with ZATCA before you rely on it. This is a checklist, not legal advice; confirm with the authority.",
+    "ar": "نظام ضريبة القيمة المضافة (المرسوم الملكي رقم م/113 لعام 1438هـ) ولائحته التنفيذية ولائحة الفوترة الإلكترونية، هيئة الزكاة والضريبة والجمارك. راجع النص الحالي لدى الهيئة قبل الاعتماد عليه. هذه قائمة فحص وليست استشارة قانونية؛ تأكد لدى الجهة المختصة."
+  },
+  "checks": [
+    {
+      "key": "vat_tax_15",
+      "check": "tax_rate",
+      "severity": "critical",
+      "params": {"rate": 15.0, "use": "sale", "modules": ["account"]},
+      "title": {"en": "A 15% sales VAT is set up", "ar": "ضريبة مبيعات بنسبة 15% معرّفة"},
+      "explanation": {
+        "en": "The standard rate of VAT in Saudi Arabia is 15% since 1 July 2020. The Saudi chart of accounts (module l10n_sa) brings it.",
+        "ar": "السعر الأساسي لضريبة القيمة المضافة في المملكة 15% منذ 1 يوليو 2020. يأتي بها دليل حسابات المملكة (الوحدة l10n_sa)."
+      }
+    },
+    {
+      "key": "vat_on_products",
+      "check": "tax_on_products",
+      "severity": "warning",
+      "params": {"rate": 15.0},
+      "title": {"en": "Products that are sold carry the 15% VAT", "ar": "المنتجات المباعة عليها ضريبة 15%"},
+      "explanation": {
+        "en": "These products can be sold but do not carry the 15% sales tax: their invoices would show no VAT. Zero-rated or exempt supplies need a tax of their own.",
+        "ar": "هذه المنتجات قابلة للبيع لكن ليس عليها ضريبة المبيعات 15%: فواتيرها لن تُظهر ضريبة. التوريدات ذات النسبة الصفرية أو المعفاة تحتاج ضريبة خاصة بها."
+      }
+    },
+    {
+      "key": "company_vat",
+      "check": "company_field",
+      "severity": "critical",
+      "params": {"fields": ["vat"], "pattern": "3\\d{13}3"},
+      "title": {"en": "The company has its VAT number of 15 digits", "ar": "للشركة رقم ضريبي من 15 رقماً"},
+      "explanation": {
+        "en": "The VAT registration number has 15 digits, starts with 3 and ends with 3. It must appear on every tax invoice and in the e-invoice. Enter it in Tax ID on the company.",
+        "ar": "رقم التسجيل في ضريبة القيمة المضافة من 15 رقماً يبدأ بـ 3 وينتهي بـ 3، ويجب أن يظهر على كل فاتورة ضريبية وفي الفاتورة الإلكترونية. أدخله في الرقم الضريبي للشركة."
+      }
+    },
+    {
+      "key": "partner_vat",
+      "check": "partner_field",
+      "severity": "warning",
+      "params": {"field": "vat", "pattern": "3\\d{13}3", "customers_only": true},
+      "title": {"en": "Customers in Saudi Arabia have a VAT number of 15 digits", "ar": "عملاء المملكة لديهم رقم ضريبي من 15 رقماً"},
+      "explanation": {
+        "en": "A tax invoice to a registered business shows the VAT number of the buyer. These customers have none, or one that does not have the right form. A consumer needs none: a simplified invoice is issued.",
+        "ar": "الفاتورة الضريبية لمنشأة مسجَّلة تُظهر الرقم الضريبي للمشتري. هؤلاء العملاء ليس لديهم رقم أو رقمهم بصيغة غير صحيحة. المستهلك لا يحتاج رقماً: تصدر له فاتورة مبسطة."
+      }
+    },
+    {
+      "key": "edi_module",
+      "check": "module_installed",
+      "severity": "warning",
+      "params": {"modules": ["l10n_sa_edi"]},
+      "title": {"en": "The e-invoicing module of ZATCA is installed", "ar": "وحدة الفوترة الإلكترونية لهيئة الزكاة مثبَّتة"},
+      "explanation": {
+        "en": "E-invoicing is compulsory: invoices are generated electronically (phase 1) and sent to ZATCA for clearance or reporting (phase 2, in waves of taxpayers). The module l10n_sa_edi does the XML, the signature and the connection.",
+        "ar": "الفوترة الإلكترونية إلزامية: تُنشأ الفواتير إلكترونياً (المرحلة الأولى) وتُرسل إلى الهيئة للتخليص أو الإبلاغ (المرحلة الثانية، على دفعات من المكلفين). تتولى الوحدة l10n_sa_edi ملف XML والتوقيع والاتصال."
+      },
+      "reference": {
+        "en": "ZATCA E-Invoicing Regulation: generation of electronic invoices from 4 December 2021 (phase 1), integration with the ZATCA platform in waves from 1 January 2023 (phase 2).",
+        "ar": "لائحة الفوترة الإلكترونية للهيئة: إصدار الفواتير الإلكترونية اعتباراً من 4 ديسمبر 2021 (المرحلة الأولى)، والربط مع منصة الهيئة على دفعات اعتباراً من 1 يناير 2023 (المرحلة الثانية)."
+      }
+    },
+    {
+      "key": "qr_code",
+      "check": "field_present",
+      "severity": "warning",
+      "params": {"model": "account.move", "fields": ["l10n_sa_qr_code_str"], "modules": ["l10n_sa_edi"]},
+      "title": {"en": "Invoices can carry the QR code", "ar": "يمكن أن تحمل الفواتير رمز QR"},
+      "explanation": {
+        "en": "The QR code is compulsory on simplified invoices and is part of the e-invoice. Odoo computes it from the seller, the VAT number, the time, the total and the VAT; the field comes with the Saudi e-invoicing module.",
+        "ar": "رمز QR إلزامي في الفواتير المبسطة وهو جزء من الفاتورة الإلكترونية. يحسبه أودو من البائع والرقم الضريبي والوقت والإجمالي والضريبة؛ ويأتي الحقل مع وحدة الفوترة الإلكترونية السعودية."
+      }
+    },
+    {
+      "key": "uuid_hash",
+      "check": "invoices_with",
+      "severity": "warning",
+      "params": {"fields": ["l10n_sa_uuid"], "modules": ["l10n_sa_edi"]},
+      "title": {"en": "Posted customer invoices carry their UUID", "ar": "الفواتير المرحَّلة للعملاء تحمل معرّفها UUID"},
+      "explanation": {
+        "en": "Each e-invoice has a UUID and a hash that chains it to the previous one. Posted invoices without a UUID were not generated by the e-invoicing module (for example those posted before it was installed).",
+        "ar": "لكل فاتورة إلكترونية معرّف UUID وبصمة تربطها بالسابقة. الفواتير المرحَّلة بلا UUID لم تُنشأ بوحدة الفوترة الإلكترونية (مثل التي رُحّلت قبل تثبيتها)."
+      }
+    },
+    {
+      "key": "arabic_language",
+      "check": "language_active",
+      "severity": "warning",
+      "params": {"prefix": "ar"},
+      "title": {"en": "Arabic is active, for the invoices", "ar": "اللغة العربية مفعّلة للفواتير"},
+      "explanation": {
+        "en": "The tax invoice must be in Arabic; another language may be added next to it. Activate Arabic and set it on the customers, so that the invoice prints in Arabic.",
+        "ar": "يجب أن تكون الفاتورة الضريبية بالعربية، ويجوز إضافة لغة أخرى بجانبها. فعّل العربية واضبطها على العملاء لتُطبع الفاتورة بالعربية."
+      },
+      "reference": {
+        "en": "VAT Implementing Regulations, tax invoices: the invoice is in Arabic, and may also be in another language.",
+        "ar": "اللائحة التنفيذية لنظام ضريبة القيمة المضافة، الفواتير الضريبية: تكون الفاتورة بالعربية ويجوز أن تكون أيضاً بلغة أخرى."
+      }
+    },
+    {
+      "key": "hijri_date",
+      "check": "note",
+      "severity": "info",
+      "title": {"en": "Hijri date: to know", "ar": "التاريخ الهجري: للعلم"},
+      "explanation": {
+        "en": "The e-invoice carries the Gregorian date and time of issue; the Hijri date may be shown in addition. Odoo prints Gregorian dates. Add the Hijri date to the invoice layout only if your customers ask for it.",
+        "ar": "تحمل الفاتورة الإلكترونية التاريخ والوقت الميلاديين؛ ويجوز إظهار التاريخ الهجري إضافةً. يطبع أودو التاريخ الميلادي. أضف التاريخ الهجري إلى قالب الفاتورة إذا طلبه عملاؤك فقط."
+      }
+    },
+    {
+      "key": "currency_sar",
+      "check": "company_currency",
+      "severity": "warning",
+      "params": {"code": "SAR"},
+      "title": {"en": "The company keeps its books in SAR", "ar": "الشركة تمسك دفاترها بالريال السعودي"},
+      "explanation": {
+        "en": "VAT returns and e-invoices are in Saudi riyals. A company in another currency must show the VAT converted in SAR on each invoice.",
+        "ar": "الإقرارات الضريبية والفواتير الإلكترونية بالريال السعودي. الشركة بعملة أخرى يجب أن تُظهر الضريبة محوّلة بالريال في كل فاتورة."
+      }
+    },
+    {
+      "key": "gosi_employees",
+      "check": "employees_of_module",
+      "severity": "warning",
+      "params": {"fields": ["identification_id"], "modules": ["l10n_sa_hr_payroll"]},
+      "title": {"en": "Employees have the ID that the GOSI registration needs", "ar": "للموظفين الهوية التي يحتاجها التسجيل في التأمينات الاجتماعية"},
+      "explanation": {
+        "en": "Employers register their employees with the General Organization for Social Insurance (GOSI) with the national ID or the Iqama number. The payroll localisation (module l10n_sa_hr_payroll) computes the contributions. These employees have no ID number.",
+        "ar": "يسجّل أصحاب العمل موظفيهم في المؤسسة العامة للتأمينات الاجتماعية برقم الهوية الوطنية أو الإقامة. تحسب وحدة توطين الرواتب (l10n_sa_hr_payroll) الاشتراكات. هؤلاء الموظفون بلا رقم هوية."
+      }
+    }
+  ]
+}

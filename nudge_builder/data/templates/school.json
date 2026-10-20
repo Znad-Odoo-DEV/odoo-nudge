@@ -1,0 +1,926 @@
+{
+ "schema": 1,
+ "key": "school",
+ "sector": "school",
+ "shop": false,
+ "name": {
+  "en": "Private school",
+  "ar": "مدرسة خاصة"
+ },
+ "brand": {
+  "en": "Nour Private School",
+  "ar": "مدرسة النور الخاصة"
+ },
+ "suggest": [
+  "school",
+  "school",
+  "مدرسة خاصة"
+ ],
+ "palette": {
+  "primary": "#1d4e89",
+  "secondary": "#f9a620",
+  "accent": "#5ba55b",
+  "light": "#f7f9fc",
+  "dark": "#1f2a44"
+ },
+ "fonts": {
+  "heading": "Montserrat",
+  "body": "Open Sans"
+ },
+ "fonts_ar": {
+  "heading": "Tajawal",
+  "body": "Tajawal"
+ },
+ "hero_image": "static/img/templates/school.webp",
+ "thumbnail": "static/img/templates/school_thumb.webp",
+ "menu": [
+  "home",
+  "about",
+  "services",
+  "projects",
+  "team",
+  "contact",
+  "faq"
+ ],
+ "pages": [
+  {
+   "key": "home",
+   "kind": "home",
+   "name": {
+    "en": "Home",
+    "ar": "الرئيسية"
+   },
+   "blocks": [
+    {
+     "snippet": "s_cover",
+     "copy": {
+      "en": {
+       "title": "Where curiosity becomes confidence",
+       "text": "Kindergarten to grade twelve with small classes, bilingual teaching and caring teachers.",
+       "button": "Apply for admission",
+       "button_url": "/contactus"
+      },
+      "ar": {
+       "title": "حيث يتحوّل الفضول إلى ثقة",
+       "text": "من الروضة حتى الصف الثاني عشر بصفوف صغيرة وتعليم ثنائي اللغة ومعلمين مهتمين.",
+       "button": "قدّم طلب التسجيل",
+       "button_url": "/contactus"
+      }
+     },
+     "image": "school",
+     "image_prompt": "wide photo of a sunny school courtyard with a classroom building, no children faces, no text"
+    },
+    {
+     "snippet": "s_three_columns",
+     "copy": {
+      "en": {
+       "title": "Why Nour Private School",
+       "items": [
+        {
+         "title": "Small classes",
+         "text": "Twenty-five students at most, with a teaching assistant in the early years."
+        },
+        {
+         "title": "Two languages",
+         "text": "Arabic and English taught side by side from the first year."
+        },
+        {
+         "title": "Safe campus",
+         "text": "Cameras, trained guards and supervised transport."
+        }
+       ]
+      },
+      "ar": {
+       "title": "لماذا مدرسة النور الخاصة",
+       "items": [
+        {
+         "title": "صفوف صغيرة",
+         "text": "خمسة وعشرون طالباً كحد أقصى مع مساعدة معلّمة في المراحل الأولى."
+        },
+        {
+         "title": "لغتان",
+         "text": "العربية والإنجليزية جنباً إلى جنب منذ السنة الأولى."
+        },
+        {
+         "title": "حرم آمن",
+         "text": "كاميرات وحراس مدرّبون ونقل مدرسي مُشرَف عليه."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_features",
+     "copy": {
+      "en": {
+       "title": "What we do",
+       "items": [
+        {
+         "title": "Kindergarten",
+         "text": "Learning through play for ages three to five."
+        },
+        {
+         "title": "Primary",
+         "text": "Reading, mathematics and science with hands-on projects."
+        },
+        {
+         "title": "Middle and secondary",
+         "text": "Exam preparation and university guidance."
+        },
+        {
+         "title": "Activities",
+         "text": "Sports, robotics, art and Quran memorisation clubs."
+        }
+       ]
+      },
+      "ar": {
+       "title": "ما نقدّمه",
+       "items": [
+        {
+         "title": "رياض الأطفال",
+         "text": "تعلّم باللعب للأعمار من ثلاث إلى خمس سنوات."
+        },
+        {
+         "title": "المرحلة الابتدائية",
+         "text": "قراءة ورياضيات وعلوم بمشاريع عملية."
+        },
+        {
+         "title": "المتوسطة والثانوية",
+         "text": "التحضير للامتحانات والإرشاد الجامعي."
+        },
+        {
+         "title": "الأنشطة",
+         "text": "أندية الرياضة والروبوت والفن وتحفيظ القرآن."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_numbers",
+     "copy": {
+      "en": {
+       "title": "In numbers",
+       "items": [
+        {
+         "number": "900",
+         "label": "Students"
+        },
+        {
+         "number": "75",
+         "label": "Teachers"
+        },
+        {
+         "number": "1:12",
+         "label": "Teacher to student"
+        },
+        {
+         "number": "96%",
+         "label": "University placement"
+        }
+       ]
+      },
+      "ar": {
+       "title": "بالأرقام",
+       "items": [
+        {
+         "number": "900",
+         "label": "طالباً وطالبة"
+        },
+        {
+         "number": "75",
+         "label": "معلماً ومعلمة"
+        },
+        {
+         "number": "1:12",
+         "label": "معلم لكل طلاب"
+        },
+        {
+         "number": "96%",
+         "label": "قبول جامعي"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "A school that knows every child",
+       "text": "With no more than twenty-five students per class, every teacher knows each child's strengths. We combine the national curriculum with strong Arabic, English and values education.",
+       "button": "About us",
+       "button_url": "/about"
+      },
+      "ar": {
+       "title": "مدرسة تعرف كل طالب",
+       "text": "بما لا يزيد على خمسة وعشرين طالباً في الصف، يعرف كل معلم نقاط قوة طلابه. نجمع بين المنهج الوطني وتعليم قوي للعربية والإنجليزية والقيم.",
+       "button": "من نحن",
+       "button_url": "/about"
+      }
+     },
+     "image": "school"
+    },
+    {
+     "snippet": "s_call_to_action",
+     "copy": {
+      "en": {
+       "title": "Visit us before you decide",
+       "text": "Join a campus tour every Tuesday and meet the teachers.",
+       "button": "Book a tour",
+       "button_url": "/contactus"
+      },
+      "ar": {
+       "title": "زرنا قبل أن تقرّر",
+       "text": "انضم إلى جولة في الحرم كل ثلاثاء والتقِ بالمعلمين.",
+       "button": "احجز جولة",
+       "button_url": "/contactus"
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Private school | Kindergarten to grade 12",
+     "ar": "مدرسة خاصة | من الروضة إلى الصف الثاني عشر"
+    },
+    "description": {
+     "en": "Bilingual private school with small classes, safe campus and open admission.",
+     "ar": "مدرسة خاصة ثنائية اللغة بصفوف صغيرة وحرم آمن والتسجيل مفتوح."
+    }
+   },
+   "url": "/"
+  },
+  {
+   "key": "about",
+   "kind": "about",
+   "name": {
+    "en": "About us",
+    "ar": "من نحن"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "About Nour Private School"
+      },
+      "ar": {
+       "title": "عن مدرسة النور الخاصة"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "A school that knows every child",
+       "text": "With no more than twenty-five students per class, every teacher knows each child's strengths. We combine the national curriculum with strong Arabic, English and values education."
+      },
+      "ar": {
+       "title": "مدرسة تعرف كل طالب",
+       "text": "بما لا يزيد على خمسة وعشرين طالباً في الصف، يعرف كل معلم نقاط قوة طلابه. نجمع بين المنهج الوطني وتعليم قوي للعربية والإنجليزية والقيم."
+      }
+     },
+     "image": "school"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Small classes",
+       "text": "Twenty-five students at most, with a teaching assistant in the early years."
+      },
+      "ar": {
+       "title": "صفوف صغيرة",
+       "text": "خمسة وعشرون طالباً كحد أقصى مع مساعدة معلّمة في المراحل الأولى."
+      }
+     },
+     "image": "school"
+    },
+    {
+     "snippet": "s_numbers",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "number": "900",
+         "label": "Students"
+        },
+        {
+         "number": "75",
+         "label": "Teachers"
+        },
+        {
+         "number": "1:12",
+         "label": "Teacher to student"
+        },
+        {
+         "number": "96%",
+         "label": "University placement"
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "number": "900",
+         "label": "طالباً وطالبة"
+        },
+        {
+         "number": "75",
+         "label": "معلماً ومعلمة"
+        },
+        {
+         "number": "1:12",
+         "label": "معلم لكل طلاب"
+        },
+        {
+         "number": "96%",
+         "label": "قبول جامعي"
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "About Nour Private School",
+     "ar": "عن مدرسة النور الخاصة"
+    },
+    "description": {
+     "en": "With no more than twenty-five students per class, every teacher knows each child's strengths. We combine the national curriculum with strong Arabic, E",
+     "ar": "بما لا يزيد على خمسة وعشرين طالباً في الصف، يعرف كل معلم نقاط قوة طلابه. نجمع بين المنهج الوطني وتعليم قوي للعربية والإنجليزية والقيم."
+    }
+   }
+  },
+  {
+   "key": "services",
+   "kind": "services",
+   "name": {
+    "en": "Services",
+    "ar": "الخدمات"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Our services",
+       "text": "Kindergarten to grade twelve with small classes, bilingual teaching and caring teachers."
+      },
+      "ar": {
+       "title": "خدماتنا",
+       "text": "من الروضة حتى الصف الثاني عشر بصفوف صغيرة وتعليم ثنائي اللغة ومعلمين مهتمين."
+      }
+     }
+    },
+    {
+     "snippet": "s_features",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "title": "Kindergarten",
+         "text": "Learning through play for ages three to five."
+        },
+        {
+         "title": "Primary",
+         "text": "Reading, mathematics and science with hands-on projects."
+        },
+        {
+         "title": "Middle and secondary",
+         "text": "Exam preparation and university guidance."
+        },
+        {
+         "title": "Activities",
+         "text": "Sports, robotics, art and Quran memorisation clubs."
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "title": "رياض الأطفال",
+         "text": "تعلّم باللعب للأعمار من ثلاث إلى خمس سنوات."
+        },
+        {
+         "title": "المرحلة الابتدائية",
+         "text": "قراءة ورياضيات وعلوم بمشاريع عملية."
+        },
+        {
+         "title": "المتوسطة والثانوية",
+         "text": "التحضير للامتحانات والإرشاد الجامعي."
+        },
+        {
+         "title": "الأنشطة",
+         "text": "أندية الرياضة والروبوت والفن وتحفيظ القرآن."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_three_columns",
+     "copy": {
+      "en": {
+       "title": "How we work",
+       "items": [
+        {
+         "title": "Small classes",
+         "text": "Twenty-five students at most, with a teaching assistant in the early years."
+        },
+        {
+         "title": "Two languages",
+         "text": "Arabic and English taught side by side from the first year."
+        },
+        {
+         "title": "Safe campus",
+         "text": "Cameras, trained guards and supervised transport."
+        }
+       ]
+      },
+      "ar": {
+       "title": "كيف نعمل",
+       "items": [
+        {
+         "title": "صفوف صغيرة",
+         "text": "خمسة وعشرون طالباً كحد أقصى مع مساعدة معلّمة في المراحل الأولى."
+        },
+        {
+         "title": "لغتان",
+         "text": "العربية والإنجليزية جنباً إلى جنب منذ السنة الأولى."
+        },
+        {
+         "title": "حرم آمن",
+         "text": "كاميرات وحراس مدرّبون ونقل مدرسي مُشرَف عليه."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_call_to_action",
+     "copy": {
+      "en": {
+       "title": "Visit us before you decide",
+       "text": "Join a campus tour every Tuesday and meet the teachers.",
+       "button": "Book a tour",
+       "button_url": "/contactus"
+      },
+      "ar": {
+       "title": "زرنا قبل أن تقرّر",
+       "text": "انضم إلى جولة في الحرم كل ثلاثاء والتقِ بالمعلمين.",
+       "button": "احجز جولة",
+       "button_url": "/contactus"
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Private school services",
+     "ar": "خدمات مدرسة خاصة"
+    },
+    "description": {
+     "en": "Bilingual private school with small classes, safe campus and open admission.",
+     "ar": "مدرسة خاصة ثنائية اللغة بصفوف صغيرة وحرم آمن والتسجيل مفتوح."
+    }
+   }
+  },
+  {
+   "key": "projects",
+   "kind": "projects",
+   "name": {
+    "en": "Projects",
+    "ar": "المشاريع"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Our work"
+      },
+      "ar": {
+       "title": "أعمالنا"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Science fair",
+       "text": "Students present experiments to parents each spring."
+      },
+      "ar": {
+       "title": "معرض العلوم",
+       "text": "يعرض الطلاب تجاربهم أمام أولياء الأمور كل ربيع."
+      }
+     },
+     "image": "school"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Robotics team",
+       "text": "Regional finalists for three years running."
+      },
+      "ar": {
+       "title": "فريق الروبوت",
+       "text": "وصل إلى نهائيات المنطقة ثلاث سنوات متتالية."
+      }
+     },
+     "image": "school"
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Reading corner",
+       "text": "A library of 12,000 Arabic and English books."
+      },
+      "ar": {
+       "title": "ركن القراءة",
+       "text": "مكتبة تضم اثني عشر ألف كتاب عربي وإنجليزي."
+      }
+     },
+     "image": "school"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Sports day",
+       "text": "Family races and team games on the school field."
+      },
+      "ar": {
+       "title": "اليوم الرياضي",
+       "text": "سباقات عائلية وألعاب جماعية في ملعب المدرسة."
+      }
+     },
+     "image": "school"
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Private school projects",
+     "ar": "أعمال مدرسة خاصة"
+    },
+    "description": {
+     "en": "Bilingual private school with small classes, safe campus and open admission.",
+     "ar": "مدرسة خاصة ثنائية اللغة بصفوف صغيرة وحرم آمن والتسجيل مفتوح."
+    }
+   }
+  },
+  {
+   "key": "team",
+   "kind": "team",
+   "name": {
+    "en": "Our team",
+    "ar": "فريقنا"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Meet the team"
+      },
+      "ar": {
+       "title": "تعرّف على فريقنا"
+      }
+     }
+    },
+    {
+     "snippet": "s_company_team",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "name": "Raghad",
+         "role": "Principal"
+        },
+        {
+         "name": "Ebrahim",
+         "role": "Head of primary"
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "name": "رغد",
+         "role": "مديرة المدرسة"
+        },
+        {
+         "name": "إبراهيم",
+         "role": "رئيس المرحلة الابتدائية"
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Our team | Nour Private School",
+     "ar": "فريقنا | مدرسة النور الخاصة"
+    },
+    "description": {
+     "en": "The people behind Nour Private School.",
+     "ar": "الأشخاص الذين يقفون خلف مدرسة النور الخاصة."
+    }
+   }
+  },
+  {
+   "key": "contact",
+   "kind": "contact",
+   "name": {
+    "en": "Contact us",
+    "ar": "اتصل بنا"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Contact us",
+       "text": "We reply within one working day."
+      },
+      "ar": {
+       "title": "اتصل بنا",
+       "text": "نردّ خلال يوم عمل واحد."
+      }
+     }
+    },
+    {
+     "snippet": "s_contact_info",
+     "copy": {
+      "en": {
+       "title": "Find us",
+       "items": [
+        {
+         "title": "Address",
+         "text": "Al Nahda, Ajman"
+        },
+        {
+         "title": "Opening hours",
+         "text": "Sun-Thu 7:00-15:00"
+        },
+        {
+         "title": "Phone",
+         "text": "+971 4 000 0000"
+        },
+        {
+         "title": "Email",
+         "text": "hello@example.com"
+        }
+       ]
+      },
+      "ar": {
+       "title": "تجدنا هنا",
+       "items": [
+        {
+         "title": "العنوان",
+         "text": "النهدة، عجمان"
+        },
+        {
+         "title": "ساعات العمل",
+         "text": "الأحد - الخميس 7:00 - 15:00"
+        },
+        {
+         "title": "الهاتف",
+         "text": "+971 4 000 0000"
+        },
+        {
+         "title": "البريد الإلكتروني",
+         "text": "hello@example.com"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Visit us before you decide",
+       "text": "Join a campus tour every Tuesday and meet the teachers."
+      },
+      "ar": {
+       "title": "زرنا قبل أن تقرّر",
+       "text": "انضم إلى جولة في الحرم كل ثلاثاء والتقِ بالمعلمين."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Contact Nour Private School",
+     "ar": "تواصل مع مدرسة النور الخاصة"
+    },
+    "description": {
+     "en": "Call, write or visit us: Al Nahda, Ajman.",
+     "ar": "اتصل بنا أو راسلنا أو زرنا: النهدة، عجمان."
+    }
+   },
+   "url": "/contactus"
+  },
+  {
+   "key": "faq",
+   "kind": "faq",
+   "name": {
+    "en": "FAQ",
+    "ar": "الأسئلة الشائعة"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Frequently asked questions"
+      },
+      "ar": {
+       "title": "الأسئلة الشائعة"
+      }
+     }
+    },
+    {
+     "snippet": "s_faq_collapse",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "title": "When does admission open?",
+         "text": "Applications open in January for the next academic year."
+        },
+        {
+         "title": "Is there a placement test?",
+         "text": "Yes, a friendly assessment and a short meeting with the parents."
+        },
+        {
+         "title": "Do you offer transport?",
+         "text": "Buses cover most neighbourhoods; fees depend on distance."
+        },
+        {
+         "title": "Are there sibling discounts?",
+         "text": "Yes, ten percent for the second child and fifteen for the third."
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "title": "متى يبدأ التسجيل؟",
+         "text": "يفتح باب التسجيل في يناير للعام الدراسي القادم."
+        },
+        {
+         "title": "هل هناك اختبار قبول؟",
+         "text": "نعم، تقييم ودّي ولقاء قصير مع ولي الأمر."
+        },
+        {
+         "title": "هل يتوفر نقل مدرسي؟",
+         "text": "تغطي الحافلات معظم الأحياء وتختلف الرسوم حسب المسافة."
+        },
+        {
+         "title": "هل توجد خصومات للأشقاء؟",
+         "text": "نعم، عشرة بالمئة للطفل الثاني وخمسة عشر للثالث."
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "FAQ | Nour Private School",
+     "ar": "الأسئلة الشائعة | مدرسة النور الخاصة"
+    },
+    "description": {
+     "en": "Answers to the questions we hear most.",
+     "ar": "إجابات عن الأسئلة التي نسمعها أكثر من غيرها."
+    }
+   }
+  },
+  {
+   "key": "legal_privacy",
+   "kind": "legal",
+   "name": {
+    "en": "Privacy policy",
+    "ar": "سياسة الخصوصية"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Privacy policy"
+      },
+      "ar": {
+       "title": "سياسة الخصوصية"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "What we collect",
+       "text": "Nour Private School collects only the details you give us through forms, orders or calls: your name, phone, email and the content of your request. We use them to answer you and to deliver what you asked for."
+      },
+      "ar": {
+       "title": "ما الذي نجمعه",
+       "text": "تجمع مدرسة النور الخاصة فقط البيانات التي تقدّمها عبر النماذج أو الطلبات أو المكالمات: اسمك وهاتفك وبريدك ومضمون طلبك. نستخدمها للرد عليك وتنفيذ ما طلبته."
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Your rights",
+       "text": "We never sell your data. You may ask us to show, correct or delete it at any time by writing to the address on the contact page."
+      },
+      "ar": {
+       "title": "حقوقك",
+       "text": "لا نبيع بياناتك أبداً. ويمكنك أن تطلب منا الاطلاع عليها أو تصحيحها أو حذفها في أي وقت بمراسلتنا على العنوان المذكور في صفحة التواصل."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Privacy policy",
+     "ar": "سياسة الخصوصية"
+    },
+    "description": {
+     "en": "How we collect, use and protect your personal data.",
+     "ar": "كيف نجمع بياناتك الشخصية ونستخدمها ونحميها."
+    }
+   },
+   "url": "/privacy"
+  },
+  {
+   "key": "legal_terms",
+   "kind": "legal",
+   "name": {
+    "en": "Terms and conditions",
+    "ar": "الشروط والأحكام"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Terms and conditions"
+      },
+      "ar": {
+       "title": "الشروط والأحكام"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Using this website",
+       "text": "The content of this website is provided for information. Prices, availability and timelines are confirmed in writing before any agreement starts."
+      },
+      "ar": {
+       "title": "استخدام الموقع",
+       "text": "المحتوى المنشور في هذا الموقع للاطلاع. وتُؤكَّد الأسعار والتوفر والمواعيد كتابةً قبل بدء أي اتفاق."
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Responsibility",
+       "text": "We do our best to keep the website accurate. We are not liable for decisions taken only on the basis of the sample information shown here."
+      },
+      "ar": {
+       "title": "المسؤولية",
+       "text": "نحرص على دقة المعلومات في الموقع، ولا نتحمل مسؤولية قرارات بُنيت على المعلومات التوضيحية المعروضة هنا فقط."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Terms and conditions",
+     "ar": "الشروط والأحكام"
+    },
+    "description": {
+     "en": "The terms that apply when you use our website and services.",
+     "ar": "الشروط المطبقة عند استخدام موقعنا وخدماتنا."
+    }
+   },
+   "url": "/terms"
+  }
+ ]
+}

@@ -336,10 +336,10 @@ class TestReading(AgentCase, TransactionCase):
         agent = [tool.name for tool in tools.base.available(self.env(user=self.agent), "agent")]
         self.assertEqual(agent, sorted(agent))
         expected = [
-            "aggregate_records", "call_method", "filter_screen", "find_products", "find_record",
-            "open_record", "prepare_create", "prepare_plan", "prepare_task", "prepare_write", "read_record", "search_records"]
+            "aggregate_records", "bulk_apply", "call_method", "document_to_record", "filter_screen", "find_products", "find_record",
+            "open_record", "prepare_create", "prepare_plan", "prepare_revert", "prepare_task", "prepare_write", "read_record", "save_report", "search_records", "show_chart"]
         # Other modules add their own agent tools
-        expected += [name for name in ("make_spreadsheet",) if name in tools.base.TOOLS]
+        expected += [name for name in ("make_spreadsheet", "build_shop", "check_site", "fix_site") if name in tools.base.TOOLS]
         self.assertEqual(sorted(set(agent) - set(talk)), sorted(expected))
         self.assertEqual(set(talk) - set(agent), set())
         plain = [tool.name for tool in tools.base.available(self.env(user=self.user_a), "agent")]
@@ -909,7 +909,8 @@ class TestAgent(AgentCase, TransactionCase):
         self.assertEqual([turn["role"] for turn in turns], ["user", "assistant", "tool"])
         self.assertEqual(turns[1]["tool_calls"][0]["name"], "prepare_create")
         self.assertEqual(turns[2]["results"], [{
-            "id": "call_c", "name": "prepare_create", "content": step.result, "is_error": False}])
+            "id": "call_c", "name": "prepare_create",
+            "content": tools.base.as_data("prepare_create", step.result), "is_error": False}])
         self.assertIn("## Mode: Agent", adapter.calls[1]["system"][-1])
 
     def test_no(self):

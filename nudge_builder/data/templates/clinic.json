@@ -1,0 +1,926 @@
+{
+ "schema": 1,
+ "key": "clinic",
+ "sector": "clinic",
+ "shop": false,
+ "name": {
+  "en": "Medical clinic",
+  "ar": "عيادة طبية"
+ },
+ "brand": {
+  "en": "Shifa Clinic",
+  "ar": "عيادة الشفاء"
+ },
+ "suggest": [
+  "clinic",
+  "clinic",
+  "عيادة طبية"
+ ],
+ "palette": {
+  "primary": "#0e7c86",
+  "secondary": "#7ac7c4",
+  "accent": "#f4a261",
+  "light": "#f3fafa",
+  "dark": "#173b3f"
+ },
+ "fonts": {
+  "heading": "Montserrat",
+  "body": "Open Sans"
+ },
+ "fonts_ar": {
+  "heading": "Tajawal",
+  "body": "Tajawal"
+ },
+ "hero_image": "static/img/templates/clinic.webp",
+ "thumbnail": "static/img/templates/clinic_thumb.webp",
+ "menu": [
+  "home",
+  "about",
+  "services",
+  "projects",
+  "team",
+  "contact",
+  "faq"
+ ],
+ "pages": [
+  {
+   "key": "home",
+   "kind": "home",
+   "name": {
+    "en": "Home",
+    "ar": "الرئيسية"
+   },
+   "blocks": [
+    {
+     "snippet": "s_cover",
+     "copy": {
+      "en": {
+       "title": "Care that listens first",
+       "text": "Family medicine, dentistry and paediatrics under one roof, with same-day appointments.",
+       "button": "Book an appointment",
+       "button_url": "/contactus"
+      },
+      "ar": {
+       "title": "رعاية تبدأ بالإصغاء",
+       "text": "طب الأسرة والأسنان والأطفال تحت سقف واحد، مع مواعيد في اليوم نفسه.",
+       "button": "احجز موعداً",
+       "button_url": "/contactus"
+      }
+     },
+     "image": "clinic",
+     "image_prompt": "wide photo of a calm modern clinic reception with plants and soft light, no text"
+    },
+    {
+     "snippet": "s_three_columns",
+     "copy": {
+      "en": {
+       "title": "Why Shifa Clinic",
+       "items": [
+        {
+         "title": "Short waiting",
+         "text": "Booked slots are respected; most patients are seen within ten minutes."
+        },
+        {
+         "title": "Qualified doctors",
+         "text": "Licensed specialists with hospital experience."
+        },
+        {
+         "title": "Clear prices",
+         "text": "Fees are shown before the visit and insurance is accepted."
+        }
+       ]
+      },
+      "ar": {
+       "title": "لماذا عيادة الشفاء",
+       "items": [
+        {
+         "title": "انتظار قصير",
+         "text": "نحترم المواعيد المحجوزة ومعظم المرضى يدخلون خلال عشر دقائق."
+        },
+        {
+         "title": "أطباء مؤهلون",
+         "text": "أخصائيون مرخّصون بخبرة مستشفيات."
+        },
+        {
+         "title": "أسعار واضحة",
+         "text": "الرسوم معلنة قبل الزيارة والتأمين مقبول."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_features",
+     "copy": {
+      "en": {
+       "title": "What we do",
+       "items": [
+        {
+         "title": "Family medicine",
+         "text": "Check-ups, chronic disease follow-up and vaccinations."
+        },
+        {
+         "title": "Dentistry",
+         "text": "Cleaning, fillings, whitening and orthodontics."
+        },
+        {
+         "title": "Paediatrics",
+         "text": "Growth follow-up and a calm room for little patients."
+        },
+        {
+         "title": "Laboratory",
+         "text": "Blood tests with results the same day."
+        }
+       ]
+      },
+      "ar": {
+       "title": "ما نقدّمه",
+       "items": [
+        {
+         "title": "طب الأسرة",
+         "text": "فحوص دورية ومتابعة الأمراض المزمنة والتطعيمات."
+        },
+        {
+         "title": "طب الأسنان",
+         "text": "تنظيف وحشوات وتبييض وتقويم."
+        },
+        {
+         "title": "طب الأطفال",
+         "text": "متابعة النمو وغرفة هادئة للمرضى الصغار."
+        },
+        {
+         "title": "المختبر",
+         "text": "تحاليل دم بنتائج في اليوم نفسه."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_numbers",
+     "copy": {
+      "en": {
+       "title": "In numbers",
+       "items": [
+        {
+         "number": "12",
+         "label": "Specialists"
+        },
+        {
+         "number": "30,000",
+         "label": "Patients a year"
+        },
+        {
+         "number": "10",
+         "label": "Minutes of average waiting"
+        },
+        {
+         "number": "9",
+         "label": "Insurance partners"
+        }
+       ]
+      },
+      "ar": {
+       "title": "بالأرقام",
+       "items": [
+        {
+         "number": "12",
+         "label": "طبيباً أخصائياً"
+        },
+        {
+         "number": "30,000",
+         "label": "مريض في السنة"
+        },
+        {
+         "number": "10",
+         "label": "دقائق متوسط الانتظار"
+        },
+        {
+         "number": "9",
+         "label": "شركات تأمين"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "A clinic for the whole family",
+       "text": "Our doctors take the time to explain your diagnosis and your options. Files are digital, waiting is short, and results reach you by message.",
+       "button": "About us",
+       "button_url": "/about"
+      },
+      "ar": {
+       "title": "عيادة لكل أفراد الأسرة",
+       "text": "يخصص أطباؤنا وقتاً لشرح التشخيص والخيارات المتاحة. الملفات إلكترونية والانتظار قصير والنتائج تصلك برسالة.",
+       "button": "من نحن",
+       "button_url": "/about"
+      }
+     },
+     "image": "clinic"
+    },
+    {
+     "snippet": "s_call_to_action",
+     "copy": {
+      "en": {
+       "title": "Your health cannot wait",
+       "text": "Book online in under a minute and choose your doctor.",
+       "button": "Book now",
+       "button_url": "/contactus"
+      },
+      "ar": {
+       "title": "صحتك لا تحتمل التأجيل",
+       "text": "احجز عبر الموقع في أقل من دقيقة واختر طبيبك.",
+       "button": "احجز الآن",
+       "button_url": "/contactus"
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Family clinic | Doctors, dentistry and paediatrics",
+     "ar": "عيادة أسرة | أطباء وأسنان وأطفال"
+    },
+    "description": {
+     "en": "Book a same-day appointment with licensed family doctors, dentists and paediatricians.",
+     "ar": "احجز موعداً في اليوم نفسه مع أطباء أسرة وأسنان وأطفال مرخّصين."
+    }
+   },
+   "url": "/"
+  },
+  {
+   "key": "about",
+   "kind": "about",
+   "name": {
+    "en": "About us",
+    "ar": "من نحن"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "About Shifa Clinic"
+      },
+      "ar": {
+       "title": "عن عيادة الشفاء"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "A clinic for the whole family",
+       "text": "Our doctors take the time to explain your diagnosis and your options. Files are digital, waiting is short, and results reach you by message."
+      },
+      "ar": {
+       "title": "عيادة لكل أفراد الأسرة",
+       "text": "يخصص أطباؤنا وقتاً لشرح التشخيص والخيارات المتاحة. الملفات إلكترونية والانتظار قصير والنتائج تصلك برسالة."
+      }
+     },
+     "image": "clinic"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Short waiting",
+       "text": "Booked slots are respected; most patients are seen within ten minutes."
+      },
+      "ar": {
+       "title": "انتظار قصير",
+       "text": "نحترم المواعيد المحجوزة ومعظم المرضى يدخلون خلال عشر دقائق."
+      }
+     },
+     "image": "clinic"
+    },
+    {
+     "snippet": "s_numbers",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "number": "12",
+         "label": "Specialists"
+        },
+        {
+         "number": "30,000",
+         "label": "Patients a year"
+        },
+        {
+         "number": "10",
+         "label": "Minutes of average waiting"
+        },
+        {
+         "number": "9",
+         "label": "Insurance partners"
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "number": "12",
+         "label": "طبيباً أخصائياً"
+        },
+        {
+         "number": "30,000",
+         "label": "مريض في السنة"
+        },
+        {
+         "number": "10",
+         "label": "دقائق متوسط الانتظار"
+        },
+        {
+         "number": "9",
+         "label": "شركات تأمين"
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "About Shifa Clinic",
+     "ar": "عن عيادة الشفاء"
+    },
+    "description": {
+     "en": "Our doctors take the time to explain your diagnosis and your options. Files are digital, waiting is short, and results reach you by message.",
+     "ar": "يخصص أطباؤنا وقتاً لشرح التشخيص والخيارات المتاحة. الملفات إلكترونية والانتظار قصير والنتائج تصلك برسالة."
+    }
+   }
+  },
+  {
+   "key": "services",
+   "kind": "services",
+   "name": {
+    "en": "Services",
+    "ar": "الخدمات"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Our services",
+       "text": "Family medicine, dentistry and paediatrics under one roof, with same-day appointments."
+      },
+      "ar": {
+       "title": "خدماتنا",
+       "text": "طب الأسرة والأسنان والأطفال تحت سقف واحد، مع مواعيد في اليوم نفسه."
+      }
+     }
+    },
+    {
+     "snippet": "s_features",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "title": "Family medicine",
+         "text": "Check-ups, chronic disease follow-up and vaccinations."
+        },
+        {
+         "title": "Dentistry",
+         "text": "Cleaning, fillings, whitening and orthodontics."
+        },
+        {
+         "title": "Paediatrics",
+         "text": "Growth follow-up and a calm room for little patients."
+        },
+        {
+         "title": "Laboratory",
+         "text": "Blood tests with results the same day."
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "title": "طب الأسرة",
+         "text": "فحوص دورية ومتابعة الأمراض المزمنة والتطعيمات."
+        },
+        {
+         "title": "طب الأسنان",
+         "text": "تنظيف وحشوات وتبييض وتقويم."
+        },
+        {
+         "title": "طب الأطفال",
+         "text": "متابعة النمو وغرفة هادئة للمرضى الصغار."
+        },
+        {
+         "title": "المختبر",
+         "text": "تحاليل دم بنتائج في اليوم نفسه."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_three_columns",
+     "copy": {
+      "en": {
+       "title": "How we work",
+       "items": [
+        {
+         "title": "Short waiting",
+         "text": "Booked slots are respected; most patients are seen within ten minutes."
+        },
+        {
+         "title": "Qualified doctors",
+         "text": "Licensed specialists with hospital experience."
+        },
+        {
+         "title": "Clear prices",
+         "text": "Fees are shown before the visit and insurance is accepted."
+        }
+       ]
+      },
+      "ar": {
+       "title": "كيف نعمل",
+       "items": [
+        {
+         "title": "انتظار قصير",
+         "text": "نحترم المواعيد المحجوزة ومعظم المرضى يدخلون خلال عشر دقائق."
+        },
+        {
+         "title": "أطباء مؤهلون",
+         "text": "أخصائيون مرخّصون بخبرة مستشفيات."
+        },
+        {
+         "title": "أسعار واضحة",
+         "text": "الرسوم معلنة قبل الزيارة والتأمين مقبول."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_call_to_action",
+     "copy": {
+      "en": {
+       "title": "Your health cannot wait",
+       "text": "Book online in under a minute and choose your doctor.",
+       "button": "Book now",
+       "button_url": "/contactus"
+      },
+      "ar": {
+       "title": "صحتك لا تحتمل التأجيل",
+       "text": "احجز عبر الموقع في أقل من دقيقة واختر طبيبك.",
+       "button": "احجز الآن",
+       "button_url": "/contactus"
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Medical clinic services",
+     "ar": "خدمات عيادة طبية"
+    },
+    "description": {
+     "en": "Book a same-day appointment with licensed family doctors, dentists and paediatricians.",
+     "ar": "احجز موعداً في اليوم نفسه مع أطباء أسرة وأسنان وأطفال مرخّصين."
+    }
+   }
+  },
+  {
+   "key": "projects",
+   "kind": "projects",
+   "name": {
+    "en": "Projects",
+    "ar": "المشاريع"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Our work"
+      },
+      "ar": {
+       "title": "أعمالنا"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Reception and waiting area",
+       "text": "Bright, quiet and fully accessible."
+      },
+      "ar": {
+       "title": "الاستقبال وقاعة الانتظار",
+       "text": "مضيئة وهادئة ومهيأة لذوي الاحتياجات."
+      }
+     },
+     "image": "clinic"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Dental suite",
+       "text": "Digital X-ray and four treatment rooms."
+      },
+      "ar": {
+       "title": "قسم الأسنان",
+       "text": "أشعة رقمية وأربع غرف علاج."
+      }
+     },
+     "image": "clinic"
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Children's room",
+       "text": "A friendly space that eases the first visit."
+      },
+      "ar": {
+       "title": "غرفة الأطفال",
+       "text": "مساحة ودودة تخفف رهبة الزيارة الأولى."
+      }
+     },
+     "image": "clinic"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Laboratory",
+       "text": "Modern analysers and quick reporting."
+      },
+      "ar": {
+       "title": "المختبر",
+       "text": "أجهزة تحليل حديثة وتقارير سريعة."
+      }
+     },
+     "image": "clinic"
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Medical clinic projects",
+     "ar": "أعمال عيادة طبية"
+    },
+    "description": {
+     "en": "Book a same-day appointment with licensed family doctors, dentists and paediatricians.",
+     "ar": "احجز موعداً في اليوم نفسه مع أطباء أسرة وأسنان وأطفال مرخّصين."
+    }
+   }
+  },
+  {
+   "key": "team",
+   "kind": "team",
+   "name": {
+    "en": "Our team",
+    "ar": "فريقنا"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Meet the team"
+      },
+      "ar": {
+       "title": "تعرّف على فريقنا"
+      }
+     }
+    },
+    {
+     "snippet": "s_company_team",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "name": "Raghad",
+         "role": "Medical director"
+        },
+        {
+         "name": "Ebrahim",
+         "role": "Family physician"
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "name": "رغد",
+         "role": "المدير الطبي"
+        },
+        {
+         "name": "إبراهيم",
+         "role": "طبيبة أسرة"
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Our team | Shifa Clinic",
+     "ar": "فريقنا | عيادة الشفاء"
+    },
+    "description": {
+     "en": "The people behind Shifa Clinic.",
+     "ar": "الأشخاص الذين يقفون خلف عيادة الشفاء."
+    }
+   }
+  },
+  {
+   "key": "contact",
+   "kind": "contact",
+   "name": {
+    "en": "Contact us",
+    "ar": "اتصل بنا"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Contact us",
+       "text": "We reply within one working day."
+      },
+      "ar": {
+       "title": "اتصل بنا",
+       "text": "نردّ خلال يوم عمل واحد."
+      }
+     }
+    },
+    {
+     "snippet": "s_contact_info",
+     "copy": {
+      "en": {
+       "title": "Find us",
+       "items": [
+        {
+         "title": "Address",
+         "text": "Al Wasl Road, Dubai"
+        },
+        {
+         "title": "Opening hours",
+         "text": "Daily 8:00-22:00"
+        },
+        {
+         "title": "Phone",
+         "text": "+971 4 000 0000"
+        },
+        {
+         "title": "Email",
+         "text": "hello@example.com"
+        }
+       ]
+      },
+      "ar": {
+       "title": "تجدنا هنا",
+       "items": [
+        {
+         "title": "العنوان",
+         "text": "شارع الوصل، دبي"
+        },
+        {
+         "title": "ساعات العمل",
+         "text": "يومياً 8:00 - 22:00"
+        },
+        {
+         "title": "الهاتف",
+         "text": "+971 4 000 0000"
+        },
+        {
+         "title": "البريد الإلكتروني",
+         "text": "hello@example.com"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Your health cannot wait",
+       "text": "Book online in under a minute and choose your doctor."
+      },
+      "ar": {
+       "title": "صحتك لا تحتمل التأجيل",
+       "text": "احجز عبر الموقع في أقل من دقيقة واختر طبيبك."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Contact Shifa Clinic",
+     "ar": "تواصل مع عيادة الشفاء"
+    },
+    "description": {
+     "en": "Call, write or visit us: Al Wasl Road, Dubai.",
+     "ar": "اتصل بنا أو راسلنا أو زرنا: شارع الوصل، دبي."
+    }
+   },
+   "url": "/contactus"
+  },
+  {
+   "key": "faq",
+   "kind": "faq",
+   "name": {
+    "en": "FAQ",
+    "ar": "الأسئلة الشائعة"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Frequently asked questions"
+      },
+      "ar": {
+       "title": "الأسئلة الشائعة"
+      }
+     }
+    },
+    {
+     "snippet": "s_faq_collapse",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "title": "Do I need an appointment?",
+         "text": "Appointments are preferred, but walk-ins are seen when a doctor is free."
+        },
+        {
+         "title": "Which insurance do you accept?",
+         "text": "Most major insurers; call us with your card number to confirm."
+        },
+        {
+         "title": "How do I get my results?",
+         "text": "By message and in the clinic file; we can print them at the desk."
+        },
+        {
+         "title": "Do you treat emergencies?",
+         "text": "We handle minor emergencies and refer serious cases to the nearest hospital."
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "title": "هل أحتاج إلى موعد؟",
+         "text": "نفضّل الحجز المسبق لكن نستقبل الحالات دون موعد عند توفر الطبيب."
+        },
+        {
+         "title": "ما التأمينات المقبولة؟",
+         "text": "معظم شركات التأمين الكبرى؛ اتصل بنا برقم بطاقتك للتأكد."
+        },
+        {
+         "title": "كيف أحصل على نتائجي؟",
+         "text": "برسالة وفي ملفك بالعيادة، ويمكننا طباعتها في الاستقبال."
+        },
+        {
+         "title": "هل تستقبلون الحالات الطارئة؟",
+         "text": "نعالج الحالات الطارئة البسيطة ونحيل الحالات الخطيرة إلى أقرب مستشفى."
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "FAQ | Shifa Clinic",
+     "ar": "الأسئلة الشائعة | عيادة الشفاء"
+    },
+    "description": {
+     "en": "Answers to the questions we hear most.",
+     "ar": "إجابات عن الأسئلة التي نسمعها أكثر من غيرها."
+    }
+   }
+  },
+  {
+   "key": "legal_privacy",
+   "kind": "legal",
+   "name": {
+    "en": "Privacy policy",
+    "ar": "سياسة الخصوصية"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Privacy policy"
+      },
+      "ar": {
+       "title": "سياسة الخصوصية"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "What we collect",
+       "text": "Shifa Clinic collects only the details you give us through forms, orders or calls: your name, phone, email and the content of your request. We use them to answer you and to deliver what you asked for."
+      },
+      "ar": {
+       "title": "ما الذي نجمعه",
+       "text": "تجمع عيادة الشفاء فقط البيانات التي تقدّمها عبر النماذج أو الطلبات أو المكالمات: اسمك وهاتفك وبريدك ومضمون طلبك. نستخدمها للرد عليك وتنفيذ ما طلبته."
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Your rights",
+       "text": "We never sell your data. You may ask us to show, correct or delete it at any time by writing to the address on the contact page."
+      },
+      "ar": {
+       "title": "حقوقك",
+       "text": "لا نبيع بياناتك أبداً. ويمكنك أن تطلب منا الاطلاع عليها أو تصحيحها أو حذفها في أي وقت بمراسلتنا على العنوان المذكور في صفحة التواصل."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Privacy policy",
+     "ar": "سياسة الخصوصية"
+    },
+    "description": {
+     "en": "How we collect, use and protect your personal data.",
+     "ar": "كيف نجمع بياناتك الشخصية ونستخدمها ونحميها."
+    }
+   },
+   "url": "/privacy"
+  },
+  {
+   "key": "legal_terms",
+   "kind": "legal",
+   "name": {
+    "en": "Terms and conditions",
+    "ar": "الشروط والأحكام"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Terms and conditions"
+      },
+      "ar": {
+       "title": "الشروط والأحكام"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Using this website",
+       "text": "The content of this website is provided for information. Prices, availability and timelines are confirmed in writing before any agreement starts."
+      },
+      "ar": {
+       "title": "استخدام الموقع",
+       "text": "المحتوى المنشور في هذا الموقع للاطلاع. وتُؤكَّد الأسعار والتوفر والمواعيد كتابةً قبل بدء أي اتفاق."
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Responsibility",
+       "text": "We do our best to keep the website accurate. We are not liable for decisions taken only on the basis of the sample information shown here."
+      },
+      "ar": {
+       "title": "المسؤولية",
+       "text": "نحرص على دقة المعلومات في الموقع، ولا نتحمل مسؤولية قرارات بُنيت على المعلومات التوضيحية المعروضة هنا فقط."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Terms and conditions",
+     "ar": "الشروط والأحكام"
+    },
+    "description": {
+     "en": "The terms that apply when you use our website and services.",
+     "ar": "الشروط المطبقة عند استخدام موقعنا وخدماتنا."
+    }
+   },
+   "url": "/terms"
+  }
+ ]
+}

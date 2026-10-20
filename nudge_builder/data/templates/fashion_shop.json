@@ -1,0 +1,1172 @@
+{
+ "schema": 1,
+ "key": "fashion_shop",
+ "sector": "fashion",
+ "shop": {
+  "categories": [
+   {
+    "name": {
+     "en": "Women",
+     "ar": "نسائي"
+    },
+    "keywords": [
+     "women",
+     "نسائي"
+    ],
+    "children": [
+     {
+      "name": {
+       "en": "Abayas",
+       "ar": "عبايات"
+      },
+      "keywords": [
+       "abaya",
+       "عبايات"
+      ],
+      "children": []
+     },
+     {
+      "name": {
+       "en": "Dresses",
+       "ar": "فساتين"
+      },
+      "keywords": [
+       "dress",
+       "فساتين"
+      ],
+      "children": []
+     },
+     {
+      "name": {
+       "en": "Hijabs and scarves",
+       "ar": "حجابات وأوشحة"
+      },
+      "keywords": [
+       "hijab",
+       "scarf",
+       "حجاب"
+      ],
+      "children": []
+     }
+    ]
+   },
+   {
+    "name": {
+     "en": "Men",
+     "ar": "رجالي"
+    },
+    "keywords": [
+     "men",
+     "رجالي"
+    ],
+    "children": [
+     {
+      "name": {
+       "en": "Thobes",
+       "ar": "ثياب"
+      },
+      "keywords": [
+       "thobe",
+       "ثوب"
+      ],
+      "children": []
+     },
+     {
+      "name": {
+       "en": "Shirts",
+       "ar": "قمصان"
+      },
+      "keywords": [
+       "shirt",
+       "قميص"
+      ],
+      "children": []
+     }
+    ]
+   },
+   {
+    "name": {
+     "en": "Kids",
+     "ar": "أطفال"
+    },
+    "keywords": [
+     "kids",
+     "أطفال"
+    ],
+    "children": []
+   },
+   {
+    "name": {
+     "en": "Accessories",
+     "ar": "إكسسوارات"
+    },
+    "keywords": [
+     "accessory",
+     "bag",
+     "إكسسوار"
+    ],
+    "children": [
+     {
+      "name": {
+       "en": "Bags",
+       "ar": "حقائب"
+      },
+      "keywords": [
+       "bag",
+       "حقيبة"
+      ],
+      "children": []
+     },
+     {
+      "name": {
+       "en": "Jewellery",
+       "ar": "مجوهرات"
+      },
+      "keywords": [
+       "jewellery",
+       "مجوهرات"
+      ],
+      "children": []
+     }
+    ]
+   }
+  ],
+  "banners": [
+   {
+    "title": {
+     "en": "New season",
+     "ar": "موسم جديد"
+    },
+    "text": {
+     "en": "Fresh abayas and dresses just landed.",
+     "ar": "وصلت عبايات وفساتين جديدة."
+    },
+    "button": {
+     "en": "Discover",
+     "ar": "اكتشفي"
+    }
+   },
+   {
+    "title": {
+     "en": "Free delivery over 250",
+     "ar": "توصيل مجاني فوق 250"
+    },
+    "text": {
+     "en": "On every order across the UAE.",
+     "ar": "على كل طلب داخل الإمارات."
+    },
+    "button": {
+     "en": "Shop now",
+     "ar": "تسوّقي الآن"
+    }
+   },
+   {
+    "title": {
+     "en": "Second piece 20% off",
+     "ar": "القطعة الثانية بخصم 20%"
+    },
+    "text": {
+     "en": "Mix and match any two scarves.",
+     "ar": "اختاري أي وشاحين بالمطابقة."
+    },
+    "button": {
+     "en": "See offer",
+     "ar": "شاهدي العرض"
+    }
+   }
+  ],
+  "menu": [
+   {
+    "name": {
+     "en": "Shop",
+     "ar": "المتجر"
+    },
+    "url": "/shop"
+   }
+  ],
+  "layout": {
+   "shop_ppg": 20,
+   "shop_ppr": 3,
+   "product_page_image_layout": "carousel",
+   "add_to_cart_action": "stay"
+  },
+  "filters": [
+   {
+    "name": {
+     "en": "Size",
+     "ar": "المقاس"
+    },
+    "type": "attribute"
+   },
+   {
+    "name": {
+     "en": "Colour",
+     "ar": "اللون"
+    },
+    "type": "attribute"
+   },
+   {
+    "name": {
+     "en": "Price",
+     "ar": "السعر"
+    },
+    "type": "range"
+   },
+   {
+    "name": {
+     "en": "Fabric",
+     "ar": "القماش"
+    },
+    "type": "attribute"
+   },
+   {
+    "name": {
+     "en": "New arrivals",
+     "ar": "وصل حديثاً"
+    },
+    "type": "flag"
+   }
+  ],
+  "product_page": {
+   "layout": {
+    "en": "Large zoomable gallery on the left, size guide and delivery estimate under the add-to-cart button.",
+    "ar": "معرض صور كبير قابل للتكبير على اليسار، ودليل المقاسات وموعد التوصيل أسفل زر الإضافة للسلة."
+   },
+   "sections": [
+    "size_guide",
+    "fabric_care",
+    "reviews",
+    "related_products",
+    "recently_viewed"
+   ]
+  },
+  "cart_checkout": {
+   "notes": {
+    "en": "Show the free-delivery threshold in the cart, offer cash on delivery and ask for the phone number at checkout for the courier.",
+    "ar": "اعرضي حد التوصيل المجاني في السلة وفعّلي الدفع عند الاستلام واطلبي رقم الهاتف عند الدفع لمندوب التوصيل."
+   },
+   "options": [
+    "cod",
+    "card",
+    "guest_checkout",
+    "phone_required"
+   ]
+  },
+  "sample_products": [
+   {
+    "name": {
+     "en": "Crepe open abaya",
+     "ar": "عباية كريب مفتوحة"
+    },
+    "description": {
+     "en": "Light crepe with embroidered cuffs.",
+     "ar": "كريب خفيف بأكمام مطرزة."
+    },
+    "price": {
+     "en": "AED 340",
+     "ar": "340 د.إ"
+    }
+   },
+   {
+    "name": {
+     "en": "Linen midi dress",
+     "ar": "فستان كتان متوسط الطول"
+    },
+    "description": {
+     "en": "Breathable linen for warm days.",
+     "ar": "كتان يسمح بالتهوية للأيام الحارة."
+    },
+    "price": {
+     "en": "AED 210",
+     "ar": "210 د.إ"
+    }
+   },
+   {
+    "name": {
+     "en": "Silk scarf",
+     "ar": "وشاح حرير"
+    },
+    "description": {
+     "en": "Hand-rolled edges, six colours.",
+     "ar": "حواف يدوية وستة ألوان."
+    },
+    "price": {
+     "en": "AED 85",
+     "ar": "85 د.إ"
+    }
+   },
+   {
+    "name": {
+     "en": "Cotton thobe",
+     "ar": "ثوب قطني"
+    },
+    "description": {
+     "en": "Soft cotton with a hidden placket.",
+     "ar": "قطن ناعم بأزرار مخفية."
+    },
+    "price": {
+     "en": "AED 260",
+     "ar": "260 د.إ"
+    }
+   }
+  ]
+ },
+ "name": {
+  "en": "Fashion shop",
+  "ar": "متجر أزياء"
+ },
+ "brand": {
+  "en": "Zahra Fashion",
+  "ar": "أزياء زهرة"
+ },
+ "suggest": [
+  "fashion",
+  "clothes",
+  "boutique",
+  "abaya",
+  "أزياء",
+  "ملابس",
+  "عبايات"
+ ],
+ "palette": {
+  "primary": "#2d1e2f",
+  "secondary": "#c77da3",
+  "accent": "#e9b872",
+  "light": "#fbf5f3",
+  "dark": "#1b1220"
+ },
+ "fonts": {
+  "heading": "Raleway",
+  "body": "Tajawal"
+ },
+ "fonts_ar": {
+  "heading": "Tajawal",
+  "body": "Tajawal"
+ },
+ "hero_image": "static/img/templates/fashion_shop.webp",
+ "thumbnail": "static/img/templates/fashion_shop_thumb.webp",
+ "menu": [
+  "home",
+  "products",
+  "about",
+  "projects",
+  "contact",
+  "faq"
+ ],
+ "pages": [
+  {
+   "key": "home",
+   "kind": "home",
+   "name": {
+    "en": "Home",
+    "ar": "الرئيسية"
+   },
+   "blocks": [
+    {
+     "snippet": "s_cover",
+     "copy": {
+      "en": {
+       "title": "Wear what feels like you",
+       "text": "New abayas, dresses and accessories every week, delivered across the Gulf.",
+       "button": "Shop the collection",
+       "button_url": "/shop"
+      },
+      "ar": {
+       "title": "ارتدِ ما يشبهك",
+       "text": "عبايات وفساتين وإكسسوارات جديدة كل أسبوع، تصلك في أنحاء الخليج.",
+       "button": "تسوّقي المجموعة",
+       "button_url": "/shop"
+      }
+     },
+     "image": "fashion",
+     "image_prompt": "wide editorial photo of folded abayas and silk scarves on a pale table, soft light, no text"
+    },
+    {
+     "snippet": "s_product_list",
+     "copy": {
+      "en": {
+       "title": "New arrivals"
+      },
+      "ar": {
+       "title": "وصل حديثاً"
+      }
+     }
+    },
+    {
+     "snippet": "s_banner",
+     "copy": {
+      "en": {
+       "title": "New season",
+       "text": "Fresh abayas and dresses just landed.",
+       "button": "Discover",
+       "button_url": "/shop"
+      },
+      "ar": {
+       "title": "موسم جديد",
+       "text": "وصلت عبايات وفساتين جديدة.",
+       "button": "اكتشفي",
+       "button_url": "/shop"
+      }
+     },
+     "image": "fashion"
+    },
+    {
+     "snippet": "s_three_columns",
+     "copy": {
+      "en": {
+       "title": "Why shop with Zahra Fashion",
+       "items": [
+        {
+         "title": "Free delivery",
+         "text": "On all orders above 250 dirhams."
+        },
+        {
+         "title": "Easy exchange",
+         "text": "Change the size or colour within fourteen days."
+        },
+        {
+         "title": "Pay on delivery",
+         "text": "Cash or card at your door."
+        }
+       ]
+      },
+      "ar": {
+       "title": "لماذا تتسوّق من أزياء زهرة",
+       "items": [
+        {
+         "title": "توصيل مجاني",
+         "text": "للطلبات التي تزيد على 250 درهماً."
+        },
+        {
+         "title": "استبدال سهل",
+         "text": "بدّلي المقاس أو اللون خلال أربعة عشر يوماً."
+        },
+        {
+         "title": "الدفع عند الاستلام",
+         "text": "نقداً أو بالبطاقة عند الباب."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_product_list",
+     "copy": {
+      "en": {
+       "title": "Best sellers"
+      },
+      "ar": {
+       "title": "الأكثر مبيعاً"
+      }
+     }
+    },
+    {
+     "snippet": "s_banner",
+     "copy": {
+      "en": {
+       "title": "Free delivery over 250",
+       "text": "On every order across the UAE.",
+       "button": "Shop now",
+       "button_url": "/shop"
+      },
+      "ar": {
+       "title": "توصيل مجاني فوق 250",
+       "text": "على كل طلب داخل الإمارات.",
+       "button": "تسوّقي الآن",
+       "button_url": "/shop"
+      }
+     }
+    },
+    {
+     "snippet": "s_banner",
+     "copy": {
+      "en": {
+       "title": "Second piece 20% off",
+       "text": "Mix and match any two scarves.",
+       "button": "See offer",
+       "button_url": "/shop"
+      },
+      "ar": {
+       "title": "القطعة الثانية بخصم 20%",
+       "text": "اختاري أي وشاحين بالمطابقة.",
+       "button": "شاهدي العرض",
+       "button_url": "/shop"
+      }
+     }
+    },
+    {
+     "snippet": "s_call_to_action",
+     "copy": {
+      "en": {
+       "title": "Join the list for first access",
+       "text": "New drops and private sales, once a week at most.",
+       "button": "Subscribe",
+       "button_url": "/contactus"
+      },
+      "ar": {
+       "title": "انضمي للقائمة لتصلك أولاً",
+       "text": "إصدارات جديدة وتخفيضات خاصة، مرة أسبوعياً على الأكثر.",
+       "button": "اشتركي",
+       "button_url": "/contactus"
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Fashion boutique | Abayas, dresses and accessories",
+     "ar": "بوتيك أزياء | عبايات وفساتين وإكسسوارات"
+    },
+    "description": {
+     "en": "Shop new abayas, dresses and accessories with free delivery and easy exchange.",
+     "ar": "تسوّقي عبايات وفساتين وإكسسوارات جديدة مع توصيل مجاني واستبدال سهل."
+    }
+   },
+   "url": "/"
+  },
+  {
+   "key": "about",
+   "kind": "about",
+   "name": {
+    "en": "About us",
+    "ar": "من نحن"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "About Zahra Fashion"
+      },
+      "ar": {
+       "title": "عن أزياء زهرة"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "A small label with a big eye for detail",
+       "text": "We design in our own studio and choose fabrics that stay soft after fifty washes. Small batches mean you will rarely see your outfit on someone else."
+      },
+      "ar": {
+       "title": "علامة صغيرة بعين دقيقة للتفاصيل",
+       "text": "نصمم في استوديو خاص بنا ونختار أقمشة تبقى ناعمة بعد خمسين غسلة. الدفعات الصغيرة تعني أنك نادراً ما سترين قطعتك على غيرك."
+      }
+     },
+     "image": "fashion"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Free delivery",
+       "text": "On all orders above 250 dirhams."
+      },
+      "ar": {
+       "title": "توصيل مجاني",
+       "text": "للطلبات التي تزيد على 250 درهماً."
+      }
+     },
+     "image": "fashion"
+    },
+    {
+     "snippet": "s_numbers",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "number": "12,000",
+         "label": "Happy customers"
+        },
+        {
+         "number": "300",
+         "label": "Designs a year"
+        },
+        {
+         "number": "14",
+         "label": "Days to exchange"
+        },
+        {
+         "number": "4.9/5",
+         "label": "Average review"
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "number": "12,000",
+         "label": "عميلة سعيدة"
+        },
+        {
+         "number": "300",
+         "label": "تصميم في السنة"
+        },
+        {
+         "number": "14",
+         "label": "يوماً للاستبدال"
+        },
+        {
+         "number": "4.9/5",
+         "label": "متوسط التقييم"
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "About Zahra Fashion",
+     "ar": "عن أزياء زهرة"
+    },
+    "description": {
+     "en": "We design in our own studio and choose fabrics that stay soft after fifty washes. Small batches mean you will rarely see your outfit on someone else.",
+     "ar": "نصمم في استوديو خاص بنا ونختار أقمشة تبقى ناعمة بعد خمسين غسلة. الدفعات الصغيرة تعني أنك نادراً ما سترين قطعتك على غيرك."
+    }
+   }
+  },
+  {
+   "key": "products",
+   "kind": "services",
+   "name": {
+    "en": "Collections",
+    "ar": "المجموعات"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Our collections",
+       "text": "New abayas, dresses and accessories every week, delivered across the Gulf."
+      },
+      "ar": {
+       "title": "مجموعاتنا",
+       "text": "عبايات وفساتين وإكسسوارات جديدة كل أسبوع، تصلك في أنحاء الخليج."
+      }
+     }
+    },
+    {
+     "snippet": "s_product_catalog",
+     "copy": {
+      "en": {
+       "title": "Popular products",
+       "items": [
+        {
+         "title": "Crepe open abaya",
+         "text": "Light crepe with embroidered cuffs. - AED 340"
+        },
+        {
+         "title": "Linen midi dress",
+         "text": "Breathable linen for warm days. - AED 210"
+        },
+        {
+         "title": "Silk scarf",
+         "text": "Hand-rolled edges, six colours. - AED 85"
+        },
+        {
+         "title": "Cotton thobe",
+         "text": "Soft cotton with a hidden placket. - AED 260"
+        }
+       ]
+      },
+      "ar": {
+       "title": "منتجات رائجة",
+       "items": [
+        {
+         "title": "عباية كريب مفتوحة",
+         "text": "كريب خفيف بأكمام مطرزة. - 340 د.إ"
+        },
+        {
+         "title": "فستان كتان متوسط الطول",
+         "text": "كتان يسمح بالتهوية للأيام الحارة. - 210 د.إ"
+        },
+        {
+         "title": "وشاح حرير",
+         "text": "حواف يدوية وستة ألوان. - 85 د.إ"
+        },
+        {
+         "title": "ثوب قطني",
+         "text": "قطن ناعم بأزرار مخفية. - 260 د.إ"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_call_to_action",
+     "copy": {
+      "en": {
+       "title": "Join the list for first access",
+       "text": "New drops and private sales, once a week at most.",
+       "button": "Subscribe",
+       "button_url": "/shop"
+      },
+      "ar": {
+       "title": "انضمي للقائمة لتصلك أولاً",
+       "text": "إصدارات جديدة وتخفيضات خاصة، مرة أسبوعياً على الأكثر.",
+       "button": "اشتركي",
+       "button_url": "/shop"
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Fashion shop collections",
+     "ar": "مجموعات متجر أزياء"
+    },
+    "description": {
+     "en": "Shop new abayas, dresses and accessories with free delivery and easy exchange.",
+     "ar": "تسوّقي عبايات وفساتين وإكسسوارات جديدة مع توصيل مجاني واستبدال سهل."
+    }
+   },
+   "url": "/collections"
+  },
+  {
+   "key": "projects",
+   "kind": "projects",
+   "name": {
+    "en": "Gallery",
+    "ar": "المعرض"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Gallery"
+      },
+      "ar": {
+       "title": "المعرض"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Spring lookbook",
+       "text": "Soft tones for the new season."
+      },
+      "ar": {
+       "title": "كتالوج الربيع",
+       "text": "ألوان هادئة للموسم الجديد."
+      }
+     },
+     "image": "fashion"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "In the studio",
+       "text": "Where every pattern is cut by hand."
+      },
+      "ar": {
+       "title": "داخل الاستوديو",
+       "text": "حيث يُقص كل نمط يدوياً."
+      }
+     },
+     "image": "fashion"
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Eid collection",
+       "text": "Embroidered pieces for the celebration."
+      },
+      "ar": {
+       "title": "مجموعة العيد",
+       "text": "قطع مطرزة للاحتفال."
+      }
+     },
+     "image": "fashion"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Customer favourites",
+       "text": "The five best sellers of the year."
+      },
+      "ar": {
+       "title": "المفضلة لدى العميلات",
+       "text": "أفضل خمس قطع مبيعاً هذا العام."
+      }
+     },
+     "image": "fashion"
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Zahra Fashion gallery",
+     "ar": "معرض أزياء زهرة"
+    },
+    "description": {
+     "en": "Shop new abayas, dresses and accessories with free delivery and easy exchange.",
+     "ar": "تسوّقي عبايات وفساتين وإكسسوارات جديدة مع توصيل مجاني واستبدال سهل."
+    }
+   },
+   "url": "/gallery"
+  },
+  {
+   "key": "team",
+   "kind": "team",
+   "name": {
+    "en": "Our team",
+    "ar": "فريقنا"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Meet the team"
+      },
+      "ar": {
+       "title": "تعرّف على فريقنا"
+      }
+     }
+    },
+    {
+     "snippet": "s_company_team",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "name": "Raghad",
+         "role": "Founder and designer"
+        },
+        {
+         "name": "Ebrahim",
+         "role": "Head of styling"
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "name": "رغد",
+         "role": "المؤسسة والمصممة"
+        },
+        {
+         "name": "إبراهيم",
+         "role": "رئيسة قسم التنسيق"
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Our team | Zahra Fashion",
+     "ar": "فريقنا | أزياء زهرة"
+    },
+    "description": {
+     "en": "The people behind Zahra Fashion.",
+     "ar": "الأشخاص الذين يقفون خلف أزياء زهرة."
+    }
+   }
+  },
+  {
+   "key": "contact",
+   "kind": "contact",
+   "name": {
+    "en": "Contact us",
+    "ar": "اتصل بنا"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Contact us",
+       "text": "We reply within one working day."
+      },
+      "ar": {
+       "title": "اتصل بنا",
+       "text": "نردّ خلال يوم عمل واحد."
+      }
+     }
+    },
+    {
+     "snippet": "s_contact_info",
+     "copy": {
+      "en": {
+       "title": "Find us",
+       "items": [
+        {
+         "title": "Address",
+         "text": "Mall of the Emirates, Dubai"
+        },
+        {
+         "title": "Opening hours",
+         "text": "Daily 10:00-22:00"
+        },
+        {
+         "title": "Phone",
+         "text": "+971 4 000 0000"
+        },
+        {
+         "title": "Email",
+         "text": "hello@example.com"
+        }
+       ]
+      },
+      "ar": {
+       "title": "تجدنا هنا",
+       "items": [
+        {
+         "title": "العنوان",
+         "text": "مول الإمارات، دبي"
+        },
+        {
+         "title": "ساعات العمل",
+         "text": "يومياً 10:00 - 22:00"
+        },
+        {
+         "title": "الهاتف",
+         "text": "+971 4 000 0000"
+        },
+        {
+         "title": "البريد الإلكتروني",
+         "text": "hello@example.com"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Join the list for first access",
+       "text": "New drops and private sales, once a week at most."
+      },
+      "ar": {
+       "title": "انضمي للقائمة لتصلك أولاً",
+       "text": "إصدارات جديدة وتخفيضات خاصة، مرة أسبوعياً على الأكثر."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Contact Zahra Fashion",
+     "ar": "تواصل مع أزياء زهرة"
+    },
+    "description": {
+     "en": "Call, write or visit us: Mall of the Emirates, Dubai.",
+     "ar": "اتصل بنا أو راسلنا أو زرنا: مول الإمارات، دبي."
+    }
+   },
+   "url": "/contactus"
+  },
+  {
+   "key": "faq",
+   "kind": "faq",
+   "name": {
+    "en": "FAQ",
+    "ar": "الأسئلة الشائعة"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Frequently asked questions"
+      },
+      "ar": {
+       "title": "الأسئلة الشائعة"
+      }
+     }
+    },
+    {
+     "snippet": "s_faq_collapse",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "title": "How do I choose my size?",
+         "text": "Each product page has a size guide in centimetres; message us if you are between sizes."
+        },
+        {
+         "title": "How long does delivery take?",
+         "text": "One to two working days inside the UAE and three to five across the Gulf."
+        },
+        {
+         "title": "Can I return an item?",
+         "text": "Unworn items with tags can be exchanged or refunded within fourteen days."
+        },
+        {
+         "title": "How should I wash my abaya?",
+         "text": "Gentle cycle at thirty degrees, hang dry, iron on low heat."
+        },
+        {
+         "title": "Which payment methods do you accept?",
+         "text": "Cards, Apple Pay and cash on delivery."
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "title": "كيف أختار مقاسي؟",
+         "text": "في كل صفحة منتج دليل مقاسات بالسنتيمتر، وراسلينا إن كنتِ بين مقاسين."
+        },
+        {
+         "title": "كم يستغرق التوصيل؟",
+         "text": "من يوم إلى يومي عمل داخل الإمارات ومن ثلاثة إلى خمسة أيام في الخليج."
+        },
+        {
+         "title": "هل يمكنني إرجاع قطعة؟",
+         "text": "يمكن استبدال أو استرجاع القطع غير المستعملة وعليها بطاقاتها خلال أربعة عشر يوماً."
+        },
+        {
+         "title": "كيف أغسل عبايتي؟",
+         "text": "دورة لطيفة بدرجة ثلاثين وتجفيف معلّق وكي على حرارة منخفضة."
+        },
+        {
+         "title": "ما طرق الدفع المقبولة؟",
+         "text": "البطاقات وآبل باي والدفع نقداً عند الاستلام."
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "FAQ | Zahra Fashion",
+     "ar": "الأسئلة الشائعة | أزياء زهرة"
+    },
+    "description": {
+     "en": "Answers to the questions we hear most.",
+     "ar": "إجابات عن الأسئلة التي نسمعها أكثر من غيرها."
+    }
+   }
+  },
+  {
+   "key": "legal_privacy",
+   "kind": "legal",
+   "name": {
+    "en": "Privacy policy",
+    "ar": "سياسة الخصوصية"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Privacy policy"
+      },
+      "ar": {
+       "title": "سياسة الخصوصية"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "What we collect",
+       "text": "Zahra Fashion collects only the details you give us through forms, orders or calls: your name, phone, email and the content of your request. We use them to answer you and to deliver what you asked for."
+      },
+      "ar": {
+       "title": "ما الذي نجمعه",
+       "text": "تجمع أزياء زهرة فقط البيانات التي تقدّمها عبر النماذج أو الطلبات أو المكالمات: اسمك وهاتفك وبريدك ومضمون طلبك. نستخدمها للرد عليك وتنفيذ ما طلبته."
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Your rights",
+       "text": "We never sell your data. You may ask us to show, correct or delete it at any time by writing to the address on the contact page."
+      },
+      "ar": {
+       "title": "حقوقك",
+       "text": "لا نبيع بياناتك أبداً. ويمكنك أن تطلب منا الاطلاع عليها أو تصحيحها أو حذفها في أي وقت بمراسلتنا على العنوان المذكور في صفحة التواصل."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Privacy policy",
+     "ar": "سياسة الخصوصية"
+    },
+    "description": {
+     "en": "How we collect, use and protect your personal data.",
+     "ar": "كيف نجمع بياناتك الشخصية ونستخدمها ونحميها."
+    }
+   },
+   "url": "/privacy"
+  },
+  {
+   "key": "legal_terms",
+   "kind": "legal",
+   "name": {
+    "en": "Terms and conditions",
+    "ar": "الشروط والأحكام"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Terms and conditions"
+      },
+      "ar": {
+       "title": "الشروط والأحكام"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Using this website",
+       "text": "The content of this website is provided for information. Prices, availability and timelines are confirmed in writing before any agreement starts."
+      },
+      "ar": {
+       "title": "استخدام الموقع",
+       "text": "المحتوى المنشور في هذا الموقع للاطلاع. وتُؤكَّد الأسعار والتوفر والمواعيد كتابةً قبل بدء أي اتفاق."
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Responsibility",
+       "text": "We do our best to keep the website accurate. We are not liable for decisions taken only on the basis of the sample information shown here."
+      },
+      "ar": {
+       "title": "المسؤولية",
+       "text": "نحرص على دقة المعلومات في الموقع، ولا نتحمل مسؤولية قرارات بُنيت على المعلومات التوضيحية المعروضة هنا فقط."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Terms and conditions",
+     "ar": "الشروط والأحكام"
+    },
+    "description": {
+     "en": "The terms that apply when you use our website and services.",
+     "ar": "الشروط المطبقة عند استخدام موقعنا وخدماتنا."
+    }
+   },
+   "url": "/terms"
+  }
+ ]
+}

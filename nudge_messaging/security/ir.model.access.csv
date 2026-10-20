@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_nudge_messaging_link_user,nudge.messaging.link user,model_nudge_messaging_link,nudge.group_nudge_user,1,0,0,0
+access_nudge_messaging_link_manager,nudge.messaging.link manager,model_nudge_messaging_link,nudge.group_nudge_manager,1,0,0,0
+access_nudge_messaging_message_manager,nudge.messaging.message manager,model_nudge_messaging_message,nudge.group_nudge_manager,1,0,0,0
+access_nudge_messaging_code_system,nudge.messaging.code system,model_nudge_messaging_code,base.group_system,0,0,0,0

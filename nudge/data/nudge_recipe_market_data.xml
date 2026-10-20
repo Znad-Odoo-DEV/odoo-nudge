@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- The index of the author's site, switched off until an administrator enables it (and until the site publishes one) -->
+    <record id="recipe_source_default" model="nudge.recipe.source">
+        <field name="name">Nudge recipes (znad-odoo-dev)</field>
+        <field name="url">https://znad-odoo-dev.github.io/nudge/recipes/index.json</field>
+        <field name="enabled" eval="False"/>
+        <field name="trusted" eval="True"/>
+        <field name="sequence">1</field>
+    </record>
+
+    <!-- Once a week, for the sources that asked for it; switched on by the first source that does -->
+    <record id="cron_recipe_index" model="ir.cron">
+        <field name="name">Nudge: read the recipe indexes again</field>
+        <field name="model_id" ref="model_nudge_recipe_source"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_refresh()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">weeks</field>
+        <field name="active" eval="False"/>
+    </record>
+</odoo>

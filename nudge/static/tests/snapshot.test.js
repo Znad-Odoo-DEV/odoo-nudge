@@ -15,7 +15,9 @@ import {
 } from "@web/../tests/web_test_helpers";
 
 import { hotkeyLabel } from "@nudge/core/hotkeys";
-import { formatValue, summarize, takeSnapshot } from "@nudge/context/snapshot";
+import { Component, xml } from "@odoo/owl";
+import { registry } from "@web/core/registry";
+import { describeTaxTotals, formatValue, summarize, takeSnapshot } from "@nudge/context/snapshot";
 
 class Partner extends models.Model {
     _name = "partner";
@@ -35,6 +37,7 @@ class Partner extends models.Model {
     secret_code = fields.Char({ string: "Secret Code" });
     notes = fields.Html({ string: "Notes" });
     photo = fields.Binary({ string: "Photo" });
+    tax_totals = fields.Json({ string: "Tax Totals" });
     parent_id = fields.Many2one({ string: "Company", relation: "partner" });
     child_ids = fields.One2many({ string: "Contacts", relation: "partner", relation_field: "parent_id" });
 
@@ -51,6 +54,18 @@ class Partner extends models.Model {
             notes: "<p>Pays <b>late</b></p><script>alert(1)</script>",
             photo: "R0lGODlhAQABAAAAACw=",
             child_ids: [2, 3],
+            tax_totals: {
+                total_amount_currency: 1150,
+                base_amount_currency: 1000,
+                tax_amount_currency: 150,
+                subtotals: [
+                    {
+                        name: "Untaxed Amount",
+                        base_amount_currency: 1000,
+                        tax_groups: [{ group_name: "Tax 15%", tax_amount_currency: 150 }],
+                    },
+                ],
+            },
         },
         { id: 2, name: "Brandon", email: "brandon@example.com", parent_id: 1, state: "done" },
         { id: 3, name: "Colleen", parent_id: 1, state: "draft" },
@@ -424,4 +439,63 @@ test("Studio is seen in the snapshot, with the view edited and the tab open", ()
     expect(summarize(snapshot)).toBe("Studio: form view");
     getFixture().innerHTML = "";
     expect(takeSnapshot({ action: { currentController: null }, views: [] }).studio).toBe(undefined);
+});
+
+test("the totals box of an order and its lines are described", async () => {
+    class TotalsStub extends Component {
+        static template = xml`<span class="o_stub_totals"/>`;
+        static props = ["*"];
+    }
+    registry.category("fields").add("account-tax-totals-field", { component: TotalsStub }, { force: true });
+    try {
+        await start();
+        await mountView({
+            resModel: "partner",
+            type: "form",
+            resId: 1,
+            arch: /* xml */ `
+                <form>
+                    <field name="name"/>
+                    <field name="child_ids">
+                        <list>
+                            <field name="name"/>
+                            <field name="email"/>
+                        </list>
+                    </field>
+                    <field name="tax_totals" widget="account-tax-totals-field"/>
+                </form>`,
+        });
+        const seen = byName(capture().snapshot.fields);
+        expect(seen.tax_totals.value).toEqual({
+            total: "1,150.00",
+            untaxed: "1,000.00",
+            tax: "150.00",
+            taxes: [{ name: "Tax 15%", amount: "150.00" }],
+        });
+        expect(seen.child_ids.value.count).toBe(2);
+        expect(seen.child_ids.value.rows).toHaveLength(2);
+        expect("more" in seen.child_ids.value).toBe(false);
+    } finally {
+        registry.category("fields").remove("account-tax-totals-field");
+    }
+});
+
+test("the totals of Odoo 17 and 18 and a long table are described", () => {
+    expect(
+        describeTaxTotals(
+            { amount_total: 115, amount_untaxed: 100, formatted_amount_total: "$ 115.00" },
+            { type: "binary" },
+            {}
+        )
+    ).toEqual({ total: "$ 115.00", untaxed: "100.00", tax: "15.00" });
+    expect(describeTaxTotals(false, {}, {})).toBe(null);
+    const records = Array.from({ length: 60 }, (_, index) => ({
+        resId: index + 1,
+        fields: { name: { type: "char" } },
+        activeFields: { name: {} },
+        data: { name: `Line ${index + 1}` },
+    }));
+    const value = formatValue({ type: "one2many" }, { count: 60, records });
+    expect(value.rows).toHaveLength(50);
+    expect(value.more).toBe(10);
 });

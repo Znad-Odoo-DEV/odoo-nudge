@@ -22,6 +22,16 @@
         <field name="interval_type">minutes</field>
     </record>
 
+    <!-- The recording of a meeting is never kept: what a summary left behind goes within the hour -->
+    <record id="cron_forget_meeting_audio" model="ir.cron">
+        <field name="name">Nudge: forget recordings of meetings</field>
+        <field name="model_id" ref="model_nudge_conversation"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_forget_meeting_audio()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">hours</field>
+    </record>
+
     <record id="cron_agent_runs" model="ir.cron">
         <field name="name">Nudge: work on what was asked in the background</field>
         <field name="model_id" ref="model_nudge_run"/>
@@ -29,5 +39,36 @@
         <field name="code">model._cron_work()</field>
         <field name="interval_number">10</field>
         <field name="interval_type">minutes</field>
+    </record>
+
+    <!-- The local search model: the download asked for in the Settings, then the
+         indexing, a few minutes at a time. Does nothing without the model. -->
+    <record id="cron_embedding" model="ir.cron">
+        <field name="name">Nudge: download and index the local search model</field>
+        <field name="model_id" ref="model_nudge_embedding"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_work()</field>
+        <field name="interval_number">30</field>
+        <field name="interval_type">minutes</field>
+    </record>
+
+    <!-- The weekly health check of the companies that asked for it, each as the manager who asked -->
+    <record id="cron_health_check" model="ir.cron">
+        <field name="name">Nudge: weekly database health check</field>
+        <field name="model_id" ref="model_nudge_health_report"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_run()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+    </record>
+
+    <!-- The questions asked often that nothing answers yet: counted without any AI, proposed to the managers -->
+    <record id="cron_recurring_questions" model="ir.cron">
+        <field name="name">Nudge: find recurring questions</field>
+        <field name="model_id" ref="model_nudge_question"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_find()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">weeks</field>
     </record>
 </odoo>

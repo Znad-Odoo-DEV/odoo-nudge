@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_website" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.nudge.website</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="nudge.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='nudge_budget_container']" position="before">
+                <block title="Website Assistant" name="nudge_website_container">
+                    <setting help="A chat bubble on the website and in the portal. Visitors with no login are answered only from the published products, the company files marked public and the published pages. Customers who are logged in are also answered about their own orders and invoices.">
+                        <field name="website_id" options="{'no_open': True, 'no_create': True}"/>
+                        <field name="nudge_assistant"/>
+                        <div class="content-group" invisible="not nudge_assistant">
+                            <div class="row mt8">
+                                <label for="nudge_greeting" class="col-lg-4 o_light_label"/>
+                                <field name="nudge_greeting" class="col-lg-8"/>
+                            </div>
+                            <div class="row">
+                                <label for="nudge_lang_ids" class="col-lg-4 o_light_label"/>
+                                <field name="nudge_lang_ids" widget="many2many_tags" class="col-lg-8" options="{'no_create': True}"/>
+                            </div>
+                            <div class="mt8">
+                                <button name="action_nudge_read_pages" type="object" class="btn btn-link" string="Read the published pages now"/>
+                            </div>
+                        </div>
+                    </setting>
+                    <setting help="What the AI may spend each day on visitors, in tokens, and how many messages one visitor may send. Past the budget, visitors are still answered, from the products and files alone, with no AI. 0 tokens: never the AI.">
+                        <div class="row">
+                            <label for="nudge_public_budget" class="col-lg-6 o_light_label"/>
+                            <field name="nudge_public_budget" class="col-lg-6"/>
+                        </div>
+                        <div class="row">
+                            <label for="nudge_rate_messages" class="col-lg-6 o_light_label"/>
+                            <field name="nudge_rate_messages" class="col-lg-6"/>
+                        </div>
+                        <div class="row">
+                            <label for="nudge_rate_minutes" class="col-lg-6 o_light_label"/>
+                            <field name="nudge_rate_minutes" class="col-lg-6"/>
+                        </div>
+                        <div class="row">
+                            <label for="nudge_web_max_ai" class="col-lg-6 o_light_label"/>
+                            <field name="nudge_web_max_ai" class="col-lg-6"/>
+                        </div>
+                        <div class="row">
+                            <label for="nudge_web_handover_max" class="col-lg-6 o_light_label"/>
+                            <field name="nudge_web_handover_max" class="col-lg-6"/>
+                        </div>
+                        <div class="row">
+                            <label for="nudge_web_keep_days" class="col-lg-6 o_light_label"/>
+                            <field name="nudge_web_keep_days" class="col-lg-6"/>
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

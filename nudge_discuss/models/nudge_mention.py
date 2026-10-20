@@ -9,6 +9,8 @@ Nothing is ever changed from there.
 """
 import logging
 import re
+import time
+from datetime import timedelta
 
 from lxml import html as lxml_html
 from markupsafe import Markup, escape
@@ -24,6 +26,10 @@ from odoo.addons.nudge.tools.records import (
 
 _logger = logging.getLogger(__name__)
 
+# Seconds a pass of the cron answers before the rest waits for the next pass
+CRON_SECONDS = 60
+# An answer unfinished after this long is taken up again
+ANSWERING_MINUTES = 10
 MAX_FIELDS = 40
 MAX_LINKED = 6
 MAX_MESSAGES = 10
@@ -32,6 +38,24 @@ MAX_QUESTION_CHARS = 2000
 # Fields of how a record is followed and talked about, not of what it is
 TECHNICAL = re.compile(r"^(message_|activity_|website_message|rating_|__|has_message|access_)")
 CHANNEL = "discuss.channel"
+# What is asked in a few words, and Nudge does at once: the history of the record summarised
+HISTORY_ASK = re.compile(
+    r"^(please\s+)?(summari[sz]e|recap|summary|catch me up|what happened|where are we|"
+    r"give me (a )?(summary|recap)|لخص|لخّص|ملخص)"
+    r"(\s+(this|it|that|here|everything|for me|with\s+\w+|the\s+(history|record|thread|conversation|customer|order|"
+    r"project|ticket)|لي|هذا|هاد|هذه))*$",
+    re.IGNORECASE)
+REPLY_ASK = re.compile(
+    r"^(please\s+)?((draft|write|prepare|compose)(\s+me)?(\s+(a|the|an))?(\s+(formal|friendly|short))?\s+"
+    r"(reply|response|answer)|reply|اكتب(\s+لي)?\s+(رد|جواب)|"
+    r"جهز(\s+لي)?\s+(رد|جواب))"
+    r"(\s+(to\s+(this|the\s+\w+|them|him|her|it)|for\s+me|in\s+(a\s+)?(formal|friendly|short)(\s+tone)?|"
+    r"(formal|friendly|short)(\s+tone)?|على\s+\S+|رسمي|ودي|"
+    r"مختصر))*$",
+    re.IGNORECASE)
+TONE = re.compile(r"\b(formal|friendly|short)\b|(رسمي|ودي|مختصر)", re.IGNORECASE)
+TONES = {"formal": "formal", "friendly": "friendly", "short": "short",
+         "رسمي": "formal", "ودي": "friendly", "مختصر": "short"}
 HEADING = re.compile(r"^#{1,6}\s+(.*)$")
 LIST_ITEM = re.compile(r"^([-*•]|\d+[.)])\s+")
 
@@ -44,6 +68,21 @@ def text_of(body):
         return " ".join(lxml_html.fromstring(f"<div>{body}</div>").text_content().split())
     except Exception:  # noqa: BLE001
         return " ".join(str(body).split())
+
+
+def asked_for(text):
+    """:return: ``(kind, tone)``: what the message asks in a few words, once @Nudge is taken off:
+    ``"history"`` for the record summarised, ``"reply"`` for a reply to its customer drafted (with the
+    tone asked, friendly by default); ``(None, None)`` for anything else, which is a question"""
+    words = " ".join(re.sub(r"[.!?؟,;:]+", " ", (text or "").replace("@Nudge", "").replace("@nudge", "")).split())
+    if not words:
+        return None, None
+    if HISTORY_ASK.match(words):
+        return "history", None
+    if REPLY_ASK.match(words):
+        tone = TONE.search(words)
+        return "reply", TONES.get(tone.group(0).lower(), "friendly") if tone else "friendly"
+    return None, None
 
 
 def _goes_on(rest):
@@ -64,7 +103,9 @@ def to_html(text):
         line = re.sub(r"(?<![\w*])\*(?=\S)([^*\n]+?)(?<=\S)\*(?![\w*])", r"<i>\1</i>", line)
         line = re.sub(r"(?<!\w)_(?=\S)([^_\n]+?)(?<=\S)_(?!\w)", r"<i>\1</i>", line)
         line = re.sub(r"`([^`]+)`", r"<code>\1</code>", line)
-        return re.sub(r"\[([^\]]+)\]\((https?://[^)\s]+)\)", r'<a href="\2" target="_blank">\1</a>', line)
+        line = re.sub(r"\[([^\]]+)\]\((https?://[^)\s]+)\)", r'<a href="\2" target="_blank">\1</a>', line)
+        # An address inside Odoo opens in the same tab: the "Show me" of a summary
+        return re.sub(r"\[([^\]]+)\]\((/odoo/[A-Za-z0-9_./-]+)\)", r'<a href="\2">\1</a>', line)
 
     parts, items, kind, start = [], [], None, 1
 
@@ -115,7 +156,7 @@ class NudgeMention(models.Model):
     res_id = fields.Integer(string="Record ID", required=True)
     user_id = fields.Many2one("res.users", string="Asked By", ondelete="cascade")
     state = fields.Selection(
-        [("queued", "Waiting"), ("done", "Answered"), ("refused", "Not for Them"), ("failed", "Failed")],
+        [("queued", "Waiting"), ("answering", "Answering"), ("done", "Answered"), ("refused", "Not for Them"), ("failed", "Failed")],
         default="queued", required=True, index=True)
     answer_id = fields.Many2one("mail.message", string="Answer", ondelete="set null")
     conversation_id = fields.Many2one("nudge.conversation", ondelete="set null")
@@ -136,10 +177,26 @@ class NudgeMention(models.Model):
 
     @api.model
     def _cron_answer(self):
-        for mention in self.search([("state", "=", "queued")], order="id", limit=20):
-            mention._answer()
-            if not self.env.context.get("nudge_keep_transaction"):
+        keep = self.env.context.get("nudge_keep_transaction")
+        # A worker killed in the middle of an answer leaves the mention "answering": it goes
+        # back to the queue after a while, instead of blocking the front of it
+        old = fields.Datetime.now() - timedelta(minutes=ANSWERING_MINUTES)
+        self.search([("state", "=", "answering"), ("write_date", "<", old)]).write({"state": "queued"})
+        started = time.monotonic()
+        while True:
+            mention = self.search([("state", "=", "queued")], order="id", limit=1)
+            if not mention:
+                break
+            # Marked and committed before the (slow) answer, so a kill does not repeat it first
+            mention.state = "answering"
+            if not keep:
                 self.env.cr.commit()
+            mention._answer()
+            if not keep:
+                self.env["ir.cron"]._commit_progress(1)
+            if time.monotonic() - started > CRON_SECONDS:
+                self.env.ref("nudge_discuss.cron_mentions").sudo()._trigger()
+                break
 
     # ------------------------------------------------------------------
     # Answered as the person who asked
@@ -174,6 +231,13 @@ class NudgeMention(models.Model):
         env = self._as_person()
         try:
             with self.env.cr.savepoint():
+                kind, tone = asked_for(text_of(self.message_id.body)) if self.model != CHANNEL else (None, None)
+                if kind:
+                    # A few words that ask for one thing: Nudge does it, as the person, and says it here
+                    record = get_records(get_model(env, self.model), [self.res_id], "read")
+                    self.answer_id = self._post(self._done(env, kind, tone, record))
+                    self.state = "done"
+                    return
                 context = self._context_of(env)
                 question = cut(text_of(self.message_id.body).replace("@Nudge", "").strip(), MAX_QUESTION_CHARS)
                 question = question or env._("Summarise this for me.")
@@ -199,6 +263,23 @@ class NudgeMention(models.Model):
         except Exception as error:  # noqa: BLE001
             _logger.exception("Nudge: mention %s failed", self.id)
             self.write({"state": "failed", "error": cut(str(error), 300)})
+
+    def _done(self, env, kind, tone, record):
+        """:return: what is posted for a request made in a few words: the history of the record
+        summarised, or the draft of a reply to its customer. A draft is only text here, and a hint at
+        where it is read and sent: Nudge never sends it."""
+        if kind == "history":
+            return env["nudge.history"]._summary(record)["text"]
+        draft = env["nudge.reply"]._draft(record, tone)
+        hint = (env._("To edit it and send it, open Nudge on this record and press Draft a reply. It is sent only "
+                      "when you press Send.") if "nudge.email.review" in env
+                else env._("Copy it into your reply: Nudge never sends it."))
+        return "\n\n".join((
+            env._("**Draft of a reply, not sent**"),
+            env._("To: %(to)s", to=draft["to"]) + "\n" + env._("Subject: %(subject)s", subject=draft["subject"]),
+            draft["text"],
+            hint,
+        ))
 
     def _context_of(self, env):
         """:return: ``{"title", "block"}``: what the person may read of the

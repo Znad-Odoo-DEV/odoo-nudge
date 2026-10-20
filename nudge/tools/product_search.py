@@ -359,16 +359,20 @@ def describe(env, product, warehouses):
         item["cost"] = _money(env, product.standard_price, currency)
     if "qty_available" in product._fields and product.type not in ("service", "combo") and _readable(product, "qty_available"):
         try:
-            item["on_hand"] = product.qty_available
-            item["unit"] = product.uom_id.name if "uom_id" in product._fields else ""
-            item["by_warehouse"] = [
-                {"name": warehouse.name, "quantity": quantity}
-                for warehouse in warehouses
-                for quantity in [product.with_context(warehouse_id=warehouse.id).qty_available]
-                if quantity
-            ]
+            # All or nothing: a person who may not read the stock moves gets no stock figures at all
+            stock = {
+                "on_hand": product.qty_available,
+                "unit": product.uom_id.name if "uom_id" in product._fields else "",
+                "by_warehouse": [
+                    {"name": warehouse.name, "quantity": quantity}
+                    for warehouse in warehouses
+                    for quantity in [product.with_context(warehouse_id=warehouse.id).qty_available]
+                    if quantity
+                ],
+            }
         except AccessError:
-            item.pop("on_hand", None)
+            stock = {}
+        item.update(stock)
     return item
 
 

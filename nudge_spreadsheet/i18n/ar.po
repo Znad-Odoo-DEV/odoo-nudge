@@ -16,6 +16,7 @@ msgstr ""
 
 #. module: nudge_spreadsheet
 #: model:ir.model,name:nudge_spreadsheet.model_nudge_spreadsheet
+#: code:addons/nudge_spreadsheet/static/src/assets/spreadsheet_action_loader.js:0
 msgid "Nudge Spreadsheet"
 msgstr "جدول بيانات Nudge"
 
@@ -67,14 +68,10 @@ msgstr "لا جداول بيانات بعد"
 
 #. module: nudge_spreadsheet
 #: model_terms:ir.actions.act_window,help:nudge_spreadsheet.nudge_spreadsheet_action
-msgid "Ask Nudge for a comparison or a report and choose a spreadsheet: it lands here."
+msgid ""
+"Ask Nudge for a comparison or a report and choose a spreadsheet: it lands "
+"here."
 msgstr "اطلب من Nudge مقارنة أو تقريرًا واختر جدول بيانات: يصل إلى هنا."
-
-#. module: nudge_spreadsheet
-#. odoo-javascript
-#: code:addons/nudge_spreadsheet/static/src/assets/spreadsheet_action_loader.js:0
-msgid "Nudge Spreadsheet"
-msgstr "جدول بيانات Nudge"
 
 #. module: nudge_spreadsheet
 #. odoo-javascript
@@ -87,3 +84,53 @@ msgstr "تعذّر حفظ التغييرات."
 #: code:addons/nudge_spreadsheet/static/src/bundle/spreadsheet_action.xml:0
 msgid "Download"
 msgstr "تنزيل"
+
+#. module: nudge_spreadsheet
+#: model:ir.model.fields,field_description:nudge_spreadsheet.field_nudge_spreadsheet__create_uid
+msgid "Created by"
+msgstr "أنشئ بواسطة"
+
+#. module: nudge_spreadsheet
+#: model:ir.model.fields,field_description:nudge_spreadsheet.field_nudge_spreadsheet__create_date
+msgid "Created on"
+msgstr "أنشئ في"
+
+#. module: nudge_spreadsheet
+#: model:ir.model.fields,field_description:nudge_spreadsheet.field_nudge_spreadsheet__display_name
+msgid "Display Name"
+msgstr "اسم العرض"
+
+#. module: nudge_spreadsheet
+#: model:ir.model.fields,field_description:nudge_spreadsheet.field_nudge_spreadsheet__id
+msgid "ID"
+msgstr "المعرف"
+
+#. module: nudge_spreadsheet
+#: model:ir.model.fields,field_description:nudge_spreadsheet.field_nudge_spreadsheet__write_uid
+msgid "Last Updated by"
+msgstr "آخر تحديث بواسطة"
+
+#. module: nudge_spreadsheet
+#: model:ir.model.fields,field_description:nudge_spreadsheet.field_nudge_spreadsheet__write_date
+msgid "Last Updated on"
+msgstr "آخر تحديث في"
+
+#. module: nudge_spreadsheet
+#: model:ir.model.fields,field_description:nudge_spreadsheet.field_nudge_spreadsheet__spreadsheet_data
+msgid "Spreadsheet Data"
+msgstr "بيانات جدول البيانات"
+
+#. module: nudge_spreadsheet
+#: model:ir.model.fields,field_description:nudge_spreadsheet.field_nudge_spreadsheet__spreadsheet_file_name
+msgid "Spreadsheet File Name"
+msgstr "اسم ملف جدول البيانات"
+
+#. module: nudge_spreadsheet
+#: model:ir.model.fields,field_description:nudge_spreadsheet.field_nudge_spreadsheet__spreadsheet_binary_data
+msgid "Spreadsheet file"
+msgstr "ملف جدول البيانات"
+
+#. module: nudge_spreadsheet
+#: model:ir.model.fields,field_description:nudge_spreadsheet.field_nudge_spreadsheet__thumbnail
+msgid "Thumbnail"
+msgstr "صورة مصغرة"

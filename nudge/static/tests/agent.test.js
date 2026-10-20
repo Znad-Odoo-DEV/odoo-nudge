@@ -113,6 +113,20 @@ test("the mode is for those who may", async () => {
     expect(nudge.state.mode).toBe("talk");
 });
 
+test("a lock shows in the panel when the company asks for private mode", async () => {
+    const { nudge } = await start({ config: { is_private: true } });
+    nudge.open();
+    await animationFrame();
+    expect(".o_nudge_private").toHaveCount(1);
+});
+
+test("no lock when private mode is off", async () => {
+    const { nudge } = await start();
+    nudge.open();
+    await animationFrame();
+    expect(".o_nudge_private").toHaveCount(0);
+});
+
 test("the person chooses who does the work", async () => {
     const { asked, nudge } = await start();
     nudge.open();

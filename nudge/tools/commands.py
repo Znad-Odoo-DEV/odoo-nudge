@@ -9,6 +9,7 @@ the tokens of a question asked in full.
 """
 import re
 
+from ..llm import arabic
 from . import base
 
 DIRECT = "direct"
@@ -33,10 +34,23 @@ COMMANDS = (
     Command("product", ("/product", "/منتج")),
     Command("stock", ("/stock", "/مخزون")),
     Command("rules", ("/rules", "/قواعد")),
+    # Why an automation, a server action or a scheduled action failed, no AI (tools/debugger.py)
+    Command("debug", ("/debug", "/فشل")),
+    Command("tour", ("/tour", "/جولة")),
+    # The health of the database, found by small checks, no AI (tools/health.py)
+    Command("health", ("/health", "/فحص")),
+    # A CSV or Excel file matched to the fields of a model and tried, no AI (tools/import_match.py)
+    Command("import", ("/import", "/استيراد")),
     Command("sql", ("/sql",)),
+    # The screen explained from what Odoo knows, no AI (tools/explainer.py)
+    Command("why", ("/why", "/لماذا")),
+    Command("field", ("/field", "/حقل")),
+    Command("here", ("/here", "/هنا")),
     Command("count", ("/count", "/كم"), FOCUSED),
     Command("explain", ("/explain", "/اشرح"), FOCUSED),
 )
+# Read the screen: they need no words after them, and are run at once when chosen
+SCREEN_COMMANDS = ("why", "field", "here")
 BY_NAME = {command.name: command for command in COMMANDS}
 BY_WORD = {word: command for command in COMMANDS for word in command.words}
 
@@ -56,26 +70,25 @@ FOCUS = {
         "mode": base.MODE_TALK,
         "tools": ("search_odoo_documentation",),
     },
+    # The history of a record summarised, and a reply to its customer drafted
+    # (tools/history.py, models/nudge_reply.py): all they may know comes with
+    # the question as data
+    "history": {"mode": base.MODE_TALK, "tools": ()},
+    "reply": {"mode": base.MODE_TALK, "tools": ()},
 }
 # Focused by the code of a companion module, never typed
-INTERNAL_FOCUS = ("mention",)
+INTERNAL_FOCUS = ("mention", "history", "reply")
 # Focused questions a small model answers from what Nudge found for them
 GROUNDED_FOCUS = ("mention", "explain")
 # Times the model is called for a focused command: look, look again, answer
 FOCUS_ROUNDS = 4
 
 
-# Marks over the letters, and the stretching of a word
-ARABIC_MARKS = re.compile("[\u064b-\u065f\u0670\u0640]")
-# The forms of a letter people write one for the other
-ARABIC_LETTERS = str.maketrans("\u0623\u0625\u0622\u0671\u0629\u0649", "\u0627\u0627\u0627\u0627\u0647\u064a")
-
-
 def fold(text):
     """:return: ``text`` as words compared, whatever the spelling: lower case,
     no marks, one form of alif, ta marbuta and alif maqsura, and "al" taken
     off the start of an Arabic word: "عروض الأسعار" and "عروض اسعار" meet"""
-    text = ARABIC_MARKS.sub("", (text or "").casefold()).translate(ARABIC_LETTERS)
+    text = arabic.fold(text)
     words = []
     for word in re.findall(r"\w+", text):
         if word.startswith("\u0627\u0644") and len(word) > 4:
@@ -169,8 +182,10 @@ def is_open(env, name):
         return "stock.warehouse" in env and "product.product" in env
     if name == "file":
         return bool(env["nudge.source"].search_count([("state", "=", "ready")], limit=1))
-    if name == "rules":
+    if name in ("rules", "debug"):
         return Conversation._can_develop()
+    if name == "health":
+        return user.has_group("nudge.group_nudge_manager")
     if name == "sql":
         tool = base.TOOLS.get("run_sql")
         return bool(tool) and tool.is_available(env, base.MODE_AGENT)
@@ -193,7 +208,18 @@ def texts(env):
         "stock": (env._("The stock of products, by warehouse"), env._("/stock cement")),
         "rules": (env._("What runs by itself on a kind of record: automations, scheduled actions, emails"),
                   env._("/rules sale.order")),
+        "debug": (env._("Why an automation, a server action or a scheduled action failed: what the code names that "
+                        "does not exist, the rights, the last errors"), env._("/debug payroll cron")),
+        "tour": (env._("A recorded tour of a task, shown with the pointer"), env._("/tour create a quotation")),
+        "health": (env._("Checks the database for duplicates, missing setup, risky rights and stuck jobs"), "/health"),
+        "import": (env._("Match the columns of the CSV or Excel file you attach to the fields of a model, and try it"),
+                   env._("/import (with the file attached)")),
         "sql": (env._("One SELECT, read only, at most 50 rows"), "/sql SELECT name FROM res_partner LIMIT 5"),
+        "why": (env._("What stops this form from being saved: required fields, refused values, rights, companies"),
+                "/why"),
+        "field": (env._("What a field is, in words; with no words, the field you were in"),
+                  env._("/field customer")),
+        "here": (env._("What this screen is: the record, its state, its buttons"), "/here"),
         "count": (env._("A number about your records, worked out by the AI with your data only"),
                   env._("/count invoices unpaid this month")),
         "explain": (env._("A field, a term or this screen, explained by the AI in a few words"),
@@ -211,6 +237,7 @@ def listed(env):
             "kind": command.kind,
             "hint": described[command.name][0],
             "example": described[command.name][1],
+            "at_once": command.name in SCREEN_COMMANDS,
         }
         for command in COMMANDS if is_open(env, command.name)
     ]

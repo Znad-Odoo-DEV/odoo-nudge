@@ -1,0 +1,46 @@
+// The strip of warnings under the title of a form: quiet, in the colours of Odoo
+.o_nudge_strip {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0 0 8px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: rgba(var(--bs-warning-rgb, 255, 193, 7), 0.12);
+    border: 1px solid rgba(var(--bs-warning-rgb, 255, 193, 7), 0.45);
+    font-size: 0.9rem;
+
+    .o_nudge_strip_item {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 2px 12px;
+    }
+
+    .o_nudge_strip_text {
+        flex: 1 1 24rem;
+    }
+
+    .o_nudge_strip_label {
+        font-weight: 600;
+        margin-inline-end: 6px;
+    }
+
+    .o_nudge_strip_info .o_nudge_strip_label {
+        opacity: 0.8;
+    }
+
+    .o_nudge_strip_actions .btn {
+        padding: 0 6px;
+    }
+
+    .o_nudge_strip_answer {
+        flex: 1 1 100%;
+        padding-inline-start: 12px;
+        border-inline-start: 2px solid var(--bs-primary, #714b67);
+    }
+
+    .o_nudge_strip_muted {
+        opacity: 0.75;
+    }
+}

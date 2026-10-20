@@ -284,7 +284,7 @@ time, never a deletion. Passwords, keys and tokens are never shown, whoever asks
 If you see **Talk** and **Agent** under the messages, you may ask Nudge to do things.
 
 1. Press **Agent**, or say "Nudge, do it" after it explained how.
-2. Ask: "Create a quotation for Acme with 3 office chairs, then confirm it."
+2. Ask: "Create a quotation for Raghad with 3 office chairs, then confirm it."
 3. Nudge finds what it needs and shows you what it is about to do: the fields as they are and
    as they will be, or the button it is about to press, and on which record.
 4. Press **Yes, do it** or **No**. Nothing changes before your yes. On a no, it asks what you
@@ -299,7 +299,7 @@ means the action is not taken back with a click: read twice.
 
 ### Many records with one yes
 
-"Confirm all the draft quotations of Acme", "set the delivery date on these orders, then
+"Confirm all the draft quotations of Raghad", "set the delivery date on these orders, then
 confirm them": Nudge makes one plan and one card, not a card per record. Before you decide, it
 tries the plan and undoes it, and the card says how many records go through and why the others
 do not ("missing Payment Terms"). Say **Yes, all of them**, **Only the … that go through**, or
