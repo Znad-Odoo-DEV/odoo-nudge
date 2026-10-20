@@ -1431,7 +1431,12 @@ class NudgeConversation(models.Model):
             else:
                 # In the environment of the person, never in sudo
                 env = self.with_context(nudge_conversation_id=self.id, nudge_mode=mode).env
-                result = tools.base.guarded(env, step.tool, lambda: tool.execute(env, step))
+                try:
+                    env = step._company_env(env)
+                except UserError as error:
+                    result = tools.base.ToolResult(str(error), is_error=True)
+                else:
+                    result = tools.base.guarded(env, step.tool, lambda: tool.execute(env, step))
             state = "failed" if result.is_error else "done"
             if result.event:
                 events.append(result.event)

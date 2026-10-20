@@ -40,6 +40,7 @@ class NudgeStep(models.Model):
         user_env = self.env(context=dict(
             self.env.context, nudge_conversation_id=prepared.conversation_id.id,
             nudge_mode=MODE_AGENT, nudge_messaging=True))
+        user_env = step._company_env(user_env)
         result = tool_base.guarded(user_env, step.tool, lambda: tool.execute(user_env, step))
         values = {
             "state": "failed" if result.is_error else "done",

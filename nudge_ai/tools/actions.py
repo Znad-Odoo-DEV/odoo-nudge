@@ -10,7 +10,7 @@ import json
 
 from odoo.addons.ai.utils.tools_schema.validators import validate_params_llm_values_with_schema
 from odoo.addons.nudge.tools import base
-from odoo.addons.nudge.tools.records import Refused, cut, refusing
+from odoo.addons.nudge.tools.records import Refused, cut, get_records, refusing
 
 MAX_ACTIONS = 30
 # Under the size of a tool result, with room for the note
@@ -203,7 +203,9 @@ class RunAiAction(base.Action):
         action = self._find(env, name)
         values = (step.arguments or {}).get("arguments") or {}
         model = env[action.model_id.model]
-        record = model.browse(step.res_ids or []).exists()
+        # What was previewed must still be there and still be the person's to use: the action
+        # never falls back to the bare model when it is not
+        record = get_records(model, step.res_ids, "read") if step.res_ids else model.browse()
         context = {
             "active_model": model._name,
             "active_id": record.id if len(record) == 1 else False,

@@ -1,4 +1,5 @@
 import json
+from types import SimpleNamespace
 
 from odoo.tests import TransactionCase, tagged
 
@@ -113,6 +114,17 @@ class TestBridge(NudgeCase, TransactionCase):
         self.assertEqual(step.state, "done")
         self.assertIn("Hello Bob", step.result)
         self.assertIn("Hello Bob", adapter.calls[-1]["turns"][-1]["results"][0]["content"])
+
+    def test_a_previewed_record_deleted_before_the_yes_stops_the_action(self):
+        action, name = self.make_action()
+        env = self.env(user=self.agent)
+        partner = self.env["res.partner"].create({"name": "Raghad AI Customer"})
+        step = SimpleNamespace(
+            arguments={"action": name, "arguments": {"name": "Ebrahim"}}, res_ids=partner.ids, values={})
+        partner.unlink()
+        result = tools.base.guarded(env, "run_ai_action", lambda: tools.base.TOOLS["run_ai_action"].execute(env, step))
+        self.assertTrue(result.is_error, result.content)
+        self.assertIn("do not exist", result.content)
 
     def test_who_gets_the_ai_tools(self):
         self.make_action()

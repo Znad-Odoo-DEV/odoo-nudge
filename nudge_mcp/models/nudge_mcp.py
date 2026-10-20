@@ -518,6 +518,10 @@ class NudgeMcp(models.AbstractModel):
             env.context, nudge_conversation_id=prepared.conversation_id.id,
             nudge_mode=tool_base.MODE_AGENT, nudge_mcp=True))
         # In the environment of the person, never in sudo; only the step is the log's
+        try:
+            user_env = step._company_env(user_env)
+        except UserError as error:
+            return finish("failed", str(error))
         result = tool_base.guarded(user_env, step.tool, lambda: tool.execute(user_env, step))
         values = {
             "state": "failed" if result.is_error else "done",

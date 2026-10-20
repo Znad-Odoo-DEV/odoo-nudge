@@ -199,6 +199,18 @@ class TestDoors(MessagingCase, HttpCase):
         self.assertEqual(self.env["sale.order"].search_count([]), orders + 1)
         self.assertEqual(self.env["sale.order"].search([], limit=1).create_uid, self.raghad)
 
+    def test_a_yes_given_after_leaving_the_company_is_refused(self):
+        self.env["res.partner"].create({"name": "راغد"})
+        self.link(self.raghad)
+        orders = self.env["sale.order"].search_count([])
+        self.say_whatsapp("اعمل عرض سعر لراغد")
+        step = self.env["nudge.step"].sudo().search([("origin", "=", "WhatsApp")])
+        self.assertEqual(step.company_id, self.env.company)
+        step.company_id = self.env["res.company"].create({"name": "Nudge Messaging Other Company"})
+        with self.assertRaises(UserError):
+            step.with_user(self.raghad).action_messaging_apply()
+        self.assertEqual((step.state, self.env["sale.order"].search_count([])), ("pending", orders))
+
     def test_another_person_cannot_say_yes_for_them(self):
         self.env["res.partner"].create({"name": "راغد"})
         self.link(self.raghad)

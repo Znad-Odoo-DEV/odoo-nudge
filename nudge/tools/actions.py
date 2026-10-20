@@ -417,6 +417,11 @@ class PrepareWrite(base.Action):
                 if isinstance(line["before"], dict):
                     line["before"] = line["before"].get("name") or line["before"].get("count")
         title = env._("Change: %s", model_label(model))
+        # Imported here: plans are built on the actions of this file
+        from .plans import snapshot  # noqa: PLC0415
+
+        # What the fields to write hold now: the yes is refused if someone changed them since
+        current = {str(record.id): snapshot(record, list(values)) for record in records}
         return base.ToolResult(
             "The person is being shown what is about to be changed.",
             pending={
@@ -424,7 +429,7 @@ class PrepareWrite(base.Action):
                 "res_model": model._name,
                 "res_ids": records.ids,
                 "record_names": ", ".join(records[:MAX_SHOWN_RECORDS].mapped("display_name")),
-                "values": {"values": values, "lines": lines},
+                "values": {"values": values, "lines": lines, "current": current},
                 "is_sensitive": is_sensitive(model._name) or values.get("active") is False,
                 "preview": {"records": name_records(records), "lines": shown + shown_lines},
             },
@@ -438,6 +443,15 @@ class PrepareWrite(base.Action):
 
         names = list(step.values["values"])
         before = {str(record.id): snapshot(record, names) for record in records}
+        # Steps made before the snapshot existed have none and run as they always did
+        for key, seen in (step.values.get("current") or {}).items():
+            if before.get(key) is not None and any(before[key].get(n) != v for n, v in seen.items()):
+                record = records.browse(int(key))
+                field = next(n for n, v in seen.items() if before[key].get(n) != v)
+                raise Refused(env._(
+                    "%(record)s was changed since you were shown this: its field %(field)s is no longer "
+                    "what it was. Nothing was written; ask again to see it as it is now.",
+                    record=record.display_name, field=model._fields[field].string))
         records.write(to_write(step.values["values"], step.values.get("lines")))
         step.values = dict(step.values, undo={model._name: {
             str(record.id): {"before": before[str(record.id)], "after": snapshot(record, names)}
