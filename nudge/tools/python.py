@@ -15,6 +15,13 @@ read are called. Nothing a savepoint cannot take back is reachable: no
 action_, no send, no post, no message_. The code has DEADLINE_SECONDS to
 finish; a loop that goes on is stopped there.
 
+The deadline is looked at between two steps of the code, and one step that
+runs in C is not stopped before it ends: 10 ** 10 ** 10, 'a' * 10 ** 10.
+So the size of such a step is bounded before the code runs: the whole
+numbers it writes, a power or a shift between them or of a value, a text or
+a list repeated. A long range is walked one step at a time, where the
+deadline sees it, even inside sum() or list().
+
 The code reads and computes. What it would write is refused before it
 runs, and it runs in a savepoint that is rolled back whatever happens all
 the same. A change goes through prepare_write or prepare_create, where the
@@ -48,6 +55,22 @@ MAX_RESULT_CHARS = 4000
 # How long the code may run, in seconds: a loop that goes on is stopped there
 DEADLINE_SECONDS = 10
 FILENAME = "nudge:run_python"
+# The size of one step that runs in C, between two looks at the deadline:
+# the whole numbers the code writes or computes from numbers it writes (a
+# billion keeps every id of a database), the power of a value (x ** 2, x **
+# 0.5), a shift, the items of a text or a list repeated
+MAX_NUMBER = 10 ** 9
+MAX_EXPONENT = 3
+MAX_SHIFT = 64
+MAX_REPEAT = 100000
+# A range longer than this is walked in Python, one step at a time
+MAX_C_RANGE = 10 ** 6
+
+BEYOND = "{expression} is beyond 10 ** 9: a step that size runs past the deadline."
+POWER = (
+    "** and << take small numbers written in the code (10 ** 6, x ** 2, 1 << 8): a computed power "
+    "could run past the deadline.")
+REPEAT = "Repeat a text or a list by a number written in the code, 100000 items at most ('-' * 40, [0] * 12)."
 
 # time without sleep: the code computes, it does not wait
 safe_time = wrap_module(__import__("time"), ["time", "strptime", "strftime"])
@@ -122,6 +145,13 @@ def check_code(code):
             raise Refused("The code may not name private attributes.")
         if isinstance(node, ast.FormattedValue) and node.conversion in (ord("r"), ord("a")):
             raise Refused("No !r or !a in an f-string: it shows the inside of things.")
+        if (isinstance(node, ast.Constant) and isinstance(node.value, int) and not isinstance(node.value, bool)
+                and abs(node.value) > MAX_NUMBER):
+            raise Refused(BEYOND.format(expression=node.value))
+        if isinstance(node, ast.BinOp):
+            _check_size(node.left, node.op, node.right)
+        if isinstance(node, ast.AugAssign):
+            _check_size(node.target, node.op, node.value)
         if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Mod):
             left, right = node.left, node.right
             if isinstance(left, ast.Constant) and isinstance(left.value, str):
@@ -131,6 +161,114 @@ def check_code(code):
                 raise Refused(
                     "% is read with a constant text on its left, '...' % (...), or a number on its "
                     "right, n % 2: between two names it is not.")
+
+
+def _shown(node):
+    return cut(ast.unparse(node), 60)
+
+
+def _number(node):
+    """:return: the value of ``node`` when it is a number written in the
+        code, or arithmetic between such numbers; None otherwise
+    :raise Refused: when a whole number it comes to is beyond MAX_NUMBER,
+        found out before it is computed when it would take long"""
+    if isinstance(node, ast.Constant):
+        value = node.value
+        return value if isinstance(value, (int, float)) and not isinstance(value, bool) else None
+    if isinstance(node, ast.UnaryOp) and isinstance(node.op, (ast.USub, ast.UAdd)):
+        value = _number(node.operand)
+        return None if value is None else -value if isinstance(node.op, ast.USub) else value
+    if not isinstance(node, ast.BinOp):
+        return None
+    left, right = _number(node.left), _number(node.right)
+    if left is None or right is None:
+        return None
+    whole = isinstance(left, int) and isinstance(right, int)
+    if isinstance(node.op, ast.Pow) and whole and right > 0 and abs(left) > 1 and right * abs(left).bit_length() > 64:
+        raise Refused(BEYOND.format(expression=_shown(node)))
+    if isinstance(node.op, ast.LShift) and whole and right > MAX_SHIFT:
+        raise Refused(BEYOND.format(expression=_shown(node)))
+    operations = {
+        ast.Add: lambda: left + right, ast.Sub: lambda: left - right, ast.Mult: lambda: left * right,
+        ast.Div: lambda: left / right, ast.FloorDiv: lambda: left // right, ast.Mod: lambda: left % right,
+        ast.Pow: lambda: left ** right, ast.LShift: lambda: left << right,
+    }
+    compute = operations.get(type(node.op))
+    if compute is None:
+        return None
+    try:
+        value = compute()
+    except (ArithmeticError, TypeError, ValueError):
+        # Left to Python to say, at once, when the code runs
+        return None
+    if isinstance(value, int) and abs(value) > MAX_NUMBER:
+        raise Refused(BEYOND.format(expression=_shown(node)))
+    return value if isinstance(value, (int, float)) else None
+
+
+def _repeated(node):
+    """:return: whether ``node`` is a text or a list as the code writes it,
+        and how many items it holds when that is known"""
+    if isinstance(node, ast.Constant) and isinstance(node.value, (str, bytes)):
+        return True, len(node.value)
+    if isinstance(node, (ast.List, ast.Tuple)):
+        starred = any(isinstance(item, ast.Starred) for item in node.elts)
+        return True, None if starred else len(node.elts)
+    if isinstance(node, (ast.JoinedStr, ast.ListComp)):
+        return True, None
+    if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+        (left, left_size), (right, right_size) = _repeated(node.left), _repeated(node.right)
+        if left or right:
+            return True, None if left_size is None or right_size is None else left_size + right_size
+    if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Mult):
+        for sequence, count in ((node.left, node.right), (node.right, node.left)):
+            found, size = _repeated(sequence)
+            if found:
+                count = _number(count)
+                return True, size * count if size is not None and isinstance(count, int) else None
+    return False, None
+
+
+def _check_size(left, op, right):
+    """:raise Refused: when ``left op right`` is one step of C larger than
+    the deadline can stop: a power or a shift beyond small numbers, a
+    repetition by a count that is not small or not written in the code"""
+    left_value, right_value = _number(left), _number(right)
+    if left_value is not None and right_value is not None:
+        # Numbers written in the code: what they come to is bounded
+        _number(ast.BinOp(left=left, op=op, right=right))
+        return
+    if isinstance(op, ast.Pow):
+        if right_value is None or abs(right_value) > MAX_EXPONENT:
+            raise Refused(POWER)
+    elif isinstance(op, ast.LShift):
+        if not isinstance(right_value, int) or not 0 <= right_value <= MAX_SHIFT:
+            raise Refused(POWER)
+    elif isinstance(op, ast.Mult):
+        for sequence, count in ((left, right_value), (right, left_value)):
+            found, size = _repeated(sequence)
+            if found:
+                if not isinstance(count, int) or count > MAX_REPEAT or (size is not None and size * count > MAX_REPEAT):
+                    raise Refused(REPEAT)
+                break
+
+
+def _range(*args):
+    """range, as the code calls it: a long one is walked one step at a time
+    in Python, where the deadline looks at every step, even inside sum() or
+    list(), which would walk it in C to its end"""
+    steps = range(*args)
+    try:
+        long = len(steps) > MAX_C_RANGE
+    except OverflowError:
+        long = True
+    return _stepping(steps) if long else steps
+
+
+def _stepping(steps):
+    # Every step resumes this frame: a call the trace of the deadline sees
+    for step in steps:
+        yield step
 
 
 def _check_path(records, path):
@@ -433,6 +571,8 @@ class RunPython(base.Tool):
             "Command": Command,
             "UserError": UserError,
             "log": log,
+            "range": _range,
+            "xrange": _range,
             "result": None,
         }
         started = time.monotonic()

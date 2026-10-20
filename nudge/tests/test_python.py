@@ -171,6 +171,51 @@ class TestPython(NudgeCase, TransactionCase):
         self.assertEqual(self.partners[0].name, "Nudge Py One")
         self.assertEqual(self.payload("result = 1 + 1")["result"], 2)
 
+    def test_one_step_too_large_for_the_deadline_is_refused(self):
+        # The deadline is looked at between two steps: one step in C is bounded before it runs
+        for code, text in [
+            ("result = 10 ** 10 ** 10", "10 ** 10 is beyond 10 ** 9"),
+            ("result = 'Raghad' * 10 ** 10", "beyond 10 ** 9"),
+            ("result = sum(range(10 ** 12))", "10 ** 12 is beyond 10 ** 9"),
+            ("result = [0] * 10 ** 10", "beyond 10 ** 9"),
+            ("result = 2 ** 100", "2 ** 100 is beyond 10 ** 9"),
+            ("result = 10 ** 6 * 10 ** 6", "beyond 10 ** 9"),
+            ("result = 1 << 100", "beyond 10 ** 9"),
+            ("result = 12345678901", "12345678901 is beyond 10 ** 9"),
+            ("n = 3\nresult = n ** n", "** and <<"),
+            ("n = 3\nn **= n", "** and <<"),
+            ("n = 3\nresult = 2 << n", "** and <<"),
+            ("n = 3\nresult = 'Ebrahim' * n", "Repeat a text or a list"),
+            ("result = ['Raghad', 'Ebrahim'] * 10 ** 6", "Repeat a text or a list"),
+            ("result = ('Raghad' * 10 ** 4) * 10 ** 4", "Repeat a text or a list"),
+        ]:
+            result = self.run_code(code)
+            self.assertTrue(result.is_error, code)
+            self.assertIn(text, result.content, code)
+
+    def test_a_long_range_is_walked_where_the_deadline_sees_it(self):
+        # sum() walks a range in C, to its end: a long one is walked step by step instead
+        with patch.object(python_tool, "DEADLINE_SECONDS", 0.2):
+            started = time.monotonic()
+            result = self.run_code("n = 10 ** 5\nresult = sum(range(n * n))")
+            self.assertTrue(result.is_error)
+            self.assertIn("was stopped", result.content)
+            self.assertLess(time.monotonic() - started, 5)
+
+    def test_small_arithmetic_is_computed(self):
+        payload = self.payload(
+            "names = ['Raghad', 'Ebrahim'] * 2\n"
+            "x = len(names)\n"
+            "x **= 2\n"
+            "result = {'names': names, 'square': 7 ** 2, 'root': 16 ** 0.5, 'x': x, 'cube': x ** 3,\n"
+            "          'line': '-' * 10, 'zeros': [0] * 3, 'million': 10 ** 6, 'amount': 25000000000.0 * 2,\n"
+            "          'flag': 1 << 8, 'sum': sum(range(101)), 'long': sum(range(1000001))}\n")
+        self.assertEqual(payload["result"], {
+            "names": ["Raghad", "Ebrahim", "Raghad", "Ebrahim"], "square": 49, "root": 4.0, "x": 16,
+            "cube": 4096, "line": "----------", "zeros": [0, 0, 0], "million": 1000000,
+            "amount": 50000000000.0, "flag": 256, "sum": 5050, "long": 500000500000,
+        })
+
     def test_what_the_sandbox_refuses(self):
         for code, text in [
             ("result = env['res.partner'].sudo().search([])", ".sudo"),
