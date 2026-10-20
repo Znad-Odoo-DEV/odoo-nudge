@@ -138,6 +138,24 @@ class TestApprovalFlow(NudgeCase, TransactionCase):
         self.assertNotIn("prepare_approval_flow", offered)
         self.assertIn("prepare_approval_flow", [t.name for t in tools.base.available(self.dev, "dev")])
 
+    def test_a_role_named_in_words_resolves_to_the_group_of_that_app(self):
+        for text, xmlid in (
+                ("purchase manager", "purchase.group_purchase_manager"),
+                ("the purchase administrator", "purchase.group_purchase_manager"),
+                ("manager of purchase", "purchase.group_purchase_manager"),
+                ("sales manager", "sales_team.group_sale_manager"),
+                ("مدير المشتريات", "purchase.group_purchase_manager")):
+            if not self.env.ref(xmlid, raise_if_not_found=False):
+                continue
+            group, note = approval_flow.find_group(self.env, text)
+            self.assertEqual(group, self.env.ref(xmlid), text)
+            self.assertFalse(note, text)
+
+    def test_a_role_of_an_unknown_app_is_reported_and_not_replaced_silently(self):
+        group, note = approval_flow.find_group(self.env, "Raghad Ebrahim Foundry manager")
+        self.assertIn("Raghad Ebrahim Foundry manager", note)
+        self.assertIn("No group is named", note)
+
     def test_a_sentence_that_is_no_rule_is_refused_in_words(self):
         refused = self.ask({"sentence": "Create a purchase order for Raghad"})
         self.assertTrue(refused.is_error)
