@@ -1582,7 +1582,22 @@ function isReadable(file) {
                     }
                     break;
                 }
-                case "done":
+                case "done": {
+                    const twin = answer.afterYes && event.message_id &&
+                        state.messages.find((message) => message !== answer && message.id === event.message_id);
+                    if (twin) {
+                        // Settled without the AI, the answer is the message of the card itself:
+                        // what it said goes there, and no second bubble of one message is drawn
+                        if (answer.content) {
+                            twin.content = join(twin.content, answer.content);
+                        }
+                        answer.state = "complete";
+                        const index = state.messages.indexOf(answer);
+                        if (index >= 0) {
+                            state.messages.splice(index, 1);
+                        }
+                        break;
+                    }
                     answer.id = event.message_id;
                     answer.state = event.state;
                     answer.error = event.message || "";
@@ -1598,6 +1613,7 @@ function isReadable(file) {
                             : _t("No answer came. Ask again, in other words.");
                     }
                     break;
+                }
                 case "error":
                     answer.id = event.message_id || answer.id;
                     answer.state = "error";
@@ -1965,6 +1981,8 @@ function isReadable(file) {
             card.state = "deciding";
             const holder = state.messages.find((message) => message.card === card);
             const answer = addAnswer();
+            // The answer to a yes may be the message of its card (settled without the AI)
+            answer.afterYes = true;
             await receive(answer, (params) =>
                 streamDecision({
                     conversationId: state.conversationId,
