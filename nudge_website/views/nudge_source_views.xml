@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_source_view_form_public" model="ir.ui.view">
+        <field name="name">nudge.source.view.form.public</field>
+        <field name="model">nudge.source</field>
+        <field name="inherit_id" ref="nudge.nudge_source_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='group_ids']" position="after">
+                <field name="is_public"/>
+                <field name="public_url" invisible="not website_page_id"/>
+                <field name="website_page_id" invisible="not website_page_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="nudge_source_view_list_public" model="ir.ui.view">
+        <field name="name">nudge.source.view.list.public</field>
+        <field name="model">nudge.source</field>
+        <field name="inherit_id" ref="nudge.nudge_source_view_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='group_ids']" position="after">
+                <field name="is_public" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

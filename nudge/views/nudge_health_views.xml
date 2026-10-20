@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_health_report_form" model="ir.ui.view">
+        <field name="name">nudge.health.report.form</field>
+        <field name="model">nudge.health.report</field>
+        <field name="arch" type="xml">
+            <form string="Database Health" create="0" edit="0">
+                <header>
+                    <button name="action_run" type="object" string="Check Again" class="btn-primary" invisible="pack"/>
+                    <button name="action_run_pack" type="object" string="Run Again" class="btn-primary" invisible="not pack"/>
+                    <button name="action_toggle_weekly" type="object" string="Check Every Week as Me / Stop"
+                            invisible="scope == 'upgrade'"/>
+                </header>
+                <sheet>
+                    <field name="scope" invisible="1"/>
+                    <div class="alert alert-info" role="alert" invisible="scope != 'upgrade'">
+                        An Odoo.sh upgrade works on the last daily backup of production, not on the database of the branch.
+                        This report is read from the database as it is now: do the real test on a staging copy restored
+                        from that backup, and run the check there too.
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="summary"/></h1>
+                        <h3 invisible="not pack"><field name="pack_name"/></h3>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date"/>
+                            <field name="user_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="previous_id"/>
+                            <field name="target" invisible="scope != 'upgrade'"/>
+                            <field name="weekly"/>
+                        </group>
+                    </group>
+                    <field name="finding_ids" nolabel="1">
+                        <list create="0" delete="0" edit="0" decoration-danger="severity == 'critical'"
+                              decoration-warning="severity == 'warning'" decoration-muted="severity == 'info'">
+                            <field name="severity" widget="badge"/>
+                            <field name="message"/>
+                            <field name="count_text" string="Count"/>
+                            <field name="detail" string="What It Means" optional="show"
+                                   column_invisible="not parent.pack"/>
+                            <field name="is_new"/>
+                            <field name="delta"/>
+                            <button name="action_show" type="object" string="Show me" icon="fa-search"
+                                    invisible="not model_name"/>
+                            <field name="model_name" column_invisible="1"/>
+                        </list>
+                    </field>
+                    <group string="Solved Since the Last Time" invisible="not resolved_text">
+                        <field name="resolved_text" nolabel="1" colspan="2"/>
+                    </group>
+                    <group string="Not Checked" invisible="not skipped_text">
+                        <field name="skipped_text" nolabel="1" colspan="2"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_health_report_list" model="ir.ui.view">
+        <field name="name">nudge.health.report.list</field>
+        <field name="model">nudge.health.report</field>
+        <field name="arch" type="xml">
+            <list string="Database Health" create="0">
+                <field name="date"/>
+                <field name="pack_name" string="Checklist" optional="show"/>
+                <field name="scope"/>
+                <field name="target" optional="show"/>
+                <field name="user_id"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="critical_count"/>
+                <field name="warning_count"/>
+                <field name="info_count"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_health_report_action" model="ir.actions.act_window">
+        <field name="name">Health Reports</field>
+        <field name="res_model">nudge.health.report</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('scope', '=', 'health')]</field>
+    </record>
+
+    <record id="nudge_upgrade_report_action" model="ir.actions.act_window">
+        <field name="name">Upgrade Reports</field>
+        <field name="res_model">nudge.health.report</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('scope', '=', 'upgrade')]</field>
+    </record>
+
+    <record id="nudge_upgrade_wizard_form" model="ir.ui.view">
+        <field name="name">nudge.upgrade.wizard.form</field>
+        <field name="model">nudge.upgrade.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Check Before an Upgrade">
+                <group>
+                    <field name="target" widget="radio"/>
+                    <field name="known" invisible="1"/>
+                </group>
+                <div class="alert alert-warning" role="alert" invisible="known">
+                    Nudge has no list of renamed fields for this series yet: it checks what is true of every series
+                    (Studio objects, markup, modules, data).
+                </div>
+                <div class="text-muted">
+                    Nothing is changed. An Odoo.sh upgrade works on the last daily backup of production, so do the real
+                    test on a staging copy restored from that backup.
+                </div>
+                <footer>
+                    <button name="action_check" type="object" string="Check" class="btn-primary" data-hotkey="q"/>
+                    <button special="cancel" string="Cancel" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_upgrade_wizard_action" model="ir.actions.act_window">
+        <field name="name">Before an Upgrade</field>
+        <field name="res_model">nudge.upgrade.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Runs the check, as the one who clicks, and opens its report -->
+    <record id="nudge_health_run_action" model="ir.actions.server">
+        <field name="name">Check the Database</field>
+        <field name="model_id" ref="model_nudge_health_report"/>
+        <field name="state">code</field>
+        <field name="code">action = model.run_check().action_open()</field>
+    </record>
+
+    <record id="nudge_compliance_pack_list" model="ir.ui.view">
+        <field name="name">nudge.compliance.pack.list</field>
+        <field name="model">nudge.compliance.pack</field>
+        <field name="arch" type="xml">
+            <list string="Compliance checklists" create="0" edit="0" delete="0">
+                <field name="name"/>
+                <field name="countries"/>
+                <field name="check_count"/>
+                <field name="reference"/>
+                <field name="last_date"/>
+                <field name="last_summary"/>
+                <field name="error" decoration-danger="1"/>
+                <button name="action_run" type="object" string="Run" icon="fa-play" class="btn-primary"
+                        invisible="not pack"/>
+                <button name="action_last" type="object" string="Last report" icon="fa-search"
+                        invisible="not report_id"/>
+                <field name="pack" column_invisible="1"/>
+                <field name="report_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- The checklists of the country of the company, one Run for each -->
+    <record id="nudge_compliance_action" model="ir.actions.server">
+        <field name="name">Compliance</field>
+        <field name="model_id" ref="model_nudge_compliance_pack"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open()</field>
+    </record>
+
+    <menuitem id="nudge_menu_health" name="Health Check" sequence="40" parent="nudge_menu_root"
+              groups="nudge.group_nudge_manager"/>
+    <menuitem id="nudge_menu_health_run" name="Check the Database" sequence="10"
+              parent="nudge_menu_health" action="nudge_health_run_action"/>
+    <menuitem id="nudge_menu_health_compliance" name="Compliance" sequence="15"
+              parent="nudge_menu_health" action="nudge_compliance_action"/>
+    <menuitem id="nudge_menu_health_reports" name="Reports" sequence="20"
+              parent="nudge_menu_health" action="nudge_health_report_action"/>
+    <menuitem id="nudge_menu_upgrade_run" name="Before an Upgrade" sequence="30"
+              parent="nudge_menu_health" action="nudge_upgrade_wizard_action" groups="base.group_system"/>
+    <menuitem id="nudge_menu_upgrade_reports" name="Upgrade Reports" sequence="40"
+              parent="nudge_menu_health" action="nudge_upgrade_report_action" groups="base.group_system"/>
+</odoo>

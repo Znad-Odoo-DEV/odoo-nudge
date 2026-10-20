@@ -209,6 +209,10 @@ class RunAiAction(base.Action):
             "active_id": record.id if len(record) == 1 else False,
             "active_ids": record.ids,
         } if record else {}
+        # find_ai_action reads the definition in sudo, and a recordset keeps the environment it
+        # was found in: run it in the one of the person, as the AI app does for its agents
+        # (env(su=False)), so that its code has the rights of the person and no more
+        action = env["ir.actions.server"].browse(action.id)
         result = action.with_context(**context)._ai_tool_run(record or model, values)
         told = f"Ran the AI action {action.name!r}."
         if result is not None:

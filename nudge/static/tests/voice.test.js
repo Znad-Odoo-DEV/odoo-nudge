@@ -524,7 +524,7 @@ test("preferences of the voice", async () => {
     nudge.showSettings();
     await animationFrame();
 
-    expect(".o_nudge_voice_language option").toHaveCount(3);
+    expect(".o_nudge_voice_language option").toHaveCount(22);
     expect(".o_nudge_dictation_hotkey option").toHaveCount(3);
     expect(".o_nudge_voice_note").toHaveText(/Your browser turns what you say into text/);
     expect(".o_nudge_speak").not.toBeChecked();

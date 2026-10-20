@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_nudge_source_public,nudge.source public,nudge.model_nudge_source,base.group_public,1,0,0,0
+access_nudge_source_portal,nudge.source portal,nudge.model_nudge_source,base.group_portal,1,0,0,0
+access_nudge_source_passage_public,nudge.source.passage public,nudge.model_nudge_source_passage,base.group_public,1,0,0,0
+access_nudge_source_passage_portal,nudge.source.passage portal,nudge.model_nudge_source_passage,base.group_portal,1,0,0,0
+access_nudge_web_message_manager,nudge.web.message manager,model_nudge_web_message,nudge.group_nudge_manager,1,0,0,0
+access_nudge_web_message_system,nudge.web.message system,model_nudge_web_message,base.group_system,1,0,0,0

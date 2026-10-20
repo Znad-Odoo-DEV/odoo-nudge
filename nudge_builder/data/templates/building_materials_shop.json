@@ -1,0 +1,1194 @@
+{
+ "schema": 1,
+ "key": "building_materials_shop",
+ "sector": "building_materials",
+ "shop": {
+  "categories": [
+   {
+    "name": {
+     "en": "Structure",
+     "ar": "الهيكل"
+    },
+    "keywords": [
+     "cement",
+     "steel",
+     "block",
+     "أسمنت",
+     "حديد",
+     "بلوك"
+    ],
+    "children": [
+     {
+      "name": {
+       "en": "Cement and sand",
+       "ar": "أسمنت ورمل"
+      },
+      "keywords": [
+       "cement",
+       "sand",
+       "أسمنت"
+      ],
+      "children": []
+     },
+     {
+      "name": {
+       "en": "Steel and rebar",
+       "ar": "حديد تسليح"
+      },
+      "keywords": [
+       "steel",
+       "rebar",
+       "حديد"
+      ],
+      "children": []
+     },
+     {
+      "name": {
+       "en": "Blocks and bricks",
+       "ar": "بلوك وطوب"
+      },
+      "keywords": [
+       "block",
+       "brick",
+       "بلوك"
+      ],
+      "children": []
+     }
+    ]
+   },
+   {
+    "name": {
+     "en": "Finishing",
+     "ar": "التشطيب"
+    },
+    "keywords": [
+     "tile",
+     "paint",
+     "بلاط",
+     "دهان"
+    ],
+    "children": [
+     {
+      "name": {
+       "en": "Floor and wall tiles",
+       "ar": "بلاط أرضيات وجدران"
+      },
+      "keywords": [
+       "tile",
+       "بلاط"
+      ],
+      "children": []
+     },
+     {
+      "name": {
+       "en": "Paint and coatings",
+       "ar": "دهانات وعوازل"
+      },
+      "keywords": [
+       "paint",
+       "دهان"
+      ],
+      "children": []
+     },
+     {
+      "name": {
+       "en": "Gypsum and ceilings",
+       "ar": "جبس وأسقف"
+      },
+      "keywords": [
+       "gypsum",
+       "جبس"
+      ],
+      "children": []
+     }
+    ]
+   },
+   {
+    "name": {
+     "en": "Plumbing and electrical",
+     "ar": "السباكة والكهرباء"
+    },
+    "keywords": [
+     "pipe",
+     "cable",
+     "أنابيب",
+     "كابلات"
+    ],
+    "children": [
+     {
+      "name": {
+       "en": "Pipes and fittings",
+       "ar": "أنابيب وتركيبات"
+      },
+      "keywords": [
+       "pipe",
+       "أنابيب"
+      ],
+      "children": []
+     },
+     {
+      "name": {
+       "en": "Cables and switches",
+       "ar": "كابلات ومفاتيح"
+      },
+      "keywords": [
+       "cable",
+       "كابل"
+      ],
+      "children": []
+     }
+    ]
+   },
+   {
+    "name": {
+     "en": "Tools and safety",
+     "ar": "العدد والسلامة"
+    },
+    "keywords": [
+     "tool",
+     "safety",
+     "عدد",
+     "سلامة"
+    ],
+    "children": []
+   }
+  ],
+  "banners": [
+   {
+    "title": {
+     "en": "Cement pallet offer",
+     "ar": "عرض مشتاح الأسمنت"
+    },
+    "text": {
+     "en": "Ten pallets or more at a lower price.",
+     "ar": "سعر أقل عند عشرة مشاتيح أو أكثر."
+    },
+    "button": {
+     "en": "Order now",
+     "ar": "اطلب الآن"
+    }
+   },
+   {
+    "title": {
+     "en": "Tile clearance",
+     "ar": "تصفية البلاط"
+    },
+    "text": {
+     "en": "Last boxes at half price.",
+     "ar": "آخر الصناديق بنصف السعر."
+    },
+    "button": {
+     "en": "View tiles",
+     "ar": "شاهد البلاط"
+    }
+   },
+   {
+    "title": {
+     "en": "Open a credit account",
+     "ar": "افتح حساباً آجلاً"
+    },
+    "text": {
+     "en": "For contractors with a valid licence.",
+     "ar": "للمقاولين أصحاب الرخصة السارية."
+    },
+    "button": {
+     "en": "Apply",
+     "ar": "قدّم طلباً"
+    }
+   }
+  ],
+  "menu": [
+   {
+    "name": {
+     "en": "Shop",
+     "ar": "المتجر"
+    },
+    "url": "/shop"
+   }
+  ],
+  "layout": {
+   "shop_ppg": 20,
+   "shop_ppr": 3,
+   "product_page_image_layout": "grid",
+   "add_to_cart_action": "stay"
+  },
+  "filters": [
+   {
+    "name": {
+     "en": "Brand",
+     "ar": "الماركة"
+    },
+    "type": "attribute"
+   },
+   {
+    "name": {
+     "en": "Size",
+     "ar": "المقاس"
+    },
+    "type": "attribute"
+   },
+   {
+    "name": {
+     "en": "Unit",
+     "ar": "الوحدة"
+    },
+    "type": "attribute"
+   },
+   {
+    "name": {
+     "en": "Price",
+     "ar": "السعر"
+    },
+    "type": "range"
+   },
+   {
+    "name": {
+     "en": "In stock",
+     "ar": "متوفر"
+    },
+    "type": "flag"
+   }
+  ],
+  "product_page": {
+   "layout": {
+    "en": "Unit selector (bag, pallet, tonne), quantity price breaks table, delivery estimate by truck and a downloadable data sheet.",
+    "ar": "اختيار الوحدة (كيس أو مشتاح أو طن) وجدول أسعار الكميات وموعد التوصيل بالشاحنة وورقة بيانات قابلة للتنزيل."
+   },
+   "sections": [
+    "price_breaks",
+    "data_sheet",
+    "delivery_estimate",
+    "related_products"
+   ]
+  },
+  "cart_checkout": {
+   "notes": {
+    "en": "Ask for the site address and a contact on site at checkout, show the delivery slot, and allow quotation requests for large orders.",
+    "ar": "اطلب عنوان الموقع وشخصاً للتواصل هناك عند الدفع، واعرض موعد التوصيل، وأتح طلب عرض سعر للطلبات الكبيرة."
+   },
+   "options": [
+    "quotation",
+    "bank_transfer",
+    "credit_account",
+    "site_address",
+    "phone_required"
+   ]
+  },
+  "sample_products": [
+   {
+    "name": {
+     "en": "Portland cement, 50 kg bag",
+     "ar": "أسمنت بورتلاندي، كيس 50 كجم"
+    },
+    "description": {
+     "en": "Sold by the bag or by the pallet of 40.",
+     "ar": "يُباع بالكيس أو بالمشتاح من 40 كيساً."
+    },
+    "price": {
+     "en": "AED 14",
+     "ar": "14 د.إ"
+    }
+   },
+   {
+    "name": {
+     "en": "Rebar 12 mm, 12 m",
+     "ar": "حديد تسليح 12 ملم، طول 12 م"
+    },
+    "description": {
+     "en": "Certified grade 60, priced per tonne.",
+     "ar": "درجة 60 معتمدة والسعر للطن."
+    },
+    "price": {
+     "en": "AED 2,650",
+     "ar": "2,650 د.إ"
+    }
+   },
+   {
+    "name": {
+     "en": "Porcelain floor tile 60x60",
+     "ar": "بلاط بورسلان للأرضيات 60×60"
+    },
+    "description": {
+     "en": "Matt finish, box of 1.44 square metres.",
+     "ar": "تشطيب مطفي والصندوق 1.44 متر مربع."
+    },
+    "price": {
+     "en": "AED 62",
+     "ar": "62 د.إ"
+    }
+   },
+   {
+    "name": {
+     "en": "Interior emulsion paint, 18 L",
+     "ar": "دهان داخلي مائي، 18 لتراً"
+    },
+    "description": {
+     "en": "Washable, low odour, 20 colours.",
+     "ar": "قابل للغسل وقليل الرائحة و20 لوناً."
+    },
+    "price": {
+     "en": "AED 185",
+     "ar": "185 د.إ"
+    }
+   }
+  ]
+ },
+ "name": {
+  "en": "Building materials shop",
+  "ar": "متجر مواد بناء"
+ },
+ "brand": {
+  "en": "Rukn Building Materials",
+  "ar": "ركن لمواد البناء"
+ },
+ "suggest": [
+  "building materials",
+  "hardware",
+  "tiles",
+  "paint",
+  "مواد بناء",
+  "بلاط",
+  "دهانات"
+ ],
+ "palette": {
+  "primary": "#3d405b",
+  "secondary": "#e07a5f",
+  "accent": "#81b29a",
+  "light": "#f4f1de",
+  "dark": "#2a2c3f"
+ },
+ "fonts": {
+  "heading": "Oswald",
+  "body": "Tajawal"
+ },
+ "fonts_ar": {
+  "heading": "Tajawal",
+  "body": "Tajawal"
+ },
+ "hero_image": "static/img/templates/building_materials_shop.webp",
+ "thumbnail": "static/img/templates/building_materials_shop_thumb.webp",
+ "menu": [
+  "home",
+  "products",
+  "about",
+  "projects",
+  "contact",
+  "faq"
+ ],
+ "pages": [
+  {
+   "key": "home",
+   "kind": "home",
+   "name": {
+    "en": "Home",
+    "ar": "الرئيسية"
+   },
+   "blocks": [
+    {
+     "snippet": "s_cover",
+     "copy": {
+      "en": {
+       "title": "Everything for the site, delivered to the site",
+       "text": "Cement, steel, tiles, paint and plumbing at trade prices, with truck delivery on your schedule.",
+       "button": "Browse materials",
+       "button_url": "/shop"
+      },
+      "ar": {
+       "title": "كل ما يحتاجه الموقع، يصل إلى الموقع",
+       "text": "أسمنت وحديد وبلاط ودهانات وسباكة بأسعار الجملة، وتوصيل بالشاحنات حسب جدولك.",
+       "button": "تصفّح المواد",
+       "button_url": "/shop"
+      }
+     },
+     "image": "building",
+     "image_prompt": "wide photo of stacked tiles, cement bags and paint cans in a tidy yard, no text"
+    },
+    {
+     "snippet": "s_product_list",
+     "copy": {
+      "en": {
+       "title": "New arrivals"
+      },
+      "ar": {
+       "title": "وصل حديثاً"
+      }
+     }
+    },
+    {
+     "snippet": "s_banner",
+     "copy": {
+      "en": {
+       "title": "Cement pallet offer",
+       "text": "Ten pallets or more at a lower price.",
+       "button": "Order now",
+       "button_url": "/shop"
+      },
+      "ar": {
+       "title": "عرض مشتاح الأسمنت",
+       "text": "سعر أقل عند عشرة مشاتيح أو أكثر.",
+       "button": "اطلب الآن",
+       "button_url": "/shop"
+      }
+     },
+     "image": "building"
+    },
+    {
+     "snippet": "s_three_columns",
+     "copy": {
+      "en": {
+       "title": "Why shop with Rukn Building Materials",
+       "items": [
+        {
+         "title": "Trade prices",
+         "text": "Tiered pricing for contractors and bulk orders."
+        },
+        {
+         "title": "Truck delivery",
+         "text": "Crane trucks and flatbeds booked by the hour."
+        },
+        {
+         "title": "Credit accounts",
+         "text": "Thirty-day credit for approved companies."
+        }
+       ]
+      },
+      "ar": {
+       "title": "لماذا تتسوّق من ركن لمواد البناء",
+       "items": [
+        {
+         "title": "أسعار الجملة",
+         "text": "أسعار متدرجة للمقاولين والكميات الكبيرة."
+        },
+        {
+         "title": "توصيل بالشاحنات",
+         "text": "شاحنات بونش وسطحات تُحجز بالساعة."
+        },
+        {
+         "title": "حسابات آجلة",
+         "text": "ائتمان ثلاثين يوماً للشركات المعتمدة."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_product_list",
+     "copy": {
+      "en": {
+       "title": "Best sellers"
+      },
+      "ar": {
+       "title": "الأكثر مبيعاً"
+      }
+     }
+    },
+    {
+     "snippet": "s_banner",
+     "copy": {
+      "en": {
+       "title": "Tile clearance",
+       "text": "Last boxes at half price.",
+       "button": "View tiles",
+       "button_url": "/shop"
+      },
+      "ar": {
+       "title": "تصفية البلاط",
+       "text": "آخر الصناديق بنصف السعر.",
+       "button": "شاهد البلاط",
+       "button_url": "/shop"
+      }
+     }
+    },
+    {
+     "snippet": "s_banner",
+     "copy": {
+      "en": {
+       "title": "Open a credit account",
+       "text": "For contractors with a valid licence.",
+       "button": "Apply",
+       "button_url": "/shop"
+      },
+      "ar": {
+       "title": "افتح حساباً آجلاً",
+       "text": "للمقاولين أصحاب الرخصة السارية.",
+       "button": "قدّم طلباً",
+       "button_url": "/shop"
+      }
+     }
+    },
+    {
+     "snippet": "s_call_to_action",
+     "copy": {
+      "en": {
+       "title": "Planning a big job?",
+       "text": "Send your quantities and get one price for materials and delivery.",
+       "button": "Request a quotation",
+       "button_url": "/contactus"
+      },
+      "ar": {
+       "title": "تخطط لمشروع كبير؟",
+       "text": "أرسل كمياتك ويصلك سعر واحد للمواد والتوصيل.",
+       "button": "اطلب عرض سعر",
+       "button_url": "/contactus"
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Building materials | Cement, steel, tiles and paint",
+     "ar": "مواد بناء | أسمنت وحديد وبلاط ودهانات"
+    },
+    "description": {
+     "en": "Order building materials at trade prices with truck delivery to your site.",
+     "ar": "اطلب مواد البناء بأسعار الجملة مع توصيل بالشاحنات إلى موقعك."
+    }
+   },
+   "url": "/"
+  },
+  {
+   "key": "about",
+   "kind": "about",
+   "name": {
+    "en": "About us",
+    "ar": "من نحن"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "About Rukn Building Materials"
+      },
+      "ar": {
+       "title": "عن ركن لمواد البناء"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "A supplier contractors rely on",
+       "text": "We keep large stock so that your crew is never waiting. Quantities are checked at loading, and invoices list weights, sizes and batch numbers so that your engineer can verify them."
+      },
+      "ar": {
+       "title": "مورّد يعتمد عليه المقاولون",
+       "text": "نحتفظ بمخزون كبير حتى لا ينتظر طاقمك. تُراجع الكميات عند التحميل وتذكر الفواتير الأوزان والمقاسات وأرقام الدفعات ليتحقق منها مهندسك."
+      }
+     },
+     "image": "building"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Trade prices",
+       "text": "Tiered pricing for contractors and bulk orders."
+      },
+      "ar": {
+       "title": "أسعار الجملة",
+       "text": "أسعار متدرجة للمقاولين والكميات الكبيرة."
+      }
+     },
+     "image": "building"
+    },
+    {
+     "snippet": "s_numbers",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "number": "5,000",
+         "label": "Items in stock"
+        },
+        {
+         "number": "600",
+         "label": "Contractor accounts"
+        },
+        {
+         "number": "30",
+         "label": "Delivery trucks"
+        },
+        {
+         "number": "2",
+         "label": "Hour loading time"
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "number": "5,000",
+         "label": "صنف متوفر"
+        },
+        {
+         "number": "600",
+         "label": "حساب مقاول"
+        },
+        {
+         "number": "30",
+         "label": "شاحنة توصيل"
+        },
+        {
+         "number": "2",
+         "label": "ساعة زمن التحميل"
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "About Rukn Building Materials",
+     "ar": "عن ركن لمواد البناء"
+    },
+    "description": {
+     "en": "We keep large stock so that your crew is never waiting. Quantities are checked at loading, and invoices list weights, sizes and batch numbers so that ",
+     "ar": "نحتفظ بمخزون كبير حتى لا ينتظر طاقمك. تُراجع الكميات عند التحميل وتذكر الفواتير الأوزان والمقاسات وأرقام الدفعات ليتحقق منها مهندسك."
+    }
+   }
+  },
+  {
+   "key": "products",
+   "kind": "services",
+   "name": {
+    "en": "Collections",
+    "ar": "المجموعات"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Our collections",
+       "text": "Cement, steel, tiles, paint and plumbing at trade prices, with truck delivery on your schedule."
+      },
+      "ar": {
+       "title": "مجموعاتنا",
+       "text": "أسمنت وحديد وبلاط ودهانات وسباكة بأسعار الجملة، وتوصيل بالشاحنات حسب جدولك."
+      }
+     }
+    },
+    {
+     "snippet": "s_product_catalog",
+     "copy": {
+      "en": {
+       "title": "Popular products",
+       "items": [
+        {
+         "title": "Portland cement, 50 kg bag",
+         "text": "Sold by the bag or by the pallet of 40. - AED 14"
+        },
+        {
+         "title": "Rebar 12 mm, 12 m",
+         "text": "Certified grade 60, priced per tonne. - AED 2,650"
+        },
+        {
+         "title": "Porcelain floor tile 60x60",
+         "text": "Matt finish, box of 1.44 square metres. - AED 62"
+        },
+        {
+         "title": "Interior emulsion paint, 18 L",
+         "text": "Washable, low odour, 20 colours. - AED 185"
+        }
+       ]
+      },
+      "ar": {
+       "title": "منتجات رائجة",
+       "items": [
+        {
+         "title": "أسمنت بورتلاندي، كيس 50 كجم",
+         "text": "يُباع بالكيس أو بالمشتاح من 40 كيساً. - 14 د.إ"
+        },
+        {
+         "title": "حديد تسليح 12 ملم، طول 12 م",
+         "text": "درجة 60 معتمدة والسعر للطن. - 2,650 د.إ"
+        },
+        {
+         "title": "بلاط بورسلان للأرضيات 60×60",
+         "text": "تشطيب مطفي والصندوق 1.44 متر مربع. - 62 د.إ"
+        },
+        {
+         "title": "دهان داخلي مائي، 18 لتراً",
+         "text": "قابل للغسل وقليل الرائحة و20 لوناً. - 185 د.إ"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_call_to_action",
+     "copy": {
+      "en": {
+       "title": "Planning a big job?",
+       "text": "Send your quantities and get one price for materials and delivery.",
+       "button": "Request a quotation",
+       "button_url": "/shop"
+      },
+      "ar": {
+       "title": "تخطط لمشروع كبير؟",
+       "text": "أرسل كمياتك ويصلك سعر واحد للمواد والتوصيل.",
+       "button": "اطلب عرض سعر",
+       "button_url": "/shop"
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Building materials shop collections",
+     "ar": "مجموعات متجر مواد بناء"
+    },
+    "description": {
+     "en": "Order building materials at trade prices with truck delivery to your site.",
+     "ar": "اطلب مواد البناء بأسعار الجملة مع توصيل بالشاحنات إلى موقعك."
+    }
+   },
+   "url": "/collections"
+  },
+  {
+   "key": "projects",
+   "kind": "projects",
+   "name": {
+    "en": "Gallery",
+    "ar": "المعرض"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Gallery"
+      },
+      "ar": {
+       "title": "المعرض"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "The yard",
+       "text": "Over 3,000 pallets in stock."
+      },
+      "ar": {
+       "title": "الساحة",
+       "text": "أكثر من ثلاثة آلاف مشتاح في المخزون."
+      }
+     },
+     "image": "building"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Tile showroom",
+       "text": "Hundreds of finishes to touch."
+      },
+      "ar": {
+       "title": "صالة البلاط",
+       "text": "مئات التشطيبات لتلمسها."
+      }
+     },
+     "image": "building"
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Loading bay",
+       "text": "Forklifts load a truck in fifteen minutes."
+      },
+      "ar": {
+       "title": "منطقة التحميل",
+       "text": "تحمّل الرافعات الشاحنة في خمس عشرة دقيقة."
+      }
+     },
+     "image": "building"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Colour mixing",
+       "text": "Any shade matched in minutes."
+      },
+      "ar": {
+       "title": "خلط الألوان",
+       "text": "نطابق أي درجة لون في دقائق."
+      }
+     },
+     "image": "building"
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Rukn Building Materials gallery",
+     "ar": "معرض ركن لمواد البناء"
+    },
+    "description": {
+     "en": "Order building materials at trade prices with truck delivery to your site.",
+     "ar": "اطلب مواد البناء بأسعار الجملة مع توصيل بالشاحنات إلى موقعك."
+    }
+   },
+   "url": "/gallery"
+  },
+  {
+   "key": "team",
+   "kind": "team",
+   "name": {
+    "en": "Our team",
+    "ar": "فريقنا"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Meet the team"
+      },
+      "ar": {
+       "title": "تعرّف على فريقنا"
+      }
+     }
+    },
+    {
+     "snippet": "s_company_team",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "name": "Raghad",
+         "role": "Owner"
+        },
+        {
+         "name": "Ebrahim",
+         "role": "Sales manager"
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "name": "رغد",
+         "role": "المالك"
+        },
+        {
+         "name": "إبراهيم",
+         "role": "مدير المبيعات"
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Our team | Rukn Building Materials",
+     "ar": "فريقنا | ركن لمواد البناء"
+    },
+    "description": {
+     "en": "The people behind Rukn Building Materials.",
+     "ar": "الأشخاص الذين يقفون خلف ركن لمواد البناء."
+    }
+   }
+  },
+  {
+   "key": "contact",
+   "kind": "contact",
+   "name": {
+    "en": "Contact us",
+    "ar": "اتصل بنا"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Contact us",
+       "text": "We reply within one working day."
+      },
+      "ar": {
+       "title": "اتصل بنا",
+       "text": "نردّ خلال يوم عمل واحد."
+      }
+     }
+    },
+    {
+     "snippet": "s_contact_info",
+     "copy": {
+      "en": {
+       "title": "Find us",
+       "items": [
+        {
+         "title": "Address",
+         "text": "Industrial Area 2, Ajman"
+        },
+        {
+         "title": "Opening hours",
+         "text": "Sat-Thu 7:00-18:00"
+        },
+        {
+         "title": "Phone",
+         "text": "+971 4 000 0000"
+        },
+        {
+         "title": "Email",
+         "text": "hello@example.com"
+        }
+       ]
+      },
+      "ar": {
+       "title": "تجدنا هنا",
+       "items": [
+        {
+         "title": "العنوان",
+         "text": "المنطقة الصناعية 2، عجمان"
+        },
+        {
+         "title": "ساعات العمل",
+         "text": "السبت - الخميس 7:00 - 18:00"
+        },
+        {
+         "title": "الهاتف",
+         "text": "+971 4 000 0000"
+        },
+        {
+         "title": "البريد الإلكتروني",
+         "text": "hello@example.com"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Planning a big job?",
+       "text": "Send your quantities and get one price for materials and delivery."
+      },
+      "ar": {
+       "title": "تخطط لمشروع كبير؟",
+       "text": "أرسل كمياتك ويصلك سعر واحد للمواد والتوصيل."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Contact Rukn Building Materials",
+     "ar": "تواصل مع ركن لمواد البناء"
+    },
+    "description": {
+     "en": "Call, write or visit us: Industrial Area 2, Ajman.",
+     "ar": "اتصل بنا أو راسلنا أو زرنا: المنطقة الصناعية 2، عجمان."
+    }
+   },
+   "url": "/contactus"
+  },
+  {
+   "key": "faq",
+   "kind": "faq",
+   "name": {
+    "en": "FAQ",
+    "ar": "الأسئلة الشائعة"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Frequently asked questions"
+      },
+      "ar": {
+       "title": "الأسئلة الشائعة"
+      }
+     }
+    },
+    {
+     "snippet": "s_faq_collapse",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "title": "Do you deliver to the site?",
+         "text": "Yes, with flatbed and crane trucks; the fee depends on distance and load."
+        },
+        {
+         "title": "Can I get a quotation?",
+         "text": "Send your bill of quantities and we reply within four hours."
+        },
+        {
+         "title": "Do you offer credit?",
+         "text": "For licensed companies, after a short credit review."
+        },
+        {
+         "title": "What if I order too much?",
+         "text": "Unopened full pallets can be returned within fourteen days."
+        },
+        {
+         "title": "Do you cut or mix to order?",
+         "text": "Yes, we cut steel and mix paint colours in store."
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "title": "هل توصلون إلى الموقع؟",
+         "text": "نعم، بسطحات وشاحنات بونش، والأجرة حسب المسافة والحمولة."
+        },
+        {
+         "title": "هل أستطيع الحصول على عرض سعر؟",
+         "text": "أرسل جدول الكميات ونردّ خلال أربع ساعات."
+        },
+        {
+         "title": "هل تقدمون بيعاً آجلاً؟",
+         "text": "للشركات المرخصة بعد مراجعة ائتمانية قصيرة."
+        },
+        {
+         "title": "ماذا لو طلبت كمية زائدة؟",
+         "text": "يمكن إرجاع المشاتيح الكاملة غير المفتوحة خلال أربعة عشر يوماً."
+        },
+        {
+         "title": "هل تقصّون أو تخلطون حسب الطلب؟",
+         "text": "نعم، نقص الحديد ونخلط ألوان الدهان في المتجر."
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "FAQ | Rukn Building Materials",
+     "ar": "الأسئلة الشائعة | ركن لمواد البناء"
+    },
+    "description": {
+     "en": "Answers to the questions we hear most.",
+     "ar": "إجابات عن الأسئلة التي نسمعها أكثر من غيرها."
+    }
+   }
+  },
+  {
+   "key": "legal_privacy",
+   "kind": "legal",
+   "name": {
+    "en": "Privacy policy",
+    "ar": "سياسة الخصوصية"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Privacy policy"
+      },
+      "ar": {
+       "title": "سياسة الخصوصية"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "What we collect",
+       "text": "Rukn Building Materials collects only the details you give us through forms, orders or calls: your name, phone, email and the content of your request. We use them to answer you and to deliver what you asked for."
+      },
+      "ar": {
+       "title": "ما الذي نجمعه",
+       "text": "تجمع ركن لمواد البناء فقط البيانات التي تقدّمها عبر النماذج أو الطلبات أو المكالمات: اسمك وهاتفك وبريدك ومضمون طلبك. نستخدمها للرد عليك وتنفيذ ما طلبته."
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Your rights",
+       "text": "We never sell your data. You may ask us to show, correct or delete it at any time by writing to the address on the contact page."
+      },
+      "ar": {
+       "title": "حقوقك",
+       "text": "لا نبيع بياناتك أبداً. ويمكنك أن تطلب منا الاطلاع عليها أو تصحيحها أو حذفها في أي وقت بمراسلتنا على العنوان المذكور في صفحة التواصل."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Privacy policy",
+     "ar": "سياسة الخصوصية"
+    },
+    "description": {
+     "en": "How we collect, use and protect your personal data.",
+     "ar": "كيف نجمع بياناتك الشخصية ونستخدمها ونحميها."
+    }
+   },
+   "url": "/privacy"
+  },
+  {
+   "key": "legal_terms",
+   "kind": "legal",
+   "name": {
+    "en": "Terms and conditions",
+    "ar": "الشروط والأحكام"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Terms and conditions"
+      },
+      "ar": {
+       "title": "الشروط والأحكام"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Using this website",
+       "text": "The content of this website is provided for information. Prices, availability and timelines are confirmed in writing before any agreement starts."
+      },
+      "ar": {
+       "title": "استخدام الموقع",
+       "text": "المحتوى المنشور في هذا الموقع للاطلاع. وتُؤكَّد الأسعار والتوفر والمواعيد كتابةً قبل بدء أي اتفاق."
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Responsibility",
+       "text": "We do our best to keep the website accurate. We are not liable for decisions taken only on the basis of the sample information shown here."
+      },
+      "ar": {
+       "title": "المسؤولية",
+       "text": "نحرص على دقة المعلومات في الموقع، ولا نتحمل مسؤولية قرارات بُنيت على المعلومات التوضيحية المعروضة هنا فقط."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Terms and conditions",
+     "ar": "الشروط والأحكام"
+    },
+    "description": {
+     "en": "The terms that apply when you use our website and services.",
+     "ar": "الشروط المطبقة عند استخدام موقعنا وخدماتنا."
+    }
+   },
+   "url": "/terms"
+  }
+ ]
+}

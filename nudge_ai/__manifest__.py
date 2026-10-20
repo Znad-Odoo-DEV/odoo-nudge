@@ -22,6 +22,7 @@ Installs itself where both Nudge and the AI app are installed.
 """,
     "author": "Ibrahim Elzenad",
     "website": "https://znad-odoo-dev.github.io",
+    "support": "https://github.com/Znad-Odoo-DEV/odoo-nudge/issues",
     "license": "OPL-1",
     "images": ["static/description/banner.png"],
     "depends": ["nudge", "ai"],

@@ -139,6 +139,41 @@ class TestSnapshotInChat(NudgeCase, TransactionCase):
         self.assertIn('"name":"Azure Interior"', context)
         self.assertLess(context.index("<nudge_context>"), context.index("<screen_snapshot>"))
 
+    def test_order_total_and_lines_reach_the_model(self):
+        self.use_adapter()
+        rows = [
+            {"name": "Desk %s" % i, "product_uom_qty": 2, "price_unit": "$ 100.00",
+             "price_subtotal": "$ 200.00", "id": i}
+            for i in range(1, 6)
+        ]
+        order = {
+            "v": 1, "model": "sale.order", "view_type": "form",
+            "record": {"id": 3, "name": "S00003", "is_new": False, "unsaved_changes": True},
+            "fields": [
+                {"name": "tax_totals", "label": "Tax Totals", "type": "binary", "on_screen": True,
+                 "value": {"total": "$ 1,150.00", "untaxed": "$ 1,000.00", "tax": "$ 150.00",
+                           "taxes": [{"name": "Tax 15%", "amount": "$ 150.00"}]}},
+                {"name": "order_line", "label": "Order Lines", "type": "one2many", "on_screen": True,
+                 "value": {"count": 60, "rows": rows, "more": 55}},
+            ],
+        }
+        _conversation, job = self.ask_with_screen("What is the total?", json.dumps(order))
+        context = job["turns"][-1]["context"]
+        for text in ("$ 1,150.00", "$ 1,000.00", "$ 150.00", "Tax 15%", "Desk 1", "Desk 5", '"more":55'):
+            self.assertIn(text, context)
+
+    def test_many_lines_are_cut_before_the_total_is(self):
+        rows = [{"name": "Line %s " % i + "x" * 100, "price_subtotal": "$ 1.00", "id": i}
+                for i in range(50)]
+        order = {"v": 1, "model": "sale.order", "view_type": "form", "fields": [
+            {"name": "tax_totals", "label": "Tax Totals", "type": "binary", "on_screen": True,
+             "value": {"total": "$ 9.00"}},
+            {"name": "order_line", "label": "Lines", "type": "one2many", "on_screen": True,
+             "value": {"count": 50, "rows": rows}}]}
+        cleaned = screen.sanitize(dict(order, pad="p" * 1))
+        self.assertIn("$ 9.00", json.dumps(cleaned))
+        self.assertLessEqual(len(screen.render(cleaned)), screen.MAX_CHARS + 100)
+
     def test_same_screen_is_not_sent_twice(self):
         self.use_adapter()
         conversation, _job = self.ask_with_screen("First", SNAPSHOT)

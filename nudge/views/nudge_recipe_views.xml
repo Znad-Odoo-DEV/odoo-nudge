@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_lexicon_entry_rule_company" model="ir.rule">
+        <field name="name">Nudge Command Word: the companies of the person</field>
+        <field name="model_id" ref="model_nudge_lexicon_entry"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <!-- Command words of the company -->
+    <record id="nudge_lexicon_entry_view_list" model="ir.ui.view">
+        <field name="name">nudge.lexicon.entry.list</field>
+        <field name="model">nudge.lexicon.entry</field>
+        <field name="arch" type="xml">
+            <list string="Command Words" editable="bottom">
+                <header>
+                    <button name="action_export_recipe" type="object" string="Export as a recipe" display="always"/>
+                </header>
+                <field name="synonym"/>
+                <field name="intent"/>
+                <field name="dialect"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_lexicon_entry_action" model="ir.actions.act_window">
+        <field name="name">Command Words</field>
+        <field name="res_model">nudge.lexicon.entry</field>
+        <field name="view_mode">list</field>
+        <field name="help">Add the words your people use for what Nudge already does, in any dialect, and it understands them without any AI.</field>
+    </record>
+
+    <!-- Export -->
+    <record id="nudge_recipe_export_view_form" model="ir.ui.view">
+        <field name="name">nudge.recipe.export.form</field>
+        <field name="model">nudge.recipe.export</field>
+        <field name="arch" type="xml">
+            <form string="Export a recipe">
+                <field name="state" invisible="1"/>
+                <field name="only_model" invisible="1"/>
+                <field name="only_ids" invisible="1"/>
+                <group invisible="state != 'choose'">
+                    <group string="What goes in the recipe">
+                        <field name="with_tours"/>
+                        <field name="with_rules"/>
+                        <field name="with_presets"/>
+                        <field name="with_health"/>
+                        <field name="with_lexicon"/>
+                        <field name="with_memories"/>
+                        <field name="with_files"/>
+                        <field name="with_screens"/>
+                        <field name="include_files" invisible="not with_files"/>
+                    </group>
+                </group>
+                <div class="text-muted" invisible="state != 'choose'">
+                    The recipe is one file with a version and a checksum. It holds the setup of Nudge in this
+                    company, never conversations, keys or the data of your records. Another database reads it
+                    from Nudge / Configuration / Recipes / Import.
+                </div>
+                <group invisible="state != 'done'">
+                    <field name="item_count"/>
+                    <field name="file" filename="file_name"/>
+                    <field name="file_name" invisible="1"/>
+                </group>
+                <footer>
+                    <button name="action_export" type="object" string="Make the recipe" class="btn-primary"
+                            invisible="state != 'choose'"/>
+                    <button special="cancel" string="Close"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_recipe_export_action" model="ir.actions.act_window">
+        <field name="name">Export a recipe</field>
+        <field name="res_model">nudge.recipe.export</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Import -->
+    <record id="nudge_recipe_import_view_form" model="ir.ui.view">
+        <field name="name">nudge.recipe.import.form</field>
+        <field name="model">nudge.recipe.import</field>
+        <field name="arch" type="xml">
+            <form string="Import a recipe">
+                <field name="state" invisible="1"/>
+                <field name="rolled_back" invisible="1"/>
+                <group invisible="state != 'choose'">
+                    <field name="file" filename="file_name"/>
+                    <field name="file_name" invisible="1"/>
+                </group>
+                <div invisible="state == 'choose'">
+                    <field name="summary" readonly="1"/>
+                </div>
+                <field name="line_ids" invisible="state == 'choose'">
+                    <list string="Items" create="0" delete="0" editable="bottom"
+                          decoration-muted="action in ('same', 'skip')" decoration-danger="result == 'failed'">
+                        <field name="selected" readonly="action in ('same', 'skip') or parent.state == 'done'"/>
+                        <field name="kind" readonly="1"/>
+                        <field name="name" readonly="1"/>
+                        <field name="action" readonly="1"/>
+                        <field name="note" readonly="1"/>
+                        <field name="result" readonly="1" column_invisible="parent.state != 'done'"/>
+                        <field name="message" readonly="1" column_invisible="parent.state != 'done'"/>
+                    </list>
+                </field>
+                <div class="text-muted" invisible="state != 'review'">
+                    Everything is made as you, in the current company. Untick what you do not want.
+                    Nothing is deleted; an item whose groups are not found here comes in archived.
+                </div>
+                <div class="text-success" invisible="state != 'done' or rolled_back">
+                    Done. If it is not what you wanted, Undo archives what this import made.
+                </div>
+                <div class="text-muted" invisible="not rolled_back">What this import made is archived.</div>
+                <footer>
+                    <button name="action_read" type="object" string="Read the file" class="btn-primary"
+                            invisible="state != 'choose'"/>
+                    <button name="action_import" type="object" string="Import the ticked items" class="btn-primary"
+                            invisible="state != 'review'"/>
+                    <button name="action_rollback" type="object" string="Undo this import"
+                            invisible="state != 'done' or rolled_back"/>
+                    <button special="cancel" string="Close"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_recipe_import_action" model="ir.actions.act_window">
+        <field name="name">Import a recipe</field>
+        <field name="res_model">nudge.recipe.import</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="nudge_menu_recipes" name="Recipes" sequence="40"
+              parent="nudge_menu_configuration" groups="nudge.group_nudge_manager"/>
+    <menuitem id="nudge_menu_recipe_export" name="Export" sequence="10"
+              parent="nudge_menu_recipes" action="nudge_recipe_export_action"/>
+    <menuitem id="nudge_menu_recipe_import" name="Import" sequence="20"
+              parent="nudge_menu_recipes" action="nudge_recipe_import_action"/>
+    <menuitem id="nudge_menu_lexicon" name="Command Words" sequence="30"
+              parent="nudge_menu_recipes" action="nudge_lexicon_entry_action"/>
+</odoo>

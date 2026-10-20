@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="nudge.CoachCard">
+        <div t-if="card and card.active" class="o_nudge_coach card my-2" role="region" aria-label="Your first week">
+            <div class="card-body p-2">
+                <p class="mb-1"><i class="fa fa-graduation-cap"/> <strong>Your first week</strong></p>
+                <div class="progress mb-1" style="height: 6px;">
+                    <div class="progress-bar o_nudge_coach_bar" role="progressbar"
+                         t-att-style="'width: ' + card.percent + '%'"
+                         t-att-aria-valuenow="card.percent" aria-valuemin="0" aria-valuemax="100"/>
+                </div>
+                <p class="o_nudge_coach_progress mb-1">
+                    You opened <t t-esc="card.opened"/> of <t t-esc="card.total"/> key screens.
+                </p>
+                <div t-if="card.next" class="o_nudge_coach_next mb-1">
+                    <p class="mb-1" t-esc="card.next.text"/>
+                    <button t-if="card.next.tour_id" type="button" class="btn btn-sm btn-primary o_nudge_coach_tour"
+                            t-on-click="() => this.takeTour(card.next.tour_id)">
+                        <i class="fa fa-map-signs"/> Take the tour
+                    </button>
+                    <button t-elif="card.next.xmlid" type="button" class="btn btn-sm btn-light o_nudge_coach_open"
+                            t-on-click="() => this.openScreen(card.next.xmlid)">
+                        <i class="fa fa-external-link"/> Open it
+                    </button>
+                </div>
+                <p t-else="" class="o_nudge_coach_all mb-1">You have been through all the key screens of your role.</p>
+                <div class="d-flex justify-content-end">
+                    <button type="button" class="btn btn-sm btn-link o_nudge_coach_done" t-on-click="done">
+                        Done with training
+                    </button>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

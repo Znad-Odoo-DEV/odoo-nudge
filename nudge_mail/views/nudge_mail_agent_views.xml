@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_mail_proposal_view_list" model="ir.ui.view">
+        <field name="name">nudge.mail.proposal.view.list</field>
+        <field name="model">nudge.mail.proposal</field>
+        <field name="arch" type="xml">
+            <list create="0" delete="0" decoration-muted="state in ('ignored', 'rejected')"
+                  decoration-success="state == 'approved'">
+                <field name="create_date" string="Received"/>
+                <field name="name"/>
+                <field name="email_from"/>
+                <field name="kind"/>
+                <field name="confidence" widget="percentage"/>
+                <field name="reason" optional="show"/>
+                <field name="state"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_mail_proposal_view_form" model="ir.ui.view">
+        <field name="name">nudge.mail.proposal.view.form</field>
+        <field name="model">nudge.mail.proposal</field>
+        <field name="arch" type="xml">
+            <form string="Mail Proposal" create="0" delete="0">
+                <header>
+                    <button name="action_approve" type="object" string="Yes, Make It" class="btn-primary"
+                            invisible="state != 'pending'"
+                            confirm="Nudge makes this as you, in draft. Nothing is sent or posted."/>
+                    <button name="action_reject" type="object" string="No, and Learn" invisible="state != 'pending'"/>
+                    <button name="action_reclassify" type="object" string="It Is Rather... (Learn)"
+                            invisible="state not in ('pending', 'ignored')"/>
+                    <button name="action_open_created" type="object" string="Open What Was Made"
+                            invisible="not created_id"/>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,approved"/>
+                </header>
+                <sheet>
+                    <field name="created_id" invisible="1"/>
+                    <div class="alert alert-info" role="alert" invisible="state != 'pending'">
+                        Nudge proposes; nothing is made and nothing is sent until you say yes.
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="email_from"/>
+                            <field name="partner_id"/>
+                            <field name="attachment_names"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="kind"/>
+                            <field name="confidence" widget="percentage"/>
+                            <field name="source"/>
+                            <field name="reason"/>
+                        </group>
+                    </group>
+                    <group string="What Nudge Would Make">
+                        <field name="draft_text" nolabel="1" colspan="2"/>
+                    </group>
+                    <group string="If You Say No, or It Is Something Else"
+                           invisible="state not in ('pending', 'ignored')">
+                        <field name="taught_kind" readonly="0"/>
+                        <field name="teach_domain" readonly="0"/>
+                    </group>
+                    <group string="Message">
+                        <field name="description" nolabel="1" colspan="2"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_mail_proposal_view_search" model="ir.ui.view">
+        <field name="name">nudge.mail.proposal.view.search</field>
+        <field name="model">nudge.mail.proposal</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="email_from"/>
+                <filter name="pending" string="Waiting for a Manager" domain="[('state', '=', 'pending')]"/>
+                <filter name="ignored" string="Left Alone" domain="[('state', '=', 'ignored')]"/>
+                <filter name="decided" string="Decided" domain="[('state', 'in', ('approved', 'rejected'))]"/>
+                <group>
+                    <filter name="by_kind" string="Kind" context="{'group_by': 'kind'}"/>
+                    <filter name="by_state" string="State" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_mail_proposal_action" model="ir.actions.act_window">
+        <field name="name">Mail Proposals</field>
+        <field name="res_model">nudge.mail.proposal</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_pending': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No mail waits for you</p>
+            <p>When the mail agent is on (Settings, Nudge), the new messages of the shared mailbox are sorted
+               here: Nudge says what each one is and what it would make, and you say yes or no.</p>
+        </field>
+    </record>
+
+    <record id="nudge_mail_rule_view_list" model="ir.ui.view">
+        <field name="name">nudge.mail.rule.view.list</field>
+        <field name="model">nudge.mail.rule</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="match"/>
+                <field name="value"/>
+                <field name="kind"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_mail_rule_action" model="ir.actions.act_window">
+        <field name="name">What the Mail Agent Learned</field>
+        <field name="res_model">nudge.mail.rule</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <menuitem id="nudge_mail_menu_proposals" name="Mail Proposals" parent="nudge.nudge_menu_root"
+              action="nudge_mail_proposal_action" sequence="120" groups="nudge.group_nudge_manager"/>
+    <menuitem id="nudge_mail_menu_rules" name="Mail Agent Rules" parent="nudge.nudge_menu_root"
+              action="nudge_mail_rule_action" sequence="121" groups="nudge.group_nudge_manager"/>
+
+    <record id="res_config_settings_view_form_mail_agent" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.nudge.mail.agent</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="93"/>
+        <field name="inherit_id" ref="nudge.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='nudge_access_container']" position="after">
+                <block title="Mail Agent" name="nudge_mail_agent_container">
+                    <setting help="Nudge reads the new messages of a shared mailbox and proposes what to make of each: a lead, a ticket, a vendor bill, a reply. Managers say yes or no in Nudge, Mail Proposals. Nothing is made or sent by itself. Off by default; set for the company in use.">
+                        <field name="nudge_mail_agent_on"/>
+                        <div class="content-group mt8" invisible="not nudge_mail_agent_on">
+                            <div class="row mt8">
+                                <label for="nudge_mail_agent_alias" class="col-lg-4"/>
+                                <field name="nudge_mail_agent_alias" class="col-lg-6" placeholder="inbox"/>
+                            </div>
+                            <div class="text-muted">
+                                The incoming mail server of Odoo (Settings, Technical, Incoming Mail Servers)
+                                must deliver the mailbox, and the alias domain must be set.
+                            </div>
+                            <div class="row mt8">
+                                <label for="nudge_mail_agent_project" class="col-lg-4"/>
+                                <field name="nudge_mail_agent_project" class="col-lg-6"/>
+                            </div>
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

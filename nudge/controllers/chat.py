@@ -33,7 +33,7 @@ class NudgeChat(http.Controller):
     @http.route("/nudge/chat/stream", type="http", auth="user", methods=["POST"])
     def chat_stream(self, message=None, conversation_id=None, snapshot=None, spoken=None,
                     read_aloud=None, mode=None, background=None, explain=None, file=None,
-                    report=None, **kwargs):
+                    report=None, fresh=None, **kwargs):
         """Answer one message as a stream of JSON lines.
 
         :param snapshot: JSON description of the screen, when the user shares it
@@ -63,7 +63,7 @@ class NudgeChat(http.Controller):
                 mode=mode if mode in ("agent", "dev") else "talk", background=background == "1",
                 explain=explain if explain in ("screen", "text") else None,
                 attachment=self._read_upload(file),
-                report=report if report in ("sheet", "chat") else None)
+                report=report if report in ("sheet", "chat") else None, fresh=fresh == "1")
         except (UserError, AccessError) as exc:
             return self._reject(exc)
         return self._respond(job)
@@ -79,7 +79,9 @@ class NudgeChat(http.Controller):
         mimetype = file.mimetype or ""
         if attachments.kind_of(file.filename, mimetype) is None:
             raise UserError(env._(attachments.WRONG_KIND))
-        too_large = env._(attachments.TOO_LARGE, attachments.MAX_BYTES // (1024 * 1024))
+        too_large = env._(
+            attachments.TOO_LARGE_AUDIO if attachments.kind_of(file.filename, mimetype) == "audio"
+            else attachments.TOO_LARGE, attachments.MAX_BYTES // (1024 * 1024))
         if (request.httprequest.content_length or 0) > MAX_REQUEST_BYTES:
             raise UserError(too_large)
         # One byte more than allowed is enough to know that it is too much
@@ -87,6 +89,43 @@ class NudgeChat(http.Controller):
         if len(data) > attachments.MAX_BYTES:
             raise UserError(too_large)
         return (file.filename, data, mimetype)
+
+    @http.route("/nudge/bulk/start", type="http", auth="user", methods=["POST"])
+    def bulk_start(self, conversation_id=None, model=None, operation=None, field=None, ids=None,
+                   domain=None, instruction=None, language=None, source_fields=None, **kwargs):
+        """Put the same AI work on the records selected in a list before the
+        user as a card: the sample the AI proposes for, and what the rest
+        costs. The answer is a stream of JSON lines, as for a message.
+
+        :param ids: JSON list of the ids selected
+        :param domain: JSON domain of the list, for every record that matches
+            it (up to the limit of a plan) when none is selected
+        """
+        env = request.env
+        if not env.user.has_group("nudge.group_nudge_agent"):
+            raise Forbidden()
+        try:
+            conversation = env["nudge.conversation"]._chat_open(self._to_id(conversation_id))
+            arguments = {
+                "model": model or "", "operation": operation or "", "field": field or "",
+                "instruction": (instruction or "")[:500], "language": (language or "")[:60],
+            }
+            sources = self._json_list(source_fields)
+            if sources:
+                arguments["source_fields"] = [str(name) for name in sources][:12]
+            job = env["nudge.bulk"]._start(
+                conversation, arguments, ids=self._json_list(ids), domain=self._json_list(domain))
+        except (UserError, AccessError) as exc:
+            return self._reject(exc)
+        return self._respond(job)
+
+    @staticmethod
+    def _json_list(value):
+        try:
+            found = json.loads(value) if value else None
+        except ValueError:
+            return None
+        return found if isinstance(found, list) else None
 
     @http.route("/nudge/agent/decide", type="http", auth="user", methods=["POST"])
     def agent_decide(self, conversation_id=None, step_id=None, decision=None, **kwargs):

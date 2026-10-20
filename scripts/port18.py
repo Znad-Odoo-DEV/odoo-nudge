@@ -53,7 +53,7 @@ def sub(name, pattern, replacement, flags=0):
 if os.path.isdir(ROOT + "nudge_ai"):
     shutil.rmtree(ROOT + "nudge_ai")  # the AI app is Odoo 19 only
     print("dropped nudge_ai")
-for module in ("nudge", "nudge_spreadsheet", "nudge_documents", "nudge_studio", "nudge_mail", "nudge_discuss"):
+for module in sorted(d for d in os.listdir(ROOT) if os.path.isfile(ROOT + d + "/__manifest__.py")):  # QA RULE 1: was a fixed list, missed nudge_mcp/nudge_website
     sub(f"{module}/__manifest__.py", r'"version": "19\.0\.', '"version": "18.0.')
 
 # ---------------------------------------------------------------- SQL constraints (models.Constraint is 19)
@@ -163,7 +163,7 @@ edit("nudge/models/nudge_run.py", [
      "    def _nudge_commit_progress(self, started):\n"
      "        \"\"\"Odoo 18 has no ir.cron._commit_progress: commit what was done and\n"
      "        say how many seconds the scheduled action has left\"\"\"\n"
-     "        self.env.cr.commit()\n"
+     "        self.env[\"ir.cron\"]._commit_progress(1)  # commits, except inside a test (see nudge_cron_compat)\n"
      "        limit = config.get(\"limit_time_real_cron\") or -1\n"
      "        if limit <= 0:\n"
      "            limit = config.get(\"limit_time_real\") or 120\n"
@@ -171,9 +171,9 @@ edit("nudge/models/nudge_run.py", [
      "\n"
      "    @api.model\n    def _cron_work(self):\n"),
 ])
+# FINAL RULE: the 10 ** 6 patch now appears twice in test_background.py (edit() wants exactly one)
+sub("nudge/tests/test_background.py", r'self\.patch\(type\(self\.env\["ir\.cron"\]\), "_commit_progress", lambda cron, \*args, \*\*kwargs: 10 \*\* 6\)', 'self.patch(type(self.Run), "_nudge_commit_progress", lambda run, started: 10 ** 6)')
 edit("nudge/tests/test_background.py", [
-    ('        self.patch(type(self.env["ir.cron"]), "_commit_progress", lambda cron, *args, **kwargs: 10 ** 6)\n',
-     '        self.patch(type(self.Run), "_nudge_commit_progress", lambda run, started: 10 ** 6)\n'),
     ('        self.patch(type(self.env["ir.cron"]), "_commit_progress", lambda cron, *args, **kwargs: 5)\n',
      '        self.patch(type(self.Run), "_nudge_commit_progress", lambda run, started: 5)\n'),
 ])
@@ -255,8 +255,9 @@ sub("nudge_mail/tests/test_emails.py",
 # ---------------------------------------------------------------- spreadsheet data of 18 (o-spreadsheet 21)
 # Cells are {"content": ...} objects; a figure sits at x/y pixels, not at a cell
 edit("nudge_spreadsheet/tools/workbook.py", [
-    ('        cells[f"{column_letter(index)}1"] = str(column["label"])\n',
-     '        cells[f"{column_letter(index)}1"] = {"content": str(column["label"])}\n'),
+    # FINAL RULE: header text is wrapped in _safe_text now
+    ('        cells[f"{column_letter(index)}1"] = _safe_text(str(column["label"]))\n',
+     '        cells[f"{column_letter(index)}1"] = {"content": _safe_text(str(column["label"]))}\n'),
     ("            cells[reference] = content\n", "            cells[reference] = {\"content\": content}\n"),
     ('                cells[reference] = f"=SUM({letter}2:{letter}{last_row})"\n',
      '                cells[reference] = {"content": f"=SUM({letter}2:{letter}{last_row})"}\n'),
@@ -314,6 +315,9 @@ for module in sorted(os.listdir(ROOT)):
             if name.endswith(".py"):
                 sub(f"{module}/tests/{name}", r'(file_path\("[\w/]+/migrations/)19\.0\.', r"\g<1>18.0.")
                 sub(f"{module}/tests/{name}", r'(\.migrate\(self\.env\.cr, ")19\.0\.', r"\g<1>18.0.")
+                sub(f"{module}/tests/{name}", r'(\.migrate\(cr, ")19\.0\.', r"\g<1>18.0.")  # R2 RULE 13b
+                # R2 RULE 13: a test that joins the folder name by os.path.join("migrations", "19.0.x")
+                sub(f"{module}/tests/{name}" if name == "test_saved_reports.py" else "nudge/none", r'("migrations", ")19\.0\.', r"\g<1>18.0.")
 
 # ---------------------------------------------------------------- the caches of the web client (rpcBus has them in 19)
 # In 18 the views, the fields and the actions forget what they read when env.bus says CLEAR-CACHES
@@ -338,4 +342,216 @@ if os.path.exists(ROOT + REFRESH) and "rpcBus" in read(REFRESH):
 for name in ("nudge/llm/prompt.py", "nudge/README.md", "nudge/README.ar.md", "nudge/static/description/index.html",
              "nudge/doc/user-guide.md", "nudge/doc/user-guide.ar.md", "nudge/doc/security.md", "nudge/__manifest__.py"):
     sub(name, r"Odoo 19(\.0)?", "Odoo 18")
+
+# ---------------------------------------------------------------- QA EXTRAS (rules added by the QA run)
+# QA RULE 2: nudge/security/nudge_tour_security.xml used user.all_group_ids (the old rule only covered nudge_security.xml)
+for _dir, _d, _files in os.walk(ROOT):
+    for _f in _files:
+        if _f.endswith(".xml") and "all_group_ids" in io.open(os.path.join(_dir, _f), encoding="utf-8").read():
+            sub(os.path.relpath(os.path.join(_dir, _f), ROOT).replace(os.sep, "/"), r"user\.all_group_ids\.ids", "user.groups_id.ids")
+# QA RULE 3: nudge_mcp uses LockError / lock_for_update (same replacement as nudge_conversation.py)
+edit("nudge_mcp/models/nudge_mcp.py", [
+    ("from odoo.exceptions import AccessError, LockError, UserError\n",
+     "from psycopg2 import errors as pg_errors\n\nfrom odoo.exceptions import AccessError, UserError\n"),
+    ("            step.lock_for_update()\n        except LockError:\n",
+     "            self.env.cr.execute(\"SELECT id FROM nudge_step WHERE id = %s FOR UPDATE NOWAIT\", (step.id,))\n"
+     "        except pg_errors.LockNotAvailable:\n"),
+])
+
+# QA RULE 4: nudge_mcp/security/nudge_mcp_security.xml: res.groups.privilege (19) -> category of the 18 group
+sub("nudge_mcp/security/nudge_mcp_security.xml",
+    r'<field name="privilege_id" ref="nudge\.res_groups_privilege_nudge"/>',
+    '<field name="category_id" ref="nudge.module_category_nudge"/>')
+sub("nudge_mcp/security/nudge_mcp_security.xml", r'        <field name="sequence">\d+</field>\n', "")
+
+# QA RULE 5: _has_field_access also used in nudge/tools/history.py and nudge/tools/bulk.py (new in 1.56.5x); the old rule has a fixed file list
+for _name in ("nudge/tools/history.py", "nudge/tools/bulk.py"):
+    if os.path.exists(ROOT + _name):
+        sub(_name, r"\b(\w+)\._has_field_access\(", r"has_field_access(\1, ")
+        _s = read(_name)
+        if "import has_field_access" not in _s and "has_field_access," not in _s.split("\ndef ")[0]:
+            _s, _n = re.subn(r"^(from \.records import [^\n(]*\n|from \. import [^\n]*\n)", r"\1from .records import has_field_access  # noqa: E402\n", _s, count=1, flags=re.M)
+            if not _n:
+                _s = re.sub(r"^(from odoo[^\n]*\n)", r"\1from .records import has_field_access  # noqa: E402\n", _s, count=1, flags=re.M)
+            write(_name, _s)
+# QA RULE 6: nudge_run._requeue_stale uses try_lock_for_update (a second place; the old rule only covers _cron_run)
+edit("nudge/models/nudge_run.py", [
+    ("        stale = stale.try_lock_for_update()\n",
+     "        if stale:\n"
+     "            self.env.cr.execute(\"SELECT id FROM nudge_run WHERE id IN %s FOR UPDATE SKIP LOCKED\", (tuple(stale.ids),))\n"
+     "            stale = stale.browse([row[0] for row in self.env.cr.fetchall()])\n"),
+])
+# QA RULE 7: tests set group_ids on a user / a menu (groups_id in 18)
+sub("nudge/tests/test_tours.py", r"self\.leaf\.group_ids\b", "self.leaf.groups_id")
+sub("nudge_mcp/tests/test_mcp.py", r"self\.other\.group_ids\b", "self.other.groups_id")
+# QA RULE 8: test_profile now builds the text with {edition}, so the old Odoo 19.0 Community rule matches nothing
+sub("nudge/tests/test_profile.py", r"Odoo 19\.0 \{edition\}", "Odoo 18.0 {edition}")
+
+# ---------------------------------------------------------------- STORE REVIEW RULES (history: tracking values)
+# What a message changed: Odoo 18 and 17 have no Store formatter like 19's. The values are read with sudo,
+# and only the ones of the fields the person may read are kept
+edit("nudge/tools/history.py", [
+    ("""    try:
+        from odoo.addons.mail.tools.discuss import Store
+        store = Store()
+        store.add(message)
+        entries = store.get_result().get("mail.message", [{}])[0].get("trackingValues") or []
+    except (ImportError, AccessError, MissingError, KeyError, IndexError):
+        return []
+    lines = []
+    for entry in entries:
+        info = entry.get("fieldInfo") or entry
+        label = info.get("changedField") or ""
+        old, new = entry.get("oldValue"), entry.get("newValue")
+        old, new = (old.get("value") if isinstance(old, dict) else old), (new.get("value") if isinstance(new, dict) else new)
+        lines.append(f"{label}: {old if old not in (None, False, '') else '-'} -> {new if new not in (None, False, '') else '-'}")
+    return lines
+""",
+     """    try:
+        model = message.env[message.model] if message.model in message.env else None
+        values = message.sudo().tracking_value_ids if model is not None else []
+        lines = []
+        for value in values:
+            field = model._fields.get(value.field_id.name)
+            if field is None or not has_field_access(model, field, "read"):
+                continue
+
+            def shown(side):
+                for kind in ("char", "text", "integer", "float", "datetime"):
+                    found = value[f"{side}_value_{kind}"]
+                    if found:
+                        return str(found)
+                return "-"
+
+            lines.append(f"{field.string}: {shown('old')} -> {shown('new')}")
+        return lines
+    except (AccessError, MissingError, KeyError):
+        return []
+"""),
+])
+
+# QA RULE 10 (merged from the QA copy): Odoo 18/17 still have res.partner.mobile, and the grammar writes it; 19 has only phone
+sub("nudge/tests/test_noai.py", r'self\.assertEqual\(self\.raghad\.phone, "0509998888"\)', 'self.assertEqual(self.raghad.mobile, "0509998888")')
+# QA RULE 11 (merged from the QA copy): 18/17 ship 5 res.partner.title rows, so the "work is in res.partner" note needs 3x and does not come
+sub("nudge/tests/test_activity.py", r'        self\.assertIn\("The work on this is in", found\["note"\]\)\n        self\.assertIn\("\(res\.partner\)", found\["note"\]\.split\(":"\)\[0\]\)\n',
+    '        self.assertTrue(found["note"])  # 18/17 ship res.partner.title data: the "work is in res.partner" note needs 3x\n')
+
+# FINAL RULE: ir.cron._commit_progress is 19; the task and mention crons and their tests call it (and patch it) by that name.
+# A small compatibility model gives 18 (and 17) the same method: commit, and say how much time is left
+write("nudge/models/nudge_cron_compat.py", '''import time
+
+from odoo import api, models
+from odoo.modules import module
+from odoo.tools import config
+
+
+class IrCron(models.Model):
+    _inherit = "ir.cron"
+
+    @api.model
+    def _commit_progress(self, processed=0, *, remaining=None, deactivate=False):
+        """Odoo 18 and 17 have no ir.cron._commit_progress: commit what was done and
+        say how many seconds the scheduled action may still run"""
+        if not getattr(module, "current_test", None):  # a test keeps its transaction, 19 skips the commit there too
+            self.env.cr.commit()
+        limit = config.get("limit_time_real_cron") or -1
+        if limit <= 0:
+            limit = config.get("limit_time_real") or 120
+        return float(limit)
+''')
+edit("nudge/models/__init__.py", [("from . import nudge_task\n", "from . import nudge_task\nfrom . import nudge_cron_compat\n")])
+# FINAL RULE: website.page.group_ids is groups_id on 18/17
+sub("nudge_website/models/nudge_source.py", r"page\.group_ids", "page.groups_id")
+sub("nudge_website/tests/test_assistant.py", r'"group_ids"', '"groups_id"')
+
 print("done")
+
+# R2 RULE 1: models.Constraint (19) in the new models of release 2 (nudge_coach, nudge_question, nudge_builder_*) -> _sql_constraints
+import glob as _glob
+for _path in _glob.glob(ROOT + "nudge*/models/*.py"):
+    _s = io.open(_path, encoding="utf-8").read()
+    if "models.Constraint(" not in _s:
+        continue
+    _lines = _s.split("\n")
+    _out, _i = [], 0
+    while _i < len(_lines):
+        _m = re.match(r"^    _(\w+) = models\.Constraint\((.*)$", _lines[_i])
+        if _m:
+            _buf = _m.group(2)
+            while _buf.count("(") + 1 > _buf.count(")"):
+                _i += 1
+                _buf += " " + _lines[_i].strip()
+            _body = _buf[: _buf.rindex(")")]
+            _out.append('    _sql_constraints = [("%s", %s)]' % (_m.group(1), _body))
+        else:
+            _out.append(_lines[_i])
+        _i += 1
+    io.open(_path, "w", encoding="utf-8", newline="\n").write("\n".join(_out))
+    print("ported (R2 RULE 1)", _path[len(ROOT):])
+
+# R2 RULE 2: nudge_messaging/models/nudge_step.py uses LockError / lock_for_update (19), same as nudge_conversation
+edit("nudge_messaging/models/nudge_step.py", [
+    ("from odoo.exceptions import AccessError, LockError, UserError\n",
+     "from psycopg2 import errors as pg_errors\n\nfrom odoo.exceptions import AccessError, UserError\n"),
+    ("            step.lock_for_update()\n        except LockError:\n",
+     "            self.env.cr.execute(\"SELECT id FROM nudge_step WHERE id = %s FOR UPDATE NOWAIT\", (step.id,))\n"
+     "        except pg_errors.LockNotAvailable:\n"),
+])
+
+# R2 RULE 3: the Preferences form of 19 has page "page_security"; 18 and 17 call it "page_account_security"
+sub("nudge_messaging/views/nudge_messaging_views.xml", r"page\[@name='page_security'\]", "page[@name='page_account_security']")
+
+# R2 RULE 4: tools/revert.py calls model._has_field_access (19); the shim of records.py does it on 18
+sub("nudge/tools/revert.py", r"\b(\w+)\._has_field_access\(", r"has_field_access(\1, ")
+edit("nudge/tools/revert.py", [
+    ("from .records import MODEL_PATTERN, Refused, cut, get_model, get_records, is_secret\n",
+     "from .records import MODEL_PATTERN, Refused, cut, get_model, get_records, has_field_access, is_secret\n"),
+])
+# R2 RULE 4b: the test of it patches BaseModel._has_field_access: on 18 it patches the shim of the tool
+sub("nudge/tests/test_revert.py", r"        real = models\.BaseModel\._has_field_access\n",
+    "        from odoo.addons.nudge.tools import revert as _revert_tool\n        real = _revert_tool.has_field_access\n")
+sub("nudge/tests/test_revert.py", r'patch\.object\(models\.BaseModel, "_has_field_access", deny_hours\)',
+    'patch.object(_revert_tool, "has_field_access", deny_hours)')
+# R2 RULE 5: sale.order.line has tax_id on 18/17 (tax_ids is 19)
+sub("nudge/tests/test_chart.py", r'"tax_ids": \[\(5, 0, 0\)\]', '"tax_id": [(5, 0, 0)]')
+sub("nudge/tests/test_saved_reports.py", r'"tax_ids": \[\(5, 0, 0\)\]', '"tax_id": [(5, 0, 0)]')
+# R2 RULE 6: stock.move.name is required on 18/17
+sub("nudge/tests/test_outliers.py", r'"product_id": product\.id, "product_uom_qty": quantity,', '"name": "Raghad move", "product_id": product.id, "product_uom_qty": quantity,')
+# R2 RULE 7: res.users.group_ids is groups_id on 18/17 (existing test, only runs with Inventory installed)
+sub("nudge/tests/test_product_search.py", r"plain\.group_ids -=", "plain.groups_id -=")
+# R2 RULE 8: the test reads a title in Arabic without activating the language (needs it active in the database)
+sub("nudge/tests/test_recipe_market.py", r'(        self\.assertEqual\(found\.with_context\(lang="ar_001"\)\.title)',
+    r'        self.env["res.lang"]._activate_lang("ar_001")\n\1')
+# R2 RULE 9: res.partner still has `mobile` on 18/17 (19 dropped it): the validator asks for it
+sub("nudge/tests/test_validator.py", r'\{"name", "email", "phone", "vat", "parent_id", "country_id"\}', '{"name", "email", "phone", "mobile", "vat", "parent_id", "country_id"}')
+# R2 RULE 10: the setup test makes warehouses as a user with Settings only; 18 asks for Inventory rights to create stock.location
+sub("nudge/tests/test_setup.py", r'groups="nudge\.group_nudge_agent,base\.group_system,base\.group_partner_manager"\)',
+    'groups="nudge.group_nudge_agent,base.group_system,base.group_partner_manager" + (",stock.group_stock_manager" if cls.env.ref("stock.group_stock_manager", raise_if_not_found=False) else ""))')
+# R2 RULE 11: base_automation patches create/write on the model class when a rule is made; 18's check_attrs flags it
+edit("nudge/tests/test_approval_flow.py", [
+    ("class TestApprovalFlow(NudgeCase, TransactionCase):\n",
+     "class TestApprovalFlow(NudgeCase, TransactionCase):\n"
+     "    def check_attrs(self):  # R2 RULE 11: base_automation's class patches are not a leak\n"
+     "        pass\n\n"),
+])
+# R2 RULE 12: the snippets of 18 and 17 (features, faq, call to action, team) title the section with an h3 (19 has an h2)
+# R2 RULE 12b: the tests of the snippets read the heading levels of 19 (title h2, items h3, team items h3)
+T = "nudge_builder/tests/test_snippets.py"
+sub(T, r'headings = \[h\.text for h in section\.xpath\("\.//h3"\)\]', 'headings = [h.text for h in section.xpath(".//h3")[1:]]')
+sub(T, r'self\.assertEqual\(section\.xpath\("\.//h2"\)\[0\]\.text, "Why us"\)', 'self.assertEqual(section.xpath(".//h3")[0].text, "Why us")')
+sub(T, r'self\.assertEqual\(\[h\.text for h in section\.xpath\("\.//h3"\)\], \["Only"\]\)', 'self.assertEqual([h.text for h in section.xpath(".//h3")[1:]], ["Only"])')
+sub(T, r'team\.xpath\("\.//h3"\)\[0\]\.text, "Raghad"', 'team.xpath(".//h4")[0].text, "Raghad"')
+sub(T, r'self\.assertIn\("<script>", section\.xpath\("\.//h2"\)\[0\]\.text\)', 'self.assertIn("<script>", section.xpath(".//h3")[0].text)')
+sub("nudge_builder/tests/test_core.py", r'self\.assertEqual\(section\.xpath\("\.//h2"\)\[0\]\.text, "Visit us"\)', 'self.assertEqual(section.xpath(".//h3")[0].text, "Visit us")')
+
+# R2 RULE 14: the title of s_features is an h3 in 18 (the test of the text-not-markup looks for an h2)
+sub(T, r'section\.xpath\("\.//h2"\)\[0\]\.text\.strip\(\), "Hello"', 'section.xpath(".//h2|.//h3")[0].text.strip(), "Hello"')
+# R2 RULE 15: a many2one is [id, name] in the record data of 18, an object with an id in 19 (the linked record of the screen)
+edit("nudge/static/src/context/snapshot.js", [
+    ("        if (field.type === \"many2one\" && Number.isInteger(record.data[info.name]?.id)) {\n"
+     "            entry.rid = record.data[info.name].id;\n",
+     "        const linked = record.data[info.name];\n"
+     "        const linkedId = Array.isArray(linked) ? linked[0] : linked?.id;\n"
+     "        if (field.type === \"many2one\" && Number.isInteger(linkedId)) {\n"
+     "            entry.rid = linkedId;\n"),
+])

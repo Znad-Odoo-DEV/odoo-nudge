@@ -5,7 +5,7 @@
         <!-- The layout uses logical properties and follows this attribute, so it
              mirrors in right-to-left languages on its own -->
         <div t-if="state.isEnabled" class="o_nudge" t-att-dir="direction" t-att-data-theme="state.theme"
-             t-att-class="{ o_nudge_open: state.isOpen, o_nudge_moved: placement }"
+             t-att-class="{ o_nudge_open: state.isOpen, o_nudge_moved: placement, o_nudge_mobile: state.isMobile }"
              t-att-style="placement ? placement.style : undefined"
              t-att-data-flip="placement ? placement.flip : undefined"
              t-att-data-align="placement ? placement.align : undefined">

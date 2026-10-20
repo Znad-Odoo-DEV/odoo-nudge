@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="coach_screen_sale_action_quotations_with_onboarding" model="nudge.coach.screen">
+            <field name="name">Quotations</field>
+            <field name="module_name">sale</field>
+            <field name="action_xmlid">sale.action_quotations_with_onboarding</field>
+            <field name="sequence">10</field>
+        </record>
+        <record id="coach_screen_sale_action_orders" model="nudge.coach.screen">
+            <field name="name">Sales Orders</field>
+            <field name="module_name">sale</field>
+            <field name="action_xmlid">sale.action_orders</field>
+            <field name="sequence">20</field>
+        </record>
+        <record id="coach_screen_sale_action_orders_to_invoice" model="nudge.coach.screen">
+            <field name="name">Orders to Invoice</field>
+            <field name="module_name">sale</field>
+            <field name="action_xmlid">sale.action_orders_to_invoice</field>
+            <field name="sequence">30</field>
+        </record>
+        <record id="coach_screen_account_res_partner_action_customer" model="nudge.coach.screen">
+            <field name="name">Customers</field>
+            <field name="module_name">sale</field>
+            <field name="action_xmlid">account.res_partner_action_customer</field>
+            <field name="sequence">40</field>
+        </record>
+        <record id="coach_screen_sale_product_template_action" model="nudge.coach.screen">
+            <field name="name">Products</field>
+            <field name="module_name">sale</field>
+            <field name="action_xmlid">sale.product_template_action</field>
+            <field name="sequence">50</field>
+        </record>
+        <record id="coach_screen_purchase_purchase_rfq" model="nudge.coach.screen">
+            <field name="name">Requests for Quotation</field>
+            <field name="module_name">purchase</field>
+            <field name="action_xmlid">purchase.purchase_rfq</field>
+            <field name="sequence">60</field>
+        </record>
+        <record id="coach_screen_purchase_purchase_form_action" model="nudge.coach.screen">
+            <field name="name">Purchase Orders</field>
+            <field name="module_name">purchase</field>
+            <field name="action_xmlid">purchase.purchase_form_action</field>
+            <field name="sequence">70</field>
+        </record>
+        <record id="coach_screen_account_res_partner_action_supplier" model="nudge.coach.screen">
+            <field name="name">Vendors</field>
+            <field name="module_name">purchase</field>
+            <field name="action_xmlid">account.res_partner_action_supplier</field>
+            <field name="sequence">80</field>
+        </record>
+        <record id="coach_screen_purchase_product_normal_action_puchased" model="nudge.coach.screen">
+            <field name="name">Products</field>
+            <field name="module_name">purchase</field>
+            <field name="action_xmlid">purchase.product_normal_action_puchased</field>
+            <field name="sequence">90</field>
+        </record>
+        <record id="coach_screen_account_action_move_out_invoice_type" model="nudge.coach.screen">
+            <field name="name">Customer Invoices</field>
+            <field name="module_name">account</field>
+            <field name="action_xmlid">account.action_move_out_invoice_type</field>
+            <field name="sequence">100</field>
+        </record>
+        <record id="coach_screen_account_action_move_in_invoice_type" model="nudge.coach.screen">
+            <field name="name">Vendor Bills</field>
+            <field name="module_name">account</field>
+            <field name="action_xmlid">account.action_move_in_invoice_type</field>
+            <field name="sequence">110</field>
+        </record>
+        <record id="coach_screen_account_action_account_payments" model="nudge.coach.screen">
+            <field name="name">Payments</field>
+            <field name="module_name">account</field>
+            <field name="action_xmlid">account.action_account_payments</field>
+            <field name="sequence">120</field>
+        </record>
+        <record id="coach_screen_account_action_move_journal_line" model="nudge.coach.screen">
+            <field name="name">Journal Entries</field>
+            <field name="module_name">account</field>
+            <field name="action_xmlid">account.action_move_journal_line</field>
+            <field name="sequence">130</field>
+        </record>
+        <record id="coach_screen_stock_action_picking_tree_all" model="nudge.coach.screen">
+            <field name="name">Transfers</field>
+            <field name="module_name">stock</field>
+            <field name="action_xmlid">stock.action_picking_tree_all</field>
+            <field name="sequence">140</field>
+        </record>
+        <record id="coach_screen_stock_product_template_action_product" model="nudge.coach.screen">
+            <field name="name">Products</field>
+            <field name="module_name">stock</field>
+            <field name="action_xmlid">stock.product_template_action_product</field>
+            <field name="sequence">150</field>
+        </record>
+        <record id="coach_screen_hr_open_view_employee_list_my" model="nudge.coach.screen">
+            <field name="name">Employees</field>
+            <field name="module_name">hr</field>
+            <field name="action_xmlid">hr.open_view_employee_list_my</field>
+            <field name="sequence">160</field>
+        </record>
+        <record id="coach_screen_hr_holidays_hr_leave_action_my" model="nudge.coach.screen">
+            <field name="name">My Time Off</field>
+            <field name="module_name">hr_holidays</field>
+            <field name="action_xmlid">hr_holidays.hr_leave_action_my</field>
+            <field name="sequence">170</field>
+        </record>
+        <record id="coach_screen_crm_crm_lead_action_pipeline" model="nudge.coach.screen">
+            <field name="name">Pipeline</field>
+            <field name="module_name">crm</field>
+            <field name="action_xmlid">crm.crm_lead_action_pipeline</field>
+            <field name="sequence">180</field>
+        </record>
+        <record id="coach_screen_crm_crm_lead_all_leads" model="nudge.coach.screen">
+            <field name="name">Leads</field>
+            <field name="module_name">crm</field>
+            <field name="action_xmlid">crm.crm_lead_all_leads</field>
+            <field name="sequence">190</field>
+        </record>
+        <record id="coach_screen_project_open_view_project_all" model="nudge.coach.screen">
+            <field name="name">Projects</field>
+            <field name="module_name">project</field>
+            <field name="action_xmlid">project.open_view_project_all</field>
+            <field name="sequence">200</field>
+        </record>
+        <record id="coach_screen_project_action_view_all_task" model="nudge.coach.screen">
+            <field name="name">Tasks</field>
+            <field name="module_name">project</field>
+            <field name="action_xmlid">project.action_view_all_task</field>
+            <field name="sequence">210</field>
+        </record>
+        <record id="coach_screen_base_action_partner_form" model="nudge.coach.screen">
+            <field name="name">Contacts</field>
+            <field name="module_name">contacts</field>
+            <field name="action_xmlid">base.action_partner_form</field>
+            <field name="sequence">220</field>
+        </record>
+    </data>
+</odoo>

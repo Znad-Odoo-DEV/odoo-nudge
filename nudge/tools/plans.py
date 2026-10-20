@@ -179,6 +179,11 @@ class PreparePlan(base.Action):
         },
     }
 
+    @staticmethod
+    def in_background(values):
+        """Whether the yes sends the plan to the background"""
+        return total_of(values["plan"]) > INLINE_RECORDS
+
     # ------------------------------------------------------------------
     # Asked for: read, tried, shown
     # ------------------------------------------------------------------
@@ -323,13 +328,15 @@ class PreparePlan(base.Action):
     # ------------------------------------------------------------------
     # Said yes to: done, record by record
     # ------------------------------------------------------------------
-    def execute(self, env, step, deadline=None, save=None):
+    def execute(self, env, step, deadline=None, save=None, stop=None):
         """Do the plan of ``step``, from where it was left.
 
         :param deadline: :func:`now` past which the work stops, to
             go on in the next piece; None does it all
         :param save: called with the progress every few records, in the
             background, where it is committed
+        :param stop: called after each save; true when the person stopped the
+            request, and the work is left where it is
         :return: :class:`ToolResult`, or None when there is more to do
         """
         values = dict(step.values or {})
@@ -380,6 +387,8 @@ class PreparePlan(base.Action):
                 if save and counted % CHUNK == 0:
                     keep()
                     save()
+                    if stop and stop():
+                        return None
             progress["step"], progress["offset"] = index + 1, 0
         keep()
         return self.outcome(env, plan, progress, skipped, windows)
@@ -435,6 +444,17 @@ def undo_changes(env, undo):
     """
     restored, kept = 0, []
     for model_name, entries in undo.items():
+        if any(entry.get("created") for entry in entries.values()):
+            # Made from a document: taken back by removing the draft nobody changed
+            from .document_record import undo_created  # noqa: PLC0415
+
+            for record_id, entry in entries.items():
+                removed, why = undo_created(env, model_name, record_id, entry)
+                if removed:
+                    restored += 1
+                else:
+                    kept.append((key_of(model_name, record_id), why))
+            continue
         try:
             model = get_model(env, model_name, "write", to_change=True)
         except Refused as refusal:

@@ -1,0 +1,966 @@
+"""Common requests of the Agent understood without any AI.
+
+``tools/noai_commands`` turns a sentence, in any Arabic dialect or in
+English, into what is asked. Here that is resolved on the data, as the
+person, and handed to the tools Nudge already has: the same cards to say
+yes or no to, the same rights, the same log and undo as when the AI asks.
+What is not understood well enough goes to the AI provider as before; with
+none, or with private mode on, the person is told what was understood and
+what can be done without AI.
+"""
+import datetime
+import copy
+import json
+import logging
+
+from odoo import api, fields, models
+from odoo.exceptions import UserError
+
+from ..llm import base as llm
+from ..llm import snapshot as screen_snapshot
+from ..tools import approval_sentence, base, noai_commands, revert, setup, setup_sentence
+from ..tools.base import MODE_AGENT, MODE_DEV, MODE_TALK
+from ..tools.noai_commands import grammar
+from ..tools.records import Refused
+
+_logger = logging.getLogger(__name__)
+
+PARAM = "nudge.noai_first"
+NO_TOKENS = {"input_tokens": 0, "output_tokens": 0, "cache_read_tokens": 0, "cache_write_tokens": 0}
+MAX_CHOICES = 5
+
+# What each kind of record is: its model, the date it is counted by, the
+# amount it is summed by, the field that holds who it is for
+KINDS = {
+    "contact": {"model": "res.partner", "date": "create_date", "screen": "contacts"},
+    "product": {"model": "product.template", "date": "create_date", "screen": "products"},
+    "quotation": {"model": "sale.order", "date": "date_order", "amount": "amount_total",
+                  "party": "partner_id", "screen": "quotations", "states": ("draft", "sent")},
+    "sales_order": {"model": "sale.order", "date": "date_order", "amount": "amount_total",
+                    "party": "partner_id", "screen": "orders", "states": ("sale", "done")},
+    "sales": {"model": "sale.order", "date": "date_order", "amount": "amount_total",
+              "party": "partner_id", "screen": "orders", "states": ("sale", "done")},
+    "purchase_order": {"model": "purchase.order", "date": "date_order", "amount": "amount_total",
+                       "party": "partner_id", "screen": "purchase orders"},
+    "invoice": {"model": "account.move", "date": "invoice_date", "amount": "amount_total",
+                "party": "partner_id", "screen": "invoices", "move_types": ("out_invoice",)},
+    "bill": {"model": "account.move", "date": "invoice_date", "amount": "amount_total",
+             "party": "partner_id", "screen": "bills", "move_types": ("in_invoice",)},
+    "task": {"model": "project.task", "date": "create_date", "party": "partner_id", "screen": "tasks"},
+    "lead": {"model": "crm.lead", "date": "create_date", "party": "partner_id", "screen": "leads"},
+    "ticket": {"model": "helpdesk.ticket", "date": "create_date", "party": "partner_id", "screen": "tickets"},
+    "timeoff": {"model": "hr.leave", "date": "date_from", "screen": "time off"},
+    "employee": {"model": "hr.employee", "date": "create_date", "screen": "employees"},
+}
+# The fields a word names, the first one the model has
+FIELD_NAMES = {
+    "phone": ("phone", "mobile"),
+    "mobile": ("mobile", "phone"),
+    "email": ("email", "email_from"),
+    "price": ("list_price", "price_unit"),
+    "name": ("name",),
+    "deadline": ("date_deadline",),
+    "date": ("date_deadline", "date_order", "date"),
+    "city": ("city",),
+    "street": ("street",),
+}
+# The buttons a verb presses: by method, and by what their label says
+BUTTONS = {
+    "press_confirm": ("action_confirm", "button_confirm"),
+    "press_validate": ("button_validate", "action_validate", "action_done"),
+    "press_post": ("action_post",),
+    "press_approve": ("action_approve", "button_approve", "approve", "action_validate"),
+}
+
+
+class Plan:
+    """What is to be done for a sentence: tool calls to hand to the pipeline,
+    or a plain answer"""
+
+    def __init__(self, text, calls=None, events=None, parsed=None):
+        self.text = text
+        self.calls = calls or []
+        self.events = events or []
+        self.parsed = parsed
+
+
+class NudgeNoai(models.AbstractModel):
+    _name = "nudge.noai"
+    _description = "Nudge Common Requests Without AI"
+
+    # ------------------------------------------------------------------
+    # Settings and the screen
+    # ------------------------------------------------------------------
+    @api.model
+    def _is_enabled(self):
+        value = self.env["ir.config_parameter"].sudo().get_param(PARAM)
+        return str(value if value not in (None, "") else "1").lower() in ("1", "true")
+
+    @api.model
+    def _screen_of(self, snapshot):
+        """:return: ``{"model", "record_id", "buttons"}`` of a snapshot of the screen"""
+        snapshot = snapshot if isinstance(snapshot, dict) else screen_snapshot.sanitize(snapshot) or {}
+        record = snapshot.get("record") if isinstance(snapshot.get("record"), dict) else {}
+        return {
+            "model": snapshot.get("model") or "",
+            "record_id": record.get("id") or None,
+            "view_type": snapshot.get("view_type") or "",
+            "buttons": [button for button in snapshot.get("buttons") or [] if isinstance(button, dict)],
+        }
+
+    @api.model
+    def _has_ai(self, conversation, mode):
+        """:return: whether a provider can answer: one is set up, and private mode lets it"""
+        Provider = self.env["nudge.provider"].sudo()
+        provider = Provider._get_for_mode(mode) or Provider._get_default()
+        if not provider or not provider.is_configured or not provider.active:
+            return False
+        return not (Provider._is_private_mode() and not provider.runs_locally)
+
+    # ------------------------------------------------------------------
+    # The way in
+    # ------------------------------------------------------------------
+    @api.model
+    def _company_words(self):
+        """:return: a block in which the words the company added are understood too"""
+        return noai_commands.lexicon.extended(self.env["nudge.lexicon.entry"]._pairs())
+
+    @api.model
+    def suggest(self, words, snapshot=None):
+        """For the quick search box: what the words ask, understood without any AI.
+        :return: ``{"intent", "label"}`` or False"""
+        self.env["nudge.quick"]._check_user()
+        if not self._is_enabled() or not self.env.user.has_group("nudge.group_nudge_agent"):
+            return False
+        with self._company_words():
+            parsed = noai_commands.parse(str(words or "")[:400], self._screen_of(snapshot))
+        if not parsed.intent or parsed.confidence < noai_commands.THRESHOLD:
+            return False
+        return {"intent": parsed.intent, "label": self._describe(parsed), "text": parsed.text}
+
+    @api.model
+    def _chat_serve(self, conversation, text, mode, focus, found, explain, background, snapshot, fresh=False):
+        """Answer ``text`` when it is a common request, before any provider is called.
+
+        :return: the job of the stream (the answer is already written), or None to go on"""
+        if mode == MODE_AGENT:
+            served = self._serve_setup(conversation, text, mode, (fresh, focus, found, background, explain), snapshot)
+            if served:
+                return served
+        if mode == MODE_DEV:
+            return self._serve_approval(conversation, text, mode, (fresh, focus, found, background, explain), snapshot)
+        if (fresh or focus or found or background or explain == "screen" or mode not in (MODE_TALK, MODE_AGENT)
+                or not self.env.user.has_group("nudge.group_nudge_agent")):
+            return None
+        direct = self._serve_changes(conversation, text, mode, snapshot)
+        if direct is not None:
+            return direct
+        has_ai = self._has_ai(conversation, mode)
+        if has_ai and not self._is_enabled():
+            return None
+        values, _text = conversation._chat_screen(snapshot)
+        screen = self._screen_of(values.get("snapshot") or {})
+        with self._company_words():
+            parsed = noai_commands.parse(text, screen)
+        plan = None
+        # Talk does not read the data: only taking the person to a screen is done there
+        talking = mode == MODE_TALK and parsed.intent != "open"
+        if parsed.intent and parsed.confidence >= noai_commands.THRESHOLD and not talking:
+            try:
+                plan = self._plan(parsed, screen, mode)
+            except (UserError, Refused) as error:
+                _logger.info("Nudge: a request understood without AI could not be planned: %s", error)
+        if plan is None:
+            if has_ai:
+                return None
+            plan = Plan(self._what_i_understood(parsed), parsed=parsed)
+        return self._deliver(conversation, text, mode, plan, parsed, values)
+
+    @api.model
+    def _serve_setup(self, conversation, text, mode, state, snapshot):
+        """The first-setup assistant when no provider reads the answers: “set up this database with me” (or an
+        answer to the question it asked) is understood by rules and shown as the same cards, one step at a time.
+        With a provider, the provider leads the conversation with ``read_setup`` and ``prepare_setup_step``."""
+        fresh, focus, found, background, explain = state
+        if (fresh or focus or found or background or explain == "screen"
+                or "prepare_setup_step" not in base.TOOLS
+                or not base.TOOLS["prepare_setup_step"].is_available(self.env, mode)
+                or self._has_ai(conversation, mode)):
+            return None
+        env = self.env(context=dict(self.env.context, nudge_conversation_id=conversation.id, nudge_mode=mode))
+        current = dict(conversation.sudo().setup_state or {})
+        call = None
+        if current.get("active"):
+            current, reply, call = setup.converse(env, current, text, conversation)
+        elif setup_sentence.is_request(text):
+            current, reply = setup.start(env)
+        else:
+            return None
+        conversation.sudo().setup_state = dict(current)
+        values, _text = conversation._chat_screen(snapshot)
+        parsed = grammar.Parse(text)
+        parsed.intent, parsed.confidence = "setup", 0.98
+        plan = Plan(reply, calls=[call] if call else [], parsed=parsed)
+        return self._deliver(conversation, text, mode, plan, parsed, values)
+
+    @api.model
+    def _serve_approval(self, conversation, text, mode, state, snapshot):
+        """An approval rule said in a sentence (“a purchase order above 50,000 needs the finance
+        manager”) in Developer mode: the flow is prepared by ``prepare_approval_flow``, which
+        shows it in words and waits for a yes. Anything else goes to the provider."""
+        fresh, focus, found, background, explain = state
+        if (fresh or focus or found or background or explain == "screen" or not self._is_enabled()
+                or "prepare_approval_flow" not in base.TOOLS
+                or not base.TOOLS["prepare_approval_flow"].is_available(self.env, mode)
+                or not approval_sentence.parse(text)):
+            return None
+        values, _text = conversation._chat_screen(snapshot)
+        parsed = grammar.Parse(text)
+        parsed.intent, parsed.confidence = "approval_flow", 0.98
+        plan = Plan(self.env._("I read this as an approval rule. Here is what I would build:"),
+                    calls=[("prepare_approval_flow", {"sentence": text[:600]})], parsed=parsed)
+        return self._deliver(conversation, text, mode, plan, parsed, values)
+
+    # ------------------------------------------------------------------
+    # Planning: the sentence on the data
+    # ------------------------------------------------------------------
+    def _plan(self, parsed, screen, mode):
+        """:return: the :class:`Plan` for ``parsed``, or None when it cannot be done here"""
+        method = getattr(self, f"_plan_{parsed.intent}", None)
+        plan = method(parsed, screen, mode) if method else None
+        if plan:
+            plan.parsed = plan.parsed or parsed
+            for name, _arguments in plan.calls:
+                tool = base.TOOLS.get(name)
+                if not tool or not tool.is_available(self.env, mode):
+                    return None
+        return plan
+
+    def _call(self, name, arguments, screen=None, mode=MODE_AGENT):
+        """Run a tool as the person: what it reads comes back as data"""
+        result = base.call(self.env, name, arguments, screen, mode)
+        return result
+
+    def _json(self, result):
+        try:
+            return json.loads(result.content)
+        except ValueError:
+            return None
+
+    def _model_of(self, kind):
+        spec = KINDS.get(kind or "")
+        if not spec or spec["model"] not in self.env:
+            return None
+        return spec["model"]
+
+    def _plural_of(self, kind, model_name):
+        """:return: what a kind of record is called in the plural, for counts and lists"""
+        names = {
+            "contact": self.env._("contacts"), "product": self.env._("products"),
+            "quotation": self.env._("quotations"), "sales_order": self.env._("sales orders"),
+            "sales": self.env._("sales orders"), "purchase_order": self.env._("purchase orders"),
+            "invoice": self.env._("invoices"), "bill": self.env._("vendor bills"), "task": self.env._("tasks"),
+            "lead": self.env._("leads"), "ticket": self.env._("tickets"), "timeoff": self.env._("time off"),
+            "employee": self.env._("employees"),
+        }
+        return names.get(kind) or self._label_of(model_name)
+
+    def _label_of(self, model_name):
+        return self.env["ir.model"]._get(model_name).name or model_name
+
+    def _today(self):
+        return fields.Date.context_today(self)
+
+    # -- who and what ------------------------------------------------
+    def _pick(self, name, model_name=None, topic=None, screen=None):
+        """:return: ``(status, candidates)``: "one" with the record, "many" with the
+        candidates, "none"; the same words are tried again without a leading "ل" """
+        tries = [name]
+        if name[:1] == "ل" and len(name) > 3:
+            tries.append(name[1:])
+        # Of a record whose kind is not said, a person is the likeliest
+        trials = [(words, model_name) for words in tries] + (
+            [(words, "res.partner") for words in tries] if not model_name else [])
+        for words, model_hint in trials:
+            arguments = {"name": words}
+            if model_hint:
+                arguments["model"] = model_hint
+            elif topic:
+                arguments["topic"] = topic
+            result = self._call("find_record", arguments, screen)
+            data = self._json(result) if not result.is_error else None
+            candidates = (data or {}).get("candidates") or []
+            if not candidates:
+                continue
+            exact = [c for c in candidates if (c.get("name") or "").casefold() == words.casefold()]
+            if len(exact) == 1:
+                return "one", exact
+            if len(candidates) == 1:
+                return "one", candidates
+            return "many", candidates[:MAX_CHOICES]
+        return "none", []
+
+    def _choice(self, candidates, text):
+        """A card of the records to choose among: which one is asked, never guessed"""
+        records = [{
+            "model": c["model"], "id": c["id"], "name": c["name"], "kind": c.get("kind") or "",
+            "state": c.get("state") or "",
+        } for c in candidates]
+        return Plan(text, events=[{"type": "found", "records": records}])
+
+    # -- date conditions ---------------------------------------------
+    def _period_conditions(self, parsed, field):
+        if not parsed.period or not field:
+            return []
+        span = grammar.period_range(parsed.period, self._today())
+        if not span:
+            return []
+        return [
+            {"field": field, "operator": ">=", "value": span[0].isoformat()},
+            {"field": field, "operator": "<", "value": span[1].isoformat()},
+        ]
+
+    def _selection_keys(self, model_name, field):
+        field = self.env[model_name]._fields.get(field)
+        if not field or field.type != "selection":
+            return set()
+        return {key for key, _label in field._description_selection(self.env)}
+
+    def _state_conditions(self, kind, state, model_name):
+        """:return: the conditions of a state for a kind of record, or None when
+        the kind has no such state"""
+        today = self._today().isoformat()
+        if model_name == "account.move":
+            unpaid = [{"field": "state", "operator": "=", "value": "posted"},
+                      {"field": "payment_state", "operator": "in", "value": "not_paid,partial"}]
+            return {
+                "unpaid": unpaid,
+                "overdue": unpaid + [{"field": "invoice_date_due", "operator": "<", "value": today}],
+                "paid": [{"field": "payment_state", "operator": "in", "value": "paid,in_payment"}],
+                "draft": [{"field": "state", "operator": "=", "value": "draft"}],
+                "posted": [{"field": "state", "operator": "=", "value": "posted"}],
+                "confirmed": [{"field": "state", "operator": "=", "value": "posted"}],
+                "cancelled": [{"field": "state", "operator": "=", "value": "cancel"}],
+            }.get(state)
+        wanted = {
+            "draft": ("draft", "sent"), "confirmed": ("sale", "done", "purchase"), "cancelled": ("cancel",),
+        }.get(state)
+        if wanted and "state" in self.env[model_name]._fields:
+            keys = [key for key in wanted if key in self._selection_keys(model_name, "state")]
+            if keys:
+                return [{"field": "state", "operator": "in" if len(keys) > 1 else "=", "value": ",".join(keys)}]
+        return None
+
+    def _conditions(self, parsed, kind, model_name):
+        """:return: the conditions for the kind, the states and the period said, or None
+        when one of them means nothing for that kind"""
+        spec = KINDS.get(kind or "", {})
+        conditions = []
+        if spec.get("move_types"):
+            conditions.append({"field": "move_type", "operator": "in", "value": ",".join(spec["move_types"])})
+        elif spec.get("states") and not parsed.states:
+            keys = [key for key in spec["states"] if key in self._selection_keys(model_name, "state")]
+            if keys:
+                conditions.append({"field": "state", "operator": "in", "value": ",".join(keys)})
+        for state in parsed.states:
+            found = self._state_conditions(kind, state, model_name)
+            if found is None:
+                return None
+            conditions.extend(found)
+        date_field = spec.get("date") or "create_date"
+        if date_field not in self.env[model_name]._fields:
+            date_field = "create_date"
+        conditions.extend(self._period_conditions(parsed, date_field))
+        return conditions
+
+    def _what_is_said(self, parsed):
+        """:return: the states and the period said, in words"""
+        words = {
+            "unpaid": self.env._("unpaid"), "paid": self.env._("paid"), "overdue": self.env._("overdue"),
+            "draft": self.env._("draft"), "confirmed": self.env._("confirmed"), "posted": self.env._("posted"),
+            "cancelled": self.env._("cancelled"),
+        }
+        parts = [words[state] for state in parsed.states]
+        if parsed.period:
+            parts.append(self._period_words(parsed.period))
+        return ", ".join(parts)
+
+    def _period_words(self, spec):
+        if spec[0] == "rel":
+            return {
+                "today": self.env._("today"), "yesterday": self.env._("yesterday"),
+                "tomorrow": self.env._("tomorrow"), "this_week": self.env._("this week"),
+                "last_week": self.env._("last week"), "this_month": self.env._("this month"),
+                "last_month": self.env._("last month"), "next_month": self.env._("next month"),
+                "this_year": self.env._("this year"), "last_year": self.env._("last year"),
+            }.get(spec[1], "")
+        start, end = grammar.period_range(spec, self._today()) or (None, None)
+        if not start:
+            return ""
+        if spec[0] == "year":
+            return str(start.year)
+        return start.strftime("%B %Y")
+
+    # -- intents -------------------------------------------------------
+    def _plan_open(self, parsed, screen, mode):
+        words = parsed.slots.get("words") or ""
+        quick = self.env["nudge.quick"]
+        found = {}
+        queries = [words]
+        spec = KINDS.get(parsed.kind or "")
+        if spec:
+            queries.append(spec["screen"])
+        for query in queries:
+            for rank, item in quick._scored_screens(query):
+                if item["menu_id"] not in found or rank < found[item["menu_id"]][0]:
+                    found[item["menu_id"]] = (rank, item)
+        ranked = sorted(found.values(), key=lambda pair: pair[0])
+        if not ranked:
+            name = parsed.slots.get("name") or ""
+            if name and not parsed.kind and mode != MODE_TALK:
+                found_plan = self._plan_find(parsed, screen, mode)
+                if found_plan:
+                    return found_plan
+            return None
+        best = [item for rank, item in ranked if rank == ranked[0][0]]
+        model_name = self._model_of(parsed.kind)
+        if len(best) > 1 and model_name:
+            same = [item for item in best if item.get("model") == model_name]
+            if same:
+                best = same
+        if len(best) > 1:
+            same = {item["path"]: item for item in best}
+            best = list(same.values())
+        if len(best) == 1:
+            item = best[0]
+            return Plan(
+                self.env._("Opening %s.", item["path"]),
+                [("open_screen", {"menu_id": item["menu_id"], "text": self.env._("Opening %s.", item["path"])})])
+        menus = [{"id": item["menu_id"], "path": item["path"]} for item in best[:MAX_CHOICES]]
+        return Plan(self.env._("Which screen?"), events=[{"type": "found", "menus": menus}])
+
+    def _plan_find(self, parsed, screen, mode):
+        name = parsed.slots.get("name") or ""
+        kind = parsed.kind
+        model_name = self._model_of(kind)
+        if parsed.slots.get("latest") and model_name:
+            return self._plan_latest(parsed, name, kind, model_name, screen)
+        if not name:
+            return self._plan_open(grammar.Parse(parsed.text), screen, mode) if False else None
+        status, candidates = self._pick(name, model_name, None, screen)
+        if status == "none":
+            return Plan(self.env._("I found nothing called “%s”.", name))
+        if status == "many":
+            return self._choice(candidates, self.env._("Which one is “%s”?", name))
+        record = candidates[0]
+        text = self.env._("Opening %s.", record["name"])
+        return Plan(text, [("open_record", {"model": record["model"], "id": record["id"], "text": text})])
+
+    def _plan_latest(self, parsed, name, kind, model_name, screen):
+        """The most recent record of a kind, of someone when a name is said"""
+        spec = KINDS[kind]
+        conditions = self._conditions(grammar.Parse(parsed.text), kind, model_name) or []
+        if name and spec.get("party"):
+            status, candidates = self._pick(name, "res.partner", None, screen)
+            if status == "none":
+                return Plan(self.env._("I found nothing called “%s”.", name))
+            if status == "many":
+                return self._choice(candidates, self.env._("Which one is “%s”?", name))
+            conditions.append({"field": spec["party"], "operator": "=", "value": str(candidates[0]["id"])})
+        result = self._call("search_records", {
+            "model": model_name, "conditions": conditions, "order": "id desc", "limit": 1,
+        }, screen)
+        data = self._json(result) if not result.is_error else None
+        rows = (data or {}).get("records") or (data or {}).get("rows") or []
+        if not rows:
+            return Plan(self.env._("I found no %s.", self._plural_of(kind, model_name)))
+        row = rows[0]
+        label = row.get("display_name") or row.get("name") or str(row.get("id"))
+        text = self.env._("Opening %s.", label)
+        return Plan(text, [("open_record", {"model": model_name, "id": row["id"], "text": text})])
+
+    def _plan_filter(self, parsed, screen, mode):
+        kind = parsed.kind
+        model_name = self._model_of(kind) or (screen.get("model") if screen.get("model") in self.env else None)
+        if not model_name:
+            return None
+        conditions = self._conditions(parsed, kind if self._model_of(kind) else None, model_name)
+        if not conditions:
+            return None
+        said = self._what_is_said(parsed)
+        text = self.env._("Showing %(what)s: %(said)s.", what=self._plural_of(kind, model_name), said=said)
+        return Plan(text, [("filter_screen", {
+            "model": model_name, "conditions": conditions, "text": text,
+        })])
+
+    def _plan_aggregate(self, parsed, screen, mode):
+        kind = parsed.kind
+        model_name = self._model_of(kind) or (screen.get("model") if screen.get("model") in self.env else None)
+        if not model_name:
+            return None
+        spec = KINDS.get(kind or "", {})
+        conditions = self._conditions(parsed, kind if self._model_of(kind) else None, model_name)
+        if conditions is None:
+            return None
+        measure = parsed.slots["measure"]
+        field = spec.get("amount")
+        if measure != "count" and (not field or field not in self.env[model_name]._fields):
+            return None
+        measures = ["count"] if measure == "count" else [f"{field}:{measure}"]
+        result = self._call("aggregate_records", {
+            "model": model_name, "conditions": conditions, "measures": measures,
+        }, screen)
+        data = self._json(result) if not result.is_error else None
+        rows = (data or {}).get("rows") or []
+        if not rows:
+            return Plan(result.content if result.is_error else self.env._("I found nothing to count."))
+        value = self._measure_value(rows[0], measures[0])
+        label = self._plural_of(kind, model_name)
+        said = self._what_is_said(parsed)
+        suffix = f" ({said})" if said else ""
+        if measure == "count":
+            text = self.env._("%(count)s %(what)s%(said)s.", count=self._number(value), what=label, said=suffix)
+        elif measure == "sum":
+            text = self.env._("The total of %(what)s%(said)s: %(value)s.", what=label, said=suffix,
+                              value=self._number(value))
+        else:
+            text = self.env._("The average of %(what)s%(said)s: %(value)s.", what=label, said=suffix,
+                              value=self._number(value))
+        return Plan(text)
+
+    # What a chart is split by: the fields of a model that can say it, the first one it has
+    CHART_FIELDS = {
+        "by_user": ("user_id", "invoice_user_id", "employee_id", "create_uid"),
+        "by_partner": ("partner_id",),
+        "by_product": ("product_id", "product_tmpl_id"),
+        "by_state": ("state",),
+    }
+    CHART_INTERVALS = {"by_month": "month", "by_year": "year", "by_week": "week"}
+
+    def _plan_chart(self, parsed, screen, mode):
+        kind = parsed.kind
+        model_name = self._model_of(kind) or (screen.get("model") if screen.get("model") in self.env else None)
+        if not model_name:
+            return None
+        spec = KINDS.get(kind or "", {})
+        model = self.env[model_name]
+        conditions = self._conditions(parsed, kind if self._model_of(kind) else None, model_name)
+        if conditions is None:
+            return None
+        group = parsed.slots.get("group") or "by_month"
+        if group in self.CHART_INTERVALS:
+            date_field = spec.get("date") if spec.get("date") in model._fields else "create_date"
+            group_by = [f"{date_field}:{self.CHART_INTERVALS[group]}"]
+        else:
+            name = next((f for f in self.CHART_FIELDS[group] if f in model._fields), None)
+            if not name:
+                return Plan(self.env._("I cannot split %(what)s by that.", what=self._plural_of(kind, model_name)))
+            group_by = [name]
+        measure = parsed.slots.get("measure")
+        amount = spec.get("amount")
+        measure_spec = "count" if measure == "count" or not amount or amount not in model._fields else (
+            f"{amount}:{'avg' if measure == 'avg' else 'sum'}")
+        arguments = {"model": model_name, "conditions": conditions, "group_by": group_by, "measure": measure_spec}
+        if parsed.slots.get("chart_type"):
+            arguments["chart_type"] = parsed.slots["chart_type"]
+        result = self._call("show_chart", arguments, screen)
+        if result.is_error or not result.event:
+            return Plan(result.content)
+        said = self._what_is_said(parsed)
+        text = self.env._("Here is the chart: %(title)s%(said)s.", title=result.event["title"],
+                          said=f" ({said})" if said else "")
+        return Plan(text, events=[result.event])
+
+    # The periods a saved report keeps moving with the day; any other period is kept as fixed dates
+    REPORT_PERIODS = ("this_month", "last_month", "this_year", "last_year")
+
+    def _plan_save_report(self, parsed, screen, mode):
+        """Keep what the sentence draws, to open again: the same slots as a chart, any number of
+        groups, and the pivot as a shape. The card shows it in words; the yes makes it."""
+        kind = parsed.kind
+        model_name = self._model_of(kind) or (screen.get("model") if screen.get("model") in self.env else None)
+        if not model_name:
+            return None
+        spec = KINDS.get(kind or "", {})
+        model = self.env[model_name]
+        period = parsed.period[1] if parsed.period and parsed.period[0] == "rel" and (
+            parsed.period[1] in self.REPORT_PERIODS) else None
+        fixed = copy.copy(parsed)
+        if period:
+            fixed.period = None
+        conditions = self._conditions(fixed, kind if self._model_of(kind) else None, model_name)
+        if conditions is None:
+            return None
+        date_field = spec.get("date") if spec.get("date") in model._fields else "create_date"
+        group_by = []
+        for group in parsed.slots.get("groups") or ["by_month"]:
+            if group in self.CHART_INTERVALS:
+                group_by.append(f"{date_field}:{self.CHART_INTERVALS[group]}")
+                continue
+            name = next((f for f in self.CHART_FIELDS[group] if f in model._fields), None)
+            if not name:
+                return Plan(self.env._("I cannot split %(what)s by that.", what=self._plural_of(kind, model_name)))
+            group_by.append(name)
+        measure = parsed.slots.get("measure")
+        amount = spec.get("amount")
+        measure_spec = "count" if measure == "count" or not amount or amount not in model._fields else (
+            f"{amount}:{'avg' if measure == 'avg' else 'sum'}")
+        view = parsed.slots.get("shape") or ("line" if group_by[0].partition(":")[2] and len(group_by) == 1 else "bar")
+        if view in ("bar", "line", "pie") and len(group_by) > 2:
+            view = "pivot"
+        arguments = {"model": model_name, "conditions": conditions, "group_by": group_by,
+                     "measures": [measure_spec], "view": view}
+        if period:
+            arguments.update(period=period, period_field=date_field)
+        said = self._what_is_said(parsed)
+        text = self.env._("Preparing to save the report: %(what)s%(said)s.", what=self._plural_of(kind, model_name),
+                          said=f" ({said})" if said else "")
+        return Plan(text, [("save_report", arguments)])
+
+    def _measure_value(self, row, measure):
+        if measure in row:
+            return row[measure]
+        for key, value in row.items():
+            if key == measure or key.startswith(measure.split(":")[0]) or key in ("count", "__count"):
+                if isinstance(value, (int, float)):
+                    return value
+        numbers = [value for value in row.values() if isinstance(value, (int, float))]
+        return numbers[0] if numbers else 0
+
+    def _number(self, value):
+        value = float(value or 0)
+        return f"{value:,.0f}" if value == int(value) else f"{value:,.2f}"
+
+    def _plan_create(self, parsed, screen, mode):
+        kind = parsed.kind
+        slots = parsed.slots
+        model_name = self._model_of(kind)
+        if not model_name or kind in ("invoice", "bill", "sales", "employee"):
+            return None
+        label = self._label_of(model_name)
+        if kind == "contact":
+            values = [("name", slots["name"])]
+            if slots.get("phone"):
+                values.append(("phone", slots["phone"]))
+            if slots.get("email"):
+                values.append(("email", slots["email"]))
+            return self._create_plan(model_name, values, [], label)
+        if kind == "product":
+            values = [("name", slots["name"])]
+            if slots.get("price") is not None:
+                values.append(("list_price", self._number_text(slots["price"])))
+            return self._create_plan(model_name, values, [], label)
+        if kind in ("task", "lead", "ticket"):
+            return self._create_plan(model_name, [("name", slots["title"])], [], label)
+        if kind in ("quotation", "sales_order", "purchase_order"):
+            return self._plan_create_order(parsed, model_name, label, screen)
+        if kind == "timeoff":
+            return self._plan_create_leave(parsed, model_name, label, screen)
+        return None
+
+    def _number_text(self, value):
+        return str(int(value)) if float(value) == int(value) else str(value)
+
+    def _create_plan(self, model_name, values, lines, label):
+        text = self.env._("Preparing to create: %s.", label)
+        arguments = {"model": model_name, "values": [{"field": f, "value": v} for f, v in values]}
+        if lines:
+            arguments["lines"] = lines
+        return Plan(text, [("prepare_create", arguments)])
+
+    def _plan_create_order(self, parsed, model_name, label, screen):
+        slots = parsed.slots
+        status, candidates = self._pick(slots["partner"], "res.partner", None, screen)
+        if status == "none":
+            return Plan(self.env._("I found no contact called “%s”.", slots["partner"]))
+        if status == "many":
+            return self._choice(candidates, self.env._("Which contact is “%s”?", slots["partner"]))
+        partner = candidates[0]
+        quantity_field = "product_qty" if model_name == "purchase.order" else "product_uom_qty"
+        lines = []
+        for line in slots["lines"]:
+            product_status, products = self._pick(line["product"], "product.template", None, screen)
+            if product_status == "none":
+                return Plan(self.env._("I found no product called “%s”.", line["product"]))
+            if product_status == "many":
+                return self._choice(products, self.env._("Which product is “%s”?", line["product"]))
+            template = self.env["product.template"].browse(products[0]["id"])
+            if len(template.product_variant_ids) != 1:
+                return Plan(self.env._("“%s” has several variants: say which one.", template.display_name))
+            lines.append({"field": "order_line", "values": [
+                {"field": "product_id", "value": str(template.product_variant_id.id)},
+                {"field": quantity_field, "value": self._number_text(line["qty"])},
+            ]})
+        return self._create_plan(model_name, [("partner_id", str(partner["id"]))], lines, label)
+
+    def _plan_create_leave(self, parsed, model_name, label, screen):
+        today = self._today()
+        specs = parsed.slots.get("dates") or []
+        days = [grammar.date_of(spec, today) for spec in specs]
+        days = [day for day in days if day]
+        if not days:
+            return None
+        start, end = days[0], days[-1]
+        types = self.env["hr.leave.type"].search([])
+        words = grammar.normalise.fold(parsed.slots.get("words") or "")
+        chosen = types.filtered(lambda t: t.name and grammar.normalise.fold(t.name) in words) if words else types.browse()
+        chosen = chosen or (types if len(types) == 1 else types.browse())
+        if len(chosen) != 1:
+            names = ", ".join(types.mapped("name")[:MAX_CHOICES])
+            return Plan(self.env._("Which kind of time off? One of: %s.", names))
+        values = [("holiday_status_id", str(chosen.id)), ("request_date_from", start.isoformat()),
+                  ("request_date_to", end.isoformat())]
+        return self._create_plan(model_name, values, [], label)
+
+    def _find_target(self, parsed, screen):
+        """:return: ``(status, candidates)`` of the record a sentence is about: the one on
+        screen when it says "this", or by its name"""
+        slots = parsed.slots
+        if slots.get("current") and screen.get("record_id") and screen.get("model"):
+            return "one", [{"model": screen["model"], "id": screen["record_id"], "name": "", "buttons": [
+                {"name": b.get("name"), "label": b.get("label")} for b in screen["buttons"]]}]
+        if not slots.get("name"):
+            return "none", []
+        return self._pick(slots["name"], self._model_of(parsed.kind), None, screen)
+
+    def _plan_update(self, parsed, screen, mode):
+        slots = parsed.slots
+        status, candidates = self._find_target(parsed, screen)
+        if status == "none":
+            return Plan(self.env._("I found nothing called “%s”.", slots.get("name") or ""))
+        if status == "many":
+            return self._choice(candidates, self.env._("Which one is “%s”?", slots["name"]))
+        record = candidates[0]
+        model = self.env[record["model"]]
+        field_name = next((name for name in FIELD_NAMES[slots["field"]] if name in model._fields), None)
+        if not field_name:
+            return Plan(self.env._("%(what)s has no such field.", what=self._label_of(record["model"])))
+        value = slots["value"]
+        if model._fields[field_name].type in ("date", "datetime"):
+            specs = grammar.date_specs(slots.get("value_spans") or [])
+            day = grammar.date_of(specs[0], self._today()) if specs else None
+            if not day:
+                return None
+            value = day.isoformat()
+        text = self.env._("Preparing to change %(field)s of %(name)s.", field=model._fields[field_name].string,
+                          name=record.get("name") or model.browse(record["id"]).display_name)
+        return Plan(text, [("prepare_write", {
+            "model": record["model"], "ids": [record["id"]], "values": [{"field": field_name, "value": value}],
+        })])
+
+    def _plan_history(self, parsed, screen, mode):
+        return self._plan_changes(parsed, screen, mode, restore=False)
+
+    def _plan_revert(self, parsed, screen, mode):
+        return self._plan_changes(parsed, screen, mode, restore=True)
+
+    def _plan_changes(self, parsed, screen, mode, restore):
+        """Who changed a record, or put a field of it back as it was. The record is the one on the
+        screen or the one named; what Odoo tracked is read by the tools, as the person."""
+        slots = parsed.slots
+        status, candidates = self._find_target(parsed, screen)
+        if status == "none":
+            if not slots.get("name"):
+                return Plan(self.env._("Open the record first, or tell me its name."))
+            return Plan(self.env._("I found nothing called “%s”.", slots["name"]))
+        if status == "many":
+            return self._choice(candidates, self.env._("Which one is “%s”?", slots["name"]))
+        record = candidates[0]
+        model = self.env[record["model"]]
+        arguments = {"model": record["model"], "id": record["id"]}
+        label = record.get("name") or model.browse(record["id"]).display_name
+        if slots.get("field"):
+            field_name = next((name for name in FIELD_NAMES[slots["field"]] if name in model._fields), None)
+            if not field_name:
+                return Plan(self.env._("%(what)s has no such field.", what=self._label_of(record["model"])))
+            arguments["field"] = field_name
+        if restore and arguments.get("field"):
+            text = self.env._("Preparing to restore the old value of %(field)s of %(name)s.",
+                              field=model._fields[arguments["field"]].string, name=label)
+            return Plan(text, [("prepare_revert", arguments)])
+        span = grammar.period_range(parsed.period, self._today()) if parsed.period else None
+        if span:
+            arguments["since"] = span[0].isoformat()
+            arguments["until"] = (span[1] - datetime.timedelta(days=1)).isoformat()
+        return Plan(self.env._("Here are the changes of %(name)s.", name=label), [("record_changes", arguments)])
+
+    @api.model
+    def _serve_changes(self, conversation, text, mode, snapshot):
+        """The buttons of the list of changes say ``/restore change 12`` or ``/restore message 7``; the
+        button of the panel says ``/changes``. Understood without any AI, in Agent mode only.
+
+        :return: the job of the stream, or None when ``text`` is none of these"""
+        match = revert.RESTORE_COMMAND.match(text.strip())
+        listing = revert.CHANGES_COMMAND.match(text.strip())
+        if not (match or listing) or mode != MODE_AGENT:
+            return None
+        values, _text = conversation._chat_screen(snapshot)
+        screen = self._screen_of(values.get("snapshot") or {})
+        parsed = grammar.Parse(text)
+        parsed.intent, parsed.confidence = ("revert" if match else "history"), 0.98
+        if match:
+            model_name, record_id = revert.target_of(self.env, match.group(1), match.group(2))
+            if not model_name:
+                plan = Plan(self.env._("That change is not there any more."), parsed=parsed)
+            else:
+                key = "change_id" if match.group(1) == "change" else "message_id"
+                plan = Plan(self.env._("Preparing to restore the old value."), parsed=parsed, calls=[(
+                    "prepare_revert", {"model": model_name, "id": record_id, key: int(match.group(2))})])
+        elif screen["model"] and screen["record_id"]:
+            plan = Plan(self.env._("Here are the changes of this record."), parsed=parsed, calls=[(
+                "record_changes", {"model": screen["model"], "id": screen["record_id"]})])
+        else:
+            plan = Plan(self.env._("Open the record first, or tell me its name."), parsed=parsed)
+        for name, _arguments in plan.calls:
+            tool = base.TOOLS.get(name)
+            if not tool or not tool.is_available(self.env, mode):
+                return None
+        return self._deliver(conversation, text, mode, plan, parsed, values)
+
+    def _plan_press(self, parsed, screen, mode):
+        slots = parsed.slots
+        status, candidates = self._find_target(parsed, screen)
+        if status == "none":
+            if not slots.get("name"):
+                return Plan(self.env._("Open the record first, or say its name."))
+            return Plan(self.env._("I found nothing called “%s”.", slots["name"]))
+        if status == "many":
+            return self._choice(candidates, self.env._("Which one is “%s”?", slots["name"]))
+        record = candidates[0]
+        button = self._button_for(slots["button"], record.get("buttons") or [])
+        if isinstance(button, list):
+            names = ", ".join(b.get("label") or b.get("name") for b in button[:MAX_CHOICES])
+            return Plan(self.env._("Which button: %s?", names))
+        if not button:
+            shown = ", ".join(b.get("label") or b.get("name") for b in (record.get("buttons") or [])[:MAX_CHOICES])
+            return Plan(self.env._("This record has no such button. Its buttons: %s.", shown or "-"))
+        label = button.get("label") or button["name"]
+        text = self.env._("Preparing to press “%s”.", label)
+        return Plan(text, [("call_method", {
+            "model": record["model"], "ids": [record["id"]], "method": button["name"],
+        })])
+
+    def _button_for(self, verb, buttons):
+        """:return: the button a verb presses among ``buttons``, a list when several
+        could be, None when none"""
+        methods = BUTTONS[verb]
+        wanted = {tuple(token.stem for token in grammar.normalise.tokenize(phrase))
+                  for phrase in self._verb_phrases(verb)}
+        by_name = [b for b in buttons if b.get("name") in methods]
+        if by_name:
+            return by_name[0] if len(by_name) == 1 else by_name
+        by_label = []
+        for button in buttons:
+            label = tuple(token.stem for token in grammar.normalise.tokenize(button.get("label") or ""))
+            if label in wanted or any(token in {w[0] for w in wanted if len(w) == 1} for token in label):
+                by_label.append(button)
+        if by_label:
+            return by_label[0] if len(by_label) == 1 else by_label
+        return None
+
+    def _verb_phrases(self, verb):
+        keys = noai_commands.lexicon.phrases_of(verb)
+        return [" ".join(key) for key in keys]
+
+    # ------------------------------------------------------------------
+    # Telling the person
+    # ------------------------------------------------------------------
+    def _describe(self, parsed):
+        """:return: what a sentence asks, in a few words"""
+        intent, slots = parsed.intent, parsed.slots
+        kind = KINDS.get(parsed.kind or "")
+        what = self._label_of(kind["model"]) if kind and kind["model"] in self.env else ""
+        said = self._what_is_said(parsed)
+        if intent == "open":
+            return self.env._("Open: %s", slots.get("words") or what)
+        if intent == "find":
+            return self.env._("Find: %s", " ".join(part for part in (what, slots.get("name") or "") if part))
+        if intent == "filter":
+            return self.env._("Filter: %s", " ".join(part for part in (what, said) if part))
+        if intent == "aggregate":
+            return {
+                "count": self.env._("Count: %s"), "sum": self.env._("Total: %s"), "avg": self.env._("Average: %s"),
+            }[slots["measure"]] % " ".join(part for part in (what, said) if part)
+        if intent == "chart":
+            return self.env._("Chart: %s", " ".join(part for part in (what, said) if part))
+        if intent == "save_report":
+            return self.env._("Save a report: %s", " ".join(part for part in (what, said) if part))
+        if intent == "create":
+            return self.env._("Create: %s", " ".join(
+                part for part in (what, slots.get("name") or slots.get("partner") or slots.get("title") or "") if part))
+        if intent == "update":
+            return self.env._("Change: %s", " ".join(part for part in (slots.get("name") or "", slots["field"]) if part))
+        if intent == "press":
+            return self.env._("Press a button: %s", slots.get("name") or "")
+        if intent == "history":
+            return self.env._("Who changed: %s", " ".join(part for part in (slots.get("name") or "", slots.get("field") or "") if part))
+        if intent == "revert":
+            return self.env._("Put back: %s", " ".join(part for part in (slots.get("name") or "", slots.get("field") or "") if part))
+        return parsed.text
+
+    def _what_i_understood(self, parsed):
+        """:return: one line on what was understood and what can be done without AI"""
+        if parsed.intent:
+            understood = self.env._("I understood: %s.", self._describe(parsed))
+        else:
+            understood = self.env._("I did not understand this request.")
+        return "%s %s" % (understood, self.env._(
+            "Without an AI provider I can open screens, find a record, filter a list, count and sum, "
+            "create a contact, a product, a quotation, a task or a time off, change one field and press "
+            "a button. For example: “open invoices”, “how many overdue invoices”."))
+
+    def _deliver(self, conversation, text, mode, plan, parsed, values):
+        """Write the question, run the tools of the plan through the pipeline of the
+        agent, and return the job of the stream"""
+        record = conversation.sudo()
+        record._agent_leave_undecided()
+        record.run_id._end(record.run_id._outcome("stopped"))
+        record.write({"stream_started_at": fields.Datetime.now(), "run_id": False})
+        if not record.name:
+            record.name = text[:60].strip()
+        Message = self.env["nudge.message"].sudo()
+        question = Message.create(dict({
+            "conversation_id": conversation.id, "role": "user", "content": text, "mode": mode,
+        }, **values))
+        if plan.calls and mode != MODE_TALK:
+            record.run_id = self.env["nudge.run"].sudo().create({
+                "name": text[:120].strip(), "conversation_id": conversation.id, "question_id": question.id,
+                "user_id": self.env.uid, "company_id": self.env.company.id, "model_name": "-",
+                "is_developer": mode == MODE_DEV,
+            })
+        calls = [{"id": f"noai_{index}", "name": name, "input": arguments, "extra": None}
+                 for index, (name, arguments) in enumerate(plan.calls)]
+        # A tool that shows something says it itself, on the screen
+        told = "" if calls and all(base.TOOLS[name].terminal for name, _arguments in plan.calls) else plan.text
+        outcome = {
+            "text": told, "tool_calls": calls, "last_round": True, "noai": True,
+            "stop": {"reason": llm.STOP_TOOL_USE if calls else llm.STOP_END, "usage": {}, "blocks": []},
+        }
+        step = conversation._chat_record(outcome)
+        answer = step["event"]
+        message = Message.browse(answer.get("message_id")) if answer.get("message_id") else Message
+        if calls and answer.get("type") != "waiting":
+            # Refused by the tool, in words: said as it is, not as a success
+            failed = record.run_id.step_ids.filtered(lambda s: s.state == "failed")[-1:]
+            if failed and failed.error:
+                told = plan.text = failed.error.split(" Nothing was")[0][:600]
+                message.content = told
+        events = [{"type": "delta", "text": told}] if told else []
+        events.extend(plan.events)
+        events.extend(step.get("screen_events") or [])
+        if message:
+            message.write({"noai_intent": parsed.intent or "unknown"})
+            if plan.events:
+                message.screen_events = (message.screen_events or []) + list(plan.events)
+        if parsed.intent != "bulk":
+            self.env["nudge.usage"]._add(
+                "noai", dict(NO_TOKENS), 0.0, self.env.user, self.env.company, intent=parsed.intent or "unknown",
+                conversation_id=conversation.id, message_id=message.id if message else False)
+        return {
+            "conversation_id": conversation.id,
+            "user_message_id": question.id,
+            "title": record.name,
+            "mode": mode,
+            "first_events": events,
+            "answered": answer,
+        }

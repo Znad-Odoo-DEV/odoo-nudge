@@ -43,6 +43,12 @@ class NudgeMessage(models.Model):
     # Said by the person about an answer: useful or not, and why
     feedback = fields.Selection([("up", "Useful"), ("down", "Not Useful")], readonly=True, index=True)
     feedback_note = fields.Char(readonly=True)
+    # Answered from the memory of answers, without any AI
+    is_remembered = fields.Boolean(readonly=True)
+    noai_intent = fields.Char(
+        string="Understood Without AI As", readonly=True, help="Set when the request was understood without any AI: what it asked.")
+    memory_id = fields.Many2one(
+        "nudge.memory", readonly=True, ondelete="set null", groups="nudge.group_nudge_manager")
     attachment_id = fields.Many2one(
         "ir.attachment", string="File Sent", ondelete="set null", groups="base.group_system")
     content_blocks = fields.Json(
@@ -95,6 +101,9 @@ class NudgeMessage(models.Model):
             if record.user_id.id != self.env.uid or record.role != "assistant":
                 raise AccessError(self.env._("Only the person who asked may rate an answer."))
             record.write({"feedback": value, "feedback_note": note or False})
+            if value == "up":
+                # Found useful: kept for a manager to approve, when it is the kind of answer that may be kept
+                self.env["nudge.memory"]._propose_from(record)
             if value == "down" and note:
                 question = record.conversation_id.message_ids.filtered(
                     lambda earlier: earlier.role == "user" and earlier.id < record.id)[-1:]

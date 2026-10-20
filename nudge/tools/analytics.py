@@ -6,6 +6,8 @@ companies. What they cannot open in Odoo is not counted for them.
 """
 import datetime
 
+from psycopg2.errors import QueryCanceled
+
 from . import base
 from .records import (
     FIELD_PATTERN, MAX_CONDITIONS, MODEL_PATTERN, OPERATORS, PATH_PATTERN, Refused,
@@ -50,6 +52,27 @@ def measure_value(value):
     if isinstance(value, (int, bool)) or value is None:
         return value
     return cut(value)
+
+
+# Seconds the database may spend on one count or sum
+AGGREGATE_SECONDS = 5
+
+
+class TooBig(Refused):
+    """A count or a sum that the database did not finish in time"""
+
+
+def grouped(env, model, domain, groups, measures, limit=None, order=None, seconds=AGGREGATE_SECONDS):
+    """``model._read_group`` under a clock: a group-by on millions of rows with no index is cut after
+    ``seconds`` and said to be too big, not left to hold a worker.
+
+    :raise TooBig: when the database stopped it"""
+    from .health import budget  # noqa: PLC0415 - health reads this module
+    try:
+        with budget(env, seconds):
+            return model._read_group(domain, groupby=groups, aggregates=measures, limit=limit, order=order)
+    except QueryCanceled:
+        raise TooBig("This is too big to count in a moment: add conditions, or open the list.") from None
 
 
 @base.register
@@ -157,7 +180,7 @@ class AggregateRecords(base.Tool):
             order = f"{measures[0]} DESC"
 
         limit = min(arguments.get("limit") or DEFAULT_ROWS, MAX_ROWS)
-        rows = model._read_group(domain, groupby=groups, aggregates=measures, limit=limit, order=order)
+        rows = grouped(env, model, domain, groups, measures, limit, order)
 
         result_rows = []
         for row in rows:

@@ -30,14 +30,35 @@ class IrHttp(models.AbstractModel):
             # update while the page was open is told, not suffered
             "version": nudge_version(),
             "is_manager": user.has_group("nudge.group_nudge_manager"),
+            # Private mode of the company: the panel shows a lock
+            "is_private": self.env["nudge.provider"]._is_private_mode(),
             "is_configured": bool(self.env["nudge.provider"].sudo()._get_default()),
+            # Common requests are understood without any AI, so the panel works with no provider
+            "can_work_without_ai": True,
+            # A reply to a customer can be drafted when the module of the emails is installed
+            "can_draft_reply": "nudge.email.review" in self.env,
             "can_share_screen": self.env["nudge.conversation"]._can_share_screen(),
             "can_use_agent": self.env["nudge.conversation"]._can_use_agent(),
             # Developer mode: an administrator the switch is on for
             "can_develop": self.env["nudge.conversation"]._can_develop(),
+            # A new database that nobody has set up: Nudge offers to do it with the administrator
+            "setup_offer": self.env["nudge.conversation"]._can_use_agent() and tools.setup.offered(self.env),
             # A report can be a spreadsheet when the module for it is installed
             "can_make_spreadsheet": self.env["nudge.conversation"]._can_make_spreadsheet(),
             # The commands of the message box this person may type
             "commands": tools.commands.listed(self.with_context(lang=user.lang).env),
+            # The quick actions of the panel on a phone: those of the company, of the apps installed
+            "mobile_tiles": self._get_nudge_mobile_tiles(),
             **self.env["nudge.voice"]._get_session_info(),
         }
+
+    def _get_nudge_mobile_tiles(self):
+        """:return: ids of the big tiles the panel shows on a phone, for the company in use"""
+        tiles = self.env.company.sudo()._nudge_mobile_tiles()
+        agent = self.env["nudge.conversation"]._can_use_agent()
+        user = self.env.user
+        if "photo" in tiles and not agent:
+            tiles.remove("photo")
+        if "clock" in tiles and not user.sudo().employee_id:
+            tiles.remove("clock")
+        return tiles

@@ -28,6 +28,9 @@
     <menuitem id="nudge_menu_notes" name="Business Notes" sequence="20"
               parent="nudge_menu_knowledge" action="nudge_note_action"/>
 
+    <menuitem id="nudge_menu_memory" name="Remembered Answers" sequence="22"
+              parent="nudge_menu_knowledge" action="nudge_memory_action"/>
+
     <menuitem id="nudge_menu_sources" name="Company Files" sequence="25"
               parent="nudge_menu_knowledge" action="nudge_source_action"/>
 
@@ -47,6 +50,16 @@
               parent="nudge_menu_configuration" action="nudge_config_settings_action"
               groups="base.group_system"/>
 
+    <menuitem id="nudge_menu_validator_policy" name="Fields the Company Requires" sequence="25"
+              parent="nudge_menu_configuration" action="nudge_validator_policy_action"/>
+
     <menuitem id="nudge_menu_providers" name="AI Providers" sequence="20"
               parent="nudge_menu_configuration" action="nudge_provider_action"/>
+    <menuitem id="nudge_menu_translation" name="Translations" sequence="30"
+              parent="nudge_menu_configuration" action="nudge_translation_action"
+              groups="base.group_system"/>
+    <menuitem id="nudge_menu_questions" name="Recurring Questions" sequence="21"
+              parent="nudge_menu_knowledge" action="nudge_question_action"/>
+    <menuitem id="nudge_menu_questions_find" name="Find Recurring Questions" sequence="23"
+              parent="nudge_menu_knowledge" action="nudge_question_find_action"/>
 </odoo>

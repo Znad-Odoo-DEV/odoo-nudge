@@ -42,13 +42,25 @@ export function nextLanguage(current, interfaceLocale) {
     return languages[(languages.indexOf(current) + 1) % languages.length];
 }
 
+// The dialects the person may choose to be listened to in: a tag the browser's recognition reads
+export const ARABIC_VARIANTS = [
+    "ar-SA", "ar-EG", "ar-AE", "ar-SY", "ar-IQ", "ar-JO", "ar-LB", "ar-PS", "ar-KW", "ar-QA",
+    "ar-BH", "ar-OM", "ar-YE", "ar-SD", "ar-MA", "ar-DZ", "ar-TN",
+];
+export const ENGLISH_VARIANTS = ["en-US", "en-GB"];
+const VARIANT = /^[a-z]{2}-[A-Z]{2}$/;
+
 /**
  * @param {string} code
  * @param {string[]} [preferred] languages the browser asks websites for
+ * @param {string} [chosen] what the person chose in Nudge: "auto", a language, or a dialect such as "ar-EG"
  * @returns {string} what the recognition of the browser is told to listen to.
- *   The dialect is the one the person chose for their browser, when they did.
+ *   The dialect is the one the person chose in Nudge, else the one they chose for their browser.
  */
-export function speechTag(code, preferred = []) {
+export function speechTag(code, preferred = [], chosen = "") {
+    if (VARIANT.test(chosen || "") && languageOf(chosen) === code) {
+        return chosen;
+    }
     const own = preferred.find((tag) => String(tag).toLowerCase().startsWith(`${code}-`));
     return own || DEFAULT_TAGS[code] || code;
 }

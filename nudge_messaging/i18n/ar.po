@@ -1,0 +1,862 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* nudge_messaging
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-17 17:02+0000\n"
+"PO-Revision-Date: 2026-10-17 17:02+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid ""
+"%(head)s\n"
+"Nothing was changed. It waits for your yes in Odoo."
+msgstr ""
+"%(head)s\n"
+"لم يتغير أي شيء. هذا ينتظر موافقتك داخل أودو."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "%(origin)s: a change waits for you"
+msgstr "%(origin)s: تغيير ينتظر موافقتك"
+
+#. module: nudge_messaging
+#: model:ir.model.constraint,message:nudge_messaging.constraint_nudge_messaging_message_unique_message
+msgid "A message is taken once."
+msgstr "تُؤخذ الرسالة مرة واحدة."
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_link__active
+msgid "Active"
+msgstr "نشط"
+
+#. module: nudge_messaging
+#: model:ir.model.fields.selection,name:nudge_messaging.selection__nudge_messaging_message__state__answered
+msgid "Answered"
+msgstr "تمت الإجابة"
+
+#. module: nudge_messaging
+#: model:ir.model.fields,help:nudge_messaging.field_res_config_settings__nudge_msg_whatsapp_verify_token
+msgid ""
+"Any word you choose. Give the same one to Meta when you register the "
+"webhook."
+msgstr "أي كلمة تختارها. أعطِ ميتا الكلمة نفسها عند تسجيل الـ webhook."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "Approve in Odoo"
+msgstr "وافق في أودو"
+
+#. module: nudge_messaging
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.view_users_form_simple_modif_nudge_messaging
+msgid ""
+"Ask Nudge from WhatsApp or Telegram. Press the button, then send the code from your\n"
+"                        phone within 10 minutes. Nudge answers your questions there; a change it prepares\n"
+"                        waits for your yes in Odoo."
+msgstr ""
+"اسأل نودج من واتساب أو تيليجرام. اضغط الزر ثم أرسل الرمز من هاتفك خلال 10 "
+"دقائق. يجيب نودج عن أسئلتك هناك، وأي تغيير يجهّزه ينتظر موافقتك في أودو."
+
+#. module: nudge_messaging
+#: model:ir.actions.act_window,name:nudge_messaging.nudge_step_action_messaging_approvals
+msgid "Changes Asked From a Phone"
+msgstr "تغييرات طُلبت من الهاتف"
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_link__channel
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_message__channel
+msgid "Channel"
+msgstr "القناة"
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_code__code_hash
+msgid "Code Hash"
+msgstr "بصمة الرمز"
+
+#. module: nudge_messaging
+#: model:ir.model,name:nudge_messaging.model_res_config_settings
+msgid "Config Settings"
+msgstr "إعدادات التهيئة"
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_code__create_uid
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_link__create_uid
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_message__create_uid
+msgid "Created by"
+msgstr "أنشأه"
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_code__create_date
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_link__create_date
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_message__create_date
+msgid "Created on"
+msgstr "تاريخ الإنشاء"
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging__display_name
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_api__display_name
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_code__display_name
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_link__display_name
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_message__display_name
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_step__display_name
+#: model:ir.model.fields,field_description:nudge_messaging.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:nudge_messaging.field_res_users__display_name
+msgid "Display Name"
+msgstr "الاسم المعروض"
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_step.py:0
+msgid "Done"
+msgstr "تم"
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "Done. This phone is no longer linked to your account."
+msgstr "تم. لم يعد هذا الهاتف مربوطًا بحسابك."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_step.py:0
+msgid "Done: %s"
+msgstr "تم: %s"
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_code__expires_at
+msgid "Expires At"
+msgstr "ينتهي في"
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_step.py:0
+#: model:ir.model.fields.selection,name:nudge_messaging.selection__nudge_messaging_message__state__failed
+msgid "Failed"
+msgstr "فشل"
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_res_config_settings__nudge_msg_forget_keys
+msgid "Forget the Stored Keys"
+msgstr "نسيان المفاتيح المخزّنة"
+
+#. module: nudge_messaging
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.view_users_form_simple_modif_nudge_messaging
+msgid "Get a Linking Code"
+msgstr "احصل على رمز الربط"
+
+#. module: nudge_messaging
+#: model:ir.model.fields,help:nudge_messaging.field_res_config_settings__nudge_msg_whatsapp_url
+msgid "Give this address to Meta as the callback URL of the webhook."
+msgstr "أعطِ هذا العنوان لـ Meta كعنوان الاستدعاء للـ webhook."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid ""
+"Hello. I do not know this phone yet. In Odoo, open your Preferences, Nudge "
+"Messaging, get a code and send it here."
+msgstr ""
+"مرحبًا. لا أعرف هذا الهاتف بعد. افتح في Odoo تفضيلاتك ثم Nudge Messaging "
+"واحصل على رمز وأرسله هنا."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "I cannot listen to voice notes in private mode. Please send text."
+msgstr ""
+"لا أستطيع الاستماع إلى الرسائل الصوتية في الوضع الخاص. أرسل نصاً من فضلك."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "I could not reach the AI provider. Try again in a moment."
+msgstr "تعذّر الوصول إلى مزوّد الذكاء الاصطناعي. حاول بعد قليل."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "I could not understand the voice note. Please send text."
+msgstr "لم أستطع فهم الرسالة الصوتية. أرسل نصاً من فضلك."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "I found these screens and pages in Odoo:"
+msgstr "وجدت هذه الشاشات والصفحات في أودو:"
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "I have nothing to answer to this."
+msgstr "ليس عندي ما أجيب به على هذا."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "I heard nothing in the voice note. Please send text."
+msgstr "لم أسمع شيئاً في الرسالة الصوتية. أرسل نصاً من فضلك."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "I prepared this. It waits for your yes in Odoo."
+msgstr "جهّزت هذا. إنه ينتظر موافقتك في أودو."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid ""
+"I read the file but I need your choice before I can prepare it. Please send "
+"it in the Nudge panel in Odoo."
+msgstr ""
+"قرأت الملف لكني أحتاج إلى اختيارك قبل أن أجهّزه. أرسله من لوحة نودج في أودو "
+"من فضلك."
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging__id
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_api__id
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_code__id
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_link__id
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_message__id
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_step__id
+#: model:ir.model.fields,field_description:nudge_messaging.field_res_config_settings__id
+#: model:ir.model.fields,field_description:nudge_messaging.field_res_users__id
+msgid "ID"
+msgstr "المعرّف"
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_step.py:0
+msgid "It could not be done: %s"
+msgstr "تعذّر التنفيذ: %s"
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_code__write_uid
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_link__write_uid
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_message__write_uid
+msgid "Last Updated by"
+msgstr "آخر تعديل بواسطة"
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_code__write_date
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_link__write_date
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_message__write_date
+msgid "Last Updated on"
+msgstr "آخر تعديل في"
+
+#. module: nudge_messaging
+#: model:ir.model.fields,help:nudge_messaging.field_res_config_settings__nudge_msg_telegram_webhook_secret
+msgid ""
+"Letters, digits, underscore and hyphen only. Telegram repeats it with every "
+"message."
+msgstr "حروف وأرقام وشرطة سفلية وشرطة فقط. يكررها تيليجرام مع كل رسالة."
+
+#. module: nudge_messaging
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.nudge_messaging_link_view_list
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.view_users_form_simple_modif_nudge_messaging
+msgid "Linked On"
+msgstr "تاريخ الربط"
+
+#. module: nudge_messaging
+#: model:ir.actions.act_window,name:nudge_messaging.nudge_messaging_link_action
+#: model:ir.model.fields,field_description:nudge_messaging.field_res_users__nudge_msg_link_ids
+#: model:ir.ui.menu,name:nudge_messaging.nudge_messaging_menu_links
+msgid "Linked Phones"
+msgstr "الهواتف المرتبطة"
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid ""
+"Linked to %(name)s. Ask me about your invoices, orders or contacts. A change"
+" I prepare waits for your yes in Odoo."
+msgstr ""
+"تم الربط بـ %(name)s. اسألني عن فواتيرك أو طلباتك أو جهات اتصالك. أي تغيير "
+"أجهّزه ينتظر موافقتك في أودو."
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_message__ext_id
+msgid "Message Id"
+msgstr "معرّف الرسالة"
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_res_config_settings__nudge_msg_enabled
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.res_config_settings_view_form_messaging
+msgid "Messaging Assistants"
+msgstr "مساعدو المراسلة"
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/res_users.py:0
+msgid "Messaging is closed. An administrator turns it on in Settings, Nudge."
+msgstr "المراسلة مغلقة. يفتحها المسؤول من الإعدادات ثم نودج."
+
+#. module: nudge_messaging
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.nudge_step_view_form_messaging
+msgid "No"
+msgstr "لا"
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "No converter for voice notes on this server."
+msgstr "لا يوجد محوّل للرسائل الصوتية على هذا الخادم."
+
+#. module: nudge_messaging
+#: model_terms:ir.actions.act_window,help:nudge_messaging.nudge_step_action_messaging_approvals
+msgid "Nothing waits for you"
+msgstr "لا شيء ينتظرك"
+
+#. module: nudge_messaging
+#: model:ir.model,name:nudge_messaging.model_nudge_step
+msgid "Nudge Agent Step"
+msgstr "خطوة وكيل نودج"
+
+#. module: nudge_messaging
+#: model:ir.model,name:nudge_messaging.model_nudge_messaging_link
+msgid "Nudge Linked Phone"
+msgstr "هاتف مرتبط بنودج"
+
+#. module: nudge_messaging
+#: model:ir.model,name:nudge_messaging.model_nudge_messaging_code
+msgid "Nudge Linking Code"
+msgstr "رمز ربط نودج"
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/res_users.py:0
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.view_users_form_simple_modif_nudge_messaging
+msgid "Nudge Messaging"
+msgstr "مراسلة نودج"
+
+#. module: nudge_messaging
+#: model:ir.model,name:nudge_messaging.model_nudge_messaging
+msgid "Nudge Messaging Assistant"
+msgstr "مساعد مراسلة نودج"
+
+#. module: nudge_messaging
+#: model:ir.model,name:nudge_messaging.model_nudge_messaging_api
+msgid "Nudge Messaging Channels"
+msgstr "قنوات مراسلة نودج"
+
+#. module: nudge_messaging
+#: model:ir.model,name:nudge_messaging.model_nudge_messaging_message
+msgid "Nudge Messaging Log"
+msgstr "سجل مراسلة نودج"
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_res_config_settings__nudge_msg_telegram_keys_set
+msgid "Nudge Msg Telegram Keys Set"
+msgstr "مفاتيح تيليجرام مخزّنة"
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_res_config_settings__nudge_msg_whatsapp_keys_set
+msgid "Nudge Msg Whatsapp Keys Set"
+msgstr "مفاتيح واتساب مخزّنة"
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "Open in Odoo"
+msgstr "افتح في أودو"
+
+#. module: nudge_messaging
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.res_config_settings_view_form_messaging
+msgid ""
+"People who linked their phone can ask Nudge on WhatsApp or Telegram. A "
+"question is answered in the chat; a change is never made there: Nudge sends "
+"a link and the person says yes in Odoo. Each person links their own phone "
+"with a code from their Preferences."
+msgstr ""
+"من ربط هاتفه يستطيع أن يسأل نودج على واتساب أو تيليجرام. يُجاب السؤال في "
+"المحادثة، ولا يُجرى أي تغيير هناك: يرسل نودج رابطاً ويقول الشخص نعم داخل "
+"أودو. يربط كل شخص هاتفه برمز من تفضيلاته."
+
+#. module: nudge_messaging
+#: model:ir.model.fields,help:nudge_messaging.field_res_config_settings__nudge_msg_enabled
+msgid ""
+"People who linked their phone can ask Nudge on WhatsApp or Telegram. Changes"
+" are never made from the chat: Nudge answers with a link and the person says"
+" yes in Odoo."
+msgstr ""
+"من ربط هاتفه يستطيع أن يسأل نودج على واتساب أو تيليجرام. لا تُجرى التغييرات "
+"من المحادثة: يجيب نودج برابط ويقول الشخص نعم في أودو."
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_link__user_id
+msgid "Person"
+msgstr "الشخص"
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_link__sender_hint
+msgid "Phone"
+msgstr "الهاتف"
+
+#. module: nudge_messaging
+#: model:ir.ui.menu,name:nudge_messaging.nudge_messaging_menu_approvals
+msgid "Phone Approvals"
+msgstr "موافقات الهاتف"
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_link__sender_id
+msgid "Phone Identifier"
+msgstr "معرّف الهاتف"
+
+#. module: nudge_messaging
+#: model:ir.model.fields.selection,name:nudge_messaging.selection__nudge_messaging_message__state__linked
+msgid "Phone Linked"
+msgstr "تم ربط الهاتف"
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid ""
+"Prepared. Nothing was changed: it waits for the person's yes in Odoo, and "
+"Nudge sends them the link. Tell them what you prepared, in one sentence."
+msgstr ""
+"جُهّز. لم يتغير شيء: إنه ينتظر موافقة الشخص في أودو، وسيرسل نودج له الرابط. "
+"أخبره بما جهّزته في جملة واحدة."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid ""
+"Reading a document needs the AI provider, which is not available now. Please"
+" send text."
+msgstr ""
+"قراءة المستند تحتاج إلى مزوّد الذكاء الاصطناعي وهو غير متاح الآن. أرسل نصاً "
+"من فضلك."
+
+#. module: nudge_messaging
+#: model:ir.model.fields.selection,name:nudge_messaging.selection__nudge_messaging_message__state__received
+msgid "Received"
+msgstr "مستلمة"
+
+#. module: nudge_messaging
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.res_config_settings_view_form_messaging
+msgid "Register the Webhook"
+msgstr "تسجيل الـ webhook"
+
+#. module: nudge_messaging
+#: model:ir.model.fields,help:nudge_messaging.field_res_config_settings__nudge_msg_forget_keys
+msgid "Remove the keys of both channels when you save."
+msgstr "إزالة مفاتيح القناتين عند الحفظ."
+
+#. module: nudge_messaging
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.res_config_settings_view_form_messaging
+msgid "Remove the stored keys of both channels when you save."
+msgstr "إزالة المفاتيح المخزّنة للقناتين عند الحفظ."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "Send me a question as text, a voice note, or a picture of a document."
+msgstr "أرسل لي سؤالاً نصاً، أو رسالة صوتية، أو صورة مستند."
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_message__sender_hash
+msgid "Sender Hash"
+msgstr "بصمة المرسل"
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "Something went wrong on the server. Try again in a moment."
+msgstr "حدث خطأ في الخادم. حاول مرة أخرى بعد قليل."
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_message__state
+msgid "State"
+msgstr "الحالة"
+
+#. module: nudge_messaging
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.res_config_settings_view_form_messaging
+msgid "Stored, not shown"
+msgstr "مخزّن، غير ظاهر"
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/res_config_settings.py:0
+#: model:ir.model.fields.selection,name:nudge_messaging.selection__nudge_messaging_link__channel__telegram
+#: model:ir.model.fields.selection,name:nudge_messaging.selection__nudge_messaging_message__channel__telegram
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.res_config_settings_view_form_messaging
+msgid "Telegram"
+msgstr "تيليجرام"
+
+#. module: nudge_messaging
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.res_config_settings_view_form_messaging
+msgid ""
+"Telegram Bot API. Make a bot with BotFather, paste its token, choose a "
+"webhook secret, save, then press Register the Webhook. The token and the "
+"secret are kept and never shown again."
+msgstr ""
+"واجهة بوت تيليجرام. أنشئ بوتاً عبر BotFather والصق رمزه، واختر سراً للـ "
+"webhook، ثم احفظ واضغط «تسجيل الـ webhook». يُحفظ الرمز والسر ولا يُعرضان "
+"مرة أخرى."
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_res_config_settings__nudge_msg_telegram_bot_token
+msgid "Telegram Bot Token"
+msgstr "رمز بوت تيليجرام"
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_res_config_settings__nudge_msg_telegram_url
+msgid "Telegram Webhook Address"
+msgstr "عنوان webhook في تيليجرام"
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_res_config_settings__nudge_msg_telegram_webhook_secret
+msgid "Telegram Webhook Secret"
+msgstr "سر الـ webhook لتيليجرام"
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/res_config_settings.py:0
+msgid ""
+"Telegram did not accept it. Save the bot token and the webhook secret first,"
+" and the address must be reachable from the internet over https."
+msgstr ""
+"لم يقبله تيليجرام. احفظ رمز البوت وسر الـ webhook أولاً، ويجب أن يكون "
+"العنوان متاحاً من الإنترنت عبر https."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/res_config_settings.py:0
+msgid "Telegram will send the messages here."
+msgstr "سيرسل تيليجرام الرسائل إلى هنا."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "That is a bigger change: do it in the Nudge panel in Odoo."
+msgstr "هذا تغيير أكبر: نفّذه من لوحة نودج في أودو."
+
+#. module: nudge_messaging
+#: model:ir.model.fields,help:nudge_messaging.field_res_config_settings__nudge_msg_telegram_url
+msgid ""
+"The address Telegram sends messages to; the button next to it registers it."
+msgstr "العنوان الذي يرسل إليه تيليجرام الرسائل؛ والزر المجاور له يسجّله."
+
+#. module: nudge_messaging
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.res_config_settings_view_form_messaging
+msgid "The app secret and the access token are stored."
+msgstr "سر التطبيق ورمز الوصول مخزّنان."
+
+#. module: nudge_messaging
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.res_config_settings_view_form_messaging
+msgid "The bot token and the webhook secret are stored."
+msgstr "رمز البوت وسر الـ webhook مخزّنان."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging_api.py:0
+msgid "The file could not be downloaded."
+msgstr "تعذّر تنزيل الملف."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging_api.py:0
+msgid "The file is too large."
+msgstr "الملف كبير جداً."
+
+#. module: nudge_messaging
+#: model:ir.model.fields,help:nudge_messaging.field_res_config_settings__nudge_msg_whatsapp_phone_id
+msgid ""
+"The identifier of the business phone number in the WhatsApp Business Cloud "
+"API (Meta for Developers, WhatsApp, API Setup)."
+msgstr ""
+"معرّف رقم هاتف النشاط في WhatsApp Business Cloud API (Meta for Developers، "
+"WhatsApp، API Setup)."
+
+#. module: nudge_messaging
+#: model:ir.model.fields,help:nudge_messaging.field_res_config_settings__nudge_msg_whatsapp_access_token
+msgid ""
+"The permanent token Nudge uses to answer on WhatsApp. Stored, never shown "
+"again."
+msgstr ""
+"الرمز الدائم الذي يستخدمه Nudge للرد على واتساب. يُخزَّن ولا يُعرض مجددًا."
+
+#. module: nudge_messaging
+#: model:ir.model.fields,help:nudge_messaging.field_res_config_settings__nudge_msg_whatsapp_app_secret
+msgid ""
+"The secret of the Meta app. Every message is checked against it before "
+"anything is read. Stored, never shown again."
+msgstr ""
+"سر تطبيق Meta. تُفحص كل رسالة به قبل قراءة أي شيء منها. يُخزَّن ولا يُعرض "
+"مجددًا."
+
+#. module: nudge_messaging
+#: model:ir.model.fields,help:nudge_messaging.field_res_config_settings__nudge_msg_telegram_bot_token
+msgid "The token BotFather gave to your bot. Stored, never shown again."
+msgstr "الرمز الذي أعطاه BotFather لروبوتك. يُخزَّن ولا يُعرض مجددًا."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "The voice note could not be converted."
+msgstr "تعذّر تحويل الرسالة الصوتية."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_step.py:0
+msgid "This can no longer be done. Nothing was changed."
+msgstr "لم يعد ممكناً تنفيذ هذا. لم يتغير شيء."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_step.py:0
+msgid "This has expired. Ask again from your phone."
+msgstr "انتهت صلاحية هذا. اطلبه من هاتفك مرة أخرى."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_step.py:0
+msgid "This is being done already."
+msgstr "هذا قيد التنفيذ بالفعل."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_step.py:0
+msgid "This is not waiting for you."
+msgstr "هذا لا ينتظرك."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging_link.py:0
+msgid "This is not your phone."
+msgstr "هذا ليس هاتفك."
+
+#. module: nudge_messaging
+#: model:ir.model.fields.selection,name:nudge_messaging.selection__nudge_messaging_message__state__limited
+msgid "Too Many"
+msgstr "رسائل كثيرة"
+
+#. module: nudge_messaging
+#: model:ir.model.fields.selection,name:nudge_messaging.selection__nudge_messaging_message__state__unknown
+msgid "Unknown Sender"
+msgstr "مرسل غير معروف"
+
+#. module: nudge_messaging
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.nudge_messaging_link_view_list
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.view_users_form_simple_modif_nudge_messaging
+msgid "Unlink"
+msgstr "إلغاء الربط"
+
+#. module: nudge_messaging
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.nudge_messaging_link_view_list
+msgid "Unlink this phone?"
+msgstr "إلغاء ربط هذا الهاتف؟"
+
+#. module: nudge_messaging
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.view_users_form_simple_modif_nudge_messaging
+msgid "Unlink this phone? Nudge will stop answering it."
+msgstr "إلغاء ربط هذا الهاتف؟ سيتوقف نودج عن الرد عليه."
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_code__used
+msgid "Used"
+msgstr "مستخدم"
+
+#. module: nudge_messaging
+#: model:ir.model,name:nudge_messaging.model_res_users
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_code__user_id
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_message__user_id
+msgid "User"
+msgstr "المستخدم"
+
+#. module: nudge_messaging
+#: model:ir.model.fields.selection,name:nudge_messaging.selection__nudge_messaging_link__channel__whatsapp
+#: model:ir.model.fields.selection,name:nudge_messaging.selection__nudge_messaging_message__channel__whatsapp
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.res_config_settings_view_form_messaging
+msgid "WhatsApp"
+msgstr "واتساب"
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_res_config_settings__nudge_msg_whatsapp_access_token
+msgid "WhatsApp Access Token"
+msgstr "رمز وصول واتساب"
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_res_config_settings__nudge_msg_whatsapp_app_secret
+msgid "WhatsApp App Secret"
+msgstr "سر تطبيق واتساب"
+
+#. module: nudge_messaging
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.res_config_settings_view_form_messaging
+msgid ""
+"WhatsApp Business Cloud API. In the Meta app, set the callback address below"
+" and the verify token; the app secret signs every message, the access token "
+"sends the answers. Both are kept and never shown again: leave them blank to "
+"keep what is stored."
+msgstr ""
+"واجهة واتساب للأعمال السحابية. في تطبيق ميتا ضع عنوان الاستدعاء أدناه ورمز "
+"التحقق؛ يوقّع سر التطبيق كل رسالة، ويرسل رمز الوصول الإجابات. يُحفظان ولا "
+"يُعرضان مرة أخرى: اتركهما فارغين للإبقاء على المخزَّن."
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_res_config_settings__nudge_msg_whatsapp_url
+msgid "WhatsApp Callback Address"
+msgstr "عنوان الاستدعاء في واتساب"
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_res_config_settings__nudge_msg_whatsapp_phone_id
+msgid "WhatsApp Phone Number ID"
+msgstr "معرّف رقم هاتف واتساب"
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_res_config_settings__nudge_msg_whatsapp_verify_token
+msgid "WhatsApp Verify Token"
+msgstr "رمز التحقق لواتساب"
+
+#. module: nudge_messaging
+#: model_terms:ir.actions.act_window,help:nudge_messaging.nudge_step_action_messaging_approvals
+msgid ""
+"When you ask Nudge for a change on WhatsApp or Telegram, it waits here until"
+" you say yes."
+msgstr ""
+"عندما تطلب من نودج تغييراً على واتساب أو تيليجرام، ينتظر هنا حتى تقول نعم."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid ""
+"Without an AI provider I can count, sum and look up. For example: \"how many"
+" overdue invoices\", \"find Raghad\", \"create a task Call Ebrahim\"."
+msgstr ""
+"بدون مزوّد ذكاء اصطناعي أستطيع العد والجمع والبحث. مثلاً: «كم فاتورة "
+"متأخرة»، «ابحث عن راغد»، «أنشئ مهمة اتصل بإبراهيم»."
+
+#. module: nudge_messaging
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.nudge_step_view_form_messaging
+msgid "Yes, make this change"
+msgstr "نعم، نفّذ هذا التغيير"
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "You wrote a lot in a short time. Please wait a few minutes."
+msgstr "كتبتَ كثيرًا في وقت قصير. انتظر بضع دقائق من فضلك."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "Your account cannot use Nudge. Ask your administrator."
+msgstr "لا يستطيع حسابك استخدام نودج. اسأل المسؤول."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/res_users.py:0
+msgid ""
+"Your code: %(code)s. Send it as a message from your phone to the Nudge "
+"number on WhatsApp or to the Nudge bot on Telegram within 10 minutes."
+msgstr ""
+"رمزك: %(code)s. أرسله كرسالة من هاتفك إلى رقم نودج على واتساب أو إلى بوت "
+"نودج على تيليجرام خلال 10 دقائق."
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_res_config_settings__nudge_msg_allow_private
+msgid "Allow Messaging in Private Mode"
+msgstr "السماح بالمراسلة في الوضع الخاص"
+
+#. module: nudge_messaging
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.res_config_settings_view_form_messaging
+msgid ""
+"In private mode no company data goes to outside AI. A chat answer still "
+"travels through WhatsApp or Telegram, so by default the channel is closed "
+"while private mode is on."
+msgstr ""
+"في الوضع الخاص لا تذهب بيانات الشركة إلى ذكاء اصطناعي خارجي. لكن جواب "
+"المحادثة يمر عبر واتساب أو تيليغرام، لذلك تكون القناة مغلقة افتراضيًا ما دام"
+" الوضع الخاص مفعّلًا."
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_res_config_settings__nudge_msg_retention_days
+msgid "Keep the Message Log (Days)"
+msgstr "مدة الاحتفاظ بسجل الرسائل (أيام)"
+
+#. module: nudge_messaging
+#: model:ir.actions.server,name:nudge_messaging.cron_answer_ir_actions_server
+msgid "Nudge Messaging: answer the messages that wait"
+msgstr "مراسلة Nudge: الرد على الرسائل المنتظرة"
+
+#. module: nudge_messaging
+#: model:ir.actions.server,name:nudge_messaging.ir_cron_nudge_messaging_purge_ir_actions_server
+msgid "Nudge messaging: forget the log after 90 days"
+msgstr "مراسلة Nudge: نسيان السجل بعد 90 يومًا"
+
+#. module: nudge_messaging
+#: model:ir.model.fields,help:nudge_messaging.field_res_config_settings__nudge_msg_retention_days
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.res_config_settings_view_form_messaging
+msgid ""
+"Older lines of the log of received messages are deleted. The limit per "
+"sender and the check against a repeated message need only a few hours of it."
+msgstr ""
+"تُحذف الأسطر الأقدم من سجل الرسائل المستلمة. الحد لكل مرسل وفحص الرسالة "
+"المكررة لا يحتاجان إلا إلى بضع ساعات منه."
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_message__payload
+msgid "Payload"
+msgstr "المحتوى"
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "Private mode is on: this channel carries no company data."
+msgstr "الوضع الخاص مفعّل: هذه القناة لا تحمل أي بيانات للشركة."
+
+#. module: nudge_messaging
+#: model:ir.model.fields,help:nudge_messaging.field_res_config_settings__nudge_msg_allow_private
+msgid ""
+"Private mode keeps company data from outside AI, but a chat answer travels "
+"through the servers of WhatsApp or Telegram. Off: in private mode the "
+"channel answers only that it is closed."
+msgstr ""
+"الوضع الخاص يمنع بيانات الشركة من الوصول إلى ذكاء اصطناعي خارجي، لكن جواب "
+"المحادثة يمر عبر خوادم واتساب أو تيليغرام. معطّل: في الوضع الخاص تجيب القناة"
+" بأنها مغلقة فقط."
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_message__started_at
+msgid "Started At"
+msgstr "بدأ في"
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging_api.py:0
+msgid "The file took too long to download."
+msgstr "استغرق تنزيل الملف وقتًا أطول من اللازم."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "The voice note is too long."
+msgstr "المقطع الصوتي طويل جدًا."
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_message__tries
+msgid "Tries"
+msgstr "المحاولات"
+
+#. module: nudge_messaging
+#: model:ir.model.fields,help:nudge_messaging.field_nudge_messaging_message__started_at
+msgid "When an answer was last begun: one that never ended is begun again."
+msgstr "متى بدأ الرد آخر مرة: الرد الذي لم ينتهِ يُبدأ من جديد."
+
+#. module: nudge_messaging
+#: model:ir.model.fields.selection,name:nudge_messaging.selection__nudge_messaging_message__state__wrong_code
+msgid "Wrong Code"
+msgstr "رمز خاطئ"

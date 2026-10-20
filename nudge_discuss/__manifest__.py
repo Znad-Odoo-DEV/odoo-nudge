@@ -17,9 +17,10 @@ Installed from Apps by an administrator who wants it, with Nudge and Discuss;
 never by itself.
 """,
     "category": "Productivity",
-    "version": "19.0.1.0.6",
+    "version": "19.0.1.0.8",
     "author": "Ibrahim Elzenad",
     "website": "https://znad-odoo-dev.github.io",
+    "support": "https://github.com/Znad-Odoo-DEV/odoo-nudge/issues",
     "license": "OPL-1",
     "images": ["static/description/banner.png"],
     "depends": ["nudge", "mail"],

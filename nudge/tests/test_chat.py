@@ -245,15 +245,22 @@ class TestChat(NudgeCase, TransactionCase):
         IrHttp = self.env["ir.http"]
         info = IrHttp.with_user(self.user_a)._get_nudge_session_info()
         self.assertIn("help", [command["name"] for command in info.pop("commands")])
+        # A person who cannot make drafts has no photo tile; the others follow the apps installed
+        info_tiles = [tile for tile in ("tasks", "record", "note") if tile != "tasks" or "project.task" in self.env]
+        self.assertEqual(info["mobile_tiles"], info_tiles)
         self.assertEqual(
             info,
             {
                 "version": nudge_version(),
-                "is_manager": False, "is_configured": True, "can_share_screen": True,
+                "is_manager": False, "is_private": False, "is_configured": True, "can_work_without_ai": True,
+                "can_share_screen": True,
+                "can_draft_reply": "nudge.email.review" in self.env,
                 "can_use_agent": False,
-                "can_develop": False,
+                "can_develop": False, "setup_offer": False,
                 "can_make_spreadsheet": False,
                 "can_use_voice": True, "voice_engine": "auto", "can_transcribe": False,
+                "voice_private": False, "voice_blocked_reason": "", "browser_speech_ok": True,
+                "mobile_tiles": info_tiles,
             },
         )
         self.assertTrue(IrHttp.with_user(self.manager)._get_nudge_session_info()["is_manager"])
@@ -265,15 +272,20 @@ class TestChat(NudgeCase, TransactionCase):
         Conversation = self.env["nudge.conversation"]
         status = Conversation.with_user(self.manager).get_status()
         self.assertIn("help", [command["name"] for command in status.pop("commands")])
+        info_tiles = [tile for tile in ("photo", "tasks", "record", "note") if tile != "tasks" or "project.task" in self.env]
         self.assertEqual(
             status,
             {
                 "version": nudge_version(),
-                "is_manager": True, "is_configured": True, "can_share_screen": True,
+                "is_manager": True, "is_private": False, "is_configured": True, "can_work_without_ai": True,
+                "can_share_screen": True,
+                "can_draft_reply": "nudge.email.review" in self.env,
                 "can_use_agent": True,
-                "can_develop": False,
+                "can_develop": False, "setup_offer": False,
                 "can_make_spreadsheet": "make_spreadsheet" in tools.base.TOOLS,
                 "can_use_voice": True, "voice_engine": "auto", "can_transcribe": False,
+                "voice_private": False, "voice_blocked_reason": "", "browser_speech_ok": True,
+                "mobile_tiles": info_tiles,
             },
         )
         self.assertEqual(Conversation.with_user(self.outsider).get_status(), {})

@@ -107,3 +107,23 @@ test("with a provider, the search is not there", async () => {
     expect(".o_nudge_quick").toHaveCount(0);
     expect(".o_nudge_composer").toHaveCount(1);
 });
+
+test("without a provider, a remembered answer is offered above the search", async () => {
+    onRpc("nudge.quick", "find", () => FOUND);
+    onRpc("nudge.memory", "suggest", ({ args }) => {
+        expect.step(`suggest ${args[0]}`);
+        return { id: 3, question: "How do I create a quotation?", answer: "Open Sales, press New." };
+    });
+    await start();
+    await click(".o_nudge_quick_input");
+    await edit("create quotation");
+    await animationFrame();
+    await click(".o_nudge_quick_go");
+    await animationFrame();
+    expect.verifySteps(["suggest create quotation"]);
+    expect(".o_nudge_quick_memory").toHaveCount(1);
+    expect(".o_nudge_quick_memory").toHaveText(/Open Sales, press New\./);
+    expect(".o_nudge_remembered").toHaveCount(1);
+    expect(".o_nudge_remembered_ask").toHaveCount(0, { message: "There is no AI to ask" });
+    expect(".o_nudge_quick_menu").toHaveCount(1, { message: "The usual search is still there" });
+});

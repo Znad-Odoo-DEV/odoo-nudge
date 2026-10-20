@@ -61,7 +61,7 @@ for module in ("nudge_spreadsheet", "nudge_documents", "nudge_studio"):
     if os.path.isdir(ROOT + module):
         shutil.rmtree(ROOT + module)
         print("dropped", module)
-for module in ("nudge", "nudge_mail", "nudge_discuss"):
+for module in ("nudge", "nudge_mail", "nudge_discuss", "nudge_mcp", "nudge_website", "nudge_builder", "nudge_messaging"):  # R2 RULE: release-2 modules
     sub(f"{module}/__manifest__.py", r'"version": "18\.0\.', '"version": "17.0.')
 
 # ---------------------------------------------------------------- Hoot does not exist in 17
@@ -73,7 +73,7 @@ for path in files("nudge/static/tests/*.js"):
 print("Hoot tests removed:", not files("nudge/static/tests/*.js"))
 
 # ---------------------------------------------------------------- env._ is 18
-for name in files("nudge/**/*.py", "nudge_mail/**/*.py", "nudge_discuss/**/*.py"):
+for name in files("nudge/**/*.py", "nudge_mail/**/*.py", "nudge_discuss/**/*.py", "nudge_mcp/**/*.py", "nudge_website/**/*.py", "nudge_builder/**/*.py", "nudge_messaging/**/*.py"):  # R2 RULE
     s = read(name)
     # self.env._( / env._( / record.env._( / self.env["x"].env._( → _(
     s2, n = re.subn(r"(?<![\w.\]])(?:[A-Za-z_]\w*(?:\[[^\[\]]*\])?\.)*env\._\(", "_(", s)
@@ -124,7 +124,7 @@ class Base(models.AbstractModel):
         self.check_access_rule(operation)
 ''')
 edit("nudge/models/__init__.py", [("from . import nudge_provider\n", "from . import compat17\nfrom . import nudge_provider\n")])
-for name in files("nudge/**/*.py", "nudge_mail/**/*.py"):
+for name in files("nudge/**/*.py", "nudge_mail/**/*.py", "nudge_mcp/**/*.py", "nudge_website/**/*.py", "nudge_builder/**/*.py", "nudge_messaging/**/*.py"):  # R2 RULE
     if name.endswith("compat17.py"):
         continue
     n = sub(name, r"\.has_access\(", "._nudge_has_access(")
@@ -156,12 +156,6 @@ edit("nudge/tests/test_profile.py", [
     ('        self.assertEqual(described["fields"][0]["added_by"], "web_tour", "What is added comes first")\n', ""),
 ])
 
-# ---------------------------------------------------------------- the bus (records._bus_send is 18)
-edit("nudge/models/nudge_run.py", [
-    ('            run.user_id._bus_send("nudge.run", {\n',
-     '            run.env["bus.bus"]._sendone(run.user_id.partner_id, "nudge.run", {\n'),
-])
-
 # ---------------------------------------------------------------- test users (17 gives them no password)
 edit("nudge/tests/common.py", [
     ("from odoo.tests import new_test_user\n",
@@ -186,7 +180,7 @@ if os.path.exists(ROOT + "nudge/tests/test_building.py"):
     sub("nudge/tests/test_building.py", r'"view_type": "list"', '"view_type": "tree"')
     sub("nudge/tests/test_building.py", r'assertIn\("\(list\)"', 'assertIn("(tree)"')
 
-for name in files("nudge/**/*.xml", "nudge_mail/**/*.xml"):
+for name in files("nudge/**/*.xml", "nudge_mail/**/*.xml", "nudge_mcp/**/*.xml", "nudge_website/**/*.xml", "nudge_builder/**/*.xml", "nudge_messaging/**/*.xml"):  # R2 RULE
     n = sub(name, r"<list(?=[\s>])", "<tree")
     n += sub(name, r"</list>", "</tree>")
     n += sub(name, r'(<field name="view_mode">)list', r"\1tree")
@@ -313,6 +307,7 @@ sub("nudge/tests/test_ui.py", r'f"/odoo/action-\{action\.id\}/\{partner\.id\}"',
 
 # ---------------------------------------------------------------- no Studio, no spreadsheets in 17: the store page says nothing of them
 # Named among the other companions, they are left out of the sentence; a line of their own goes
+sub("nudge/static/description/index.html", r"Nudge: Discuss, Nudge: Spreadsheets, ", "Nudge: Discuss, ")
 sub("nudge/static/description/index.html", r", Nudge: Discuss and Nudge: Spreadsheets\. ", " and Nudge: Discuss. ")
 sub("nudge/static/description/index.html", r", the tasks, the spreadsheets\.", ", the tasks.")
 sub("nudge/static/description/index.html",
@@ -342,10 +337,123 @@ for module in sorted(os.listdir(ROOT)):
             if name.endswith(".py"):
                 sub(f"{module}/tests/{name}", r'(file_path\("[\w/]+/migrations/)18\.0\.', r"\g<1>17.0.")
                 sub(f"{module}/tests/{name}", r'(\.migrate\(self\.env\.cr, ")18\.0\.', r"\g<1>17.0.")
+                sub(f"{module}/tests/{name}", r'(\.migrate\(cr, ")18\.0\.', r"\g<1>17.0.")  # R2 RULE 13b
+                sub(f"{module}/tests/{name}" if name == "test_saved_reports.py" else "nudge/none", r'("migrations", ")18\.0\.', r"\g<1>17.0.")  # R2 RULE 13
 
 # ---------------------------------------------------------------- the words "Odoo 18"
 for name in ("nudge/llm/prompt.py", "nudge/README.md", "nudge/README.ar.md", "nudge/static/description/index.html",
              "nudge/doc/user-guide.md", "nudge/doc/user-guide.ar.md", "nudge/doc/security.md", "nudge/__manifest__.py"):
     sub(name, r"Odoo 18(\.0)?", "Odoo 17")
 sub("nudge/tests/test_profile.py", r"Odoo 18\.0 Community", "Odoo 17.0 Community")
+# ---------------------------------------------------------------- STORE REVIEW RULES (nudge_mcp, nudge_website, later files)
+# FINAL RULE: the record address is handled by nudge/tools/urls.py (record_url) in the code itself now; the old history.py edit is gone
+# The check of access of the public assistant looks for the method by its name
+sub("nudge_website/tools/assistant.py", r'hasattr\(records, "has_access"\)', 'hasattr(records, "_nudge_has_access")')
+# Odoo 17 has no expiry on an API key: _generate takes two arguments, and the wizard does not ask for a duration
+edit("nudge_mcp/models/nudge_mcp_help.py", [
+    ("        expires = fields.Datetime.now() + timedelta(days=int(self.duration))\n", ""),
+    ("._generate(SCOPE, self.name, expires)", "._generate(SCOPE, self.name)"),
+])
+sub("nudge_mcp/views/nudge_mcp_views.xml", r'\n[ \t]*<field name="duration"/>', "")
+
+# FINAL RULE: Odoo 17 validates that a field used in a modifier is in the view; the MCP approval buttons use origin
+sub("nudge_mcp/views/nudge_mcp_views.xml", r'(<xpath expr="//header" position="inside">\n)(\s*)(<button name="action_mcp_approve")',
+    r'\1\2<field name="origin" invisible="1"/>\n\2\3')
+
+# QA RULE 13 (17, merged from the QA copy): `_ = self.env._` is an alias, not a call: the env._( rule never sees it
+sub("nudge/models/nudge_embedding.py", r"^(\s*)_ = self\.env\._\n", r"\1from odoo import _  # noqa: PLC0415\n", flags=re.M)
+
+# QA RULE 12 (17, merged from the QA copy): res.lang._get_data is 18; 17 has _lang_get
+sub("nudge/models/nudge_history.py", r'self\.env\["res\.lang"\]\._get_data\(code=user\.lang or "en_US"\)', 'self.env["res.lang"]._lang_get(user.lang or "en_US")')
+# QA RULE 14 (17, merged): test_profile builds "Odoo 18.0 {edition}"
+sub("nudge/tests/test_profile.py", r"Odoo 18\.0 \{edition\}", "Odoo 17.0 {edition}")
+# QA RULE 15 (17, merged): tests assert the /odoo/action-N/id shape of 18; 17 gives /web#action=N&active_id=id
+sub("nudge/tests/test_task_lists.py", r'self\.assertIn\(f"action-\{server\.id\}", location\)', 'self.assertIn(f"action={server.id}", location)')
+sub("nudge/tests/test_task_lists.py", r'self\.assertIn\(f"/\{step\.id\}/", location\)', 'self.assertIn(f"active_id={step.id}", location)')
+sub("nudge/tests/test_task_rules.py", r'self\.assertIn\("/action-", task\.last_result\)', 'self.assertIn("#action=", task.last_result)')
+
+# FINAL RULE: tools/history.py:linked read the model out of /odoo/<model>/<id>; 17 has /web#model=<model>&id=<id>
+sub("nudge/tools/history.py", r'covered = \{row\.get\("url", ""\)\.split\("/"\)\[2\] for row in rows if row\.get\("url"\)\}',
+    'covered = {found.group(1) or found.group(2) for found in (re.search(r"/odoo/([^/]+)/|[#&]model=([^&]+)", row["url"]) for row in rows if row.get("url")) if found}')
+# FINAL RULE: the link of a note ("Show me") accepts the 17 address too, and its test expects it
+sub("nudge_discuss/models/nudge_mention.py", r'\(/odoo/\[A-Za-z0-9_\./-\]\+\)', r'(/(?:odoo/|web#)[A-Za-z0-9_./=&;#-]+)')
+sub("nudge_discuss/tests/test_mentions.py", r'''f'<a href="/odoo/res\.partner/\{child\.id\}">Show me</a>\'''', '''f'<a href="/web#model=res.partner&amp;id={child.id}&amp;view_type=form">Show me</a>\'''')
+
+# FINAL RULE: Odoo 17's _() finds the language of the reader in the locals of its caller (cr, uid, context) or in self.env;
+# the health checks translate where only env is known, so they were always in English
+sub("nudge/tools/health.py", r"(    def texts\(self, env, key, count, sample\):\n)(        \"\"\"[^\n]*\"\"\"\n)?",
+    lambda m: m.group(1) + (m.group(2) or "") + "        cr, uid, context = env.cr, env.uid, env.context  # 17: what _() looks for\n")
+
 print("done")
+
+# R2 RULE 1 (17): the forms of 17 must carry every field their modifiers read (18 adds the field itself)
+edit("nudge/views/nudge_translation_views.xml", [
+    ('                <sheet>\n                    <div class="alert alert-info" role="alert" invisible="not note">',
+     '                <sheet>\n                    <field name="state" invisible="1"/>\n                    <div class="alert alert-info" role="alert" invisible="not note">'),
+])
+# R2 RULE 2 (17): self.env._ with a language of its own. 17's _() reads `context` and `cr` of the frame that calls it
+_name = "nudge_messaging/models/nudge_messaging.py"
+_s = read(_name)
+if "def _tr(env, source" not in _s:
+    _helper = (
+        "\n\ndef _tr(env, source, *args, **kwargs):  # R2 RULE 2: 17's _() reads these two locals\n"
+        "    context = env.context  # noqa: F841\n"
+        "    cr = env.cr  # noqa: F841\n"
+        "    return _(source, *args, **kwargs)\n\n\n"
+        "class _Lang:\n"
+        "    def __init__(self, env):\n"
+        "        self.env = env\n\n"
+        "    def _(self, source, *args, **kwargs):\n"
+        "        return _tr(self.env, source, *args, **kwargs)\n\n\n"
+        "class ")
+    _s = _s.replace("\n\nclass ", _helper, 1)
+    write(_name, _s)
+edit(_name, [
+    ('        return self.with_context(lang=lang or self.env.context.get("lang") or "en_US").env\n',
+     '        return _Lang(self.with_context(lang=lang or self.env.context.get("lang") or "en_US").env)\n'),
+])
+sub(_name, r"self\.with_context\(lang=self\._lang_of\(user, lang\)\)\.env\._\(",
+    "_tr(self.with_context(lang=self._lang_of(user, lang)).env, ")
+edit("nudge/views/nudge_health_views.xml", [
+    ('                    <field name="scope" invisible="1"/>\n                    <div class="alert alert-info" role="alert" invisible="scope != \'upgrade\'">',
+     '                    <field name="scope" invisible="1"/>\n                    <field name="pack" invisible="1"/>\n                    <div class="alert alert-info" role="alert" invisible="scope != \'upgrade\'">'),
+])  # R2 RULE 3 (17): the form reads `pack` in modifiers (also parent.pack of the lines): the field must be in the form
+# R2 RULE 4 (17): the settings of the messaging companion read two computed flags in modifiers: 17 wants the fields in the view
+sub("nudge_messaging/views/res_config_settings_views.xml", r'(\n( *)<field name="nudge_msg_enabled"/>)(?!\n *<field name="nudge_msg_whatsapp_keys_set")',
+    r'\1\n\2<field name="nudge_msg_whatsapp_keys_set" invisible="1"/>\n\2<field name="nudge_msg_telegram_keys_set" invisible="1"/>')
+
+# R2 RULE 8 (17): ir.cron has no failure_count on 17
+sub("nudge/tools/debugger.py", r"if not cron\.active and cron\.failure_count:", 'if not cron.active and "failure_count" in cron._fields and cron.failure_count:')
+sub("nudge/tests/test_debugger.py", r'(        cron\.write\(\{"failure_count": 3)',
+    r'        if "failure_count" not in cron._fields:\n            self.skipTest("ir.cron has no failure_count on 17")\n\1')
+# R2 RULE 9 (17): product.product has detailed_type, not is_storable
+sub("nudge/tests/test_outliers.py", r'"is_storable": True', '"detailed_type": "product"')
+# R2 RULE 10 (17): the key of 17 has no expiry
+sub("nudge_mcp/tests/test_mcp.py", r'\._generate\(\n\s+scope, "test", fields\.Datetime\.now\(\) \+ timedelta\(days=days\)\)', '._generate(scope, "test")')
+# R2 RULE 11 (17): the tests patch has_access, which the port renamed; a sale line of 17 needs a product (CHECK accountable_required_fields)
+sub("nudge/tests/test_revert.py", r'patch\.object\(type\(self\.task\), "has_access",', 'patch.object(type(self.task), "_nudge_has_access",')
+sub("nudge/tests/test_revert.py", r'"name": "Door", "product_uom_qty": 1, "price_unit": 10\.0\}', '"product_id": self.env["product.product"].create({"name": "Raghad Door"}).id, "name": "Door", "product_uom_qty": 1, "price_unit": 10.0}')
+# R2 RULE 12 (17): product.group_product_manager is 18; the sales manager can make products on 17
+for _name in ("nudge_builder/tests/test_checks.py", "nudge_builder/tests/test_shop.py"):
+    sub(_name, r"product\.group_product_manager", "sales_team.group_sale_manager")
+# R2 RULE 13 (17): the snippets of 17: no section title in s_features, no contact snippet, a team without data-name
+T = "nudge_builder/tests/test_snippets.py"
+sub(T, r'section\.xpath\("\.//h3"\)\[1:\]', 'section.xpath(".//h3")')
+sub(T, r'        self\.assertEqual\(section\.xpath\("\.//h3"\)\[0\]\.text, "Why us"\)\n', "        # 17: s_features has no section title\n")
+sub(T, r'        self\.assertIn\("<script>", section\.xpath\("\.//h3"\)\[0\]\.text\)\n', "        # 17: s_features has no section title to put the text in\n")
+sub(T, r"(    def test_contact_and_map_take_the_company_facts\(self\):\n)", r'\1        self.skipTest("Odoo 17 has no contact snippet: a text block stands in")\n')
+sub(T, r"len\(team\.xpath\(\"\.//div\[@data-name='Team Member'\]\"\)\)", 'len(team.xpath(".//h4"))')
+sub("nudge_builder/tests/test_templates.py", r"        for snippet in used:\n            self\.assertTrue\(self\.env\.ref\(\"website\.\" \+ snippet",
+    '        for snippet in used - {"s_contact_info"}:  # 17 has no contact snippet\n            self.assertTrue(self.env.ref("website." + snippet')
+# R2 RULE 15 (17): the tests look for the /odoo/<model>/<id> shape of the link; 17 has /web#model=..&id=..&view_type=form
+M = "nudge_messaging/tests/test_messaging.py"
+sub(M, r'f"/nudge\.step/\{step\.id\}"', 'f"id={step.id}&view_type=form"')
+sub(M, r'f"/res\.partner/\{partner\.id\}"', 'f"id={partner.id}&view_type=form"')
+# R2 RULE 16 (17): the accordion of 17 is cards with an <a> and a collapse (18 has accordion-item and a button)
+T = "nudge_builder/tests/test_snippets.py"
+sub(T, r'faq\.xpath\("\.//div\[contains\(@class,\'accordion-collapse\'\)\]/@id"\)', 'faq.xpath(".//div[contains(@class,\'collapse\')]/@id")')
+sub(T, r'faq\.xpath\("\.//button/@data-bs-target"\)', 'faq.xpath(".//a[@data-bs-toggle=\'collapse\']/@data-bs-target")')
+sub(T, r"\.//div\[contains\(@class,'accordion-body'\)\]", ".//div[contains(@class,'card-body')]")
+sub(T, r"        self\.assertEqual\(section\.xpath\(\"\.//p\[contains\(@class,'lead'\)\]\"\)\[0\]\.text, \"Three reasons\.\"\)\n", "        # 17: s_features has no lead text\n")
+# R2 RULE 17: 17's features block has no title slot, and a title is added only to a block that has items (the test gives none)
+sub("nudge_builder/tests/test_snippets.py", r'snippets\.fill\(section, "s_features", \{"title": "Hello <script>alert\(1\)</script>"\}\)', 'snippets.fill(section, "s_features", {"title": "Hello <script>alert(1)</script>", "items": [{"title": "One", "text": "x"}]})')

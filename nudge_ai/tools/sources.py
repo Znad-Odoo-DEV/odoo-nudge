@@ -28,6 +28,9 @@ def readable_sources(agent):
 def embed(env, agent, text):
     """:return: the embedding of ``text`` by the provider of ``agent``
     :raise Refused: when the AI app has no key for it"""
+    if env["nudge.provider"]._is_private_mode():
+        # The embedding is made by an outside provider of the AI app: never in private mode
+        raise Refused("Private mode is on: the sources cannot be searched, as that asks an outside provider.")
     provider = get_provider(env, agent.llm_model)
     service = LLMApiService(env=env, provider=provider)
     try:

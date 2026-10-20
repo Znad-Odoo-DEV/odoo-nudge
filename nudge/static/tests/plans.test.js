@@ -136,3 +136,32 @@ test("the person finds the tasks Nudge does by itself in the preferences", async
     expect.verifySteps(["open nudge.nudge_task_action"]);
     expect(nudge.state.isOpen).toBe(false);
 });
+
+test("the person sets up the morning digest in one click and reads a preview", async () => {
+    setupNudge({ config: { can_use_agent: true } });
+    await mountView({ resModel: "partner", type: "form", arch: "<form><field name='name'/></form>", resId: 1 });
+    onRpc("nudge.task", "action_setup_digest", ({ kwargs }) => {
+        expect.step(`setup ${kwargs.hour}`);
+        return { id: 5, hour: kwargs.hour, tz: "Asia/Dubai" };
+    });
+    onRpc("nudge.task", "action_preview_digest", () => {
+        expect.step("preview");
+        return 77;
+    });
+    onRpc("nudge.conversation", "read", () => [{ id: 77, name: "My morning digest" }]);
+    onRpc("nudge.message", "search_read", () => []);
+    const nudge = getService("nudge");
+    nudge.open();
+    nudge.showSettings();
+    await animationFrame();
+    await click(".o_nudge_digest_hour");
+    const select = document.querySelector(".o_nudge_digest_hour");
+    select.value = "7";
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+    await animationFrame();
+    await click(".o_nudge_digest_setup");
+    await animationFrame();
+    await click(".o_nudge_digest_preview");
+    await animationFrame();
+    expect.verifySteps(["setup 7", "preview"]);
+});

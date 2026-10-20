@@ -5,6 +5,9 @@
         <field name="model">nudge.source</field>
         <field name="arch" type="xml">
             <list string="Company Files" decoration-danger="state == 'failed'" decoration-muted="state == 'empty'">
+                <header>
+                    <button name="action_export_recipe" type="object" string="Export as a recipe" display="always" groups="nudge.group_nudge_manager"/>
+                </header>
                 <field name="name"/>
                 <field name="purpose"/>
                 <field name="group_ids" widget="many2many_tags"/>

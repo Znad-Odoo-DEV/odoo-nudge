@@ -79,6 +79,10 @@ export class NudgeRoot extends Component {
     }
 
     get placement() {
+        // On a phone the sheet covers the screen, and the avatar stays where it is
+        if (this.state.isMobile) {
+            return null;
+        }
         return placement(this.drag.position || this.state.position, this.viewport, AVATAR_SIZE);
     }
 }

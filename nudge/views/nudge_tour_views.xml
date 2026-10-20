@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_tour_view_list" model="ir.ui.view">
+        <field name="name">nudge.tour.view.list</field>
+        <field name="model">nudge.tour</field>
+        <field name="arch" type="xml">
+            <list string="Tours">
+                <header>
+                    <button name="action_export_recipe" type="object" string="Export as a recipe" display="always" groups="nudge.group_nudge_manager"/>
+                </header>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="step_count" string="Steps"/>
+                <field name="module_name"/>
+                <field name="group_ids" widget="many2many_tags" optional="hide"/>
+                <field name="company_id" groups="base.group_multi_company" optional="show"/>
+                <field name="is_library" optional="show"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_tour_view_form" model="ir.ui.view">
+        <field name="name">nudge.tour.view.form</field>
+        <field name="model">nudge.tour</field>
+        <field name="arch" type="xml">
+            <form string="Tour">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Create a quotation"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="phrases_en" placeholder="create a quotation&#10;new quote"/>
+                            <field name="phrases_ar" placeholder="انشاء عرض سعر"/>
+                        </group>
+                        <group>
+                            <field name="action_xmlid" placeholder="sale.action_quotations_with_onboarding"/>
+                            <field name="module_name" placeholder="sale"/>
+                            <field name="group_ids" widget="many2many_tags"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="is_library"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Steps" name="steps">
+                            <field name="step_ids">
+                                <list string="Steps" editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="kind"/>
+                                    <field name="name"/>
+                                    <field name="label"/>
+                                    <field name="note"/>
+                                    <field name="res_model" optional="hide"/>
+                                    <field name="view_type" optional="hide"/>
+                                    <field name="skip_reason" optional="show"/>
+                                </list>
+                            </field>
+                            <div class="text-muted">
+                                Each step points at a menu, a button, a field or a tab by its name, never by its
+                                place on the page. A step that this database does not have is skipped with a
+                                note. To record a tour instead of writing it, use Record a tour in the menu of
+                                your user.
+                            </div>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_tour_view_search" model="ir.ui.view">
+        <field name="name">nudge.tour.view.search</field>
+        <field name="model">nudge.tour</field>
+        <field name="arch" type="xml">
+            <search string="Tours">
+                <field name="name"/>
+                <field name="phrases_en"/>
+                <field name="phrases_ar"/>
+                <filter name="ready_made" string="Ready-Made" domain="[('is_library', '=', True)]"/>
+                <filter name="recorded" string="Recorded" domain="[('is_library', '=', False)]"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_tour_action" model="ir.actions.act_window">
+        <field name="name">Tours</field>
+        <field name="res_model">nudge.tour</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No tour yet</p>
+            <p>Record one from the menu of your user: click through a task once, and everybody can replay it with the pointer.</p>
+        </field>
+    </record>
+
+    <menuitem id="nudge_menu_tours" name="Tours" sequence="15"
+              parent="nudge_menu_configuration" action="nudge_tour_action"/>
+</odoo>

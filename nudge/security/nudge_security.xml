@@ -92,6 +92,13 @@
             <field name="groups" eval="[Command.link(ref('group_nudge_manager'))]"/>
         </record>
 
+        <record id="nudge_digest_link_rule_own" model="ir.rule">
+            <field name="name">Nudge Digest Link: own</field>
+            <field name="model_id" ref="model_nudge_digest_link"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[Command.link(ref('group_nudge_user'))]"/>
+        </record>
+
         <record id="nudge_task_rule_own" model="ir.rule">
             <field name="name">Nudge Scheduled Task: own</field>
             <field name="model_id" ref="model_nudge_task"/>
@@ -133,6 +140,80 @@
         <record id="nudge_step_rule_manager" model="ir.rule">
             <field name="name">Nudge Step: all</field>
             <field name="model_id" ref="model_nudge_step"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[Command.link(ref('group_nudge_manager'))]"/>
+        </record>
+
+        <record id="nudge_history_rule_own" model="ir.rule">
+            <field name="name">Nudge Record Summary: own</field>
+            <field name="model_id" ref="model_nudge_history"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[Command.link(ref('group_nudge_user'))]"/>
+        </record>
+
+        <record id="nudge_history_rule_manager" model="ir.rule">
+            <field name="name">Nudge Record Summary: all for managers</field>
+            <field name="model_id" ref="model_nudge_history"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[Command.link(ref('group_nudge_manager'))]"/>
+        </record>
+
+        <record id="nudge_memory_rule_company" model="ir.rule">
+            <field name="name">Nudge Answer Memory: companies of the manager</field>
+            <field name="model_id" ref="model_nudge_memory"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[Command.link(ref('group_nudge_manager'))]"/>
+        </record>
+
+        <record id="nudge_question_rule_company" model="ir.rule">
+            <field name="name">Nudge Recurring Question: companies of the manager</field>
+            <field name="model_id" ref="model_nudge_question"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[Command.link(ref('group_nudge_manager'))]"/>
+        </record>
+
+        <record id="nudge_lexicon_entry_rule_company" model="ir.rule">
+            <field name="name">Nudge Lexicon Entry: companies of the user</field>
+            <field name="model_id" ref="model_nudge_lexicon_entry"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="nudge_recipe_installed_rule_company" model="ir.rule">
+            <field name="name">Nudge Installed Recipe: companies of the user</field>
+            <field name="model_id" ref="model_nudge_recipe_installed"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="nudge_health_report_rule_company" model="ir.rule">
+            <field name="name">Nudge Health Report: companies of the manager</field>
+            <field name="model_id" ref="model_nudge_health_report"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[Command.link(ref('group_nudge_manager'))]"/>
+        </record>
+
+        <record id="nudge_health_finding_rule_company" model="ir.rule">
+            <field name="name">Nudge Health Finding: companies of the manager</field>
+            <field name="model_id" ref="model_nudge_health_finding"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[Command.link(ref('group_nudge_manager'))]"/>
+        </record>
+
+        <record id="nudge_usage_rule_company" model="ir.rule">
+            <field name="name">Nudge Usage: companies of the manager</field>
+            <field name="model_id" ref="model_nudge_usage"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[Command.link(ref('group_nudge_manager'))]"/>
+        </record>
+        <record id="nudge_coach_rule_own" model="ir.rule">
+            <field name="name">Nudge Coaching: own</field>
+            <field name="model_id" ref="model_nudge_coach"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[Command.link(ref('group_nudge_user'))]"/>
+        </record>
+
+        <record id="nudge_coach_rule_manager" model="ir.rule">
+            <field name="name">Nudge Coaching: all for managers</field>
+            <field name="model_id" ref="model_nudge_coach"/>
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="groups" eval="[Command.link(ref('group_nudge_manager'))]"/>
         </record>

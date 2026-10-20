@@ -51,9 +51,9 @@ class FakeAdapter(base.BaseAdapter):
     def check(self):
         return None
 
-    def transcribe(self, audio, language="", hints=(), deadline=None):
+    def transcribe(self, audio, language="", hints=(), deadline=None, audio_format="wav"):
         self.recordings.append({
-            "audio": audio, "language": language, "hints": list(hints), "deadline": deadline,
+            "audio_format": audio_format, "audio": audio, "language": language, "hints": list(hints), "deadline": deadline,
         })
         if isinstance(self.heard, Exception):
             raise self.heard

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="nudge.ImportCard">
+        <div t-if="state.isOpen" class="o_nudge_import card my-2" role="region" aria-label="Match the columns of the file">
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between align-items-start">
+                    <p class="mb-1">
+                        <i class="fa fa-table"/> <strong t-esc="state.name"/>
+                        <t t-if="state.modelLabel"> → <span class="o_nudge_import_model" t-esc="state.modelLabel"/></t>
+                        <span t-if="state.rows !== null" class="text-muted"> · <t t-esc="state.rows"/> rows</span>
+                    </p>
+                    <button type="button" class="btn btn-sm btn-link o_nudge_import_close"
+                            t-on-click="() => this.importer.close()" aria-label="Close"><i class="fa fa-times"/></button>
+                </div>
+                <p t-if="state.busy" class="o_nudge_import_busy"><i class="fa fa-circle-o-notch fa-spin"/></p>
+                <p t-if="state.error" class="text-danger o_nudge_import_error" t-esc="state.error"/>
+                <div t-if="state.choices" class="o_nudge_import_choices">
+                    <p class="mb-1">Which kind of records is it for?</p>
+                    <button t-foreach="state.choices" t-as="choice" t-key="choice.model" type="button"
+                            class="btn btn-sm btn-light me-1 mb-1 o_nudge_import_choice"
+                            t-on-click="() => this.importer.pick(choice.model)">
+                        <t t-esc="choice.label"/> <span class="text-muted" t-esc="choice.score + '%'"/>
+                    </button>
+                </div>
+                <table t-if="state.columns.length" class="table table-sm mb-1 o_nudge_import_table">
+                    <thead>
+                        <tr><th>Column</th><th>Field</th><th>Match</th><th>Example</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="state.columns" t-as="column" t-key="column.index"
+                            t-att-class="'o_nudge_import_row o_nudge_import_' + column.level">
+                            <td t-esc="column.column"/>
+                            <td>
+                                <select class="form-select form-select-sm o_nudge_import_field"
+                                        t-on-change="(ev) => this.onChange(column.index, ev)">
+                                    <option value="" t-att-selected="!column.field">Ignore this column</option>
+                                    <option t-if="column.field and column.field.includes('/')" t-att-value="column.field"
+                                            selected="selected" t-esc="column.field"/>
+                                    <option t-foreach="state.fields" t-as="field" t-key="field.name"
+                                            t-att-value="field.name" t-att-selected="field.name === column.field"
+                                            t-esc="field.label"/>
+                                </select>
+                            </td>
+                            <td>
+                                <span t-if="column.field" t-att-title="column.reason"
+                                      t-att-class="'badge ' + (column.level === 'low' ? 'text-bg-warning' : column.level === 'medium' ? 'text-bg-info' : 'text-bg-success')"
+                                      t-esc="column.confidence + '%'"/>
+                                <span t-else="" class="badge text-bg-secondary">None</span>
+                            </td>
+                            <td class="text-muted" t-esc="column.sample.join(', ')"/>
+                        </tr>
+                    </tbody>
+                </table>
+                <p t-if="state.missing.length" class="text-warning o_nudge_import_missing">
+                    Required, with no column: <t t-esc="state.missing.join(', ')"/>
+                </p>
+                <div t-if="state.columns.length" class="d-flex flex-wrap gap-1">
+                    <button type="button" class="btn btn-sm btn-primary o_nudge_import_check" t-att-disabled="state.busy"
+                            t-on-click="() => this.importer.check()">Check the file</button>
+                    <button type="button" class="btn btn-sm btn-light o_nudge_import_csv" t-att-disabled="state.busy"
+                            t-on-click="() => this.importer.downloadCsv()">Download the corrected file</button>
+                    <button type="button" class="btn btn-sm btn-light o_nudge_import_open"
+                            t-on-click="() => this.importer.openImporter()">Open the Import screen</button>
+                </div>
+                <div t-if="state.check" class="mt-2 o_nudge_import_result">
+                    <p class="mb-1">
+                        <t t-if="!state.check.problems.length">No problem: <t t-esc="state.check.records"/> records would be imported.</t>
+                        <t t-else=""><t t-esc="state.check.problems.length"/> problems, <t t-esc="state.check.errors"/> of them stop the import:</t>
+                    </p>
+                    <ul t-if="state.check.problems.length" class="mb-1 ps-3">
+                        <li t-foreach="state.check.problems" t-as="problem" t-key="problem_index" t-esc="problem"/>
+                    </ul>
+                    <p class="text-muted mb-0">Nothing was saved.</p>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

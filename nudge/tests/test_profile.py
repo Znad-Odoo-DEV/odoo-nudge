@@ -30,12 +30,14 @@ class TestCollectors(NudgeCase, TransactionCase):
 
     def test_overview(self):
         overview = self.slices(collectors.collect_modules)["overview"]
-        self.assertIn("Odoo 19.0 Community", overview["summary"])
+        edition = "Enterprise" if self.env["ir.module.module"].sudo().search_count(
+            [("state", "=", "installed"), ("license", "=", "OEEL-1")]) else "Community"
+        self.assertIn(f"Odoo 19.0 {edition}", overview["summary"])
         self.assertIn("Tours (web_tour)", overview["summary"])
         self.assertFalse(overview["restricted"])
         self.assertNotIn("nudge", [module["name"] for module in overview["data"]["custom_modules"]],
                          "Nudge does not describe itself as a customization")
-        self.assertEqual(overview["data"]["edition"], "Community")
+        self.assertEqual(overview["data"]["edition"], edition)
 
         standard = self.slices(collectors.collect_modules, custom={"nudge"})["overview"]
         self.assertIn("No custom module", standard["summary"])
@@ -397,8 +399,10 @@ class TestProfileTools(NudgeCase, TransactionCase):
         self.assertEqual(
             [tool["name"] for tool in adapter.calls[0]["tools"]],
             ["assess_database", "describe_model", "describe_module", "find_screen", "locate_data",
+             "match_import_columns",
              "open_screen", "read_configuration", "read_settings",
-             "remember_lesson", "search_company_files", "search_database_profile",
+             "record_changes", "remember_lesson", "search_company_files", "search_database_profile",
              "search_odoo_documentation", "search_products",
-             "show_menu_path", "show_on_screen", "test_import", "write_in_field"],
+             "show_menu_path", "show_on_screen", "show_tour", "summarize_record_history", "test_import",
+             "write_in_field"],
         )

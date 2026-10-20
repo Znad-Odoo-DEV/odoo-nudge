@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_web_message_view_list" model="ir.ui.view">
+        <field name="name">nudge.web.message.view.list</field>
+        <field name="model">nudge.web.message</field>
+        <field name="arch" type="xml">
+            <list string="Visitor Questions" create="0" edit="0" decoration-muted="answered">
+                <field name="create_date"/>
+                <field name="website_id"/>
+                <field name="question"/>
+                <field name="answer" optional="hide"/>
+                <field name="kind"/>
+                <field name="answered"/>
+                <field name="used_ai"/>
+                <field name="user_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_web_message_view_search" model="ir.ui.view">
+        <field name="name">nudge.web.message.view.search</field>
+        <field name="model">nudge.web.message</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="question"/>
+                <field name="website_id"/>
+                <filter name="unanswered" string="Unanswered" domain="[('kind', '=', 'ask'), ('answered', '=', False)]"/>
+                <filter name="handover" string="Talk to a Person" domain="[('kind', '=', 'handover')]"/>
+                <group>
+                    <filter name="by_website" string="Website" context="{'group_by': 'website_id'}"/>
+                    <filter name="by_day" string="Day" context="{'group_by': 'create_date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_web_message_action" model="ir.actions.act_window">
+        <field name="name">Visitor Questions</field>
+        <field name="res_model">nudge.web.message</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'search_default_unanswered': 1}</field>
+    </record>
+
+    <!-- The usage of Nudge, for the calls the assistant of the website made -->
+    <record id="nudge_usage_website_action" model="ir.actions.act_window">
+        <field name="name">Website Assistant Usage</field>
+        <field name="res_model">nudge.usage</field>
+        <field name="view_mode">list,pivot</field>
+        <field name="domain">[('origin', '=', 'website')]</field>
+    </record>
+
+    <menuitem id="nudge_menu_website" name="Website Assistant" sequence="40"
+              parent="nudge.nudge_menu_root" groups="nudge.group_nudge_manager"/>
+    <menuitem id="nudge_menu_website_questions" name="Visitor Questions" sequence="10"
+              parent="nudge_menu_website" action="nudge_web_message_action"/>
+    <menuitem id="nudge_menu_website_usage" name="Usage" sequence="20"
+              parent="nudge_menu_website" action="nudge_usage_website_action"/>
+</odoo>

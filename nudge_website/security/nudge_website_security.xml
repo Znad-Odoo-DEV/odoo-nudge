@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- The visitors of the website read the files and pages marked public, and nothing else of Nudge -->
+    <record id="nudge_source_rule_public" model="ir.rule">
+        <field name="name">Nudge Company File: public ones, for visitors</field>
+        <field name="model_id" ref="nudge.model_nudge_source"/>
+        <field name="domain_force">[('is_public', '=', True), ('state', '=', 'ready')]</field>
+        <field name="groups" eval="[Command.link(ref('base.group_public')), Command.link(ref('base.group_portal'))]"/>
+    </record>
+
+    <record id="nudge_source_passage_rule_public" model="ir.rule">
+        <field name="name">Nudge Company File Passage: public ones, for visitors</field>
+        <field name="model_id" ref="nudge.model_nudge_source_passage"/>
+        <field name="domain_force">[('source_id.is_public', '=', True), ('source_id.state', '=', 'ready')]</field>
+        <field name="groups" eval="[Command.link(ref('base.group_public')), Command.link(ref('base.group_portal'))]"/>
+    </record>
+</odoo>

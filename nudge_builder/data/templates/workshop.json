@@ -1,0 +1,926 @@
+{
+ "schema": 1,
+ "key": "workshop",
+ "sector": "workshop",
+ "shop": false,
+ "name": {
+  "en": "Car workshop",
+  "ar": "ورشة صيانة"
+ },
+ "brand": {
+  "en": "Your Company",
+  "ar": "شركتك"
+ },
+ "suggest": [
+  "workshop",
+  "workshop",
+  "ورشة صيانة"
+ ],
+ "palette": {
+  "primary": "#c1121f",
+  "secondary": "#003049",
+  "accent": "#fdb927",
+  "light": "#f1f3f5",
+  "dark": "#14181f"
+ },
+ "fonts": {
+  "heading": "Oswald",
+  "body": "Roboto"
+ },
+ "fonts_ar": {
+  "heading": "Tajawal",
+  "body": "Tajawal"
+ },
+ "hero_image": "static/img/templates/workshop.webp",
+ "thumbnail": "static/img/templates/workshop_thumb.webp",
+ "menu": [
+  "home",
+  "about",
+  "services",
+  "projects",
+  "team",
+  "contact",
+  "faq"
+ ],
+ "pages": [
+  {
+   "key": "home",
+   "kind": "home",
+   "name": {
+    "en": "Home",
+    "ar": "الرئيسية"
+   },
+   "blocks": [
+    {
+     "snippet": "s_cover",
+     "copy": {
+      "en": {
+       "title": "Back on the road today",
+       "text": "Mechanical, electrical and body repairs with a written estimate before we touch the car.",
+       "button": "Book a service",
+       "button_url": "/contactus"
+      },
+      "ar": {
+       "title": "سيارتك على الطريق اليوم",
+       "text": "إصلاحات ميكانيكية وكهربائية وهيكلية مع تقدير مكتوب قبل أن نلمس سيارتك.",
+       "button": "احجز صيانة",
+       "button_url": "/contactus"
+      }
+     },
+     "image": "workshop",
+     "image_prompt": "wide photo of a clean car workshop with a car on a lift, no text"
+    },
+    {
+     "snippet": "s_three_columns",
+     "copy": {
+      "en": {
+       "title": "Why Your Company",
+       "items": [
+        {
+         "title": "Written estimate",
+         "text": "No surprise on the invoice."
+        },
+        {
+         "title": "Genuine parts",
+         "text": "Original or equivalent parts, your choice."
+        },
+        {
+         "title": "Warranty",
+         "text": "Six months or ten thousand kilometres on every repair."
+        }
+       ]
+      },
+      "ar": {
+       "title": "لماذا شركتك",
+       "items": [
+        {
+         "title": "تقدير مكتوب",
+         "text": "لا مفاجآت في الفاتورة."
+        },
+        {
+         "title": "قطع أصلية",
+         "text": "قطع أصلية أو مماثلة، وأنت من يختار."
+        },
+        {
+         "title": "ضمان",
+         "text": "ستة أشهر أو عشرة آلاف كيلومتر على كل إصلاح."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_features",
+     "copy": {
+      "en": {
+       "title": "What we do",
+       "items": [
+        {
+         "title": "Periodic service",
+         "text": "Oil, filters, brakes and a 40-point check."
+        },
+        {
+         "title": "Engine and gearbox",
+         "text": "Diagnosis with a computer and repair by specialists."
+        },
+        {
+         "title": "Air conditioning",
+         "text": "Gas refill, leak repair and compressor replacement."
+        },
+        {
+         "title": "Body and paint",
+         "text": "Dent repair and colour-matched paint."
+        }
+       ]
+      },
+      "ar": {
+       "title": "ما نقدّمه",
+       "items": [
+        {
+         "title": "الصيانة الدورية",
+         "text": "زيت وفلاتر وفرامل وفحص من أربعين نقطة."
+        },
+        {
+         "title": "المحرك وناقل الحركة",
+         "text": "تشخيص بالحاسب وإصلاح على يد مختصين."
+        },
+        {
+         "title": "التكييف",
+         "text": "تعبئة غاز وإصلاح التسريب وتبديل الضاغط."
+        },
+        {
+         "title": "السمكرة والدهان",
+         "text": "إصلاح الطعجات ودهان بلون مطابق."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_numbers",
+     "copy": {
+      "en": {
+       "title": "In numbers",
+       "items": [
+        {
+         "number": "15,000",
+         "label": "Cars serviced"
+        },
+        {
+         "number": "11",
+         "label": "Technicians"
+        },
+        {
+         "number": "24",
+         "label": "Hours for a typical job"
+        },
+        {
+         "number": "6",
+         "label": "Months of repair warranty"
+        }
+       ]
+      },
+      "ar": {
+       "title": "بالأرقام",
+       "items": [
+        {
+         "number": "15,000",
+         "label": "سيارة تمت صيانتها"
+        },
+        {
+         "number": "11",
+         "label": "فنياً"
+        },
+        {
+         "number": "24",
+         "label": "ساعة لإنجاز العمل المعتاد"
+        },
+        {
+         "number": "6",
+         "label": "أشهر ضمان للإصلاح"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Honest repairs, fair prices",
+       "text": "Our technicians show you the worn part and explain what is urgent and what can wait. You approve every job before it starts, and every repair carries a written warranty.",
+       "button": "About us",
+       "button_url": "/about"
+      },
+      "ar": {
+       "title": "إصلاح أمين وسعر عادل",
+       "text": "يريك فنيونا القطعة التالفة ويشرحون ما هو عاجل وما يمكن تأجيله. توافق على كل عمل قبل بدئه ولكل إصلاح ضمان مكتوب.",
+       "button": "من نحن",
+       "button_url": "/about"
+      }
+     },
+     "image": "workshop"
+    },
+    {
+     "snippet": "s_call_to_action",
+     "copy": {
+      "en": {
+       "title": "Warning light on?",
+       "text": "Bring the car in for a free computer scan.",
+       "button": "Free scan",
+       "button_url": "/contactus"
+      },
+      "ar": {
+       "title": "هل اشتعل مصباح التحذير؟",
+       "text": "أحضر سيارتك لفحص مجاني بالحاسب.",
+       "button": "فحص مجاني",
+       "button_url": "/contactus"
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Car workshop | Service, repair and paint",
+     "ar": "ورشة سيارات | صيانة وإصلاح ودهان"
+    },
+    "description": {
+     "en": "Book a car service with a written estimate and a warranty on every repair.",
+     "ar": "احجز صيانة سيارتك بتقدير مكتوب وضمان على كل إصلاح."
+    }
+   },
+   "url": "/"
+  },
+  {
+   "key": "about",
+   "kind": "about",
+   "name": {
+    "en": "About us",
+    "ar": "من نحن"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "About Your Company"
+      },
+      "ar": {
+       "title": "عن شركتك"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Honest repairs, fair prices",
+       "text": "Our technicians show you the worn part and explain what is urgent and what can wait. You approve every job before it starts, and every repair carries a written warranty."
+      },
+      "ar": {
+       "title": "إصلاح أمين وسعر عادل",
+       "text": "يريك فنيونا القطعة التالفة ويشرحون ما هو عاجل وما يمكن تأجيله. توافق على كل عمل قبل بدئه ولكل إصلاح ضمان مكتوب."
+      }
+     },
+     "image": "workshop"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Written estimate",
+       "text": "No surprise on the invoice."
+      },
+      "ar": {
+       "title": "تقدير مكتوب",
+       "text": "لا مفاجآت في الفاتورة."
+      }
+     },
+     "image": "workshop"
+    },
+    {
+     "snippet": "s_numbers",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "number": "15,000",
+         "label": "Cars serviced"
+        },
+        {
+         "number": "11",
+         "label": "Technicians"
+        },
+        {
+         "number": "24",
+         "label": "Hours for a typical job"
+        },
+        {
+         "number": "6",
+         "label": "Months of repair warranty"
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "number": "15,000",
+         "label": "سيارة تمت صيانتها"
+        },
+        {
+         "number": "11",
+         "label": "فنياً"
+        },
+        {
+         "number": "24",
+         "label": "ساعة لإنجاز العمل المعتاد"
+        },
+        {
+         "number": "6",
+         "label": "أشهر ضمان للإصلاح"
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "About Your Company",
+     "ar": "عن شركتك"
+    },
+    "description": {
+     "en": "Our technicians show you the worn part and explain what is urgent and what can wait. You approve every job before it starts, and every repair carries ",
+     "ar": "يريك فنيونا القطعة التالفة ويشرحون ما هو عاجل وما يمكن تأجيله. توافق على كل عمل قبل بدئه ولكل إصلاح ضمان مكتوب."
+    }
+   }
+  },
+  {
+   "key": "services",
+   "kind": "services",
+   "name": {
+    "en": "Services",
+    "ar": "الخدمات"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Our services",
+       "text": "Mechanical, electrical and body repairs with a written estimate before we touch the car."
+      },
+      "ar": {
+       "title": "خدماتنا",
+       "text": "إصلاحات ميكانيكية وكهربائية وهيكلية مع تقدير مكتوب قبل أن نلمس سيارتك."
+      }
+     }
+    },
+    {
+     "snippet": "s_features",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "title": "Periodic service",
+         "text": "Oil, filters, brakes and a 40-point check."
+        },
+        {
+         "title": "Engine and gearbox",
+         "text": "Diagnosis with a computer and repair by specialists."
+        },
+        {
+         "title": "Air conditioning",
+         "text": "Gas refill, leak repair and compressor replacement."
+        },
+        {
+         "title": "Body and paint",
+         "text": "Dent repair and colour-matched paint."
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "title": "الصيانة الدورية",
+         "text": "زيت وفلاتر وفرامل وفحص من أربعين نقطة."
+        },
+        {
+         "title": "المحرك وناقل الحركة",
+         "text": "تشخيص بالحاسب وإصلاح على يد مختصين."
+        },
+        {
+         "title": "التكييف",
+         "text": "تعبئة غاز وإصلاح التسريب وتبديل الضاغط."
+        },
+        {
+         "title": "السمكرة والدهان",
+         "text": "إصلاح الطعجات ودهان بلون مطابق."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_three_columns",
+     "copy": {
+      "en": {
+       "title": "How we work",
+       "items": [
+        {
+         "title": "Written estimate",
+         "text": "No surprise on the invoice."
+        },
+        {
+         "title": "Genuine parts",
+         "text": "Original or equivalent parts, your choice."
+        },
+        {
+         "title": "Warranty",
+         "text": "Six months or ten thousand kilometres on every repair."
+        }
+       ]
+      },
+      "ar": {
+       "title": "كيف نعمل",
+       "items": [
+        {
+         "title": "تقدير مكتوب",
+         "text": "لا مفاجآت في الفاتورة."
+        },
+        {
+         "title": "قطع أصلية",
+         "text": "قطع أصلية أو مماثلة، وأنت من يختار."
+        },
+        {
+         "title": "ضمان",
+         "text": "ستة أشهر أو عشرة آلاف كيلومتر على كل إصلاح."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_call_to_action",
+     "copy": {
+      "en": {
+       "title": "Warning light on?",
+       "text": "Bring the car in for a free computer scan.",
+       "button": "Free scan",
+       "button_url": "/contactus"
+      },
+      "ar": {
+       "title": "هل اشتعل مصباح التحذير؟",
+       "text": "أحضر سيارتك لفحص مجاني بالحاسب.",
+       "button": "فحص مجاني",
+       "button_url": "/contactus"
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Car workshop services",
+     "ar": "خدمات ورشة صيانة"
+    },
+    "description": {
+     "en": "Book a car service with a written estimate and a warranty on every repair.",
+     "ar": "احجز صيانة سيارتك بتقدير مكتوب وضمان على كل إصلاح."
+    }
+   }
+  },
+  {
+   "key": "projects",
+   "kind": "projects",
+   "name": {
+    "en": "Projects",
+    "ar": "المشاريع"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Our work"
+      },
+      "ar": {
+       "title": "أعمالنا"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Engine overhaul",
+       "text": "A full rebuild completed in four days."
+      },
+      "ar": {
+       "title": "إعادة تأهيل محرك",
+       "text": "إعادة بناء كاملة أنجزت في أربعة أيام."
+      }
+     },
+     "image": "workshop"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Accident repair",
+       "text": "Front end restored and repainted."
+      },
+      "ar": {
+       "title": "إصلاح حادث",
+       "text": "ترميم الواجهة الأمامية وإعادة الدهان."
+      }
+     },
+     "image": "workshop"
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "Fleet contract",
+       "text": "Monthly service for forty delivery vans."
+      },
+      "ar": {
+       "title": "عقد أسطول",
+       "text": "صيانة شهرية لأربعين شاحنة توصيل."
+      }
+     },
+     "image": "workshop"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Classic restoration",
+       "text": "An old saloon returned to its original colour."
+      },
+      "ar": {
+       "title": "ترميم سيارة كلاسيكية",
+       "text": "سيارة قديمة أعيدت إلى لونها الأصلي."
+      }
+     },
+     "image": "workshop"
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Car workshop projects",
+     "ar": "أعمال ورشة صيانة"
+    },
+    "description": {
+     "en": "Book a car service with a written estimate and a warranty on every repair.",
+     "ar": "احجز صيانة سيارتك بتقدير مكتوب وضمان على كل إصلاح."
+    }
+   }
+  },
+  {
+   "key": "team",
+   "kind": "team",
+   "name": {
+    "en": "Our team",
+    "ar": "فريقنا"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Meet the team"
+      },
+      "ar": {
+       "title": "تعرّف على فريقنا"
+      }
+     }
+    },
+    {
+     "snippet": "s_company_team",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "name": "Raghad",
+         "role": "Workshop manager"
+        },
+        {
+         "name": "Ebrahim",
+         "role": "Chief mechanic"
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "name": "رغد",
+         "role": "مدير الورشة"
+        },
+        {
+         "name": "إبراهيم",
+         "role": "كبير الميكانيكيين"
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Our team | Your Company",
+     "ar": "فريقنا | شركتك"
+    },
+    "description": {
+     "en": "The people behind Your Company.",
+     "ar": "الأشخاص الذين يقفون خلف شركتك."
+    }
+   }
+  },
+  {
+   "key": "contact",
+   "kind": "contact",
+   "name": {
+    "en": "Contact us",
+    "ar": "اتصل بنا"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Contact us",
+       "text": "We reply within one working day."
+      },
+      "ar": {
+       "title": "اتصل بنا",
+       "text": "نردّ خلال يوم عمل واحد."
+      }
+     }
+    },
+    {
+     "snippet": "s_contact_info",
+     "copy": {
+      "en": {
+       "title": "Find us",
+       "items": [
+        {
+         "title": "Address",
+         "text": "Industrial Area 11, Sharjah"
+        },
+        {
+         "title": "Opening hours",
+         "text": "Sat-Thu 8:00-20:00"
+        },
+        {
+         "title": "Phone",
+         "text": "+971 4 000 0000"
+        },
+        {
+         "title": "Email",
+         "text": "hello@example.com"
+        }
+       ]
+      },
+      "ar": {
+       "title": "تجدنا هنا",
+       "items": [
+        {
+         "title": "العنوان",
+         "text": "المنطقة الصناعية 11، الشارقة"
+        },
+        {
+         "title": "ساعات العمل",
+         "text": "السبت - الخميس 8:00 - 20:00"
+        },
+        {
+         "title": "الهاتف",
+         "text": "+971 4 000 0000"
+        },
+        {
+         "title": "البريد الإلكتروني",
+         "text": "hello@example.com"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Warning light on?",
+       "text": "Bring the car in for a free computer scan."
+      },
+      "ar": {
+       "title": "هل اشتعل مصباح التحذير؟",
+       "text": "أحضر سيارتك لفحص مجاني بالحاسب."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Contact Your Company",
+     "ar": "تواصل مع شركتك"
+    },
+    "description": {
+     "en": "Call, write or visit us: Industrial Area 11, Sharjah.",
+     "ar": "اتصل بنا أو راسلنا أو زرنا: المنطقة الصناعية 11، الشارقة."
+    }
+   },
+   "url": "/contactus"
+  },
+  {
+   "key": "faq",
+   "kind": "faq",
+   "name": {
+    "en": "FAQ",
+    "ar": "الأسئلة الشائعة"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Frequently asked questions"
+      },
+      "ar": {
+       "title": "الأسئلة الشائعة"
+      }
+     }
+    },
+    {
+     "snippet": "s_faq_collapse",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "title": "How long does a service take?",
+         "text": "A periodic service takes about two hours."
+        },
+        {
+         "title": "Do you collect the car?",
+         "text": "Yes, free pickup and return within ten kilometres."
+        },
+        {
+         "title": "Can I bring my own parts?",
+         "text": "You can, but the warranty then covers labour only."
+        },
+        {
+         "title": "Do you work on all brands?",
+         "text": "Japanese, Korean, European and American cars."
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "title": "كم تستغرق الصيانة؟",
+         "text": "الصيانة الدورية تستغرق نحو ساعتين."
+        },
+        {
+         "title": "هل تستلمون السيارة من عندي؟",
+         "text": "نعم، استلام وتسليم مجانيان ضمن عشرة كيلومترات."
+        },
+        {
+         "title": "هل أستطيع إحضار قطعي؟",
+         "text": "يمكنك ذلك لكن الضمان يشمل الأجرة فقط."
+        },
+        {
+         "title": "هل تصلحون جميع الماركات؟",
+         "text": "السيارات اليابانية والكورية والأوروبية والأمريكية."
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "FAQ | Your Company",
+     "ar": "الأسئلة الشائعة | شركتك"
+    },
+    "description": {
+     "en": "Answers to the questions we hear most.",
+     "ar": "إجابات عن الأسئلة التي نسمعها أكثر من غيرها."
+    }
+   }
+  },
+  {
+   "key": "legal_privacy",
+   "kind": "legal",
+   "name": {
+    "en": "Privacy policy",
+    "ar": "سياسة الخصوصية"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Privacy policy"
+      },
+      "ar": {
+       "title": "سياسة الخصوصية"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "What we collect",
+       "text": "Your Company collects only the details you give us through forms, orders or calls: your name, phone, email and the content of your request. We use them to answer you and to deliver what you asked for."
+      },
+      "ar": {
+       "title": "ما الذي نجمعه",
+       "text": "تجمع شركتك فقط البيانات التي تقدّمها عبر النماذج أو الطلبات أو المكالمات: اسمك وهاتفك وبريدك ومضمون طلبك. نستخدمها للرد عليك وتنفيذ ما طلبته."
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Your rights",
+       "text": "We never sell your data. You may ask us to show, correct or delete it at any time by writing to the address on the contact page."
+      },
+      "ar": {
+       "title": "حقوقك",
+       "text": "لا نبيع بياناتك أبداً. ويمكنك أن تطلب منا الاطلاع عليها أو تصحيحها أو حذفها في أي وقت بمراسلتنا على العنوان المذكور في صفحة التواصل."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Privacy policy",
+     "ar": "سياسة الخصوصية"
+    },
+    "description": {
+     "en": "How we collect, use and protect your personal data.",
+     "ar": "كيف نجمع بياناتك الشخصية ونستخدمها ونحميها."
+    }
+   },
+   "url": "/privacy"
+  },
+  {
+   "key": "legal_terms",
+   "kind": "legal",
+   "name": {
+    "en": "Terms and conditions",
+    "ar": "الشروط والأحكام"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Terms and conditions"
+      },
+      "ar": {
+       "title": "الشروط والأحكام"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Using this website",
+       "text": "The content of this website is provided for information. Prices, availability and timelines are confirmed in writing before any agreement starts."
+      },
+      "ar": {
+       "title": "استخدام الموقع",
+       "text": "المحتوى المنشور في هذا الموقع للاطلاع. وتُؤكَّد الأسعار والتوفر والمواعيد كتابةً قبل بدء أي اتفاق."
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Responsibility",
+       "text": "We do our best to keep the website accurate. We are not liable for decisions taken only on the basis of the sample information shown here."
+      },
+      "ar": {
+       "title": "المسؤولية",
+       "text": "نحرص على دقة المعلومات في الموقع، ولا نتحمل مسؤولية قرارات بُنيت على المعلومات التوضيحية المعروضة هنا فقط."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Terms and conditions",
+     "ar": "الشروط والأحكام"
+    },
+    "description": {
+     "en": "The terms that apply when you use our website and services.",
+     "ar": "الشروط المطبقة عند استخدام موقعنا وخدماتنا."
+    }
+   },
+   "url": "/terms"
+  }
+ ]
+}

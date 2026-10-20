@@ -42,10 +42,11 @@ MAX_MODULE_ITEMS = 25
 # Reading code
 CODE_EXTENSIONS = (".py", ".xml", ".csv", ".js", ".scss", ".css", ".md", ".rst", ".txt", ".json", ".yml", ".yaml")
 SKIPPED_DIRECTORIES = {"__pycache__", "lib", "node_modules", ".git", "i18n", "i18n_extra"}
-MAX_CODE_FILES = 200
+MAX_CODE_FILES = 600
 MAX_CODE_BYTES = 512 * 1024
 CODE_LINES = 150
 MAX_CODE_CHARS = 5500
+MAX_LISTED_TESTS = 8
 MAX_FOUND_LINES = 40
 # A secret written in code is never read out
 SECRET_IN_CODE = re.compile(
@@ -652,8 +653,18 @@ class ReadModuleCode(base.Tool):
             for relative in files:
                 folder, _sep, file_name = relative.rpartition("/")
                 folders.setdefault(folder, []).append(file_name)
-            listed = "\n".join(f"- {folder + '/' if folder else '(top)'}: {', '.join(names)}"
-                               for folder, names in folders.items())
+            # Tests are many and rarely what is asked: a few names and a count, so
+            # the folders that matter still fit in what a tool may return
+            lines, test_lines = [], []
+            for folder, names in folders.items():
+                is_tests = folder.rpartition("/")[2] == "tests"
+                if is_tests and len(names) > MAX_LISTED_TESTS:
+                    names = names[:MAX_LISTED_TESTS] + [f"... and {len(names) - MAX_LISTED_TESTS} more (use find)"]
+                (test_lines if is_tests else lines).append(
+                    f"- {folder + '/' if folder else '(top)'}: {', '.join(names)}")
+            # The folders of tests last: what a tool may return cuts the end, not the code
+            lines += test_lines
+            listed = "\n".join(lines)
             # What it is for, as its own manifest says: told only the files, a
             # small model guessed the purpose of nudge_spreadsheet from their names
             module = env["ir.module.module"].sudo().search([("name", "=", name)], limit=1)

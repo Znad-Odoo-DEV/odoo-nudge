@@ -25,7 +25,7 @@ from odoo.tools.safe_eval import test_python_expr
 from odoo import fields as odoo_fields
 
 from . import base, schema
-from .actions import VALUES_SCHEMA, read_moment, read_value, read_values, to_write
+from .actions import LINES_SCHEMA, VALUES_SCHEMA, read_lines, read_moment, read_value, read_values, to_write
 from .records import (
     FIELD_PATTERN, MODEL_PATTERN, OPERATORS, PATH_PATTERN, Refused, build_domain, cut, format_value, get_model,
     field_label, get_records, is_developing, model_label, refusing, target_field,
@@ -1690,6 +1690,7 @@ class TryAutomation(Building):
             "cron_id": {"type": "integer", "minimum": 1},
             "record": dict(VALUES_SCHEMA, minItems=0, description="The dummy record: the fields a person would fill in."),
             "change": dict(VALUES_SCHEMA, minItems=0, description="What is changed on it afterwards, which fires the rule."),
+            "lines": dict(LINES_SCHEMA, description="Lines of the dummy record, for a total that its lines make."),
         },
     }
 
@@ -1853,6 +1854,7 @@ class TryAutomation(Building):
         # Discarded after: what Odoo fills may be set ("state": "sale" fires "when confirmed")
         values, _shown = read_values(model, arguments.get("record") or [], trial=True)
         change, _shown = read_values(model, arguments.get("change") or [], trial=True)
+        lines, _shown = read_lines(model, arguments.get("lines") or []) if arguments.get("lines") else ({}, [])
         if "base.automation" in env:
             # The other rules of the model are off for the trial: what fails is what is tried
             others = env["base.automation"].sudo().search(
@@ -1879,7 +1881,7 @@ class TryAutomation(Building):
             twins = [model.create(to_write(values, None)).read(names)[0] for _twin in range(2)]
             rule.active = True
         mails_at = _mail_watch(env)
-        record = model.create(to_write(values, None))
+        record = model.create(to_write(values, lines))
         report.append(f"A dummy {model._description} was created: {record.display_name!r} (id {record.id}).")
         before = twins[0] if twins else record.read(names)[0]
         # A sequence, a date of creation: what differs between the twins is no change of the rule

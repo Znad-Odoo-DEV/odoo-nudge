@@ -1,0 +1,53 @@
+{
+  "id": "qa",
+  "name": {"en": "Qatar", "ar": "قطر"},
+  "countries": ["QA"],
+  "reference": {
+    "en": "General Tax Authority of Qatar. Qatar has signed the GCC VAT Framework Agreement but has not put a VAT in force; check the current position with the Authority. This is a checklist, not legal advice; confirm with the authority.",
+    "ar": "الهيئة العامة للضرائب في قطر. وقّعت قطر الاتفاقية الموحدة لضريبة القيمة المضافة لدول الخليج لكنها لم تطبّق الضريبة؛ راجع الوضع الحالي لدى الهيئة. هذه قائمة فحص وليست استشارة قانونية؛ تأكد لدى الجهة المختصة."
+  },
+  "checks": [
+    {
+      "key": "no_vat",
+      "check": "no_vat",
+      "severity": "warning",
+      "title": {"en": "No sales VAT is charged, as no VAT is in force yet", "ar": "لا تُحتسب ضريبة قيمة مضافة على المبيعات لأنها غير مطبّقة بعد"},
+      "explanation": {
+        "en": "A percent sales tax is active. Where no VAT is in force a customer cannot be charged one: check whether these taxes are meant for another country.",
+        "ar": "هناك ضريبة مبيعات نسبية مفعّلة. حيث لا تُطبَّق ضريبة القيمة المضافة لا يجوز تحميلها على العميل: تحقق إن كانت هذه الضرائب لبلد آخر."
+      }
+    },
+    {
+      "key": "company_registry",
+      "check": "company_field",
+      "severity": "warning",
+      "params": {"fields": ["company_registry"]},
+      "title": {"en": "The company has its commercial registration number", "ar": "للشركة رقم السجل التجاري"},
+      "explanation": {
+        "en": "Commercial documents and contracts name the commercial registration (CR) number of the company, issued by the Ministry of Commerce and Industry. Enter it in Company ID.",
+        "ar": "تذكر المستندات التجارية والعقود رقم السجل التجاري للشركة الصادر عن وزارة التجارة والصناعة. أدخله في حقل معرّف الشركة."
+      }
+    },
+    {
+      "key": "arabic_language",
+      "check": "language_active",
+      "severity": "info",
+      "params": {"prefix": "ar"},
+      "title": {"en": "Arabic is active, for invoices and contracts", "ar": "اللغة العربية مفعّلة للفواتير والعقود"},
+      "explanation": {
+        "en": "Documents addressed to authorities and to customers in Qatar are customarily issued in Arabic or in both languages. Activate Arabic and set it on the customers who ask for it.",
+        "ar": "تُصدر المستندات الموجهة إلى الجهات الرسمية والعملاء في قطر عادةً بالعربية أو بلغتين. فعّل العربية واضبطها على العملاء الذين يطلبونها."
+      }
+    },
+    {
+      "key": "vat_status",
+      "check": "note",
+      "severity": "info",
+      "title": {"en": "VAT status: to know", "ar": "وضع ضريبة القيمة المضافة: للعلم"},
+      "explanation": {
+        "en": "The day Qatar puts the VAT in force, this checklist will ask for a VAT number and a tax at the rate of the law. Until then, nothing is asked.",
+        "ar": "يوم تطبّق قطر ضريبة القيمة المضافة ستطلب هذه القائمة رقماً ضريبياً وضريبة بالنسبة المقرّرة. إلى ذلك الحين لا يُطلب شيء."
+      }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_messaging_link_rule_own" model="ir.rule">
+        <field name="name">Nudge Messaging Link: own</field>
+        <field name="model_id" ref="model_nudge_messaging_link"/>
+        <field name="domain_force">[('user_id', '=', user.id)]</field>
+        <field name="groups" eval="[Command.link(ref('nudge.group_nudge_user'))]"/>
+    </record>
+    <record id="nudge_messaging_link_rule_manager" model="ir.rule">
+        <field name="name">Nudge Messaging Link: all</field>
+        <field name="model_id" ref="model_nudge_messaging_link"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[Command.link(ref('nudge.group_nudge_manager'))]"/>
+    </record>
+</odoo>
