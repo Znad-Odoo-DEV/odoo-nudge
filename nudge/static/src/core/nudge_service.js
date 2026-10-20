@@ -15,6 +15,19 @@ import { renderMarkdown } from "./markdown";
 import { asksWithoutAi, isSpreadsheet } from "../import/import_service";
 import { streamBulk, streamChat, streamDecision } from "./stream_client";
 
+/**
+ * Whether an answer shows nothing at all: no words, no card, no chart, no list of
+ * changes, nothing found, no products, nothing written in a field, no guidance.
+ * Such a bubble says that no answer came instead of staying empty.
+ */
+export function isEmptyAnswer(answer) {
+    const found = answer.found;
+    const foundSomething = Boolean(found) && (!Array.isArray(found) || found.length > 0);
+    return !(answer.content || answer.error || answer.guidance?.length || answer.card ||
+        answer.products?.length || answer.wrote || answer.chart || answer.changes?.length ||
+        foundSomething);
+}
+
 const HISTORY_LIMIT = 30;
 // A change of the settings is read in a new page: menus and rights change with it
 const SETTINGS_MODEL = "res.config.settings";
@@ -1573,8 +1586,7 @@ function isReadable(file) {
                         answer.remembered = true;
                         answer.canAskAi = true;
                     }
-                    if (!answer.content && !answer.error && !answer.guidance?.length && !answer.card &&
-                        !answer.products?.length && !answer.wrote) {
+                    if (isEmptyAnswer(answer)) {
                         // Never an empty bubble: say that nothing came
                         answer.error = state.isOutdated
                             ? _t("Nudge was updated. Reload the page, then ask again.")
