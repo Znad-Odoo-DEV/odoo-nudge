@@ -313,6 +313,29 @@ test("yes", async () => {
     expect(asked.decisions).toHaveLength(1);
 });
 
+test("a yes whose screen never finishes reloading still ends the answer", async () => {
+    let hang = false;
+    onRpc("partner", "web_read", () => (hang ? new Promise(() => {}) : undefined));
+    const { nudge } = await start({
+        answer: WAITING,
+        decide: answered(
+            { type: "start", conversation_id: 9, title: "Restore it" },
+            { type: "decided", ...CARD, state: "done" },
+            { type: "changed", model: "partner", ids: [1] }
+        ),
+    });
+    nudge.open();
+    await nudge.send("Restore the old city of Raghad");
+    await animationFrame();
+    hang = true;
+    await click(".o_nudge_confirm");
+    await animationFrame();
+    await animationFrame();
+    expect(nudge.state.isStreaming).toBe(false);
+    expect(nudge.state.messages[1].card.state).toBe("done");
+    expect(nudge.state.messages.at(-1).state).toBe("complete");
+});
+
 test("no", async () => {
     const { asked, nudge } = await start({
         answer: WAITING,

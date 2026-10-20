@@ -29,6 +29,8 @@ export function isEmptyAnswer(answer) {
 }
 
 const HISTORY_LIMIT = 30;
+/** What an answer does to the screen, done beside the answer and never waited for. */
+const SCREEN_EVENTS = new Set(["changed", "open", "open_action", "navigate", "filter"]);
 // A change of the settings is read in a new page: menus and rights change with it
 const SETTINGS_MODEL = "res.config.settings";
 const MAX_HINTS = 40;
@@ -1633,7 +1635,16 @@ function isReadable(file) {
             try {
                 await request({
                     signal: abortController.signal,
-                    onEvent: (event) => pending.push(applyEvent(answer, event)),
+                    onEvent: (event) => {
+                        const applied = applyEvent(answer, event);
+                        if (SCREEN_EVENTS.has(event.type)) {
+                            // The screen read again or an action opened may never settle (Odoo
+                            // keeps the last load only): the answer does not wait for the screen
+                            Promise.resolve(applied).catch(() => {});
+                        } else {
+                            pending.push(applied);
+                        }
+                    },
                 });
                 await Promise.all(pending);
                 if (answer.state === "streaming") {
