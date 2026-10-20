@@ -90,6 +90,9 @@ class NudgeLog(models.AbstractModel):
 
     @api.ondelete(at_uninstall=False)
     def _unlink_never(self):
+        # Only the deletion of a conversation, which carries its log with it
+        if self.env.context.get("nudge_purge_conversation") and self.env.su:
+            return
         raise AccessError(_("The log of Nudge cannot be deleted."))
 
 

@@ -5,7 +5,7 @@ import time
 from urllib.parse import urlparse
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 from ..llm import base, ollama
 from ..tools.deadline import until
@@ -69,6 +69,7 @@ class NudgeProvider(models.Model):
         help="Tick it only when this provider, the address of its speech service included, runs "
              "on a server of yours: nothing leaves your own network. With Private Mode on "
              "(Settings, Nudge), a provider without it is never asked anything.")
+    address_warning = fields.Char(compute="_compute_address_warning")
     looks_local = fields.Boolean(
         string="Address Looks Local", compute="_compute_looks_local",
         help="The address is this machine or a private network. Only a hint: the administrator confirms.")
@@ -360,6 +361,30 @@ class NudgeProvider(models.Model):
             stt_model=(self.stt_model or "").strip(),
             stt_url=(self.stt_url or "").strip(),
         )
+
+    @api.constrains("base_url")
+    def _check_base_url(self):
+        for provider in self:
+            url = (provider.base_url or "").strip()
+            if url and not url.lower().startswith(("http://", "https://")):
+                raise ValidationError(_(
+                    "The address of the provider must start with http:// or https://"))
+
+    @api.depends("base_url", "runs_locally")
+    def _compute_address_warning(self):
+        for provider in self:
+            url = (provider.base_url or "").strip()
+            warning = False
+            if url and not _is_private_address(url):
+                if url.lower().startswith("http://"):
+                    warning = _(
+                        "This address is public and not encrypted (http): the key and your data "
+                        "travel unencrypted. Use https.")
+                elif provider.runs_locally:
+                    warning = _(
+                        "Runs on Our Own Server is ticked but the address is public: private mode "
+                        "will send data to this address. Make sure it is your own server.")
+            provider.address_warning = warning
 
     @api.depends("base_url", "stt_url")
     def _compute_looks_local(self):

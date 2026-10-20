@@ -248,6 +248,11 @@ class ResConfigSettings(models.TransientModel):
         help="How many people Nudge answers at once, for everybody together. 0 is automatic: "
              "the workers of the server less two.")
 
+    nudge_retention_days = fields.Integer(
+        string="Delete Conversations Older Than (Days)", config_parameter="nudge.retention_days",
+        help="Conversations whose last activity is older than this are deleted, with their "
+             "messages, screens, images and Agent log. 0 keeps them for ever.")
+
     def get_values(self):
         values = super().get_values()
         Voice = self.env["nudge.voice"]

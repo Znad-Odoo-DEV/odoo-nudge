@@ -57,6 +57,11 @@
                                 model runs on your own server, tick Runs on Our Own Server.
                             </div>
                             <field name="looks_local" invisible="1"/>
+                            <field name="address_warning" invisible="1"/>
+                            <div class="alert alert-warning" colspan="2" role="alert"
+                                 invisible="not address_warning">
+                                <field name="address_warning" readonly="1" nolabel="1" class="mb-0"/>
+                            </div>
                             <field name="is_ollama" invisible="not is_ollama"/>
                             <field name="ollama_version" invisible="not is_ollama"/>
                         </group>
