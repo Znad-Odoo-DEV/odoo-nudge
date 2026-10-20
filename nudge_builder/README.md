@@ -11,7 +11,7 @@ Nothing is published until the person says so, no existing page is edited and no
 
 - **The interview**: one form with six groups: the business (or a sector template), the languages, the colours
   and fonts (the colours are read from the logo when there is one), the pages wanted, a shop or not, and the tone.
-- **Three directions**: the home page drawn three ways with the company's colours, fonts and words. Pick one or
+- **Three directions**: the home page drawn three ways with the company's colours and fonts, on the sample text of the template; the words of the company are written when the site is built. Pick one or
   ask again; only then **Build this website** makes the pages.
 - **The pages**: made only of Odoo's own snippets, the text written by the AI provider in each language from the
   company's own facts (or the sample copy of the template when no AI may be used), the menu, the theme colours
