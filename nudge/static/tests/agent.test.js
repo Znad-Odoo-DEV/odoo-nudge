@@ -15,7 +15,7 @@ import {
 
 import { asksHowTo, asksToDoIt } from "@nudge/core/nudge_service";
 
-import { answered, setupNudge, streamed } from "./voice_helpers";
+import { answered, lines, setupNudge, streamed } from "./voice_helpers";
 
 class Partner extends models.Model {
     _name = "partner";
@@ -334,6 +334,33 @@ test("a yes whose screen never finishes reloading still ends the answer", async 
     expect(nudge.state.isStreaming).toBe(false);
     expect(nudge.state.messages[1].card.state).toBe("done");
     expect(nudge.state.messages.at(-1).state).toBe("complete");
+});
+
+test("a yes settled without the AI leaves one bubble, its card done", async () => {
+    const { nudge } = await start({
+        answer: WAITING,
+        decide: () =>
+            new Response(
+                lines(
+                    { type: "decided", ...CARD, state: "done" },
+                    { type: "delta", text: "Raghad's city is back." },
+                    { type: "done", message_id: 2, state: "complete", message: "" }
+                ),
+                { status: 200 }
+            ),
+    });
+    nudge.open();
+    await nudge.send("Restore the old city of Raghad");
+    await animationFrame();
+    await click(".o_nudge_confirm");
+    await animationFrame();
+    await animationFrame();
+    expect(nudge.state.isStreaming).toBe(false);
+    const same = nudge.state.messages.filter((message) => message.id === 2);
+    expect(same).toHaveLength(1);
+    expect(same[0].card.state).toBe("done");
+    expect(same[0].content).toInclude("Raghad's city is back.");
+    expect(".o_nudge_typing").toHaveCount(0);
 });
 
 test("no", async () => {
