@@ -92,6 +92,15 @@ class NudgeMemory(models.Model):
     # Settings
     # ------------------------------------------------------------------
     @api.model
+    def _set_defaults(self):
+        """On by default, as the README says: set where nothing is set, never over a choice.
+        Called after an install and by the update that brings the defaults back."""
+        Parameter = self.env["ir.config_parameter"].sudo()
+        for key, value in ((ENABLED_PARAM, "True"), (THRESHOLD_PARAM, "0.75")):
+            if Parameter.get_param(key) is None:
+                Parameter.set_param(key, value)
+
+    @api.model
     def _is_enabled(self):
         value = self.env["ir.config_parameter"].sudo().get_param(ENABLED_PARAM)
         return str(value or "").lower() in ("1", "true")

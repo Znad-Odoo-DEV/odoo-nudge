@@ -6,3 +6,5 @@ def post_init_hook(env):
         cron._trigger()
     # The documentation of Odoo that comes with the module
     env["nudge.doc.page"]._load_bundled()
+    # Answer memory is on after an install
+    env["nudge.memory"]._set_defaults()

@@ -183,3 +183,22 @@ class TestAnswerMemory(NudgeCase, TransactionCase):
             company_ids=[(6, 0, company_b.ids)])
         self.assertIsNone(self.Memory.with_user(reader_b)._find(SAME)[0], "Company A's answer is not company B's")
         self.assertFalse(self.Memory.with_user(reader_b).suggest(SAME))
+
+
+@tagged("post_install", "-at_install")
+class TestMemoryDefaults(TransactionCase):
+    """Answer memory is on after an install, and a choice made in Settings is never overwritten."""
+
+    def test_the_defaults_fill_only_what_is_not_set(self):
+        Parameter = self.env["ir.config_parameter"].sudo()
+        Memory = self.env["nudge.memory"]
+        for key in ("nudge.answer_memory", "nudge.memory_threshold"):
+            Parameter.search([("key", "=", key)]).unlink()
+        Memory._set_defaults()
+        self.assertTrue(Memory._is_enabled(), "On when nothing was chosen")
+        self.assertEqual(Parameter.get_param("nudge.memory_threshold"), "0.75")
+        Parameter.set_param("nudge.memory_threshold", "0.9")
+        Parameter.set_param("nudge.answer_memory", "0")
+        Memory._set_defaults()
+        self.assertFalse(Memory._is_enabled(), "Raghad's choice stays")
+        self.assertEqual(Parameter.get_param("nudge.memory_threshold"), "0.9")
