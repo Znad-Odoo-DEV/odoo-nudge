@@ -48,9 +48,18 @@ Off by default, each with its own word in Settings ▸ Nudge:
 - **Python for the Agent** (`nudge.python`): the code written by the model runs in the sandbox
   of Odoo (the one of the server actions), as the person, reading only: a savepoint rolled
   back when it ends; no import, no sudo, no cursor, no private attribute, no closed model.
+  It stops at a deadline of 10 seconds, looked at between two steps; one step that runs in C
+  is bounded before the code runs (whole numbers up to 10⁹, a power or a shift of small
+  numbers, a text or a list repeated 100,000 items at most), and a long range is walked
+  where the deadline sees it. What remains: code that grows its numbers step by step can
+  still burn the CPU of a worker until the limits of the server stop it.
 - **SQL for Administrators** (`nudge.sql`): one SELECT, for the group Settings allowed in every
   company; every table named must be the table of a model they may read; no change, no lock,
-  no catalog; 50 rows, 10 seconds, in a savepoint rolled back.
+  no catalog; 50 rows, 10 seconds, in a savepoint rolled back. A field kept for groups the
+  administrator is not in is refused by name, by `*`, by a whole row; a column whose name says
+  secret is listed only in the main SELECT and comes back `[hidden]` by the column it is read
+  from, whatever alias it is given; texts are read as Postgres reads them. By design, record
+  rules do not apply: SQL is for administrators who may read every company anyway.
 - **Nudge for Administrators** (`nudge.admin`): the group Settings reaches, through the agent,
   the setup of Odoo listed by name (users, groups and privileges, companies, menus, views,
   actions, scheduled actions, system parameters, sequences, mail servers, templates). Keys,
@@ -100,8 +109,8 @@ not read, a change without a yes, is refused by Odoo, not by the prompt.
 A message is at most 8,000 characters; a conversation stops at a number of messages; an
 answer stops at a deadline under the time limit of the server, and long work goes to the
 background in pieces; a tool result is at most 6,000 characters; a recording a few seconds;
-the agent at most a number of rounds per request. A run of Python has no clock of its own: a
-loop that never ends is stopped by the limits of the worker.
+the agent at most a number of rounds per request. A run of Python stops at its own deadline;
+what runs past it all the same is stopped by the limits of the worker.
 
 ## Known trade-offs
 
