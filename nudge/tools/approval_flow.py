@@ -11,6 +11,7 @@ these are used instead, as ``prepare_approval_rule`` makes them.
 The set is made after one yes, tried on a dummy record, and undone as a
 set by ``prepare_undo``: every part is logged as a step of the same request.
 """
+import re
 import secrets
 from types import SimpleNamespace
 
@@ -77,6 +78,73 @@ def groups_field(env):
     return "group_ids" if "group_ids" in env["res.users"]._fields else "groups_id"
 
 
+# How people name a role: the rank (manager ~ administrator ~ مدير) and the app (the words of its privilege or category)
+RANK_WORDS = {
+    "manager": ("manager", "managers", "administrator", "administrators", "admin", "head", "director", "officer in charge",
+                "مدير", "مديره", "مسؤول", "مسوول", "مسئول", "رئيس"),
+    "user": ("user", "users", "staff", "employee", "مستخدم", "موظف"),
+}
+FILLER_WORDS = {"the", "a", "an", "of", "for", "s", "approval", "approvals", "approve", "approver", "team", "role", "group",
+                "and", "or", "by", "في", "من", "على", "موافقه", "ال"}
+APP_WORDS_AR = {
+    "مشتريات": "purchase", "شراء": "purchase", "مبيعات": "sales", "بيع": "sales", "محاسبه": "accounting",
+    "حسابات": "accounting", "ماليه": "accounting", "مخزون": "inventory", "مخازن": "inventory", "مشاريع": "project",
+    "موظفين": "employees", "تصنيع": "manufacturing", "صيانه": "maintenance", "اجازات": "time off",
+}
+
+
+def group_scope_field(env):
+    """The record that names the app of a group: ``privilege_id`` from Odoo 19, ``category_id`` before."""
+    return "privilege_id" if "privilege_id" in env["res.groups"]._fields else "category_id"
+
+
+def _words(text):
+    return re.findall(r"\w+", approval_sentence._fold(text or "").lower())
+
+
+def _split_role(text):
+    """:return: ``(rank, app words)`` of "purchase manager", "manager of sales", "the purchase administrator"
+    ("مدير المشتريات"); ``rank`` is ``"manager"``, ``"user"`` or ``""``"""
+    ranks = {approval_sentence._fold(word): key for key, words in RANK_WORDS.items() for word in words}
+    rank, app = "", []
+    for word in _words(text):
+        bare = word[2:] if word.startswith("ال") and len(word) > 4 else word
+        if word in ranks or bare in ranks:
+            rank = rank or ranks.get(word) or ranks[bare]
+        elif word in FILLER_WORDS or bare in FILLER_WORDS:
+            continue
+        else:
+            app.append(APP_WORDS_AR.get(bare, bare))
+    return rank, app
+
+
+def _stem(word):
+    return word[:5] if len(word) > 5 else word
+
+
+def find_group_by_role(env, text):
+    """:return: the one group that "<app> manager" / "manager of <app>" / "<app> user" names, by the privilege
+    (the category before Odoo 19) of the group and its own name, or an empty recordset"""
+    rank, app = _split_role(text)
+    Groups = env["res.groups"]
+    if not rank or not app:
+        return Groups
+    scope = group_scope_field(env)
+    ranked = {key: {approval_sentence._fold(word) for word in words if word.isascii()} for key, words in RANK_WORDS.items()}
+    found = Groups
+    for group in Groups.with_context(lang="en_US").search([(scope, "!=", False)]):
+        label = set(_words(group[scope].name))
+        label |= {_stem(word) for word in label}
+        if not all(_stem(word) in label or word in label for word in app):
+            continue
+        name = set(_words(group.name))
+        if rank == "manager" and name & ranked["manager"]:
+            found |= group
+        elif rank == "user" and name & ranked["user"] and not name & ranked["manager"]:
+            found |= group
+    return found if len(found) == 1 else Groups
+
+
 def find_group(env, text, role_xmlid=None):
     """:return: ``(group, note)``: the group a level names, by external id, by role or by name;
     ``note`` is what the person is told when the group had to be chosen"""
@@ -94,6 +162,9 @@ def find_group(env, text, role_xmlid=None):
         found = Groups.search([("name", "=ilike", text)], limit=2) or Groups.search([("name", "ilike", text)], limit=2)
         if len(found) == 1:
             return found, ""
+        group = find_group_by_role(env, text)
+        if group:
+            return group, ""
         roles = approval_sentence._roles(approval_sentence._fold(text))
         for _position, role, xmlid in roles:
             if xmlid:
