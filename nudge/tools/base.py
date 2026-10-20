@@ -7,6 +7,8 @@ The list of tools is closed; a model cannot call what is not registered.
 import json
 import logging
 
+from odoo.exceptions import UserError
+
 from . import schema
 
 _logger = logging.getLogger(__name__)
@@ -192,8 +194,15 @@ def guarded(env, name, function):
         with env.cr.savepoint():
             return function()
     except Exception as error:  # noqa: BLE001
-        _logger.info("Nudge: tool %s failed for user %s: %s", name, env.uid, error)
-        return ToolResult(f"{type(error).__name__}: {error}", is_error=True)
+        if isinstance(error, (UserError, ValueError, KeyError, TypeError)):
+            # What the model can act on: a refusal of Odoo, a mistake in the arguments
+            _logger.info("Nudge: tool %s failed for user %s: %s", name, env.uid, error)
+            return ToolResult(f"{type(error).__name__}: {error}", is_error=True)
+        # A database error or a fault: the text may hold SQL, names and values
+        _logger.warning("Nudge: tool %s failed for user %s", name, env.uid, exc_info=True)
+        return ToolResult(
+            f"{type(error).__name__}: the action failed on the server. Try another way.",
+            is_error=True)
 
 
 def call(env, name, arguments, screen=None, mode=MODE_TALK):

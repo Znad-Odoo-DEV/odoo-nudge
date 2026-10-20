@@ -51,6 +51,15 @@ OpenAI-compatible server), for business data. With a local model nothing leaves 
 
 ## Deleting
 
-Deleting a conversation deletes its messages, screens and images. Archiving a user keeps
+Deleting a conversation deletes its messages, screens and images, and the log of what the
+Agent did in it: its runs and their steps. The log cannot be deleted in any other way. Archiving a user keeps
 their conversations for the managers; delete them as you would any record. The usage ledger
-is kept for the budgets and the bills and cannot be edited from the interface.
+is kept for the budgets and the bills and cannot be edited from the interface; it only loses
+the link to the deleted conversation.
+
+### Retention
+
+Settings, Nudge, Privacy: "Delete Conversations Older Than (Days)". Every day Nudge deletes,
+200 at a time, the conversations whose last activity is older than that number of days, the
+same way as above. A conversation that is answering, or has a step waiting for a yes, is
+kept. 0, the default, never deletes anything.

@@ -2,7 +2,7 @@ import sys
 import types
 from unittest.mock import patch
 
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tests import TransactionCase, tagged
 
 from odoo.addons.nudge.llm import base
@@ -144,3 +144,18 @@ class TestProvider(NudgeCase, TransactionCase):
         })
         # 2 + 1 + 0.1 + 0.5
         self.assertAlmostEqual(self.provider._compute_cost(usage), 3.6)
+
+    def test_the_address_of_a_provider_starts_with_http_and_warns_when_public(self):
+        with self.assertRaises(ValidationError):
+            self.provider.base_url = "llm.example.com/v1"
+        self.provider.base_url = "  https://llm.example.com/v1 "
+        self.assertFalse(self.provider.address_warning)
+
+        self.provider.base_url = "http://llm.example.com/v1"
+        self.assertIn("unencrypted", self.provider.address_warning)
+
+        self.provider.base_url = "https://llm.example.com/v1"
+        self.provider.runs_locally = True
+        self.assertIn("own server", self.provider.address_warning)
+        self.provider.base_url = "http://192.168.1.20:11434/v1"
+        self.assertFalse(self.provider.address_warning)

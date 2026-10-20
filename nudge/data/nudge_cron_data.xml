@@ -32,6 +32,16 @@
         <field name="interval_type">hours</field>
     </record>
 
+    <!-- Optional (Settings, Nudge): forget the conversations older than the days set; 0 is never -->
+    <record id="cron_conversation_retention" model="ir.cron">
+        <field name="name">Nudge: delete old conversations</field>
+        <field name="model_id" ref="model_nudge_conversation"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_apply_retention()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+    </record>
+
     <record id="cron_agent_runs" model="ir.cron">
         <field name="name">Nudge: work on what was asked in the background</field>
         <field name="model_id" ref="model_nudge_run"/>
