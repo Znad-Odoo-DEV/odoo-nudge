@@ -581,6 +581,9 @@ class NudgeStep(models.Model):
         "nudge.message", string="Answer", ondelete="restrict",
         help="Answer of the model that asked for this step.")
     call_id = fields.Char(string="Call")
+    company_id = fields.Many2one(
+        "res.company", default=lambda self: self.env.company, index=True,
+        help="The company the person was in when this was prepared: a yes runs in it.")
     tool = fields.Char(required=True)
     kind = fields.Selection(STEP_KINDS, required=True, default="read", index=True)
     state = fields.Selection(STEP_STATES, required=True, default="done", index=True)
@@ -604,6 +607,20 @@ class NudgeStep(models.Model):
     arguments_text = fields.Text(string="Asked by the Model", compute="_compute_texts")
     values_text = fields.Text(string="Written in the Records", compute="_compute_texts")
     preview_text = fields.Text(string="Shown to the Person", compute="_compute_texts")
+
+    def _company_env(self, env):
+        """:return: ``env`` working in the company of this step, when the person is still of it
+        :raise UserError: when they no longer are"""
+        self.ensure_one()
+        company = self.sudo().company_id
+        if not company:
+            return env
+        if company not in env.user.company_ids:
+            raise UserError(_(
+                "This was prepared in %s, a company you no longer belong to. Nothing was changed.",
+                company.name))
+        allowed = [company.id] + [other.id for other in env.companies if other != company]
+        return env(context=dict(env.context, allowed_company_ids=allowed))
 
     @api.depends("res_ids", "arguments", "values", "preview")
     def _list_link(self):
