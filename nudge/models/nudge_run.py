@@ -401,6 +401,12 @@ class NudgeRun(models.Model):
         tool = tools.base.TOOLS.get(step.tool)
         env = conversation.with_context(nudge_conversation_id=conversation.id, nudge_mode="agent").env
         deadline = tools.plans.now() + self._get_piece_seconds()
+        try:
+            # The yes was given in the company of the card: the plan works in it, or not at all
+            env = step._company_env(env)
+        except UserError as error:
+            env = None
+            refused = tools.base.ToolResult(str(error), is_error=True)
 
         def save():
             card = step._get_card()
@@ -418,12 +424,12 @@ class NudgeRun(models.Model):
         # execute(), the batches are committed outside any, and the progress
         # committed with them is where the next piece begins.
         try:
-            result = tool.execute(env, step, deadline=deadline, save=save, stop=stopped)
+            result = refused if env is None else tool.execute(env, step, deadline=deadline, save=save, stop=stopped)
         except Exception as error:  # noqa: BLE001
-            _logger.info("Nudge: plan of run %s failed: %s", run.id, error)
+            told = tools.base.error_text(error, f"the plan of run {run.id}", run.user_id.id)
             self.env.cr.rollback()
             self.env.invalidate_all()
-            result = tools.base.ToolResult(f"{type(error).__name__}: {error}", is_error=True)
+            result = tools.base.ToolResult(told, is_error=True)
         if result is None and stopped():
             # The person stopped it: what went through stays, and can be undone
             card = step._get_card()
