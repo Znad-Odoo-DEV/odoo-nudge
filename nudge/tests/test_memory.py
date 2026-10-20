@@ -202,3 +202,14 @@ class TestMemoryDefaults(TransactionCase):
         Memory._set_defaults()
         self.assertFalse(Memory._is_enabled(), "Raghad's choice stays")
         self.assertEqual(Parameter.get_param("nudge.memory_threshold"), "0.9")
+
+    def test_common_requests_without_ai_are_on_when_nothing_was_chosen(self):
+        Parameter = self.env["ir.config_parameter"].sudo()
+        Noai = self.env["nudge.noai"]
+        Parameter.search([("key", "=", "nudge.noai_first")]).unlink()
+        self.assertFalse(Noai._is_enabled(), "Unset is not a choice the code may read as on")
+        self.env["nudge.memory"]._set_defaults()
+        self.assertTrue(Noai._is_enabled(), "On after the defaults, as the README says")
+        Parameter.set_param("nudge.noai_first", "0")
+        self.env["nudge.memory"]._set_defaults()
+        self.assertFalse(Noai._is_enabled(), "An explicit off stays off")
