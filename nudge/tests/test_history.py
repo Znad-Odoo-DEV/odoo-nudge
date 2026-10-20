@@ -2,6 +2,7 @@ import datetime
 import re
 
 from odoo import fields
+from odoo.exceptions import UserError
 from odoo.tests import TransactionCase, new_test_user, tagged
 
 from odoo.addons.nudge import tools
@@ -220,6 +221,19 @@ class TestHistory(NudgeCase, TransactionCase):
         self.assertIn(record_url("res.partner", self.contact.id), context)
         self.assertIn(f"[Show me]({record_url('res.partner', self.contact.id)})", result.content)
         self.assertEqual(result.records[:2], ("res.partner", [self.partner.id]))
+
+    def test_the_summary_works_while_the_conversation_of_the_person_is_streaming(self):
+        adapter = self.use_adapter()
+        adapter.__class__ = EchoAdapter
+        outer = self.env["nudge.conversation"].with_user(self.clerk).create({})
+        outer.sudo().stream_started_at = fields.Datetime.now()
+        before = self.env["nudge.usage"].search_count([("user_id", "=", self.clerk.id)])
+        result = self.summarise(self.clerk, model="res.partner", id=self.partner.id)
+        self.assertFalse(result.is_error, result.content)
+        self.assertTrue(adapter.calls, "The provider was asked")
+        self.assertEqual(self.env["nudge.usage"].search_count([("user_id", "=", self.clerk.id)]), before + 1)
+        with self.assertRaises(UserError):
+            outer._chat_check_not_busy()
 
     def test_it_is_logged_in_usage_like_any_call(self):
         self.use_adapter()

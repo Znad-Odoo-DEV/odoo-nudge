@@ -85,8 +85,11 @@ class NudgeHistory(models.Model):
         :param block: what the model may know, framed as data
         :return: the answer
         :raise UserError: when there is none"""
+        # Often asked by a tool while the person's own conversation is streaming:
+        # the inner call is not a second question of theirs, so the busy check
+        # of the person lets it through (its cost is written down all the same)
         conversation = self.env["nudge.conversation"].create({"name": cut(title, 60)})
-        job = conversation._chat_prepare(question, focus=focus, extra=block, answer_in=answer_in)
+        job = conversation._chat_prepare(question, focus=focus, extra=block, answer_in=answer_in, inner=True)
         for _event in loop.run(job, conversation._chat_record):
             pass
         Message = self.env["nudge.message"].sudo()
