@@ -94,7 +94,7 @@ class NudgeNoai(models.AbstractModel):
     @api.model
     def _is_enabled(self):
         value = self.env["ir.config_parameter"].sudo().get_param(PARAM)
-        return str(value if value not in (None, "") else "1").lower() in ("1", "true")
+        return str(value or "").lower() in ("1", "true")
 
     @api.model
     def _screen_of(self, snapshot):

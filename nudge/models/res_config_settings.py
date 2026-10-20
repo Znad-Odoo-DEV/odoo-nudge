@@ -53,7 +53,6 @@ class ResConfigSettings(models.TransientModel):
 
     nudge_noai_first = fields.Boolean(
         string="Try to understand common requests without AI first", config_parameter="nudge.noai_first",
-        default=True,
         help="Open a screen, find a record, filter a list, count, create, change a field or press a button "
              "are understood by rules, in Arabic and English, without calling the AI provider: no token is "
              "spent, and every change still waits for a yes. What is not understood goes to the AI as before. "

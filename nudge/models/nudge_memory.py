@@ -93,10 +93,11 @@ class NudgeMemory(models.Model):
     # ------------------------------------------------------------------
     @api.model
     def _set_defaults(self):
-        """On by default, as the README says: set where nothing is set, never over a choice.
+        """On by default, as the README says (answer memory, understanding common requests without AI):
+        set where nothing is set, never over a choice.
         Called after an install and by the update that brings the defaults back."""
         Parameter = self.env["ir.config_parameter"].sudo()
-        for key, value in ((ENABLED_PARAM, "True"), (THRESHOLD_PARAM, "0.75")):
+        for key, value in ((ENABLED_PARAM, "True"), (THRESHOLD_PARAM, "0.75"), ("nudge.noai_first", "True")):
             if Parameter.get_param(key, None) is None:
                 Parameter.set_param(key, value)
 
