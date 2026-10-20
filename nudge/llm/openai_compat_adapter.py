@@ -288,7 +288,7 @@ class OpenAICompatAdapter(base.BaseAdapter):
         return self._retry(send, deadline)
 
     def stream_chat(self, system, turns, deadline=None, tools=None, tool_choice=None):
-        payload = self._build_payload(system, turns, tools, tool_choice)
+        payload = self._build_payload(base.system_texts(system), turns, tools, tool_choice)
         response = None
         try:
             response = self._open(payload, deadline)
