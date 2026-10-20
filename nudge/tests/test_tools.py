@@ -381,7 +381,9 @@ class TestTools(NudgeCase, TransactionCase):
         with self.assertLogs("odoo.addons.nudge.tools.base", logging.INFO):
             result = self.run_tool("find_screen", {"words": "x"}, user=self.user_contacts)
         self.assertTrue(result.is_error)
-        self.assertIn("boom", result.content)
+        # A fault is told by its kind only: its text may hold SQL, names and values
+        self.assertIn("RuntimeError", result.content)
+        self.assertNotIn("boom", result.content)
         self.assertFalse(self.env["res.partner"].search([("name", "=", "Left behind")]),
                          "What a failed tool did is undone")
 

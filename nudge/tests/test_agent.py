@@ -3,8 +3,6 @@ import logging
 import re
 import types
 
-from psycopg2 import IntegrityError
-
 from odoo import http
 from odoo.exceptions import AccessError, UserError
 from odoo.tests import HttpCase, TransactionCase, tagged
@@ -1167,8 +1165,9 @@ class TestLog(AgentCase, TransactionCase):
         conversation = self.conversation.with_user(self.manager)
         conversation.active = False
         self.assertFalse(conversation.active, "It can be put away")
-        with self.assertRaises(IntegrityError), mute_logger("odoo.sql_db"), self.env.cr.savepoint():
+        with self.assertRaisesRegex(UserError, "the log of what it did is kept"):
             conversation.unlink()
+        self.assertTrue(conversation.exists())
         self.assertTrue(self.step.exists())
 
     def test_each_reads_their_own(self):

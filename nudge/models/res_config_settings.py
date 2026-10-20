@@ -250,8 +250,10 @@ class ResConfigSettings(models.TransientModel):
 
     nudge_retention_days = fields.Integer(
         string="Delete Conversations Older Than (Days)", config_parameter="nudge.retention_days",
-        help="Conversations whose last activity is older than this are deleted, with their "
-             "messages, screens, images and Agent log. 0 keeps them for ever.")
+        help="Conversations whose last activity is older than this number of days are deleted every day, "
+             "with their messages, screens and images. One in which the Agent acted is archived instead: "
+             "the log of what it did is kept. One that is answering, or waits for a yes, is left. "
+             "0 keeps them for ever.")
 
     def get_values(self):
         values = super().get_values()

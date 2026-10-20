@@ -207,10 +207,11 @@ class TestSql(NudgeCase, TransactionCase):
                 "select json_agg(p) from res_partner p where p.name in ('Raghad Sql', 'Ebrahim Sql')",
                 "select json_agg(res_partner) from res_partner",
                 "select p::text from res_partner p",
-                "select x5 from res_partner p(x1, x2, x3, x4, x5)",
                 "select distinct on (id) * from res_partner",
                 "with t as (select * from res_partner) select name from t",
             ], "res_partner has columns hidden from this person")
+            # Columns renamed in FROM are refused before that, as a call outside the report functions
+            self.refused(["select x5 from res_partner p(x1, x2, x3, x4, x5)"], "may not call p()")
             # What the person may read is read as before, in the same table
             payload = self.payload(
                 "select p.name, c.name as country from res_partner p left join res_country c "
