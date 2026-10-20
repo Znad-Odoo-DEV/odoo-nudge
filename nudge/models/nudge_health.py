@@ -50,6 +50,14 @@ class NudgeHealthReport(models.Model):
         for report in self:
             pack = packs.get(report.pack)
             report.pack_name = tools.compliance.pick(pack.name, report.env) if pack else False
+
+    @api.depends("date", "pack", "scope")
+    def _compute_display_name(self):
+        scopes = dict(self._fields["scope"]._description_selection(self.env))
+        for report in self:
+            title = report.pack_name or scopes.get(report.scope) or report._description
+            when = fields.Datetime.context_timestamp(report, report.date).strftime("%Y-%m-%d %H:%M")                 if report.date else ""
+            report.display_name = f"{title} · {when}" if when else title
     scope = fields.Selection(
         [("health", "Health Check"), ("upgrade", "Before an Upgrade")], default="health", required=True,
         readonly=True, index=True)

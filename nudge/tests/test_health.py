@@ -329,3 +329,14 @@ class TestHealth(NudgeCase, TransactionCase):
             [("report_id", "=", report.id)]))
         with self.assertRaises(AccessError):
             report.with_user(manager_b).read(["findings_json"])
+
+
+@tagged("post_install", "-at_install")
+class TestHealthReportName(TransactionCase):
+
+    def test_a_report_is_named_by_what_it_checked_and_when(self):
+        report = self.env["nudge.health.report"].sudo().create({
+            "company_id": self.env.company.id, "user_id": self.env.uid})
+        self.assertNotIn("nudge.health.report", report.display_name)
+        self.assertIn(dict(report._fields["scope"]._description_selection(self.env))[report.scope],
+                      report.display_name)
