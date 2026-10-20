@@ -97,7 +97,7 @@ class NudgeMemory(models.Model):
         Called after an install and by the update that brings the defaults back."""
         Parameter = self.env["ir.config_parameter"].sudo()
         for key, value in ((ENABLED_PARAM, "True"), (THRESHOLD_PARAM, "0.75")):
-            if Parameter.get_param(key) is None:
+            if Parameter.get_param(key, None) is None:
                 Parameter.set_param(key, value)
 
     @api.model
