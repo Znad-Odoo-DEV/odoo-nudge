@@ -56,7 +56,11 @@ export const nudgeGuidanceService = {
                 return undefined;
             }
             const record = context.frontView()?.controller.model?.root;
-            const value = record?.data?.[step.target.name];
+            // A list, or a form still opening, holds no value of the field yet: unknown, not empty
+            if (!record?.data || !(step.target.name in record.data)) {
+                return undefined;
+            }
+            const value = record.data[step.target.name];
             if (value && typeof value === "object") {
                 return JSON.stringify(value.id ?? value.resIds ?? value.currentIds ?? String(value));
             }
@@ -137,7 +141,11 @@ export const nudgeGuidanceService = {
             // A field changed by something else than typing: a choice in a list
             if (!state.isDetour && step.advance !== "manual") {
                 const value = readField(step);
-                if (fieldValue !== null && value !== undefined && value !== fieldValue) {
+                if (fieldValue === null) {
+                    // The form the step is on opened after the step was shown (a click on
+                    // New): what it holds now is where the field starts from
+                    fieldValue = value ?? null;
+                } else if (value !== undefined && value !== fieldValue) {
                     unwatch();
                     advance();
                 }
