@@ -743,7 +743,36 @@ class NudgeConversation(models.Model):
         # The messages go with the conversation in the database, not through the
         # ORM: the images sent with them would be left behind
         self.sudo().message_ids.attachment_id.unlink()
+        # The runs and steps of the Agent go with it, through the ORM: the log
+        # refuses every other deletion, and the database refuses a conversation
+        # that still has runs
+        runs = self.sudo().with_context(nudge_purge_conversation=True).run_ids
+        if runs:
+            steps = runs.step_ids
+            Attachment = self.env["ir.attachment"].sudo()
+            Attachment.search([("res_model", "=", "nudge.step"), ("res_id", "in", steps.ids)]).unlink()
+            Attachment.search([("res_model", "=", "nudge.run"), ("res_id", "in", runs.ids)]).unlink()
+            steps.unlink()
+            runs.unlink()
         return super().unlink()
+
+    @api.model
+    def _cron_apply_retention(self, batch=200):
+        """Delete the conversations whose last activity is older than the days
+        set in Settings (0: never), a batch at a time. One that is answering,
+        or has a step waiting for a yes, is left."""
+        days = int(float(self.env["ir.config_parameter"].sudo().get_param("nudge.retention_days") or 0))
+        if days <= 0:
+            return 0
+        limit = fields.Datetime.subtract(fields.Datetime.now(), days=days)
+        old = self.sudo().with_context(active_test=False).search([
+            ("write_date", "<", limit), ("stream_started_at", "=", False),
+            ("waiting_step_id", "=", False)], order="write_date, id", limit=batch * 3)
+        waiting = set(self.env["nudge.step"].sudo().search([
+            ("conversation_id", "in", old.ids), ("state", "=", "pending")]).conversation_id.ids)
+        doomed = old.filtered(lambda conversation: conversation.id not in waiting)[:batch]
+        doomed.unlink()
+        return len(doomed)
 
     @api.model
     def _cron_forget_meeting_audio(self):
