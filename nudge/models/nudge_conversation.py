@@ -495,7 +495,7 @@ class NudgeConversation(models.Model):
 
     def _chat_prepare(self, text, snapshot=None, spoken=False, read_aloud=False, mode=MODE_TALK,
                       background=False, explain=None, attachment=None, report=None, focus=None,
-                      extra=None, fresh=False, answer_in=None):
+                      extra=None, fresh=False, answer_in=None, inner=False):
         """Validate the message, store it and gather everything the stream
         needs.
 
@@ -555,7 +555,11 @@ class NudgeConversation(models.Model):
             self, text, mode, focus, found, explain, background, fresh=fresh)
         if served:
             return served
-        self._chat_check_not_busy()
+        if not inner:
+            # ``inner``: a one-off call made by a tool inside the person's own answer (the summary
+            # of a record), not a second question of theirs, and no stream of its own for the http
+            # workers. An argument, not a key of the context, which a request could carry
+            self._chat_check_not_busy()
         self._chat_check_not_at_work()
         limit = AGENT_MAX_MESSAGES if self.sudo().run_ids else MAX_MESSAGES
         if self.message_count >= limit:
