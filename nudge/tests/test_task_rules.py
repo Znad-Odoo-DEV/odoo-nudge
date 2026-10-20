@@ -42,6 +42,15 @@ class TestTaskRules(BackgroundCase, TransactionCase):
         self.assertEqual(action["res_model"], "res.partner")
         self.assertEqual(self.env["res.partner"].search_count(action["domain"]), 2)
 
+    def test_the_result_is_said_in_the_language_of_the_owner(self):
+        self.env["res.lang"]._activate_lang("ar_001")
+        self.agent.lang = "ar_001"
+        self.partners("A")
+        task = self.make()
+        self.run_rule(task)
+        self.assertIn("افتح القائمة", task.last_result)
+        self.assertNotIn("Open the list", task.last_result)
+
     def test_group_and_sum(self):
         self.partners("A", "B")
         field = self.env["ir.model.fields"]._get("res.partner", "color")
