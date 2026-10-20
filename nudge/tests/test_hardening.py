@@ -55,15 +55,23 @@ class TestHardening(NudgeCase, TransactionCase):
             "run_id": run.id, "tool": "search_records", "kind": "read", "state": state})
         return conversation, run, step
 
-    def test_deleting_a_conversation_deletes_its_runs_and_steps(self):
-        conversation, run, step = self._conversation_with_run(self.agent)
-        conversation.waiting_step_id = step
+    def test_a_conversation_where_nudge_acted_is_refused_in_words_and_keeps_its_log(self):
+        conversation, run, step = self._conversation_with_run(self.agent, state="done")
+        with self.assertRaisesRegex(UserError, "Archive it instead"):
+            conversation.with_user(self.manager).unlink()
+        self.assertTrue(conversation.exists() and run.exists() and step.exists())
+
+    def test_deleting_a_conversation_without_a_log_takes_its_files_and_keeps_the_ledger(self):
+        conversation = self.env["nudge.conversation"].sudo().create({"user_id": self.agent.id, "name": "Raghad"})
+        message = self.env["nudge.message"].sudo().create({
+            "conversation_id": conversation.id, "role": "user", "content": "Ebrahim's picture"})
+        picture = self.env["ir.attachment"].sudo().create({
+            "name": "raghad.png", "raw": b"x", "res_model": "nudge.message", "res_id": message.id})
+        message.attachment_id = picture
         usage = self.env["nudge.usage"].sudo().create({
-            "user_id": self.agent.id, "conversation_id": conversation.id})
-        conversation.sudo().unlink()
-        self.assertFalse(conversation.exists())
-        self.assertFalse(run.exists())
-        self.assertFalse(step.exists())
+            "user_id": self.agent.id, "conversation_id": conversation.id, "date": fields.Date.today()})
+        conversation.with_user(self.manager).unlink()
+        self.assertFalse(conversation.exists() or message.exists() or picture.exists())
         self.assertTrue(usage.exists())
         self.assertFalse(usage.conversation_id)
 
@@ -74,27 +82,35 @@ class TestHardening(NudgeCase, TransactionCase):
         with self.assertRaises(AccessError):
             run.sudo().unlink()
 
-    def test_the_retention_deletes_only_the_old_ones_that_are_idle(self):
-        Conversation = self.env["nudge.conversation"].sudo()
-        old, _run, _step = self._conversation_with_run(self.agent, state="done")
+    def test_the_retention_forgets_only_the_old_ones_that_are_idle(self):
+        Conversation = self.env["nudge.conversation"].sudo().with_context(active_test=False)
+        old = Conversation.create({"user_id": self.agent.id, "name": "Raghad old"})
+        acted, _run, _step = self._conversation_with_run(self.agent, state="done")
         streaming = Conversation.create({"user_id": self.agent.id})
         streaming.stream_started_at = fields.Datetime.now()
         waiting, _run, _step = self._conversation_with_run(self.agent)
-        recent = Conversation.create({"user_id": self.agent.id, "name": "Raghad recent"})
-        old_ones = old | streaming | waiting
+        recent = Conversation.create({"user_id": self.agent.id, "name": "Ebrahim recent"})
+        old_ones = old | acted | streaming | waiting
+        # what the ORM still holds would be written after, with a write_date of now
+        self.env.flush_all()
         self.env.cr.execute(
             "UPDATE nudge_conversation SET write_date = %s WHERE id IN %s",
             (fields.Datetime.subtract(fields.Datetime.now(), days=100), tuple(old_ones.ids)))
         old_ones.invalidate_recordset()
+        everyone = old_ones | recent
 
         self.env["ir.config_parameter"].sudo().set_param("nudge.retention_days", "0")
-        Conversation._cron_apply_retention()
-        self.assertEqual((old | streaming | waiting | recent).exists(), old | streaming | waiting | recent)
+        self.assertEqual(Conversation._cron_apply_retention(), 0)
+        self.assertEqual(everyone.exists(), everyone)
 
         self.env["ir.config_parameter"].sudo().set_param("nudge.retention_days", "30")
-        Conversation._cron_apply_retention()
-        self.assertFalse(old.exists())
+        # a batch large enough for whatever older conversations the database already holds
+        Conversation._cron_apply_retention(batch=100000)
+        self.assertFalse(old.exists(), "Old and idle: deleted")
+        self.assertTrue(acted.exists(), "The log of the Agent is kept")
+        self.assertFalse(acted.active, "and the conversation put away")
         self.assertEqual((streaming | waiting | recent).exists(), streaming | waiting | recent)
+        self.assertTrue(all((streaming | waiting | recent).mapped("active")))
 
     def test_a_tool_error_tells_only_what_the_model_can_act_on(self):
         from odoo.addons.nudge.tools.base import guarded
@@ -108,8 +124,9 @@ class TestHardening(NudgeCase, TransactionCase):
         def broken():
             self.env.cr.execute("SELECT * FROM table_of_ebrahim")
 
+        refused = guarded(self.env, "t", refuse).content
         self.assertIn("Raghad may not do this", refused)
         self.assertIn("amount must be a number", guarded(self.env, "t", mistake).content)
         hidden = guarded(self.env, "t", broken).content
-        self.assertIn("ProgrammingError", hidden)
+        self.assertIn("the action failed on the server", hidden)
         self.assertNotIn("table_of_ebrahim", hidden)
