@@ -1,4 +1,6 @@
 import json
+import re
+from unittest.mock import patch
 
 import psycopg2.errors
 
@@ -7,6 +9,7 @@ from odoo.tools import mute_logger
 
 from odoo.addons.nudge import tools
 from odoo.addons.nudge.llm.snapshot import HIDDEN
+from odoo.addons.nudge.tools import sql as sql_tool
 from odoo.addons.nudge.tools.sql import SQL_PARAM, TIMEOUT_MS, read_only
 
 from .common import NudgeCase
@@ -26,6 +29,9 @@ class TestSql(NudgeCase, TransactionCase):
         cls.partners = cls.env["res.partner"].create([
             {"name": "Nudge Sql One"}, {"name": "Nudge Sql Two"},
         ])
+        cls.people = cls.env["res.partner"].create([
+            {"name": "Raghad Sql", "ref": "RAGHAD-1234"}, {"name": "Ebrahim Sql", "ref": "EBRAHIM-5678"},
+        ])
 
     def query(self, text, user=None):
         return tools.base.call(
@@ -36,6 +42,16 @@ class TestSql(NudgeCase, TransactionCase):
         result = self.query(text)
         self.assertFalse(result.is_error, result.content)
         return json.loads(result.content)
+
+    def kept(self, groups="base.group_portal", field="ref"):
+        """A field of the partners kept for ``groups``: the administrator is no portal user"""
+        return patch.object(self.env["res.partner"]._fields[field], "groups", groups)
+
+    def refused(self, texts, message):
+        for text in texts:
+            result = self.query(text)
+            self.assertTrue(result.is_error, text)
+            self.assertIn(message, result.content, text)
 
     def test_reads_rows(self):
         payload = self.payload(
@@ -172,3 +188,90 @@ class TestSql(NudgeCase, TransactionCase):
         settings = Settings.create({"nudge_sql": False})
         settings.set_values()
         self.assertFalse(self.env["nudge.conversation"]._is_sql_allowed())
+
+    def test_a_field_kept_for_groups_is_not_read(self):
+        with self.kept():
+            # Named, under any name, in any case, quoted or not, wherever it stands
+            self.refused([
+                "select ref from res_partner where name = 'Raghad Sql'",
+                "select name, REF as x from res_partner where name = 'Raghad Sql'",
+                'select "ref" from res_partner',
+                "select p.ref as reference from res_partner p",
+                "select name from res_partner where ref like 'RAGHAD%'",
+                "select json_build_object('r', ref) from res_partner",
+            ], "ref of res_partner, a field for the groups base.group_portal only")
+            # Or reached without a name: a *, a whole row, columns renamed in FROM
+            self.refused([
+                "select * from res_partner where name = 'Raghad Sql'",
+                "select p.* from res_partner p where p.name = 'Ebrahim Sql'",
+                "select json_agg(p) from res_partner p where p.name in ('Raghad Sql', 'Ebrahim Sql')",
+                "select json_agg(res_partner) from res_partner",
+                "select p::text from res_partner p",
+                "select x5 from res_partner p(x1, x2, x3, x4, x5)",
+                "select distinct on (id) * from res_partner",
+                "with t as (select * from res_partner) select name from t",
+            ], "res_partner has columns hidden from this person")
+            # What the person may read is read as before, in the same table
+            payload = self.payload(
+                "select p.name, c.name as country from res_partner p left join res_country c "
+                "on c.id = p.country_id where p.name in ('Raghad Sql', 'Ebrahim Sql') order by p.name")
+            self.assertEqual([row[0] for row in payload["rows"]], ["Ebrahim Sql", "Raghad Sql"])
+        # The people of those groups read it
+        with self.kept("base.group_system"):
+            payload = self.payload("select ref as x from res_partner where name = 'Raghad Sql'")
+            self.assertEqual(payload["rows"], [["RAGHAD-1234"]])
+
+    def test_a_many2many_kept_for_groups_is_not_read(self):
+        relation = self.env["res.partner"]._fields["category_id"].relation
+        with self.kept(field="category_id"):
+            self.refused(
+                [f"select count(*) from {relation}"],
+                f"the table {relation} of res.partner.category_id, a field for the groups base.group_portal")
+
+    def test_a_secret_is_hidden_by_the_column_it_is_read_from(self):
+        # The reference and the code stand for columns whose name says secret
+        with patch.object(sql_tool, "SENSITIVE_NAME", re.compile(r"^(ref|code)$")):
+            payload = self.payload(
+                "select p.ref as reference, p.name as who from res_partner p where p.name = 'Raghad Sql'")
+            self.assertEqual(payload["columns"], ["reference", "who"])
+            self.assertEqual(payload["rows"], [[sql_tool.HIDDEN, "Raghad Sql"]])
+            payload = self.payload("select ref as label from res_partner where name = 'Ebrahim Sql'")
+            self.assertEqual(payload["rows"], [[sql_tool.HIDDEN]])
+            # A * of the main SELECT shows it hidden too
+            payload = self.payload("select * from res_country where id = %d" % self.env.ref("base.ae").id)
+            self.assertEqual(payload["row_count"], 1)
+            self.assertEqual(payload["rows"][0][payload["columns"].index("code")], sql_tool.HIDDEN)
+            # Computed with, compared, or out of a subquery, it would come back plain
+            self.refused([
+                "select lower(ref) from res_partner",
+                "select name from res_partner where ref = 'RAGHAD-1234'",
+                "select max(x) from (select ref as x from res_partner) s",
+                "select ref as a from res_partner union select name from res_partner",
+            ], "ref of res_partner holds a secret")
+            self.refused([
+                "select json_agg(c) from res_country c",
+                "select json_agg(s) from (select * from res_country) s",
+            ], "res_country has columns hidden from this person")
+
+    def test_postgres_tells_what_is_wrong_with_the_query(self):
+        result = self.query("select nowhere from res_partner where name = 'Raghad Sql'")
+        self.assertTrue(result.is_error)
+        self.assertIn('Postgres refused the query: column "nowhere" does not exist', result.content)
+        self.assertNotIn("LINE", result.content)
+        # The savepoint went with the error: the transaction writes again and reads on
+        self.env.cr.execute("show transaction_read_only")
+        self.assertEqual(self.env.cr.fetchone(), ("off",))
+        self.assertEqual(
+            self.payload("select name from res_partner where name = 'Ebrahim Sql'")["rows"], [["Ebrahim Sql"]])
+
+    def test_texts_are_read_as_postgres_reads_them(self):
+        # A text that ends elsewhere than it seems to would hide a call or a name
+        self.refused([
+            "select E'\\'', query_to_xml('select 1', true, false, '') from res_partner",
+            "select $$'$$, name from res_partner",
+            "select 'Raghad Sql from res_partner",
+        ], "plainly between single quotes")
+        self.refused(['select x from res_partner "where", res_country'], "quoted name")
+        # A quote doubled inside a text is still the text
+        payload = self.payload("select 'Raghad''s' as t from res_partner where name = 'Raghad Sql'")
+        self.assertEqual(payload["rows"], [["Raghad's"]])
