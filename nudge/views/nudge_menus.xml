@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- One app for every employee: it opens on My Nudge Home (nudge_home_views.xml gives it the action).
+         Each menu inside keeps to its own groups; the manager group of the old root comes off on update. -->
     <menuitem id="nudge_menu_root" name="Nudge" sequence="250"
               web_icon="nudge,static/description/icon.png"
-              groups="nudge.group_nudge_manager"/>
+              groups="base.group_user,-nudge.group_nudge_manager"/>
 
     <menuitem id="nudge_menu_conversations" name="Conversations" sequence="10"
-              parent="nudge_menu_root" action="nudge_conversation_action"/>
+              parent="nudge_menu_root" action="nudge_conversation_action"
+              groups="nudge.group_nudge_manager"/>
 
     <menuitem id="nudge_menu_agent" name="What Nudge Did" sequence="15"
-              parent="nudge_menu_root"/>
+              parent="nudge_menu_root"
+              groups="nudge.group_nudge_manager"/>
 
     <menuitem id="nudge_menu_runs" name="Requests" sequence="10"
               parent="nudge_menu_agent" action="nudge_run_action"/>
@@ -20,7 +24,8 @@
               parent="nudge_menu_agent" action="nudge_task_action"/>
 
     <menuitem id="nudge_menu_knowledge" name="What Nudge Knows" sequence="20"
-              parent="nudge_menu_root"/>
+              parent="nudge_menu_root"
+              groups="nudge.group_nudge_manager"/>
 
     <menuitem id="nudge_menu_profile" name="Database Profile" sequence="10"
               parent="nudge_menu_knowledge" action="nudge_profile_action"/>
@@ -41,10 +46,12 @@
               parent="nudge_menu_knowledge" action="nudge_doc_page_action"/>
 
     <menuitem id="nudge_menu_usage" name="Usage" sequence="30"
-              parent="nudge_menu_root" action="nudge_usage_action"/>
+              parent="nudge_menu_root" action="nudge_usage_action"
+              groups="nudge.group_nudge_manager"/>
 
     <menuitem id="nudge_menu_configuration" name="Configuration" sequence="100"
-              parent="nudge_menu_root"/>
+              parent="nudge_menu_root"
+              groups="nudge.group_nudge_manager"/>
 
     <menuitem id="nudge_menu_settings" name="Settings" sequence="10"
               parent="nudge_menu_configuration" action="nudge_config_settings_action"

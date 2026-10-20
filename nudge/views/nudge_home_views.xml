@@ -5,7 +5,11 @@
         <field name="tag">nudge_home</field>
     </record>
 
-    <menuitem id="nudge_menu_home" name="My Nudge Home" sequence="249"
-              web_icon="nudge,static/description/icon.png"
+    <!-- The first screen of the Nudge app, and its first menu -->
+    <record id="nudge_menu_root" model="ir.ui.menu">
+        <field name="action" ref="nudge_home_action"/>
+    </record>
+
+    <menuitem id="nudge_menu_home" name="Home" sequence="1" parent="nudge_menu_root"
               action="nudge_home_action" groups="base.group_user"/>
 </odoo>
