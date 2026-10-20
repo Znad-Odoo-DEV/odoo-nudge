@@ -29,15 +29,17 @@ def set_theme_values(env, colors, fonts):
     :param colors: ``{"primary", "secondary", "accent", "light", "dark"}``
     :param fonts: ``{"heading", "body"}``"""
     assets = assets_model(env)
+    # colours are Sass literals, unquoted as the editor writes them; only font names and
+    # template keys are strings
     # o-color-1 primary, 2 secondary, 3 light, 4 white, 5 dark: the order of the editor
     assets.make_scss_customization(COLOR_URL, {
-        "o-color-1": f"'{colors['primary']}'",
-        "o-color-2": f"'{colors['secondary']}'",
-        "o-color-3": f"'{colors['light']}'",
-        "o-color-4": "'#FFFFFF'",
-        "o-color-5": f"'{colors['dark']}'",
+        "o-color-1": colors["primary"],
+        "o-color-2": colors["secondary"],
+        "o-color-3": colors["light"],
+        "o-color-4": "#FFFFFF",
+        "o-color-5": colors["dark"],
     })
-    assets.make_scss_customization(THEME_COLOR_URL, {"info": f"'{colors['accent']}'"})
+    assets.make_scss_customization(THEME_COLOR_URL, {"info": colors["accent"]})
     families = []
     for name in (fonts["heading"], fonts["body"]):
         if name not in families:
