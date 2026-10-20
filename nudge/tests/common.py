@@ -30,6 +30,9 @@ class NudgeCase:
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        # The AI path is what these tests ask for: common requests understood by rules first is on
+        # by default since 57.31, and the tests that want it switch it on themselves
+        cls.env["ir.config_parameter"].sudo().set_param("nudge.noai_first", "0")
         cls.user_a = new_test_user(cls.env, login="nudge_a", groups="nudge.group_nudge_user")
         cls.user_b = new_test_user(cls.env, login="nudge_b", groups="nudge.group_nudge_user")
         cls.manager = new_test_user(cls.env, login="nudge_m", groups="nudge.group_nudge_manager")
