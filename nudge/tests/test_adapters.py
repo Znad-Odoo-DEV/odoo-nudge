@@ -778,3 +778,28 @@ class TestToolChoice(BaseCase):
         params = adapter._build_params(SYSTEM, TURNS, tools=[TOOL], tool_choice="none")
         self.assertEqual(params["tool_choice"], {"type": "none"})
         self.assertEqual(params["thinking"], THINKING, "Thinking before the answer is allowed")
+
+
+@tagged("post_install", "-at_install")
+class TestOneShot(BaseCase):
+    """One question with no conversation: what the translation, the AI over a list and the shop builder use."""
+
+    def test_a_system_prompt_given_as_one_text_reaches_the_adapter_whole(self):
+        from odoo.addons.nudge.llm import oneshot
+
+        seen = []
+
+        class Adapter:
+            def stream_chat(self, system, turns, deadline=None, tools=None):
+                seen.append(system)
+                yield {"type": "text", "text": "Raghad"}
+                yield {"type": "stop", "usage": base.normalize_usage(None), "model": "m"}
+
+        answer, _usage, _model = oneshot.ask(Adapter(), "Translate for Ebrahim.", "Hello")
+        self.assertEqual(answer, "Raghad")
+        self.assertEqual(seen, [["Translate for Ebrahim."]])
+
+    def test_claude_gets_one_block_for_one_text_and_none_for_blanks(self):
+        adapter = AnthropicAdapter.__new__(AnthropicAdapter)
+        blocks = adapter._build_system(["Translate for Raghad.", " ", ""])
+        self.assertEqual([block["text"] for block in blocks], ["Translate for Raghad."])

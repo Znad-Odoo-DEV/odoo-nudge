@@ -12,6 +12,10 @@ def ask(adapter, system, text, deadline=None):
     :param text: what is asked, in one turn
     :return: ``(answer, usage, model)``, usage as :func:`base.normalize_usage`
     :raise base.AdapterError: when the provider failed"""
+    if isinstance(system, str):
+        # The adapters read the system prompt as a list of texts: a text alone would be read
+        # letter by letter (Claude refuses the blank ones, the others get it scrambled)
+        system = [system]
     parts, usage, model = [], base.normalize_usage(None), ""
     for event in adapter.stream_chat(
             system, [{"role": "user", "text": text, "context": ""}], deadline=deadline, tools=None):
