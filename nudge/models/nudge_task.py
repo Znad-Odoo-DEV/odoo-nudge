@@ -493,7 +493,7 @@ class NudgeTask(models.Model):
         try:
             measured = task.with_env(env)._rule_measure()
         except Exception as error:  # noqa: BLE001
-            task.write(dict(values, last_result=self.env._("Could not run: %s", error)))
+            task.write(dict(values, last_result=env._("Could not run: %s", error)))
             return
         previous = task.rule_last if isinstance(task.rule_last, dict) else None
         values["rule_last"] = measured
@@ -509,10 +509,10 @@ class NudgeTask(models.Model):
             if previous == measured:
                 shown = {}
             else:
-                before = self.env._("Before: %s", ", ".join(f"{k} {v}" for k, v in previous.items()) or "-")
+                before = env._("Before: %s", ", ".join(f"{k} {v}" for k, v in previous.items()) or "-")
         if not shown:
             task.write(dict(values, skip_count=task.skip_count + 1,
-                            last_result=self.env._("Nothing to report.")))
+                            last_result=env._("Nothing to report.")))
             return
         lines = [task.name]
         for label, value in shown.items():
@@ -520,7 +520,7 @@ class NudgeTask(models.Model):
             lines.append(f"- {label}: {value}")
         if before:
             lines.append(before)
-        lines.append(self.env._("Open the list: %s", task._rule_link()))
+        lines.append(env._("Open the list: %s", task._rule_link()))
         return task._publish("\n".join(lines), env, values)
 
     def _publish(self, text, env, values):
