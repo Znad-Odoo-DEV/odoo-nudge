@@ -11,4 +11,5 @@ def migrate(cr, version):
             SELECT res_id FROM ir_model_data
              WHERE module = 'nudge' AND name = 'nudge_report_menu_rule_owner' AND model = 'ir.rule')""")
     cr.execute("DELETE FROM ir_model_data WHERE module = 'nudge' AND name = 'nudge_report_menu_rule_owner'")
-    cr.execute("ALTER TABLE nudge_report DROP COLUMN IF EXISTS menu_id")
+    # A database older than the saved reports (57.17) has no such table yet
+    cr.execute("ALTER TABLE IF EXISTS nudge_report DROP COLUMN IF EXISTS menu_id")
