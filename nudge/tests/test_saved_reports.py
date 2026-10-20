@@ -176,8 +176,10 @@ class TestSavedReports(NudgeCase, TransactionCase):
         self.assertNotIn("nudge_user_id", self.env["ir.ui.menu"]._fields)
         my_reports = self.env.ref("nudge.nudge_menu_my_reports")
         self.assertEqual(my_reports.action, self.env.ref("nudge.nudge_report_action"))
+        manager = new_test_user(self.env, login="nudge_saved_manager", groups="nudge.group_nudge_manager")
+        self.assertIn(my_reports.id, self.visible_menus(manager), "Managers see the one menu")
         for user in (self.raghad_user, self.ebrahim_user):
-            self.assertIn(my_reports.id, self.visible_menus(user), "Everyone sees the one menu")
+            self.assertNotIn(my_reports.id, self.visible_menus(user), "The others reach their reports from the home")
         self.assertEqual(report.action_id.res_model, "sale.order")
         self.assertEqual(self.env.ref("nudge.nudge_report_action").res_model, "nudge.report")
         self.assertIn(report, self.env["nudge.report"].with_user(self.raghad_user).search([]))

@@ -1,6 +1,6 @@
 # Changelog
 
-Current version: nudge 19.0.1.57.27, nudge_builder 19.0.1.0.2, nudge_messaging 19.0.1.0.2, nudge_mail 19.0.1.0.13.
+Current version: nudge 19.0.1.57.28, nudge_builder 19.0.1.0.3, nudge_messaging 19.0.1.0.3, nudge_mcp 19.0.1.0.3, nudge_mail 19.0.1.0.13.
 
 ## Release 2 (19.0.1.57.x)
 
@@ -8,6 +8,7 @@ Odoo 19 only for now: the two new companions, nudge_builder and nudge_messaging,
 
 Summary: 24 features and 2 new companions. What is on after install: answer memory (nothing is served before a manager approves one), common requests understood by rules before the AI, warnings before saving (duplicates, tax-number format, a bill number already used, the required fields), the new-user coach for 14 days (a company switch turns it off) and the weekly count of recurring questions (no AI). What is off until someone turns it on: the weekly health check, the Mail agent, WhatsApp and Telegram, the MCP server, the marketplace source and its weekly refresh. No schedule calls an AI provider by itself.
 
+- 57.28 Inside the one app, My Reports, the approvals of WhatsApp, Telegram and external assistants, the help of external assistants and the Website Builder are for Nudge managers only again; everyone else has Home, and their reports stay on its tiles (builder, MCP and messaging 1.0.3)
 - 57.27 One Nudge app instead of two: it opens on My Nudge Home for every employee and Home is its first menu; the menus of managers stay with managers, while My Reports, the approvals of WhatsApp, Telegram and external assistants, and the Website Builder now reach the people their groups name, whom the managers-only app used to hide them from
 - 57.26 Port gaps closed in the code (builder 1.0.2, messaging 1.0.2, MCP 1.0.2): the website builder makes its slug, writes the page arch as XML, finds a section title at any heading level or adds one, and fills the FAQ and team blocks of Odoo 17 and the stand-in snippets itself; a notice to a person goes through one helper that uses the user bus of Odoo 18 and 19 or the partner bus of Odoo 17; the debugger reads a scheduled action's failures only where the version records them; the sentences of the health, compliance, upgrade and outlier checks keep the reader's language on Odoo 17; the coach counts a screen only when every menu above it is open to the person; a test class that needs Purchase, Sales, Project, Inventory, Employees or Automation skips itself when that app is missing.
 - 57.25 Review fixes (developer): My Reports is one menu that lists the reports of the person (managers read all), and the update removes the per-report menus, the rule that hid them and their columns; the builder link check follows redirects itself (three hops, each checked) within a time budget; sites carry company rules, colours and fonts are validated; the SQL constraints work on every series; old counted questions, lexicon and installed-recipe rows are collected or carry company rules; the messaging log and codes are cleaned by retention; mail the provider could not read is read again by the scheduled action.

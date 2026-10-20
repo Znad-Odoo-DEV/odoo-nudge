@@ -60,5 +60,5 @@
     </record>
 
     <menuitem id="nudge_menu_my_reports" name="My Reports" sequence="12" parent="nudge_menu_root"
-              action="nudge_report_action" groups="nudge.group_nudge_user"/>
+              action="nudge_report_action" groups="nudge.group_nudge_manager,-nudge.group_nudge_user"/>
 </odoo>
