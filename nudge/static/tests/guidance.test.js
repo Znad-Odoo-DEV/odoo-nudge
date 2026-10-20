@@ -286,6 +286,26 @@ test("steps follow what the person does", async () => {
     expect(".o_nudge_cursor").toHaveCount(0);
 });
 
+test("a step on a form that opens after the step is shown waits for it", async () => {
+    const { guidance, view } = await start();
+    // The list is in front, as after a click on New, until the form is mounted
+    const list = { controller: { model: { root: {} }, rootRef: { el: document.createElement("div") } } };
+    const context = getService("nudge_context");
+    patchWithCleanup(context, { frontView: () => list });
+    guidance.begin([step("field", "email", "Type the address.")]);
+    await advanceTime(1000);
+    expect(guidance.state.element).toBe(null);
+
+    patchWithCleanup(context, { frontView: () => view });
+    await advanceTime(1000);
+    await animationFrame();
+    await pointed();
+
+    expect(guidance.state.isActive).toBe(true);
+    expect(guidance.state.index).toBe(0);
+    expect(guidance.state.element).toBe(queryOne(".o_field_widget[name=email]"));
+});
+
 test("a closed tab is opened on the way", async () => {
     const { guidance } = await start();
     guidance.begin([step("field", "notes", "Write a note.")]);
