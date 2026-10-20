@@ -86,7 +86,7 @@
 
     <menuitem id="nudge_mcp_menu_help" name="External Assistants" parent="nudge.nudge_menu_root"
               action="nudge_mcp_help_action" sequence="110"
-              groups="nudge_mcp.group_nudge_mcp,nudge.group_nudge_manager"/>
+              groups="nudge.group_nudge_manager,-nudge_mcp.group_nudge_mcp"/>
 
     <record id="nudge_step_view_form_mcp" model="ir.ui.view">
         <field name="name">nudge.step.view.form.mcp</field>
@@ -116,7 +116,7 @@
 
     <menuitem id="nudge_mcp_menu_approvals" name="Assistant Approvals" parent="nudge.nudge_menu_root"
               action="nudge_step_action_mcp_approvals" sequence="111"
-              groups="nudge_mcp.group_nudge_mcp"/>
+              groups="nudge.group_nudge_manager,-nudge_mcp.group_nudge_mcp"/>
 
     <record id="nudge_run_view_list_mcp" model="ir.ui.view">
         <field name="name">nudge.run.view.list.mcp</field>

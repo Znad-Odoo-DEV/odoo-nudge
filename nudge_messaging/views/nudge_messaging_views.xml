@@ -66,7 +66,7 @@
 
     <menuitem id="nudge_messaging_menu_approvals" name="Phone Approvals" parent="nudge.nudge_menu_root"
               action="nudge_step_action_messaging_approvals" sequence="112"
-              groups="nudge.group_nudge_agent"/>
+              groups="nudge.group_nudge_manager,-nudge.group_nudge_agent"/>
 
     <!-- The linked phones, for the manager -->
     <record id="nudge_messaging_link_view_list" model="ir.ui.view">

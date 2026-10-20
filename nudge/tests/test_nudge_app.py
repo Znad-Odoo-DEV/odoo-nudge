@@ -17,7 +17,7 @@ class TestNudgeApp(TransactionCase):
         cls.manager_menus = {
             "nudge.nudge_menu_conversations", "nudge.nudge_menu_agent", "nudge.nudge_menu_knowledge",
             "nudge.nudge_menu_usage", "nudge.nudge_menu_configuration", "nudge.nudge_menu_coach",
-            "nudge.nudge_menu_health",
+            "nudge.nudge_menu_health", "nudge.nudge_menu_my_reports",
         }
 
     def reachable(self, user):
@@ -45,11 +45,10 @@ class TestNudgeApp(TransactionCase):
     def test_an_employee_sees_the_app_and_its_home_only(self):
         self.assertEqual(self.reachable(self.plain), {"nudge.nudge_menu_root", "nudge.nudge_menu_home"})
 
-    def test_a_nudge_user_also_finds_their_reports(self):
-        menus = self.reachable(self.member)
-        self.assertLessEqual({"nudge.nudge_menu_root", "nudge.nudge_menu_home", "nudge.nudge_menu_my_reports"}, menus)
-        self.assertFalse(menus & self.manager_menus, "What managers see stays theirs")
+    def test_a_nudge_user_sees_the_home_only_too(self):
+        # their saved reports are on the tiles of the home; the menu of reports is for managers
+        self.assertEqual(self.reachable(self.member), {"nudge.nudge_menu_root", "nudge.nudge_menu_home"})
 
     def test_a_manager_keeps_every_menu(self):
         menus = self.reachable(self.manager)
-        self.assertLessEqual(self.manager_menus | {"nudge.nudge_menu_home", "nudge.nudge_menu_my_reports"}, menus)
+        self.assertLessEqual(self.manager_menus | {"nudge.nudge_menu_home"}, menus)
