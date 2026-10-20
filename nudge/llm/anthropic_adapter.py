@@ -128,7 +128,8 @@ class AnthropicAdapter(base.BaseAdapter):
     # Request building
     # ------------------------------------------------------------------
     def _build_system(self, system):
-        blocks = [{"type": "text", "text": text} for text in system if text]
+        # Claude refuses a block of blanks only
+        blocks = [{"type": "text", "text": text} for text in system if text and text.strip()]
         if blocks:
             # Read point for the stable prefix (tools + system)
             blocks[-1]["cache_control"] = {"type": "ephemeral"}
