@@ -214,6 +214,7 @@ class AnthropicAdapter(base.BaseAdapter):
     # API
     # ------------------------------------------------------------------
     def stream_chat(self, system, turns, deadline=None, tools=None, tool_choice=None):
+        system = base.system_texts(system)
         try:
             anthropic = self._sdk()
         except base.AdapterError as exc:
