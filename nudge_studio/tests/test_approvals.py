@@ -72,6 +72,26 @@ class TestApprovals(NudgeCase, TransactionCase):
         self.do("prepare_delete", gone)
         self.assertFalse(rule.exists())
 
+    def test_a_deleted_approver_or_model_is_told_plainly(self):
+        result = self.run_tool("prepare_approval_rule", {
+            "model": "res.partner", "method": "create_company", "approvers": ["nudge_approver"]})
+        self.assertFalse(result.is_error, result.content)
+        gone = new_test_user(self.env, login="nudge_gone_approver", name="Raghad Gone", groups="base.group_user")
+        survivors = result.pending["values"]["rule"]["approver_ids"]
+        # The only approver is deleted between the card and the yes
+        result.pending["values"]["rule"]["approver_ids"] = [gone.id]
+        gone.unlink()
+        done = self.do("prepare_approval_rule", result)
+        self.assertTrue(done.is_error)
+        self.assertIn("approver", done.content)
+        self.assertIn("deleted", done.content)
+        # The model is deleted
+        result.pending["values"]["rule"]["approver_ids"] = survivors
+        result.pending["values"]["rule"]["model_id"] = 999999999
+        done = self.do("prepare_approval_rule", result)
+        self.assertTrue(done.is_error)
+        self.assertIn("model", done.content)
+
     def test_a_rule_left_pointing_at_what_is_gone_is_listed_with_the_others(self):
         # On dev_0, rule #56 on purchase.order pointed at action #3375, deleted since: reading
         # its name failed (MissingError), no rule was listed, and the card was built blind

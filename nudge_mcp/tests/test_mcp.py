@@ -336,6 +336,18 @@ class TestMcp(HttpCase):
         self.assertTrue(again["result"]["isError"])
         self.assertEqual(Partner.search_count([("name", "=", "Ebrahim MCP Contact")]), 1)
 
+    def test_a_yes_given_after_leaving_the_company_is_refused(self):
+        self.writes_on()
+        token = self.token_of(self.prepare("Ebrahim Left Company"))
+        self.approve(token)
+        step = self.step_of(token)
+        self.assertEqual(step.company_id, self.env.company)
+        step.company_id = self.env["res.company"].create({"name": "Nudge MCP Other Company"})
+        answer = self.call("confirm", {"token": token})
+        self.assertTrue(answer["result"]["isError"])
+        self.assertIn("no longer belong", self.text(answer))
+        self.assertEqual(self.env["res.partner"].search_count([("name", "=", "Ebrahim Left Company")]), 0)
+
     def test_decline_and_bad_tokens(self):
         self.writes_on()
         token = self.token_of(self.prepare("Ebrahim Declined"))

@@ -559,6 +559,42 @@ class TestActing(AgentCase, TransactionCase):
         self.assertEqual(self.bob.write_uid, self.agent)
         self.assertEqual(result.event, {"type": "changed", "model": "res.partner", "ids": self.bob.ids})
 
+    def test_a_record_changed_since_the_preview_is_not_overwritten(self):
+        pending = self.prepare("prepare_write", {
+            "model": "res.partner", "ids": [self.bob.id], "values": values(function="Head of Purchase")})
+        self.assertEqual(pending["values"]["current"], {str(self.bob.id): {"function": "Buyer"}})
+        # Raghad changes the job while the card waits for Ebrahim's yes
+        self.bob.function = "Accountant"
+        result = self.execute("prepare_write", pending)
+        self.assertTrue(result.is_error, result.content)
+        self.assertIn(self.bob.display_name, result.content)
+        self.assertIn("Job Position", result.content)
+        self.assertIn("ask again", result.content)
+        self.assertEqual(self.bob.function, "Accountant")
+        # A step made before the snapshot existed runs as it always did
+        pending["values"].pop("current")
+        result = self.execute("prepare_write", pending)
+        self.assertFalse(result.is_error, result.content)
+        self.assertEqual(self.bob.function, "Head of Purchase")
+
+    def test_a_yes_runs_in_the_company_of_the_step(self):
+        second = self.env["res.company"].create({"name": "Nudge Second Company"})
+        self.agent.sudo().company_ids = [(4, second.id)]
+        step = self.step("prepare_write", self.prepare("prepare_write", {
+            "model": "res.partner", "ids": [self.bob.id], "values": values(function="Head of Purchase")}))
+        self.assertEqual(step.company_id, self.env.company)
+        step.company_id = second
+        env = step._company_env(self.env(user=self.agent))
+        self.assertEqual(env.company, second)
+        # No company: as today
+        step.company_id = False
+        self.assertEqual(step._company_env(self.env(user=self.agent)).company, self.agent.company_id)
+        # The person left that company since
+        step.company_id = second
+        self.agent.sudo().company_ids = [(3, second.id)]
+        with self.assertRaises(UserError):
+            step._company_env(self.env(user=self.agent))
+
     def test_many2many_is_added_to_not_replaced(self):
         # "Give Marc the Inventory access" as group_ids = [45] took away every other access
         first, second = self.env["res.partner.category"].create([{"name": "Nudge A"}, {"name": "Nudge B"}])

@@ -253,8 +253,21 @@ class PrepareApprovalRule(Building):
         values = dict((step.values or {}).get("rule") or {})
         if not values.get("model_id") or not (values.get("method") or values.get("action_id")):
             return base.ToolResult("This rule cannot be made.", is_error=True)
-        values["approver_ids"] = [Command.set(values.get("approver_ids") or [])]
-        values["users_to_notify"] = [Command.set(values.get("users_to_notify") or [])]
+        # Shown yesterday, applied today: what was named may be gone since
+        if not env["ir.model"].browse(values["model_id"]).exists():
+            return base.ToolResult(env._(
+                "The model this rule was prepared for does not exist any more. Nothing was made. "
+                "Ask again."), is_error=True)
+        approvers = env["res.users"].browse(values.get("approver_ids") or []).exists()
+        group = env["res.groups"].browse(values.get("approval_group_id") or []).exists()
+        if not approvers and not group:
+            return base.ToolResult(env._(
+                "Every approver this rule named has been deleted since. Nothing was made. "
+                "Ask again and name who approves."), is_error=True)
+        values["approval_group_id"] = group.id or False
+        values["approver_ids"] = [Command.set(approvers.ids)]
+        values["users_to_notify"] = [Command.set(
+            env["res.users"].browse(values.get("users_to_notify") or []).exists().ids)]
         rule = env[RULE].create(values)
         return base.ToolResult(
             f"Made: approval rule #{rule.id} on {rule.model_name}, button {button_of(rule)}. "
