@@ -1,6 +1,6 @@
 # Changelog
 
-Current version: nudge 19.0.1.57.29, nudge_builder 19.0.1.0.3, nudge_messaging 19.0.1.0.4, nudge_mcp 19.0.1.0.4, nudge_ai 19.0.1.0.9, nudge_studio 19.0.1.0.9, nudge_mail 19.0.1.0.13.
+Current version: nudge 19.0.1.57.30, nudge_builder 19.0.1.0.3, nudge_messaging 19.0.1.0.4, nudge_mcp 19.0.1.0.4, nudge_ai 19.0.1.0.9, nudge_studio 19.0.1.0.9, nudge_mail 19.0.1.0.13.
 
 ## Release 2 (19.0.1.57.x)
 
@@ -8,6 +8,7 @@ Odoo 19 only for now: the two new companions, nudge_builder and nudge_messaging,
 
 Summary: 24 features and 2 new companions. What is on after install: answer memory (nothing is served before a manager approves one), common requests understood by rules before the AI, warnings before saving (duplicates, tax-number format, a bill number already used, the required fields), the new-user coach for 14 days (a company switch turns it off) and the weekly count of recurring questions (no AI). What is off until someone turns it on: the weekly health check, the Mail agent, WhatsApp and Telegram, the MCP server, the marketplace source and its weekly refresh. No schedule calls an AI provider by itself.
 
+- 57.30 A database older than 57.22 updates again: the migrations of 57.24 and 57.25 no longer touch the tables of the recipe marketplace and of the saved reports before the update has made them
 - 57.29 Security review fixes: a yes refuses what changed since its card (a deleted or unreadable record, a field someone else wrote, a company the person left, a deleted approver) and works in the company of the card, also in the background; deleting a conversation in which the Agent acted is refused in words, since its log is kept, and it can be archived; conversations older than a set number of days are deleted every day, or archived when the Agent acted (off by default); a tool that fails tells only the kind of a database error; run_sql refuses fields kept for groups the administrator is not in and hides secrets by the column they come from, whatever the alias; run_python refuses numbers and repetitions too large for one step; a provider address must be http or https, with warnings for plain http and for a public address marked as our own server; the store page names the CC BY-SA licence of the bundled Odoo documentation (ai 1.0.9, studio 1.0.9, mcp 1.0.4, messaging 1.0.4)
 - 57.28 Inside the one app, My Reports, the approvals of WhatsApp, Telegram and external assistants, the help of external assistants and the Website Builder are for Nudge managers only again; everyone else has Home, and their reports stay on its tiles (builder, MCP and messaging 1.0.3)
 - 57.27 One Nudge app instead of two: it opens on My Nudge Home for every employee and Home is its first menu; the menus of managers stay with managers, while My Reports, the approvals of WhatsApp, Telegram and external assistants, and the Website Builder now reach the people their groups name, whom the managers-only app used to hide them from
