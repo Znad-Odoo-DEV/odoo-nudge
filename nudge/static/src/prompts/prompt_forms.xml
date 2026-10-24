@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="nudge.PromptFill">
+        <form class="o_nudge_prompt_form" t-on-submit.prevent="send">
+            <p class="o_nudge_prompt_title" dir="auto" t-esc="props.chip.name"/>
+            <p class="o_nudge_prompt_text" dir="auto" t-esc="preview"/>
+            <t t-foreach="props.chip.variables" t-as="variable" t-key="variable.name">
+                <label class="o_nudge_prompt_field">
+                    <span class="o_nudge_prompt_label" t-esc="variable.label"/>
+                    <t t-if="variable.type === 'many2one'">
+                        <AutoComplete value="state.shown[variable.name]" sources="sourcesOf(variable)"
+                                      onSelect="(option) => this.pick(variable, option)"
+                                      onInput="({ inputValue }) => this.typed(variable, inputValue)"/>
+                    </t>
+                    <select t-elif="variable.type === 'selection'" class="form-select form-select-sm"
+                            t-model="state.values[variable.name]">
+                        <option t-foreach="variable.options" t-as="option" t-key="option_index"
+                                t-att-value="option" t-esc="option or '-'"/>
+                    </select>
+                    <input t-elif="variable.type === 'boolean'" type="checkbox" class="form-check-input"
+                           t-model="state.values[variable.name]"/>
+                    <input t-elif="variable.type === 'date'" type="date" class="form-control form-control-sm"
+                           t-model="state.values[variable.name]"/>
+                    <input t-elif="variable.type === 'integer' or variable.type === 'number'" type="text"
+                           inputmode="decimal" class="form-control form-control-sm"
+                           t-model="state.values[variable.name]"/>
+                    <textarea t-elif="variable.type === 'text'" rows="3" maxlength="3000"
+                              class="form-control form-control-sm" t-model="state.values[variable.name]"/>
+                    <input t-else="" type="text" maxlength="300" class="form-control form-control-sm"
+                           t-model="state.values[variable.name]"/>
+                </label>
+            </t>
+            <p t-if="state.error" class="o_nudge_prompt_error" role="alert" t-esc="state.error"/>
+            <div class="o_nudge_prompt_buttons">
+                <button type="submit" class="btn btn-primary btn-sm o_nudge_prompt_send" t-att-disabled="state.busy">
+                    Send
+                </button>
+                <button type="button" class="btn btn-link btn-sm o_nudge_prompt_cancel" t-on-click="props.onCancel">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </t>
+
+    <t t-name="nudge.PromptSave">
+        <form class="o_nudge_prompt_form o_nudge_prompt_save" t-on-submit.prevent="save">
+            <p class="o_nudge_prompt_title">Keep this as a prompt</p>
+            <label class="o_nudge_prompt_field">
+                <span class="o_nudge_prompt_label">Title</span>
+                <input type="text" maxlength="120" class="form-control form-control-sm o_nudge_prompt_name"
+                       dir="auto" t-model="state.name"/>
+            </label>
+            <label t-if="props.canShare" class="o_nudge_prompt_field">
+                <span class="o_nudge_prompt_label">Who can use it</span>
+                <select class="form-select form-select-sm o_nudge_prompt_scope"
+                        t-on-change="(ev) => this.setScope(ev.target.value)">
+                    <option value="private" t-att-selected="state.scope === 'private'">Only me</option>
+                    <option value="company" t-att-selected="state.scope === 'company'">Everybody in the company</option>
+                </select>
+            </label>
+            <t t-if="state.proposal">
+                <p class="o_nudge_prompt_text" dir="auto" t-esc="state.proposal.body"/>
+                <ul t-if="state.proposal.found.length" class="o_nudge_prompt_found">
+                    <li t-foreach="state.proposal.found" t-as="item" t-key="item.name">
+                        <label>
+                            <input type="checkbox" class="form-check-input" t-att-checked="item.used"
+                                   t-att-disabled="shared" t-on-change="() => this.toggle(item)"/>
+                            <span dir="auto" t-esc="item.sample"/>
+                            <span class="o_nudge_prompt_label">is a variable</span>
+                        </label>
+                    </li>
+                </ul>
+                <p t-if="shared" class="o_nudge_prompt_note">
+                    A prompt for others keeps none of the words of this message: each one is asked for.
+                </p>
+            </t>
+            <p t-if="state.error" class="o_nudge_prompt_error" role="alert" t-esc="state.error"/>
+            <div class="o_nudge_prompt_buttons">
+                <button type="submit" class="btn btn-primary btn-sm o_nudge_prompt_keep"
+                        t-att-disabled="state.busy or !state.proposal or !state.name.trim()">
+                    Keep
+                </button>
+                <button type="button" class="btn btn-link btn-sm o_nudge_prompt_cancel" t-on-click="props.onCancel">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </t>
+
+</templates>

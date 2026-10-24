@@ -186,6 +186,14 @@
                             t-on-click="openProviders">
                         Set up a provider
                     </button>
+                    <div t-if="promptChips.length" class="o_nudge_suggestions o_nudge_noai_prompts">
+                        <p class="o_nudge_empty_text">Try one of these. Nudge understands them without any AI:</p>
+                        <button t-foreach="promptChips" t-as="chip" t-key="chip.id"
+                                type="button" class="o_nudge_suggestion o_nudge_prompt_chip" dir="auto"
+                                t-att-title="chip.description" t-on-click="() => this.onChip(chip)">
+                            <span t-esc="chip.name"/>
+                        </button>
+                    </div>
                     <form class="o_nudge_quick" t-on-submit.prevent="quickSearch">
                         <p class="o_nudge_empty_text">Meanwhile, search the screens, the settings and the Odoo documentation:</p>
                         <div class="input-group">
@@ -317,9 +325,19 @@
                                t-on-change="onPhotoChosen"/>
                     </div>
                     <div class="o_nudge_suggestions">
-                        <button t-foreach="suggestions" t-as="suggestion" t-key="suggestion_index"
-                                type="button" class="o_nudge_suggestion" dir="auto"
-                                t-on-click="() => this.send(suggestion)" t-esc="suggestion"/>
+                        <t t-if="promptChips.length">
+                            <button t-foreach="promptChips" t-as="chip" t-key="chip.id"
+                                    type="button" class="o_nudge_suggestion o_nudge_prompt_chip" dir="auto"
+                                    t-att-title="chip.description" t-on-click="() => this.onChip(chip)">
+                                <span t-esc="chip.name"/>
+                                <span t-if="chip.variables.length" class="o_nudge_prompt_chip_hint">Fill in, then send</span>
+                            </button>
+                        </t>
+                        <t t-else="">
+                            <button t-foreach="suggestions" t-as="suggestion" t-key="suggestion_index"
+                                    type="button" class="o_nudge_suggestion" dir="auto"
+                                    t-on-click="() => this.send(suggestion)" t-esc="suggestion"/>
+                        </t>
                     </div>
                     <p t-if="state.commands.length" class="o_nudge_hint o_nudge_commands_hint">
                         Type “/” to tell me where to look
@@ -402,6 +420,14 @@
                     <NudgeImportCard/>
                 </t>
             </div>
+
+            <NudgePromptFill t-if="prompts.fill and state.view === 'chat'" chip="prompts.fill"
+                             onSend="(result) => this.sendFilled(result)"
+                             onCancel="() => this.prompts.fill = null"/>
+            <NudgePromptSave t-if="prompts.save and state.view === 'chat'" text="prompts.save.text"
+                             mode="prompts.save.mode" canShare="state.isManager"
+                             onSaved="() => this.savedPrompt()"
+                             onCancel="() => this.prompts.save = null"/>
 
             <div t-if="canCompose and state.view === 'chat' and bulkTarget" class="o_nudge_bulk">
                 <button type="button" class="o_nudge_suggestion o_nudge_bulk_open" t-att-disabled="state.isStreaming"
@@ -538,6 +564,11 @@
                         title="Send a file with the question: a PDF, a text, an image, a recording"
                         aria-label="Send a file" t-on-click="pickFile">
                     <i class="fa fa-paperclip"/>
+                </button>
+                <button t-if="canSavePrompt" type="button" class="o_nudge_attach o_nudge_save_prompt"
+                        title="Keep this as a prompt to use again" aria-label="Keep this as a prompt"
+                        t-on-click="openSave">
+                    <i class="fa fa-bookmark-o"/>
                 </button>
                 <button t-if="canRecordMeeting or meeting.on" type="button" class="o_nudge_attach o_nudge_meeting"
                         t-att-class="{ o_nudge_meeting_on: meeting.on }"

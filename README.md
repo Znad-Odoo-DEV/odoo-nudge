@@ -318,6 +318,32 @@ sentence typed right; a sentence that changes something and needed a slip correc
 two things, stays under the threshold and is only offered. The parse carries `corrections` (what was read as
 what) and, under the threshold, `candidates`: the sentences it may have meant, each with the corrected text, for
 a “Did you mean” offer. A parse between 0.4 and 0.7 is offered the same way and is never acted on.
+### The prompt library
+
+Requests worth asking again are kept as prompts (Nudge ‣ Prompts). A prompt has a title and a text in
+English and in Arabic, the mode it is sent in, the screens (models) and the apps it fits, and its
+variables: write `{{customer}}` in the text and Nudge asks for it before sending. A variable is a
+text, a number, a date, a yes/no, a choice or a record (picked with the rights of the person, so only
+what they may read is offered). A prompt is private, for a team (a group), or for the company; only a
+Nudge manager shares one. 50 ready prompts come with Nudge (talk, agent, developer, industries, roles,
+websites) and are archived, never deleted, when you do not want them.
+
+- **Chips.** Above the message box Nudge suggests the prompts of the model of the screen you are on,
+  then the general ones. A prompt whose apps are not installed, or whose mode you may not use, is not
+  suggested. A chip with variables, or from a colleague or a recipe, opens a small form that shows the
+  text first; you send it, nothing is sent by itself.
+- **Keep as a prompt.** The bookmark button next to the paperclip keeps what you typed, or your last
+  message, and proposes the dates, numbers and names in it as variables. For a prompt shared with others
+  every one of them becomes a variable: no data of a record is kept in a shared prompt.
+- **Safe by construction.** The text of a prompt is the message of the person who chooses it: it is never
+  put into the system prompt, never run on import, and the values are checked and cannot add
+  placeholders of their own. The filled text goes through the same cards, log and undo as anything typed.
+- **No provider.** Before a provider is set up, the panel offers the starters that the rules of Nudge
+  understand (marked “answered without AI”); one the rules cannot read is not offered.
+- **Sharing.** Prompts are an item kind (`prompt`) of the recipes: export them, import them, publish them
+  in an index (kind `prompts`). An import shows each text first, brings it in as a company prompt and
+  never replaces a newer version. A recipe item of a kind this Nudge does not know is skipped with a
+  warning; the rest of the file is imported.
 
 ### In the background
 
