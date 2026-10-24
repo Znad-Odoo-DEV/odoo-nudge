@@ -25810,3 +25810,9 @@ msgstr "جهّزت تعديلاً على إعدادات البحث للصفحة"
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "Prepared taking back a website change"
 msgstr "جهّزت التراجع عن تعديل في الموقع"
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_conversation.py:0
+#, python-format
+msgid "%(refusal)s The model chosen to stand in (%(model)s) is not on the list either."
+msgstr "%(refusal)s والنموذج البديل (%(model)s) ليس على القائمة أيضاً."
