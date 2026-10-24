@@ -20,8 +20,8 @@ from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, ValidationError
 
 from .. import tools
-from ..llm import prompt
-from ..tools import base, skills as skill_rules
+from ..llm import fingerprint, prompt
+from ..tools import base, skill_router, skills as skill_rules
 
 _logger = logging.getLogger(__name__)
 
@@ -269,6 +269,22 @@ class NudgeSkill(models.Model):
                 chosen[skill.key] = skill
         return self.browse([chosen[key].id for key in sorted(chosen)])
 
+    def _route(self, text, model=None, screen=None):
+        """S1: the skills a question needs, even when it holds none of their trigger words
+        (``tools/skill_router.py``: the trigger words and the screen, then the words of the skills, then
+        the local search model if it is already on). :return: the ``Choice``, with the skills in
+        ``keys`` and every skill the question scored for in ``ranked``"""
+        index = skill_router.index_of(self.env, self)
+        return skill_router.route(index, text, model, screen, engine_of=self._search_engine)
+
+    def _search_engine(self):
+        """:return: the local search model when an administrator has already switched it on, else None"""
+        try:
+            # sudo: reads a server parameter and the model kept in memory; it shows the person nothing
+            return self.env["nudge.embedding"].sudo()._embedder()
+        except Exception:  # noqa: BLE001 - the search model is never needed to choose a skill
+            return None
+
     def _router_entries(self):
         return [(skill.key, skill_rules.forms_of(skill.trigger_words), set(skill_rules.split_names(skill.model_names)))
                 for skill in self]
@@ -318,7 +334,9 @@ class NudgeSkill(models.Model):
             ("state", "=", "published"), ("id", "!=", self.id),
             ("company_id", "in", [self.company_id.id, False] if self.company_id else [False])])
         rivals = rivals.filtered(lambda other: set(other._modes_list()) & set(self._modes_list()))
-        picked = skill_rules.pick((self | rivals)._router_entries(), self.test_sentence)
+        # By its words, as the weekly check always said: the other layers would hide a trigger word that is gone
+        index = skill_router.index_of(self.env, self | rivals)
+        picked = skill_router.route(index, self.test_sentence, layers=("rules",)).keys
         if self.key not in picked:
             return "failed", _(
                 "The test sentence does not bring the skill any more; it brings %s.",
@@ -407,27 +425,38 @@ class NudgeConversation(models.Model):
             return plan
         if inline:
             # The fallback: every skill in full, as the instructions were before skills
-            given, entries = visible, []
+            given, entries, shown = visible, [], None
         else:
+            shown = None
             screen = question.snapshot if isinstance(question.snapshot, dict) else {}
-            entries = visible._router_entries()
-            keys = skill_rules.pick(entries, question.content or "", screen.get("model"))
+            choice = visible._route(question.content or "", screen.get("model"), screen)
+            keys = list(choice.keys)
             # An answer to a question of Nudge goes on with the skills of the question it answers
-            keys += [key for key in skill_rules.pick(entries, previous.content or "") if key not in keys]
-            kept = [key for key in reversed((self.sudo().skill_keys or "").split(",")) if key and key not in keys]
+            keys += [key for key in visible._route(previous.content or "").keys if key not in keys]
+            kept_all = [key for key in reversed((self.sudo().skill_keys or "").split(",")) if key]
+            kept = [key for key in kept_all if key not in keys]
+            if not keys and not kept and question.content:
+                # No skill for this question: the model may ask for one (use_skill); the miss is kept
+                skill_router.note_miss(fingerprint.sample(question.content))
             keys = (keys + kept)[:skill_rules.MAX_LOADED]
             by_key = {skill.key: skill for skill in visible}
             given = Skill.browse([by_key[key].id for key in keys if key in by_key])
-            entries = [] if compact else [(skill.key, skill.summary) for skill in visible]
+            # S1: the index lists the skills this question scored for, the best first, and those already in
+            # the conversation, not every skill: the others are asked for by key or by describing the work
+            shown = skill_router.offered(choice, [*keys, *kept_all]) if len(visible) > skill_router.INDEX_MAX else None
+            entries = [] if compact else [
+                (skill.key, skill.summary) for skill in visible if shown is None or skill.key in shown]
         texts = given.mapped("instructions")
         plan.update(
             # Every skill in full is the same text for every question: it stays in the cached prefix
-            index=prompt.render_skills(texts) if inline else prompt.render_skill_index(entries),
-            text=[] if inline else texts,
+            # A list cut to the question changes from one question to the next: it goes with the skills of
+            # the question, after the part of the prompt the cache keeps; a whole list is the same each time
+            index=prompt.render_skills(texts) if inline else ("" if shown is not None else prompt.render_skill_index(entries)),
+            text=[] if inline else ([prompt.render_skill_index(entries)] if shown is not None and entries else []) + list(texts),
             given=given,
             offer={**plan["offer"],
                    "tools": sorted({name for skill in given for name in skill_rules.split_names(skill.tool_names)}),
-                   "index": bool(entries)})
+                   "index": bool(visible) and not compact and not inline})
         return plan
 
     def _skill_plan_or_nothing(self, mode, compact):
@@ -476,8 +505,18 @@ class NudgeConversation(models.Model):
         # use_skill: the skill joins the instructions from the next step of this answer, with its tools,
         # as a system block (llm/loop.py), never as a tool result; a text already there is not given twice
         self.invalidate_recordset(["skill_keys"])
-        asked = {str((call.get("input") or {}).get("key") or "").strip().lower() for call in calls} - loaded
-        given = self.env["nudge.skill"]._visible(mode).filtered(lambda skill: skill.key in asked)
+        visible = self.env["nudge.skill"]._visible(mode)
+        asked = set()
+        for call in calls:
+            arguments = call.get("input") or {}
+            key = str(arguments.get("key") or "").strip().lower()
+            if not key and arguments.get("work"):
+                # use_skill with the work described: the same skill the tool itself chose
+                found = visible._route(str(arguments["work"]).strip()).ranked
+                key = found[0][0] if found else ""
+            asked.add(key)
+        asked -= loaded
+        given = visible.filtered(lambda skill: skill.key in asked)
         if given:
             provider = self.sudo().provider_id
             step["skills"] = given.mapped("instructions")

@@ -400,6 +400,23 @@ version and a test sentence with the tool it expects.
   step of the same answer, and for the next questions of the conversation; the text joins the
   instructions, never a tool result). A small model gets the skills of its question without the list. Measured with the method of the load test (system text and tool schema at 4 bytes a token):
   about 0.4k tokens less in each call of Talk and Agent, about 0.9k less in Developer.
+- **The right skill without its words (S1).** A question that holds none of a skill's trigger words
+  still gets the skill it is about, with no AI and no model (`tools/skill_router.py`): the trigger words
+  and the screen model as before, then the words of the question (Arabic folded as the rules fold it, a
+  slip of the keys or Arabic written in Latin letters read as the word it was meant to be, English and
+  Arabic words of one meaning grouped) scored against the text of each skill (BM25: trigger words,
+  title, summary, instructions, tools and a short list of cues for the skills that come with Nudge,
+  `tools/skill_words.py`), then a small push from the model of the screen, and only when an
+  administrator has already switched the local search model on, its reading as one more signal (asked
+  only when the words left the choice unsure). Nothing found: no skill, the model may call `use_skill`
+  with a key or with the work described (`work`), and the question is kept (redacted) for the coverage
+  page (`skill_router.MISSES`). The index is built once per registry and set of skills and costs about
+  1 ms a question. **The index of a call lists at most 8 skills**: those the question scored best for
+  and those already loaded in the conversation; the others are asked for with `use_skill`.
+  Measured on `tests/skill_router_cases.py` (no model): sentences the word lists were tuned on 92%
+  top-2; two sets written afterwards (40 each, 22 English, 12-13 Arabic, 5-6 Arabizi) 93% on the first, after its
+  words were added, and 70% on the second one, taken once: vocabulary is what limits the words, and
+  Arabizi most; the model is the remedy for the rest.
 - **Never more rights.** The tools a skill names are offered only to the people who may already use
   them in that mode (groups, the switches of the administrator): a skill naming `run_sql` gives nothing
   to an Agent user without the SQL switch. A skill is an instruction of the company: only Nudge managers
