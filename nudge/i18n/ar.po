@@ -2463,8 +2463,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_plan_card.js:0
 msgid ""
-"After your yes, each change shows its own card before it is done. Take out "
-"a step, or correct a value, first."
+"After your yes, each change shows its own card before it is done. Take out a"
+" step, or correct a value, first."
 msgstr ""
 "بعد موافقتك، يعرض كل تغيير بطاقته الخاصة قبل تنفيذه. أزل خطوة أو صحّح قيمة "
 "أولاً إن أردت."
@@ -4463,6 +4463,7 @@ msgstr "يأتي مع نودج"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__command
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_plugin_item__kind__command
 msgid "Command"
 msgstr "الأمر"
 
@@ -5196,6 +5197,8 @@ msgstr "JSON المنشأ"
 #: model:ir.model.fields,field_description:nudge.field_nudge_upgrade_wizard__create_uid
 #: model:ir.model.fields,field_description:nudge.field_nudge_usage__create_uid
 #: model:ir.model.fields,field_description:nudge.field_nudge_validator_policy__create_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__create_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin_item__create_uid
 msgid "Created by"
 msgstr "أنشئ بواسطة"
 
@@ -5255,6 +5258,8 @@ msgstr "أنشئ بواسطة"
 #: model:ir.model.fields,field_description:nudge.field_nudge_upgrade_wizard__create_date
 #: model:ir.model.fields,field_description:nudge.field_nudge_usage__create_date
 #: model:ir.model.fields,field_description:nudge.field_nudge_validator_policy__create_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__create_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin_item__create_date
 msgid "Created on"
 msgstr "أنشئ في"
 
@@ -5633,6 +5638,7 @@ msgstr "إذن تسليم"
 #: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__description
 #: model:ir.model.fields,field_description:nudge.field_nudge_prompt__description
 #: model:ir.model.fields,field_description:nudge.field_nudge_report__description
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin_item__description
 msgid "Description"
 msgstr "الوصف"
 
@@ -5850,6 +5856,8 @@ msgstr "تجاهل"
 #: model:ir.model.fields,field_description:nudge.field_res_partner__display_name
 #: model:ir.model.fields,field_description:nudge.field_res_users__display_name
 #: model:ir.model.fields,field_description:nudge.field_res_users_settings__display_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__display_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin_item__display_name
 msgid "Display Name"
 msgstr "اسم العرض"
 
@@ -7018,6 +7026,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:nudge.field_nudge_profile__fingerprint
 #: model:ir.model.fields,field_description:nudge.field_nudge_question__fingerprint
 #: code:addons/nudge/models/nudge_recipe_sign.py:34
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__fingerprint
 msgid "Fingerprint"
 msgstr "البصمة"
 
@@ -7650,6 +7659,8 @@ msgstr "تلميحات للاختبارات: الأدوات التي يجب أن
 #. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_form
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__history
 msgid "History"
 msgstr "السجل"
 
@@ -8112,6 +8123,8 @@ msgstr "أعمل عليه في الخلفية. سأخبرك عندما ينته�
 #: model:ir.model.fields,field_description:nudge.field_res_partner__id
 #: model:ir.model.fields,field_description:nudge.field_res_users__id
 #: model:ir.model.fields,field_description:nudge.field_res_users_settings__id
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__id
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin_item__id
 msgid "ID"
 msgstr "المعرف"
 
@@ -8201,6 +8214,7 @@ msgstr ""
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider_model__is_selected
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__live
 msgid "In Use"
 msgstr "مستخدم"
 
@@ -8778,6 +8792,7 @@ msgstr "الشاشات الأساسية لتدريب المستخدمين الج
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_import_view_form
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_search
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_search
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin_item__kind
 msgid "Kind"
 msgstr "النوع"
 
@@ -8960,6 +8975,8 @@ msgstr "آخر تشغيل"
 #: model:ir.model.fields,field_description:nudge.field_nudge_upgrade_wizard__write_uid
 #: model:ir.model.fields,field_description:nudge.field_nudge_usage__write_uid
 #: model:ir.model.fields,field_description:nudge.field_nudge_validator_policy__write_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__write_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin_item__write_uid
 msgid "Last Updated by"
 msgstr "آخر تحديث بواسطة"
 
@@ -9019,6 +9036,8 @@ msgstr "آخر تحديث بواسطة"
 #: model:ir.model.fields,field_description:nudge.field_nudge_upgrade_wizard__write_date
 #: model:ir.model.fields,field_description:nudge.field_nudge_usage__write_date
 #: model:ir.model.fields,field_description:nudge.field_nudge_validator_policy__write_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__write_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin_item__write_date
 msgid "Last Updated on"
 msgstr "آخر تحديث في"
 
@@ -10055,6 +10074,7 @@ msgstr "النموذج: %(model)s. المُشغِّل: %(trigger)s."
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_skill__modes
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin_item__modes
 msgid "Modes"
 msgstr "الأوضاع"
 
@@ -10063,6 +10083,7 @@ msgstr "الأوضاع"
 #: code:addons/nudge/tools/scaffold.py:0
 #: model:ir.model,name:nudge.model_ir_module_module
 #: model:ir.model.fields,field_description:nudge.field_nudge_translation__module_id
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__name
 msgid "Module"
 msgstr "الموديول"
 
@@ -10250,6 +10271,7 @@ msgstr "مهامي اليوم"
 #: model:ir.model.fields,field_description:nudge.field_nudge_tour__name
 #: model:nudge.tour.step,label:nudge.tour_create_contact_2
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_entry_view_search
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin_item__name
 msgid "Name"
 msgstr "الاسم"
 
@@ -10877,6 +10899,7 @@ msgstr "ليس بعد: يحتاج إلى كلمات أكثر"
 #: model:ir.model.fields,field_description:nudge.field_nudge_tour_step__note
 #: model:ir.model.fields,field_description:nudge.field_nudge_translation__note
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_note__kind__note
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin_item__note
 msgid "Note"
 msgstr "الملاحظة"
 
@@ -12235,8 +12258,8 @@ msgstr "إحدى صيغ السؤال، بلا عناوين بريد أو أرق�
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_plan_card.js:0
 msgid ""
-"One yes does every step below, as it is shown. Take out a step, or correct "
-"a value, first."
+"One yes does every step below, as it is shown. Take out a step, or correct a"
+" value, first."
 msgstr ""
 "موافقة واحدة تنفّذ كل الخطوات أدناه كما هي معروضة. أزل خطوة أو صحّح قيمة "
 "أولاً إن أردت."
@@ -13732,6 +13755,7 @@ msgstr "المشاريع"
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_prompt__body
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_prompt_view_form
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_plugin_item__kind__prompt
 msgid "Prompt"
 msgstr "طلب جاهز"
 
@@ -13748,6 +13772,7 @@ msgstr "طلب (لا يُرسل إلا عندما يختاره شخص): %s"
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_recipe_entry__kind__prompts
 #: model:ir.ui.menu,name:nudge.nudge_menu_prompts
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_prompt_view_list
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__prompt_count
 msgid "Prompts"
 msgstr "الطلبات الجاهزة"
 
@@ -14231,6 +14256,7 @@ msgstr "يقرأ الشاشة المعروضة ويشير إلى الحقل أو
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider__is_configured
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_source__state__ready
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_source_view_search
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_plugin_item__status__ok
 msgid "Ready"
 msgstr "جاهز"
 
@@ -14535,6 +14561,7 @@ msgstr "رفض"
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_memory__state__refused
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_message__state__refused
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_note__state__refused
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_plugin_item__status__refused
 msgid "Refused"
 msgstr "مرفوض"
 
@@ -15575,12 +15602,12 @@ msgstr "مستشار الإعداد: يقرأ الإعدادات ويقترح م
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form_plan
 msgid ""
 "Several changes asked at once (a customer, the quotation with its lines, "
-"then sending it) are shown first as one card with numbered steps: the "
-"person takes a step out or corrects a value, says yes once, then each "
-"change still shows its own card. A single change has no plan. A step that "
-"fails stops the plan and says what was done and what was not, with Undo for "
-"what was done; after each change, Nudge reads the records again and says so "
-"when a field did not end as asked."
+"then sending it) are shown first as one card with numbered steps: the person"
+" takes a step out or corrects a value, says yes once, then each change still"
+" shows its own card. A single change has no plan. A step that fails stops "
+"the plan and says what was done and what was not, with Undo for what was "
+"done; after each change, Nudge reads the records again and says so when a "
+"field did not end as asked."
 msgstr ""
 "التغييرات المتعددة المطلوبة دفعةً واحدة (عميل، ثم عرض السعر بسطوره، ثم "
 "إرساله) تُعرض أولاً في بطاقة واحدة بخطوات مرقّمة: يزيل الشخص خطوة أو يصحّح "
@@ -15854,6 +15881,7 @@ msgstr "الحجم"
 #: model:ir.model.fields,field_description:nudge.field_nudge_skill_revision__skill_id
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_form
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_market_view_form
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_plugin_item__kind__skill
 msgid "Skill"
 msgstr "مهارة"
 
@@ -15891,6 +15919,7 @@ msgstr "فشل اختبار المهارة: %s"
 #: model:ir.ui.menu,name:nudge.nudge_menu_skills
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_list
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form_skills
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__skill_count
 msgid "Skills"
 msgstr "المهارات"
 
@@ -16090,6 +16119,8 @@ msgstr "الحالة"
 #: model:ir.model.fields,field_description:nudge.field_nudge_built__state
 #: model:ir.model.fields,field_description:nudge.field_nudge_question__status
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_search
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__state
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin_item__status
 msgid "Status"
 msgstr "الحالة"
 
@@ -16373,6 +16404,7 @@ msgstr "لخّص تاريخ: %s"
 #: model:ir.model.fields,field_description:nudge.field_nudge_skill__summary
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__summary
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_conversation_view_form
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__summary
 msgid "Summary"
 msgstr "الملخص"
 
@@ -16440,6 +16472,7 @@ msgstr "تاريخ الإيقاف"
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_built__state__archived
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_built_log__action__switch_off
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_built_view_form
+#: code:addons/nudge/models/nudge_plugin.py:0
 msgid "Switched off"
 msgstr "متوقف"
 
@@ -17268,6 +17301,7 @@ msgstr "يُحذف العمود وكل قيمة فيه أيضًا"
 #. odoo-python
 #: code:addons/nudge/models/nudge_conversation.py:0
 #: code:addons/nudge/models/nudge_quick.py:0
+#: code:addons/nudge/models/nudge_plugin.py:0
 msgid "The command %s is not open to you."
 msgstr "الأمر %s غير متاح لك."
 
@@ -19105,6 +19139,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:nudge.field_nudge_prompt__name
 #: model:ir.model.fields,field_description:nudge.field_nudge_recipe_entry__title
 #: model:ir.model.fields,field_description:nudge.field_nudge_skill__name
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__title
 msgid "Title"
 msgstr "العنوان"
 
@@ -19231,6 +19266,7 @@ msgstr "تحويلات كثيرة: مرفوض."
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__tool
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_message__role__tool
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_plugin_item__kind__tool
 msgid "Tool"
 msgstr "أداة"
 
@@ -19251,6 +19287,7 @@ msgstr "نتائج الأدوات"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_provider_model__uses_tools
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__tool_count
 msgid "Tools"
 msgstr "الأدوات"
 
@@ -19967,6 +20004,7 @@ msgstr "الموردون"
 #: model:ir.model.fields,field_description:nudge.field_nudge_doc_page__version
 #: model:ir.model.fields,field_description:nudge.field_nudge_prompt__version
 #: model:ir.model.fields,field_description:nudge.field_nudge_skill__version
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__version
 msgid "Version"
 msgstr "الإصدار"
 
@@ -23961,6 +23999,7 @@ msgstr "وقّعها"
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_export_view_form
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__signature_state
 msgid "Signature"
 msgstr "التوقيع"
 
@@ -24041,6 +24080,7 @@ msgstr "تحديث"
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_market_view_search
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__publisher
 msgid "Publisher"
 msgstr "الناشر"
 
@@ -24230,3 +24270,372 @@ msgstr "الأنماط"
 #: model:ir.cron,cron_name:nudge.cron_observe_rules
 msgid "Nudge: find the requests that come back"
 msgstr "Nudge: البحث عن الطلبات التي تتكرر"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_list
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_search
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form_plugins
+#: model:ir.actions.act_window,name:nudge.nudge_plugin_action
+#: model:ir.ui.menu,name:nudge.nudge_menu_plugins
+msgid "Plugins"
+msgstr "الإضافات"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_form
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin_item__plugin_id
+msgid "Plugin"
+msgstr "الإضافة"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_list
+msgid "Look for Plugins"
+msgstr "ابحث عن الإضافات"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_form
+msgid "Allow"
+msgstr "اسمح بها"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_form
+msgid "Do Not Allow"
+msgstr "لا تسمح بها"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_form
+msgid "Back to Review"
+msgstr "أعدها إلى المراجعة"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_form
+msgid ""
+"Its tools, skills, prompts and commands will reach the people of this "
+"database, with their own rights. Allow it?"
+msgstr ""
+"ستصل أدواتها ومهاراتها وطلباتها الجاهزة وأوامرها إلى مستخدمي قاعدة البيانات "
+"هذه، بصلاحياتهم هم. هل تسمح بها؟"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_form
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_plugin__signature_state__verified
+msgid "Verified publisher"
+msgstr "ناشر موثَّق"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_form
+msgid "What It Asks For"
+msgstr "ما تطلبه"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_form
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__item_ids
+msgid "What It Brings"
+msgstr "ما تأتي به"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_form
+msgid ""
+"A tool runs as the person who asks, with their rights; a tool that writes "
+"shows the same confirmation card as every change, and nothing is done before"
+" their yes. A plugin never replaces a tool or a command of Nudge: a name "
+"already taken is refused."
+msgstr ""
+"تعمل الأداة باسم من يسأل وبصلاحياته؛ والأداة التي تكتب تعرض بطاقة التأكيد "
+"نفسها التي يعرضها كل تغيير، ولا يُنفَّذ شيء قبل موافقته. لا تحلّ الإضافة "
+"أبدًا محلّ أداة أو أمر من نادج: يُرفض الاسم المستخدم من قبل."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_form
+msgid "Manifest"
+msgstr "ملف التعريف"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_search
+msgid "Waiting for Review"
+msgstr "بانتظار المراجعة"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_search
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_plugin__state__allowed
+msgid "Allowed"
+msgstr "مسموح بها"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_search
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_plugin__state__blocked
+msgid "Not Allowed"
+msgstr "غير مسموح بها"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form_plugins
+msgid ""
+"Modules named nudge_plugin_something add tools, skills, prompts and "
+"commands. Each one waits for a system administrator to allow it; switch this"
+" on to take every plugin away at once."
+msgstr ""
+"الموديولات التي يبدأ اسمها بـ nudge_plugin_ تضيف أدوات ومهارات وطلبات جاهزة "
+"وأوامر. تنتظر كل واحدة منها أن يسمح بها مدير النظام؛ فعّل هذا الخيار لإيقاف "
+"كل الإضافات دفعة واحدة."
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_plugin_action
+msgid "No plugin installed"
+msgstr "لا توجد إضافة مثبّتة"
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_plugin_action
+msgid ""
+"A plugin is an Odoo module named nudge_plugin_something that brings tools, "
+"skills, prompts and commands to Nudge. Once installed it waits here: nothing"
+" of it reaches anyone before a system administrator reads what it brings and"
+" allows it."
+msgstr ""
+"الإضافة موديول Odoo يبدأ اسمه بـ nudge_plugin_ ويأتي إلى نادج بأدوات ومهارات"
+" وطلبات جاهزة وأوامر. بعد تثبيتها تنتظر هنا: لا يصل شيء منها إلى أحد قبل أن "
+"يقرأ مدير النظام ما تأتي به ويسمح بها."
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_plugin
+msgid "Nudge Plugin"
+msgstr "إضافة نادج"
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_plugin_item
+msgid "Nudge Plugin Item"
+msgstr "عنصر إضافة نادج"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__enabled
+msgid "Switched On"
+msgstr "مُشغَّلة"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_plugin__enabled
+msgid ""
+"Switch it off to take every tool, skill, prompt and command of this plugin "
+"away at once, without losing the review."
+msgstr ""
+"أوقفها لسحب كل أدوات هذه الإضافة ومهاراتها وطلباتها الجاهزة وأوامرها دفعة "
+"واحدة، دون أن تضيع المراجعة."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_plugin__live
+msgid ""
+"Its tools, skills, prompts and commands reach the people of this database "
+"now."
+msgstr ""
+"أدواتها ومهاراتها وطلباتها الجاهزة وأوامرها تصل الآن إلى مستخدمي قاعدة "
+"البيانات هذه."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__can_allow
+msgid "Can Be Allowed"
+msgstr "يمكن السماح بها"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__writes
+msgid "Has Tools That Write"
+msgstr "فيها أدوات تكتب"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__models_read
+msgid "Models It Reads"
+msgstr "النماذج التي تقرؤها"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__models_write
+msgid "Models It Writes"
+msgstr "النماذج التي تكتب فيها"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__scopes
+msgid "Scopes"
+msgstr "النطاقات"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__problems
+msgid "Problems"
+msgstr "المشكلات"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__declaration
+msgid "Declaration"
+msgstr "التعريف"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_plugin__declaration
+msgid "The nudge_plugin entry of its manifest, as Nudge read it."
+msgstr "مدخل nudge_plugin في ملف تعريفها، كما قرأه نادج."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_plugin__fingerprint
+msgid "Changes when what the plugin brings changes."
+msgstr "تتغيّر عندما يتغيّر ما تأتي به الإضافة."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__allowed_fingerprint
+msgid "Allowed Fingerprint"
+msgstr "البصمة المسموح بها"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__allowed_by
+msgid "Allowed By"
+msgstr "سمح بها"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin__allowed_on
+msgid "Allowed On"
+msgstr "تاريخ السماح"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin_item__writes
+msgid "Writes"
+msgstr "تكتب"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin_item__models
+msgid "Models"
+msgstr "النماذج"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin_item__requires
+msgid "Needs"
+msgstr "تحتاج"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_plugin_item__requires
+msgid "Modules a tool needs; tools a skill names."
+msgstr "الموديولات التي تحتاجها الأداة؛ والأدوات التي تسمّيها المهارة."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin_item__group
+msgid "Group"
+msgstr "المجموعة"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin_item__detail
+msgid "Detail"
+msgstr "التفاصيل"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_plugin_item__detail
+msgid "The input of a tool; the text of a skill or a prompt."
+msgstr "مدخلات الأداة؛ ونص المهارة أو الطلب الجاهز."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_plugin_item__res_id
+msgid "Record ID"
+msgstr "معرّف السجل"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_plugins_off
+msgid "Every Plugin Off"
+msgstr "كل الإضافات متوقفة"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_plugins_off
+msgid ""
+"No tool, skill, prompt or command of any plugin reaches anyone, whatever was"
+" allowed. What was allowed comes back when this is switched on again."
+msgstr ""
+"لا تصل أي أداة أو مهارة أو طلب جاهز أو أمر من أي إضافة إلى أحد، مهما كان "
+"مسموحًا به. ويعود ما سُمح به عند تشغيل هذا من جديد."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_plugins_pending
+msgid "Plugins Waiting"
+msgstr "إضافات بانتظار المراجعة"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_plugin__state__pending
+msgid "Pending"
+msgstr "بانتظار المراجعة"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_plugin__signature_state__none
+msgid "Not signed"
+msgstr "غير موقَّعة"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_plugin__signature_state__untrusted
+msgid "Signed, key not trusted"
+msgstr "موقَّعة بمفتاح غير موثوق"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_plugin__signature_state__invalid
+msgid "Signature not valid"
+msgstr "التوقيع غير صالح"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_plugin_item__status__clash
+msgid "Name already taken"
+msgstr "الاسم مستخدم من قبل"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_skill__origin__plugin
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_prompt__origin__plugin
+msgid "Comes with a plugin"
+msgstr "يأتي مع إضافة"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_plugin.py:0
+msgid "Only a system administrator decides on plugins."
+msgstr "مدير النظام وحده يقرّر في الإضافات."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_plugin.py:0
+msgid ""
+"What a plugin brings is read from its module: only its switch is changed "
+"here."
+msgstr ""
+"ما تأتي به الإضافة يُقرأ من موديولها: لا يُغيَّر هنا إلا مفتاح تشغيلها."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_plugin.py:0
+msgid "Switched on"
+msgstr "شُغِّلت"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_plugin.py:0
+msgid "%(plugin)s cannot be allowed: %(why)s"
+msgstr "لا يمكن السماح بـ %(plugin)s: %(why)s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_plugin.py:0
+msgid "Allowed (%s)"
+msgstr "سُمح بها (%s)"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_plugin.py:0
+msgid "Not allowed"
+msgstr "غير مسموح بها"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_plugin.py:0
+msgid "Back to review"
+msgstr "أُعيدت إلى المراجعة"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_plugin.py:0
+msgid "Installed: waiting for a system administrator"
+msgstr "ثُبِّتت: بانتظار مدير النظام"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_plugin.py:0
+msgid "Changed since it was allowed: waiting for a review again"
+msgstr "تغيّرت منذ السماح بها: بانتظار مراجعة جديدة"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_plugin.py:0
+msgid "%s: send it to Nudge from here."
+msgstr "%s: أرسله إلى نادج من هنا."

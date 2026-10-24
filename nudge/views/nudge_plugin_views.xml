@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- L3: plugins (modules nudge_plugin_<name>), reviewed and allowed by a system administrator -->
+<odoo>
+    <record id="nudge_plugin_view_list" model="ir.ui.view">
+        <field name="name">nudge.plugin.view.list</field>
+        <field name="model">nudge.plugin</field>
+        <field name="arch" type="xml">
+            <tree string="Plugins" create="0" delete="0" decoration-muted="state == 'blocked'"
+                  decoration-warning="state == 'pending'">
+                <header>
+                    <button name="action_find_plugins" type="object" string="Look for Plugins" display="always"/>
+                </header>
+                <field name="title"/>
+                <field name="name" optional="show"/>
+                <field name="publisher" optional="show"/>
+                <field name="version" optional="hide"/>
+                <field name="signature_state" widget="badge" optional="show"
+                       decoration-success="signature_state == 'verified'"
+                       decoration-danger="signature_state == 'invalid'"/>
+                <field name="tool_count" optional="show"/>
+                <field name="skill_count" optional="show"/>
+                <field name="prompt_count" optional="hide"/>
+                <field name="writes" optional="show"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'allowed'" decoration-warning="state == 'pending'"/>
+                <field name="enabled" widget="boolean_toggle" readonly="state != 'allowed'"/>
+                <field name="live" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="nudge_plugin_view_form" model="ir.ui.view">
+        <field name="name">nudge.plugin.view.form</field>
+        <field name="model">nudge.plugin</field>
+        <field name="arch" type="xml">
+            <form string="Plugin" create="0" delete="0">
+                <header>
+                    <button name="action_allow" type="object" string="Allow" class="btn-primary"
+                            invisible="state == 'allowed' or not can_allow"
+                            confirm="Its tools, skills, prompts and commands will reach the people of this database, with their own rights. Allow it?"/>
+                    <button name="action_block" type="object" string="Do Not Allow"
+                            invisible="state == 'blocked'"/>
+                    <button name="action_review_again" type="object" string="Back to Review"
+                            invisible="state == 'pending'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Verified publisher" bg_color="text-bg-success"
+                            invisible="signature_state != 'verified'"/>
+                    <field name="can_allow" invisible="1"/>
+                    <div class="oe_title">
+                        <label for="title"/>
+                        <h1><field name="title"/></h1>
+                        <div class="text-muted"><field name="summary"/></div>
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="not problems">
+                        <field name="problems"/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="publisher"/>
+                            <field name="version"/>
+                            <field name="signature_state" widget="badge"
+                                   decoration-success="signature_state == 'verified'"
+                                   decoration-danger="signature_state == 'invalid'"/>
+                        </group>
+                        <group>
+                            <field name="enabled" widget="boolean_toggle" readonly="state != 'allowed'"/>
+                            <field name="live"/>
+                            <field name="writes"/>
+                            <field name="allowed_by"/>
+                            <field name="allowed_on"/>
+                        </group>
+                    </group>
+                    <group string="What It Asks For">
+                        <field name="models_read"/>
+                        <field name="models_write"/>
+                        <field name="scopes"/>
+                    </group>
+                    <notebook>
+                        <page string="What It Brings" name="items">
+                            <field name="item_ids">
+                                <tree decoration-danger="status != 'ok'">
+                                    <field name="kind"/>
+                                    <field name="name"/>
+                                    <field name="description"/>
+                                    <field name="writes"/>
+                                    <field name="models" optional="show"/>
+                                    <field name="requires" optional="show"/>
+                                    <field name="group" optional="hide"/>
+                                    <field name="modes" optional="hide"/>
+                                    <field name="status" widget="badge"
+                                           decoration-success="status == 'ok'" decoration-danger="status != 'ok'"/>
+                                    <field name="note" optional="show"/>
+                                </tree>
+                                <form string="What It Brings">
+                                    <group>
+                                        <group>
+                                            <field name="kind"/>
+                                            <field name="name"/>
+                                            <field name="status"/>
+                                            <field name="note"/>
+                                        </group>
+                                        <group>
+                                            <field name="writes"/>
+                                            <field name="models"/>
+                                            <field name="requires"/>
+                                            <field name="group"/>
+                                            <field name="modes"/>
+                                        </group>
+                                    </group>
+                                    <field name="description"/>
+                                    <field name="detail" class="font-monospace"/>
+                                </form>
+                            </field>
+                            <div class="text-muted">
+                                A tool runs as the person who asks, with their rights; a tool that writes shows the
+                                same confirmation card as every change, and nothing is done before their yes. A
+                                plugin never replaces a tool or a command of Nudge: a name already taken is refused.
+                            </div>
+                        </page>
+                        <page string="Manifest" name="declaration">
+                            <field name="declaration" class="font-monospace"/>
+                            <group>
+                                <field name="fingerprint"/>
+                            </group>
+                        </page>
+                        <page string="History" name="history">
+                            <field name="history"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_plugin_view_search" model="ir.ui.view">
+        <field name="name">nudge.plugin.view.search</field>
+        <field name="model">nudge.plugin</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="title"/>
+                <field name="name"/>
+                <field name="publisher"/>
+                <filter name="pending" string="Waiting for Review" domain="[('state', '=', 'pending')]"/>
+                <filter name="allowed" string="Allowed" domain="[('state', '=', 'allowed')]"/>
+                <filter name="blocked" string="Not Allowed" domain="[('state', '=', 'blocked')]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_plugin_action" model="ir.actions.act_window">
+        <field name="name">Plugins</field>
+        <field name="res_model">nudge.plugin</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No plugin installed</p>
+            <p>
+                A plugin is an Odoo module named nudge_plugin_something that brings tools, skills, prompts and
+                commands to Nudge. Once installed it waits here: nothing of it reaches anyone before a system
+                administrator reads what it brings and allows it.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="nudge_menu_plugins" name="Plugins" sequence="40"
+              parent="nudge_menu_configuration" action="nudge_plugin_action"
+              groups="base.group_system"/>
+
+    <record id="res_config_settings_view_form_plugins" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.nudge.plugins</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='nudge']" position="inside">
+                <block title="Plugins" name="nudge_plugins_container">
+                    <setting help="Modules named nudge_plugin_something add tools, skills, prompts and commands. Each one waits for a system administrator to allow it; switch this on to take every plugin away at once.">
+                        <field name="nudge_plugins_off"/>
+                        <div class="content-group mt8">
+                            <field name="nudge_plugins_pending" invisible="not nudge_plugins_pending"
+                                   class="badge text-bg-warning"/>
+                            <button name="%(nudge_plugin_action)d" type="action"
+                                    string="Plugins" icon="oi-arrow-right" class="btn-link"/>
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>
