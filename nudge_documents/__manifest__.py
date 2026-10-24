@@ -1,5 +1,5 @@
 {
-    "name": "Nudge: Spreadsheets in Documents (Enterprise)",
+    "name": "Nudge for Documents",
     "summary": "Nudge sheets in Documents; installs itself (Enterprise)",
     "description": """
 Requires Odoo Enterprise (documents_spreadsheet).
