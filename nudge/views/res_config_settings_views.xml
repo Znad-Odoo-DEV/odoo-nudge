@@ -280,6 +280,16 @@
                             <field name="nudge_max_streams"/>
                         </setting>
                     </block>
+                    <!-- NP-20 -->
+                    <block title="Usage List" name="nudge_usage_retention_container">
+                        <setting help="Calls to the AI provider older than this many whole months are removed from the usage list every day, a batch at a time. The current month is always kept, so budgets read the same totals. 0 keeps everything.">
+                            <field name="nudge_usage_retention_months"/>
+                            <div class="mt8">
+                                <button name="%(nudge_latency_action)d" type="action"
+                                        string="Latency and Cost" icon="oi-arrow-right" class="btn-link"/>
+                            </div>
+                        </setting>
+                    </block>
                     <block title="Your First Week" name="nudge_coach_container">
                         <setting help="A card in the panel shows a new person (in their first 14 days, or put in training by a manager) how many of the key screens of their role they opened and the tours left to take. No AI is used and only the screens opened are kept. Switched off, nobody is followed.">
                             <field name="nudge_coach_enabled"/>

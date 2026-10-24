@@ -426,6 +426,7 @@ The administrator is a Manager after installation. Give access to others from
   day, with tokens and cost. **Settings ‣ Nudge ‣ Budgets** sets what may be spent: tokens or
   cost, per person and per day, per company and per month; 0 is no limit. Past a limit, Nudge
   says it must wait until tomorrow, or until next month.
+- **Nudge ‣ Latency and Cost** (managers): how long Nudge takes to answer, as the median (p50) and the slowest 5 in 100 (p95), in each mode and at each provider, and the tokens, cost, errors and refusals, by mode, provider, person, company and day, as a graph, a pivot and a list. Numbers only, never the text of a message. The time to the first line and the wait in the queue stay empty until a feature records them. **Settings ‣ Nudge ‣ Usage List** can keep only the last N whole months of the usage list (0 keeps everything); the current month is always kept, so budgets read the same totals.
 - **Settings ‣ Nudge ‣ Budgets ‣ Answers at the Same Time**: one answer holds one worker of the
   server while it streams, so the answers to everybody together are capped; the default cap is
   the workers of the server less two. Past it, Nudge asks the person to try again in a moment.

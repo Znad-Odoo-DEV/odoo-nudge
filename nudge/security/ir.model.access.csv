@@ -65,3 +65,4 @@ access_nudge_built_log_manager,nudge.built.log manager,model_nudge_built_log,gro
 access_nudge_built_log_system,nudge.built.log system,model_nudge_built_log,base.group_system,1,0,0,0
 access_nudge_built_switch_manager,nudge.built.switch manager,model_nudge_built_switch,group_nudge_manager,1,1,1,1
 access_nudge_built_switch_system,nudge.built.switch system,model_nudge_built_switch,base.group_system,1,1,1,1
+access_nudge_latency_report_manager,nudge.latency.report manager,model_nudge_latency_report,group_nudge_manager,1,0,0,0

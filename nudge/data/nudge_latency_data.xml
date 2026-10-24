@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- NP-20: the usage list is trimmed to the months set in Settings (0: nothing is removed) -->
+    <record id="cron_usage_retention" model="ir.cron">
+        <field name="name">Nudge: forget old calls of the usage list</field>
+        <field name="model_id" ref="model_nudge_usage"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_apply_retention()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+    </record>
+
+    <record id="nudge_latency_rule_company" model="ir.rule">
+        <field name="name">Nudge Latency: companies of the manager</field>
+        <field name="model_id" ref="model_nudge_latency_report"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[Command.link(ref('nudge.group_nudge_manager'))]"/>
+    </record>
+</odoo>
