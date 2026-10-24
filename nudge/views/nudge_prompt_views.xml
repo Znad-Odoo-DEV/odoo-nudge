@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_prompt_view_list" model="ir.ui.view">
+        <field name="name">nudge.prompt.view.list</field>
+        <field name="model">nudge.prompt</field>
+        <field name="arch" type="xml">
+            <tree string="Prompts">
+                <header>
+                    <button name="action_export_recipe" type="object" string="Export as a recipe" display="always"
+                            groups="nudge.group_nudge_manager"/>
+                </header>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="description" optional="show"/>
+                <field name="mode" optional="show"/>
+                <field name="scope" optional="show"/>
+                <field name="model_names" optional="hide"/>
+                <field name="apps" optional="hide"/>
+                <field name="version" optional="hide"/>
+                <field name="use_count" optional="show"/>
+                <field name="origin" optional="hide"/>
+                <field name="company_id" optional="hide" groups="base.group_multi_company"/>
+                <field name="active" column_invisible="True"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="nudge_prompt_view_form" model="ir.ui.view">
+        <field name="name">nudge.prompt.view.form</field>
+        <field name="model">nudge.prompt</field>
+        <field name="arch" type="xml">
+            <form string="Prompt">
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <field name="origin" invisible="1"/>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="description"/>
+                            <field name="mode"/>
+                            <field name="scope"/>
+                            <field name="group_ids" widget="many2many_tags"
+                                   required="scope == 'team'" invisible="scope == 'private'"/>
+                            <field name="company_id" groups="base.group_multi_company" invisible="scope == 'private'"/>
+                        </group>
+                        <group>
+                            <field name="model_names" placeholder="account.move, sale.order"/>
+                            <field name="apps" placeholder="account, sale"/>
+                            <field name="version"/>
+                            <field name="use_count"/>
+                            <field name="noai"/>
+                        </group>
+                    </group>
+                    <group string="The message">
+                        <field name="body" nolabel="1" colspan="2" placeholder="Chase {{customer}} for the invoice {{invoice}}"/>
+                        <field name="variable_names"/>
+                    </group>
+                    <div class="text-muted">
+                        The text is sent as your own message when you choose it, with your rights and the same
+                        confirmation cards. A word between double braces, such as {{customer}}, is asked for first.
+                        Never write the data of a record in a prompt you share.
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_prompt_view_search" model="ir.ui.view">
+        <field name="name">nudge.prompt.view.search</field>
+        <field name="model">nudge.prompt</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="body"/>
+                <field name="model_names"/>
+                <filter name="mine" string="Mine" domain="[('scope', '=', 'private')]"/>
+                <filter name="shared" string="Shared" domain="[('scope', '!=', 'private')]"/>
+                <separator/>
+                <filter name="talk" string="Talk" domain="[('mode', '=', 'talk')]"/>
+                <filter name="agent" string="Agent" domain="[('mode', '=', 'agent')]"/>
+                <filter name="dev" string="Developer" domain="[('mode', '=', 'dev')]"/>
+                <separator/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_mode" string="Mode" context="{'group_by': 'mode'}"/>
+                    <filter name="group_scope" string="Who Sees It" context="{'group_by': 'scope'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_prompt_action" model="ir.actions.act_window">
+        <field name="name">Prompts</field>
+        <field name="res_model">nudge.prompt</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No prompt yet</p>
+            <p>
+                Keep the requests you ask again and again. Write {{customer}} where a word changes: Nudge asks
+                for it before sending. The ones that suit the screen you are on appear above the message box.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="nudge_menu_prompts" name="Prompts" sequence="35"
+              parent="nudge_menu_root" action="nudge_prompt_action"
+              groups="nudge.group_nudge_user"/>
+</odoo>
