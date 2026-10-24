@@ -462,9 +462,12 @@ class NudgeMessaging(models.AbstractModel):
         return self._quick(text)
 
     def _remembered(self, text, has_ai):
-        """An answer the company approved earlier: no AI, no cost"""
+        """An answer the company approved earlier: no AI, no cost. As in the panel, never for live
+        figures, nor in Agent mode for a change to make: their rule or tool answers"""
         Memory = self.env["nudge.memory"]
         if not Memory._is_enabled():
+            return ""
+        if Memory._asks_live_data(text) or (self._mode() == MODE_AGENT and Memory._asks_to_act(text)):
             return ""
         memory, _score = Memory._find(text, floor=not has_ai)
         if not memory:

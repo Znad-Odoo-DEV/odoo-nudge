@@ -502,6 +502,24 @@ class TestEngine(MessagingCase, HttpCase):
         self.assertIn("Agent mode", text)
         self.assertEqual(Step.search_count([("origin", "=", "WhatsApp")]), 1)
 
+    def test_a_remembered_answer_is_not_served_for_live_figures_or_a_change_to_make(self):
+        """Review ai #7: the guards of the panel hold on the phone: a question of figures, or in Agent mode
+        a change to make, is worked out by the rules or the AI, never answered by a remembered how-to"""
+        self.env["ir.config_parameter"].sudo().set_param("nudge.answer_memory", "True")
+        memory = self.env["nudge.memory"].sudo().create({
+            "question": "How do I see overdue invoices?", "answer": "Remembered: open Invoicing, then Overdue.",
+            "state": "approved"})
+        # Whatever is asked matches it: only the guards stand between
+        self.patch(type(self.env["nudge.memory"]), "_find", lambda model, text, floor=False: (memory, 1.0))
+        self.overdue_invoices(2)
+        self.env["res.partner"].create({"name": "راغد"})
+        self.link(self.raghad)
+        self.assertNotIn("Remembered", self.receive("كم فاتورة متأخرة"))
+        text = self.receive("اعمل عرض سعر لراغد")
+        self.assertNotIn("Remembered", text)
+        self.assertIn("/nudge.step/", text, "The change is prepared")
+        self.assertIn("Remembered", self.receive("How do I create an invoice?"))
+
     def test_a_tool_outside_the_list_is_refused_to_the_model(self):
         self.link(self.raghad)
         adapter = self.use_adapter(script=[
