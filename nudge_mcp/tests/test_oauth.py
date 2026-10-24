@@ -386,6 +386,8 @@ class TestMcpOAuth(HttpCase):
         auditor = new_test_user(self.env, login="oauth_auditor", groups="nudge_mcp.group_nudge_mcp,nudge.group_nudge_auditor",
                                 nudge_auditor_until=fields.Date.today() + timedelta(days=5))
         client, tokens = self.sign_in(login="oauth_auditor", granted=(nudge_mcp.SCOPE_READ,))
+        # The assistant has its token only, not the browser session the consent was given in
+        self.opener.cookies.clear()
         self.assertEqual(self.rpc(tokens["access_token"], "ping").status_code, 200)
         auditor.sudo().nudge_auditor_until = fields.Date.today() - timedelta(days=1)
         self.assertEqual(self.rpc(tokens["access_token"], "ping").status_code, 401)

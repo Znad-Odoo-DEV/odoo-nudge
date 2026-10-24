@@ -90,7 +90,9 @@ class TestRecipeMarket(NudgeCase, TransactionCase):
 
     def serve(self, files):
         """A fake network: ``{url: bytes}``, anything else is not found."""
-        def download(url, cap=market.CAP, timeout=market.TIMEOUT):
+        def download(url, cap=market.CAP, timeout=market.TIMEOUT, check=None):
+            if check:
+                check(url)
             if url not in files:
                 raise market.FetchError("notfound")
             return files[url]
