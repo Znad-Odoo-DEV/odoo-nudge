@@ -25947,3 +25947,47 @@ msgstr ""
 "علّم أنك تفهم ما يُرسل إلى المزود: الأسئلة والسجلات التي تحتاجها تغادر "
 "خادمك. الوضع الخاص في الإعدادات يمنع خروج أي شيء."
 
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_record.py:0
+msgid ""
+"No pricelist is in %(currency)s: the quotation is made in the currency "
+"of its pricelist, with the amounts of the document as they are written."
+msgstr ""
+"لا توجد قائمة أسعار بعملة %(currency)s: يُنشأ عرض السعر بعملة قائمة "
+"أسعاره، بمبالغ المستند كما هي مكتوبة."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_record.py:0
+msgid ""
+"%(count)s taxes fit %(text)s: %(tax)s was taken. Change it on the draft "
+"if another one applies."
+msgstr ""
+"هناك %(count)s ضرائب تناسب %(text)s: أُخذت %(tax)s. غيّرها في المسودة إن "
+"كانت أخرى هي المقصودة."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_record.py:0
+msgid "A %(kind)s from %(partner)s with the reference %(ref)s: %(names)s"
+msgstr "يوجد %(kind)s من %(partner)s بالمرجع %(ref)s: %(names)s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "sales price %s (Odoo's default, the file gives none)"
+msgstr "سعر البيع %s (الافتراضي في أودو، الملف لا يذكر سعراً)"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid ""
+"The file is in %(currency)s: costs and prices of the products are "
+"converted to %(company)s at today's rate (1 %(currency)s = %(rate)s "
+"%(company)s); the vendor line keeps %(currency)s."
+msgstr ""
+"الملف بعملة %(currency)s: تُحوَّل تكاليف المنتجات وأسعارها إلى "
+"%(company)s بسعر اليوم (1 %(currency)s = %(rate)s %(company)s)؛ وسطر "
+"المورّد يبقى بـ %(currency)s."
+
