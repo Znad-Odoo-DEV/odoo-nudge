@@ -21,11 +21,15 @@ const LINE_POLL_MS = 4000;
 
 /**
  * NP-10: what the person is told of an answer given by the model standing in.
- * @param {Object} event the "fallback" event: provider, model, local
+ * S6: "escalated" when the economy model could not answer and the main model did.
+ * @param {Object} event the "fallback" event: provider, model, local, reason
  * @returns {string}
  */
 export function fallbackLabel(event) {
     const model = event.model || event.provider || "";
+    if (event.reason === "escalated") {
+        return _t("Answered by the main model (%s)", model);
+    }
     return event.local
         ? _t("Answered by the local model (%s)", model)
         : _t("Answered by the fallback model (%s)", model);

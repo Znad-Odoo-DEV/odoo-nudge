@@ -1,3 +1,5 @@
+import dataclasses
+import functools
 import ipaddress
 import logging
 import os
@@ -7,7 +9,7 @@ from urllib.parse import urlparse
 from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
-from ..llm import base, ollama
+from ..llm import base, ollama, tier
 from ..tools.deadline import until
 
 _logger = logging.getLogger(__name__)
@@ -34,6 +36,33 @@ MODE_PROVIDER_PARAMS = {"agent": AGENT_PROVIDER_PARAM, "dev": DEVELOPER_PROVIDER
 FALLBACK_PROVIDER_PARAM = "nudge.fallback_provider_id"
 # The address Ollama listens on by default: one question at a time, unless it is told otherwise
 OLLAMA_PORT = ":11434"
+# S6: another provider answering the light work of every provider without an economy model of its own
+ECONOMY_PROVIDER_PARAM = "nudge.economy_provider_id"
+PRICE_KEYS = ("input", "output", "cache_read", "cache_write")
+
+
+@functools.lru_cache(maxsize=1)
+def _price_table():
+    """:return: the price table of Nudge (data/nudge_price_table.json), read once per process"""
+    from .nudge_setup_wizard import price_table  # noqa: PLC0415 - the wizard imports this module
+    return price_table()
+
+
+def model_prices(model):
+    """S6: :return: the prices per million tokens of ``model`` in the price table, ``{input, output,
+    cache_read, cache_write}``, the longest name that starts it winning (a dated name finds its
+    model); an empty dict for a model it does not know"""
+    model = (model or "").strip().lower()
+    known = _price_table().get("models") or {}
+    names = sorted((name for name in known if model.startswith(name)), key=len, reverse=True)
+    return dict(known[names[0]]) if model and names else {}
+
+
+def cache_shares(kind):
+    """S8: :return: what reading from and writing to the cache cost, as shares of the input price,
+    for the protocol ``kind``: the prices left empty on a provider are worked out with them"""
+    shares = (_price_table().get("cache_shares") or {}).get(kind) or {}
+    return {"cache_read": float(shares.get("cache_read", 1.0)), "cache_write": float(shares.get("cache_write", 1.0))}
 
 
 def _is_private_address(url):
@@ -187,6 +216,24 @@ class NudgeProvider(models.Model):
         string="Cache Read Price", digits=(12, 4), help="Per million tokens.")
     price_cache_write = fields.Float(
         string="Cache Write Price", digits=(12, 4), help="Per million tokens.")
+    # S6: the economy tier, a cheaper model of this provider for the light work
+    economy_model_name = fields.Char(
+        string="Economy Model",
+        help="A cheaper model of this provider, such as claude-haiku-5-5 beside claude-sonnet-5-5, a mini "
+             "model beside the full one, Flash beside Pro. It answers the light work: questions in Talk, "
+             "which change nothing, summaries, explanations and short texts. The model above answers "
+             "what acts or builds, what is marked heavy, and once more what the economy model failed "
+             "at. Empty: the economy provider of Settings, if any, else the model above answers "
+             "everything, as before.")
+    economy_capabilities = fields.Json(copy=False)
+    economy_price_input = fields.Float(
+        string="Economy Input Price", digits=(12, 4),
+        help="Per million tokens. Filled from the price table of Nudge for the models it knows.")
+    economy_price_output = fields.Float(string="Economy Output Price", digits=(12, 4), help="Per million tokens.")
+    economy_price_cache_read = fields.Float(
+        string="Economy Cache Read Price", digits=(12, 4), help="Per million tokens.")
+    economy_price_cache_write = fields.Float(
+        string="Economy Cache Write Price", digits=(12, 4), help="Per million tokens.")
     notes = fields.Text(translate=True)
     is_configured = fields.Boolean(
         string="Ready", compute="_compute_is_configured", compute_sudo=True)
@@ -308,7 +355,17 @@ class NudgeProvider(models.Model):
         if "capabilities" not in vals and {"model_name", "kind", "base_url"} & vals.keys():
             # Capabilities belong to one model of one provider
             vals = dict(vals, capabilities=False)
+        if "economy_capabilities" not in vals and {"economy_model_name", "kind", "base_url"} & vals.keys():
+            vals = dict(vals, economy_capabilities=False)
         return super().write(vals)
+
+    @api.onchange("economy_model_name")
+    def _onchange_economy_model_name(self):
+        """S6: the prices of a model the price table of Nudge knows, for the administrator to check"""
+        known = model_prices(self.economy_model_name)
+        if known and not any(self[f"economy_price_{key}"] for key in PRICE_KEYS):
+            for key in PRICE_KEYS:
+                self[f"economy_price_{key}"] = known.get(key, 0.0)
 
     # ------------------------------------------------------------------
     # Resolution
@@ -390,6 +447,37 @@ class NudgeProvider(models.Model):
         if self._is_private_mode() and not provider.runs_locally:
             return self.browse()
         return provider
+
+    @api.model
+    def _get_economy_provider(self):
+        """S6: the provider set in Settings to answer the light work of every provider without an
+        economy model of its own, ready to answer, possibly empty. In private mode only one that runs
+        on our own server, as for :meth:`_get_fallback`. Must be called in sudo."""
+        value = self.env["ir.config_parameter"].sudo().get_param(ECONOMY_PROVIDER_PARAM)
+        if not value or not value.isdigit():
+            return self.browse()
+        provider = self.browse(int(value)).exists()
+        if not (provider.active and provider.is_configured):
+            return self.browse()
+        if self._is_private_mode() and not provider.runs_locally:
+            return self.browse()
+        return provider
+
+    def _get_economy(self):
+        """S6: who answers the light work of this provider: its economy model, else the economy
+        provider of Settings. Nothing goes where private mode forbids.
+
+        :return: ``(provider, model)``, or None when the model of this provider answers everything"""
+        self.ensure_one()
+        if self._is_private_mode() and not self.runs_locally:
+            return None
+        model = (self.economy_model_name or "").strip()
+        if model and model != self.model_name:
+            return self, model
+        other = self._get_economy_provider()
+        if other and other != self:
+            return other, other.model_name
+        return None
 
     def _get_max_parallel(self):
         """NP-04: :return: how many answers this provider gives at once; 0 is no limit of its own"""
@@ -501,16 +589,20 @@ class NudgeProvider(models.Model):
         return url or ("https://api.anthropic.com" if self.kind == "anthropic" else "")
 
     @api.model
-    def _complete(self, system, prompt, user, company, timeout=40, check_budget=True, **links):
+    def _complete(self, system, prompt, user, company, timeout=40, check_budget=True, heavy=False, **links):
         """One short answer of the provider in use, outside any conversation:
         the narrative of a digest, the sentence of a website assistant.
         Never raises; the call is written in the ledger of usage.
+
+        S6: light work, answered by the economy tier of the provider when it has one; when that
+        fails, by the model of the provider, once, within the same time.
 
         :param str system: the instructions
         :param str prompt: what is asked, already framed as data where it holds data
         .. note:: ``check_budget`` False: the caller has a budget of its own.
 
         :param user: who the call is made for, and whose budget it counts against
+        :param heavy: the model of the provider answers at once, never its economy tier
         :param links: more values of the line of usage (``origin``...)
         :return: the text, or "" when no provider can answer (none set up,
             private mode, a limit reached, a failure): the caller then has the numbers"""
@@ -519,13 +611,39 @@ class NudgeProvider(models.Model):
             return ""
         try:
             provider._check_private()
-            adapter = provider._get_adapter()
             if check_budget:
                 self.with_user(user.id).env["nudge.usage"]._check_budget()
         except UserError:
             return ""
-        turns = [{"role": "user", "text": prompt, "context": ""}]
+        economy = None if heavy else provider._get_economy()
+        tiers = [(*economy, tier.ECONOMY)] if economy else []
+        tiers.append((provider, provider.model_name, tier.MAIN))
         deadline = until(timeout)
+        for answering, model, level in tiers:
+            answer = answering._complete_with(model, system, prompt, deadline)
+            if answer is not None:
+                text, usage = answer
+                cost = answering._compute_cost(usage, model)
+                self.env["nudge.usage"]._add(
+                    "chat", usage, cost, user, company, provider_id=answering.id, model_name=model,
+                    tier=level, cost_saved=provider._cost_saved(usage, answering, model) if level == tier.ECONOMY else 0.0,
+                    **links)
+                if text or level == tier.MAIN:
+                    return text
+            if level == tier.ECONOMY:
+                _logger.info("Nudge: the economy model %s gave no short answer, %s answers",
+                             model, provider.model_name)
+        return ""
+
+    def _complete_with(self, model, system, prompt, deadline):
+        """:param model: the model of this provider or its economy model
+        :return: ``(text, usage)`` of one short answer, or None when the provider refused or failed"""
+        self.ensure_one()
+        try:
+            adapter = self._get_tier_adapter(model)
+        except UserError:
+            return None
+        turns = [{"role": "user", "text": prompt, "context": ""}]
         text, usage = [], None
         try:
             for event in adapter.stream_chat(system, turns, deadline=deadline):
@@ -534,20 +652,19 @@ class NudgeProvider(models.Model):
                 elif event["type"] == "stop":
                     usage = event.get("usage")
                 elif event["type"] == "error":
-                    return ""
+                    return None
         except Exception:  # noqa: BLE001
             _logger.info("Nudge: a short answer could not be had", exc_info=True)
-            return ""
-        usage = base.normalize_usage(usage)
-        self.env["nudge.usage"]._add(
-            "chat", usage, provider._compute_cost(usage), user, company,
-            provider_id=provider.id, model_name=provider.model_name, **links)
-        return "".join(text).strip()
+            return None
+        return "".join(text).strip(), base.normalize_usage(usage)
 
     def _get_adapter(self):
         self.ensure_one()
         self._check_private()
-        adapter = base.get_adapter(self._get_config())
+        return self._wrap_adapter(base.get_adapter(self._get_config()))
+
+    def _wrap_adapter(self, adapter):
+        """:return: ``adapter`` as this provider sends with it"""
         # NP-13: a provider beyond the company's own server gets tokens for personal data, not the data
         # sudo: the switch is Nudge's own setting; a person who may ask Nudge may not read companies
         if not self.runs_locally and self.env.company.sudo().nudge_redact_pii:
@@ -555,16 +672,76 @@ class NudgeProvider(models.Model):
             adapter = RedactingAdapter(adapter)
         return adapter
 
-    def _compute_cost(self, usage):
+    def _get_economy_adapter(self):
+        """S6: the adapter of the economy model of this provider: its address, its key and its
+        settings, with the capabilities of that model, read once (:meth:`_ensure_economy_capabilities`).
+        Private mode and the allowed destinations are checked as for :meth:`_get_adapter`."""
+        self.ensure_one()
+        self._check_private()
+        config = dataclasses.replace(
+            self._get_config(), model=(self.economy_model_name or "").strip(),
+            capabilities=self.economy_capabilities or {})
+        return self._wrap_adapter(base.get_adapter(config))
+
+    def _get_tier_adapter(self, model):
+        """:return: the adapter of ``model``: the economy model of this provider, or its model"""
+        self.ensure_one()
+        if model and model != self.model_name and model == (self.economy_model_name or "").strip():
+            return self._get_economy_adapter()
+        return self._get_adapter()
+
+    def _prices(self, model=None):
+        """S6, S8: the prices of one model of this provider, per million tokens.
+
+        Those set on the provider; its economy model has its own, which the price table of Nudge
+        fills for a model it knows when they were left empty. A cache price left empty follows the
+        input price at the share the protocol bills (data/nudge_price_table.json, ``cache_shares``):
+        a token read from the cache is never counted at the full price, nor for nothing.
+
+        :param model: the model that answered; the model of the provider by default
+        :return: ``{input, output, cache_read, cache_write}``"""
+        self.ensure_one()
+        economy = bool(model) and model != self.model_name and model == (self.economy_model_name or "").strip()
+        prefix = "economy_price_" if economy else "price_"
+        prices = {key: self[prefix + key] for key in PRICE_KEYS}
+        if economy and not any(prices.values()):
+            prices.update(model_prices(model))
+        shares = cache_shares(self.kind)
+        for key in ("cache_read", "cache_write"):
+            if not prices.get(key) and prices.get("input"):
+                prices[key] = prices["input"] * shares[key]
+        return {key: float(prices.get(key) or 0.0) for key in PRICE_KEYS}
+
+    def _compute_cost(self, usage, model=None):
         """:param dict usage: normalized token counts
+        :param model: the model that answered (S6): the economy model has its own prices. By default
+            the one the answer being recorded names in the context, else the model of the provider
         :return: price of one answer, in the currency of the provider's price list"""
         self.ensure_one()
-        return (
-            usage["input_tokens"] * self.price_input
-            + usage["output_tokens"] * self.price_output
-            + usage["cache_read_tokens"] * self.price_cache_read
-            + usage["cache_write_tokens"] * self.price_cache_write
-        ) / 1_000_000
+        prices = self._prices(model or self.env.context.get("nudge_priced_model"))
+        return sum(usage[f"{key}_tokens"] * prices[key] for key in PRICE_KEYS) / 1_000_000
+
+    def _cost_saved(self, usage, answering, model):
+        """S6: what the economy tier saved on one call: its tokens at the prices of the model of
+        this provider, less what they cost. 0 when the price of the economy model is not known:
+        nothing is claimed that cannot be shown.
+
+        :param answering: the provider of the economy tier (this one, or the one of Settings)
+        :param model: the model that answered"""
+        self.ensure_one()
+        if not answering._prices(model)["input"]:
+            return 0.0
+        return max(self._compute_cost(usage, self.model_name) - answering._compute_cost(usage, model), 0.0)
+
+    def _ensure_economy_capabilities(self):
+        """S6: ask the provider once what its economy model supports (Claude: thinking, effort)"""
+        self.ensure_one()
+        if self.kind != "anthropic" or self.economy_capabilities or not (self.economy_model_name or "").strip():
+            return
+        try:
+            self.economy_capabilities = self._get_economy_adapter().fetch_capabilities()
+        except base.AdapterError as exc:
+            _logger.info("Nudge: capabilities of %s not available: %s", self.economy_model_name, exc)
 
     def _ensure_capabilities(self):
         """Ask the provider once what the configured model supports."""
