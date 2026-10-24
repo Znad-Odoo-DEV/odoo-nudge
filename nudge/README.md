@@ -381,6 +381,10 @@ the previous section answer the usual counts first, with no AI, for these people
 `/count unpaid invoices this month` answers with no provider at all. The switch is **Settings ‣
 Nudge ‣ Ask the Data** (on by default); off, the data stays closed to those without the Agent group.
 
+### Answer cache
+
+The same question is not sent to the provider twice. An answer of Talk mode that called only the documentation, menu and structure tools, shared no record of the screen, held nothing personal and no secret, and was the first question of its conversation is kept. The next person with the same groups, in the same company, on the same kind of screen (model and view type, never a record), on the same version of Nudge and with the same skills, who asks the same question (same words after the folding of the no-AI router: Arabic letters, stems, filler words) is answered from it, marked as a remembered answer with the button **Ask the AI instead**; the usage report shows a `Cached Answer` row of zero tokens, and **Nudge ‣ What Nudge Knows ‣ Cached Answers** shows what each entry saved. Kept for 7 days (**Settings ‣ Nudge ‣ Answer Cache**), per company, on for exact questions and off for close ones; with close ones on, a question whose words are very near (token-set similarity, 0.85 by default) is offered the earlier answer as an earlier answer to a very close question. Nothing is kept or served in private mode. A change of a skill, a lesson or a saved setting empties the cache; managers can delete one entry or empty it. No model is used to match: plain Python on the words.
+
 ### Skills
 
 The instructions of one kind of work are kept apart as **skills** (Nudge ‣ What Nudge Knows ‣ Skills):

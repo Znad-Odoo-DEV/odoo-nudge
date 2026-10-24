@@ -23306,3 +23306,138 @@ msgstr "سجلات كثيرة دفعة واحدة"
 #: model:nudge.skill,name:nudge.skill_recurring_tasks
 msgid "Recurring AI tasks"
 msgstr "مهام الذكاء الاصطناعي المتكررة"
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_answer_cache.py:0
+msgid "An earlier answer to a very close question (%(question)s). Press Ask the AI instead to ask again."
+msgstr "إجابة سابقة عن سؤال قريب جدًا (%(question)s). اضغط «اسأل الذكاء الاصطناعي بدلًا من ذلك» للسؤال من جديد."
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_answer_cache.py:0
+msgid "Only the managers of Nudge empty the cache."
+msgstr "مديرو Nudge وحدهم يفرغون الذاكرة المؤقتة."
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_answer_cache
+msgid "Nudge Cached Answer"
+msgstr "إجابة مخزنة مؤقتًا في Nudge"
+
+#. module: nudge
+#: model:ir.actions.act_window,name:nudge.nudge_answer_cache_action
+msgid "Cached Answers"
+msgstr "الإجابات المخزنة مؤقتًا"
+
+#. module: nudge
+#: model:ir.cron,name:nudge.cron_answer_cache_purge
+msgid "Nudge: forget old cached answers"
+msgstr "Nudge: نسيان الإجابات المخزنة القديمة"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_usage__kind__cache
+msgid "Cached Answer"
+msgstr "إجابة مخزنة مؤقتًا"
+
+#. module: nudge
+#: model:res.company,field_description:nudge.field_res_company__nudge_cache_exact
+msgid "Answer Cache"
+msgstr "ذاكرة الإجابات المؤقتة"
+
+#. module: nudge
+#: model:res.company,field_description:nudge.field_res_company__nudge_cache_near
+msgid "Offer Close Answers"
+msgstr "اقتراح الإجابات القريبة"
+
+#. module: nudge
+#: model:res.config.settings,field_description:nudge.field_res_config_settings__nudge_cache_ttl_days
+msgid "Keep Answers For (Days)"
+msgstr "مدة الاحتفاظ بالإجابات (أيام)"
+
+#. module: nudge
+#: model:res.config.settings,field_description:nudge.field_res_config_settings__nudge_cache_near_threshold
+msgid "Closeness Required"
+msgstr "درجة التقارب المطلوبة"
+
+#. module: nudge
+#: model:nudge.answer.cache,field_description:nudge.field_nudge_answer_cache__question
+msgid "Question"
+msgstr "السؤال"
+
+#. module: nudge
+#: model:nudge.answer.cache,field_description:nudge.field_nudge_answer_cache__answer
+msgid "Answer"
+msgstr "الإجابة"
+
+#. module: nudge
+#: model:nudge.answer.cache,field_description:nudge.field_nudge_answer_cache__qkey
+msgid "Words"
+msgstr "الكلمات"
+
+#. module: nudge
+#: model:nudge.answer.cache,field_description:nudge.field_nudge_answer_cache__screen_model
+msgid "Screen Model"
+msgstr "نموذج الشاشة"
+
+#. module: nudge
+#: model:nudge.answer.cache,field_description:nudge.field_nudge_answer_cache__view_type
+msgid "View Type"
+msgstr "نوع العرض"
+
+#. module: nudge
+#: model:nudge.answer.cache,field_description:nudge.field_nudge_answer_cache__stored_on
+msgid "Kept On"
+msgstr "حُفظت في"
+
+#. module: nudge
+#: model:nudge.answer.cache,field_description:nudge.field_nudge_answer_cache__hits
+msgid "Served"
+msgstr "قُدّمت"
+
+#. module: nudge
+#: model:nudge.answer.cache,field_description:nudge.field_nudge_answer_cache__near_hits
+msgid "Offered as Close"
+msgstr "عُرضت كقريبة"
+
+#. module: nudge
+#: model:nudge.answer.cache,field_description:nudge.field_nudge_answer_cache__last_hit
+msgid "Last Served"
+msgstr "آخر تقديم"
+
+#. module: nudge
+#: model:nudge.answer.cache,field_description:nudge.field_nudge_answer_cache__tokens
+msgid "Tokens of the Call"
+msgstr "رموز الاستدعاء"
+
+#. module: nudge
+#: model:nudge.answer.cache,field_description:nudge.field_nudge_answer_cache__cost
+msgid "Cost of the Call"
+msgstr "كلفة الاستدعاء"
+
+#. module: nudge
+#: model:nudge.answer.cache,field_description:nudge.field_nudge_answer_cache__tokens_saved
+msgid "Tokens Saved"
+msgstr "الرموز الموفَّرة"
+
+#. module: nudge
+#: model:nudge.answer.cache,field_description:nudge.field_nudge_answer_cache__cost_saved
+msgid "Cost Saved"
+msgstr "الكلفة الموفَّرة"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_answer_cache_view_list
+msgid "Empty the cache"
+msgstr "إفراغ الذاكرة المؤقتة"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_answer_cache_view_list
+msgid "Every cached answer is deleted. The next questions ask the AI provider again."
+msgstr "ستُحذف كل الإجابات المخزنة. الأسئلة التالية ستُوجَّه إلى مزوّد الذكاء الاصطناعي من جديد."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_answer_cache_view_search
+msgid "Language"
+msgstr "اللغة"
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_answer_cache_action
+msgid "No answer is cached yet"
+msgstr "لا توجد إجابة مخزنة بعد"
