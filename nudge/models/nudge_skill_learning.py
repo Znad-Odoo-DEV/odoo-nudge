@@ -392,6 +392,36 @@ class NudgeSkill(models.Model):
                 made |= skill
         return made
 
+    def _rebuild_from_references(self):
+        """An approved answer left these skills (archived, no longer approved or deleted): a draft says only
+        what the answers it still holds say, as it was made; with fewer than Answers per Draft Skill left it is
+        archived and its proposal refused. A skill no longer a draft (a manager published it) is never touched."""
+        needed = self.env["nudge.memory"]._skill_count()
+        drafts = self.exists().filtered(
+            lambda record: record.active and record.origin == "references" and record.state == "draft")
+        for skill in drafts:
+            references = skill.reference_ids.with_context(active_test=False)
+            kept = references.filtered(lambda reference: reference.active and reference.state == "approved")
+            (references - kept).write({"skill_id": False})
+            parts = []
+            if len(kept) >= needed:
+                screens = sorted({name for name in kept.mapped("model_name") if name and name in self.env})
+                label = self._references_label(kept[:1].domain_key or "", screens)[0] or skill.name
+                parts = self._references_parts(label, kept)
+            if not parts:
+                kept.write({"skill_id": False})
+                skill.write({"active": False})
+                skill._close_proposals("refused")
+                continue
+            text, taken = parts[0]
+            if kept - taken:
+                (kept - taken).write({"skill_id": False})
+            if text != skill.instructions:
+                skill.write({"instructions": text})
+            first = " ".join((taken[:1].question or "").split())[:200]
+            if first and first != skill.test_sentence:
+                skill.write({"test_sentence": first})
+
     def _rebuild_from_lessons(self):
         """A lesson left these skills (refused, archived, deleted or changed): each now says only what the
         lessons it still holds say, as the draft was made; one with no lesson left is archived, and its

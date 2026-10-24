@@ -24,6 +24,7 @@ An answer kept in another language is translated once, by the cheapest model
 of the provider, stored for a manager to review, and free from then on; in
 private mode nothing is sent and the original is offered instead.
 """
+import json
 import logging
 import re
 
@@ -67,6 +68,7 @@ MIN_QUESTION_CHARS = 8
 # What a question carried to English by the bridge costs: its words were guessed from a glossary
 BRIDGE_PENALTY = 0.05
 TRANSLATE_SECONDS = 20
+MAX_STEP_NOTES = 20
 # pg_try_advisory_xact_lock(namespace, memory id): one translation of an answer at a time
 TRANSLATE_LOCK = 0x4E4D
 NO_TOKENS = {"input_tokens": 0, "output_tokens": 0, "cache_read_tokens": 0, "cache_write_tokens": 0}
@@ -301,10 +303,22 @@ class NudgeMemory(models.Model):
                 values[key] = scrub(values[key])
         if values.get("state") == "approved" and "approved_date" not in values:
             values["approved_date"] = fields.Datetime.now()
+        left = self.browse()
+        if values.get("active") is False or values.get("state", "approved") != "approved":
+            left = self.filtered("skill_id")
         result = super().write(values)
         if "question" in values:
             # Its vector said the old question: it is made again
             self.env["nudge.embedding"]._forget(self._name, self.ids)
+        if left:
+            # An answer no longer approved leaves the draft skill it was put into
+            left.sudo().skill_id._rebuild_from_references()
+        return result
+
+    def unlink(self):
+        skills = self.sudo().skill_id
+        result = super().unlink()
+        skills._rebuild_from_references()
         return result
 
     def action_approve(self):
@@ -903,7 +917,8 @@ class NudgeMemory(models.Model):
         row = self.env.cr.fetchone()
         if row:
             return row[0]
-        text = self._reference_translate(self.answer, language)
+        notes = self._step_notes()
+        text, kept_notes = self._reference_translate(self.answer, language, notes)
         if not text:
             return ""
         Provider = self.env["nudge.provider"].sudo()
@@ -916,25 +931,51 @@ class NudgeMemory(models.Model):
             "memory_id": self.id, "language": language, "answer": text[:MAX_ANSWER_CHARS],
             "question": _one_line(scrub(asked), MAX_VARIANT_CHARS) or False,
             "origin": "ai", "model_name": model_name or False,
+            "step_notes": json.dumps(kept_notes, ensure_ascii=False) if kept_notes else False,
         })
         self.invalidate_recordset(["translation_ids"])
         return text
 
-    @api.model
-    def _reference_translate(self, text, language):
-        """One very short request: the source text only, "translate to <language>, keep terms". Nothing is
-        sent in private mode to a provider outside the server. ``nudge.provider._complete`` gives it to the
-        economy model of the provider when one is set (S6), to its main model otherwise.
+    def _step_notes(self):
+        """:return: the notes of the steps of the tour of this reference, as the pointer says them"""
+        self.ensure_one()
+        notes = (step.note or "" for step in self.sudo().tour_id.step_ids.sorted(lambda s: (s.sequence, s.id)))
+        return list(dict.fromkeys(note.strip() for note in notes if note.strip()))[:MAX_STEP_NOTES]
 
-        :return: the translation, or "" when no provider can answer"""
+    @api.model
+    def _reference_translate(self, text, language, notes=()):
+        """One very short request: the source text only, "translate to <language>, keep terms". The notes of
+        the steps of its tour, when it has any, go in the same request (a JSON of the answer and the notes),
+        never in a second one. Nothing is sent in private mode to a provider outside the server.
+        ``nudge.provider._complete`` gives it to the economy model of the provider when one is set (S6), to
+        its main model otherwise.
+
+        :return: ``(translation, {note: translated note})``, the translation "" when no provider can answer"""
         Provider = self.env["nudge.provider"].sudo()
         chosen = Provider._get_for_mode("agent") or Provider._get_default()
         if not chosen or (Provider._is_private_mode() and not chosen.runs_locally):
-            return ""
+            return "", {}
         system = (f"Translate to {self._language_name(language)}. Keep the terms, names, numbers and "
                   f"formatting. Reply with the translation only.")
-        answer = Provider._complete(system, text, self.env.user, self.env.company, timeout=TRANSLATE_SECONDS)
-        return (answer or "").strip()
+        notes = list(notes or ())
+        if notes:
+            system = (f"Translate to {self._language_name(language)} the values of this JSON object. Keep the "
+                      f"terms, names, numbers and formatting. Reply with the JSON object only, with the same "
+                      f"keys: \"answer\" is a text, \"notes\" a list in the same order.")
+            text = json.dumps({"answer": text, "notes": notes}, ensure_ascii=False)
+        answer = (Provider._complete(system, text, self.env.user, self.env.company,
+                                     timeout=TRANSLATE_SECONDS) or "").strip()
+        if not notes:
+            return answer, {}
+        try:
+            body = answer[answer.index("{"):answer.rindex("}") + 1]
+            data = json.loads(body)
+            translated = str(data.get("answer") or "").strip()
+            done = [str(note).strip() for note in data.get("notes") or []]
+        except (ValueError, AttributeError, TypeError):
+            return "", {}
+        pairs = {note: new for note, new in zip(notes, done) if new} if len(done) == len(notes) else {}
+        return translated, pairs
 
     def _question_in(self, language):
         self.ensure_one()
@@ -942,9 +983,10 @@ class NudgeMemory(models.Model):
             lambda translation: translation.language == language and translation.question)[:1]
         return kept.question or self.question
 
-    def _replay_steps(self):
+    def _replay_steps(self, language=""):
         """:return: the steps of the reference for the pointer, as the person may see them (the record
-        rules of the tour, the menus they may open), with no AI"""
+        rules of the tour, the menus they may open), with no AI; the notes in ``language`` when a
+        translation of the answer kept them"""
         self.ensure_one()
         if not self.tour_id:
             return []
@@ -953,6 +995,15 @@ class NudgeMemory(models.Model):
         if not tour or not tour._is_offered(Tour._installed_modules()):
             return []
         steps, _skipped = tour._pointer_steps()
+        # sudo: the kept translation of an answer the person is served is Nudge's own record
+        kept = self.sudo().translation_ids.filtered(lambda translation: translation.language == language)[:1]
+        try:
+            notes = json.loads(kept.step_notes) if language and kept.step_notes else {}
+        except ValueError:
+            notes = {}
+        if notes:
+            for step in steps:
+                step["text"] = notes.get((step.get("text") or "").strip()) or step.get("text")
         return steps
 
     def _answer_with(self, conversation, text, memory, mode=MODE_TALK, ask=True):
@@ -961,8 +1012,9 @@ class NudgeMemory(models.Model):
         record = conversation.sudo()
         if not record.name:
             record.name = text[:60].strip()
-        content, note = memory._answer_in(self._language_of(text), asked=text)
-        steps = memory._replay_steps()
+        language = self._language_of(text)
+        content, note = memory._answer_in(language, asked=text)
+        steps = memory._replay_steps(language)
         events = [{"type": "guidance", "steps": steps}] if steps else []
         Message = self.env["nudge.message"].sudo()
         question = Message.browse()
@@ -1135,6 +1187,9 @@ class NudgeMemoryTranslation(models.Model):
         [("ai", "Translated by the AI"), ("manager", "Written by a manager")], default="manager", required=True)
     model_name = fields.Char(string="Translated By", readonly=True)
     reviewed = fields.Boolean(help="A manager read it. A translation by the AI is served before it is reviewed.")
+    step_notes = fields.Text(
+        string="Translated Step Notes",
+        help="The notes of the steps of the explanation in this language, as JSON: the note, then its translation.")
 
     @api.model_create_multi
     def create(self, vals_list):
