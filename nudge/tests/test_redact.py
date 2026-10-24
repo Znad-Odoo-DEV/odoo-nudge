@@ -83,8 +83,10 @@ class TestRedactingAdapter(BaseCase):
             {"role": "tool", "results": [{"id": "c1", "name": "x", "content": f"id {EMIRATES_ID} {CARD}",
                                           "is_error": False}]},
         ]
-        list(adapter.stream_chat(f"Company phone {PHONE}", turns))
+        # Review (ai #4): the system prompt is a list of blocks in every real call (build_system_blocks, oneshot)
+        list(adapter.stream_chat(["You are Nudge.", f"Company phone {PHONE}"], turns))
         text = sent(inner)
+        self.assertEqual(inner.calls[0]["system"], ["You are Nudge.", "Company phone PHONE_1"])
         for value in (EMAIL, PHONE, IBAN, EMIRATES_ID, CARD):
             self.assertNotIn(value, text)
         sent_turns = inner.calls[0]["turns"]
