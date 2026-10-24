@@ -7,7 +7,7 @@ import logging
 import time
 
 from . import base, resilience
-from .prompt import render_user_text
+from .prompt import is_question_block, render_user_text
 
 _logger = logging.getLogger(__name__)
 
@@ -146,9 +146,12 @@ class AnthropicAdapter(base.BaseAdapter):
     def _build_system(self, system):
         # Claude refuses a block of blanks only
         blocks = [{"type": "text", "text": text} for text in system if text and text.strip()]
-        if blocks:
-            # Read point for the stable prefix (tools + system)
-            blocks[-1]["cache_control"] = {"type": "ephemeral"}
+        # Read point for the stable prefix (tools + system): on the last block that is the same from one
+        # question to the next. The skills of the question come after it, so that other skills, or
+        # one asked for with use_skill, never rewrite the cached tools and rules
+        stable = [block for block in blocks if not is_question_block(block["text"])]
+        if stable:
+            stable[-1]["cache_control"] = {"type": "ephemeral"}
         return blocks
 
     def _build_messages(self, turns):

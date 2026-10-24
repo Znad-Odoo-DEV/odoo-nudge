@@ -11,7 +11,7 @@ import requests
 
 from odoo.tests import BaseCase, tagged
 
-from odoo.addons.nudge.llm import base, openai_compat_adapter, resilience
+from odoo.addons.nudge.llm import base, openai_compat_adapter, prompt, resilience
 from odoo.addons.nudge.llm.anthropic_adapter import TOOL_NOTE, AnthropicAdapter, sanitize_blocks
 from odoo.addons.nudge.llm.openai_compat_adapter import OpenAICompatAdapter
 
@@ -540,6 +540,31 @@ class TestAnthropicAdapter(BaseCase):
         self.assertNotIn("thinking", params, "Nothing is sent that the model is not known to accept")
         self.assertNotIn("output_config", params)
         self.assertNotIn("temperature", params)
+
+    def test_the_skills_of_a_question_come_after_the_cached_prefix(self):
+        # NP-03: the skills change from one question to the next; the tools and the rules stay cached
+        rules = ["You are Nudge.", "Talk mode: explain, and Raghad decides."]
+        index = "## Skills\n- odoo-setup: Set Odoo up.\n"
+        first = prompt.with_skills(rules, index, ["## Setting Odoo up\n- Ask first.\n"])
+        second = prompt.with_skills(rules, index, ["## Importing files\n- Test first.\n"])
+        self.assertEqual(first[:-1], second[:-1], "The blocks before the skills are the same for both questions")
+        self.assertTrue(first[-1].startswith(prompt.SKILLS_GIVEN))
+        self.assertEqual(rules, ["You are Nudge.", "Talk mode: explain, and Raghad decides."], "Not changed in place")
+        list(self.adapter().stream_chat(first, TURNS))
+        system = self.calls[0][1]["system"]
+        self.assertEqual([bool(block.get("cache_control")) for block in system], [False, True, False])
+        self.assertIn("## Skills", system[1]["text"], "The index is the same for every question: cached")
+        self.assertIn("## Setting Odoo up", system[2]["text"])
+        self.assertEqual([bool(block.get("cache_control")) for block in self.adapter()._build_system(rules)],
+                         [False, True])
+        # use_skill in the middle of an answer: one block of skills, a text already there not given twice
+        again = prompt.with_skills(first, loaded=["## Setting Odoo up\n- Ask first.\n", "## Importing files\n- Test first.\n"])
+        self.assertEqual(again[:-1], first[:-1])
+        self.assertEqual(again[-1].count("## Setting Odoo up"), 1)
+        self.assertIn("## Importing files", again[-1])
+        # Every other adapter reads the same text, the skills last
+        messages = OpenAICompatAdapter.__new__(OpenAICompatAdapter)._build_messages(again, [])
+        self.assertTrue(messages[0]["content"].endswith("## Importing files\n- Test first.\n"))
 
     def test_capabilities_decide_the_options(self):
         adapter = self.adapter(effort="low", capabilities=CAPABILITIES)

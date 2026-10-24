@@ -3,11 +3,14 @@ them. Only their one-line index is in every call; the rules router brings one or
 no AI; a skill never gives a tool; a draft never reaches a model; skills travel in recipes, grow from three
 approved lessons and are tested every week. Never a provider is reached."""
 import json
+from contextlib import closing
 
+from odoo import SUPERUSER_ID, api, sql_db
 from odoo.exceptions import AccessError, ValidationError
 from odoo.tests import TransactionCase, new_test_user, tagged
 
 from odoo.addons.nudge.llm import base as llm, loop, prompt
+from odoo.addons.nudge.llm.anthropic_adapter import AnthropicAdapter
 from odoo.addons.nudge.models.nudge_conversation import DEVELOPER_PARAM
 from odoo.addons.nudge.models.nudge_recipe import checksum_of
 from odoo.addons.nudge.models.nudge_skill import INLINE_PARAM
@@ -105,7 +108,7 @@ class TestSkills(NudgeCase, TransactionCase):
         self.assertIn("## Importing files", calls[1]["system"][-1], "From its next step of the same answer")
         self.assertNotIn("## Importing files", json.dumps(calls[1]["turns"], default=str),
                          "Instructions come only as instructions, never as a tool result")
-        self.assertEqual(calls[0]["system"][:-1], calls[1]["system"][:-1], "The blocks before stay as they were")
+        self.assertEqual(calls[1]["system"][:-1], calls[0]["system"], "The cached blocks stay as they were")
         importing.invalidate_recordset(["load_count"])
         self.assertEqual(importing.load_count, before + 1)
         # The next questions of the conversation get it too; asked again, it is not given twice
@@ -342,6 +345,59 @@ class TestSkills(NudgeCase, TransactionCase):
         skill = self.made(test_sentence="sales reports", trigger_words="sales report", test_expect="search_records")
         skill.sudo().write({"test_expect": "no_such_tool"})
         self.assertEqual(skill._self_test()[0], "failed")
+
+    # ------------------------------------------------------ review fixes
+    def test_the_skills_of_a_question_never_rewrite_the_cached_prefix(self):
+        self.made(key="raghad-reports", trigger_words="raghad", instructions="## Reports of Raghad\n- By week.\n")
+        self.made(key="ebrahim-reports", trigger_words="ebrahim", instructions="## Reports of Ebrahim\n- By month.\n")
+        conversation, first = self.call_for(self.user_a, "The report of Raghad please")
+        _conversation, second = self.call_for(self.user_a, "Now the one of Ebrahim", conversation_id=conversation.id)
+        self.assertEqual(first[0]["system"][:-1], second[0]["system"][:-1], "Tools and rules: read from the cache")
+        self.assertTrue(first[0]["system"][-1].startswith(prompt.SKILLS_GIVEN))
+        self.assertIn("## Reports of Raghad", first[0]["system"][-1])
+        self.assertIn("## Reports of Ebrahim", second[0]["system"][-1])
+        blocks = AnthropicAdapter.__new__(AnthropicAdapter)._build_system(first[0]["system"])
+        self.assertEqual([index for index, block in enumerate(blocks) if block.get("cache_control")], [len(blocks) - 2])
+
+    def test_use_skill_on_a_skill_kept_but_not_given_gives_it(self):
+        self.made(key="raghad-reports", trigger_words="raghad, reports", instructions="## Reports of Raghad\n")
+        self.made(key="ebrahim-reports", trigger_words="ebrahim, reports", instructions="## Reports of Ebrahim\n")
+        conversation, _calls = self.call_for(self.user_a, "Hello")
+        conversation.sudo().skill_keys = "import-files"
+        script = [[llm.tool_use_event("call_1", "use_skill", {"key": "import-files"}), llm.stop_event(llm.STOP_TOOL_USE)],
+                  [llm.text_event("Noted."), llm.stop_event(llm.STOP_END)]]
+        # The two skills the words bring take both places: the kept one is not given with the question
+        _conversation, calls = self.call_for(
+            self.user_a, "Reports of Raghad and Ebrahim", conversation_id=conversation.id, script=script)
+        self.assertNotIn("## Importing files", json.dumps(calls[0]["system"]))
+        self.assertIn("joins your instructions", json.dumps(calls[1]["turns"], default=str))
+        self.assertIn("## Importing files", calls[1]["system"][-1], "What use_skill says is what happens")
+        self.assertEqual(calls[1]["system"][-1].count("## Reports of Raghad"), 1)
+
+    def test_a_count_made_since_by_another_question_never_fails_the_answer(self):
+        # Two real transactions on a skill of their own, which the transaction of the test never sees: the
+        # answer began, then another question counted the skill and committed (REPEATABLE READ)
+        connection = sql_db.db_connect(self.env.cr.dbname)
+        with closing(connection.cursor()) as other, closing(connection.cursor()) as answer:
+            other.execute(
+                "INSERT INTO nudge_skill (key, name, summary, instructions, modes, state, origin, active, load_count)"
+                " VALUES ('race-of-raghad', '{\"en_US\": \"Race\"}', 'x', 'x', 'talk', 'draft', 'ui', false, 0)"
+                " RETURNING id")
+            skill_id = other.fetchone()[0]
+            other.commit()
+            try:
+                answer.execute("SELECT load_count FROM nudge_skill WHERE id = %s", [skill_id])
+                other.execute("UPDATE nudge_skill SET load_count = load_count + 1 WHERE id = %s", [skill_id])
+                other.commit()
+                skill = api.Environment(answer, SUPERUSER_ID, {})["nudge.skill"].browse(skill_id)
+                skill._count_given()
+                answer.execute("SELECT load_count FROM nudge_skill WHERE id = %s", [skill_id])
+                self.assertEqual(answer.fetchone(), (0,), "Left uncounted, and the answer goes on")
+                answer.rollback()
+            finally:
+                answer.rollback()
+                other.execute("DELETE FROM nudge_skill WHERE id = %s", [skill_id])
+                other.commit()
 
     # ---------------------------------------------------------- the saving
     def test_the_saving_is_measured(self):
