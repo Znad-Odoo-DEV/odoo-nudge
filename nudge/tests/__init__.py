@@ -26,6 +26,7 @@ from . import test_admin
 from . import test_attachments
 from . import test_assessment
 from . import test_lessons
+from . import test_answer_cache
 from . import test_memory
 from . import test_noai
 from . import test_noai_fuzzy
