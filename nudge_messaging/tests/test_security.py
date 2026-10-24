@@ -10,7 +10,9 @@ from odoo.tests import TransactionCase, new_test_user, tagged
 
 from odoo.addons.nudge_messaging.hooks import uninstall_hook
 
-from .test_messaging import BOT_TOKEN, MessagingCase, RAGHAD_PHONE
+from odoo.addons.nudge_messaging.models import nudge_messaging_api
+
+from .test_messaging import ACCESS_TOKEN, BOT_TOKEN, MessagingCase, RAGHAD_PHONE
 
 
 @tagged("post_install", "-at_install", "nudge_messaging")
@@ -152,3 +154,49 @@ class TestRelease2Security(MessagingCase, TransactionCase):
         self.receive("hello again", "971522", "u2")
         self.receive("and again", "971522", "u3")
         self.assertEqual(len(self.sent), 1)
+
+    def test_the_channels_keep_to_the_allowed_destinations_and_the_token_to_meta(self):
+        """Review (S10): the allowed destinations hold for the channels, and the WhatsApp token is sent to
+        Meta's file servers only, never to an address an answer named"""
+        Api = type(self.env["nudge.messaging.api"])
+        for name in ("_send_text", "_download", "_telegram_set_webhook"):
+            self.patch(Api, name, nudge_messaging_api.NudgeMessagingApi.__dict__[name])
+        sent = []
+
+        class Reply:
+            status_code = 200
+
+            def __init__(self, payload):
+                self.payload = payload
+
+            def json(self):
+                return self.payload
+
+            def raise_for_status(self):
+                return None
+
+        def get(url, **kwargs):
+            sent.append((url, (kwargs.get("headers") or {}).get("Authorization")))
+            return Reply({"url": "https://files.example.com/m1", "mime_type": "image/png"})
+
+        self.patch(requests, "get", get)
+        self.patch(requests, "post", lambda url, **kwargs: sent.append((url, None)) or Reply({"ok": True}))
+        api = self.env["nudge.messaging.api"]
+        with self.assertRaises(UserError):
+            api._download("whatsapp", {"id": "m1"})
+        self.assertEqual(sent, [("https://graph.facebook.com/v21.0/m1", f"Bearer {ACCESS_TOKEN}")],
+                         "Nothing went to files.example.com")
+        self.assertTrue(api._is_media_host("https://lookaside.fbsbx.com/whatsapp_business/attachments/?mid=1"))
+        self.assertFalse(api._is_media_host("https://lookaside.fbsbx.com.example.com/x"))
+        self.assertFalse(api._is_media_host("http://lookaside.fbsbx.com/x"))
+        sent.clear()
+        self.env.company.nudge_egress_hosts = "api.anthropic.com"
+        self.assertFalse(api._send_text("whatsapp", RAGHAD_PHONE, "hello"))
+        self.assertFalse(api._send_text("telegram", "555", "hello"))
+        self.assertFalse(api._telegram_set_webhook("https://odoo.example.com/nudge/telegram"))
+        with self.assertRaises(UserError):
+            api._download("telegram", {"id": "f1"})
+        self.assertEqual(sent, [], "Nothing left for a host off the list")
+        self.env.company.nudge_egress_hosts = "api.anthropic.com, api.telegram.org"
+        self.assertTrue(api._send_text("telegram", "555", "hello"))
+
