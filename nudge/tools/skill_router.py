@@ -78,7 +78,17 @@ same s t get got let like want need would tell show give make let ok okay hi hel
 انت انتي هو هي هم لي لنا لك له لها بدي ابغى ابي اريد ممكن لو اذا يا كان كانت يكون حتى لكن او ثم قد لا شي شيء
 عند عندنا عندي لما فيه فيها هاد هاذا بس كمان مرة انو انه انها اللي""".split())
 
-STOP = frozenset(commands.fold(word) for word in _STOP) | _STOP
+# The same small words as people type them in Latin letters (Arabizi): the, to, of, from, on, all, what, how,
+# I want, we have, only, but; they say nothing of the work
+_STOP_ARABIZI = """el al la lal lel ll w wa ma mn men min 3ala 3al 3la hal hayda hay hayy hadi hadol shu shou shoo
+shi eh eish wesh kif kifak kayf keef lesh leish lamma lama eza iza ya kol kul bas kaman marra bdi baddi bade
+bdna baddna abghi abi ureed 3ndi 3ndna 3andi 3ndak 3ndkon 3ndha 3ndo 3and ana ent inta inti huwa hiye hom
+nahnu fi fih feh feha fe 3am ba3d abel abl ma3 eli elli illi lli lazem mumken momken bs""".split()
+
+STOP = frozenset(commands.fold(word) for word in _STOP) | _STOP | frozenset(_STOP_ARABIZI)
+# What the Latin spelling of an Arabic word has written onto it: the article and the particles, the endings
+LATIN_HEADS = ("bel", "bil", "wel", "lel", "lal", "el", "al", "bi", "ll", "la", "w", "b", "l", "y", "t", "n")
+LATIN_TAILS = ("een", "oon", "at", "et", "it", "in", "un", "ha", "hom", "kon", "na", "ni", "ak", "ek", "o")
 
 # Models of screens that are of a kind of work: the push they give to the skills named (only the
 # skills that are there, and only with some word of the question as well)
@@ -332,15 +342,18 @@ class Index:
         return out
 
     def _arabizi(self, raw):
-        """:return: the Arabic terms whose consonants the Latin spelling can be read as, the likeliest two"""
+        """:return: the Arabic terms whose consonants the Latin spelling can be read as, the likeliest two.
+        The spelling is also read without the article, the particle or the ending written onto it ("bel",
+        "at", "na"), and with a 2 as the qaf the Levant says with it ("wa2fat"), as the Arabic stems are"""
         out = []
-        for reading in arabic.arabizi_skeletons(raw):
-            if len(reading) < MIN_SKELETON:
-                continue
-            for term in self.skeletons.get(reading, ()):
-                cost = arabic.arabizi_cost(raw, term)
-                if cost is not None:
-                    out.append((cost, term))
+        for variant, penalty in arabizi_variants(raw):
+            for reading in arabic.arabizi_skeletons(variant):
+                if len(reading) < MIN_SKELETON:
+                    continue
+                for term in self.skeletons.get(reading, ()):
+                    cost = arabic.arabizi_cost(variant, term)
+                    if cost is not None:
+                        out.append((cost + penalty, term))
         out.sort()
         seen, terms = set(), []
         for _cost, term in out:
@@ -383,6 +396,25 @@ class Index:
             for position, saturated in self.postings[term]:
                 scores[position] += weight * idf * saturated
         return scores
+
+
+def arabizi_variants(raw):
+    """:return: ``[(spelling, extra cost)]`` the ways a Latin spelling of an Arabic word is read: as typed,
+    with its 2 as a q, and each of them without a particle or an ending written onto the word"""
+    bases = [(raw, 0.0)]
+    if "2" in raw:
+        bases.append((raw.replace("2", "q"), 0.3))
+    out = list(bases)
+    for base, penalty in bases:
+        heads = [("", base)] + [(head, base[len(head):]) for head in LATIN_HEADS
+                                if base.startswith(head) and len(base) - len(head) >= 3]
+        for head, rest in heads:
+            tails = [rest] + [rest[:-len(tail)] for tail in LATIN_TAILS
+                              if rest.endswith(tail) and len(rest) - len(tail) >= 3]
+            for cut in tails:
+                if cut != base and (cut, penalty + 0.5) not in out:
+                    out.append((cut, penalty + 0.5))
+    return out[:12]
 
 
 def forms_of(trigger_words):
