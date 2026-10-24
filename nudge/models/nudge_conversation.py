@@ -666,7 +666,7 @@ class NudgeConversation(models.Model):
             # Counted by the meaning of the words, for the recurring questions: nobody is kept with it
             self.env["nudge.question"]._record(text)
         served = self.env["nudge.memory"]._chat_serve(
-            self, text, mode, focus, found, explain, background, fresh=fresh)
+            self, text, mode, focus, found, explain, background, fresh=fresh, snapshot=snapshot)
         if served:
             return served
         if not inner:

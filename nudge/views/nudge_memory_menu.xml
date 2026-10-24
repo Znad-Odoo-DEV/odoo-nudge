@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- S15: loaded after the menus, the settings and the skills it adds to -->
+    <menuitem id="nudge_menu_memory" name="Nudge Memory" sequence="22"
+              parent="nudge_menu_knowledge" action="nudge_memory_action"/>
+
+    <menuitem id="nudge_menu_memory_suggested" name="Suggested References" sequence="23"
+              parent="nudge_menu_knowledge" action="nudge_memory_suggested_action"/>
+
+    <record id="res_config_settings_view_form_memory" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.nudge.memory</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='nudge_memory_container']/setting[1]" position="attributes">
+                <attribute name="help">Approved answers (a manager's Save as reference or thumbs-up) answer the same question of the others at once, in any language or dialect, without the AI provider and without cost. Nothing that changed data is kept, and a question asking for live figures is never answered from memory.</attribute>
+            </xpath>
+            <xpath expr="//block[@name='nudge_memory_container']" position="inside">
+                <setting help="An answer liked by enough different people becomes a Suggested reference, for a manager to approve with one click. Nothing is served before that yes. Off: only a manager's thumbs-up and Save as reference keep answers.">
+                    <field name="nudge_memory_like_suggest"/>
+                    <div class="content-group" invisible="not nudge_memory_like_suggest">
+                        <div class="row mt8">
+                            <label for="nudge_memory_like_count" class="col-lg-6 o_light_label"/>
+                            <field name="nudge_memory_like_count" class="col-lg-6"/>
+                        </div>
+                        <div class="mt8">
+                            <button name="%(nudge_memory_suggested_action)d" type="action"
+                                    string="Suggested References" icon="oi-arrow-right" class="btn-link"/>
+                        </div>
+                    </div>
+                </setting>
+                <setting help="When this many approved answers are about one app or skill, they are put together as a draft skill for a manager to publish. The answers keep answering their questions first, with no AI.">
+                    <div class="content-group">
+                        <div class="row mt8">
+                            <label for="nudge_memory_skill_count" class="col-lg-6 o_light_label"/>
+                            <field name="nudge_memory_skill_count" class="col-lg-6"/>
+                        </div>
+                    </div>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="nudge_skill_view_form_references" model="ir.ui.view">
+        <field name="name">nudge.skill.view.form.references</field>
+        <field name="model">nudge.skill</field>
+        <field name="inherit_id" ref="nudge_skill_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='lessons']" position="after">
+                <page string="Approved Answers" name="references" invisible="not reference_ids">
+                    <field name="reference_ids">
+                        <list>
+                            <field name="question"/>
+                            <field name="answer"/>
+                            <field name="approved_by"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
