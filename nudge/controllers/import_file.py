@@ -14,14 +14,14 @@ from odoo.http import Response, request
 from ..llm import attachments
 from ..tools import import_match
 from ..tools.records import Refused, get_model
-from .chat import NudgeChat
+from .chat import UPLOAD_CAP, NudgeChat
 
 CSV_NAME_LIMIT = 80
 
 
 class NudgeImportFile(http.Controller):
 
-    @http.route("/nudge/import/file", type="http", auth="user", methods=["POST"])
+    @http.route("/nudge/import/file", type="http", auth="user", methods=["POST"], max_content_length=UPLOAD_CAP)
     def import_file(self, file=None, model=None, step="match", mapping=None, sheet=None, **kwargs):
         """:param file: the Excel or CSV file
         :param model: technical name of the model; without it the likely models come back
