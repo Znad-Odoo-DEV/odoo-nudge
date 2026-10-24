@@ -8,7 +8,7 @@ the resolution of the names is done by ``nudge.noai``, as the person.
 import datetime
 import re
 
-from . import lexicon, normalise
+from . import fuzzy, lexicon, normalise
 
 KINDS = ("contact", "product", "quotation", "sales_order", "sales", "purchase_order", "invoice", "bill",
          "task", "lead", "ticket", "timeoff", "employee")
@@ -41,10 +41,10 @@ SLASH_DATE = re.compile(r"^(\d{1,2})/(\d{1,2})/(\d{4})$")
 
 class Span:
     """A word or a phrase of the sentence, with what it can mean"""
-    __slots__ = ("i", "j", "cats", "raw", "value")
+    __slots__ = ("i", "j", "cats", "raw", "value", "fix")
 
-    def __init__(self, i, j, cats, raw, value=None):
-        self.i, self.j, self.cats, self.raw, self.value = i, j, set(cats), raw, value
+    def __init__(self, i, j, cats, raw, value=None, fix=None):
+        self.i, self.j, self.cats, self.raw, self.value, self.fix = i, j, set(cats), raw, value, fix
 
     def __repr__(self):
         return f"Span({self.raw!r}, {sorted(self.cats)})"
@@ -68,6 +68,10 @@ class Parse:
         self.states = []
         self.period = None
         self.latest = False
+        # The words read as other words of the lexicon, and the other sentences the person may
+        # have meant when this one is not sure enough to be acted on (see ``parse``)
+        self.corrections = []
+        self.candidates = []
 
     def __repr__(self):
         return f"Parse({self.intent!r}, {self.confidence:.2f}, kind={self.kind!r}, {self.slots!r})"
@@ -333,14 +337,9 @@ def _name_of(spans):
     return " ".join(words).strip()
 
 
-def parse(text, screen=None):
-    """:param screen: what is known of the screen the person is on:
-        ``{"model": str, "record_id": int|None}``
-    :return: the :class:`Parse` of ``text``; ``intent`` is empty when nothing is understood"""
-    text = (text or "").strip()[:400]
+def _interpret(text, spans, screen):
+    """:return: the :class:`Parse` of the ``spans`` of ``text``, as they are"""
     result = Parse(text)
-    screen = screen or {}
-    spans = scan(normalise.tokenize(text))
     if not spans:
         return result
     cats = set().union(*(span.cats for span in spans))
@@ -500,6 +499,122 @@ def parse(text, screen=None):
             return finish("open", 0.85 if "open" in verbs or result.kind else 0.72, words=words,
                           name=names, kind=result.kind)
     return finish("", 0.2) if head else result
+
+
+# What changes data or the screen: a sentence whose words were guessed from a slip is never acted on as one
+WRITES = frozenset(("create", "update", "press", "save_report", "revert"))
+# Below the threshold and from here, a parse is still worth offering as "Did you mean"
+OFFER_FROM = 0.4
+MAX_CANDIDATES = 3
+
+
+def _summary(parsed, fixes=()):
+    """:return: ``parsed`` as a plain dict, for the panel to offer it"""
+    slots = {key: value for key, value in parsed.slots.items() if key != "value_spans"}
+    return {"intent": parsed.intent, "kind": parsed.kind, "confidence": parsed.confidence, "slots": slots,
+            "states": list(parsed.states), "text": fuzzy.corrected_text(parsed.text, fixes) if fixes else parsed.text,
+            "corrections": [fix.record() for fix in fixes]}
+
+
+def _fixes_of(text, tokens, spans):
+    """:return: ``[(index of the token, Fix)]`` for the words nothing in the lexicon explains and
+    that may be a slip or Arabic in Latin letters. Names in quotes, the value a field is set to,
+    numbers and addresses are left alone."""
+    quoted = fuzzy.quoted_words(text)
+    fixes = []
+    for index, span in enumerate(spans):
+        if span.cats or span.j - span.i != 1 or tokens[span.i].norm in quoted:
+            continue
+        before = spans[:index]
+        if before and "to" in before[-1].cats and any(prev.cats & set(FIELDS) for prev in before):
+            continue  # "set the phone to ...": a value, as typed
+        fix = fuzzy.suggest(tokens[span.i], first=span.i == 0)
+        if fix:
+            fixes.append((span.i, fix))
+    return fixes
+
+
+def _rescan(tokens, fixes):
+    """:return: the spans of ``tokens`` with the words of ``fixes`` read as the word of the lexicon
+    (so that a phrase of the lexicon made of it is found), each still as it was written"""
+    tokens = list(tokens)
+    for index, fix in fixes:
+        read = normalise.Token(fix.option.word)
+        read.raw = tokens[index].raw
+        tokens[index] = read
+    return scan(tokens)
+
+
+def _corrected(text, tokens, screen, fixes):
+    """:return: the parse of ``tokens`` with the words of ``fixes`` read as the lexicon word, scored
+    lower for it, and kept under the threshold when it would change something (a correction is
+    never enough to act) or when a word may have meant two things"""
+    parsed = _interpret(text, _rescan(tokens, fixes), screen)
+    parsed.corrections = [fix.record() for _, fix in fixes]
+    if parsed.intent:
+        score = max(0.0, parsed.confidence - fuzzy.penalty([fix for _, fix in fixes]))
+        # A slip is not enough to change something, and a word that may be two things is not enough
+        # to act on; Arabic read from Latin letters, not guessed from a slip, is
+        if any(fix.ambiguous or (parsed.intent in WRITES and fix.option.via == "typo") for _, fix in fixes):
+            score = min(score, THRESHOLD - 0.01)
+        parsed.confidence = round(score, 2)
+    return parsed
+
+
+def parse(text, screen=None):
+    """:param screen: what is known of the screen the person is on:
+        ``{"model": str, "record_id": int|None}``
+    :return: the :class:`Parse` of ``text``; ``intent`` is empty when nothing is understood.
+
+    A word the lexicon does not know is read as the word it was most likely meant to be (a slip, or
+    Arabic in Latin letters). That costs confidence, and a sentence that changes something is
+    never sure enough to be acted on after a correction. A parse under the threshold that is worth
+    asking about has the sentences it may have meant in ``candidates``, each as a dict
+    ``{"intent", "kind", "confidence", "slots", "text", "corrections"}``, the likeliest first.
+    """
+    text = (text or "").strip()[:400]
+    screen = screen or {}
+    tokens = normalise.tokenize(text)
+    spans = scan(tokens)
+    strict = _interpret(text, spans, screen)
+    fixes = _fixes_of(text, tokens, spans) if spans else []
+    if fixes:
+        loose = _corrected(text, tokens, screen, fixes)
+        if loose.intent:
+            if (strict.intent and strict.confidence >= THRESHOLD and strict.intent != loose.intent
+                    and strict.intent not in ("open", "find")):
+                # Understood as it was typed, and not by taking the unknown words for names: the
+                # corrected reading is only a suggestion
+                strict.candidates = [_summary(loose, [fix for _, fix in fixes])]
+                return strict
+            same = (loose.intent, loose.kind, loose.states, loose.period) == (
+                strict.intent, strict.kind, strict.states, strict.period)
+            if not (same and strict.confidence >= THRESHOLD):
+                loose.candidates = _alternatives(text, tokens, screen, fixes, loose)
+                return loose
+    if strict.intent and OFFER_FROM <= strict.confidence < THRESHOLD:
+        strict.candidates = [_summary(strict)]
+    return strict
+
+
+def _alternatives(text, tokens, screen, fixes, loose):
+    """:return: the readings of the sentence worth offering when the corrected one is not sure
+    enough: the likeliest, and what the words that may have meant two things would give"""
+    if loose.confidence >= THRESHOLD:
+        return []
+    found = {(loose.intent, loose.kind): (loose, [fix for _, fix in fixes])}
+    for index, (position, fix) in enumerate(fixes):
+        for choice in range(1, len(fix.options)):
+            other = fuzzy.Fix(fix.raw, fix.options)
+            other.chosen = choice
+            swapped = list(fixes)
+            swapped[index] = (position, other)
+            parsed = _corrected(text, tokens, screen, swapped)
+            key = (parsed.intent, parsed.kind)
+            if parsed.intent and (key not in found or found[key][0].confidence < parsed.confidence):
+                found[key] = (parsed, [one for _, one in swapped])
+    ranked = sorted(found.values(), key=lambda pair: -pair[0].confidence)
+    return [_summary(parsed, used) for parsed, used in ranked[:MAX_CANDIDATES] if parsed.confidence >= OFFER_FROM]
 
 
 def _screen_words(spans):

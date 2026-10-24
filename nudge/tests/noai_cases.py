@@ -125,4 +125,16 @@ CASES = {
         ("what is the weather", "", None, {}),
         ("hello", "", None, {}),
     ],
+    # Slips and Arabic in Latin letters: understood as the word they were meant to be
+    "typo_arabizi": [
+        ("show me unpiad invoicse", "filter", "invoice", {"states": ["unpaid"]}),
+        ("opne the invoices", "open", "invoice", {}),
+        ("how many qoutations", "aggregate", "quotation", {"slots": {"measure": "count"}}),
+        ("how maney employes", "aggregate", "employee", {}),
+        ("كم موضف عنا", "aggregate", "employee", {}),
+        ("افتح الفواتيير", "open", "invoice", {}),
+        ("a3rad el 3omala2", "open", "contact", {}),
+        ("7otli el mntgat", "open", "product", {}),
+        ("shwo me the customers", "open", "contact", {}),
+    ],
 }
