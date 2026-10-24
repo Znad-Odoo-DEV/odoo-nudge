@@ -406,6 +406,16 @@ class TestSettingsActions(NudgeCase, TransactionCase):
             self.assertTrue(embedder.download(self.files, self.folder))
         self.assertEqual(calls[0][1], 20, "It goes on from where it stopped")
 
+    def test_how_far_the_download_is_is_read_on_the_disk(self):
+        # Review odoo-tech #11: the progress was a parameter written every two seconds, and each
+        # write emptied the caches of every worker for as long as the download lasted
+        self.as_admin().action_download()
+        with open(os.path.join(self.folder, "model.onnx.part"), "wb") as stream:
+            stream.write(self.model[:55])
+        total = len(self.model) + len(self.tokenizer)
+        self.assertIn(f"{int(100 * 55 / total)}%", self.Embedding._status())
+        self.assertNotIn("done", self.Embedding._download_state())
+
     def test_remove_and_reindex(self):
         for name, data in (("model.onnx", self.model), ("tokenizer.json", self.tokenizer)):
             with open(os.path.join(self.folder, name), "wb") as stream:
