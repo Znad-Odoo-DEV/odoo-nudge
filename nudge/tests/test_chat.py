@@ -91,11 +91,19 @@ class TestChat(NudgeCase, TransactionCase):
         self.provider.sequence = 1
         other.sequence = 2
         Provider = self.env["nudge.provider"].sudo()
+        Parameter = self.env["ir.config_parameter"]
+        # LEAD-03: two ready and none named: none is chosen for the administrator
+        Parameter.set_param("nudge.default_provider_id", "")
+        self.assertFalse(Provider._get_default())
+        Parameter.set_param("nudge.default_provider_id", str(self.provider.id))
         self.assertEqual(Provider._get_default(), self.provider)
-        self.env["ir.config_parameter"].set_param("nudge.default_provider_id", str(other.id))
+        Parameter.set_param("nudge.default_provider_id", str(other.id))
         self.assertEqual(Provider._get_default(), other)
         other.api_key = False
-        self.assertEqual(Provider._get_default(), self.provider)
+        # The one named cannot answer: no silent switch to the other
+        self.assertFalse(Provider._get_default())
+        Parameter.set_param("nudge.default_provider_id", "")
+        self.assertEqual(Provider._get_default(), self.provider, "Nothing named, one ready: the first install rule")
 
     def test_one_answer_at_a_time(self):
         self.use_adapter()
