@@ -14,7 +14,8 @@ class TestLatencyPanel(NudgeCase, TransactionCase):
     def setUp(self):
         super().setUp()
         self.Report = self.env["nudge.latency.report"]
-        self.today = fields.Date.context_today(self.env["nudge.usage"])
+        # The panel counts the days in the manager's zone: today is theirs too, even near midnight
+        self.today = fields.Date.context_today(self.Report.with_user(self.manager))
         self.company = self.env.company
 
     def answer(self, user, mode="agent", duration=0, state="complete", company=None, cost=0.0, tokens=0):
