@@ -157,7 +157,8 @@ class TestChart(NudgeCase, TransactionCase):
     def test_the_tool_is_for_those_who_may_ask_for_work(self):
         talker = new_test_user(self.env, login="nudge_chart_talk", groups="nudge.group_nudge_user,sales_team.group_sale_manager")
         names = [tool.name for tool in tools.base.available(self.env(user=talker))]
-        self.assertNotIn("show_chart", names)
+        self.assertIn("show_chart", names, "NP-02: Talk has the reading tools of the Ask tier")
+        self.assertNotIn("show_chart", [tool.name for tool in tools.base.available(self.env(user=talker), mode="agent")])
         result = self.chart(talker)
         self.assertTrue(result.is_error)
         agent = [tool.name for tool in tools.base.available(self.env(user=self.raghad_user), mode="agent")]

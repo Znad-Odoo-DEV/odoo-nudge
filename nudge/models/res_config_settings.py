@@ -1,7 +1,7 @@
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
-from ..tools import validator
+from ..tools import base, validator
 from .nudge_conversation import (
     ADMIN_PARAM, AGENT_PARAM, DEVELOPER_PARAM, MAX_STREAMS_PARAM, PYTHON_PARAM,
     SCREEN_SHARING_PARAM, SQL_PARAM,
@@ -124,6 +124,13 @@ class ResConfigSettings(models.TransientModel):
     def action_nudge_embedding_reindex(self):
         return self.env["nudge.embedding"].action_reindex()
 
+    # NP-02
+    nudge_ask_data = fields.Boolean(
+        string="Ask the Data",
+        help="Let every Nudge User ask questions of the data in Talk: count, sum, group, look up and chart "
+             "what their own access rights allow. Nudge gets the reading tools only; nothing is created, "
+             "changed or deleted. Off: the data stays closed to those without the Agent User group.",
+    )
     nudge_agent = fields.Boolean(
         string="Agent Mode",
         help="Let the people of the group Agent User ask Nudge to do the work: look up "
@@ -274,6 +281,7 @@ class ResConfigSettings(models.TransientModel):
             nudge_developer=Conversation._is_developer_allowed(),
             nudge_voice=Voice._is_allowed(),
             nudge_voice_engine=Voice._get_engine(),
+            nudge_ask_data=base.ask_data_enabled(self.env),  # NP-02
         )
         return values
 
@@ -288,6 +296,7 @@ class ResConfigSettings(models.TransientModel):
         Parameter.set_param(DEVELOPER_PARAM, "yes" if self.nudge_developer else "no")
         Parameter.set_param(VOICE_PARAM, "yes" if self.nudge_voice else "no")
         Parameter.set_param(VOICE_ENGINE_PARAM, self.nudge_voice_engine or ENGINE_AUTO)
+        Parameter.set_param(base.ASK_DATA_PARAM, "yes" if self.nudge_ask_data else "no")  # NP-02
 
     @api.depends("company_id")
     def _compute_validator_switches(self):

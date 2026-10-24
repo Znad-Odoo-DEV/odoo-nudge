@@ -60,7 +60,8 @@ class TestFinding(NudgeCase, TransactionCase):
         nothing = self.find({"name": "Nowhere Nobody Never", "model": "res.partner"})
         self.assertFalse(nothing.is_error)
         self.assertIn("Nothing called", nothing.content)
-        for mode, user in (("talk", self.agent), ("agent", self.user_a)):
+        # NP-02: Talk offers find_record to those who may ask the data
+        for mode, user in (("agent", self.user_a),):
             names = [tool.name for tool in tools.base.available(self.env(user=user), mode)]
             self.assertNotIn("find_record", names)
 

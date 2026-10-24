@@ -344,6 +344,18 @@ websites) and are archived, never deleted, when you do not want them.
   in an index (kind `prompts`). An import shows each text first, brings it in as a company prompt and
   never replaces a newer version. A recipe item of a kind this Nudge does not know is skipped with a
   warning; the rest of the file is imported.
+### Ask the data
+
+A Nudge User can ask questions of the data in Talk: how many, how much,
+which most, a chart. Nudge is given the reading tools only (search, read, find, count, sum, group,
+chart, and taking the person to a list or a record); the tools that create, change, press a button,
+plan, run code or read the database are not in what the model receives, so a record name that
+says “update everything” has nothing to call. Every read goes through the rights, the record rules
+and the companies of the person. Each figure ends with the filter it was worked out on, for example
+“Showing: Invoice: Status is posted, Customer Ebrahim, 14 rows”, and carries a link to the list. The rules of
+the previous section answer the usual counts first, with no AI, for these people too, and
+`/count unpaid invoices this month` answers with no provider at all. The switch is **Settings ‣
+Nudge ‣ Ask the Data** (on by default); off, the data stays closed to those without the Agent group.
 
 ### In the background
 
@@ -401,7 +413,7 @@ another screen: the work goes on, and Odoo tells you from wherever you are.
 
 | Group | Can |
 |---|---|
-| Nudge / User | Talk to Nudge. Sees only their own conversations. |
+| Nudge / User | Talk to Nudge. Sees only their own conversations. Can ask Nudge about the data in Talk (see “Ask the data”). |
 | Nudge / Agent User | Can also ask Nudge to do the work, in Agent mode. Reads the log of what Nudge did for them. |
 | Nudge / Manager | Sees every conversation and its cost. Reads the provider list. Reads and corrects the database profile. Writes business notes. |
 | Settings (Administrator) | Creates providers and sets API keys. |
