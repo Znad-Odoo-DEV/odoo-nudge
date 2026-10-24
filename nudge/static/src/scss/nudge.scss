@@ -2,8 +2,10 @@
 // root carries a dir attribute: it mirrors in right-to-left languages whether
 // or not the bundle went through rtlcss.
 
-$o-nudge-accent: #6c4df6 !default;
-$o-nudge-accent-strong: #4f35c9 !default;
+// UI-03: by default the accent is the primary colour of Odoo (see .o_nudge below), so it follows the company,
+// the theme and the dark mode. The violet is kept as a choice (data-theme="violet").
+$o-nudge-violet: #6c4df6 !default;
+$o-nudge-violet-strong: #4f35c9 !default;
 $o-nudge-on-accent: #ffffff !default;
 $o-nudge-surface: $o-view-background-color !default;
 $o-nudge-surface-muted: $o-gray-100 !default;
@@ -26,20 +28,41 @@ $o-nudge-radius: 18px;
 }
 
 .o_nudge {
-    @include o-nudge-theme($o-nudge-accent, $o-nudge-accent-strong);
+    // Design tokens (the table of the UI audit, section 5): Nudge owns no palette, it consumes Odoo's
+    --nudge-accent: var(--bs-primary);
+    --nudge-accent-strong: color-mix(in srgb, var(--bs-primary) 85%, black);
+    --nudge-accent-rgb: var(--bs-primary-rgb);
+    --nudge-accent-strong-rgb: var(--bs-primary-rgb);
+    --nudge-on-accent: var(--bs-white);
+    --nudge-surface: var(--bs-body-bg);
+    --nudge-surface-muted: var(--bs-tertiary-bg);
+    --nudge-border: var(--bs-border-color);
+    --nudge-text: var(--bs-body-color);
+    --nudge-text-muted: var(--bs-secondary-color);
+    --nudge-danger: var(--bs-danger);
+    --nudge-success: var(--bs-success);
+    --nudge-warning: var(--bs-warning);
+    --nudge-info: var(--bs-info);
+    --nudge-focus: var(--nudge-accent);
+    --nudge-dock-width: 400px;
     position: fixed;
     inset-block-end: $o-nudge-gap;
-    inset-inline-start: $o-nudge-gap;
+    // UI-05: at the inline-end like the chat of Odoo, so that the first column of a page stays readable
+    inset-inline-end: $o-nudge-gap;
     // Above dialogs, so that Nudge can be asked about them; below tooltips
     z-index: $zindex-modal + 5;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: flex-end;
     gap: 12px;
     pointer-events: none;
 
     > * {
         pointer-events: auto;
+    }
+
+    &[data-theme="violet"] {
+        @include o-nudge-theme($o-nudge-violet, $o-nudge-violet-strong);
     }
 
     &[data-theme="teal"] {
@@ -59,6 +82,10 @@ $o-nudge-radius: 18px;
     }
 
     // Moved by the person: the panel opens on the side where there is room
+    &[data-align="start"] {
+        align-items: flex-start;
+    }
+
     &[data-align="end"] {
         align-items: flex-end;
     }
@@ -435,7 +462,7 @@ $o-nudge-radius: 18px;
 }
 
 .o_nudge_meeting_on {
-    color: #dc3545;
+    color: var(--bs-danger);
 }
 
 .o_nudge_meeting_time {
@@ -752,6 +779,8 @@ $o-nudge-radius: 18px;
 }
 
 .o_nudge_cursor_arrow {
+    // The point of the arrow, in the units of its drawing: the same in both directions of writing
+    transform-origin: 2px 2px;
     position: absolute;
     inset: 0;
     width: 100%;
@@ -776,12 +805,16 @@ $o-nudge-radius: 18px;
 }
 
 .o_nudge_cursor_pupil {
+    // The pupil is dark on the white eye in both modes: a fixed ink on purpose
     fill: #1f1f24;
 }
 
 // The press, seen as a ripple leaving the tip
 .o_nudge_cursor_ripple {
     position: absolute;
+    // Centred on the tip of the cursor, which is placed with physical coordinates: left and top on purpose
+    top: -12px;
+    left: -12px;
     width: 28px;
     height: 28px;
     border: 2px solid var(--nudge-accent);
@@ -1514,6 +1547,176 @@ $o-nudge-radius: 18px;
         animation: none;
         transition: none;
     }
+
+    // Anything else that moves inside Nudge stands still too
+    .o_nudge,
+    .o_nudge * {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+// ---------------------------------------------------------------------
+// NP-23: the look the person chose, and the room the avatar needs
+// ---------------------------------------------------------------------
+
+// The company colour, when asked for and known
+.o_nudge.o_nudge_company {
+    --nudge-accent: var(--nudge-company);
+    --nudge-accent-strong: color-mix(in srgb, var(--nudge-company) 85%, black);
+    --nudge-accent-rgb: var(--nudge-company-rgb);
+    --nudge-accent-strong-rgb: var(--nudge-company-rgb);
+}
+
+// Visible keyboard focus on every control of Nudge
+.o_nudge :is(button, input, select, textarea, a, [tabindex]):focus-visible {
+    outline: 2px solid var(--nudge-focus);
+    outline-offset: 2px;
+}
+
+// High contrast: the text is the full colour of the text, borders are drawn, the focus ring is thick
+.o_nudge.o_nudge_hc {
+    --nudge-text-muted: var(--bs-body-color);
+    --nudge-border: var(--bs-body-color);
+    --nudge-accent: color-mix(in srgb, var(--bs-primary) 70%, black);
+    --nudge-accent-strong: color-mix(in srgb, var(--bs-primary) 50%, black);
+    --nudge-focus: var(--bs-body-color);
+
+    .o_nudge_panel {
+        border: 2px solid var(--bs-body-color);
+    }
+
+    .o_nudge_hint,
+    .o_nudge_empty_text,
+    .o_nudge_command_hint,
+    .o_nudge_history_date {
+        color: var(--bs-body-color);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+        border: 2px solid currentColor;
+    }
+
+    :is(button, input, select, textarea, a):focus-visible {
+        outline-width: 3px;
+    }
+}
+
+// Large text
+.o_nudge.o_nudge_lg {
+    .o_nudge_panel {
+        font-size: 1.15rem;
+    }
+
+    .o_nudge_command_hint,
+    .o_nudge_hint {
+        font-size: 1rem;
+    }
+}
+
+// Docked: a drawer at the inline-end of the screen, the page keeps its room
+.o_nudge.o_nudge_docked {
+    inset-block: 0;
+    inset-inline: auto 0;
+    z-index: $zindex-modal - 1;
+
+    .o_nudge_avatar {
+        display: none;
+    }
+
+    .o_nudge_panel {
+        width: var(--nudge-dock-width);
+        max-width: 100vw;
+        height: 100vh;
+        max-height: 100vh;
+        border-radius: 0;
+        border-block: 0;
+        border-inline-end: 0;
+    }
+}
+
+body.o_nudge_dock_open .o_action_manager {
+    margin-inline-end: 400px;
+}
+
+// UI-05: the last row, the pager and the footer of a form are not under the avatar
+body.o_nudge_on .o_content {
+    padding-block-end: calc(#{$o-nudge-avatar-size} + #{$o-nudge-gap} * 2);
+}
+
+// On a phone, a dialog has the whole screen: the avatar steps aside until the dialog is closed
+body.modal-open .o_nudge.o_nudge_mobile:not(.o_nudge_open) .o_nudge_avatar {
+    display: none;
+}
+
+// The "?" overlay
+.o_nudge_shortcuts {
+    padding: 12px;
+    border-block-end: 1px solid var(--nudge-border);
+    background: var(--nudge-surface-muted);
+    max-height: 50%;
+    overflow-y: auto;
+
+    .o_nudge_shortcuts_head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .o_nudge_icon_button {
+        color: var(--nudge-text);
+    }
+
+    .o_nudge_shortcuts_list {
+        display: grid;
+        grid-template-columns: max-content 1fr;
+        column-gap: 12px;
+        row-gap: 4px;
+        margin: 8px 0 0;
+    }
+
+    dt,
+    dd {
+        margin: 0;
+    }
+
+    dt {
+        font-weight: 600;
+    }
+
+    dd {
+        color: var(--nudge-text-muted);
+    }
+}
+
+.o_nudge_systray .o_nudge_face {
+    width: 18px;
+    height: 18px;
+    color: inherit;
+
+    // The outline of the bubble, in the colour of the other icons of the bar
+    .o_nudge_face_bubble {
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 3;
+        stroke-linejoin: round;
+    }
+
+    .o_nudge_face_eye {
+        fill: currentColor;
+        animation: none;
+    }
+
+    .o_nudge_face_mouth {
+        stroke: currentColor;
+        stroke-width: 3;
+    }
 }
 
 // ---------------------------------------------------------------------
@@ -1712,7 +1915,7 @@ $o-nudge-radius: 18px;
     inset-inline: 12px;
     bottom: calc(100% - 4px);
     z-index: 2;
-    max-height: 260px;
+    max-height: 40vh;
     margin: 0;
     padding: 4px;
     overflow-y: auto;
@@ -1724,8 +1927,9 @@ $o-nudge-radius: 18px;
 
     li {
         display: flex;
+        flex-wrap: wrap;
         align-items: baseline;
-        gap: 6px;
+        column-gap: 6px;
         padding: 6px 8px;
         border-radius: 6px;
         cursor: pointer;
@@ -1737,13 +1941,13 @@ $o-nudge-radius: 18px;
     }
 }
 
+// UI-09: the hint takes its own line and wraps, instead of being cut
 .o_nudge_command_hint {
+    flex: 1 1 100%;
     min-width: 0;
-    overflow: hidden;
     color: $o-nudge-text-muted;
     font-size: 0.8rem;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: anywhere;
 }
 
 .o_nudge_private {
