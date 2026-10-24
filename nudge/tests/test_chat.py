@@ -92,9 +92,12 @@ class TestChat(NudgeCase, TransactionCase):
         other.sequence = 2
         Provider = self.env["nudge.provider"].sudo()
         Parameter = self.env["ir.config_parameter"]
-        # LEAD-03: two ready and none named: none is chosen for the administrator
+        # Two ready and none named: the first in the administrator's order
         Parameter.set_param("nudge.default_provider_id", "")
-        self.assertFalse(Provider._get_default())
+        self.assertEqual(Provider._get_default(), self.provider)
+        other.sequence = 0
+        self.assertEqual(Provider._get_default(), other)
+        other.sequence = 2
         Parameter.set_param("nudge.default_provider_id", str(self.provider.id))
         self.assertEqual(Provider._get_default(), self.provider)
         Parameter.set_param("nudge.default_provider_id", str(other.id))
