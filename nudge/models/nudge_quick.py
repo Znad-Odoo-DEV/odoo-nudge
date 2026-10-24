@@ -465,6 +465,14 @@ class NudgeQuick(models.AbstractModel):
         if kind:
             # A sofa that shared "two" with "Cabinet, large, two doors" came before the cabinets
             of_kind = [item for item in items if kind in product_search.words_of(item["name"])]
+            if not of_kind:
+                # Many products sharing "large" and "oak" can fill the pool before the one of the kind
+                # comes: the kind is looked for on its own
+                try:
+                    named = product_search.find(self.env, kind, GROUND_POOL)["items"]
+                except Exception:  # noqa: BLE001
+                    named = []
+                of_kind = [item for item in named if kind in product_search.words_of(item["name"])]
             items = of_kind or items
         items = items[:GROUND_PRODUCTS]
         keys = ("name", "code", "price", "on_hand", "unit")
