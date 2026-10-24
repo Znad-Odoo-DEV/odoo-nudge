@@ -170,6 +170,13 @@
             <field name="groups" eval="[Command.link(ref('group_nudge_manager'))]"/>
         </record>
 
+        <record id="nudge_rule_rule_company" model="ir.rule">
+            <field name="name">Nudge Learned Rule: companies of the manager</field>
+            <field name="model_id" ref="model_nudge_rule"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[Command.link(ref('group_nudge_manager'))]"/>
+        </record>
+
         <record id="nudge_lexicon_entry_rule_company" model="ir.rule">
             <field name="name">Nudge Lexicon Entry: companies of the user</field>
             <field name="model_id" ref="model_nudge_lexicon_entry"/>

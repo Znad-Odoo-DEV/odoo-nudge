@@ -23758,3 +23758,135 @@ msgid ""
 msgstr ""
 "لا أحد هنا يضمن من أعدّ هذا الملف. مدير النظام وحده يستورده بعد قراءة ما "
 "تقوله مهاراته للنموذج (أدناه). تدخل مهاراته كمسودات."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_rule.py:0
+msgid "Only Nudge managers decide on the proposed rules."
+msgstr "وحدهم مديرو Nudge يقررون في القواعد المقترحة."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_rule.py:0
+msgid "A request that changes data: kept as a prompt of the library."
+msgstr "طلب يغيّر البيانات: يُحفظ كأمر جاهز في المكتبة."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_rule.py:0
+msgid "Counts or sums %s"
+msgstr "يعدّ أو يجمع: %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_rule.py:0
+msgid "Lists %s"
+msgstr "يعرض قائمة: %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_rule.py:0
+msgid "Opens a screen"
+msgstr "يفتح شاشة"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_rule.py:0
+msgid "Filters the screen of %s"
+msgstr "يصفّي شاشة: %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_rule.py:0
+msgid "Only a tool that reads can answer on its own."
+msgstr "وحدها الأداة التي تقرأ فقط يمكنها الإجابة من تلقاء نفسها."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_rule.py:0
+msgid "Asked again and again: kept for you to send, never done on its own."
+msgstr ""
+"يتكرر السؤال عنه: محفوظ لترسله بنفسك، ولا يُنفَّذ من تلقاء نفسه أبدًا."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_rule.py:0
+msgid "Done."
+msgstr "تم."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_rule.py:0
+msgid "I found nothing to list."
+msgstr "لم أجد شيئًا لعرضه."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_rule.py:0
+msgid "%(total)s %(what)s"
+msgstr "%(total)s %(what)s"
+
+#. module: nudge
+#: model:ir.actions.act_window,name:nudge.nudge_rule_action
+#: model:ir.ui.menu,name:nudge.nudge_menu_rules
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_rule_view_list
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_rule_view_search
+msgid "Recurring Requests"
+msgstr "الطلبات المتكررة"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_rule_view_form
+msgid "Recurring Request"
+msgstr "طلب متكرر"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_rule_view_list
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_rule_view_form
+msgid "Bring back"
+msgstr "إعادته"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_rule_view_form
+msgid "What it does"
+msgstr "ما يفعله"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_rule_view_search
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_rule__kind__rule
+msgid "Rules Without AI"
+msgstr "قواعد بلا ذكاء اصطناعي"
+
+#. module: nudge
+#: model:ir.actions.server,name:nudge.nudge_rule_observe_action
+msgid "Find Recurring Requests"
+msgstr "البحث عن الطلبات المتكررة"
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_rule_action
+msgid "No request comes back often enough yet"
+msgstr "لا يوجد طلب يتكرر بما يكفي بعد"
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_rule_action
+msgid ""
+"When people ask the AI the same thing again and again, Nudge proposes a rule"
+" here: the next time it is answered with no AI and no cost. A request that "
+"only reads becomes a rule; one that changes data becomes a prompt of the "
+"library and is never done on its own. Nothing of what was asked is kept, "
+"only the shape of the sentence."
+msgstr ""
+"حين يسأل الناس الذكاء الاصطناعي الشيء نفسه مرة بعد مرة، يقترح Nudge هنا "
+"قاعدة: في المرة القادمة يُجاب عنه بلا ذكاء اصطناعي وبلا تكلفة. الطلب الذي "
+"يقرأ فقط يصبح قاعدة، والذي يغيّر البيانات يصبح أمرًا جاهزًا في المكتبة ولا "
+"يُنفَّذ من تلقاء نفسه أبدًا. لا يُحفظ شيء مما سُئل عنه، بل شكل الجملة فقط."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_rule_view_form
+#: model:ir.model.fields,field_description:nudge.field_nudge_rule__patterns_text
+msgid "Patterns"
+msgstr "الأنماط"
+
+#. module: nudge
+#: model:ir.cron,cron_name:nudge.cron_observe_rules
+msgid "Nudge: find the requests that come back"
+msgstr "Nudge: البحث عن الطلبات التي تتكرر"

@@ -89,6 +89,8 @@ Without them the rest works and the feature says what is missing.
         "views/nudge_slot_views.xml",
         "views/nudge_auditor_views.xml",
         "views/nudge_coverage_views.xml",
+        "data/nudge_rule_cron.xml",
+        "views/nudge_rule_views.xml",
         "security/nudge_skill_security.xml",
         "data/nudge_skill_data.xml",
         "data/nudge_skill_data_np03.xml",
