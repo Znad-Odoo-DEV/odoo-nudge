@@ -392,6 +392,39 @@ class TestNoaiRun(NudgeCase, TransactionCase):
         self.assertEqual(self.last_text(events), "From the AI")
         self.assertFalse(self.cards(events))
 
+    def test_a_negated_verb_is_never_read_as_the_verb(self):
+        for text in ("Do not publish", "don't confirm this invoice", "never validate it"):
+            with self.subTest(text=text):
+                parsed = noai_commands.parse(text, {"model": "account.move", "record_id": 1})
+                self.assertFalse(parsed.intent, parsed)
+
+    def test_a_request_the_rules_do_not_read_whole_goes_to_the_ai(self):
+        # Found in the live trial: several sentences became ONE card with the last price, "three contacts" a
+        # task called "position of Buyer", other requests "I found nothing called" garbled words, no AI call
+        self.provider.active = True
+        self.use_adapter(reply="From the AI")
+        for text in (
+            "Create a product Trial Plan Pen price 5. Create a product Trial Plan Cap price 7. Create a tag Trial",
+            "Create three contacts Anna, Omar and Lina with job position Buyer",
+            "Create a contact Zed Alpha and then send a quotation to Zed Alpha for 3 pens",
+            "Build a website for my contracting business",
+            "Design a new website for my company with pages Home, Services and Contact",
+            "Do not publish the website yet",
+            "Create a contact Raghad Eighth\nCreate a contact Raghad Ninth",
+        ):
+            with self.subTest(text=text):
+                conversation = self.env["nudge.conversation"].with_user(self.worker)._chat_open(None)
+                job = conversation._chat_prepare(text, mode="agent")
+                events = job.get("first_events") or []
+                self.assertFalse(job.get("answered"), "Not answered by the rules: %s" % job)
+                self.assertFalse(self.cards(events), "No rules card")
+                conversation.sudo().stream_started_at = False  # the next sentence is a new question
+                self.env["nudge.slot"].sudo().search([]).unlink()
+        # a request the rules read whole stays with the rules
+        conversation = self.env["nudge.conversation"].with_user(self.worker)._chat_open(None)
+        job = conversation._chat_prepare("create contact Raghad Tenth", mode="agent")
+        self.assertTrue(job.get("answered"))
+
     def test_the_setting_on_spares_the_provider_and_what_is_not_understood_goes_to_it(self):
         self.provider.active = True
         adapter = self.use_adapter(reply="From the AI")
