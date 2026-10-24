@@ -94,6 +94,20 @@ def check_url(url, allow_private=False):
             raise McpError("private")
 
 
+def read_capped(response, cap, seconds):
+    """:return: the bytes of a streamed ``response``, at most ``cap`` of them, all within ``seconds``
+    :raise McpError: ``toobig`` or ``timeout``"""
+    limit = time.monotonic() + seconds
+    data = bytearray()
+    for block in response.iter_content(1 << 14):
+        data += block
+        if len(data) > cap:
+            raise McpError("toobig")
+        if time.monotonic() > limit:
+            raise McpError("timeout")
+    return bytes(data)
+
+
 def header_value(value):
     """:return: ``value`` as an HTTP header may carry it: as it is when it is plain visible ASCII,
     else Base64 between the sentinels of the specification"""
