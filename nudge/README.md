@@ -416,8 +416,24 @@ version and a test sentence with the tool it expects.
   weekly health check runs the test sentence of every active skill without any AI (does it still bring
   the skill, is its tool still here) and writes a red line in Business Notes for each that fails; red
   lines and proposals are never sent to a model.
-- **Fallback.** Settings ‣ Nudge ‣ Skills ‣ Every Skill in Full sends every skill in full with every
-  question, as before skills.
+- **The tools a question needs.** A call no longer carries every tool. It carries the core of its mode
+  (finding, reading and showing; in Agent mode creating, changing and pressing a button; in Developer
+  mode reading what runs, checking code, deleting and taking back what was built), and the tools of the
+  kinds of work its question needs, with no AI: by its words and those of the question before it, which
+  it may answer, its screen (the Import screen, Studio), its context (a report as a spreadsheet, an
+  explanation on the screen), its command (`/import`), its file, the tools called since, and the tools of
+  its skills. A question of Developer mode that names nothing to build gets the automations. The model
+  asks for the rest with `more_tools`, and a tool it calls without being offered still runs when the
+  person may use it, and is offered from its next step. Every tool still passes the person's groups and
+  the switches of the administrator. The domain sections of the instructions (bulk plans, recurring
+  tasks, SQL and Python, products, the assessment, and in Developer mode trying a rule, scheduled actions,
+  approvals, code, screens and reports) moved into skills. Measured on the real request (system text and
+  tool schema at 4 characters a token, an administrator with every switch on): Agent 12.5k tokens for a
+  plain question, 13.0-13.3k for an invoice or an import question, 14.4k for a report, against 20.7k with
+  every tool; Talk 10.1k against 13.5k; Developer 11.2-17.0k against 32.5k
+  (`tests/test_prompt_budget.py`).
+- **Fallback.** Settings ‣ Nudge ‣ Skills ‣ Every Skill in Full sends every skill in full and every tool
+  with every question, as before skills.
 
 ### In the background
 
