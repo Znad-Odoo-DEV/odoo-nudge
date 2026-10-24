@@ -1,5 +1,7 @@
 import logging
 
+from psycopg2 import OperationalError
+
 from odoo import api, fields, models
 from odoo.modules import module as odoo_module
 
@@ -102,11 +104,33 @@ class NudgeConversationSummary(models.Model):
         body = "\n".join(part for part in (text, extra) if part)
         return kept, summary.frame(body) if body else ""
 
+    def _summary_lock(self):
+        """Take the row of this conversation, never waiting for it, and read it again as it is now: two
+        questions asked together in one conversation do not lose or repeat each other's lines.
+
+        :return: whether the row is ours"""
+        self.ensure_one()
+        try:
+            with self.env.cr.savepoint():
+                self.env.cr.execute(
+                    "SELECT id FROM nudge_conversation WHERE id = %s FOR UPDATE SKIP LOCKED", [self.id])
+                taken = bool(self.env.cr.fetchone())
+        except OperationalError:
+            # Written by another transaction since this one began (serialization): the next question catches up
+            return False
+        if taken:
+            self.invalidate_recordset()
+        return taken
+
     def _summary_refresh(self):
         """Store what the next question will not replay: called when the question is prepared,
         which makes no call to a provider. The improvement of the wording is another job."""
         self.ensure_one()
         conversation = self.sudo()
+        if not conversation._summary_lock():
+            # Another question of this conversation is writing the summary at this instant: what it
+            # leaves out is read again from the last message covered, by the next question
+            return
         messages = conversation.message_ids.sorted("id")
         question = messages.filtered(lambda message: message.role == "user")[-1:]
         if question.command in tools.commands.FOCUS:
@@ -150,10 +174,22 @@ class NudgeConversationSummary(models.Model):
                 continue
             company = conversation.company_id or self.env.company
             system, prompt = summary.improve_prompt(text)
+            conversation.flush_recordset()
+            if not odoo_module.current_test:
+                # The row is let go before the provider is asked: a person's next question in this
+                # conversation writes it, and must not wait up to IMPROVE_SECONDS for us
+                self.env.cr.commit()
             answer = Provider.with_company(company)._complete(
                 system, prompt, conversation.user_id, company,
                 timeout=IMPROVE_SECONDS, conversation_id=conversation.id)
             answer = summary.fit((answer or "").strip())
+            if not odoo_module.current_test:
+                # The ledger of the call is kept, and a new transaction sees what was written meanwhile
+                self.env.cr.commit()
+            if not conversation._summary_lock():
+                # Written by a question at this instant: the summary stays as it is, that question
+                # marks it for another improvement if it adds lines
+                continue
             conversation.invalidate_recordset(["summary_upto_id", "summary_edited"])
             if answer and conversation.summary_upto_id == upto and not conversation.summary_edited:
                 conversation.write({"summary_text": answer, "summary_ai": True})

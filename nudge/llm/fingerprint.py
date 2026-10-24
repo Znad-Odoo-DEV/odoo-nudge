@@ -10,7 +10,7 @@ fingerprint. Nothing of who asked is in it. Plain Python, no state, nothing from
 import hashlib
 import re
 
-from . import arabic, memory_match
+from . import arabic, memory_match, redact
 
 # A question of fewer meaningful words than this says too little to be told from another
 MIN_WORDS = 2
@@ -156,10 +156,21 @@ def of(text):
     return hashlib.sha1("\n".join(sorted(found)).encode("utf-8")).hexdigest()[:24]
 
 
+# What a person types by mistake into a question: a key, or the word that follows "password"
+_SECRET = re.compile(
+    r"\b(?:sk|pk|rk|gsk|ghp|xox[a-z]|AIza)[-_A-Za-z0-9]{8,}"
+    r"|\b(?=[A-Za-z0-9_-]*\d)(?=[A-Za-z0-9_-]*[A-Za-z])[A-Za-z0-9_-]{20,}"
+    r"|(?i:\b(?:password|passwd|pwd|passcode|api[ _-]?key|كلمة\s+(?:ال)?(?:سر|مرور)|الباسورد|باسورد)"
+    r"\s*(?:is|=|:|هي|هو)?\s*)\S+")
+
+
 def sample(text):
     """:return: ``text`` as it may be kept to be read by a manager: one line, no address of mail,
-    no telephone or long number, cut"""
+    no telephone or long number, no key or password, the personal data the redactor knows replaced,
+    cut"""
     text = " ".join(str(text or "").split())
+    text = _SECRET.sub("…", text)
+    text = redact.TOKEN.sub("…", redact.Redactor().redact(text))
     text = _PHONE.sub(lambda m: "…" if sum(c.isdigit() for c in m.group()) >= 7 else m.group(), _EMAIL.sub("…", text))
     text = _LONG_NUMBER.sub("…", text)
     return text[:SAMPLE_CHARS]

@@ -193,6 +193,15 @@ class NudgeConversation(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        if not self.env.su:
+            for vals in vals_list:
+                if SUMMARY_BOOKKEEPING & vals.keys():
+                    raise AccessError(_("Only Nudge writes the bookkeeping of a summary."))
+                if vals.get("summary_text") and vals.get("user_id", self.env.uid) != self.env.uid:
+                    # NP-22: as on write, the summary is the owner's to correct, a manager included
+                    raise AccessError(_("Only the owner of a conversation can change its summary."))
+            vals_list = [
+                dict(vals, summary_edited=True) if vals.get("summary_text") else vals for vals in vals_list]
         if not self._is_privileged():
             # Tokens and ownership are bookkeeping, not user input
             vals_list = [
@@ -652,7 +661,8 @@ class NudgeConversation(models.Model):
             raise UserError(_("Agent mode is not open to you. Ask your administrator."))
         mode = mode if mode in (MODE_AGENT, MODE_DEV) else MODE_TALK
         background = bool(background) and mode != MODE_TALK
-        if mode == MODE_TALK and not focus and not found:
+        if mode == MODE_TALK and not focus and not found and not self.env["nudge.provider"]._is_private_mode():
+            # In private mode nothing of a question is kept for the managers to read
             # Counted by the meaning of the words, for the recurring questions: nobody is kept with it
             self.env["nudge.question"]._record(text)
         served = self.env["nudge.memory"]._chat_serve(
