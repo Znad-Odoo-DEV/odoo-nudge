@@ -84,14 +84,17 @@ class UseSkill(base.Tool):
         "Ask for the instructions of a skill of the list \"Skills\" of your instructions, by its key, "
         "when what the person asks is that kind of work and its instructions are not given yet. They "
         "join your instructions from your next step, and stay for the next questions of this "
-        "conversation, with the tools the skill needs that are open to this person."
+        "conversation, with the tools the skill needs that are open to this person. The list shows the "
+        "skills closest to the question; other skills exist: ask for one by its key, or describe the "
+        "work in \"work\" and the closest skill is given."
     )
     input_schema = {
         "type": "object",
         "additionalProperties": False,
-        "required": ["key"],
         "properties": {
             "key": {"type": "string", "minLength": 2, "maxLength": 63, "description": "The key of the skill, as the list writes it."},
+            "work": {"type": "string", "minLength": 3, "maxLength": 300,
+                     "description": "Instead of a key: the kind of work, in a few words, when no listed skill fits."},
         },
     }
 
@@ -99,11 +102,19 @@ class UseSkill(base.Tool):
         mode = env.context.get("nudge_mode") or base.MODE_TALK
         Skill = env["nudge.skill"]
         visible = Skill._visible(mode)
-        skill = visible.filtered(lambda record: record.key == arguments["key"].strip().lower())[:1]
+        asked = str(arguments.get("key") or "").strip().lower()
+        work = str(arguments.get("work") or "").strip()
+        if not asked and not work:
+            return base.ToolResult("Give the key of a skill, or describe the work in \"work\".", is_error=True)
+        skill = visible.filtered(lambda record: record.key == asked)[:1]
+        if not skill and not asked and work:
+            # The work described, read by the router as a question is (the closest skill, if any)
+            found = visible._route(work).ranked
+            skill = visible.filtered(lambda record: found and record.key == found[0][0])[:1]
         if not skill:
             keys = ", ".join(sorted(set(visible.mapped("key")))) or "none"
             return base.ToolResult(
-                f"No skill {arguments['key']!r} is open to this person in this mode. Their skills: {keys}.",
+                f"No skill {asked or work!r} is open to this person in this mode. Their skills: {keys}.",
                 is_error=True)
         conversation = env["nudge.conversation"].browse(env.context.get("nudge_conversation_id")).exists()
         if not conversation:
