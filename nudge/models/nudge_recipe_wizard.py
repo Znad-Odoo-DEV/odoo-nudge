@@ -9,7 +9,7 @@ from .nudge_recipe import KINDS, MODELS, canonical
 FLAGS = {
     "with_tours": "tour", "with_rules": "rule", "with_presets": "preset", "with_health": "health",
     "with_lexicon": "lexicon", "with_memories": "memory", "with_files": "file",
-    "with_screens": "screen", "with_prompts": "prompt",
+    "with_screens": "screen", "with_prompts": "prompt", "with_skills": "skill",
 }
 
 
