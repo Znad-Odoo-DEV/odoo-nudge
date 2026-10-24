@@ -39,6 +39,10 @@
         <field name="res_model">nudge.web.message</field>
         <field name="view_mode">tree</field>
         <field name="context">{'search_default_unanswered': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No visitor question yet</p>
+            <p>What visitors ask the website assistant is listed here.</p>
+        </field>
     </record>
 
     <!-- The usage of Nudge, for the calls the assistant of the website made -->
@@ -47,6 +51,10 @@
         <field name="res_model">nudge.usage</field>
         <field name="view_mode">tree,pivot</field>
         <field name="domain">[('origin', '=', 'website')]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Nothing spent by the website assistant yet</p>
+            <p>Every call the website assistant makes to an AI provider is written here, with its tokens and its cost.</p>
+        </field>
     </record>
 
     <menuitem id="nudge_menu_website" name="Website Assistant" sequence="40"

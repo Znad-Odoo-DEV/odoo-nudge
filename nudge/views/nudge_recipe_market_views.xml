@@ -137,6 +137,10 @@
         <field name="name">Recipe Sources</field>
         <field name="res_model">nudge.recipe.source</field>
         <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No recipe source yet</p>
+            <p>A recipe source is a place Nudge reads shared recipes from. Add one to browse and install its recipes.</p>
+        </field>
     </record>
 
     <!-- Installed -->
@@ -161,6 +165,10 @@
         <field name="res_model">nudge.recipe.installed</field>
         <field name="view_mode">tree</field>
         <field name="context">{'active_test': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No recipe installed yet</p>
+            <p>The recipes you install from a source are listed here, with their version.</p>
+        </field>
     </record>
 
     <!-- Publish ours -->
