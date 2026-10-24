@@ -121,6 +121,7 @@ def draw_picture(provider, model, prompt, timeout=60):
         if entry.get("b64_json"):
             return base64.b64decode(entry["b64_json"])
         if entry.get("url"):
+            provider.env["nudge.egress"].check(entry["url"], "picture")  # NP-15: it lives on another host
             fetched = requests.get(entry["url"], timeout=timeout)
             fetched.raise_for_status()
             return fetched.content

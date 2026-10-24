@@ -138,6 +138,20 @@ def sanitize(raw):
     return snapshot or None
 
 
+def has_masked_value(snapshot):
+    """NP-15: whether a value was hidden in ``snapshot`` (a password widget, or a field named like a credential)."""
+    stack = [snapshot]
+    while stack:
+        item = stack.pop()
+        if isinstance(item, dict):
+            if item.get("value") == HIDDEN:
+                return True
+            stack.extend(item.values())
+        elif isinstance(item, list):
+            stack.extend(item)
+    return False
+
+
 def fingerprint(snapshot):
     return hashlib.sha256(_dump(snapshot).encode()).hexdigest()
 
