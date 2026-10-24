@@ -76,7 +76,7 @@ connector and person, readable by the Settings group only, sent only to the serv
 log, the answers and every prompt, and renewed with the refresh token when they end. A person without a token is told
 to sign in; another person's token is never used. The state is random, single use, bound to the person and the
 connector, and valid for 10 minutes; the return address comes from `web.base.url`, never from a request. **Sign Out**
-forgets one person's tokens, **Sign Everybody Out** all of them; changing the client or addresses of a connector signs
+forgets one person's tokens, **Sign Everybody Out** (administrators) all of them; when the server publishes a `revocation_endpoint` (RFC 7009) it is told too, best effort; each person sees "Signed in as of <date>" or "Not signed in" on the form; changing the client or addresses of a connector signs
 everybody out. The connector's companies and groups apply as to every connector.
 
 Presets: Google Calendar and Gmail (Developer Preview: enable the API in your Google Cloud project and create an OAuth

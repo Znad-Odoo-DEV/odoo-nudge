@@ -78,6 +78,7 @@ class FakeMcpServer:
         self.refreshes = {}
         self.issued = 0
         self.registered = []
+        self.revoked = []
         self.no_discovery = False
         self.bad_endpoint = None
         self.expires_in = 3600
@@ -100,6 +101,8 @@ class FakeMcpServer:
                 headers = {key.lower(): value for key, value in self.headers.items()}
                 if self.path == "/token":
                     return fake.grant(self, raw.decode(), headers)
+                if self.path == "/revoke":
+                    return fake.revoke(self, raw.decode())
                 if self.path == "/register":
                     return fake.register(self, json.loads(raw or b"{}"))
                 body = json.loads(raw or b"{}")
@@ -168,7 +171,14 @@ class FakeMcpServer:
 
     def metadata(self, origin):
         return {"issuer": origin, "authorization_endpoint": self.bad_endpoint or origin + "/authorize",
-                "token_endpoint": origin + "/token", "registration_endpoint": origin + "/register"}
+                "token_endpoint": origin + "/token", "registration_endpoint": origin + "/register",
+                "revocation_endpoint": origin + "/revoke"}
+
+    def revoke(self, handler, form):
+        values = dict(parse_qsl(form))
+        self.requests.append({"method": "revoke", "headers": {}, "body": values})
+        self.revoked = getattr(self, "revoked", []) + [values.get("token")]
+        return handler.reply(200, {})
 
     def register(self, handler, body):
         self.registered.append(body)
