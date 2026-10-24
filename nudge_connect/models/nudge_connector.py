@@ -274,6 +274,7 @@ class NudgeConnector(models.Model):
 
         :return: a notification of what changed"""
         self.ensure_one()
+        self._nudge_check_access("write")
         try:
             client = self._client()
             listed = client.list_tools()
@@ -281,7 +282,9 @@ class NudgeConnector(models.Model):
             told = self._failure(error)
             self.last_error = told
             return self._notify(told, "danger")
-        Tool = self.env["nudge.connector.tool"]
+        # sudo: the tools are written by Nudge when it reads them, after the check above that the person may
+        # manage this connector; nobody creates one by hand
+        Tool = self.env["nudge.connector.tool"].sudo()
         mine = {tool.remote_name: tool for tool in self.with_context(active_test=False).tool_ids}
         changed = 0
         seen, fresh = set(), []
