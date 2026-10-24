@@ -66,7 +66,8 @@ class TestDidYouMean(NudgeCase, TransactionCase):
         self.assertFalse([event for event in shown if event.get("commands")], shown)
 
     def test_the_agenda_is_counted_by_rules_as_the_person(self):
-        today = fields.Date.context_today(self.env["res.users"])
+        # Today as the person counts it (their zone): near midnight it is not the test's own day
+        today = fields.Date.context_today(self.env["res.users"].with_user(self.raghad))
         partner = self.env["res.partner"].create({"name": "Raghad Partner"})
         Activity = self.env["mail.activity"].sudo()
         kind = self.env.ref("mail.mail_activity_data_todo")

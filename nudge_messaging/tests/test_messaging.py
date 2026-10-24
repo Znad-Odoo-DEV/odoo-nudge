@@ -531,6 +531,8 @@ class TestEngine(MessagingCase, HttpCase):
         self.assertTrue(result["is_error"])
 
     def test_the_budget_stops_the_provider(self):
+        # One zone for the person and the test: near midnight their days would differ
+        self.raghad.tz = self.env.context.get("tz") or self.env.user.tz or "UTC"
         self.link(self.raghad)
         adapter = self.use_adapter(reply="Should not be asked.")
         self.env["ir.config_parameter"].sudo().set_param("nudge.budget_user_tokens", "1")
