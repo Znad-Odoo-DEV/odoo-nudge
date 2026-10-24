@@ -2,6 +2,7 @@ import json
 import threading
 import time
 from datetime import timedelta
+from unittest import mock
 
 import psycopg2.errors
 
@@ -172,6 +173,31 @@ class TestWaitingRoom(LineCase, TransactionCase):
                 other.execute("SELECT pg_advisory_unlock_all()")
         self.assertEqual(self.env["nudge.slot"].with_user(self.user_a)._claim(conversation, self.provider).state,
                          "claimed")
+
+    def test_what_is_counted_under_the_lock_is_what_its_last_holder_committed(self):
+        # Review odoo-tech #2: the snapshot of a transaction in repeatable read is taken by its first
+        # statement, the one that waits for the lock: the places the holder committed meanwhile
+        # were not counted, and two questions took the last place. A place committed by another
+        # worker after the lock is taken stands for one committed before the wait ended.
+        dbname = self.env.cr.dbname
+        admin = self.env.ref("base.user_admin")
+
+        def forget(slot_id):
+            with db_connect(dbname).cursor() as cr:
+                cr.execute("DELETE FROM nudge_slot WHERE id = %s", [slot_id])
+
+        with mock.patch.object(nudge_slot.odoo_module, "current_test", None), self.Slot._own() as Slot:
+            Slot._lock()
+            claimed = [("state", "=", "claimed")]
+            before = Slot.search_count(claimed)
+            with db_connect(dbname).cursor() as other:
+                other.execute(
+                    "INSERT INTO nudge_slot (user_id, state, started_at) VALUES (%s, 'claimed', %s) RETURNING id",
+                    [admin.id, fields.Datetime.now()])
+                self.addCleanup(forget, other.fetchone()[0])
+            self.assertEqual(Slot.search_count(claimed), before + 1)
+            Slot.env.cr.execute("SHOW transaction_isolation")
+            self.assertEqual(Slot.env.cr.fetchone()[0], "read committed")
 
     def test_a_provider_takes_only_so_many_at_once(self):
         self.Parameter.set_param(nudge_conversation.MAX_STREAMS_PARAM, "8")

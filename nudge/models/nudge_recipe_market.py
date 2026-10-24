@@ -19,9 +19,15 @@ from datetime import date, datetime
 from urllib.parse import urljoin, urlparse
 
 import requests
+from psycopg2.errors import UniqueViolation
 
 from odoo import api, fields, models, release, tools
 from odoo.exceptions import UserError
+
+try:
+    from odoo.exceptions import ConcurrencyError
+except ImportError:  # Odoo 17 and 18 retry no such error: the refusal is shown, as before
+    ConcurrencyError = None
 
 from ..tools.deadline import cap as worker_cap
 from .nudge_provider import _is_private_address
@@ -535,7 +541,9 @@ class NudgeRecipeInstalled(models.Model):
 
     @api.model
     def _record(self, entry):
-        # Two installs of the same recipe at once are taken one after the other
+        # Two installs of the same recipe at once are taken one after the other. The second does
+        # not see the line of the first, committed while it waited: its snapshot is older. The
+        # database refuses its line, and the request is run again, when it sees it
         self.env.cr.execute(
             "SELECT pg_advisory_xact_lock(hashtext(%s))",
             [f"nudge.recipe.installed:{entry.source_id.id}:{entry.key}:{self.env.company.id}"])
@@ -543,9 +551,16 @@ class NudgeRecipeInstalled(models.Model):
                      ("company_id", "=", self.env.company.id)]).write({"active": False})
         # Written now, before the new line: the database allows one active line only
         self.flush_model(["active"])
-        installed = self.create({
-            "source_id": entry.source_id.id, "entry_key": entry.key, "name": entry.title,
-            "version": fields.Date.to_string(entry.updated) if entry.updated else ""})
+        try:
+            with self.env.cr.savepoint():
+                installed = self.create({
+                    "source_id": entry.source_id.id, "entry_key": entry.key, "name": entry.title,
+                    "version": fields.Date.to_string(entry.updated) if entry.updated else ""})
+                installed.flush_recordset()
+        except UniqueViolation as error:
+            if ConcurrencyError is None:
+                raise
+            raise ConcurrencyError(f"Recipe {entry.key} installed meanwhile") from error
         # The state of the cards is read from what is installed
         self.env["nudge.recipe.entry"].invalidate_model(["state", "installed_version"])
         return installed
