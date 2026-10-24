@@ -234,6 +234,44 @@ class NudgeTour(models.Model):
         return self.create(values).id
 
     @api.model
+    def _from_guidance(self, name, steps, res_model="", view_type="", phrases="", group_ids=None, company=None):
+        """A tour made of the steps an answer of Nudge pointed at (S15, a reference saved by a manager):
+        replayed with no AI, by the same pointer as a recorded one, and skipped politely where this
+        database lacks an element.
+
+        :param steps: the steps of a ``guidance`` event: ``[{"target": {"type", "name", ...}, "text"}]``
+        :return: the tour, or an empty recordset when no step can be shown again"""
+        if not self.env.user.has_group("nudge.group_nudge_manager"):
+            raise AccessError(_("Only Nudge managers record tours."))
+        clean = []
+        for position, step in enumerate((steps or [])[:MAX_STEPS], start=1):
+            target = step.get("target") if isinstance(step, dict) else None
+            if not isinstance(target, dict):
+                continue
+            recorded = {
+                "kind": target.get("type"), "name": target.get("name"), "label": target.get("label") or "",
+                "note": step.get("text") or "", "res_model": res_model, "view_type": view_type,
+            }
+            if target.get("type") == "menu":
+                recorded.update(menu_id=target.get("name"), xmlid=target.get("xmlid") or "")
+            made = self.env["nudge.tour.step"]._from_record(recorded, position * 10)
+            if made:
+                clean.append((0, 0, made))
+        if not clean:
+            return self.browse()
+        name = " ".join(str(name or "").split())[:120] or _("Steps of a remembered answer")
+        arabic = commands.language_of(phrases) == "Arabic"
+        phrase = " ".join(str(phrases or "").split())[:1000]
+        return self.create({
+            "name": name,
+            "phrases_en": "" if arabic else phrase,
+            "phrases_ar": phrase if arabic else "",
+            "step_ids": clean,
+            "company_id": (company or self.env.company).id,
+            "group_ids": [(6, 0, [int(group) for group in group_ids or []])],
+        })
+
+    @api.model
     def _xmlid_of_action(self, start):
         xmlid = str(start.get("xml_id") or "")
         if xmlid and XMLID.fullmatch(xmlid) and self.env.ref(xmlid, raise_if_not_found=False):

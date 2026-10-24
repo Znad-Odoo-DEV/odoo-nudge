@@ -39,7 +39,11 @@ class TestAnswerMemory(NudgeCase, TransactionCase):
     def setUp(self):
         super().setUp()
         self.Memory = self.env["nudge.memory"]
-        self.env["ir.config_parameter"].sudo().set_param("nudge.answer_memory", "True")
+        Parameter = self.env["ir.config_parameter"].sudo()
+        Parameter.set_param("nudge.answer_memory", "True")
+        # S15: a like of somebody else is kept only when the company suggests from likes; one is enough here
+        Parameter.set_param("nudge.memory_like_suggest", "True")
+        Parameter.set_param("nudge.memory_like_count", "1")
 
     def remember(self, state="approved", **values):
         return self.Memory.create({"question": HOW, "answer": STEPS, "state": state, **values})
@@ -97,7 +101,8 @@ class TestAnswerMemory(NudgeCase, TransactionCase):
         conversation, last = self.ask(self.user_b, SAME)
         self.assertEqual(adapter.calls, [], "No provider was called")
         self.assertEqual(last["type"], "done")
-        self.assertEqual(last["memory"], {"id": memory.id})
+        self.assertEqual(last["memory"]["id"], memory.id)
+        self.assertIn("From Nudge's memory, approved by", last["memory"]["label"])
         answer = conversation.sudo().message_ids.filtered(lambda m: m.role == "assistant")
         self.assertEqual(answer.content, STEPS)
         self.assertTrue(answer.is_remembered)
