@@ -78,6 +78,7 @@ Without them the rest works and the feature says what is missing.
         "views/nudge_prompt_views.xml",
         "data/nudge_prompt_data.xml",
         "views/nudge_built_views.xml",
+        "views/nudge_slot_views.xml",
     ],
     "assets": {
         "web.assets_backend": [

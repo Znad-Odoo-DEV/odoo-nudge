@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- NP-04: how many answers a provider gives at once; the others wait in line -->
+    <record id="nudge_provider_view_form_slot" model="ir.ui.view">
+        <field name="name">nudge.provider.form.slot</field>
+        <field name="model">nudge.provider</field>
+        <field name="inherit_id" ref="nudge.nudge_provider_view_form"/>
+        <field name="arch" type="xml">
+            <field name="timeout" position="after">
+                <field name="max_parallel"/>
+            </field>
+        </field>
+    </record>
+</odoo>

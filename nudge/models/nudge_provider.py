@@ -29,6 +29,11 @@ OLLAMA_TIMEOUT = 180
 AGENT_PROVIDER_PARAM = "nudge.agent_provider_id"
 DEVELOPER_PROVIDER_PARAM = "nudge.developer_provider_id"
 MODE_PROVIDER_PARAMS = {"agent": AGENT_PROVIDER_PARAM, "dev": DEVELOPER_PROVIDER_PARAM}
+# NP-10: the provider standing in when the one of the conversation cannot answer (an error, no key,
+# the budget used up, private mode). Empty: none, the person is told why.
+FALLBACK_PROVIDER_PARAM = "nudge.fallback_provider_id"
+# The address Ollama listens on by default: one question at a time, unless it is told otherwise
+OLLAMA_PORT = ":11434"
 
 
 def _is_private_address(url):
@@ -115,6 +120,12 @@ class NudgeProvider(models.Model):
              "on its recommended fallback model.",
     )
     timeout = fields.Integer(string="Timeout (seconds)", default=60)
+    # NP-04: past it the questions for this provider wait in line, as past the limit of Nudge
+    max_parallel = fields.Integer(
+        string="Answers at Once", default=0,
+        help="How many answers this provider gives at the same time; the others wait in line, "
+             "and start as soon as one ends. 0 is automatic: one for Ollama (a model on one "
+             "machine answers one question at a time), otherwise only the limit of Nudge.")
     tool_set = fields.Selection(
         [("full", "All the tools"), ("essential", "Essential tools")],
         string="Tools Given", default="full",
@@ -312,6 +323,10 @@ class NudgeProvider(models.Model):
             provider = self.browse(int(param)).exists()
             if provider.active and provider.is_configured and (provider.runs_locally or not private):
                 return provider
+            # NP-10: the one the administrator named cannot answer: the one they chose to stand in does
+            fallback = self._get_fallback()
+            if fallback:
+                return fallback
         providers = self.search([]).filtered("is_configured")
         # In private mode the ones on our own server come first: the others are refused
         return (providers.filtered("runs_locally") if private else self.browse()).sorted("sequence")[:1] \
@@ -329,8 +344,51 @@ class NudgeProvider(models.Model):
             if value and value.isdigit():
                 provider = self.browse(int(value)).exists()
                 if provider.active and provider.is_configured:
+                    if self._is_private_mode() and not provider.runs_locally:
+                        # NP-10: private mode sends nothing to it; the model of our own server
+                        # chosen to stand in answers instead, when there is one (else refused)
+                        return self._get_fallback() or provider
                     return provider
         return self.browse()
+
+    @api.model
+    def _get_named(self, mode):
+        """:return: the provider the administrator named for ``mode`` ("talk", "agent" or "dev"),
+        ready to answer or not, possibly empty. Must be called in sudo."""
+        Parameter = self.env["ir.config_parameter"].sudo()
+        names = {"dev": [DEVELOPER_PROVIDER_PARAM, AGENT_PROVIDER_PARAM, DEFAULT_PROVIDER_PARAM],
+                 "agent": [AGENT_PROVIDER_PARAM, DEFAULT_PROVIDER_PARAM]}.get(mode, [DEFAULT_PROVIDER_PARAM])
+        for param in names:
+            value = Parameter.get_param(param)
+            if value and value.isdigit():
+                # Archived or not: what was named, not what is ready
+                provider = self.browse(int(value)).exists()
+                if provider:
+                    return provider
+        return self.browse()
+
+    @api.model
+    def _get_fallback(self):
+        """NP-10: the provider the administrator chose to stand in when the one of a conversation
+        cannot answer, ready to answer, possibly empty. In private mode only one that runs on
+        our own server: nothing goes to a provider outside that the administrator did not choose.
+        Must be called in sudo, as :meth:`_get_default`."""
+        value = self.env["ir.config_parameter"].sudo().get_param(FALLBACK_PROVIDER_PARAM)
+        if not value or not value.isdigit():
+            return self.browse()
+        provider = self.browse(int(value)).exists()
+        if not (provider.active and provider.is_configured):
+            return self.browse()
+        if self._is_private_mode() and not provider.runs_locally:
+            return self.browse()
+        return provider
+
+    def _get_max_parallel(self):
+        """NP-04: :return: how many answers this provider gives at once; 0 is no limit of its own"""
+        self.ensure_one()
+        if self.max_parallel > 0:
+            return self.max_parallel
+        return 1 if self.is_ollama or OLLAMA_PORT in (self.base_url or "") else 0
 
     @api.model
     def _get_listener(self):
