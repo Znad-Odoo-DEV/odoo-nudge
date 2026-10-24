@@ -84,7 +84,9 @@ class NudgeRecipe(models.AbstractModel):
         if not model:
             return None
         domain = [("recipe_key", "=", key)]
-        if kind in ("rule", "preset"):
+        if kind in ("rule", "preset", "skill"):
+            # A skill too: an import here never changes one of every company or of another company;
+            # it makes a copy of this company instead, which takes the place of the shared one here
             domain.append(("company_id", "=", self.env.company.id))
         found = self.env[model].with_context(active_test=False).search(domain, limit=1)
         return found or None
