@@ -66,6 +66,11 @@ class SetupCase(NudgeCase):
         cls.admin = new_test_user(
             cls.env, login="nudge_setup_admin",
             groups="nudge.group_nudge_agent,base.group_system,base.group_partner_manager")
+        if cls.env.ref("stock.group_stock_manager", raise_if_not_found=False):
+            # the administrator of a real database holds the group of every app
+            cls.admin.write({
+                "group_ids" if "group_ids" in cls.env["res.users"]._fields else "groups_id":
+                [(4, cls.env.ref("stock.group_stock_manager").id)]})
         cls.plain = new_test_user(cls.env, login="nudge_setup_plain", groups="nudge.group_nudge_agent")
         cls.env["ir.config_parameter"].sudo().set_param(ADMIN_PARAM, "yes")
         cls.env["ir.config_parameter"].sudo().set_param(setup.PARAM_DONE, "no")
@@ -78,7 +83,16 @@ class SetupCase(NudgeCase):
         self.dev = self.env(user=self.admin, context={"nudge_conversation_id": self.conversation.id})
 
     def as_user(self, user=None):
-        return self.env(user=user or self.admin, context={"nudge_conversation_id": self.conversation.id})
+        context = {"nudge_conversation_id": self.conversation.id}
+        if getattr(self, "books", None):
+            context["allowed_company_ids"] = self.books.ids
+        return self.env(user=user or self.admin, context=context)
+
+    def company_without_entries(self):
+        """Demo data keeps books that forbid a change of currency: work on a company that has none"""
+        self.books = self.env["res.company"].create({"name": "Raghad Books"})
+        self.admin.write({"company_ids": [(4, self.books.id)], "company_id": self.books.id})
+        return self.books
 
     def card(self, step, answers=None, user=None):
         return tools.base.call(self.as_user(user), "prepare_setup_step",
@@ -195,6 +209,7 @@ class TestSetupSteps(SetupCase, TransactionCase):
         self.assertTrue(self.card("country", {"country": "Atlantis"}).is_error)
 
     def test_currency_languages_timezone_and_formats(self):
+        self.company_without_entries()
         asked = self.card("timezone", {"timezone": "Dubai"})
         self.done(asked)
         self.assertEqual(self.admin.tz, "Asia/Dubai")
@@ -205,7 +220,7 @@ class TestSetupSteps(SetupCase, TransactionCase):
         asked = self.card("currency", {"currency": "dirham"})
         self.assertEqual(self.env["res.currency"].browse(asked.pending["values"]["data"]["currency_id"]).name, "AED")
         self.done(asked)
-        self.assertEqual(self.env.company.currency_id.name, "AED")
+        self.assertEqual(self.books.currency_id.name, "AED")
         asked = self.card("languages", {"languages": ["French"]})
         self.assertIn("French", asked.pending["record_names"])
         self.assertTrue(self.card("languages", {"languages": ["Klingon"]}).is_error)
@@ -302,6 +317,7 @@ class TestSetupSteps(SetupCase, TransactionCase):
         self.assertTrue(self.card("fiscal", {"lock_date": "2999-01-01"}).is_error)
 
     def test_the_defaults_wait_for_the_first_three_and_then_do_the_rest_in_one_card(self):
+        self.company_without_entries()
         refused = self.card("remaining")
         self.assertTrue(refused.is_error)
         self.assertIn("company, the country and the currency", refused.content)
@@ -312,7 +328,10 @@ class TestSetupSteps(SetupCase, TransactionCase):
         self.assertFalse(asked.is_error, asked.content)
         steps = [item["step"] for item in asked.pending["values"]["data"]["steps"]]
         self.assertIn("timezone", steps)
-        self.assertIn("apps", steps)
+        # the apps of the default kind of business are offered only while one of them is not installed yet
+        modules = setup.app_modules(self.dev, list(setup.KIND_APPS[setup.DEFAULT_KIND]))
+        missing = [name for name, module in modules.items() if module and module.state != "installed"]
+        self.assertEqual("apps" in steps, bool(missing), steps)
         self.done(asked)
         self.assertEqual(self.admin.tz, "Asia/Dubai")
 

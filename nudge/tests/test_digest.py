@@ -21,6 +21,9 @@ class TestDigest(BackgroundCase, TransactionCase):
             groups += ",sales_team.group_sale_salesman,sales_team.group_sale_manager"
         cls.seller = new_test_user(cls.env, login="nudge_seller", groups=groups)
         cls.seller.email = "raghad@nudge.example"
+        if "sale.order" in cls.env:
+            # A database with demo data holds quotations of its own: the tests count the ones they make
+            cls.env["sale.order"].sudo().search([("state", "in", ["draft", "sent"])]).write({"state": "cancel"})
 
     def need(self, model):
         if model not in self.env:
