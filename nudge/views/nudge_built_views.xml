@@ -117,6 +117,7 @@
         <field name="model_id" ref="model_nudge_built"/>
         <field name="state">code</field>
         <field name="code">action = model.action_open()</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_manager')), Command.link(ref('nudge.group_nudge_auditor')), Command.link(ref('base.group_system'))]"/>
     </record>
 
     <record id="nudge_built_switch_view_form" model="ir.ui.view">

@@ -41,6 +41,7 @@
         <field name="model_id" ref="model_nudge_coverage"/>
         <field name="state">code</field>
         <field name="code">action = model.action_open()</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_manager'))]"/>
     </record>
 
     <menuitem id="nudge_menu_coverage" name="Missed Sentences" sequence="22"

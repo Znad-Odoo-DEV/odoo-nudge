@@ -105,6 +105,7 @@
         <field name="code">model.action_observe_now()</field>
         <field name="binding_model_id" ref="model_nudge_rule"/>
         <field name="binding_type">action</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_manager'))]"/>
     </record>
 
     <menuitem id="nudge_menu_rules" name="Recurring Requests" sequence="24"

@@ -62,5 +62,6 @@
         <field name="model_id" ref="model_nudge_question"/>
         <field name="state">code</field>
         <field name="code">action = model.action_find()</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_manager'))]"/>
     </record>
 </odoo>

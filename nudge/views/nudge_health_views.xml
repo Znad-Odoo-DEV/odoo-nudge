@@ -138,6 +138,7 @@
         <field name="model_id" ref="model_nudge_health_report"/>
         <field name="state">code</field>
         <field name="code">action = model.run_check().action_open()</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_manager'))]"/>
     </record>
 
     <record id="nudge_compliance_pack_list" model="ir.ui.view">
@@ -168,6 +169,7 @@
         <field name="model_id" ref="model_nudge_compliance_pack"/>
         <field name="state">code</field>
         <field name="code">action = model.action_open()</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_manager'))]"/>
     </record>
 
     <menuitem id="nudge_menu_health" name="Health Check" sequence="40" parent="nudge_menu_root"
