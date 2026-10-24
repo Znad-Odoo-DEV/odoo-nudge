@@ -292,8 +292,41 @@ say "Nudge, do it" after it explained how.
   anything about money or stock.
 - **Say yes or no.** On a yes, the change is made as you, with your rights: the record says it
   was created or changed by you. On a no, nothing happens and Nudge asks what you want instead.
-- **One change at a time.** A request of several changes asks you several times.
+- **One change at a time**, or one plan: a request of several changes ("create Raghad Trading, a
+  quotation for it with these lines, and send it") is shown first as a plan, see below.
 - Writing a new message instead of answering leaves the question undecided: nothing is done.
+
+#### A plan of several changes
+
+When one answer asks for more changes than set in Settings (2 by default) or for two kinds of change
+(a customer, then their quotation), Nudge first shows one card with the steps numbered: what each
+does, on which kind of record, on which records. A step that uses what an earlier one makes says so
+("the record step 1 makes"). Before your yes you can take a step out (what uses it goes with it) or
+correct a value of its own with the pencil. Then:
+
+- **Yes, go through the plan**: each change still shows its own card, as above, in turn; no AI is
+  called between two steps, only once at the end to tell you what came of it.
+- **One yes for the whole plan**: for the groups an administrator chose (Settings ‣ Nudge ‣ Agent),
+  the card shows every change in full and that yes is the confirmation of each; a step whose change
+  could not be shown in full (one done on a record an earlier step makes) still shows its own card.
+- Progress is shown step by step. **Stop the plan** (or Stop while the steps run) stops between two
+  steps, never in the middle of one; **Resume the plan** goes on from there, also after the page was
+  reloaded: the plan is kept on the conversation.
+- A step that fails stops the plan: the card says what was done and what was not, and **Undo the
+  steps done** takes them back, the last first (a draft made is archived or cancelled, never
+  deleted; what a button did is not taken back).
+- A single change never makes a plan. Each step is in What Nudge Did, with the plan it belongs to;
+  each runs as you, in the company the plan was made in. The steps are the calls of that one answer
+  and nothing else: what a record, a file or an email says cannot add a step the card does not show.
+
+#### Read again after writing
+
+After every change (alone or in a plan), Nudge reads the records again and compares each field with
+what its card said, without any AI. When Odoo changed a field on its own (the address of the company
+of a contact, a section line that keeps no quantity, a computed field, a rule), the card says
+**Written, but not everything is as asked** with the value it has now, and offers **Set it again**
+(a request put in the message box) or Undo. The AI is told the same, and is never told it is done.
+In a plan, such a step stops the plan so that you look before what comes next builds on it.
 
 What Nudge can do is what you can do: a record you cannot open is not found, a button you do not
 have on the form cannot be pressed. It never deletes, whoever asks. Users, groups, access rights,
