@@ -18,7 +18,7 @@ from odoo.exceptions import AccessError
 from odoo.osv import expression
 from odoo.tools import html2plaintext
 
-from ..llm.snapshot import HIDDEN, SENSITIVE_NAME
+from ..llm.snapshot import HIDDEN, SECRET_FIELD_NAME, SENSITIVE_NAME, SIGNATURE_NAME, WRITTEN_TYPES
 from . import base
 
 MODEL_PATTERN = r"[a-z][a-z0-9_]*(\.[a-z0-9_]+)+"
@@ -158,7 +158,11 @@ def get_fields(model, names, operation="read"):
 
 
 def is_secret(field):
-    return bool(SENSITIVE_NAME.search(field.name))
+    if not SENSITIVE_NAME.search(field.name):
+        return False
+    # SEC-01: a signature is a credential; the signature of a person's e-mails (HTML or text) is not
+    written = getattr(field, "type", None) in WRITTEN_TYPES
+    return not (written and SIGNATURE_NAME.search(field.name) and not SECRET_FIELD_NAME.search(field.name))
 
 
 PASSWORD_ATTRIBUTE = re.compile(r"""<field\b[^>]*\bpassword\s*=\s*["']?(?!false|0)\w""", re.IGNORECASE)

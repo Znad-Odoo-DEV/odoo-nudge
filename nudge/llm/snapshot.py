@@ -19,14 +19,21 @@ MAX_TEXT_CHARS = 500
 
 HIDDEN = "[hidden]"
 
-SENSITIVE_NAME = re.compile(
+_SECRET_NAMES = (
     r"pass(word|wd)?|secret|token|api_?key|private_?key|totp|otp|signup|oauth|credential"
     r"|cvv|cvc|card_?number|iban|ssn"
     # NP-13 / SEC-01: gateway and signing credentials that carry no word of the list above
-    r"|_key(?:_|$)|hash_?key|hmac|signature|(?:^|_)pin$|consumer_(?:key|secret)|client_secret"
-    r"|private_?cert|(?:^|_)(?:p12|pfx)(?:_|$)|csid|_csr$",
-    re.IGNORECASE,
+    r"|_key(?:_|$)|hash_?key|hmac|signature_?(?:hash|digest)|(?:hash|digest)_?signature"
+    r"|(?:^|_)pin$|consumer_(?:key|secret)|client_secret"
+    r"|private_?cert|(?:^|_)(?:p12|pfx)(?:_|$)|csid|_csr$"
 )
+# What a name alone shows as a credential: names only, no type (a key of a payload, a column)
+SENSITIVE_NAME = re.compile(_SECRET_NAMES + r"|signature", re.IGNORECASE)
+# The names that are a credential whatever the field holds; "signature" alone is one only when the
+# field is not a written text (the e-mail signature of a user is HTML, and is not a secret)
+SECRET_FIELD_NAME = re.compile(_SECRET_NAMES, re.IGNORECASE)
+SIGNATURE_NAME = re.compile(r"signature", re.IGNORECASE)
+WRITTEN_TYPES = ("html", "text")
 CONTROL_CHARS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 
 # Dropped one after the other until the snapshot fits, least useful first
