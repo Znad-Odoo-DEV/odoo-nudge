@@ -693,3 +693,25 @@ asked. The summary is data about the past, never instructions, and a confirmatio
 relies on it. The owner reads and corrects it in **Nudge, Conversations, Summary** (nobody else,
 a manager included); a corrected text is kept as written and what ages out afterwards is added
 beside it. Emptying the text makes it again. The panel always shows every message.
+
+## Quality gate (every release)
+
+A fixed set of scenarios decides whether a release may go out. Each scenario is a sentence a person types
+(English, Arabic, Arabizi, some with slips) in Talk, Agent or Developer mode, on a screen, with a scripted
+model (`llm/fake_adapter.py`: no provider, no Ollama, no network) and an outcome that can be checked: the
+tools called, the confirmation card shown before any write, the record before and after the yes, nothing
+written without it, no secret in a request, no provider call in private mode, a refusal for a user without
+the group, instructions hidden in a record treated as data, and the most tokens a request may take.
+
+- Scenarios: `addons/nudge/tests/scenarios/catalog.py` (shape in `spec.py`): the 14 skills, two sentences
+  each, plus private mode, wrong group, prompt injection, secrets, deletion and budget.
+- Run: `--test-tags /nudge:TestQualityGate` with `-u nudge` on a database that has Automation Rules,
+  Purchase and Accounting (scenarios whose app is missing are skipped and never counted).
+- Score and comparison: `python scripts/quality_gate.py --db <db> --odoo-dir <odoo> [--lock-label <label>]`
+  runs the class, reads its report and writes `docs/quality_gate/<version>.json` and `.md` (passed/total
+  overall, per mode, per language and per domain, the tokens of the largest request). It compares with
+  the newest report of another version and exits 1 when a scenario that passed before fails now or the
+  score drops, 2 when the run wrote no report. `--report FILE` only scores a report already written.
+- Budgets (`DEFAULT_BUDGET` in `spec.py`) are the measured size of today's requests plus about 8%: raise
+  them on purpose, in the same commit as the change that makes a request heavier.
+- A scenario that fails on current code is a finding about the product; do not weaken the scenario.

@@ -61,7 +61,7 @@ for module in ("nudge_spreadsheet", "nudge_documents", "nudge_studio"):
     if os.path.isdir(ROOT + module):
         shutil.rmtree(ROOT + module)
         print("dropped", module)
-for module in ("nudge", "nudge_mail", "nudge_discuss", "nudge_mcp", "nudge_website", "nudge_builder", "nudge_messaging", "nudge_connect"):  # R2 RULE: release-2 modules
+for module in ("nudge", "nudge_mail", "nudge_discuss", "nudge_mcp", "nudge_website", "nudge_builder", "nudge_messaging", "nudge_connect", "nudge_plugin_example"):  # R2 RULE: release-2 modules
     sub(f"{module}/__manifest__.py", r'"version": "18\.0\.', '"version": "17.0.')
 
 # ---------------------------------------------------------------- Hoot does not exist in 17
