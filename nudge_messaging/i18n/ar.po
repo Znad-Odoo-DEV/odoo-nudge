@@ -860,3 +860,14 @@ msgstr "متى بدأ الرد آخر مرة: الرد الذي لم ينتهِ 
 #: model:ir.model.fields.selection,name:nudge_messaging.selection__nudge_messaging_message__state__wrong_code
 msgid "Wrong Code"
 msgstr "رمز خاطئ"
+
+#. module: nudge_messaging
+#: model_terms:ir.actions.act_window,help:nudge_messaging.nudge_messaging_link_action
+msgid "No phone linked yet"
+msgstr "لم يُربط أي هاتف بعد"
+
+#. module: nudge_messaging
+#: model_terms:ir.actions.act_window,help:nudge_messaging.nudge_messaging_link_action
+msgid "A user links a phone number from their Nudge preferences: the link is listed here."
+msgstr "يربط المستخدم رقم هاتفه من تفضيلات Nudge: يظهر الربط هنا."
+
