@@ -1,3 +1,5 @@
+import json
+
 from odoo.exceptions import AccessError, UserError
 from odoo.tests import TransactionCase, new_test_user, tagged
 
@@ -302,6 +304,69 @@ class TestReferences(NudgeCase, TransactionCase):
         self.assertNotIn(skill.key, [one.key for one in Skill.search([("state", "=", "published")])])
         self.reference("How do I delete a contact tag?", "Open the tags.", model_name="res.partner")
         self.assertEqual(len(Skill.search([("origin", "=", "references")])), 1, "The fourth waits for the next ones")
+
+    def test_an_answer_that_leaves_approval_leaves_the_draft_skill(self):
+        Parameter = self.env["ir.config_parameter"].sudo()
+        Parameter.set_param("nudge.memory_skill_count", "5")
+        Skill = self.env["nudge.skill"]
+        memories = self.Memory
+        for question in ("How do I merge two contacts?", "How do I archive a contact?"):
+            memories |= self.reference(question, "Open Contacts and follow the company way %s." % question[9:14],
+                                       model_name="res.partner")
+        third = self.reference("How do I give a contact a tag?", "Open the tags page.", model_name="res.partner")
+        self.assertFalse(Skill.search([("origin", "=", "references")]))
+        Parameter.set_param("nudge.memory_skill_count", "3")
+        third._after_approval()
+        Parameter.set_param("nudge.memory_skill_count", "2")
+        skill = Skill.search([("origin", "=", "references")])
+        self.assertEqual(len(skill), 1)
+        self.assertEqual(len(skill.reference_ids), 3)
+        self.assertIn("give a contact a tag", skill.instructions)
+        third.with_user(self.manager).write({"active": False})
+        self.assertNotIn("give a contact a tag", skill.instructions, "Archived: out of the draft")
+        self.assertTrue(skill.active)
+        self.assertEqual(skill.reference_ids, memories)
+        self.assertEqual(skill.test_sentence, memories[0].question)
+        memories[1].with_user(self.manager).action_refuse()
+        self.assertFalse(skill.active, "Too few left: the draft is archived")
+        self.assertFalse(skill.reference_ids)
+
+    def test_a_published_skill_is_not_rebuilt_when_an_answer_leaves(self):
+        self.env["ir.config_parameter"].sudo().set_param("nudge.memory_skill_count", "2")
+        for question in ("How do I merge two contacts?", "How do I archive a contact?"):
+            self.reference(question, "Open Contacts and follow the company way.", model_name="res.partner")
+        skill = self.env["nudge.skill"].search([("origin", "=", "references")])
+        skill.sudo().write({"state": "published"})
+        before = skill.instructions
+        skill.reference_ids[:1].with_user(self.manager).write({"active": False})
+        self.assertTrue(skill.active)
+        self.assertEqual((skill.state, skill.instructions), ("published", before))
+
+    def test_the_notes_of_the_steps_are_translated_in_the_same_request(self):
+        screen = {"v": 1, "model": "res.partner", "view_type": "form"}
+        steps = [{"target": {"type": "field", "name": "phone"}, "text": "Type the phone number here.",
+                  "advance": "auto"},
+                 {"target": {"type": "control", "name": "save"}, "text": "Save.", "advance": "auto"}]
+        answer = self.turn(self.manager, PHONE, "Type it in Phone, then save.", snapshot=screen,
+                           events=[{"type": "guidance", "steps": steps}],
+                           tool_calls=[{"id": "1", "name": "show_on_screen", "input": {}}])
+        action = self.Memory.with_user(self.manager).action_save_from_message(answer.id)
+        self.env["nudge.memory.save"].with_user(self.manager).browse(action["res_id"]).action_save()
+        memory = self.Memory.search([("question", "=", PHONE)])
+        notes = memory._step_notes()
+        self.assertTrue(notes)
+        reply = json.dumps({"answer": "اكتبه في الهاتف ثم احفظ.", "notes": ["ن:" + note for note in notes]},
+                           ensure_ascii=False)
+        adapter = self.use_adapter(reply=reply)
+        text, _note = memory.sudo()._answer_in("ar", asked="كيف")
+        self.assertEqual(text, "اكتبه في الهاتف ثم احفظ.")
+        self.assertEqual(len(adapter.calls), 1, "One request for the answer and the notes")
+        texts = [step["text"] for step in memory.sudo()._replay_steps("ar")]
+        self.assertEqual(texts, ["ن:" + note for note in notes][:len(texts)])
+        self.assertIn("Type the phone number here.", [s["text"] for s in memory._replay_steps()],
+                      "The original language is untouched")
+        memory.sudo()._answer_in("ar")
+        self.assertEqual(len(adapter.calls), 1, "Kept")
 
 
 @tagged("post_install", "-at_install")
