@@ -1,0 +1,221 @@
+# Arabic translations of NP-21 "Explain this report"; the lead merges them into ar.po.
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8
+"
+"Language: ar
+"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/report_explain.py:155
+msgid "There is no data in this report: no record matches it."
+msgstr "لا توجد بيانات في هذا التقرير: لا يوجد أي سجل مطابق له."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/report_explain.py:157
+#, python-format
+msgid "Overall, %(measure)s is %(total)s over %(count)s records."
+msgstr "في المجمل، %(measure)s هو %(total)s على %(count)s سجل."
+
+#. module: nudge
+#: model:ir.ui.view,arch_db:nudge.nudge_report_explain_form
+#, python-format
+msgid "%(name)s alone is %(share)s of the total."
+msgstr "%(name)s وحده يمثل %(share)s من الإجمالي."
+
+#. module: nudge
+#: model:ir.ui.view,arch_db:nudge.nudge_report_explain_form
+#, python-format
+msgid "%(count)s rows (%(names)s) make %(share)s of the total."
+msgstr "%(count)s صفوف (%(names)s) تمثل %(share)s من الإجمالي."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/report_explain.py:214
+#, python-format
+msgid "The biggest is %(name)s with %(value)s, %(share)s of the total."
+msgstr "الأكبر هو %(name)s بقيمة %(value)s، أي %(share)s من الإجمالي."
+
+#. module: nudge
+#: model:ir.ui.view,arch_db:nudge.nudge_report_explain_form
+#, python-format
+msgid "%(last)s is %(now)s, up %(change)s on %(before)s (%(was)s)."
+msgstr "%(last)s هو %(now)s، بزيادة %(change)s عن %(before)s (%(was)s)."
+
+#. module: nudge
+#: model:ir.ui.view,arch_db:nudge.nudge_report_explain_form
+#, python-format
+msgid "%(last)s is %(now)s, down %(change)s on %(before)s (%(was)s)."
+msgstr "%(last)s هو %(now)s، بانخفاض %(change)s عن %(before)s (%(was)s)."
+
+#. module: nudge
+#: model:ir.ui.view,arch_db:nudge.nudge_report_explain_form
+#, python-format
+msgid "%(last)s is %(now)s, the same as %(before)s."
+msgstr "%(last)s هو %(now)s، مثل %(before)s."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/report_explain.py:247
+#, python-format
+msgid "The biggest step is from %(before)s to %(label)s: %(change)s."
+msgstr "أكبر قفزة من %(before)s إلى %(label)s: %(change)s."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/report_explain.py:253
+#, python-format
+msgid "The sign changed at %(names)s."
+msgstr "تغيرت الإشارة عند %(names)s."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/report_explain.py:268
+msgid "There is nothing in the period before to compare with."
+msgstr "لا يوجد شيء في الفترة السابقة للمقارنة به."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/report_explain.py:270
+#, python-format
+msgid "Against the period before (%(was)s) the total is up %(change)s."
+msgstr "مقارنة بالفترة السابقة (%(was)s) ارتفع الإجمالي بمقدار %(change)s."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/report_explain.py:270
+#, python-format
+msgid "Against the period before (%(was)s) the total is down %(change)s."
+msgstr "مقارنة بالفترة السابقة (%(was)s) انخفض الإجمالي بمقدار %(change)s."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/report_explain.py:284
+#, python-format
+msgid "Biggest movers: %(movers)s."
+msgstr "أكبر المتغيرات: %(movers)s."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/report_explain.py:289
+#, python-format
+msgid "These changed sign against the period before: %(names)s."
+msgstr "هذه تغيرت إشارتها مقارنة بالفترة السابقة: %(names)s."
+
+#. module: nudge
+#: model:ir.ui.view,arch_db:nudge.nudge_report_explain_form
+#, python-format
+msgid "%(share)s of the total has no %(field)s set."
+msgstr "%(share)s من الإجمالي بلا %(field)s محدد."
+
+#. module: nudge
+#: model:ir.ui.view,arch_db:nudge.nudge_report_explain_form
+#, python-format
+msgid "%(measure)s is empty: zero in every row."
+msgstr "%(measure)s فارغ: صفر في كل الصفوف."
+
+#. module: nudge
+#: model:ir.ui.view,arch_db:nudge.nudge_report_explain_form
+#, python-format
+msgid "%(count)s rows are below zero, for instance %(names)s."
+msgstr "%(count)s صفوف أقل من الصفر، مثل %(names)s."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_report_explain.py:48
+msgid "You may not read the data of this report."
+msgstr "لا يحق لك قراءة بيانات هذا التقرير."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_report_explain.py:67
+msgid "No AI provider is set up: these are the facts, worked out by rules."
+msgstr "لا يوجد مزود ذكاء اصطناعي مُعدّ: هذه هي الحقائق محسوبة بالقواعد."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_report_explain.py:72
+#, python-format
+msgid "No summary could be added: %s"
+msgstr "تعذّرت إضافة الملخص: %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_report_explain.py:94
+#, python-format
+msgid "Summary of the report %s"
+msgstr "ملخص التقرير %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_report_explain.py:96
+msgid "The summary is being written in the background. Press Refresh in a moment."
+msgstr "يُكتب الملخص في الخلفية. اضغط تحديث بعد لحظة."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_report_explain.py:117
+msgid "The provider gave no summary this time: these are the facts, worked out by rules."
+msgstr "لم يعطِ المزود ملخصًا هذه المرة: هذه هي الحقائق محسوبة بالقواعد."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_report_explain.py:123
+#, python-format
+msgid "Check these numbers: they are not in the facts above: %s"
+msgstr "راجع هذه الأرقام: ليست ضمن الحقائق أعلاه: %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_report_explain.py:134
+msgid "Explain This Report"
+msgstr "اشرح هذا التقرير"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/report_explain.py:1
+msgid "Explain"
+msgstr "اشرح"
+
+#. module: nudge
+#: model:ir.ui.view,arch_db:nudge.nudge_report_explain_form
+msgid "Add a summary"
+msgstr "أضف ملخصًا"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_report_explain.py:96
+msgid "Refresh"
+msgstr "تحديث"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_report_explain.py:29
+msgid "Summary"
+msgstr "الملخص"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_report_explain.py:31
+msgid "Numbers to Check"
+msgstr "أرقام للمراجعة"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_report_explain.py:33
+msgid "Being Written"
+msgstr "قيد الكتابة"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_report_explain.py:33
+msgid "Written"
+msgstr "مكتوب"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_report_explain.py:33
+msgid "Facts"
+msgstr "الحقائق"
