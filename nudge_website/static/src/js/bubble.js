@@ -38,6 +38,7 @@
     function line(log, className, text) {
         const node = document.createElement("p");
         node.className = className;
+        node.dir = "auto";
         node.textContent = text;
         log.appendChild(node);
         log.scrollTop = log.scrollHeight;
@@ -150,8 +151,13 @@
             }
         });
 
+        let sending = false;
         handover.addEventListener("submit", async (event) => {
             event.preventDefault();
+            if (sending) {
+                return;
+            }
+            sending = true;
             const data = new FormData(handover);
             try {
                 const result = await call("/nudge_website/handover", {
@@ -169,6 +175,8 @@
                 }
             } catch {
                 handover.hidden = true;
+            } finally {
+                sending = false;
             }
         });
     }
