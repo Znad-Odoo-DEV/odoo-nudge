@@ -412,9 +412,36 @@ class NudgeBuilderSite(models.Model):
             "snippet_keys": ",".join(block["snippet"].split(".")[-1] for block in spec.get("blocks") or []),
             "is_legal": bool(spec.get("legal")), "sequence": 10 * (len(self.page_ids) + 1),
         })
+        self._write_seo(page, spec.get("seo") or self._derived_seo(spec, names), self._seo_image(spec))
         if spec.get("menu"):
             self._add_menu(record, names)
         return record
+
+    def _derived_seo(self, spec, names):
+        """:return: a title (the page name and the company) and a description (the first words of the page) for a
+        page whose template has no SEO of its own, in each language the page has words in"""
+        self.ensure_one()
+        seo = {"title": {}, "description": {}}
+        company = self.company_id.name or ""
+        block = next(iter(spec.get("blocks") or []), None) or {}
+        for lang in self._langs():
+            short = compat.lang_code(lang.code)
+            name = names.get(short) or names.get("en") or spec["key"]
+            seo["title"][short] = (f"{name} | {company}" if company else name)[:70]
+            copy = (block.get("copy") or {}).get(short) or (block.get("copy") or {}).get("en") or {}
+            words = " ".join(str(copy.get("text") or copy.get("title") or "").split())
+            if len(words) > 160:
+                words = words[:160].rsplit(" ", 1)[0].rstrip(",.;: ") + "..."
+            if words:
+                seo["description"][short] = words
+        return {key: value for key, value in seo.items() if value}
+
+    def _seo_image(self, spec):
+        """:return: the share picture of a page when its template names one of the bundled pictures"""
+        key = (spec.get("seo") or {}).get("image")
+        if key not in pictures.PLACEHOLDERS:
+            return None
+        return f"/web/image/{self._picture_for(None, key).id}"
 
     def _add_menu(self, record, names):
         website = self.website_id
@@ -745,18 +772,32 @@ class NudgeBuilderSite(models.Model):
 
     # ------------------------------------------------------------------ publish
     def action_publish(self):
-        """Publish every page of the site, and make its home the home of the website"""
+        """Publish every page of the site, and make its home the home of the website. What it changes is kept
+        as a revision (the pages that were not published, the home page before, the menu): Undo publish puts it back."""
         self.ensure_one()
         self._check_designer()
         if self.state not in ("built", "published"):
             raise UserError(_("Build the site first."))
         pages = self.page_ids.page_id
-        pages.write({"is_published": True})
+        website = self.website_id
         home = self.page_ids.filtered(lambda page: page.key == "home")[:1]
+        before = {
+            "pages": [{"id": page.id, "was": bool(page.is_published)} for page in pages],
+            "home_before": website.homepage_url or False,
+            "menus": [{"id": menu.id, "sequence": menu.sequence, "parent_id": menu.parent_id.id}
+                      for menu in self.page_ids.menu_id],
+            "state_before": self.state,
+        }
+        pages.write({"is_published": True})
         if home:
-            old = self.website_id.homepage_url
-            self.website_id.homepage_url = home.url
+            old = website.homepage_url
+            website.homepage_url = home.url
             self._say(_("Home page changed from %(old)s to %(new)s.", old=old or "/", new=home.url))
+        self.env["nudge.builder.revision"].create({
+            "site_id": self.id, "kind": "publish", "before": before,
+            "name": _("Published %s pages", len(pages)),
+            "after": {"published": True, "home": website.homepage_url or False},
+        })
         self.state = "published"
         return self._reopen()
 

@@ -539,6 +539,7 @@ msgstr "ألوان من الشعار"
 #. module: nudge_builder
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check__company_id
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__company_id
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_revision__company_id
 msgid "Company"
 msgstr "الشركة"
 
@@ -684,6 +685,7 @@ msgstr "الاسم المعروض"
 #. odoo-python
 #: code:addons/nudge_builder/models/nudge_builder_check.py:0
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_fix__done
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_revision__state__done
 msgid "Done"
 msgstr "تم"
 
@@ -863,6 +865,7 @@ msgstr "المفتاح"
 
 #. module: nudge_builder
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__kind
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_revision__kind
 msgid "Kind"
 msgstr "النوع"
 
@@ -969,6 +972,7 @@ msgstr "اسم النموذج"
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page_kind__name
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__name
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_template__name
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_revision__name
 msgid "Name"
 msgstr "الاسم"
 
@@ -1453,6 +1457,7 @@ msgstr "منذ المرة الماضية"
 #. module: nudge_builder
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__site_id
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_shop_confirm__site_id
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_revision__site_id
 msgid "Site"
 msgstr "الموقع"
 
@@ -1493,6 +1498,7 @@ msgstr "السرعة"
 
 #. module: nudge_builder
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__state
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_revision__state
 msgid "State"
 msgstr "الحالة"
 
@@ -1942,3 +1948,428 @@ msgstr "اطلب من Nudge في وضع المطوّر بناء موقع إلك�
 #: model:nudge.skill,name:nudge_builder.skill_website_builder
 msgid "Building a website or shop"
 msgstr "بناء موقع أو متجر"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "Move section %(n)s (%(name)s) of %(page)s %(way)s"
+msgstr "انقل القسم %(n)s (%(name)s) في %(page)s %(way)s"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "Add %(snippet)s to the page %(page)s"
+msgstr "أضف %(snippet)s إلى الصفحة %(page)s"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "Replace section %(n)s (%(name)s) of %(page)s with %(snippet)s"
+msgstr "استبدل القسم %(n)s (%(name)s) في %(page)s بالقسم %(snippet)s"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "Change the texts or picture of section %(n)s (%(name)s) of %(page)s"
+msgstr "غيّر نصوص أو صورة القسم %(n)s (%(name)s) في %(page)s"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "Remove section %(n)s (%(name)s) from %(page)s"
+msgstr "أزل القسم %(n)s (%(name)s) من %(page)s"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "This site has no language %s."
+msgstr "ليس لهذا الموقع اللغة %s."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "That page does not belong to this site."
+msgstr "هذه الصفحة لا تتبع هذا الموقع."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "The page %s no longer exists on the website."
+msgstr "الصفحة %s لم تعد موجودة في الموقع."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "A picture must be one of the bundled ones (%s) or a /path or https:// address."
+msgstr "يجب أن تكون الصورة إحدى الصور المرفقة (%s) أو عنوانًا من نوع /path أو https://."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "Unknown edit %s."
+msgstr "تعديل غير معروف: %s."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "That section is already the first."
+msgstr "هذا القسم هو الأول بالفعل."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "That section is already the last."
+msgstr "هذا القسم هو الأخير بالفعل."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "A page keeps at least one section."
+msgstr "تحتفظ الصفحة بقسم واحد على الأقل."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "Say what the new texts or picture are."
+msgstr "اذكر النصوص أو الصورة الجديدة."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "The page %s changed since you were shown this card; ask again."
+msgstr "تغيّرت الصفحة %s منذ عرض هذه البطاقة عليك؛ اطلب مجددًا."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "The translation of %s was left as it was: its structure differs."
+msgstr "تُركت ترجمة %s كما هي لأن بنيتها مختلفة."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__seo_title
+msgid "SEO title"
+msgstr "عنوان SEO"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__seo_description
+msgid "SEO description"
+msgstr "وصف SEO"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "SEO keywords"
+msgstr "الكلمات المفتاحية لـ SEO"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "Say the new SEO title, description or keywords."
+msgstr "اذكر عنوان SEO أو الوصف أو الكلمات المفتاحية الجديدة."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "This version of Odoo has no such SEO field."
+msgstr "هذه النسخة من Odoo لا تحتوي على حقل SEO هذا."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "The SEO of %s changed since you were shown this card; ask again."
+msgstr "تغيّر SEO الصفحة %s منذ عرض هذه البطاقة عليك؛ اطلب مجددًا."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "Change the %(what)s of the page %(page)s"
+msgstr "غيّر %(what)s للصفحة %(page)s"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "You may not edit the page %s."
+msgstr "لا يحق لك تعديل الصفحة %s."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "Say which section: its number on the page, from 1."
+msgstr "حدّد القسم: رقمه في الصفحة بدءًا من 1."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "%(snippet)s is not one of the sections the builder knows: %(known)s."
+msgstr "%(snippet)s ليس من الأقسام التي يعرفها المنشئ: %(known)s."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "up"
+msgstr "للأعلى"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "down"
+msgstr "للأسفل"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "The %s cannot be empty."
+msgstr "%s لا يمكن أن يكون فارغًا."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "The %(what)s is up to %(max)s characters; this one has %(n)s."
+msgstr "%(what)s حتى %(max)s حرفًا؛ وهذا النص فيه %(n)s."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "%s: before"
+msgstr "%s: قبل"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "%s: after"
+msgstr "%s: بعد"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "The page %(page)s has %(count)s sections; there is no number %(position)s."
+msgstr "في الصفحة %(page)s عدد %(count)s أقسام؛ لا يوجد القسم رقم %(position)s."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "This version of Odoo has no section %s."
+msgstr "هذه النسخة من Odoo لا تحتوي على القسم %s."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "(empty)"
+msgstr "(فارغ)"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_revision.py:0
+msgid "Undone: %s"
+msgstr "تم التراجع: %s"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_revision.py:0
+msgid "This change was already undone."
+msgstr "تم التراجع عن هذا التغيير من قبل."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_revision.py:0
+msgid "The page of this change no longer exists."
+msgstr "صفحة هذا التغيير لم تعد موجودة."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_revision.py:0
+msgid "The page %s was changed after this edit; undo is refused so that nothing newer is lost."
+msgstr "تغيّرت الصفحة %s بعد هذا التعديل؛ رُفض التراجع حتى لا يضيع ما هو أحدث."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_revision.py:0
+msgid "The SEO of the page %s was changed after this edit; undo is refused so that nothing newer is lost."
+msgstr "تغيّر SEO الصفحة %s بعد هذا التعديل؛ رُفض التراجع حتى لا يضيع ما هو أحدث."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_revision.py:0
+msgid "There is no publish to undo."
+msgstr "لا يوجد نشر للتراجع عنه."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_revision.py:0
+msgid "%s was changed since and keeps its state."
+msgstr "تغيّرت %s منذ ذلك الحين وتبقى على حالتها."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_revision.py:0
+msgid "The home page of the website was changed since and is left as it is."
+msgstr "تغيّرت الصفحة الرئيسية للموقع منذ ذلك الحين وتُركت كما هي."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+msgid "The site %(site)s has no page %(text)s. Its pages: %(names)s."
+msgstr "الموقع %(site)s ليس فيه صفحة %(text)s. صفحاته: %(names)s."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+msgid "There is no site built by the Website Builder to edit."
+msgstr "لا يوجد موقع بناه منشئ المواقع ليُعدَّل."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+msgid "Say which page."
+msgstr "حدّد الصفحة."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+msgid "Several pages match %(text)s: %(names)s. Say which."
+msgstr "عدة صفحات تطابق %(text)s: %(names)s. حدّد أيّها."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_revision__page_id
+msgid "Page"
+msgstr "الصفحة"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+msgid "There is no change to undo."
+msgstr "لا يوجد تغيير للتراجع عنه."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_revision__before
+msgid "Before"
+msgstr "قبل"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_revision__after
+msgid "After"
+msgstr "بعد"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+msgid "Picture"
+msgstr "الصورة"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+msgid "Change the SEO of the page %s"
+msgstr "غيّر SEO الصفحة %s"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+msgid "Undo: %s"
+msgstr "تراجع: %s"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+msgid "Changed"
+msgstr "تم التغيير"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_revision__state__undone
+msgid "Undone"
+msgstr "تم التراجع"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+msgid "Change"
+msgstr "التغيير"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+msgid "Made"
+msgstr "تاريخه"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "Published %s pages"
+msgstr "نُشرت %s صفحات"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "Undo publish"
+msgstr "تراجع عن النشر"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "Every page of this site becomes visible to everybody, and its home page becomes the home page of the website. You can undo it afterwards. Continue?"
+msgstr "ستصبح كل صفحات هذا الموقع مرئية للجميع، وستصبح صفحته الرئيسية هي الصفحة الرئيسية للموقع. يمكنك التراجع بعد ذلك. هل تتابع؟"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "All pages of this site are published and its home page is the home page of the website."
+msgstr "كل صفحات هذا الموقع منشورة وصفحته الرئيسية هي الصفحة الرئيسية للموقع."
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "Changes after the build"
+msgstr "تغييرات بعد البناء"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "Undo"
+msgstr "تراجع"
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "Put the page back as it was before this change?"
+msgstr "هل تعيد الصفحة كما كانت قبل هذا التغيير؟"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__revision_ids
+msgid "Revisions"
+msgstr "المراجعات"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__last_publish_id
+msgid "Last Publish"
+msgstr "آخر نشر"
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_revision__user_id
+msgid "User"
+msgstr "المستخدم"
+
+#. module: nudge_builder
+#: model:ir.model,name:nudge_builder.model_nudge_builder_revision
+msgid "Nudge Builder Revision"
+msgstr "مراجعة منشئ المواقع"
+
+#. module: nudge_builder
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_revision__kind__publish
+msgid "Publish"
+msgstr "نشر"
+
+#. module: nudge_builder
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_revision__kind__section
+msgid "Section"
+msgstr "قسم"
+
+#. module: nudge_builder
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_revision__kind__seo
+msgid "SEO"
+msgstr "SEO"

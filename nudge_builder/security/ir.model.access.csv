@@ -12,3 +12,5 @@ access_nudge_builder_check_finding_designer,nudge.builder.check.finding designer
 access_nudge_builder_check_finding_system,nudge.builder.check.finding system,model_nudge_builder_check_finding,base.group_system,1,1,1,1
 access_nudge_builder_template_designer,nudge.builder.template designer,model_nudge_builder_template,website.group_website_designer,1,0,0,0
 access_nudge_builder_template_system,nudge.builder.template system,model_nudge_builder_template,base.group_system,1,1,1,1
+access_nudge_builder_revision_designer,nudge.builder.revision designer,model_nudge_builder_revision,website.group_website_designer,1,1,1,0
+access_nudge_builder_revision_system,nudge.builder.revision system,model_nudge_builder_revision,base.group_system,1,1,1,1

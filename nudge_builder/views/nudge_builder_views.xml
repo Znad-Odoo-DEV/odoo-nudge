@@ -17,13 +17,20 @@
                     <button name="action_open_editor" type="object" string="Open the home page in the editor"
                             invisible="state not in ('built', 'published')"/>
                     <button name="action_publish" type="object" string="Publish all pages"
-                            invisible="state != 'built'"
-                            confirm="Every page of this site becomes visible to everybody, and its home page becomes the home page of the website. Continue?"/>
+                            invisible="state not in ('built', 'published')"
+                            confirm="Every page of this site becomes visible to everybody, and its home page becomes the home page of the website. You can undo it afterwards. Continue?"/>
+                    <button name="action_undo_publish" type="object" string="Undo publish"
+                            invisible="not last_publish_id"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,previewed,built,published"/>
                 </header>
                 <sheet>
                     <div class="alert alert-info" role="status" invisible="not private">
                         No AI writes text or pictures here (no provider, or Private Mode is on): the pages are built from the sample copy of the template and the bundled placeholder pictures.
+                    </div>
+                    <div class="alert alert-success d-flex align-items-center gap-3" role="status"
+                         invisible="state != 'published' or not last_publish_id">
+                        <span class="flex-grow-1">All pages of this site are published and its home page is the home page of the website.</span>
+                        <button name="action_undo_publish" type="object" string="Undo publish" class="btn btn-secondary"/>
                     </div>
                     <div class="oe_title">
                         <h1><field name="name" readonly="state != 'draft'"/></h1>
@@ -70,11 +77,28 @@
                                 <field name="name"/>
                                 <field name="url"/>
                                 <field name="snippet_keys"/>
+                                <field name="seo_title" optional="show"/>
+                                <field name="seo_description" optional="show"/>
                                 <field name="is_published" widget="boolean"/>
                                 <button name="action_open_editor" type="object" string="Open in editor" icon="fa-pencil"/>
                             </tree>
                         </field>
                     </group>
+                    <group invisible="state not in ('built', 'published')" string="Changes after the build">
+                        <field name="revision_ids" nolabel="1" colspan="2">
+                            <tree create="0" delete="0" decoration-muted="state == 'undone'">
+                                <field name="create_date"/>
+                                <field name="kind"/>
+                                <field name="name"/>
+                                <field name="user_id"/>
+                                <field name="state"/>
+                                <button name="action_undo" type="object" string="Undo" icon="fa-undo"
+                                        invisible="state != 'done'"
+                                        confirm="Put the page back as it was before this change?"/>
+                            </tree>
+                        </field>
+                    </group>
+                    <field name="last_publish_id" invisible="1"/>
                     <field name="log" readonly="1" invisible="not log"/>
                     <field name="private" invisible="1"/>
                     <field name="stopped" invisible="1"/>

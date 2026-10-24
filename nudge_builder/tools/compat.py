@@ -174,3 +174,13 @@ def set_layout(env, website, header, footer):
             current = (specific or view).active
             if current != want:
                 view.write({"active": want})
+
+
+def check_write(records):
+    """Raise an AccessError when the person may not write ``records``: ``check_access`` from Odoo 18,
+    the rights and the record rules apart before"""
+    if hasattr(records, "check_access"):
+        records._nudge_check_access("write")
+    else:
+        records.check_access_rights("write")
+        records.check_access_rule("write")
