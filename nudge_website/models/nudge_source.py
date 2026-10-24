@@ -43,9 +43,28 @@ class NudgeSource(models.Model):
     # The published pages, read as files
     # ------------------------------------------------------------------
     @api.model
+    def _page_langs(self, page):
+        """:return: the codes of the languages the page is read in: those of its website (of every
+        website with the assistant, for a page they share), the default one first"""
+        sites = page.website_id or self.env["website"].sudo().search([("nudge_assistant", "=", True)])
+        langs = self.env["res.lang"]
+        for site in sites:
+            langs |= site.default_lang_id | site.language_ids
+        return langs.mapped("code") or [self.env.lang or "en_US"]
+
+    @api.model
     def _page_text(self, page):
-        """:return: the words of a page of the website as its visitors read them"""
-        arch = page.view_id.arch_db or ""
+        """:return: the words of a page of the website as its visitors read them, in each language
+        of the website: a visitor who asks in Arabic is answered from the Arabic page"""
+        texts = []
+        for code in self._page_langs(page):
+            text = self._arch_text(page.view_id.with_context(lang=code).arch_db or "")
+            if text and text not in texts:
+                texts.append(text)
+        return "\n\n".join(texts)
+
+    @api.model
+    def _arch_text(self, arch):
         try:
             root = html.fromstring(f"<div>{arch}</div>")
         except (etree.ParserError, ValueError):
