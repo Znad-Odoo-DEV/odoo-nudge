@@ -114,6 +114,9 @@ LANGUAGE_NAMES = {
     "zh": "Chinese", "id": "Indonesian", "bn": "Bengali", "ml": "Malayalam", "tl": "Filipino", "nl": "Dutch",
 }
 MODEL_NAME = re.compile(r"[a-z0-9_.]{1,128}")
+# What a field on the screen holds of its record (not a choice or a tick shared by every record)
+SCREEN_VALUE_TYPES = frozenset(("char", "text", "many2one", "monetary", "float", "integer", "date", "datetime"))
+DIGIT = re.compile(r"\d")
 
 # What a text of a reference means and its English words: the same for every company and every request
 _CACHE_LIMIT = 5000
@@ -554,11 +557,14 @@ class NudgeMemory(models.Model):
         if not question or not answer or len(answer) > MAX_ANSWER_CHARS:
             return none
         text = " ".join((question.content or "").split())
-        # Talk mode, typed or said, with no screen, no file, no command and
-        # nothing Nudge found in the database for it: only words
-        if (question.mode not in (False, MODE_TALK) or question.command or question.snapshot
+        # Talk mode, typed or said, with no file, no command and nothing Nudge found in the database for
+        # it. The screen is shared by default: it is no reason by itself, an answer that quotes its records is
+        if (question.mode not in (False, MODE_TALK) or question.command
                 or question.attachment_name or len(text) < MIN_QUESTION_CHARS
                 or "<nudge_found>" in (question.context_text or "") or conversation.run_ids):
+            return none
+        screen = self._question_screen(question)
+        if screen and self._quotes_screen(answer, screen):
             return none
         # Every tool called for this answer must be one of the safe ones
         between = earlier.filtered(lambda other: other.id > question.id) | message
@@ -590,9 +596,15 @@ class NudgeMemory(models.Model):
             if self.search_count([
                     ("state", "in", ("liked", "proposed")), ("proposed_by", "=", user.id)]) >= MAX_PENDING_PER_USER:
                 return none
+        model_name = str(screen.get("model") or "")
+        model_name = model_name if MODEL_NAME.fullmatch(model_name) and model_name in self.env else ""
         memory = self.create({
             "question": text,
             "answer": answer,
+            # Given on a screen, served on that screen: the manager widens it when it stays true elsewhere
+            "model_name": model_name,
+            "view_type": str(screen.get("view_type") or "")[:20] if model_name else False,
+            "screen_bound": bool(model_name),
             "company_id": company.id,
             "state": "approved" if manager else ("proposed" if self._like_count_needed() <= 1 else "liked"),
             "proposed_by": user.id,
@@ -603,6 +615,46 @@ class NudgeMemory(models.Model):
         if manager:
             memory._after_approval()
         return memory
+
+    @api.model
+    def _question_screen(self, question):
+        """:return: the screen ``question`` was asked from, as kept with it (or with the earlier question that
+        showed it, when it was sent as unchanged), or an empty dict"""
+        screen = question.snapshot if isinstance(question.snapshot, dict) else {}
+        if not screen and question.snapshot_hash:
+            shown = question.conversation_id.message_ids.filtered(
+                lambda other: other.role == "user" and other.id < question.id
+                and other.snapshot_hash == question.snapshot_hash and isinstance(other.snapshot, dict))[-1:]
+            screen = shown.snapshot if shown else {}
+        return screen
+
+    @api.model
+    def _quotes_screen(self, answer, screen):
+        """:return: whether ``answer`` repeats what the screen showed of its records (a name, an amount, a date,
+        a reference): it is about those records, not a way of working that stays true for everybody"""
+        shown = []
+        record = screen.get("record")
+        if isinstance(record, dict):
+            shown.append(record.get("name"))
+        for field in screen.get("fields") or []:
+            if isinstance(field, dict) and field.get("type") in SCREEN_VALUE_TYPES:
+                shown.append(field.get("value"))
+        for row in (screen.get("rows") or []) + (screen.get("cards") or []):
+            if isinstance(row, dict):
+                # A word alone in a list is mostly a state ("New", "Confirmed"); a name or a figure is a record's
+                shown.extend(value for key, value in row.items()
+                             if key != "id" and isinstance(value, str) and (" " in value.strip() or DIGIT.search(value)))
+        folded = memory_match.fold(answer)
+        for value in shown:
+            if not isinstance(value, (str, int, float)) or isinstance(value, bool):
+                continue
+            value = str(value).strip()
+            if len(value) < 4 or value == screen_snapshot.HIDDEN:
+                continue
+            pieces = [value] + [piece for piece in value.split() if len(piece) >= 3 and DIGIT.search(piece)]
+            if any(memory_match.fold(piece) in folded for piece in pieces):
+                return True
+        return False
 
     def _count_like(self, user, text):
         """One more person liked this answer (to ``text``): a Suggested reference once enough different
@@ -676,12 +728,8 @@ class NudgeMemory(models.Model):
             for event in turn.screen_events or []:
                 if isinstance(event, dict) and event.get("type") == "guidance" and event.get("steps"):
                     steps = list(event["steps"])
-        screen = question.snapshot if isinstance(question.snapshot, dict) else {}
-        if not screen and question.snapshot_hash:
-            # Sent as unchanged: the screen is the one of the question that showed it
-            shown = questions.filtered(lambda other: other.snapshot_hash == question.snapshot_hash
-                                       and isinstance(other.snapshot, dict))[-1:]
-            screen = shown.snapshot if shown else {}
+        # Sent as unchanged: the screen is the one of the question that showed it
+        screen = self._question_screen(question)
         model_name = str(screen.get("model") or "")
         model_name = model_name if MODEL_NAME.fullmatch(model_name) and model_name in self.env else ""
         answer = (record.content or "").strip()
