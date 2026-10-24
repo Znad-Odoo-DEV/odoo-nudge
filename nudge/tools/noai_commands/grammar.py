@@ -505,6 +505,8 @@ def _interpret(text, spans, screen):
 WRITES = frozenset(("create", "update", "press", "save_report", "revert"))
 # Below the threshold and from here, a parse is still worth offering as "Did you mean"
 OFFER_FROM = 0.4
+# What a bare name of a record is read as asking, when it carries a slip
+BARE_VERB = "show"
 MAX_CANDIDATES = 3
 
 
@@ -562,6 +564,24 @@ def _corrected(text, tokens, screen, fixes):
 
 
 def parse(text, screen=None):
+    """:return: the :class:`Parse` of ``text`` (see :func:`_parse`); a bare name of a record with a slip in it
+    ("sales ordrs", "qoutations") says no verb, so it is offered as "open" what it names, never acted on"""
+    parsed = _parse(text, screen)
+    words = (text or "").strip()
+    if not parsed.intent and not parsed.candidates and words and not words.lower().startswith(BARE_VERB):
+        shown = _parse(BARE_VERB + " " + words, screen)
+        if shown.intent == "open" and shown.corrections:
+            shown.confidence = min(shown.confidence, THRESHOLD - 0.01)
+            summary = _summary(shown)
+            for fix in shown.corrections:
+                summary["text"] = summary["text"].replace(fix["word"], fix["to"])
+            summary["corrections"] = list(shown.corrections)
+            shown.candidates = [summary] if shown.confidence >= OFFER_FROM else []
+            return shown
+    return parsed
+
+
+def _parse(text, screen=None):
     """:param screen: what is known of the screen the person is on:
         ``{"model": str, "record_id": int|None}``
     :return: the :class:`Parse` of ``text``; ``intent`` is empty when nothing is understood.
