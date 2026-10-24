@@ -60,7 +60,9 @@ class TestChat(NudgeCase, TransactionCase):
             [(turn["role"], turn["text"]) for turn in turns],
             [("user", "First question"), ("assistant", "First answer."), ("user", "Second question")],
         )
-        self.assertEqual(turns[0]["context"], first_context)
+        # PERF-08: the screen of an old question is not sent again
+        self.assertTrue(first_context)
+        self.assertEqual(turns[0]["context"], "")
         self.assertEqual(turns[1]["blocks"], [{"type": "text", "text": "First answer."}])
         self.assertEqual(turns[1]["provider_kind"], "openai_compatible")
         self.assertEqual(adapter.calls[0]["system"], adapter.calls[1]["system"])
