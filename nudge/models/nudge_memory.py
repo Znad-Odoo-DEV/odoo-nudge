@@ -908,11 +908,14 @@ class NudgeMemory(models.Model):
             return ""
         Provider = self.env["nudge.provider"].sudo()
         chosen = Provider._get_for_mode("agent") or Provider._get_default()
+        # The model that most likely answered: the economy one when set, as _complete tries it first
+        economy = chosen._get_economy() if chosen else None
+        model_name = economy[1] if economy else chosen.model_name
         # sudo: the translation is Nudge's own record, kept for a manager to review
         self.env["nudge.memory.translation"].sudo().create({
             "memory_id": self.id, "language": language, "answer": text[:MAX_ANSWER_CHARS],
             "question": _one_line(scrub(asked), MAX_VARIANT_CHARS) or False,
-            "origin": "ai", "model_name": chosen.model_name or False,
+            "origin": "ai", "model_name": model_name or False,
         })
         self.invalidate_recordset(["translation_ids"])
         return text
@@ -920,10 +923,8 @@ class NudgeMemory(models.Model):
     @api.model
     def _reference_translate(self, text, language):
         """One very short request: the source text only, "translate to <language>, keep terms". Nothing is
-        sent in private mode to a provider outside the server.
-
-        TODO(S6 merge): point this call at the economy model tier of the provider once it exists; today it
-        goes through ``nudge.provider._complete`` with the shortest prompt.
+        sent in private mode to a provider outside the server. ``nudge.provider._complete`` gives it to the
+        economy model of the provider when one is set (S6), to its main model otherwise.
 
         :return: the translation, or "" when no provider can answer"""
         Provider = self.env["nudge.provider"].sudo()
