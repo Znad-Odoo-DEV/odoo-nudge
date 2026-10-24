@@ -382,6 +382,15 @@ class TestMcpOAuth(HttpCase):
         fresh = self.refresh(client["client_id"], tokens["refresh_token"]).json()
         self.assertEqual(self.rpc(fresh["access_token"], "ping").status_code, 200)
 
+    def test_an_auditor_past_the_last_day_is_refused_before_the_cron(self):
+        auditor = new_test_user(self.env, login="oauth_auditor", groups="nudge_mcp.group_nudge_mcp,nudge.group_nudge_auditor",
+                                nudge_auditor_until=fields.Date.today() + timedelta(days=5))
+        client, tokens = self.sign_in(login="oauth_auditor", granted=(nudge_mcp.SCOPE_READ,))
+        self.assertEqual(self.rpc(tokens["access_token"], "ping").status_code, 200)
+        auditor.sudo().nudge_auditor_until = fields.Date.today() - timedelta(days=1)
+        self.assertEqual(self.rpc(tokens["access_token"], "ping").status_code, 401)
+        self.assertEqual(self.refresh(client["client_id"], tokens["refresh_token"]).json()["error"], "invalid_grant")
+
     def test_refresh_rotation_and_reuse_detection(self):
         client, tokens = self.sign_in()
         first = self.refresh(client["client_id"], tokens["refresh_token"])

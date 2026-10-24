@@ -116,6 +116,15 @@ class TestMcp(HttpCase):
             "WHERE index = %s", [key[:8]])
         self.assertEqual(self.rpc("initialize", key=key).status_code, 401)
 
+    def test_an_auditor_past_the_last_day_is_refused_before_the_cron(self):
+        auditor = new_test_user(self.env, login="mcp_auditor", groups="nudge_mcp.group_nudge_mcp,nudge.group_nudge_auditor",
+                                nudge_auditor_until=fields.Date.today() + timedelta(days=5))
+        key = self.make_key(auditor)
+        self.assertEqual(self.rpc("initialize", key=key).status_code, 200)
+        auditor.sudo().nudge_auditor_until = fields.Date.today() - timedelta(days=1)
+        self.assertTrue(auditor.active, "Not archived yet: the cron runs every hour")
+        self.assertEqual(self.rpc("initialize", key=key).status_code, 401)
+
     def test_revoked_group(self):
         key = self.make_key(self.other)
         self.assertEqual(self.rpc("initialize", key=key).status_code, 200)

@@ -218,6 +218,9 @@ class NudgeMcp(models.AbstractModel):
         user = users.sudo().browse(uid).exists() if uid else users
         if not user or not user.active or not user.has_group(GROUP):
             return users
+        # An auditor past the last day, before the hourly cron archives them
+        if users._nudge_auditor_expired(user.id):
+            return users
         return users.browse(user.id)
 
     def _session_token(self, uid, client):

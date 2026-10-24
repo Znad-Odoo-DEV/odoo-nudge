@@ -18,3 +18,4 @@
   waits for the person until an administrator lists one.
 - EXT-14: MCP prompts (`prompts/list`, `prompts/get`) answered and announced when a module adds prompts
   through `nudge.mcp._mcp_prompts()`; none are shipped here.
+- Review: (S8) An auditor past "Auditor Access Until" could still use an MCP key or an OAuth token until the hourly cron archived them (the key check and the grant check did not look at the date): both now refuse an expired auditor at once.
