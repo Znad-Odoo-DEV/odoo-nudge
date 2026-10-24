@@ -1,11 +1,38 @@
 .o_nudge_home {
+    // UI-04: a masonry of sections, two or three columns on a wide screen
+    .o_nudge_home_sections {
+        columns: 1;
+        column-gap: 24px;
+
+        @include media-breakpoint-up(lg) {
+            columns: 2;
+        }
+
+        @include media-breakpoint-up(xxl) {
+            columns: 3;
+        }
+    }
+    .o_nudge_home_section {
+        break-inside: avoid;
+    }
+    // "Nudge says" as one compact strip
+    .o_nudge_home_says {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border: 1px solid var(--bs-border-color);
+        border-radius: var(--bs-border-radius);
+        background: var(--bs-tertiary-bg);
+    }
     .o_nudge_home_tiles {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
         gap: 12px;
     }
     .o_nudge_home_tile {
-        cursor: grab;
+        cursor: default;
         background: var(--bs-body-bg);
         color: var(--bs-body-color);
     }
@@ -20,7 +47,7 @@
         display: inline-block;
         width: 96px;
         height: 32px;
-        color: #6c4df6;
+        color: var(--bs-primary);
         canvas { display: block; }
     }
     .o_nudge_home_bars {
@@ -34,5 +61,53 @@
         min-height: 2px;
         background: currentColor;
         border-radius: 2px;
+    }
+
+    // Arranging the tiles
+    &.o_nudge_home_customising .o_nudge_home_tile {
+        cursor: grab;
+        outline: 2px dashed var(--bs-border-color);
+        outline-offset: 2px;
+    }
+    .o_nudge_home_earlier,
+    .o_nudge_home_later,
+    .o_nudge_home_hide {
+        min-width: 28px;
+        min-height: 28px;
+        padding: 0;
+        line-height: 1;
+    }
+    // The chevrons point the way the tiles go: mirrored in right-to-left
+    .o_nudge_home_flip {
+        [dir="rtl"] & {
+            transform: scaleX(-1);
+        }
+    }
+    // NP-23: compact tiles, high contrast and large text on the page
+    &.o_nudge_home_compact {
+        .o_nudge_home_tiles {
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 8px;
+        }
+        .o_nudge_home_tile {
+            padding: 8px !important;
+        }
+        .o_nudge_home_count {
+            font-size: 1.4rem;
+        }
+        .o_nudge_home_spark {
+            display: none;
+        }
+    }
+    &.o_nudge_home_hc {
+        .o_nudge_home_tile {
+            border: 2px solid var(--bs-body-color);
+        }
+        .text-muted {
+            color: var(--bs-body-color) !important;
+        }
+    }
+    &.o_nudge_home_lg {
+        font-size: 1.15rem;
     }
 }
