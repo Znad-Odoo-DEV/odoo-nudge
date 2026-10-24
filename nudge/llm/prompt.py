@@ -333,13 +333,34 @@ you change, and it stays unsaved until they save.
 - If they ask you to do something for them, show them the steps so they can do it themselves.
 """
 
-TALK_MODE_WITH_AGENT = TALK_MODE + """\
-- For the figures of the data themselves, offer Agent mode.
+# NP-02: a Nudge User may ask about the data in Talk, with the reading tools only
+TALK_MODE_ASK = """\
+## Mode: Talk
+You explain, show and guide. The person does the work.
+
+- You can read, count, chart and open their data with your reading tools (search_records, \
+read_record, aggregate_records, show_chart, open_record), within what they may see: use them for \
+figures, lists and "how many", and say the filter you counted on. locate_data tells where a \
+topic lives and how much it is used.
+- You never change anything in the data: you cannot create, save, confirm or delete. Typing a text \
+in a field of their form is all you change, and it stays unsaved until they save.
+- If they ask you to change something for them, show them the steps so they can do it \
+themselves.
+"""
+
+_TALK_SWITCH = """\
 - This person can switch you to Agent mode, with the button under the message box. There you \
 look up records and do the work for them, one confirmation at a time. When what they ask is \
 work to be done rather than something to understand, tell them so in a sentence, after showing \
 them how.
 """
+
+TALK_MODE_WITH_AGENT = TALK_MODE + """\
+- For the figures of the data themselves, offer Agent mode.
+""" + _TALK_SWITCH
+TALK_MODE_ASK_WITH_AGENT = TALK_MODE_ASK + """\
+- For a change to the data, suggest Agent mode, after showing them how.
+""" + _TALK_SWITCH
 
 TALK_WITH_DEV = """\
 - Developer mode, the third button, is theirs too: there you build, as a senior Odoo \
@@ -630,7 +651,8 @@ Nudge adds the link "Open the list" under your answer by itself: do not write on
 
 
 def build_system_blocks(overview="", mode="talk", can_use_agent=False, work="", can_develop=False,
-                        is_administrator=False, focus=None, compact=False, background=False):
+                        is_administrator=False, focus=None, compact=False, background=False,
+                        ask_data=False):
     """:param overview: what is known of the database, the same for everybody
         who may know the same of it
     :param work: where the business works, among what this person may read
@@ -641,6 +663,7 @@ def build_system_blocks(overview="", mode="talk", can_use_agent=False, work="", 
     :param focus: the command the person typed to ask one precise thing:
         a short brief replaces everything else
     :param compact: for a small model: the short instructions
+    :param ask_data: whether Talk has the reading tools of the data (NP-02): its rules say so
     :return: list of text blocks, most stable first: what is the same for
         everybody comes before what depends on the person"""
     if focus in FOCUS_BRIEFS:
@@ -651,9 +674,10 @@ def build_system_blocks(overview="", mode="talk", can_use_agent=False, work="", 
     elif mode == "agent":
         rules = AGENT_MODE + AGENT_NEVER_DELETES + (AGENT_WITH_DEV if can_develop else no_dev)
     elif can_use_agent:
-        rules = TALK_MODE_WITH_AGENT + (TALK_WITH_DEV if can_develop else no_dev)
+        rules = (TALK_MODE_ASK_WITH_AGENT if ask_data else TALK_MODE_WITH_AGENT) + (
+            TALK_WITH_DEV if can_develop else no_dev)
     else:
-        rules = TALK_MODE + no_dev
+        rules = (TALK_MODE_ASK if ask_data else TALK_MODE) + no_dev
     persona = SYSTEM_PERSONA_COMPACT if compact else SYSTEM_PERSONA
     if compact and mode == "dev":
         rules += DEV_MAP_COMPACT
