@@ -4,6 +4,7 @@ Current version: nudge 19.0.1.58.0, nudge_mcp 19.0.1.1.0, nudge_connect 19.0.1.0
 
 ## 19.0.1.58.0 (unreleased)
 
+- Ask the data: the answer links the list behind a figure with a Show list button, opened as the person.
 - SEC-02 The Python sandbox of the Agent can no longer be pinned by `x = x * x`, `s = s + s` or a huge `round`/`ljust`/`bytes`: steps on computed values are size-checked before they run and the memory is watched with the deadline
 - Ask the data (NP-02): a Nudge User without the Agent group asks questions of the data in Talk with the reading tools only, under their own rights, record rules and companies; each figure states the filter it was counted on and links the list; the rules router and `/count` answer with no provider; Settings has Ask the Data (on by default)
 - NP-06 Setup wizard: Settings > Nudge > First Setup (always shown, also Nudge > Configuration > Setup Wizard) walks a system administrator through users and mode, the provider (rules only, local Ollama, Claude, Gemini, other OpenAI-compatible, each with pros, cons and a privacy note), the key and a test, a monthly cost estimate from a dated price table (data/nudge_price_table.json, editable in the wizard), the budgets and the switch-on; it works before any provider exists and ends with rules only

@@ -211,6 +211,14 @@
                     </ul>
                 </t>
             </div>
+            <div t-if="found.lists and found.lists.length" class="o_nudge_found_list">
+                <button t-foreach="found.lists" t-as="list" t-key="list_index" type="button"
+                        class="btn btn-sm btn-light o_nudge_found_open o_nudge_found_showlist"
+                        t-att-title="list.action.name or ''"
+                        t-on-click="() => props.onFound and props.onFound('list', list)">
+                    <i class="fa fa-list"/> Show list
+                </button>
+            </div>
             <div t-if="found.menus and found.menus.length" class="o_nudge_found_list">
                 <div t-foreach="found.menus" t-as="menu" t-key="menu.id" class="o_nudge_found_row">
                     <button type="button" class="o_nudge_suggestion o_nudge_found_menu" title="Show me the way"
