@@ -10,7 +10,7 @@ spreadsheet editor: collaborative, versioned, shareable, downloadable.
 Installed by itself when Nudge: Spreadsheets and Documents Spreadsheet are both there.
 """,
     "category": "Productivity",
-    "version": "18.0.1.0.6",
+    "version": "18.0.1.0.7",
     "author": "Ibrahim Elzenad",
     "website": "https://znad-odoo-dev.github.io",
     "support": "https://github.com/Znad-Odoo-DEV/odoo-nudge/issues",
