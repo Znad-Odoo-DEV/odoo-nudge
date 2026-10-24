@@ -60,7 +60,7 @@ from odoo.tools.safe_eval import datetime as safe_datetime, dateutil as safe_dat
 from ..llm.snapshot import HIDDEN, SENSITIVE_NAME
 from . import base
 from .actions import SENSITIVE_METHOD
-from .records import Refused, cut, get_model, is_closed, is_secret, refusing
+from .records import Refused, cut, get_model, holds_secret, is_closed, refusing
 
 PYTHON_PARAM = "nudge.python"
 MAX_CODE_CHARS = 4000
@@ -139,6 +139,9 @@ PERCENT_FIELD = re.compile(r"%(?:\([^)]*\))?[-#0 +]*(?P<width>\*|\d+)?(?:\.(?P<p
 # Of a domain or a method, what reads a path of fields
 WITH_DOMAIN = ("search", "search_count", "search_read", "search_fetch", "read_group", "filtered_domain")
 WITH_PATH = ("mapped", "filtered", "sorted")
+# Of a method, where it takes the fields it reads: (position, keyword)
+WITH_FIELDS = {"read": (0, "fields"), "search_read": (1, "fields"), "search_fetch": (1, "field_names"),
+               "read_group": (1, "fields")}
 
 
 class DryRun(Exception):
@@ -328,12 +331,25 @@ def _check_path(records, path):
         field = model._fields.get(name)
         if field is None:
             return
-        if is_secret(field):
+        if holds_secret(model, field):
             raise Refused(f"The code may not read {name}: it holds a secret.")
         if field.comodel_name and index < len(steps) - 1:
             if is_closed(model.env, field.comodel_name):
                 raise Refused(f"The code may not reach {field.comodel_name}: it is not for this person.")
             model = model.env[field.comodel_name]
+
+
+def _masked(records, rows):
+    """:return: ``rows``, as read or search_read give them, with what holds a secret hidden: called without a list
+    of fields, they read every field"""
+    if not isinstance(rows, list):
+        return rows
+    names = {name for row in rows if isinstance(row, dict) for name in row}
+    hidden = {name for name in names if name in records._fields and holds_secret(records, records._fields[name])}
+    if not hidden:
+        return rows
+    return [{name: HIDDEN if name in hidden else value for name, value in row.items()} if isinstance(row, dict)
+            else row for row in rows]
 
 
 def _unwrap(value):
@@ -389,7 +405,7 @@ class Records:
         records = self._records
         field = records._fields.get(name)
         if field is not None:
-            if is_secret(field):
+            if holds_secret(records, field):
                 return HIDDEN
             return _guard(self._env, getattr(records, name))
         value = getattr(records, name)
@@ -429,7 +445,16 @@ class Records:
                 path = kwargs.get("key", args[0] if args else None)
                 if isinstance(path, str):
                     _check_path(records, path)
-            return _guard(env, method(*args, **kwargs))
+            if name in WITH_FIELDS:
+                position, keyword = WITH_FIELDS[name]
+                listed = kwargs.get(keyword, args[position] if len(args) > position else None)
+                for spec in [listed] if isinstance(listed, str) else listed or []:
+                    if isinstance(spec, str):
+                        _check_path(records, re.split(r"[:(]", spec)[0].strip())
+            result = method(*args, **kwargs)
+            if name in ("read", "search_read"):
+                result = _masked(records, result)
+            return _guard(env, result)
 
         return call
 
