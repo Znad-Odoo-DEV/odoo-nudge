@@ -28,6 +28,7 @@ from . import test_assessment
 from . import test_lessons
 from . import test_memory
 from . import test_noai
+from . import test_noai_fuzzy
 from . import test_outliers
 from . import test_validator
 from . import test_sources

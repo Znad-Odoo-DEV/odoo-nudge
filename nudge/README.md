@@ -308,6 +308,17 @@ setting “Try to understand common requests without AI first” (on by default)
 usage report counts these requests with no tokens. The words are in `tools/noai_commands/lexicon/`,
 one file per group of dialects, easy to extend.
 
+Typing fast does not send the sentence to the AI. A word the lexicon does not know is read as the word it
+was meant to be: a letter more, less, swapped or changed for a near one (`opne`, `invocies`, `موضف`; one letter
+for a word of 4 to 7 letters, two from 8), or Arabic written in Latin letters and digits (`3omala2`, `a3mel`,
+`mntgat`: 3, 5, 6, 7, 8, 9 and the pairs sh, kh, gh stand for Arabic letters, matched on the consonants of
+the lexicon). Numbers, dates, addresses, names in quotes, capitalised names and the value a field is set to
+are never touched. A correction always costs confidence, so a typo never makes a sentence surer than the same
+sentence typed right; a sentence that changes something and needed a slip corrected, or a word that may mean
+two things, stays under the threshold and is only offered. The parse carries `corrections` (what was read as
+what) and, under the threshold, `candidates`: the sentences it may have meant, each with the corrected text, for
+a “Did you mean” offer. A parse between 0.4 and 0.7 is offered the same way and is never acted on.
+
 ### In the background
 
 In Agent mode, the clock next to Send leaves the request to the server. Close the panel, go to
