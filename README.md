@@ -402,6 +402,8 @@ version and a test sentence with the tool it expects.
   sent to a model.
 - **Recipes.** Skills are an item kind (`skill`) of the recipes. An imported skill, new or updated, is
   a draft until a manager reads it and publishes it; a tool this database does not have refuses the item.
+  An import only ever creates or updates a skill of the current company: one shared by every company, or
+  of another company, is left as it is and a copy of this company is made instead.
 - **Proposals and tests (NP-19).** Three approved lessons about one app (the model they name, or the
   screen they were learnt on) become a draft skill, with a line in Business Notes for the managers
   (Review opens the draft; Refuse on the line archives it; publishing it approves the line). Once the
