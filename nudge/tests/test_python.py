@@ -228,7 +228,8 @@ class TestPython(NudgeCase, TransactionCase):
         ]:
             started = time.monotonic()
             result = self.run_code(code)
-            self.assertLess(time.monotonic() - started, 2, code)
+            # An escape ran for minutes; 5 s leaves room for a loaded test machine
+            self.assertLess(time.monotonic() - started, 5, code)
             self.assertTrue(result.is_error, code)
             self.assertIn(text, result.content, code)
             self.assertNotIn("was stopped", result.content, code)

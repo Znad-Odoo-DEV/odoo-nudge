@@ -105,5 +105,5 @@
 
     <menuitem id="nudge_menu_prompts" name="Prompts" sequence="35"
               parent="nudge_menu_root" action="nudge_prompt_action"
-              groups="nudge.group_nudge_user"/>
+              groups="nudge.group_nudge_manager"/>
 </odoo>

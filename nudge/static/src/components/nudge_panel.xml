@@ -325,19 +325,15 @@
                                t-on-change="onPhotoChosen"/>
                     </div>
                     <div class="o_nudge_suggestions">
-                        <t t-if="promptChips.length">
-                            <button t-foreach="promptChips" t-as="chip" t-key="chip.id"
-                                    type="button" class="o_nudge_suggestion o_nudge_prompt_chip" dir="auto"
-                                    t-att-title="chip.description" t-on-click="() => this.onChip(chip)">
-                                <span t-esc="chip.name"/>
-                                <span t-if="chip.variables.length" class="o_nudge_prompt_chip_hint">Fill in, then send</span>
-                            </button>
-                        </t>
-                        <t t-else="">
-                            <button t-foreach="suggestions" t-as="suggestion" t-key="suggestion_index"
-                                    type="button" class="o_nudge_suggestion" dir="auto"
-                                    t-on-click="() => this.send(suggestion)" t-esc="suggestion"/>
-                        </t>
+                        <button t-foreach="suggestions" t-as="suggestion" t-key="suggestion_index"
+                                type="button" class="o_nudge_suggestion" dir="auto"
+                                t-on-click="() => this.send(suggestion)" t-esc="suggestion"/>
+                        <button t-foreach="promptChips" t-as="chip" t-key="chip.id"
+                                type="button" class="o_nudge_suggestion o_nudge_prompt_chip" dir="auto"
+                                t-att-title="chip.description" t-on-click="() => this.onChip(chip)">
+                            <span t-esc="chip.name"/>
+                            <span t-if="chip.variables.length" class="o_nudge_prompt_chip_hint">Fill in, then send</span>
+                        </button>
                     </div>
                     <p t-if="state.commands.length" class="o_nudge_hint o_nudge_commands_hint">
                         Type “/” to tell me where to look

@@ -274,7 +274,7 @@ export class NudgePanel extends Component {
     savedPrompt() {
         this.prompts.save = null;
         this.chipsKey = null;
-        this.notification.add(_t("Kept as a prompt. It is in the Prompts menu."), { type: "success" });
+        this.notification.add(_t("Kept as a prompt: it is offered as a chip on screens like this one."), { type: "success" });
         return this.loadChips();
     }
 
