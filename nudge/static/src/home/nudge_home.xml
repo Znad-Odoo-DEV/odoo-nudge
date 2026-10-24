@@ -11,7 +11,9 @@
     </t>
 
     <t t-name="nudge.NudgeHome">
-        <div class="o_nudge_home o_action overflow-auto p-3">
+        <div class="o_nudge_home o_action overflow-auto p-3 pb-5"
+             t-att-class="{ o_nudge_home_compact: nudgeState.compact, o_nudge_home_hc: nudgeState.highContrast,
+                            o_nudge_home_lg: nudgeState.largeText, o_nudge_home_customising: state.customising }">
             <div class="d-flex align-items-center flex-wrap gap-3 mb-3">
                 <h2 class="m-0 me-auto">My Nudge Home</h2>
                 <label class="form-check m-0 o_nudge_home_login">
@@ -19,13 +21,19 @@
                            t-on-change="toggleLoginHome"/>
                     <span class="form-check-label">Open this page when I log in</span>
                 </label>
+                <button class="btn btn-light o_nudge_home_customise" t-on-click="toggleCustomise"
+                        t-att-aria-pressed="state.customising ? 'true' : 'false'">
+                    <i class="fa fa-sliders me-1" aria-hidden="true"/>
+                    <t t-if="state.customising">Done</t>
+                    <t t-else="">Customise tiles</t>
+                </button>
                 <button class="btn btn-secondary o_nudge_home_refresh" t-on-click="refresh">Refresh</button>
             </div>
 
-            <div t-if="state.says.length" class="o_nudge_home_says mb-3">
-                <div class="fw-bold mb-1">Nudge says</div>
+            <div t-if="state.says.length" class="o_nudge_home_says mb-3" role="region" aria-label="Nudge says">
+                <span class="fw-bold">Nudge says</span>
                 <button t-foreach="state.says" t-as="item" t-key="item_index"
-                        class="o_nudge_home_say btn btn-light d-block text-start w-100 mb-1"
+                        class="o_nudge_home_say btn btn-light text-start"
                         t-on-click="() => this.openSaid(item)">
                     <span class="badge text-bg-secondary me-2" t-out="kindLabel(item)"/>
                     <span t-out="item.text"/>
@@ -37,24 +45,38 @@
                 Nothing to count here yet: the apps you work in will show their numbers.
             </div>
 
+            <!-- UI-04: the sections flow in two or three columns, by the width of the screen -->
+            <div class="o_nudge_home_sections">
             <section t-foreach="state.sections" t-as="section" t-key="section.key"
                      class="o_nudge_home_section mb-4" t-att-data-section="section.key">
                 <h4 t-out="section.title"/>
                 <div class="o_nudge_home_tiles">
                     <div t-foreach="visibleTiles(section)" t-as="tile" t-key="tile.key"
-                         class="o_nudge_home_tile card p-3" draggable="true"
+                         class="o_nudge_home_tile card p-3" t-att-draggable="state.customising ? 'true' : 'false'"
                          t-att-data-key="tile.key"
                          t-on-dragstart="(ev) => this.dragStart(ev, tile)"
                          t-on-dragover="dragOver"
                          t-on-drop="(ev) => this.drop(ev, tile, section)">
                         <div class="d-flex align-items-start">
                             <span class="o_nudge_home_label text-muted me-auto" t-out="tile.label"/>
-                            <button class="btn btn-sm btn-link p-0 o_nudge_home_earlier" title="Earlier"
-                                    t-on-click="() => this.move(tile, section, -1)">&#8249;</button>
-                            <button class="btn btn-sm btn-link p-0 o_nudge_home_later" title="Later"
-                                    t-on-click="() => this.move(tile, section, 1)">&#8250;</button>
-                            <button class="btn btn-sm btn-link p-0 o_nudge_home_hide" title="Hide this tile"
-                                    t-on-click="() => this.hide(tile)">&#215;</button>
+                            <!-- UI-07: only in the customise mode; chevrons that mirror, 28px targets -->
+                            <t t-if="state.customising">
+                                <button class="btn btn-sm btn-light o_nudge_home_earlier" title="Earlier"
+                                        aria-label="Move this tile earlier"
+                                        t-on-click="() => this.move(tile, section, -1)">
+                                    <i class="fa fa-chevron-left o_nudge_home_flip" aria-hidden="true"/>
+                                </button>
+                                <button class="btn btn-sm btn-light o_nudge_home_later" title="Later"
+                                        aria-label="Move this tile later"
+                                        t-on-click="() => this.move(tile, section, 1)">
+                                    <i class="fa fa-chevron-right o_nudge_home_flip" aria-hidden="true"/>
+                                </button>
+                                <button class="btn btn-sm btn-light o_nudge_home_hide" title="Hide this tile"
+                                        aria-label="Hide this tile"
+                                        t-on-click="() => this.hide(tile)">
+                                    <i class="fa fa-eye-slash" aria-hidden="true"/>
+                                </button>
+                            </t>
                         </div>
                         <div class="d-flex align-items-end justify-content-between mt-2">
                             <div>
@@ -65,12 +87,13 @@
                             </div>
                             <NudgeSparkline series="tile.series" label="tile.name"/>
                         </div>
-                        <button class="btn btn-sm btn-primary mt-2 o_nudge_home_show" t-on-click="() => this.show(tile)">
+                        <button class="btn btn-link p-0 mt-2 text-start o_nudge_home_show" t-on-click="() => this.show(tile)">
                             Show me
                         </button>
                     </div>
                 </div>
             </section>
+            </div>
 
             <div t-if="hiddenTiles.length" class="o_nudge_home_hidden">
                 <button class="btn btn-link p-0" t-on-click="() => state.showHidden = !state.showHidden">

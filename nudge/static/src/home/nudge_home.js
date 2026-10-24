@@ -42,7 +42,7 @@ export class NudgeSparkline extends Component {
                 type: "bar",
                 data: {
                     labels: this.props.series.map((_value, index) => String(index + 1)),
-                    datasets: [{ data: this.props.series, backgroundColor: style.color || "#6c4df6", borderRadius: 2 }],
+                    datasets: [{ data: this.props.series, backgroundColor: style.color || "currentColor", borderRadius: 2 }],
                 },
                 options: {
                     animation: false,
@@ -75,7 +75,10 @@ export class NudgeHome extends Component {
             loginHome: false,
             showHidden: false,
             dragging: null,
+            // UI-07: the move and hide controls show only while the person arranges the tiles
+            customising: false,
         });
+        this.nudgeState = useState(useService("nudge").state);
         this.timer = null;
         onWillStart(() => this.load(false));
         onMounted(() => {
@@ -91,6 +94,10 @@ export class NudgeHome extends Component {
         this.state.layout = data.layout;
         this.state.loginHome = data.is_login_home;
         this.state.loading = false;
+    }
+
+    toggleCustomise() {
+        this.state.customising = !this.state.customising;
     }
 
     refresh() {
@@ -180,6 +187,10 @@ export class NudgeHome extends Component {
     }
 
     dragStart(ev, tile) {
+        if (!this.state.customising) {
+            ev.preventDefault();
+            return;
+        }
         this.state.dragging = tile.key;
         ev.dataTransfer?.setData("text/plain", tile.key);
     }
