@@ -72,7 +72,7 @@
                         <t t-set="verify" t-value="step.verify"/>
                     </t>
                     <div t-if="waitsFor(step)" class="o_nudge_card_actions">
-                        <button type="button" class="btn btn-sm btn-primary o_nudge_confirm"
+                        <button type="button" class="btn btn-sm btn-primary o_nudge_confirm" t-att-disabled="edit.busy or edit.n"
                                 t-on-click="() => this.decide('confirm')">Yes, do it</button>
                         <button type="button" class="btn btn-sm btn-light o_nudge_decline"
                                 t-on-click="() => this.decide('decline')">No</button>
@@ -80,7 +80,7 @@
                 </li>
             </ol>
             <div t-if="canChange" class="o_nudge_card_actions">
-                <button type="button" class="btn btn-sm btn-primary o_nudge_confirm" t-att-disabled="!todoCount or edit.busy"
+                <button type="button" class="btn btn-sm btn-primary o_nudge_confirm" t-att-disabled="!todoCount or edit.busy or edit.n"
                         t-on-click="() => this.decide('confirm')">
                     <t t-esc="confirmLabel"/>
                 </button>
