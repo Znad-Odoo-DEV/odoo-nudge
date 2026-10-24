@@ -6,7 +6,7 @@
         <field name="name">Nudge</field>
         <field name="builtin" eval="True"/>
         <field name="public_key">-----BEGIN PUBLIC KEY-----
-MCowBQYDK2VwAyEAZ//o9Hn2ktH5x6PYDeHOPris9nBPa/NDAUn/xNtTp20=
+MCowBQYDK2VwAyEAHNhp0mOk48Kr2UtHfbMcVGD4eNiBjdJH4M/BRxN8RwI=
 -----END PUBLIC KEY-----</field>
     </record>
 </odoo>

@@ -53,8 +53,8 @@
    "signature": {
     "algorithm": "ed25519",
     "format": 1,
-    "key_id": "fdd059c25fd42310",
-    "value": "7JddKi8+09jyaGzDFa+2HngK/+wtyoFCHKhLv3NmYfaoiQl1bKEQ8Jz4x6W1auaU3MRit+JhH7I1NniAEb4aDA=="
+    "key_id": "265ec1a039cec3d9",
+    "value": "AxwzRpeRiR/azZdvrVBM9TdSEdirdy/rVRxJ1XetdtaCBA89G3efqCjb/YHZCAHNpk7Kke0vso00oiXXrrRCCg=="
    }
   },
   {
@@ -109,8 +109,8 @@
    "signature": {
     "algorithm": "ed25519",
     "format": 1,
-    "key_id": "fdd059c25fd42310",
-    "value": "7ONDov0dmxtLz0y6tCyUU3G6TIDO7jGLh07EDU7XK+YASgWlteI/bLDuFO2jrYAA/egPZZN4fuErKgFKi30ZBA=="
+    "key_id": "265ec1a039cec3d9",
+    "value": "MgXanQIR05py7SWLXViPUXhXX0aig2Wm195XF7zujIQfvygq/VhHtSWziyKz35glTl2I9U/brxA2BXXc68QKDQ=="
    }
   },
   {
@@ -166,8 +166,8 @@
    "signature": {
     "algorithm": "ed25519",
     "format": 1,
-    "key_id": "fdd059c25fd42310",
-    "value": "N+mG9UDEZeIhc+38d1woYvzxzPL8YSFAetUP2uZBbl0XKMDIisblawypUnDaoJHMcihZWj2E+JpiC5GoRjjsBQ=="
+    "key_id": "265ec1a039cec3d9",
+    "value": "OtJi4ZWnMTMlujvWO8jXBeC2+qqZsVO+6e6phOGAp+5+yFNPqOYlMpS2s1WK9XpBdK5k9vAw9dGrQgWHUKfpBA=="
    }
   },
   {
@@ -222,8 +222,8 @@
    "signature": {
     "algorithm": "ed25519",
     "format": 1,
-    "key_id": "fdd059c25fd42310",
-    "value": "LDafLrC3w0S3Tk4+k0M+WSPqKZRiyKo/Wi9be1GS8+PXCUTvOLMCiOoeNgQnpVgbPuFUtYep+TVzBwqg0Y4cCg=="
+    "key_id": "265ec1a039cec3d9",
+    "value": "6O82GyWci///YkKZGXAyS8tb6vNTfZQ92/lCzntF31GJyzCR+E7pOUbeisGTZ1e3NScikNIvuKklbSxkI0btDg=="
    }
   },
   {
@@ -276,8 +276,8 @@
    "signature": {
     "algorithm": "ed25519",
     "format": 1,
-    "key_id": "fdd059c25fd42310",
-    "value": "ec79bn+WnW9q2ggJZb4b2qe8LfQFXTseRGYIVExyczw8512mZZzf9DVpf2vIH9MiaiQqP/WpEBcH3y7trTdgCg=="
+    "key_id": "265ec1a039cec3d9",
+    "value": "5/8MS+/5qfYVRBZBmxcFiMHCYmIBK1wAnhj0ZfHHllPTyh1FjQ+UOAWW6xAn2Ak49n8jvNVVcybZDkUfjblTCw=="
    }
   },
   {
@@ -328,8 +328,8 @@
    "signature": {
     "algorithm": "ed25519",
     "format": 1,
-    "key_id": "fdd059c25fd42310",
-    "value": "/5/vPW17jjkvXibgf+U/iMww4zYgXoc2j1hsQg31EeBX5MmpwXQ6k8iAhItpHbxTrWDjI1UomzoYoCZkjETgAw=="
+    "key_id": "265ec1a039cec3d9",
+    "value": "S/8desVpEqIBgxSFtJn+sdEBnZFeHpp65em9t00JUj54BbAohkZAoAXYURF+hVApShw68rb4GEK2JNe/ruy7BA=="
    }
   }
  ]
