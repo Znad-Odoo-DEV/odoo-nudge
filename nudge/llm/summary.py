@@ -70,7 +70,7 @@ def clean(text, limit):
 
 def frame(body):
     """:return: the summary as the model reads it, labelled as data; it cannot close its frame"""
-    body = (body or "").replace("</", "<\/")
+    body = (body or "").replace("</", "<\\/")
     return FRAME.format(body=body)
 
 
@@ -152,5 +152,5 @@ def fit(text, limit=SUMMARY_MAX_CHARS):
 def improve_prompt(text):
     """:return: ``(system, prompt)`` asking a provider for a shorter summary of ``text``"""
     system = IMPROVE_SYSTEM.format(limit=SUMMARY_MAX_CHARS - 500)
-    body = text.replace("</", "<\/")
+    body = text.replace("</", "<\\/")
     return system, f"<notes>\n{body}\n</notes>"
