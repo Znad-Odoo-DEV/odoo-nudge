@@ -124,6 +124,29 @@ def time_for_a_round(deadline, last_duration, now=None):
     return (time.monotonic() if now is None else now) + needed < deadline
 
 
+def run_plan(job, record):
+    """S10: the steps of a plan said yes to once, one by one. Each is done by ``record`` in a
+    transaction of its own, so that what is done stays done; the stop of the person is read
+    between two steps, never in the middle of one, and a browser that goes away stops the plan
+    after the step being done: it can be taken up again.
+
+    :param record: callable doing what ``{"plan_id", "plan_action": "step" or "stop", "serial"}``
+        asks; see ``nudge.conversation._plan_record``
+    :return: what the last call answered: ``turns`` for the model, or the last ``event``"""
+    cancelled = job.get("cancelled")
+    while True:
+        action = "stop" if cancelled and cancelled() else "step"
+        step = record({"plan_id": job["plan_id"], "plan_action": action, "serial": job.get("serial")})
+        try:
+            yield from step.get("screen_events") or []
+        except GeneratorExit:
+            if step.get("next"):
+                record({"plan_id": job["plan_id"], "plan_action": "stop", "serial": job.get("serial")})
+            raise
+        if not step.get("next"):
+            return step
+
+
 def run(job, record):
     """:param dict job: what ``nudge.conversation._chat_prepare`` returned
     :param record: callable storing the outcome of one call to the model and
@@ -152,6 +175,13 @@ def run(job, record):
     if job.get("fell_back"):
         # NP-10: the model chosen to stand in answers, and the person is told
         yield job["fell_back"]
+    if job.get("plan_id"):
+        # S10: a plan said yes to once is done here before the model reads what came of it
+        step = yield from run_plan(job, record)
+        if "event" in step:
+            yield step["event"]
+            return
+        job["turns"] = step["turns"]
     cancelled = job.get("cancelled")
     # For the latency panel: the wait in line goes with the first answer stored, the time to
     # the first words with the answer that has them

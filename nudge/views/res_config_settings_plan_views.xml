@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- S10: several changes asked at once are shown first as one plan -->
+    <record id="res_config_settings_view_form_plan" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.nudge.plan</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='nudge_agent_container']" position="inside">
+                <setting invisible="not nudge_agent"
+                         help="Several changes asked at once (a customer, the quotation with its lines, then sending it) are shown first as one card with numbered steps: the person takes a step out or corrects a value, says yes once, then each change still shows its own card. A single change has no plan. A step that fails stops the plan and says what was done and what was not, with Undo for what was done; after each change, Nudge reads the records again and says so when a field did not end as asked.">
+                    <field name="nudge_plan_writes"/>
+                    <div class="content-group mt8">
+                        <label for="nudge_plan_one_yes_group_ids" class="o_light_label"/>
+                        <field name="nudge_plan_one_yes_group_ids" widget="many2many_tags"
+                               options="{'no_create': True}" placeholder="Nobody: a card for each change"/>
+                    </div>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>
