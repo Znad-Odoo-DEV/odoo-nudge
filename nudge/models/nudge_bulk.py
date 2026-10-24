@@ -3,16 +3,20 @@
 The work itself is the tool ``bulk_apply`` (tools/bulk.py); this hands it the
 records the person selected in a list, through the pipeline of the agent: the
 same card, the same rights, the same log and undo as when the AI asks."""
-import types
+import logging
 
-from odoo import _, api, models
+from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, UserError
+from odoo.modules.registry import Registry
 
-from ..tools import base, plans
+from ..llm import base as llm
+from ..tools import plans
 from ..tools.actions import writable_field
 from ..tools.base import MODE_AGENT
 from ..tools.bulk import FILL_TYPES, OPERATIONS, TEXT_TYPES
 from ..tools.records import Refused, field_label, get_model
+
+_logger = logging.getLogger(__name__)
 
 
 class NudgeBulk(models.AbstractModel):
@@ -95,11 +99,93 @@ class NudgeBulk(models.AbstractModel):
             "translate": _("Translate the %(count)s selected", count=len(ids)),
             "fill": _("Fill a field for the %(count)s selected", count=len(ids)),
         }
-        noai = self.env["nudge.noai"]
-        plan = types.SimpleNamespace(
-            text="", calls=[("bulk_apply", arguments)], events=[], parsed=None)
-        parsed = types.SimpleNamespace(intent="bulk")
         text = labels[arguments["operation"]]
         if arguments.get("instruction"):
             text += ": " + str(arguments["instruction"])[:120]
-        return noai._deliver(conversation, text, MODE_AGENT, plan, parsed, {})
+        return self._begin(conversation, text, arguments)
+
+    @api.model
+    def _begin(self, conversation, text, arguments):
+        """What ``nudge.noai._deliver`` does before the tool runs, and nothing
+        more: the question is written, the run opened and the mark of the
+        answer set, all of it committed with the request, so that the cap on
+        the answers and the guard of one answer per person see this work at
+        once. The sample, which is a call to the provider, is made by the
+        stream (:meth:`_preview`), in a cursor of its own, once the request
+        has ended: no lock is held while the provider is waited for, and the
+        work holds one of the places of the cap like any answer.
+
+        :return: the job of the stream
+        """
+        record = conversation.sudo()
+        record._agent_leave_undecided()
+        record.run_id._end(record.run_id._outcome("stopped"))
+        record.write({"stream_started_at": fields.Datetime.now(), "run_id": False})
+        if not record.name:
+            record.name = text[:60].strip()
+        question = self.env["nudge.message"].sudo().create({
+            "conversation_id": conversation.id, "role": "user", "content": text, "mode": MODE_AGENT})
+        record.run_id = self.env["nudge.run"].sudo().create({
+            "name": text[:120].strip(), "conversation_id": conversation.id, "question_id": question.id,
+            "user_id": self.env.uid, "company_id": self.env.company.id, "model_name": "-",
+            "is_developer": False})
+        job = {
+            "conversation_id": conversation.id,
+            "user_message_id": question.id,
+            "title": record.name,
+            "mode": MODE_AGENT,
+        }
+        # The controller adds dbname, uid and context before the stream
+        # starts; ``first_events`` is read only then, and ``answered`` after it
+        job["first_events"] = self._preview(job, conversation.id, arguments)
+        return job
+
+    @api.model
+    def _preview(self, job, conversation_id, arguments):
+        """Generator, run by the stream: asks the provider for the sample as
+        the user, in a cursor of its own, and puts the card before the person.
+        Sets ``job["answered"]`` to the last event, which the loop sends next.
+
+        :return: the events of the screen, if any"""
+        calls = [{"id": "noai_0", "name": "bulk_apply", "input": arguments, "extra": None}]
+        outcome = {
+            "text": "", "tool_calls": calls, "last_round": True, "noai": True,
+            "stop": {"reason": llm.STOP_TOOL_USE, "usage": {}, "blocks": []},
+        }
+        events = []
+        try:
+            with Registry(job["dbname"]).cursor() as cr:
+                env = api.Environment(cr, job["uid"], job["context"])
+                record = env["nudge.conversation"].browse(conversation_id).sudo()
+                step = record._chat_record(outcome)
+                answer = step["event"]
+                Message = env["nudge.message"].sudo()
+                message = Message.browse(answer["message_id"]) if answer.get("message_id") else Message
+                told = ""
+                if answer.get("type") != "waiting":
+                    # Refused by the tool, in words: said as it is, not as a success
+                    failed = record.run_id.step_ids.filtered(lambda s: s.state == "failed")[-1:]
+                    if failed and failed.error:
+                        told = failed.error.split(" Nothing was")[0][:600]
+                        message.content = told
+                if message:
+                    message.write({"noai_intent": "bulk"})
+                if told:
+                    events.append({"type": "delta", "text": told})
+                events.extend(step.get("screen_events") or [])
+        except Exception:  # noqa: BLE001
+            _logger.exception("Nudge: the sample of conversation %s could not be made", conversation_id)
+            self._release(job, conversation_id)
+            answer = {"type": "error", "state": "error", "message": ""}
+        job["answered"] = answer
+        yield from events
+
+    @api.model
+    def _release(self, job, conversation_id):
+        """Free the place of a preview that failed, in a cursor of its own"""
+        try:
+            with Registry(job["dbname"]).cursor() as cr:
+                env = api.Environment(cr, job["uid"], job["context"])
+                env["nudge.conversation"].sudo().browse(conversation_id).stream_started_at = False
+        except Exception:  # noqa: BLE001
+            _logger.exception("Nudge: the mark of conversation %s could not be cleared", conversation_id)
