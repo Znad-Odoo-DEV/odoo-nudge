@@ -40,6 +40,7 @@ export function createMeetingRecorder({ listen = false, language = "", onTick, o
     let seconds = 0;
     let words = [];
     let isRecording = false;
+    let starting = false;
     let finish = null;
 
     function startRecognition() {
@@ -108,13 +109,20 @@ export function createMeetingRecorder({ listen = false, language = "", onTick, o
         },
         /** @returns {Promise<string>} what is wrong, or "" when it recorded */
         async start() {
+            if (isRecording || starting) {
+                // A second call would open a second microphone that nothing ever stops
+                return "";
+            }
             if (!speechApi.canRecord()) {
                 return _t("This browser cannot record.");
             }
+            starting = true;
             try {
                 stream = await speechApi.openMicrophone();
             } catch (error) {
                 return microphoneMessage(error);
+            } finally {
+                starting = false;
             }
             recorder = speechApi.createRecorder(stream);
             recorder.ondataavailable = (event) => {
