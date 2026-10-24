@@ -51,8 +51,13 @@ Off by default, each with its own word in Settings ▸ Nudge:
   It stops at a deadline of 10 seconds, looked at between two steps; one step that runs in C
   is bounded before the code runs (whole numbers up to 10⁹, a power or a shift of small
   numbers, a text or a list repeated 100,000 items at most), and a long range is walked
-  where the deadline sees it. What remains: code that grows its numbers step by step can
-  still burn the CPU of a worker until the limits of the server stop it.
+  where the deadline sees it. Steps on values the code computes (`x * x`, `s + s`, `n ** 3`,
+  `l.extend(l)`, `', '.join(...)`, `ljust`, `replace`, `bytes(n)`, `round(x, -n)`, f-strings
+  and `%` texts) are rewritten to go through checked helpers: a whole number beyond 2¹⁸ bits
+  or a text, list or bytes beyond a million items is refused before it is computed, and the
+  memory of the process is watched with the deadline (200 MB above the start), so a loop of
+  small steps cannot fill it. Assigning to a slice and passing `.join`, `.ljust`... around
+  without calling them are refused.
 - **SQL for Administrators** (`nudge.sql`): one SELECT, for the group Settings allowed in every
   company; every table named must be the table of a model they may read; no change, no lock,
   no catalog; 50 rows, 10 seconds, in a savepoint rolled back. A field kept for groups the

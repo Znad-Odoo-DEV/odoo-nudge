@@ -22,6 +22,14 @@ numbers it writes, a power or a shift between them or of a value, a text or
 a list repeated. A long range is walked one step at a time, where the
 deadline sees it, even inside sum() or list().
 
+What the checks of the code cannot know before it runs (x * x, s + s, n ** 3
+with values the code computed) is checked as it runs: the code is rewritten
+so that every arithmetic step between values, and the few methods that make
+a text or a list longer (join, ljust, replace, extend...), go through a small
+helper that refuses a result beyond MAX_BITS bits or MAX_ITEMS items before
+it is computed. And the memory the process holds is looked at with the
+deadline, so a loop of steps that are each small cannot fill it.
+
 The code reads and computes. What it would write is refused before it
 runs, and it runs in a savepoint that is rolled back whatever happens all
 the same. A change goes through prepare_write or prepare_create, where the
@@ -31,10 +39,17 @@ The administrator switches the tool on in Settings ‣ Nudge: it is off by
 default.
 """
 import ast
+import copy
 import datetime
+import operator
 import re
 import sys
 import time
+
+try:
+    import psutil
+except ImportError:  # pragma: no cover - Odoo requires it
+    psutil = None
 
 from odoo import models
 from odoo.exceptions import AccessError, UserError
@@ -65,11 +80,30 @@ MAX_SHIFT = 64
 MAX_REPEAT = 100000
 # A range longer than this is walked in Python, one step at a time
 MAX_C_RANGE = 10 ** 6
+# What a step on values computed by the code may make: a whole number of this
+# many bits (79000 digits: a product takes milliseconds, a quotient less than
+# a tenth of a second), a text, a list or bytes of this many items
+MAX_BITS = 2 ** 18
+MAX_ITEMS = 10 ** 6
+# How much more memory than at the start the code may hold, in bytes, looked
+# at every MEMORY_CHECK seconds
+MAX_MEMORY = 200 * 1024 * 1024
+MEMORY_CHECK = 0.05
 
 BEYOND = "{expression} is beyond 10 ** 9: a step that size runs past the deadline."
 POWER = (
     "** and << take small numbers written in the code (10 ** 6, x ** 2, 1 << 8): a computed power "
     "could run past the deadline.")
+HUGE = (
+    "A whole number beyond 2 ** 262144 (about 79000 digits) is more than a step can compute before "
+    "the deadline.")
+LONG = "A text, a list or bytes of more than 1000000 items is more than a step can build before the deadline."
+FORMAT_WIDTH = "A width or a precision beyond 999999 in a text format makes a text too long for a step."
+CALL_DIRECTLY = (
+    "Call .{name}() on the value, s.{name}(...): it is not for passing around, a step that size "
+    "could run past the deadline.")
+BYTES_DIRECTLY = "bytes is called as bytes(...) or named in isinstance(x, bytes): nothing else."
+SLICE_ASSIGN = "No assignment to a slice, l[1:3] = ...: it could double a list. Build a new list instead."
 REPEAT = "Repeat a text or a list by a number written in the code, 100000 items at most ('-' * 40, [0] * 12)."
 
 # time without sleep: the code computes, it does not wait
@@ -100,6 +134,8 @@ READ_METHODS = frozenset({
 ACTING_METHOD = re.compile(r"^(action_|button_|message_|send|post|write|create|unlink|copy|_)")
 # %r and %a in a template: what shows the inside of things
 REPR_CONVERSION = re.compile(r"%[-#0 +]*\d*(?:\.\d+)?[ra]")
+# One conversion of a % text: its width and its precision
+PERCENT_FIELD = re.compile(r"%(?:\([^)]*\))?[-#0 +]*(?P<width>\*|\d+)?(?:\.(?P<precision>\*|\d+)?)?[a-zA-Z]")
 # Of a domain or a method, what reads a path of fields
 WITH_DOMAIN = ("search", "search_count", "search_read", "search_fetch", "read_group", "filtered_domain")
 WITH_PATH = ("mapped", "filtered", "sorted")
@@ -139,7 +175,7 @@ def check_code(code):
                 raise Refused(
                     f"The code may not call .{method}(): it only reads. A change goes through "
                     "prepare_write or prepare_create, an action through its own tool.")
-        if isinstance(node, ast.Name) and (node.id in DENIED_NAMES or node.id.startswith("__")):
+        if isinstance(node, ast.Name) and (node.id in DENIED_NAMES or node.id.startswith(("__", "_nudge_"))):
             raise Refused(f"The code may not use {node.id}.")
         if isinstance(node, ast.Constant) and isinstance(node.value, str) and "__" in node.value:
             raise Refused("The code may not name private attributes.")
@@ -157,10 +193,20 @@ def check_code(code):
             if isinstance(left, ast.Constant) and isinstance(left.value, str):
                 if REPR_CONVERSION.search(left.value):
                     raise Refused("No %r or %a in a text: it shows the inside of things.")
+                _check_format(left.value)
             elif not (isinstance(right, ast.Constant) and isinstance(right.value, (int, float))):
                 raise Refused(
                     "% is read with a constant text on its left, '...' % (...), or a number on its "
                     "right, n % 2: between two names it is not.")
+
+
+def _check_format(template):
+    """:raise Refused: when a conversion of ``template``, a % text, asks for a
+    width or a precision from the arguments (*) or beyond a million"""
+    for match in PERCENT_FIELD.finditer(template):
+        for size in (match.group("width"), match.group("precision")):
+            if size and (size == "*" or int(size) >= MAX_ITEMS):
+                raise Refused(FORMAT_WIDTH)
 
 
 def _shown(node):
@@ -503,12 +549,371 @@ def _plain(value, depth=0):
     return cut(repr(value), MAX_LINE_CHARS)
 
 
+SEQUENCES = (str, bytes, list, tuple)
+
+
+def _whole(value):
+    return isinstance(value, int)
+
+
+def _check_sum(left, right):
+    """+ and -: a whole number grows by a bit, a text or a list by the other's items"""
+    if _whole(left) and _whole(right):
+        if max(left.bit_length(), right.bit_length()) >= MAX_BITS:
+            raise Refused(HUGE)
+    elif isinstance(left, SEQUENCES) and isinstance(right, SEQUENCES):
+        if len(left) + len(right) > MAX_ITEMS:
+            raise Refused(LONG)
+
+
+def _check_product(left, right):
+    if _whole(left) and _whole(right):
+        if left.bit_length() + right.bit_length() > MAX_BITS:
+            raise Refused(HUGE)
+        return
+    for sequence, count in ((left, right), (right, left)):
+        if isinstance(sequence, SEQUENCES) and _whole(count):
+            if count > 0 and len(sequence) * count > MAX_ITEMS:
+                raise Refused(LONG)
+            return
+
+
+def _check_power(left, right):
+    if _whole(left) and _whole(right) and right > 1 and left.bit_length() > 1:
+        if left.bit_length() * right > MAX_BITS:
+            raise Refused(HUGE)
+
+
+def _check_shift(left, right):
+    if _whole(left) and _whole(right) and left and right > 0:
+        if left.bit_length() + right > MAX_BITS:
+            raise Refused(HUGE)
+
+
+def _check_template(template, arguments):
+    """% on a text: as long as the template plus the longest argument, once
+    for each conversion"""
+    if not isinstance(template, (str, bytes)):
+        return
+    values = list(arguments.values()) if isinstance(arguments, dict) else (
+        arguments if isinstance(arguments, tuple) else (arguments,))
+    longest = max((len(value) for value in values if isinstance(value, SEQUENCES)), default=0)
+    if len(template) + template.count("%" if isinstance(template, str) else b"%") * longest > MAX_ITEMS:
+        raise Refused(LONG)
+
+
+def _step(check, operate):
+    def step(left, right):
+        check(left, right)
+        return operate(left, right)
+    return step
+
+
+def _add(left, right):
+    # The most frequent steps are on whole numbers or floats: straight through
+    if type(left) is int and type(right) is int:
+        if left.bit_length() >= MAX_BITS or right.bit_length() >= MAX_BITS:
+            raise Refused(HUGE)
+    elif type(left) is not float and type(right) is not float:
+        _check_sum(left, right)
+    return left + right
+
+
+def _sub(left, right):
+    if type(left) is int and type(right) is int:
+        if left.bit_length() >= MAX_BITS or right.bit_length() >= MAX_BITS:
+            raise Refused(HUGE)
+    elif type(left) is not float and type(right) is not float:
+        _check_sum(left, right)
+    return left - right
+
+
+def _mul(left, right):
+    if type(left) is int and type(right) is int:
+        if left.bit_length() + right.bit_length() > MAX_BITS:
+            raise Refused(HUGE)
+    elif type(left) is not float and type(right) is not float:
+        _check_product(left, right)
+    return left * right
+
+
+def _in_place(plain, check, operate):
+    """+=, -=, *=: a list is extended in place, so these go through operate"""
+    def step(left, right):
+        if type(left) is int or type(left) is float:
+            return plain(left, right)
+        check(left, right)
+        return operate(left, right)
+    return step
+
+
+HELPERS = {
+    "_nudge_add": _add, "_nudge_sub": _sub, "_nudge_mul": _mul,
+    "_nudge_iadd": _in_place(_add, _check_sum, operator.iadd),
+    "_nudge_isub": _in_place(_sub, _check_sum, operator.isub),
+    "_nudge_imul": _in_place(_mul, _check_product, operator.imul),
+}
+HELPERS |= {
+    f"_nudge_{name}": _step(check, operate)
+    for name, check, operate in (
+        ("pow", _check_power, operator.pow), ("ipow", _check_power, operator.ipow),
+        ("lshift", _check_shift, operator.lshift), ("ilshift", _check_shift, operator.ilshift),
+        ("mod", _check_template, operator.mod), ("imod", _check_template, operator.imod),
+    )
+}
+
+
+def _sum(iterable, start=0):
+    """sum, as the code calls it: of numbers it is the sum of Python, of
+    anything else (sum(lists, [])) it is walked one step at a time, where
+    every step is checked and the deadline sees it"""
+    if isinstance(start, (int, float)):
+        total = sum(iterable, start)
+        if _whole(total):
+            _check_sum(total, 0)
+        return total
+    total = start
+    for item in iterable:
+        total = _add(total, item)
+    return total
+
+
+def _round(number, ndigits=None):
+    """round: a whole number rounded to a power of ten beyond its own
+    digits is 0, and 10 ** 10 ** 8 is not computed to say so"""
+    if ndigits is None:
+        return round(number)
+    if _whole(number) and _whole(ndigits) and ndigits < 0:
+        if -ndigits > number.bit_length() // 3 + 2:
+            return 0
+    return round(number, ndigits)
+
+
+def _bytes(*args, **kwargs):
+    if args and _whole(args[0]) and args[0] > MAX_ITEMS:
+        raise Refused(LONG)
+    return bytes(*args, **kwargs)
+
+
+def _text(*pieces):
+    """An f-string: its pieces, joined once their length is known"""
+    if sum(map(len, pieces)) > MAX_ITEMS:
+        raise Refused(LONG)
+    return "".join(pieces)
+
+
+def _format(value, conversion, spec):
+    """One {value!s:spec} of an f-string"""
+    if spec:
+        for size in re.findall(r"\d+", spec):
+            if int(size) >= MAX_ITEMS:
+                raise Refused(FORMAT_WIDTH)
+    if conversion == ord("s"):
+        value = str(value)
+    elif conversion == -1 and not spec and isinstance(value, str):
+        return value
+    return format(value, spec or "")
+
+
+def _call(subject, name, *args, **kwargs):
+    """``subject.name(*args)`` for the few methods that make a text, bytes or
+    a list longer than their arguments say: checked first"""
+    if isinstance(subject, (str, bytes)):
+        if name == "join" and args:
+            # A generator is walked here, where the deadline sees it, once
+            items = args[0] if isinstance(args[0], (list, tuple)) else list(args[0])
+            args = (items,) + args[1:]
+            total = sum(len(item) for item in items if isinstance(item, SEQUENCES))
+            if total + len(subject) * len(items) > MAX_ITEMS:
+                raise Refused(LONG)
+        else:
+            _check_method(subject, name, args, kwargs)
+    elif isinstance(subject, list) and name == "extend" and args:
+        extra = args[0]
+        if hasattr(extra, "__len__") and len(subject) + len(extra) > MAX_ITEMS:
+            raise Refused(LONG)
+    elif _whole(subject) and name == "to_bytes":
+        length = args[0] if args else kwargs.get("length", 1)
+        if _whole(length) and length > MAX_ITEMS:
+            raise Refused(LONG)
+    return getattr(subject, name)(*args, **kwargs)
+
+
+def _check_method(subject, name, args, kwargs):
+    tab = "\t" if isinstance(subject, str) else b"\t"
+    if name in ("ljust", "rjust", "center", "zfill"):
+        width = args[0] if args else kwargs.get("width")
+        if _whole(width) and width > MAX_ITEMS:
+            raise Refused(LONG)
+    elif name == "expandtabs":
+        tabsize = args[0] if args else kwargs.get("tabsize", 8)
+        if _whole(tabsize) and len(subject) + subject.count(tab) * max(tabsize, 0) > MAX_ITEMS:
+            raise Refused(LONG)
+    elif name == "replace" and len(args) >= 2:
+        old, new = args[0], args[1]
+        if isinstance(old, SEQUENCES) and isinstance(new, SEQUENCES) and len(new) > len(old):
+            count = args[2] if len(args) > 2 else kwargs.get("count", -1)
+            found = subject.count(old) if old else len(subject) + 1
+            if _whole(count) and count >= 0:
+                found = min(found, count)
+            if len(subject) + found * (len(new) - len(old)) > MAX_ITEMS:
+                raise Refused(LONG)
+    elif name == "translate" and args and isinstance(args[0], dict):
+        longest = max((len(value) for value in args[0].values() if isinstance(value, str)), default=1)
+        if len(subject) * longest > MAX_ITEMS:
+            raise Refused(LONG)
+
+
+# The methods that go through _call, whoever holds them
+GUARDED_METHODS = frozenset({
+    "join", "ljust", "rjust", "center", "zfill", "expandtabs", "replace", "translate", "extend", "to_bytes"})
+OPERATIONS = {
+    ast.Add: "add", ast.Sub: "sub", ast.Mult: "mul", ast.Pow: "pow", ast.LShift: "lshift", ast.Mod: "mod"}
+
+
+def _named(name, *args):
+    return ast.Call(func=ast.Name(id=name, ctx=ast.Load()), args=list(args), keywords=[])
+
+
+def _is_fixed(node):
+    """Whether ``node`` is a value written in the code that cannot make a
+    step grow by more than the length of the code: a constant, or a list or a
+    tuple of constants"""
+    if isinstance(node, ast.Constant):
+        return True
+    return isinstance(node, (ast.List, ast.Tuple)) and all(isinstance(item, ast.Constant) for item in node.elts)
+
+
+class Hardening(ast.NodeTransformer):
+    """The code, once checked, rewritten so that the steps it cannot be
+    checked for before it runs are checked as it runs (see HELPERS)"""
+
+    def __init__(self):
+        self.isinstance_depth = 0
+
+    @staticmethod
+    def _guarded(augmented, left, right, op):
+        """:return: the name of the helper that takes the step, None when the
+        step is small whatever the values"""
+        name = OPERATIONS.get(type(op))
+        if name is None:
+            return None
+        if isinstance(op, (ast.Add, ast.Sub)):
+            # Growing by a value written in the code: by its length at most
+            return None if _is_fixed(left) or _is_fixed(right) else name
+        if isinstance(op, ast.Mod):
+            # n % 2 shrinks; a text template grows with its arguments
+            if augmented:
+                return None if isinstance(right, ast.Constant) and not isinstance(right.value, (str, bytes)) else name
+            return name if isinstance(left, ast.Constant) and isinstance(left.value, (str, bytes)) else None
+        if _number(left) is not None and _number(right) is not None:
+            return None
+        if isinstance(op, ast.Mult) and (isinstance(_number(left), float) or isinstance(_number(right), float)):
+            return None
+        return name
+
+    def visit_BinOp(self, node):
+        self.generic_visit(node)
+        name = self._guarded(False, node.left, node.right, node.op)
+        if name is None:
+            return node
+        return ast.copy_location(_named(f"_nudge_{name}", node.left, node.right), node)
+
+    def visit_AugAssign(self, node):
+        self.generic_visit(node)
+        name = self._guarded(True, node.target, node.value, node.op)
+        if name is None:
+            return node
+        if isinstance(node.target, ast.Subscript) and isinstance(node.target.slice, ast.Slice):
+            raise Refused(SLICE_ASSIGN)
+        current = copy.deepcopy(node.target)
+        current.ctx = ast.Load()
+        call = _named(f"_nudge_i{name}", current, node.value)
+        return ast.copy_location(ast.Assign(targets=[node.target], value=call), node)
+
+    def visit_Subscript(self, node):
+        if isinstance(node.ctx, ast.Store) and isinstance(node.slice, ast.Slice):
+            raise Refused(SLICE_ASSIGN)
+        self.generic_visit(node)
+        return node
+
+    def visit_Attribute(self, node):
+        # Reached only when the method is not called on the spot (see visit_Call)
+        if node.attr in GUARDED_METHODS and isinstance(node.ctx, ast.Load):
+            raise Refused(CALL_DIRECTLY.format(name=node.attr))
+        self.generic_visit(node)
+        return node
+
+    def visit_Name(self, node):
+        if node.id == "bytes" and isinstance(node.ctx, ast.Load) and not self.isinstance_depth:
+            raise Refused(BYTES_DIRECTLY)
+        return node
+
+    def visit_Call(self, node):
+        func = node.func
+        if isinstance(func, ast.Attribute) and func.attr in GUARDED_METHODS:
+            subject = self.visit(func.value)
+            args = [self.visit(arg) for arg in node.args]
+            call = _named("_nudge_call", subject, ast.Constant(value=func.attr), *args)
+            call.keywords = [self.visit(keyword) for keyword in node.keywords]
+            return ast.copy_location(call, node)
+        if isinstance(func, ast.Name) and func.id == "bytes":
+            node.args = [self.visit(arg) for arg in node.args]
+            node.keywords = [self.visit(keyword) for keyword in node.keywords]
+            node.func = ast.copy_location(ast.Name(id="_nudge_bytes", ctx=ast.Load()), func)
+            return node
+        named_here = isinstance(func, ast.Name) and func.id == "isinstance"
+        self.isinstance_depth += named_here
+        try:
+            self.generic_visit(node)
+        finally:
+            self.isinstance_depth -= named_here
+        return node
+
+    def visit_JoinedStr(self, node):
+        self.generic_visit(node)
+        pieces = []
+        for part in node.values:
+            if isinstance(part, ast.FormattedValue):
+                spec = part.format_spec or ast.Constant(value=None)
+                part = _named("_nudge_format", part.value, ast.Constant(value=part.conversion), spec)
+            pieces.append(part)
+        return ast.copy_location(_named("_nudge_text", *pieces), node)
+
+
+HELPERS.update({
+    "_nudge_call": _call, "_nudge_bytes": _bytes, "_nudge_text": _text, "_nudge_format": _format})
+
+
+def harden(code):
+    """:return: ``code``, once checked, as the source to run: rewritten so
+    that a step on values the code computes is checked as it runs
+    :raise Refused: for the few shapes that cannot be checked"""
+    tree = Hardening().visit(ast.parse(code, mode="exec"))
+    return ast.unparse(ast.fix_missing_locations(tree))
+
+
+class OverMemory(BaseException):
+    """The code holds more memory than it may. Not an Exception, as TimedOut."""
+
+
 def _watching(deadline):
-    """:return: a trace function that stops the code at ``deadline``: looked
-    at on every call anywhere, and on every line of the code itself"""
+    """:return: a trace function that stops the code at ``deadline``, or when
+    it holds MAX_MEMORY more than at the start: looked at on every call
+    anywhere, and on every line of the code itself"""
+    process = psutil.Process() if psutil else None
+    start = process.memory_info().rss if process else 0
+    next_look = time.monotonic() + MEMORY_CHECK
+
     def trace(frame, event, arg):
-        if time.monotonic() > deadline:
+        nonlocal next_look
+        now = time.monotonic()
+        if now > deadline:
             raise TimedOut()
+        if process is not None and now >= next_look:
+            next_look = now + MEMORY_CHECK
+            if process.memory_info().rss - start > MAX_MEMORY:
+                raise OverMemory()
         return trace if frame.f_code.co_filename == FILENAME else None
     return trace
 
@@ -529,7 +934,8 @@ class RunPython(base.Tool):
         "filtered, sorted, browse and the like; write, create, action_ and send methods are "
         "refused, as are while loops, .format and %r. To change records, use prepare_write or "
         "prepare_create with the ids the code found. No import, no sudo, no cursor, no private "
-        "attribute, no model of the system, 10 seconds."
+        "attribute, no model of the system, 10 seconds, whole numbers under 79000 digits, texts and lists "
+        "under a million items."
     )
     input_schema = {
         "type": "object",
@@ -553,6 +959,7 @@ class RunPython(base.Tool):
     def run(self, env, arguments, screen):
         code = arguments["code"]
         check_code(code)
+        code = harden(code)
         lines = []
 
         def log(*values):
@@ -573,6 +980,9 @@ class RunPython(base.Tool):
             "log": log,
             "range": _range,
             "xrange": _range,
+            "sum": _sum,
+            "round": _round,
+            **HELPERS,
             "result": None,
         }
         started = time.monotonic()
@@ -594,6 +1004,10 @@ class RunPython(base.Tool):
             error = (
                 f"The code ran for more than {DEADLINE_SECONDS} seconds and was stopped. Narrow "
                 "the search, or compute less at a time.")
+        except OverMemory:
+            error = (
+                f"The code held more than {MAX_MEMORY // 1024 ** 2} MB of memory and was stopped. "
+                "Narrow the search, or keep less at a time.")
         except AccessError:
             # What was reached is not told: no more than a search would say
             error = "The code reached what this person may not read."
