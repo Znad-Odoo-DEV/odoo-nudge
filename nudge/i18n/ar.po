@@ -26022,3 +26022,9 @@ msgstr "يبقى الطلب الخاص لمالكه."
 #: code:addons/nudge/models/nudge_digest.py:0
 msgid "This list stays with the person it was made for."
 msgstr "تبقى هذه القائمة للشخص الذي أُعدّت له."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/controllers/chat.py:0
+msgid "This Excel file is far larger once opened than its size says. Save it again and send it."
+msgstr "ملف Excel هذا أكبر بكثير عند فتحه مما يوحي به حجمه. احفظه من جديد وأرسله."

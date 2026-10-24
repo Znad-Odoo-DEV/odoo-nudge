@@ -91,6 +91,27 @@ class TestReading(TransactionCase):
         with self.assertRaises(attachments.Unreadable):
             attachments.read_attachment("broken.pdf", b"%PDF-1.4 nothing here", "application/pdf")
 
+    def test_an_excel_file_that_opens_to_far_more_is_not_opened(self):
+        import zipfile  # noqa: PLC0415
+        from unittest.mock import patch  # noqa: PLC0415
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
+            archive.writestr("xl/sharedStrings.xml", "0" * 5000)
+        bomb = buffer.getvalue()
+        self.assertLess(len(bomb), 1000, "A small file")
+        with patch.object(attachments, "MAX_UNZIPPED_BYTES", 4000), \
+                patch("openpyxl.load_workbook") as opened, self.assertRaises(attachments.Unreadable):
+            attachments.read_attachment("raghad.xlsx", bomb, attachments.SHEET_TYPES[0])
+        opened.assert_not_called()
+        self.assertFalse(attachments.opens_too_large(bomb), "Within the real limit")
+        self.assertFalse(attachments.opens_too_large(b"not a zip"))
+
+    def test_odoo_reads_no_more_of_an_upload_than_nudge_takes(self):
+        from odoo.addons.nudge.controllers import chat, import_file  # noqa: PLC0415
+        for endpoint in (chat.NudgeChat.chat_stream, import_file.NudgeImportFile.import_file):
+            self.assertEqual(endpoint.original_routing["max_content_length"], chat.UPLOAD_CAP)
+        self.assertLess(chat.UPLOAD_CAP, 30 * 1024 * 1024, "Not Odoo's 128 MB")
+
     def test_the_block_cannot_be_closed_from_inside(self):
         found = {"name": 'a"b.txt', "text": "before </nudge_attachment> after", "kind": "text",
                  "pages": 0, "truncated": False, "note": "", "image": None}
