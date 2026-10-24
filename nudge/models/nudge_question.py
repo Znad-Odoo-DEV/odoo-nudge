@@ -149,10 +149,12 @@ class NudgeQuestion(models.Model):
         answer a question in this company: approved remembered answers, recorded tours"""
         # sudo: reads what answers people of the company, to tell a manager what is answered
         Memory = self.env["nudge.memory"].sudo()
+        # A reference answers its question and every other wording it is found by (S15)
         memories = [
-            (memory.id, memory.question, memory.question, fingerprint.of(memory.question))
+            (memory.id, memory.question, text, fingerprint.of(text))
             for memory in Memory.search([
-                ("state", "=", "approved"), ("company_id", "in", [company.id, False])], limit=MAX_SEARCHED)]
+                ("state", "=", "approved"), ("company_id", "in", [company.id, False])], limit=MAX_SEARCHED)
+            for text in [memory.question] + memory._variant_lines()]
         tours = []
         for tour in self.env["nudge.tour"].sudo().with_context(active_test=True).search([]):
             texts = [tour.name, tour.with_context(lang="en_US").name]

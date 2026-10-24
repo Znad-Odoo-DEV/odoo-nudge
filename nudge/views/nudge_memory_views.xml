@@ -4,19 +4,24 @@
         <field name="name">nudge.memory.view.list</field>
         <field name="model">nudge.memory</field>
         <field name="arch" type="xml">
-            <list string="Remembered Answers" decoration-info="state == 'proposed'" decoration-muted="state == 'refused'">
+            <list string="Nudge Memory" decoration-info="state == 'proposed'" decoration-muted="state in ('refused', 'liked')">
                 <header>
                     <button name="action_export_recipe" type="object" string="Export as a recipe" display="always" groups="nudge.group_nudge_manager"/>
                 </header>
                 <field name="question"/>
                 <field name="answer" optional="show"/>
-                <field name="language" optional="show"/>
+                <field name="languages" optional="show"/>
+                <field name="mode" optional="hide"/>
+                <field name="model_name" optional="hide"/>
+                <field name="step_count" optional="hide"/>
                 <field name="company_id" optional="show" groups="base.group_multi_company"/>
                 <field name="group_ids" widget="many2many_tags" optional="hide"/>
+                <field name="like_count" optional="hide"/>
                 <field name="state" widget="badge"
                        decoration-success="state == 'approved'" decoration-info="state == 'proposed'"/>
-                <field name="uses"/>
+                <field name="uses" string="Hits"/>
                 <field name="last_used" optional="show"/>
+                <field name="approved_by" optional="hide"/>
                 <field name="proposed_by" optional="hide"/>
                 <button name="action_approve" type="object" string="Approve" icon="fa-check"
                         class="btn-link text-success" invisible="state == 'approved'"/>
@@ -38,20 +43,64 @@
                     <field name="state" widget="statusbar" statusbar_visible="proposed,approved"/>
                 </header>
                 <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                     <group>
-                        <field name="question"/>
-                        <field name="answer"/>
-                        <field name="company_id" groups="base.group_multi_company"/>
-                        <field name="group_ids" widget="many2many_tags"/>
-                        <field name="active"/>
+                        <group>
+                            <field name="question"/>
+                            <field name="variants" placeholder="Other ways people ask it, one per line"/>
+                            <field name="answer"/>
+                        </group>
+                        <group>
+                            <field name="language"/>
+                            <field name="languages"/>
+                            <field name="mode"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="group_ids" widget="many2many_tags"/>
+                            <field name="active" invisible="1"/>
+                        </group>
                     </group>
-                    <group>
-                        <field name="language"/>
-                        <field name="uses"/>
-                        <field name="last_used"/>
-                        <field name="proposed_by"/>
-                        <field name="approved_by"/>
-                    </group>
+                    <notebook>
+                        <page string="Translations" name="translations">
+                            <field name="translation_ids">
+                                <list editable="bottom">
+                                    <field name="language"/>
+                                    <field name="question"/>
+                                    <field name="answer"/>
+                                    <field name="origin"/>
+                                    <field name="model_name" optional="hide"/>
+                                    <field name="reviewed"/>
+                                </list>
+                            </field>
+                            <div class="text-muted">
+                                A person asking in another language gets the translation of that language. A
+                                missing one is translated once by the AI provider (never in private mode), kept
+                                here for you to review, and costs nothing after that.
+                            </div>
+                        </page>
+                        <page string="Screen" name="screen">
+                            <group>
+                                <field name="model_name"/>
+                                <field name="view_type"/>
+                                <field name="menu_id"/>
+                                <field name="screen_bound"/>
+                                <field name="tour_id"/>
+                                <field name="step_count"/>
+                            </group>
+                        </page>
+                        <page string="Use" name="use">
+                            <group>
+                                <field name="uses" string="Hits"/>
+                                <field name="last_used"/>
+                                <field name="like_count"/>
+                                <field name="like_user_ids" widget="many2many_tags"/>
+                                <field name="proposed_by"/>
+                                <field name="approved_by"/>
+                                <field name="approved_date"/>
+                                <field name="domain_key"/>
+                                <field name="skill_id"/>
+                            </group>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
@@ -63,25 +112,93 @@
         <field name="arch" type="xml">
             <search>
                 <field name="question"/>
+                <field name="variants"/>
                 <field name="answer"/>
-                <filter name="proposed" string="Waiting for Approval" domain="[('state', '=', 'proposed')]"/>
+                <filter name="proposed" string="Suggested" domain="[('state', '=', 'proposed')]"/>
                 <filter name="approved" string="Approved" domain="[('state', '=', 'approved')]"/>
+                <filter name="liked" string="Collecting Likes" domain="[('state', '=', 'liked')]"/>
+                <separator/>
+                <filter name="with_steps" string="With Steps on the Screen" domain="[('tour_id', '!=', False)]"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_language" string="Language" context="{'group_by': 'language'}"/>
+                    <filter name="group_domain" string="Domain" context="{'group_by': 'domain_key'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
             </search>
         </field>
     </record>
 
     <record id="nudge_memory_action" model="ir.actions.act_window">
-        <field name="name">Remembered Answers</field>
+        <field name="name">Nudge Memory</field>
+        <field name="res_model">nudge.memory</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_approved': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Nudge remembers no answer yet</p>
+            <p>
+                Press Save as reference under an answer of Nudge, or the thumbs-up as a manager. Once
+                approved, the same question, in any language or dialect, is answered from here at once,
+                without the AI provider and at no cost. You can also write one yourself.
+            </p>
+        </field>
+    </record>
+
+    <record id="nudge_memory_suggested_action" model="ir.actions.act_window">
+        <field name="name">Suggested References</field>
         <field name="res_model">nudge.memory</field>
         <field name="view_mode">list,form</field>
         <field name="context">{'search_default_proposed': 1}</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">No answer is remembered yet</p>
+            <p class="o_view_nocontent_smiling_face">Nothing is suggested</p>
             <p>
-                When someone finds an explanation useful, it waits here for your yes. Once approved,
-                the same question is answered from here at once, without the AI provider. You can
-                also write one yourself.
+                When Suggest From Likes is on (Settings, Nudge, Answer Memory), an answer liked by enough
+                different people waits here. Approve it with one click: nothing is served before your yes.
             </p>
+        </field>
+    </record>
+
+    <record id="nudge_memory_save_view_form" model="ir.ui.view">
+        <field name="name">nudge.memory.save.view.form</field>
+        <field name="model">nudge.memory.save</field>
+        <field name="arch" type="xml">
+            <form string="Save as Reference">
+                <div class="alert alert-warning" role="alert" invisible="not warning">
+                    <field name="warning" nolabel="1"/>
+                </div>
+                <p class="text-muted">
+                    The same question, in any language or dialect, will be answered with this text at once,
+                    without the AI provider. Keep explanations, policies and how-tos: never a figure that
+                    changes.
+                </p>
+                <group>
+                    <field name="question"/>
+                    <field name="variants" placeholder="Other ways people ask it, one per line"/>
+                    <field name="answer"/>
+                </group>
+                <group>
+                    <group>
+                        <field name="language"/>
+                        <field name="mode"/>
+                        <field name="company_id" groups="base.group_multi_company"/>
+                        <field name="group_ids" widget="many2many_tags"/>
+                    </group>
+                    <group>
+                        <field name="model_name" invisible="not model_name"/>
+                        <field name="view_type" invisible="1"/>
+                        <field name="menu_id" invisible="not model_name"/>
+                        <field name="screen_bound" invisible="not model_name"/>
+                        <field name="message_ref" invisible="1"/>
+                    </group>
+                </group>
+                <group invisible="not step_lines">
+                    <field name="step_lines"/>
+                </group>
+                <footer>
+                    <button name="action_save" type="object" string="Save as Reference" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
         </field>
     </record>
 </odoo>

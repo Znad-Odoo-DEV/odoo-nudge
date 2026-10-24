@@ -3,6 +3,10 @@
 Both sides are folded the same way (Arabic marks and letter forms, English
 case and endings), cut into words, and compared as TF-IDF vectors by the
 cosine of the angle between them: 1 is the same words, 0 shares none.
+A remembered answer may be found by several texts (its question, the other
+ways it was asked, their English words): it takes the score of the best one.
+The question may come in several forms too (as typed, with its slips read
+right, carried to English), each costing what was guessed to make it.
 Plain Python, no library: it must run on any Odoo."""
 import math
 import re
@@ -110,14 +114,48 @@ def rank(question, candidates, semantic=None):
             score = blend(score, semantic[key])
         if score > 0:
             ranked.append((score, key))
-    ranked.sort(key=lambda pair: (-pair[0], pair[1]))
-    return ranked
+    return _collapsed(ranked)
 
 
-def best(question, candidates, threshold, margin=0.05, semantic=None):
-    """:return: ``(key, score)`` of the candidate to answer with, or ``(None, best score)``
-    when none reaches ``threshold`` or two come so close that none is surely the one"""
-    ranked = rank(question, candidates, semantic)
+def _collapsed(ranked):
+    """:return: ``ranked`` with one entry per key, its best score, best first: two texts of one
+    remembered answer are never two answers to choose between"""
+    best_of = {}
+    for score, key in ranked:
+        if score > best_of.get(key, 0.0):
+            best_of[key] = score
+    return sorted(((score, key) for key, score in best_of.items()), key=lambda pair: (-pair[0], pair[1]))
+
+
+def rank_forms(forms, candidates, semantic=None, concepts=None):
+    """:param forms: ``[(text, penalty)]``: the question as typed (penalty 0) and the forms made of it
+        by rules (its slips read right, its Arabic carried to English), each costing what was guessed
+    :param concepts: ``{key: score from 0 to 1}`` of what the question and a candidate mean by rules
+        (the same notions in any dialect), blended like the meaning of the local search model
+    :return: ``[(score, key)]`` best first, one per key"""
+    words_score = {}
+    for text, penalty in forms:
+        for score, key in rank(text, candidates):
+            score = max(0.0, score - penalty)
+            if score > words_score.get(key, 0.0):
+                words_score[key] = score
+    meaning = dict(concepts or {})
+    for key, score in (semantic or {}).items():
+        meaning[key] = max(meaning.get(key, 0.0), score)
+    ranked = []
+    for key in set(words_score) | set(meaning):
+        score = words_score.get(key, 0.0)
+        if key in meaning:
+            score = blend(score, meaning[key])
+        if score > 0:
+            ranked.append((score, key))
+    return _collapsed(ranked)
+
+
+def choose(ranked, threshold, margin=0.05):
+    """:param ranked: ``[(score, key)]`` best first
+    :return: ``(key, score)`` of the one to answer with, or ``(None, best score)`` when none reaches
+        ``threshold`` or two come so close that none is surely the one"""
     if not ranked:
         return None, 0.0
     score, key = ranked[0]
@@ -126,3 +164,19 @@ def best(question, candidates, threshold, margin=0.05, semantic=None):
     if len(ranked) > 1 and score - ranked[1][0] < margin:
         return None, score
     return key, score
+
+
+def dice(first, second, minimum=2):
+    """:return: how much two sets of notions share, from 0 to 1 (twice the shared over the sum),
+    or 0 when they share fewer than ``minimum``: one notion in common says too little"""
+    first, second = set(first or ()), set(second or ())
+    shared = len(first & second)
+    if shared < minimum or not first or not second:
+        return 0.0
+    return 2.0 * shared / (len(first) + len(second))
+
+
+def best(question, candidates, threshold, margin=0.05, semantic=None):
+    """:return: ``(key, score)`` of the candidate to answer with, or ``(None, best score)``
+    when none reaches ``threshold`` or two come so close that none is surely the one"""
+    return choose(rank(question, candidates, semantic), threshold, margin)
