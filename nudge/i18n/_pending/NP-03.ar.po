@@ -1,0 +1,601 @@
+# Arabic translation of skills (NP-03) and skill proposals and tests (NP-19), to be merged into ar.po by the lead.
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: ar\n"
+
+#. module: nudge
+#: model:ir.actions.act_window,name:nudge.nudge_skill_action
+#: model:ir.ui.menu,name:nudge.nudge_menu_skills
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form_skills
+msgid "Skills"
+msgstr "المهارات"
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_skill
+msgid "Nudge Skill"
+msgstr "مهارة Nudge"
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_skill_revision
+msgid "Nudge Skill Change"
+msgstr "تعديل على مهارة Nudge"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_form
+msgid "Skill"
+msgstr "مهارة"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_skill__key
+msgid "Key"
+msgstr "المفتاح"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_skill__summary
+msgid "Summary"
+msgstr "الملخص"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_skill__instructions
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_form
+msgid "Instructions"
+msgstr "التعليمات"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_skill__trigger_words
+msgid "Words That Bring It"
+msgstr "الكلمات التي تستدعيها"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_skill__tool_names
+msgid "Tools It Needs"
+msgstr "الأدوات التي تحتاجها"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_skill__load_count
+msgid "Given"
+msgstr "مرات الاستخدام"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_skill__token_estimate
+msgid "Tokens"
+msgstr "الرموز"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_skill__test_sentence
+msgid "Test Sentence"
+msgstr "جملة الاختبار"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_skill__test_expect
+msgid "Expected Tool"
+msgstr "الأداة المتوقعة"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_skill__test_date
+msgid "Tested On"
+msgstr "تاريخ الاختبار"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_skill__lesson_ids
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_form
+msgid "Lessons"
+msgstr "الدروس"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_skill__revision_ids
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_form
+msgid "Changes"
+msgstr "التعديلات"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_skill_revision__what
+msgid "Changed"
+msgstr "ما تغيّر"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_skill_revision__diff
+msgid "Difference"
+msgstr "الفرق"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_skill_revision__user_id
+msgid "By"
+msgstr "بواسطة"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_skill__state__published
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_search
+msgid "Published"
+msgstr "منشورة"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_skill__origin__lessons
+msgid "Proposed from lessons"
+msgstr "مقترحة من الدروس"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_skill__test_state__ok
+msgid "Passed"
+msgstr "نجح"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_skill__test_state__failed
+msgid "Failed"
+msgstr "فشل"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_skill__test_state__none
+msgid "Not Run"
+msgstr "لم يُشغَّل"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_note__kind__skill
+msgid "Skill Proposal"
+msgstr "اقتراح مهارة"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_note__kind__alert
+msgid "Skill Alert"
+msgstr "تنبيه مهارة"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_form
+msgid "Publish"
+msgstr "نشر"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_form
+msgid "Reject"
+msgstr "رفض"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_form
+msgid "Back to Draft"
+msgstr "إرجاع إلى مسودة"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_form
+msgid "Run Test"
+msgstr "تشغيل الاختبار"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_list
+msgid "Run Tests"
+msgstr "تشغيل الاختبارات"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_form
+msgid "When It Is Given"
+msgstr "متى تُستدعى"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_search
+msgid "To Review"
+msgstr "بانتظار المراجعة"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_search
+msgid "Test Failed"
+msgstr "فشل الاختبار"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_note_view_list_skills
+msgid "Review"
+msgstr "مراجعة"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_note_view_search_skills
+msgid "About Skills"
+msgstr "عن المهارات"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_skills_inline
+msgid "Every Skill in Full"
+msgstr "كل المهارات بنصها الكامل"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_recipe_export__with_skills
+#: model:ir.model.fields,field_description:nudge.field_nudge_recipe_publish__with_skills
+msgid "Skills (written here or imported)"
+msgstr "المهارات (المكتوبة هنا أو المستوردة)"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form_skills
+msgid "Each question carries a one-line list of the skills, and the full instructions of the one or two it needs: calls are shorter, cheaper and faster. Switch this on to send every skill in full with every question, as before."
+msgstr "يحمل كل سؤال قائمة بالمهارات في سطر واحد لكل منها، والتعليمات الكاملة للمهارة أو المهارتين اللتين يحتاجهما: فتكون الطلبات أقصر وأرخص وأسرع. فعّل هذا الخيار لإرسال كل المهارات بنصها الكامل مع كل سؤال، كما كان سابقًا."
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_skill_action
+msgid "No skill yet"
+msgstr "لا توجد مهارات بعد"
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_skill_action
+msgid "A skill holds the instructions of one kind of work. Every question carries a one-line list of the skills; the full text of one is given only when the question needs it, so each call is shorter, cheaper and faster. Three approved lessons about one app propose a draft skill here."
+msgstr "تحمل المهارة تعليمات نوع واحد من العمل. يحمل كل سؤال قائمة بالمهارات في سطر واحد لكل منها، ولا يُرسل النص الكامل لمهارة إلا عندما يحتاجه السؤال، فيكون كل طلب أقصر وأرخص وأسرع. ثلاثة دروس معتمدة عن تطبيق واحد تقترح هنا مسودة مهارة."
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_odoo_setup
+msgid "Setting Odoo up"
+msgstr "إعداد أودو"
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_import_files
+msgid "Importing files"
+msgstr "استيراد الملفات"
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_email_design
+msgid "Designed emails"
+msgstr "رسائل بريد مصممة"
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_failure_diagnosis
+msgid "Why something built failed"
+msgstr "لماذا فشل ما تم بناؤه"
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_module_scaffold
+msgid "A module for a developer"
+msgstr "موديول لمطوّر"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill.py:0
+msgid "Only Nudge managers write skills."
+msgstr "مدراء Nudge وحدهم يكتبون المهارات."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill.py:0
+msgid "Only Nudge managers change skills."
+msgstr "مدراء Nudge وحدهم يعدّلون المهارات."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill.py:0
+msgid "Only Nudge managers publish skills."
+msgstr "مدراء Nudge وحدهم ينشرون المهارات."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill.py:0
+msgid "No tool of Nudge here is named %s."
+msgstr "لا توجد هنا أداة في Nudge باسم %s."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill.py:0
+msgid "Another skill already has the key %s here."
+msgstr "توجد هنا مهارة أخرى بالمفتاح %s."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill.py:0
+msgid "The test sentence does not bring the skill any more; it brings %s."
+msgstr "جملة الاختبار لم تعد تستدعي المهارة؛ إنها تستدعي %s."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill_learning.py:0
+msgid "Skill test failed: %s"
+msgstr "فشل اختبار المهارة: %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill_learning.py:0
+msgid "Draft skill from %(count)s lessons: %(app)s"
+msgstr "مسودة مهارة من %(count)s دروس: %(app)s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill_learning.py:0
+msgid "What we learnt: %s"
+msgstr "ما تعلّمناه: %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill_learning.py:0
+msgid "Lessons about %(app)s were put together as a draft skill. Review it, publish it or reject it: until it is published, no model reads it."
+msgstr "جُمعت الدروس عن %(app)s في مسودة مهارة. راجعها ثم انشرها أو ارفضها: لن يقرأها أي نموذج قبل نشرها."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_recipe.py:0
+msgid "Skill (it comes in as a draft: no model reads it until a manager publishes it): %s"
+msgstr "مهارة (تُستورد كمسودة: لا يقرأها أي نموذج حتى ينشرها مدير): %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_recipe.py:0
+msgid "This Nudge has no tool named %s: install its module first."
+msgstr "لا توجد في Nudge هذا أداة باسم %s: ثبّت الموديول الخاص بها أولًا."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_skill__name
+msgid "Title"
+msgstr "العنوان"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_skill__model_names
+msgid "Screens"
+msgstr "الشاشات"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_skill__origin
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_search
+msgid "Origin"
+msgstr "المصدر"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_form
+msgid "Test"
+msgstr "الاختبار"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_form
+msgid "Invoice follow-up"
+msgstr "متابعة الفواتير"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_form
+msgid "Which invoices of this customer are overdue?"
+msgstr "ما فواتير هذا العميل المتأخرة؟"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_form
+msgid ""
+"Written in English, for the model. Given with a question only when it holds one of the words below, "
+"names one of the screens below, or when the model asks for it. A draft is never given to a model: "
+"publish it once you have read it."
+msgstr ""
+"تُكتب بالإنجليزية لأنها للنموذج. تُعطى مع السؤال فقط عندما يحتوي على إحدى الكلمات أدناه أو يذكر "
+"إحدى الشاشات أدناه، أو عندما يطلبها النموذج. لا تُعطى المسودة لأي نموذج أبدًا: انشرها بعد قراءتها."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_form
+msgid "The tools are offered only to the people who may already use them in that mode: a skill never gives a tool."
+msgstr "لا تُعرض الأدوات إلا على من يحق له استخدامها أصلًا في هذا الوضع: المهارة لا تمنح أداة أبدًا."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_form
+msgid ""
+"Checked every week with the health check, without any AI: the sentence must still bring this skill, "
+"and the tool must still be here. A failure is written in the business notes."
+msgstr ""
+"تُفحص كل أسبوع مع فحص السلامة، دون أي ذكاء اصطناعي: يجب أن تستدعي الجملة هذه المهارة، وأن تبقى "
+"الأداة موجودة. يُكتب أي فشل في ملاحظات العمل."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_skill__key
+msgid "Short name the model asks for it by, in small letters and dashes: invoice-follow-up."
+msgstr "اسم قصير يطلبها به النموذج، بأحرف صغيرة وشرطات: invoice-follow-up."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_skill__summary
+msgid "One line, in English, that the model reads in every call to know when this skill serves."
+msgstr "سطر واحد بالإنجليزية يقرؤه النموذج في كل استدعاء ليعرف متى تفيد هذه المهارة."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_skill__instructions
+msgid "The full instructions, in English, given to the model only when the question needs them."
+msgstr "التعليمات الكاملة بالإنجليزية، تُعطى للنموذج فقط عندما يحتاجها السؤال."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_skill__trigger_words
+msgid "Words in English and in Arabic, separated by commas: a question that holds one gets the skill, without any AI."
+msgstr "كلمات بالإنجليزية والعربية تفصل بينها فواصل: السؤال الذي يحتوي على إحداها يحصل على المهارة، دون أي ذكاء اصطناعي."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_skill__model_names
+msgid "Technical names of the models whose screens bring it, separated by commas."
+msgstr "الأسماء التقنية للنماذج التي تستدعيها شاشاتها، تفصل بينها فواصل."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_skill__tool_names
+msgid ""
+"Technical names of the tools, separated by commas. They are offered only to the people who may use "
+"them in that mode anyway: a skill never gives a tool."
+msgstr ""
+"الأسماء التقنية للأدوات، تفصل بينها فواصل. لا تُعرض إلا على من يحق له استخدامها في هذا الوضع أصلًا: "
+"المهارة لا تمنح أداة أبدًا."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_skill__modes
+msgid "talk, agent and dev, separated by commas."
+msgstr "talk وagent وdev، تفصل بينها فواصل."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_skill__group_ids
+msgid "Who may use it. Empty: every Nudge user."
+msgstr "من يحق له استخدامها. فارغ: كل مستخدمي Nudge."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_skill__company_id
+msgid "Empty: every company."
+msgstr "فارغ: كل الشركات."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_skill__state
+msgid ""
+"Only a published skill is given to the model. What comes from a recipe or from lessons is a draft "
+"until a manager publishes it."
+msgstr "لا تُعطى للنموذج إلا المهارة المنشورة. ما يأتي من وصفة أو من الدروس يبقى مسودة حتى ينشره مدير."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_skill__load_count
+msgid ""
+"How many questions were given its full text. Counted when nobody else is counting at the same "
+"instant: a figure to compare skills, not an exact one."
+msgstr ""
+"عدد الأسئلة التي أُعطيت نصها الكامل. يُحسب حين لا يحسبه أحد آخر في اللحظة نفسها: رقم للمقارنة بين "
+"المهارات، لا رقم دقيق."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_skill__token_estimate
+msgid "About what its full text adds to a call, at four characters a token."
+msgstr "ما يضيفه نصها الكامل إلى الاستدعاء تقريبًا، بحساب أربعة أحرف لكل رمز."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_skill__test_sentence
+msgid "A question that must bring this skill, checked every week without any AI."
+msgstr "سؤال يجب أن يستدعي هذه المهارة، يُفحص كل أسبوع دون أي ذكاء اصطناعي."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_skill__test_expect
+msgid "The tool a good answer to the test sentence starts with."
+msgstr "الأداة التي تبدأ بها الإجابة الجيدة عن جملة الاختبار."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_conversation__skill_keys
+msgid "The skills the model asked for with use_skill: given with every next question of the conversation."
+msgstr "المهارات التي طلبها النموذج بـ use_skill: تُعطى مع كل سؤال تالٍ في المحادثة."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_note__skill_id
+msgid "For a lesson, the skill it was put into; for a proposal or an alert, the skill it is about."
+msgstr "للدرس: المهارة التي وُضع فيها؛ للاقتراح أو التنبيه: المهارة التي يخصها."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_skills_inline
+msgid ""
+"Send the full text of every skill with every question, as before skills: longer and costlier calls. "
+"Off: a one-line list, and the full text of the skills a question needs."
+msgstr ""
+"إرسال النص الكامل لكل مهارة مع كل سؤال كما كان قبل المهارات: استدعاءات أطول وأكثر كلفة. عند "
+"الإيقاف: قائمة بسطر واحد لكل مهارة، والنص الكامل للمهارات التي يحتاجها السؤال فقط."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill.py:0
+msgid "Created"
+msgstr "أُنشئت"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill.py:0
+msgid "The key of a skill is 2 to 63 small letters, digits and dashes: %s"
+msgstr "مفتاح المهارة من 2 إلى 63 حرفًا صغيرًا أو رقمًا أو شرطة: %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill.py:0
+msgid "The modes of a skill are talk, agent and dev, separated by commas."
+msgstr "أوضاع المهارة هي talk وagent وdev، تفصل بينها فواصل."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill.py:0
+#: code:addons/nudge/models/nudge_recipe.py:0
+msgid "The instructions of a skill are at most %s characters."
+msgstr "تعليمات المهارة %s حرفًا على الأكثر."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill.py:0
+msgid "No test sentence."
+msgstr "لا توجد جملة اختبار."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill.py:0
+msgid "These tools are not here any more (a module was removed, or they were renamed): %s."
+msgstr "هذه الأدوات لم تعد موجودة (أُزيل موديول، أو تغيّرت أسماؤها): %s."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill.py:0
+msgid "No tool is named %s here any more."
+msgstr "لم تعد هنا أداة باسم %s."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill.py:0
+msgid "The expected tool %s is not among the tools of the skill."
+msgstr "الأداة المتوقعة %s ليست من أدوات المهارة."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill.py:0
+msgid "The tool %(tool)s does not work in the modes %(modes)s."
+msgstr "الأداة %(tool)s لا تعمل في الأوضاع %(modes)s."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill.py:0
+msgid "no skill"
+msgstr "لا مهارة"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill.py:0
+msgid "The test sentence brings the skill%s."
+msgstr "جملة الاختبار تستدعي المهارة%s."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill.py:0
+msgid " and its tool %s"
+msgstr " وأداتها %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill_learning.py:0
+msgid "From approved lessons."
+msgstr "من دروس معتمدة."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill_learning.py:0
+msgid "%(detail)s Test sentence: %(sentence)s"
+msgstr "%(detail)s جملة الاختبار: %(sentence)s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill_learning.py:0
+msgid "The weekly health check."
+msgstr "فحص السلامة الأسبوعي."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_recipe.py:0
+msgid "A skill needs a key of small letters, digits and dashes."
+msgstr "تحتاج المهارة إلى مفتاح من أحرف صغيرة وأرقام وشرطات."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_recipe.py:0
+msgid "A skill needs a title."
+msgstr "تحتاج المهارة إلى عنوان."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_recipe.py:0
+msgid "A skill needs its instructions."
+msgstr "تحتاج المهارة إلى تعليماتها."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_recipe.py:0
+msgid "A skill needs its one-line summary."
+msgstr "تحتاج المهارة إلى ملخصها في سطر واحد."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_recipe.py:0
+msgid "A skill is for Talk, Agent or Developer mode."
+msgstr "المهارة لوضع المحادثة أو الوكيل أو المطوّر."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_recipe.py:0
+msgid "The tools of a skill are a list of names."
+msgstr "أدوات المهارة قائمة بالأسماء."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_recipe.py:0
+msgid "Groups not found here (%s): the skill comes in archived."
+msgstr "مجموعات غير موجودة هنا (%s): تُستورد المهارة مؤرشفة."
