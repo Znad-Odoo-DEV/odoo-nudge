@@ -91,13 +91,13 @@ class NudgeMessagingCode(models.Model):
     @api.model
     def _guard(self, channel, sender):
         """Whether this sender may try a code now. A sender who guessed wrong three times in ten minutes
-        is refused; thirty wrong guesses from anybody in one minute lock every outstanding code, so the
-        people who made one must make a new one.
+        is refused; thirty wrong guesses in one minute from the phones together (:meth:`_wrong_codes`)
+        lock every outstanding code, so the people who made one must make a new one.
 
         :return: whether the guess may be tried"""
         Message = self.env["nudge.messaging.message"].sudo()
         now = fields.Datetime.now()
-        if Message.search_count([("state", "=", "wrong_code"), ("create_date", ">=", now - timedelta(minutes=1))])                 >= MAX_BAD_PER_MINUTE:
+        if self._wrong_codes(now - timedelta(minutes=1)) >= MAX_BAD_PER_MINUTE:
             self.sudo().search([("used", "=", False)]).write({"used": True})
             return False
         mine = Message.search_count([
@@ -134,6 +134,12 @@ class NudgeMessagingCode(models.Model):
     @api.model
     def _too_many_wrong(self):
         """:return: whether the wrong codes of the last hour, from any phone, are too many to try another"""
-        since = fields.Datetime.now() - timedelta(hours=1)
-        return self.env["nudge.messaging.message"].sudo().search_count([
-            ("state", "=", "wrong_code"), ("create_date", ">=", since)]) >= MAX_WRONG_CODES
+        return self._wrong_codes(fields.Datetime.now() - timedelta(hours=1)) >= MAX_WRONG_CODES
+
+    @api.model
+    def _wrong_codes(self, since):
+        """:return: the wrong codes sent since ``since`` by the phones together, each phone counted
+        ``MAX_BAD_PER_SENDER`` times at most: one phone, or two, cannot lock the codes of everybody"""
+        groups = self.env["nudge.messaging.message"].sudo()._read_group(
+            [("state", "=", "wrong_code"), ("create_date", ">=", since)], ["sender_hash"], ["__count"])
+        return sum(min(count, MAX_BAD_PER_SENDER) for _sender, count in groups)
