@@ -50,6 +50,10 @@ class TestTaskRules(BackgroundCase, TransactionCase):
         self.run_rule(task)
         self.assertIn("افتح القائمة", task.last_result)
         self.assertNotIn("Open the list", task.last_result)
+        # Stopped by the background job: said in their language too
+        self.agent.active = False
+        self.run_rule(task)
+        self.assertEqual(task.last_result, "توقفت: صاحبها مؤرشف.")
 
     def test_group_and_sum(self):
         self.partners("A", "B")

@@ -157,6 +157,19 @@ class TestMentions(NudgeCase, TransactionCase):
         mention = self.Mention.search([("message_id", "=", question.id)])
         self.assertEqual(mention.user_id, self.user_contacts)
 
+    def test_answered_in_the_company_of_the_record(self):
+        other = self.env["res.company"].create({"name": "Raghad Tiles Two"})
+        self.user_contacts.write({"company_ids": [(4, other.id)]})
+        self.acme.company_id = other
+        question = self.mention(self.user_contacts)
+        mention = self.Mention.search([("message_id", "=", question.id)])
+        env = mention._as_person()
+        self.assertEqual(env.company, other)
+        self.assertEqual(set(env.companies.ids), set(self.user_contacts.company_ids.ids))
+        # A record of no company: their own first
+        self.acme.company_id = False
+        self.assertEqual(mention._as_person().company, self.user_contacts.company_id)
+
     def test_only_when_named(self):
         self.use_adapter()
         self.mention(self.user_contacts, text="Nudge, are you there?", partners=self.env["res.partner"])

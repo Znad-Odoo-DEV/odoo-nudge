@@ -359,14 +359,16 @@ class NudgeRun(models.Model):
                 env = run._as_person().env
                 record = env[handler[0]].browse((run.job_args or {}).get("id")).exists()
                 if not record:
-                    raise UserError(self.env._("What this work was for does not exist any more."))
+                    raise UserError(env._("What this work was for does not exist any more."))
                 finished = getattr(record, handler[1])(run, worker_time.until(self._get_piece_seconds()))
         except Exception as error:  # noqa: BLE001 - the person is told, the log keeps the cause
             _logger.exception("Nudge: the work %s of run %s failed", run.job, run.id)
             self.env.cr.rollback()
             self.env.invalidate_all()
             run = self.sudo().browse(run.id)
-            run._say(str(error) if isinstance(error, UserError) else self.env._(
+            # Read by the person who asked, in their language
+            told = self.with_context(lang=run.user_id.lang or self.env.lang).env
+            run._say(str(error) if isinstance(error, UserError) else told._(
                 "Nudge had to stop before it was done. Ask it again."))
             run._end("failed")
             self._commit()
