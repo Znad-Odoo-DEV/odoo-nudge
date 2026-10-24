@@ -71,6 +71,12 @@ def register_job(kind, model, method):
     JOBS[kind] = (model, method)
 
 
+def _tr(env, source, *args, **kwargs):  # REVIEW RULE 1: 17's _() reads these two locals
+    context = env.context  # noqa: F841
+    cr = env.cr  # noqa: F841
+    return _(source, *args, **kwargs)
+
+
 class NudgeLog(models.AbstractModel):
     """What Nudge did is written by the server and changed by nobody: a log
     that can be edited tells nothing."""
@@ -368,7 +374,7 @@ class NudgeRun(models.Model):
             run = self.sudo().browse(run.id)
             # Read by the person who asked, in their language
             told = self.with_context(lang=run.user_id.lang or self.env.lang).env
-            run._say(str(error) if isinstance(error, UserError) else told._(
+            run._say(str(error) if isinstance(error, UserError) else _tr(told, 
                 "Nudge had to stop before it was done. Ask it again."))
             run._end("failed")
             self._commit()

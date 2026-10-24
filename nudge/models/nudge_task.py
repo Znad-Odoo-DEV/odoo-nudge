@@ -74,6 +74,12 @@ def result_html(text):
     return Markup("").join(out)
 
 
+def _tr(env, source, *args, **kwargs):  # REVIEW RULE 1: 17's _() reads these two locals
+    context = env.context  # noqa: F841
+    cr = env.cr  # noqa: F841
+    return _(source, *args, **kwargs)
+
+
 class NudgeTask(models.Model):
     _name = "nudge.task"
     _inherit = ["nudge.recipe.mixin"]
@@ -354,7 +360,7 @@ class NudgeTask(models.Model):
                 # Read by the owner, in their language
                 told = self.with_context(lang=task.sudo().user_id.lang or self.env.lang).env
                 task.write({
-                    "last_result": told._("Could not start: %s", error),
+                    "last_result": _tr(told, "Could not start: %s", error),
                     "next_run": task._next_after(now),
                 })
             Cron._commit_progress(1, remaining=max(len(due) - 1, 0))
@@ -383,22 +389,22 @@ class NudgeTask(models.Model):
         if task.engine == "rule":
             # No provider, so Agent mode is not needed to run; the owner must be there
             if not task.user_id.active:
-                task.write(dict(values, active=False, last_result=_("Stopped: the owner is archived.")))
+                task.write(dict(values, active=False, last_result=_tr(env, "Stopped: the owner is archived.")))
                 return
             # In the owner's environment: its texts are in their language, on 17 and 18 too
             return task.with_env(env)._start_rule(env, now, values)
         if task.engine == "digest":
             if not task.user_id.active:
-                task.write(dict(values, active=False, last_result=_("Stopped: the owner is archived.")))
+                task.write(dict(values, active=False, last_result=_tr(env, "Stopped: the owner is archived.")))
                 return
             return task._start_digest(env, now, values)
         if task.engine == "outliers":
             if not task.user_id.active:
-                task.write(dict(values, active=False, last_result=_("Stopped: the owner is archived.")))
+                task.write(dict(values, active=False, last_result=_tr(env, "Stopped: the owner is archived.")))
                 return
             return task._start_outliers(env, now, values)
         if not task.user_id.active or not env["nudge.conversation"]._can_use_agent():
-            task.write(dict(values, active=False, last_result=_(
+            task.write(dict(values, active=False, last_result=_tr(env, 
                 "Stopped: the owner may no longer use Agent mode.")))
             return
         note = ""

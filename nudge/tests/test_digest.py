@@ -133,9 +133,12 @@ class TestDigest(BackgroundCase, TransactionCase):
             "currency_id": foreign.id, "company_id": company.id, "rate": 0.5, "name": "2000-01-01"})
         pricelist = env["product.pricelist"].create({"name": "Nudge foreign", "currency_id": foreign.id})
         partner = env["res.partner"].create({"name": "Nudge Foreign Buyer"})
+        # A line with a product: Odoo 17 refuses a sale line without one
+        cement = env["product.product"].create({"name": "Cement"})
         order = env["sale.order"].create({
             "partner_id": partner.id, "pricelist_id": pricelist.id,
-            "order_line": [(0, 0, {"name": "Cement", "product_uom_qty": 1, "price_unit": 1000.0})]})
+            "order_line": [(0, 0, {"name": "Cement", "product_id": cement.id, "product_uom_qty": 1,
+                                   "price_unit": 1000.0})]})
         self.assertEqual(order.currency_id, foreign)
         total = digest._sum(env, env["sale.order"], [("id", "=", order.id)], "amount_total")
         self.assertAlmostEqual(total, foreign._convert(order.amount_total, company.currency_id, company,

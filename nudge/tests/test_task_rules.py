@@ -4,6 +4,8 @@ from odoo import fields
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tests import Form, TransactionCase, tagged
 
+from odoo.addons.nudge.models.ir_model import may_read_field
+
 from .test_background import BackgroundCase
 
 NAMED = "[('name', 'ilike', 'Nudge Rule')]"
@@ -124,7 +126,8 @@ class TestTaskRules(BackgroundCase, TransactionCase):
         offered = dict(Model.name_search("", [], limit=None))
         self.assertIn(partner.id, offered)
         self.assertNotIn(self.env["ir.model"]._get_id("ir.config_parameter"), offered)
-        self.assertIn(partner.id, [line["id"] for line in Model.web_name_search(partner.name, {"display_name": {}})])
+        if hasattr(self.env["res.partner"], "web_name_search"):  # the web client of Odoo 19; 17 and 18 use name_search
+            self.assertIn(partner.id, [line["id"] for line in Model.web_name_search(partner.name, {"display_name": {}})])
         listed = Model.web_search_read([("id", "=", partner.id)], {"name": {}, "count": {}})
         self.assertEqual(listed["records"], [{"id": partner.id, "name": partner.name}])
         # A search on anything but names and types is refused as before: no path to the code of a field
@@ -138,7 +141,7 @@ class TestTaskRules(BackgroundCase, TransactionCase):
         numbers = dict(Fields.name_search("", [("model_id", "=", partner.id), ("ttype", "in", ["integer", "float"])]))
         self.assertIn(color.id, numbers)
         hidden = [name for name, field in self.env["res.partner"]._fields.items()
-                  if field.groups and not self.env["res.partner"].with_user(self.agent)._has_field_access(field, "read")]
+                  if field.groups and not may_read_field(self.env["res.partner"].with_user(self.agent), field)]
         names = dict(Fields.name_search("", [("model_id", "=", partner.id)], limit=None))
         for name in hidden:
             self.assertNotIn(self.env["ir.model.fields"]._get("res.partner", name).id, names)
