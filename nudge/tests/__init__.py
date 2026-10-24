@@ -104,3 +104,4 @@ from . import test_skill_coverage
 from . import test_rules  # S9
 from . import test_skill_router
 from . import test_agent_plan
+from . import test_plugins  # EXT-01 / L3

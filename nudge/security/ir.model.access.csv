@@ -84,3 +84,5 @@ access_nudge_recipe_signing_system,nudge.recipe.signing system,model_nudge_recip
 access_nudge_recipe_signing_key_system,nudge.recipe.signing.key system,model_nudge_recipe_signing_key,base.group_system,1,1,1,1
 access_nudge_skill_market_manager,nudge.skill.market manager,model_nudge_skill_market,group_nudge_manager,1,0,0,0
 access_nudge_rule_manager,nudge.rule manager,model_nudge_rule,group_nudge_manager,1,0,0,0
+access_nudge_plugin_system,nudge.plugin system,model_nudge_plugin,base.group_system,1,1,0,0
+access_nudge_plugin_item_system,nudge.plugin.item system,model_nudge_plugin_item,base.group_system,1,0,0,0
