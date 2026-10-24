@@ -301,6 +301,18 @@
                             <field name="group_nudge_all_users"/>
                         </setting>
                     </block>
+                    <block title="Compliance Packs" name="nudge_compliance_feed_container">
+                        <setting help="Country checklists can be updated from a feed signed by its publisher. It is off while the address or the key is empty. Nudge then fetches one small file a day from that address only, checks its signature with the key below, and shows what would change: nothing is replaced until a system administrator approves it. The checklists that come with Nudge stay the fallback.">
+                            <field name="nudge_compliance_feed_url" placeholder="https://"/>
+                            <field name="nudge_compliance_feed_key"/>
+                            <div class="mt8">
+                                <button name="action_nudge_compliance_feed_check" type="object"
+                                        string="Check the Feed Now" icon="oi-arrow-right" class="btn-link"/>
+                                <button name="action_nudge_compliance_feed_list" type="object"
+                                        string="Pack Updates" icon="oi-arrow-right" class="btn-link"/>
+                            </div>
+                        </setting>
+                    </block>
                 </app>
             </xpath>
         </field>

@@ -42,3 +42,4 @@ from . import nudge_home
 from . import nudge_recipe_market
 from . import nudge_recipe_publish
 from . import nudge_setup_wizard
+from . import nudge_compliance_feed
