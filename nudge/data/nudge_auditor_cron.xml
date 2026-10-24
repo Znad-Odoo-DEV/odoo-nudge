@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- NP-16: the access of an auditor ends the day after their last day; the request itself refuses a session
+         past it, this archives the user -->
+    <record id="cron_end_auditors" model="ir.cron">
+        <field name="name">Nudge: end the access of auditors</field>
+        <field name="model_id" ref="base.model_res_users"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_nudge_end_auditors()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+    </record>
+</odoo>

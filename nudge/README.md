@@ -573,6 +573,22 @@ the file says which branch of the documentation it was built from.
 - Installed and tested on Odoo.sh (Linux, several workers, behind its proxy): the server
   tests pass there; the browser features were tried there by hand.
 
+## Auditor (read-only, time-boxed)
+
+An outside auditor is a Nudge User with the group **Nudge Auditor**: they ask questions of the data in Talk (the
+reading tools of Ask the data, with their own rights, record rules and companies) and read the log of what Nudge
+did (Requests, Changes, Made by Nudge) in their allowed companies, to read only. They can never be an Agent User,
+a Nudge Manager or an administrator: Odoo refuses it. Nothing can be written through Nudge for them: the confirmation,
+bulk and Agent paths answer 403 and the log has no write right.
+
+- **Add an Auditor** (Nudge, Configuration, administrators): name, login, companies and the last day. It makes the
+  user with the auditor group and the internal user group and nothing else; read-only app rights (for example the
+  read-only accounting rights) can be chosen in the wizard or on the user.
+- **Access until**: on the user (page Nudge Auditor). The day after, a daily cron archives the user, and a session
+  is refused on its next request, whatever the cron has done yet. **Revoke the Access** ends it at once.
+- **Questions of Auditors** (Nudge managers, What Nudge Did): every question an auditor asked, kept for the company.
+  The retention of old conversations leaves them and nobody can delete them.
+
 ## Compliance dates and the signed pack feed
 
 Packs that carry a date (`deadline`, `source`, `reviewed` on a check; `reviewed` on a pack) are counted down by a daily job: the accounting managers of each company (the Nudge managers when Accounting is not installed) are told 90, 30 and 7 days before, once for each threshold, as a notification and, where Discuss is installed, a message in the inbox. **Nudge, Health Check, Compliance Deadlines** lists what was told. The dates come from the authorities and are marked "confirm with the authority"; they are information, not legal advice.
