@@ -273,6 +273,7 @@ class TestPrompts(NudgeCase, TransactionCase):
         wizard = self.env["nudge.recipe.import"].with_user(self.boss).create({
             "file": base64.b64encode(canonical(package).encode()), "file_name": "r.json"})
         wizard.action_read()
+        wizard.acknowledged = True  # unsigned: an administrator who read the warning
         return wizard
 
     def test_prompts_travel_in_a_recipe(self):

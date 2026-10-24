@@ -1,8 +1,9 @@
 import base64
+import difflib
 import json
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
 
 from .nudge_recipe import KINDS, MODELS, canonical
 
@@ -29,12 +30,24 @@ class NudgeRecipeExport(models.TransientModel):
     include_files = fields.Boolean(
         string="Include the files themselves",
         help="Only the files that are public go in. The others come with their description only.")
+    sign = fields.Boolean(
+        string="Sign it", default=True,
+        help="Signed with the key an administrator uploaded (Configuration, Recipes, Signing Key). "
+             "With no key, the recipe is exported unsigned.")
+    signing_available = fields.Boolean(compute="_compute_signing_available")
+    signed = fields.Boolean(readonly=True)
     only_model = fields.Char(readonly=True)
     only_ids = fields.Char(readonly=True)
     file = fields.Binary(string="Recipe", readonly=True, attachment=False)
     file_name = fields.Char(readonly=True)
     item_count = fields.Integer(readonly=True)
     state = fields.Selection([("choose", "Choose"), ("done", "Done")], default="choose")
+
+    @api.depends_context("uid")
+    def _compute_signing_available(self):
+        available = bool(self.env["nudge.recipe.signing"]._current())
+        for wizard in self:
+            wizard.signing_available = available
 
     @api.model
     def _open_for(self, records):
@@ -54,10 +67,13 @@ class NudgeRecipeExport(models.TransientModel):
         self.ensure_one()
         kinds = [kind for flag, kind in FLAGS.items() if self[flag]]
         only = (self.only_model, json.loads(self.only_ids)) if self.only_model else None
-        package = self.env["nudge.recipe"]._export(kinds, files=self.include_files, only=only)
+        Recipe = self.env["nudge.recipe"]
+        package = Recipe._export(kinds, files=self.include_files, only=only)
+        if self.sign:
+            package = Recipe._sign(package)
         self.write({
             "file": base64.b64encode(canonical(package).encode("utf-8")), "file_name": "nudge_recipe.json",
-            "item_count": len(package["recipe"]["items"]), "state": "done"})
+            "item_count": len(package["recipe"]["items"]), "state": "done", "signed": "signature" in package})
         return self._reopen()
 
     def _reopen(self):
@@ -76,12 +92,48 @@ class NudgeRecipeImport(models.TransientModel):
     line_ids = fields.One2many("nudge.recipe.import.line", "wizard_id", string="Items")
     created_json = fields.Text(readonly=True, default="[]")
     rolled_back = fields.Boolean(readonly=True)
+    signature_state = fields.Selection(
+        [("signed", "Signed"), ("untrusted", "Signed by an unknown key"), ("unsigned", "Unsigned")], readonly=True)
+    publisher = fields.Char(readonly=True)
+    trust_note = fields.Char(string="Who Made It", readonly=True)
+    needs_warning = fields.Boolean(compute="_compute_needs_warning")
+    acknowledged = fields.Boolean(
+        string="I Read the Warning",
+        help="An unsigned recipe, or one signed by a key nobody here trusts, is imported only by a system "
+             "administrator who read its instructions and accepts them as drafts.")
+    instructions_review = fields.Text(string="Skills in Full", readonly=True)
     # Set when the file comes from the marketplace: the import is then recorded as installed
     entry_id = fields.Many2one("nudge.recipe.entry", readonly=True, ondelete="set null")
+
+    @api.depends("signature_state")
+    def _compute_needs_warning(self):
+        for wizard in self:
+            wizard.needs_warning = wizard.signature_state in ("unsigned", "untrusted")
 
     def _reopen(self):
         return {"type": "ir.actions.act_window", "res_model": self._name, "res_id": self.id,
                 "view_mode": "form", "target": "new", "name": _("Import a recipe")}
+
+    def _skills_in_full(self, body):
+        """:return: the text of every skill of the recipe, in full, with its tools and, for one that is here
+        already, what changes: read before importing an unsigned recipe, and before publishing a draft"""
+        out = []
+        for item in body["items"]:
+            if item["kind"] != "skill":
+                continue
+            data = item["data"]
+            tools = ", ".join(str(name) for name in data.get("tools") or []) or "-"
+            head = "%s (%s) - %s" % (item.get("name") or data.get("key"), data.get("key"), data.get("version") or "")
+            instructions = str(data.get("instructions") or "")
+            skill = self.env["nudge.skill"].with_context(active_test=False).search([
+                ("key", "=", data.get("key")), ("company_id", "in", (False, self.env.company.id))], limit=1)
+            change = ""
+            if skill and skill.instructions != instructions:
+                change = "\n" + _("What changes in the instructions:") + "\n" + "\n".join(
+                    difflib.unified_diff((skill.instructions or "").splitlines(), instructions.splitlines(),
+                                         lineterm="", n=2))
+            out.append("%s\n%s %s\n\n%s%s" % (head, _("Tools it asks for:"), tools, instructions, change))
+        return "\n\n----\n\n".join(out)
 
     def action_read(self):
         """Read the file, check it, and list what importing it would do."""
@@ -95,6 +147,7 @@ class NudgeRecipeImport(models.TransientModel):
         except (ValueError, UnicodeDecodeError):
             raise UserError(_("This file is not a Nudge recipe.")) from None
         body = Recipe._read(text)
+        trust = Recipe._verify(text)  # a signature that does not match refuses the file here
         plan = Recipe._plan(body)
         self.line_ids.unlink()
         summary = _("From %(company)s, made with Nudge %(version)s on Odoo %(series)s.",
@@ -103,8 +156,15 @@ class NudgeRecipeImport(models.TransientModel):
         if self.entry_id:
             summary = _("Marketplace: %(recipe)s, from %(site)s. ",
                                  recipe=self.entry_id.title, site=self.entry_id.source_id.name) + summary
+        if trust["state"] == "signed":
+            who = _("Signed by %s.", trust["publisher"])
+        elif trust["state"] == "untrusted":
+            who = _("Signed with a key nobody here trusts: treated as unsigned.")
+        else:
+            who = _("Unsigned.")
         self.write({
-            "state": "review",
+            "state": "review", "signature_state": trust["state"], "publisher": trust["publisher"],
+            "trust_note": who, "acknowledged": False, "instructions_review": self._skills_in_full(body),
             "summary": summary,
             "line_ids": [(0, 0, dict(line, selected=line["action"] in ("create", "update"))) for line in plan],
         })
@@ -115,6 +175,15 @@ class NudgeRecipeImport(models.TransientModel):
         self.ensure_one()
         Recipe = self.env["nudge.recipe"]
         Recipe._check_manager()
+        if self.signature_state != "signed":
+            # Anything but the signature of a trusted publisher: an administrator, after the warning
+            if not self.env.user.has_group("base.group_system"):
+                raise AccessError(_(
+                    "This recipe is not signed by a trusted publisher: only a system administrator may import it."))
+            if not self.acknowledged:
+                raise UserError(_(
+                    "This recipe is not signed by a trusted publisher. Read the skills below and tick "
+                    "I Read the Warning to import it; its skills come in as drafts."))
         created = []
         for line in self.line_ids.filtered(lambda l: l.selected and l.action in ("create", "update")):
             try:

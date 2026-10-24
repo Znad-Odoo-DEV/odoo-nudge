@@ -59,7 +59,7 @@ class TestRecipeMarket(NudgeCase, TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.boss = new_test_user(cls.env, login="nudge_market_boss", groups="nudge.group_nudge_manager")
+        cls.boss = new_test_user(cls.env, login="nudge_market_boss", groups="nudge.group_nudge_manager,base.group_system")
         cls.raghad = new_test_user(cls.env, login="raghad_market", groups="nudge.group_nudge_user")
         cls.source = cls.env["nudge.recipe.source"].with_user(cls.boss).create({
             "name": "Ebrahim's recipes", "url": INDEX_URL, "trusted": True})
@@ -75,6 +75,12 @@ class TestRecipeMarket(NudgeCase, TransactionCase):
         self.patch(market.socket, "getaddrinfo", resolve)
 
     # ---------------------------------------------------------------- helpers
+    def acknowledged(self, action):
+        """The wizard of an unsigned recipe, with the warning read (S2)"""
+        wizard = self.env["nudge.recipe.import"].browse(action["res_id"]).with_user(self.boss)
+        wizard.acknowledged = True
+        return wizard
+
     def recipe_file(self, items=None):
         items = items or [{"kind": "lexicon", "key": "market-word-1", "name": "word",
                            "data": {"synonym": "فرجيني", "intent": "show", "dialect": "levantine"}}]
@@ -226,6 +232,7 @@ class TestRecipeMarket(NudgeCase, TransactionCase):
         self.assertIn("Marketplace", wizard.summary)
         self.assertEqual(wizard.line_ids.mapped("action"), ["create"])
         self.assertFalse(self.env["nudge.recipe.installed"].search([("entry_key", "=", "raghad-words")]))
+        wizard.acknowledged = True
         wizard.action_import()
         self.assertEqual(wizard.line_ids.result, "done")
         word = self.env["nudge.lexicon.entry"].search([("synonym", "=", "فرجيني")])
@@ -315,13 +322,13 @@ class TestRecipeMarket(NudgeCase, TransactionCase):
         self.refresh(files)
         found = self.source.entry_ids
         action = self.install(found, files)
-        self.env["nudge.recipe.import"].browse(action["res_id"]).with_user(self.boss).action_import()
+        self.acknowledged(action).action_import()
         self.assertEqual(found.with_user(self.boss).state, "installed")
         files, _raw = self.market_files(updated="2026-10-20")
         self.refresh(files)
         self.assertEqual(found.with_user(self.boss).state, "update")
         action = self.install(found, files)
-        self.env["nudge.recipe.import"].browse(action["res_id"]).with_user(self.boss).action_import()
+        self.acknowledged(action).action_import()
         self.assertEqual(found.with_user(self.boss).state, "installed")
         history = self.env["nudge.recipe.installed"].with_context(active_test=False).search(
             [("entry_key", "=", "raghad-words")])

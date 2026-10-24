@@ -55,6 +55,7 @@ class TestRecipes(NudgeCase, TransactionCase):
         wizard = self.env["nudge.recipe.import"].with_user(self.boss).create({
             "file": base64.b64encode(canonical(package).encode()), "file_name": "r.json"})
         wizard.action_read()
+        wizard.acknowledged = True  # unsigned: an administrator who read the warning
         return wizard
 
     def package_of(self, items):

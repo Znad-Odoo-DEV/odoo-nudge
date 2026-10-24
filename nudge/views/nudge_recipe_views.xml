@@ -53,7 +53,15 @@
                         <field name="with_prompts"/>
                         <field name="include_files" invisible="not with_files"/>
                     </group>
+                    <group string="Signature">
+                        <field name="signing_available" invisible="1"/>
+                        <field name="sign" invisible="not signing_available"/>
+                    </group>
                 </group>
+                <div class="text-muted" invisible="state != 'choose' or signing_available">
+                    No signing key is set: the recipe is exported unsigned. A system administrator uploads one in
+                    Nudge / Configuration / Recipes / Signing Key.
+                </div>
                 <div class="text-muted" invisible="state != 'choose'">
                     The recipe is one file with a version and a checksum. It holds the setup of Nudge in this
                     company, never conversations, keys or the data of your records. Another database reads it
@@ -61,6 +69,7 @@
                 </div>
                 <group invisible="state != 'done'">
                     <field name="item_count"/>
+                    <field name="signed"/>
                     <field name="file" filename="file_name"/>
                     <field name="file_name" invisible="1"/>
                 </group>
@@ -95,6 +104,20 @@
                 <div invisible="state == 'choose'">
                     <field name="summary" readonly="1"/>
                 </div>
+                <field name="signature_state" invisible="1"/>
+                <field name="needs_warning" invisible="1"/>
+                <div class="text-success" invisible="state == 'choose' or signature_state != 'signed'">
+                    <field name="trust_note" readonly="1"/>
+                </div>
+                <div class="alert alert-warning" role="alert" invisible="state != 'review' or not needs_warning">
+                    <field name="trust_note" readonly="1"/>
+                    Nobody here vouches for who made this file. Only a system administrator imports it, after
+                    reading what its skills tell the model (below). Its skills come in as drafts.
+                    <field name="acknowledged"/>
+                </div>
+                <group string="Skills in full" invisible="state != 'review' or not instructions_review">
+                    <field name="instructions_review" nolabel="1" colspan="2"/>
+                </group>
                 <field name="line_ids" invisible="state == 'choose'">
                     <tree string="Items" create="0" delete="0" editable="bottom"
                           decoration-muted="action in ('same', 'skip')" decoration-danger="result == 'failed'">
