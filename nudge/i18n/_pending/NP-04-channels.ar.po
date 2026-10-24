@@ -1,5 +1,0 @@
-#. module: nudge
-#. odoo-python
-#: code:addons/nudge/models/nudge_slot.py:0
-msgid "Nudge is answering other people right now. Try again in %(seconds)s seconds."
-msgstr "Nudge يجيب أشخاصًا آخرين الآن. أعد المحاولة بعد %(seconds)s ثانية."
