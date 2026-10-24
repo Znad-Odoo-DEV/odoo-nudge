@@ -201,7 +201,12 @@ class NudgeMention(models.Model):
     def _as_person(self):
         user = self.user_id
         context = dict(user.with_user(user).context_get())
-        context["allowed_company_ids"] = user.company_ids.ids
+        # All their companies, the one of the record first (then their own): env.company is what the answer
+        # reads totals and currencies in
+        record = self.env[self.model].sudo().browse(self.res_id) if self.model in self.env else None
+        company = record.exists().company_id if record is not None and "company_id" in record._fields else None
+        first = (company or self.env["res.company"]) & user.company_ids
+        context["allowed_company_ids"] = (first | user.company_id | user.company_ids).ids
         return self.env(user=user.id, su=False, context=context)
 
     def _lang(self):

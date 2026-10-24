@@ -351,8 +351,10 @@ class NudgeTask(models.Model):
                     task._start(now)
             except Exception as error:  # noqa: BLE001
                 _logger.info("Nudge: task %s could not start: %s", task.id, error)
+                # Read by the owner, in their language
+                told = self.with_context(lang=task.sudo().user_id.lang or self.env.lang).env
                 task.write({
-                    "last_result": _("Could not start: %s", error),
+                    "last_result": told._("Could not start: %s", error),
                     "next_run": task._next_after(now),
                 })
             Cron._commit_progress(1, remaining=max(len(due) - 1, 0))

@@ -366,7 +366,9 @@ class NudgeRun(models.Model):
             self.env.cr.rollback()
             self.env.invalidate_all()
             run = self.sudo().browse(run.id)
-            run._say(str(error) if isinstance(error, UserError) else _(
+            # Read by the person who asked, in their language
+            told = self.with_context(lang=run.user_id.lang or self.env.lang).env
+            run._say(str(error) if isinstance(error, UserError) else told._(
                 "Nudge had to stop before it was done. Ask it again."))
             run._end("failed")
             self._commit()
