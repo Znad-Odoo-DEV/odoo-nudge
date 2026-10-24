@@ -63,8 +63,13 @@ class Tool:
     kind = "read"
     # What a step of it says in the log, when it is not a change, in English
     summary = None
+    # EXT-01: the modules it needs besides its own, ("sale",): not offered in a database without them
+    requires = ()
 
     def is_available(self, env, mode=MODE_TALK):
+        # EXT-01: a tool of a module this database does not have, or of a plugin not allowed here, is not there
+        if not offered_here(env, self):
+            return False
         # What the agent may do, the developer may do too
         offered = mode in self.modes or (mode == MODE_DEV and MODE_AGENT in self.modes)
         if offered and env.user.has_group(self.group):
@@ -207,8 +212,18 @@ NO_SCREEN = (
 
 
 def register(tool_class):
-    TOOLS[tool_class.name] = tool_class()
+    # EXT-01 / L3: a plugin takes only a free name, never one of Nudge's (registry.claim)
+    from . import registry  # noqa: PLC0415 - registry imports this module
+    if registry.claim(tool_class):
+        TOOLS[tool_class.name] = tool_class()
     return tool_class
+
+
+def offered_here(env, tool):
+    """:return: whether the database of ``env`` offers ``tool`` at all: its module is installed here, and for
+    a plugin, the plugin is allowed and on (tools/registry.py). Whoever asks, in whatever mode."""
+    from . import registry  # noqa: PLC0415 - registry imports this module
+    return registry.offered(env, tool)
 
 
 def available(env, mode=MODE_TALK, tool_set="full", extra=(), background=False):
@@ -218,27 +233,32 @@ def available(env, mode=MODE_TALK, tool_set="full", extra=(), background=False):
     :param extra: names of the tools of the groups the question was given
     :return: tools offered to the current user. Sorted: the list is part
     of the prompt, and its order must not change between two requests."""
+    # EXT-01: only the tools of this database, those of the plugins allowed here included
+    from . import registry  # noqa: PLC0415 - registry imports this module
+    here = registry.tools_here(env)
     if tool_set == "essential":
         names = ESSENTIAL_BY_MODE.get(mode, TALK_TOOLS) | set(extra) | {"more_tools"}
         if mode == MODE_TALK and ask_tier_applies(env):
             names |= ASK_TOOLS
     else:
-        names = {name for name, tool in TOOLS.items() if not getattr(tool, "small_models_only", False)}
+        names = {name for name, tool in here.items() if not getattr(tool, "small_models_only", False)}
         if tool_set == "core":
             from . import groups  # noqa: PLC0415 - groups imports this module
             core = CORE_BY_MODE.get(mode, CORE_BY_MODE[MODE_TALK])
             names = (names - (groups.routed_tools() - core)) | (core & {"more_tools"}) | set(extra)
+            # L3: the tools of a plugin come with the skills of the question (or extra), not in every call
+            names -= registry.plugin_names(here) - set(extra)
     # NP-03: the skills given with the question bring the tools they need (a small model gets them
     # without asking), and use_skill comes with their index only. Each name still passes is_available
     # below, as the person and in this mode: a skill narrows what is offered, it never gives a tool
     skills = env.context.get("nudge_skills") or {}
-    names = set(names) | {name for name in skills.get("tools") or () if name in TOOLS
-                          and not getattr(TOOLS[name], "small_models_only", False)}
+    names = set(names) | {name for name in skills.get("tools") or () if name in here
+                          and not getattr(here[name], "small_models_only", False)}
     if not skills.get("index"):
         names.discard("use_skill")
     if background:
         names -= SCREEN_TOOLS
-    return [tool for name, tool in sorted(TOOLS.items()) if name in names and tool.is_available(env, mode)]
+    return [tool for name, tool in sorted(here.items()) if name in names and tool.is_available(env, mode)]
 
 
 def error_text(error, what, uid):

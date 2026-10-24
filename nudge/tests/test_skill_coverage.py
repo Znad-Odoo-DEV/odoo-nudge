@@ -9,7 +9,7 @@ from pathlib import Path
 from odoo.tests import TransactionCase, tagged
 
 from odoo.addons.nudge.models.nudge_skill import MAX_INSTRUCTIONS
-from odoo.addons.nudge.tools import base, groups, skills as skill_rules
+from odoo.addons.nudge.tools import base, groups, registry, skills as skill_rules
 
 # What is not offered by a skill: how a skill is asked for, and the group request of a small model
 INFRASTRUCTURE = {"use_skill", "more_tools"}
@@ -34,8 +34,10 @@ class TestSkillCoverage(TransactionCase):
     def test_every_tool_is_core_or_in_a_skill(self):
         missing = []
         for name, tool in sorted(base.TOOLS.items()):
-            # nudge_ai needs Odoo's own ai app: its skill ships with that module
-            if name in INFRASTRUCTURE or tool.__module__.startswith("odoo.addons.nudge_ai"):
+            # nudge_ai needs Odoo's own ai app: its skill ships with that module; a plugin's tools come with
+            # the skills of that plugin (L3), checked when the plugin is reviewed
+            if (name in INFRASTRUCTURE or tool.__module__.startswith("odoo.addons.nudge_ai")
+                    or not registry.is_trusted_module(registry.module_of(tool))):
                 continue
             for mode in (base.MODE_AGENT, base.MODE_DEV):
                 if not groups.in_mode(tool, mode) or name in base.ESSENTIAL_BY_MODE[mode]:
