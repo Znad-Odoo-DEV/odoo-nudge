@@ -1,5 +1,9 @@
 # Changelog
 
+## 19.0.1.58.0 (unreleased)
+
+- SEC-02 The Python sandbox of the Agent can no longer be pinned by `x = x * x`, `s = s + s` or a huge `round`/`ljust`/`bytes`: steps on computed values are size-checked before they run and the memory is watched with the deadline
+
 Current version: nudge 19.0.1.57.31, nudge_builder 19.0.1.0.4, nudge_messaging 19.0.1.0.4, nudge_mcp 19.0.1.0.4, nudge_ai 19.0.1.0.9, nudge_studio 19.0.1.0.9, nudge_mail 19.0.1.0.13.
 
 ## 19.0.1.58.0 (unreleased)

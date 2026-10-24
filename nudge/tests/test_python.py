@@ -193,6 +193,84 @@ class TestPython(NudgeCase, TransactionCase):
             self.assertTrue(result.is_error, code)
             self.assertIn(text, result.content, code)
 
+    def test_a_step_on_computed_values_is_refused_before_it_runs(self):
+        # x * x in a loop, s + s, l.extend(l)...: each step is checked as it runs, none runs past the deadline
+        huge, long = "beyond 2 ** 262144", "more than 1000000 items"
+        for code, text in [
+            ("x = 10 ** 9\nfor i in range(40):\n    x = x * x", huge),
+            ("x = 10 ** 9\nfor i in range(40):\n    x *= x", huge),
+            ("x = 3\nfor i in range(10 ** 6):\n    x = x + x", huge),
+            ("x = 3\nfor i in range(5000):\n    x = x << 64", huge),
+            ("x = 10 ** 9\nfor i in range(100):\n    x = x ** 3", huge),
+            ("x = 10 ** 9\nfor i in range(40):\n    x = x * x\n    y = x - 1", huge),
+            ("s = 'Raghad'\nfor i in range(40):\n    s = s + s", long),
+            ("s = 'Raghad'\nfor i in range(40):\n    s += s", long),
+            ("s = 'Raghad'\nfor i in range(40):\n    s = s * 2", long),
+            ("l = [1, 2]\nfor i in range(40):\n    l += l", long),
+            ("l = [1, 2]\nfor i in range(40):\n    l.extend(l)", long),
+            ("l = [1, 2]\nfor i in range(40):\n    l = l + l", long),
+            ("s = 'x' * 90000\nresult = len(', '.join([s] * 90000))", long),
+            ("s = 'Ebrahim'\nfor i in range(40):\n    s = '%s%s' % (s, s)", long),
+            ("s = 'Ebrahim'\nfor i in range(40):\n    s = f'{s}{s}'", long),
+            ("result = 'a'.ljust(10 ** 9)", long),
+            ("result = 'a'.zfill(10 ** 8)", long),
+            ("s = 'a' * 90000\nresult = len(s.replace('a', 'b' * 100))", long),
+            ("result = len(bytes(10 ** 9))", long),
+            ("result = (10 ** 9).to_bytes(10 ** 9, 'big')", long),
+            ("n = 5\nresult = f'{n:{10 ** 9}}'", "beyond 999999"),
+            ("result = '%999999999d' % 1", "beyond 999999"),
+            ("result = '%*d' % (10 ** 9, 1)", "beyond 999999"),
+            ("l = [[1] * 50000] * 90\nresult = len(sum(l, []))", long),
+            ("l = [1]\nl[0:0] = l", "No assignment to a slice"),
+            ("f = 'a'.ljust\nresult = f(10 ** 9)", "Call .ljust()"),
+            ("f = bytes\nresult = f(10 ** 9)", "bytes is called"),
+            ("_nudge_mul = max\nresult = 1", "may not use _nudge_mul"),
+        ]:
+            started = time.monotonic()
+            result = self.run_code(code)
+            self.assertLess(time.monotonic() - started, 2, code)
+            self.assertTrue(result.is_error, code)
+            self.assertIn(text, result.content, code)
+            self.assertNotIn("was stopped", result.content, code)
+
+    def test_rounding_to_a_huge_power_of_ten_is_not_computed(self):
+        started = time.monotonic()
+        payload = self.payload("result = [round(12345, -10 ** 9), round(12345, -2), round(2.5), round(1.2345, 2)]")
+        self.assertLess(time.monotonic() - started, 2)
+        self.assertEqual(payload["result"], [0, 12300, 2, 1.23])
+
+    def test_the_memory_the_code_holds_is_bounded(self):
+        # Many steps that are each small: the memory is looked at with the deadline
+        with patch.object(python_tool, "MAX_MEMORY", 20 * 1024 * 1024), \
+                patch.object(python_tool, "MEMORY_CHECK", 0.0):
+            started = time.monotonic()
+            result = self.run_code("keep = []\nfor i in range(10 ** 6):\n    keep.append([0] * 100000)")
+            self.assertTrue(result.is_error)
+            self.assertIn("of memory and was stopped", result.content)
+            self.assertLess(time.monotonic() - started, 5)
+        self.assertEqual(self.payload("result = 1 + 1")["result"], 2)
+
+    def test_arithmetic_on_computed_values_still_works(self):
+        payload = self.payload(
+            "a = 123456789\nb = 987654321\n"
+            "total = 0\nfor i in range(1, 101):\n    total += i * a - b\n"
+            "names = ['Raghad', 'Ebrahim']\nn = len(names)\ndash = '-'\nrows = names * 2\nrows += names\n"
+            "text = ', '.join(rows)\nline = dash * n + '|'\nwords = 'Raghad and Ebrahim'.replace('and', '&')\n"
+            "square = a * a\ncube = n ** 3\nshift = n << 4\nbig = a * b * 1000\n"
+            "ids = [1, 2]\nids.extend([3, 4])\nmerged = sum([[1], [2, 3]], [])\n"
+            "result = {'total': total, 'rows': len(rows), 'text': text, 'line': line, 'words': words,\n"
+            "          'square': square, 'cube': cube, 'shift': shift, 'big': big, 'ids': ids,\n"
+            "          'merged': merged, 'pct': '%s is %d%%' % (names[0], 50), 'width': f'{n:*>4}|{a:,}',\n"
+            "          'padded': 'Ebrahim'.ljust(10, '.') + str(n).zfill(3), 'neg': -a - -b, 'f': 1.5 * a,\n"
+            "          'bytes': len(bytes(5)), 'isbytes': isinstance(b'x', bytes), 'sum': sum([1.5, 2.5])}\n")
+        self.assertEqual(payload["result"], {
+            "total": 5050 * 123456789 - 100 * 987654321, "rows": 6,
+            "text": "Raghad, Ebrahim, Raghad, Ebrahim, Raghad, Ebrahim", "line": "--|",
+            "words": "Raghad & Ebrahim", "square": 123456789 ** 2, "cube": 8, "shift": 32,
+            "big": 123456789 * 987654321 * 1000, "ids": [1, 2, 3, 4], "merged": [1, 2, 3], "pct": "Raghad is 50%",
+            "width": "***2|123,456,789", "padded": "Ebrahim...002", "neg": 864197532,
+            "f": 185185183.5, "bytes": 5, "isbytes": True, "sum": 4.0})
+
     def test_a_long_range_is_walked_where_the_deadline_sees_it(self):
         # sum() walks a range in C, to its end: a long one is walked step by step instead
         with patch.object(python_tool, "DEADLINE_SECONDS", 0.2):
