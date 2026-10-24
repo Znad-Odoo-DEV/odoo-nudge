@@ -140,8 +140,7 @@ class TestSmallModels(NudgeCase, TransactionCase):
         self.assertEqual(call["system"][0], prompt.SYSTEM_PERSONA_COMPACT)
         self.assertLess(len(prompt.SYSTEM_PERSONA_COMPACT), len(prompt.SYSTEM_PERSONA) / 3)
         # Which tool does what it is asked (the skills of the question come after it)
-        self.assertIn(prompt.TALK_MAP_COMPACT, "
-".join(base.system_texts(call["system"])))
+        self.assertIn(prompt.TALK_MAP_COMPACT, "\n".join(base.system_texts(call["system"])))
         self.assertIn("remember_lesson", prompt.TALK_MAP_COMPACT)
         context = call["turns"][-1]["context"]
         self.assertIn("<nudge_found>", context)
