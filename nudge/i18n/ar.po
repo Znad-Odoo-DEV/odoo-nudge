@@ -23248,3 +23248,51 @@ msgstr "الوحدة %s غير موجودة: تُستخدم وحدة أودو ا
 #: code:addons/nudge/tools/document_record.py:0
 msgid "bill of materials"
 msgstr "قائمة مواد"
+
+#: model:nudge.skill,name:nudge.skill_database_assessment
+msgid "Assessing the database"
+msgstr "تقييم قاعدة البيانات"
+
+#: model:nudge.skill,name:nudge.skill_data_analysis
+msgid "Numbers, charts and queries"
+msgstr "الأرقام والمخططات والاستعلامات"
+
+#: model:nudge.skill,name:nudge.skill_record_work
+msgid "Finding and changing records"
+msgstr "البحث عن السجلات وتعديلها"
+
+#: model:nudge.skill,name:nudge.skill_documents_to_records
+msgid "Records from a document"
+msgstr "سجلات من مستند"
+
+#: model:nudge.skill,name:nudge.skill_meetings
+msgid "Meeting minutes"
+msgstr "محاضر الاجتماعات"
+
+#: model:nudge.skill,name:nudge.skill_record_history
+msgid "History and changes of a record"
+msgstr "تاريخ السجل وتغييراته"
+
+#: model:nudge.skill,name:nudge.skill_product_search
+msgid "Finding products"
+msgstr "البحث عن المنتجات"
+
+#: model:nudge.skill,name:nudge.skill_database_setup
+msgid "Setting a new database up"
+msgstr "تجهيز قاعدة بيانات جديدة"
+
+#: model:nudge.skill,name:nudge.skill_guided_tours
+msgid "Showing the way on screen"
+msgstr "الإرشاد على الشاشة"
+
+#: model:nudge.skill,name:nudge.skill_automations_build
+msgid "Automations, actions and schedules"
+msgstr "الأتمتة والإجراءات والجدولة"
+
+#: model:nudge.skill,name:nudge.skill_screens_fields_build
+msgid "Fields, buttons and screens"
+msgstr "الحقول والأزرار والشاشات"
+
+#: model:nudge.skill,name:nudge.skill_approval_flows
+msgid "Approvals on documents"
+msgstr "الموافقات على المستندات"

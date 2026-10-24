@@ -87,6 +87,7 @@ Without them the rest works and the feature says what is missing.
         "views/nudge_coverage_views.xml",
         "security/nudge_skill_security.xml",
         "data/nudge_skill_data.xml",
+        "data/nudge_skill_data_np03.xml",
         "views/nudge_skill_views.xml",
     ],
     "assets": {

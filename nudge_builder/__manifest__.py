@@ -32,6 +32,7 @@ never by itself.
         "security/nudge_builder_security.xml",
         "data/templates/load.xml",
         "data/nudge_builder_data.xml",
+        "data/nudge_skill_data.xml",
         "views/nudge_builder_views.xml",
         "views/nudge_builder_check_views.xml",
     ],
