@@ -2684,6 +2684,7 @@ msgstr "توجد هنا مهارة أخرى بالمفتاح %s."
 #: model:ir.model.fields,field_description:nudge.field_nudge_memory__answer
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__message_id
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_message_view_feedback
+#: model:nudge.answer.cache,field_description:nudge.field_nudge_answer_cache__answer
 msgid "Answer"
 msgstr "الإجابة"
 
@@ -8728,6 +8729,7 @@ msgstr "التسمية"
 #: code:addons/nudge/tools/setup.py:0
 #: model:ir.model.fields,field_description:nudge.field_nudge_memory__language
 #: model:ir.model.fields,field_description:nudge.field_nudge_translation__lang_id
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_answer_cache_view_search
 msgid "Language"
 msgstr "اللغة"
 
@@ -13847,6 +13849,7 @@ msgstr "كمية أعلى بكثير من المعتاد"
 #: model:ir.model.fields,field_description:nudge.field_nudge_question__sample
 #: model:ir.model.fields,field_description:nudge.field_nudge_run__question_id
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_auditor_question_view_list
+#: model:nudge.answer.cache,field_description:nudge.field_nudge_answer_cache__question
 msgid "Question"
 msgstr "السؤال"
 
@@ -15239,8 +15242,8 @@ msgstr "إرسال رسالة بريد فيها رابط اختيار كلمة �
 #: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_skills_inline
 msgid ""
 "Send the full text of every skill and every tool with every question, as "
-"before skills: longer and costlier calls. Off: a one-line list, the full text "
-"of the skills a question needs, and the tools it needs."
+"before skills: longer and costlier calls. Off: a one-line list, the full "
+"text of the skills a question needs, and the tools it needs."
 msgstr ""
 "إرسال النص الكامل لكل مهارة وكل أداة مع كل سؤال كما كان قبل المهارات: "
 "استدعاءات أطول وأكثر كلفة. عند الإيقاف: قائمة بسطر واحد لكل مهارة، والنص "
@@ -21025,6 +21028,7 @@ msgstr "كلمة أو عبارة"
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/meeting.py:0
+#: model:nudge.answer.cache,field_description:nudge.field_nudge_answer_cache__qkey
 msgid "Words"
 msgstr "الكلمات"
 
@@ -23054,8 +23058,12 @@ msgstr "لا يوجد تقرير صحة بعد"
 
 #. module: nudge
 #: model_terms:ir.actions.act_window,help:nudge.nudge_health_report_action
-msgid "A health report checks the setup of Nudge and lists what needs a fix. Run one from the Nudge menu."
-msgstr "يفحص تقرير الصحة إعداد Nudge ويسرد ما يحتاج إلى إصلاح. شغّل واحدًا من قائمة Nudge."
+msgid ""
+"A health report checks the setup of Nudge and lists what needs a fix. Run "
+"one from the Nudge menu."
+msgstr ""
+"يفحص تقرير الصحة إعداد Nudge ويسرد ما يحتاج إلى إصلاح. شغّل واحدًا من قائمة "
+"Nudge."
 
 #. module: nudge
 #: model_terms:ir.actions.act_window,help:nudge.nudge_upgrade_report_action
@@ -23064,8 +23072,12 @@ msgstr "لا يوجد تقرير ترقية بعد"
 
 #. module: nudge
 #: model_terms:ir.actions.act_window,help:nudge.nudge_upgrade_report_action
-msgid "An upgrade report tells what a new Odoo version changes for your Nudge setup. Run the upgrade check to get one."
-msgstr "يوضح تقرير الترقية ما يغيّره إصدار Odoo الجديد في إعداد Nudge لديك. شغّل فحص الترقية للحصول على واحد."
+msgid ""
+"An upgrade report tells what a new Odoo version changes for your Nudge "
+"setup. Run the upgrade check to get one."
+msgstr ""
+"يوضح تقرير الترقية ما يغيّره إصدار Odoo الجديد في إعداد Nudge لديك. شغّل فحص"
+" الترقية للحصول على واحد."
 
 #. module: nudge
 #: model_terms:ir.actions.act_window,help:nudge.nudge_recipe_source_action
@@ -23074,8 +23086,12 @@ msgstr "لا يوجد مصدر وصفات بعد"
 
 #. module: nudge
 #: model_terms:ir.actions.act_window,help:nudge.nudge_recipe_source_action
-msgid "A recipe source is a place Nudge reads shared recipes from. Add one to browse and install its recipes."
-msgstr "مصدر الوصفات هو مكان يقرأ منه Nudge الوصفات المشتركة. أضف مصدرًا لتصفح وصفاته وتثبيتها."
+msgid ""
+"A recipe source is a place Nudge reads shared recipes from. Add one to "
+"browse and install its recipes."
+msgstr ""
+"مصدر الوصفات هو مكان يقرأ منه Nudge الوصفات المشتركة. أضف مصدرًا لتصفح "
+"وصفاته وتثبيتها."
 
 #. module: nudge
 #: model_terms:ir.actions.act_window,help:nudge.nudge_recipe_installed_action
@@ -23084,7 +23100,8 @@ msgstr "لم تُثبَّت أي وصفة بعد"
 
 #. module: nudge
 #: model_terms:ir.actions.act_window,help:nudge.nudge_recipe_installed_action
-msgid "The recipes you install from a source are listed here, with their version."
+msgid ""
+"The recipes you install from a source are listed here, with their version."
 msgstr "الوصفات التي تثبّتها من أحد المصادر تظهر هنا مع إصدارها."
 
 #. module: nudge
@@ -23180,8 +23197,11 @@ msgstr "%(qty)s × %(product)s (يُنشأ منتج جديد)"
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/document_catalogue.py:0
-msgid "A bill of materials of %(product)s with %(lines)s lines, and %(new)s new products"
-msgstr "قائمة مواد للمنتج %(product)s بـ %(lines)s سطرًا، و%(new)s منتجات جديدة"
+msgid ""
+"A bill of materials of %(product)s with %(lines)s lines, and %(new)s new "
+"products"
+msgstr ""
+"قائمة مواد للمنتج %(product)s بـ %(lines)s سطرًا، و%(new)s منتجات جديدة"
 
 #. module: nudge
 #. odoo-python
@@ -23192,7 +23212,9 @@ msgstr "مُستبعَد: ألغى المستخدم تحديد هذا الصف."
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/document_catalogue.py:0
-msgid "Left out: it looks like %s. Say 'include row %s' to make it as a new product."
+msgid ""
+"Left out: it looks like %s. Say 'include row %s' to make it as a new "
+"product."
 msgstr "مُستبعَد: يشبه %s. قل «أضف الصف %s» لإنشائه كمنتج جديد."
 
 #. module: nudge
@@ -23309,8 +23331,12 @@ msgstr "مهام الذكاء الاصطناعي المتكررة"
 
 #. module: nudge
 #: code:addons/nudge/models/nudge_answer_cache.py:0
-msgid "An earlier answer to a very close question (%(question)s). Press Ask the AI instead to ask again."
-msgstr "إجابة سابقة عن سؤال قريب جدًا (%(question)s). اضغط «اسأل الذكاء الاصطناعي بدلًا من ذلك» للسؤال من جديد."
+msgid ""
+"An earlier answer to a very close question (%(question)s). Press Ask the AI "
+"instead to ask again."
+msgstr ""
+"إجابة سابقة عن سؤال قريب جدًا (%(question)s). اضغط «اسأل الذكاء الاصطناعي "
+"بدلًا من ذلك» للسؤال من جديد."
 
 #. module: nudge
 #: code:addons/nudge/models/nudge_answer_cache.py:0
@@ -23356,21 +23382,6 @@ msgstr "مدة الاحتفاظ بالإجابات (أيام)"
 #: model:res.config.settings,field_description:nudge.field_res_config_settings__nudge_cache_near_threshold
 msgid "Closeness Required"
 msgstr "درجة التقارب المطلوبة"
-
-#. module: nudge
-#: model:nudge.answer.cache,field_description:nudge.field_nudge_answer_cache__question
-msgid "Question"
-msgstr "السؤال"
-
-#. module: nudge
-#: model:nudge.answer.cache,field_description:nudge.field_nudge_answer_cache__answer
-msgid "Answer"
-msgstr "الإجابة"
-
-#. module: nudge
-#: model:nudge.answer.cache,field_description:nudge.field_nudge_answer_cache__qkey
-msgid "Words"
-msgstr "الكلمات"
 
 #. module: nudge
 #: model:nudge.answer.cache,field_description:nudge.field_nudge_answer_cache__screen_model
@@ -23429,13 +23440,12 @@ msgstr "إفراغ الذاكرة المؤقتة"
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_answer_cache_view_list
-msgid "Every cached answer is deleted. The next questions ask the AI provider again."
-msgstr "ستُحذف كل الإجابات المخزنة. الأسئلة التالية ستُوجَّه إلى مزوّد الذكاء الاصطناعي من جديد."
-
-#. module: nudge
-#: model_terms:ir.ui.view,arch_db:nudge.nudge_answer_cache_view_search
-msgid "Language"
-msgstr "اللغة"
+msgid ""
+"Every cached answer is deleted. The next questions ask the AI provider "
+"again."
+msgstr ""
+"ستُحذف كل الإجابات المخزنة. الأسئلة التالية ستُوجَّه إلى مزوّد الذكاء "
+"الاصطناعي من جديد."
 
 #. module: nudge
 #: model_terms:ir.actions.act_window,help:nudge.nudge_answer_cache_action
