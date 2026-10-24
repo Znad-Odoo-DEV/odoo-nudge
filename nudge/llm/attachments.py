@@ -8,6 +8,7 @@ run: a file is bytes to read, whatever it claims to be.
 import base64
 import io
 import logging
+import zipfile
 
 _logger = logging.getLogger(__name__)
 
@@ -28,6 +29,8 @@ AUDIO_EXTENSIONS = (".m4a", ".mp3", ".ogg", ".oga", ".opus", ".wav", ".webm", ".
 MAX_SHEETS = 5
 MAX_SHEET_ROWS = 60
 MAX_SHEET_COLUMNS = 30
+# An .xlsx is a zip: what it holds once opened, at most (a small file can open to gigabytes)
+MAX_UNZIPPED_BYTES = 20 * MAX_BYTES
 
 # Told to the person, by the controller before the file is read in full and
 # here when it was read
@@ -35,6 +38,7 @@ TOO_LARGE = "The file is too large. The limit is %s MB."
 TOO_LARGE_AUDIO = (
     "The recording is too large. The limit is %s MB: split the file into shorter parts and send them one by one.")
 WRONG_KIND = "Only PDF, text, CSV, Excel (.xlsx) and image files can be read."
+TOO_LARGE_OPENED = "This Excel file is far larger once opened than its size says. Save it again and send it."
 
 
 class Unreadable(Exception):
@@ -100,6 +104,16 @@ def pdf_page_texts(data, max_pages=400):
         raise Unreadable("This PDF cannot be read.") from error
 
 
+def opens_too_large(data):
+    """:return: whether the zip ``data`` (an .xlsx) holds more than ``MAX_UNZIPPED_BYTES`` once opened;
+    the sizes are those its entries declare, which is what Python reads of them at most"""
+    try:
+        with zipfile.ZipFile(io.BytesIO(data)) as archive:
+            return sum(info.file_size for info in archive.infolist()) > MAX_UNZIPPED_BYTES
+    except (zipfile.BadZipFile, ValueError):
+        return False
+
+
 def sheet_text(data):
     """:return: ``(text, sheets)``: the sheets of an Excel file, each with
     its first rows as lines of cells, and how many sheets there are
@@ -108,6 +122,8 @@ def sheet_text(data):
         import openpyxl  # noqa: PLC0415
     except ImportError:
         raise Unreadable("Excel files need the Python module openpyxl on the server.") from None
+    if opens_too_large(data):
+        raise Unreadable(TOO_LARGE_OPENED)
     try:
         book = openpyxl.load_workbook(io.BytesIO(data), read_only=True, data_only=True)
     except Exception:  # noqa: BLE001

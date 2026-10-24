@@ -16,6 +16,8 @@ _logger = logging.getLogger(__name__)
 # A file, the snapshot of the screen and the fields of the form around them:
 # a request announced larger carries a file too large, told before it is read
 MAX_REQUEST_BYTES = attachments.MAX_BYTES + 2 * 1024 * 1024
+# What Odoo reads of a request at all (its default is 128 MB): up to it, a file too large is told in words
+UPLOAD_CAP = 2 * MAX_REQUEST_BYTES
 
 STREAM_HEADERS = [
     ("Content-Type", "application/x-ndjson; charset=utf-8"),
@@ -31,7 +33,7 @@ def _line(payload):
 
 class NudgeChat(http.Controller):
 
-    @http.route("/nudge/chat/stream", type="http", auth="user", methods=["POST"])
+    @http.route("/nudge/chat/stream", type="http", auth="user", methods=["POST"], max_content_length=UPLOAD_CAP)
     def chat_stream(self, message=None, conversation_id=None, snapshot=None, spoken=None,
                     read_aloud=None, mode=None, background=None, explain=None, file=None,
                     report=None, fresh=None, slot=None, **kwargs):
@@ -98,6 +100,8 @@ class NudgeChat(http.Controller):
         data = file.read(attachments.MAX_BYTES + 1)
         if len(data) > attachments.MAX_BYTES:
             raise UserError(too_large)
+        if attachments.kind_of(file.filename, mimetype) == "sheet" and attachments.opens_too_large(data):
+            raise UserError(_(attachments.TOO_LARGE_OPENED))
         return (file.filename, data, mimetype)
 
     @http.route("/nudge/bulk/start", type="http", auth="user", methods=["POST"])
