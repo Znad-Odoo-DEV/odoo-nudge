@@ -2,9 +2,10 @@ from unittest.mock import patch
 
 from psycopg2 import errors
 
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, UserError
 from odoo.tests import TransactionCase, new_test_user, tagged
 
+from odoo.addons.nudge.llm import base as llm
 from odoo.addons.nudge.llm import loop, memory_match
 
 from .common import NudgeCase
@@ -134,6 +135,34 @@ class TestAnswerMemory(NudgeCase, TransactionCase):
         self.assertTrue(self.env["nudge.usage"].search([("kind", "=", "memory")]))
         self.env["nudge.memory"]._count_use(memory)
         self.assertEqual(memory.uses, 1)
+
+    def test_a_remembered_answer_leaves_what_waited_and_waits_for_the_background(self):
+        """Review (ai #5): served from memory, as the other answers are: the card left undecided, the run
+        ended, and never in the middle of work going on in the background."""
+        self.remember()
+        partner = self.env["res.partner"].create({"name": "Raghad Memory Partner"})
+        self.use_adapter(script=[[
+            llm.tool_use_event("call_1", "prepare_write", {
+                "model": "res.partner", "ids": [partner.id], "values": [{"field": "name", "value": "Renamed"}]}),
+            llm.stop_event(llm.STOP_TOOL_USE)]])
+        conversation, _events = self.order(self.agent, "Rename Raghad Memory Partner to Renamed")
+        step = conversation.sudo().waiting_step_id
+        self.assertEqual(step.state, "pending")
+        run = conversation.sudo().run_id
+        job = conversation._chat_prepare(SAME)
+        self.assertIn("memory", job["answered"])
+        self.assertEqual((step.state, conversation.sudo().waiting_step_id), ("cancelled", step.browse()))
+        self.assertTrue(run)
+        self.assertEqual(run.state, "stopped")
+        self.assertFalse(conversation.sudo().run_id)
+        self.assertEqual(partner.name, "Raghad Memory Partner")
+
+        background = self.env["nudge.run"].sudo().create({
+            "name": "In the background", "conversation_id": conversation.id, "user_id": self.agent.id,
+            "is_background": True, "state": "queued"})
+        conversation.sudo().run_id = background
+        with self.assertRaises(UserError):
+            conversation._chat_prepare(SAME)
 
     def test_ask_the_ai_instead(self):
         self.remember()
