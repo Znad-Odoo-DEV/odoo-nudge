@@ -160,9 +160,10 @@ def facts(env, definition, domain_source):
         raise Refused(str(error)) from error
     if not count:
         return [{"key": "empty", "text": env._("There is no data in this report: no record matches it.")}]
+    records = f"{count:,}"
     out = [{"key": "total", "text": env._(
         "Overall, %(measure)s is %(total)s over %(count)s records.",
-        measure=measure, total=_money(env, model, spec, total), count=f"{count:,}")}]
+        measure=measure, total=_money(env, model, spec, total), count=records)}]
     if definition["group_by"]:
         try:
             out += _group_facts(env, model, definition, domain, total, today)

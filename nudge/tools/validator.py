@@ -508,10 +508,11 @@ class QuantityFarAbove(Check):
             return []
         shown = env["product.product"].browse([item[0] for item in far])
         top = max(far, key=lambda item: item[1])
+        usual = f"{top[2]:g}"
         return [warning(
             self.key,
             env._("%(count)s lines have a quantity far above the usual for the product: %(names)s (usual: %(usual)s).",
-                  count=len(far), names=names(shown), usual=f"{top[2]:g}"), figure=round(top[1], 1))]
+                  count=len(far), names=names(shown), usual=usual), figure=round(top[1], 1))]
 
 
 class DateInThePast(Check):

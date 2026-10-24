@@ -511,7 +511,8 @@ class NudgeTask(models.Model):
             if previous == measured:
                 shown = {}
             else:
-                before = self.env._("Before: %s", ", ".join(f"{k} {v}" for k, v in previous.items()) or "-")
+                was = ", ".join(f"{k} {v}" for k, v in previous.items()) or "-"
+                before = self.env._("Before: %s", was)
         if not shown:
             task.write(dict(values, skip_count=task.skip_count + 1,
                             last_result=self.env._("Nothing to report.")))

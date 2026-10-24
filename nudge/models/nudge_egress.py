@@ -51,10 +51,11 @@ class NudgeEgress(models.AbstractModel):
         if not entries or egress.is_allowed(entries, url):
             return
         host, port = egress.target_of(url)
+        target = f"{host}:{port}" if host else (url or "?")
         raise UserError(self.env._(
             "%(host)s is not on the list of allowed destinations of your company, so nothing was sent to it "
             "(%(purpose)s). An administrator can allow it in Settings, Nudge, Allowed Destinations.",
-            host=f"{host}:{port}" if host else (url or "?"),
+            host=target,
             purpose=self._purposes().get(purpose, purpose)))
 
     @api.model

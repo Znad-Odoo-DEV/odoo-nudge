@@ -744,8 +744,8 @@ class NudgeNoai(models.AbstractModel):
         if result.is_error or not result.event:
             return Plan(result.content)
         said = self._what_is_said(parsed)
-        text = self.env._("Here is the chart: %(title)s%(said)s.", title=result.event["title"],
-                          said=f" ({said})" if said else "")
+        said = f" ({said})" if said else ""
+        text = self.env._("Here is the chart: %(title)s%(said)s.", title=result.event["title"], said=said)
         return Plan(text, events=[result.event])
 
     # The periods a saved report keeps moving with the day; any other period is kept as fixed dates
@@ -790,8 +790,9 @@ class NudgeNoai(models.AbstractModel):
         if period:
             arguments.update(period=period, period_field=date_field)
         said = self._what_is_said(parsed)
+        said = f" ({said})" if said else ""
         text = self.env._("Preparing to save the report: %(what)s%(said)s.", what=self._plural_of(kind, model_name),
-                          said=f" ({said})" if said else "")
+                          said=said)
         return Plan(text, [("save_report", arguments)])
 
     def _measure_value(self, row, measure):

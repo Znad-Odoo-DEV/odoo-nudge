@@ -517,7 +517,8 @@ class NudgeRun(models.Model):
         deleted, kept = undo_built(self.env, runs)
         message = self.env._("Deleted: %s.", ", ".join(deleted)) if deleted else self.env._("Nothing made here still exists.")
         if kept:
-            message += " " + self.env._("Kept: %s.", "; ".join(f"{name} ({why})" for name, why in kept))
+            kept_text = "; ".join(f"{name} ({why})" for name, why in kept)
+            message += " " + self.env._("Kept: %s.", kept_text)
         return {
             "type": "ir.actions.client",
             "tag": "display_notification",
@@ -733,8 +734,8 @@ class NudgeStep(models.Model):
         else:
             message = self.env._("%s records are back as they were.", restored)
         if kept:
-            message += " " + self.env._("Left as they are: %s", "; ".join(
-                f"{name} ({why})" for name, why in kept[:10]))
+            left_text = "; ".join(f"{name} ({why})" for name, why in kept[:10])
+            message += " " + self.env._("Left as they are: %s", left_text)
         _logger.info("Nudge: step %s undone by user %s: %s back, %s left", step.id, self.env.uid,
                      restored, len(kept))
         changed = [{"model": model, "ids": [int(record_id) for record_id in entries]}
