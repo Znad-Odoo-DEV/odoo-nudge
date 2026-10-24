@@ -27,6 +27,8 @@ class NudgeStep(models.Model):
     def action_messaging_apply(self):
         """Yes, in Odoo: the change prepared from the phone is made now, as the person"""
         step = self._messaging_open_for_person()
+        if not self.env["nudge.conversation"]._can_use_agent():
+            raise UserError(self.env._("Agent mode is not open to you. Ask your administrator."))
         tool = tool_base.TOOLS.get(step.tool)
         if not isinstance(tool, tool_base.Action) or not tool.is_available(self.env, MODE_AGENT):
             raise UserError(self.env._("This can no longer be done. Nothing was changed."))
