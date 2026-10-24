@@ -314,7 +314,9 @@ class NudgeProvider(models.Model):
     # ------------------------------------------------------------------
     @api.model
     def _get_default(self):
-        """:return: the provider answering new conversations, possibly empty.
+        """:return: the provider answering new conversations, possibly empty: the one named in the
+        default parameter, else the fallback (NP-10), else none. Only when nothing was ever named
+        and exactly one provider is configured is that one used.
         Must be called in sudo: it is infrastructure, users have no access to providers."""
         param = self.env["ir.config_parameter"].sudo().get_param(DEFAULT_PROVIDER_PARAM)
         private = self._is_private_mode()
@@ -327,9 +329,15 @@ class NudgeProvider(models.Model):
             if fallback:
                 return fallback
         providers = self.search([]).filtered("is_configured")
-        # In private mode the ones on our own server come first: the others are refused
-        return (providers.filtered("runs_locally") if private else self.browse()).sorted("sequence")[:1] \
-            or providers[:1]
+        if private:
+            # In private mode the ones on our own server come first: the others are refused
+            return providers.filtered("runs_locally").sorted("sequence")[:1] or providers[:1]
+        if param and param.isdigit():
+            # LEAD-03: the administrator named one and it cannot answer: never another, which
+            # may be a cloud provider they did not choose. The rules-only path still serves.
+            return self.browse()
+        # First install, nothing chosen yet: the only configured provider answers
+        return providers if len(providers) == 1 else self.browse()
 
     @api.model
     def _get_for_mode(self, mode):
