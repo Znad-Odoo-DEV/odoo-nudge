@@ -355,21 +355,18 @@ class NudgeMessaging(models.AbstractModel):
     def _streaming(self, channel, provider=None):
         """The work of a voice note, a file or an answer holds a worker: it takes a place in the same
         line as the answers of the panel (``nudge.slot``), under the limit of Nudge and of its
-        provider, and counts in the same limit through its mark. Both are given back at the end,
-        whatever ends it. Never held while a person is waited for: a change is only prepared here.
+        provider, and keeps it claimed until the end, whatever ends it. The place is what counts:
+        nothing is marked on the log's conversation, whose messages and totals this transaction
+        writes, and a row changed meanwhile on another cursor cannot be written (repeatable read).
+        Never held while a person is waited for: a change is only prepared here.
 
         :raise NudgeBusy: when no place is free; the message stays in the queue"""
         provider = provider or self.env["nudge.provider"].sudo()._get_for_mode(MODE_AGENT)             or self.env["nudge.provider"].sudo()._get_default()
         slot = self.env["nudge.slot"]._claim_channel(self._conversation(channel), provider)
         try:
-            self._mark(channel, True, provider)
-            slot._handover(mark_committed=True)
             yield slot
         finally:
-            try:
-                self._mark(channel, False)
-            finally:
-                self.env["nudge.slot"]._finish(slot.id)
+            self.env["nudge.slot"]._finish(slot.id)
 
     # --- voice --------------------------------------------------------
     def _hear(self, channel, event):
@@ -654,18 +651,6 @@ class NudgeMessaging(models.AbstractModel):
             "state": "running",
             "origin": ORIGINS[channel],
         })
-
-    @api.model
-    def _mark(self, channel, active, provider=None):
-        """Mark (or clear) the call in the table, committed at once, so the other workers count it
-        (and count it against its provider)"""
-        conversation = self._conversation(channel)
-        with self.env.registry.cursor() as cr:
-            cr.execute("UPDATE nudge_conversation SET stream_started_at = %s, "
-                       "provider_id = COALESCE(%s, provider_id) WHERE id = %s",
-                       [fields.Datetime.now() if active else None, provider.id if provider else None,
-                        conversation.id])
-        conversation.invalidate_recordset(["stream_started_at", "provider_id"])
 
     @api.model
     def _turn(self, role, text):

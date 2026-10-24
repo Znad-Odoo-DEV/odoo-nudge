@@ -687,3 +687,27 @@ class TestMcp(HttpCase):
         self.assertTrue(self.env.company.nudge_mcp_allow_writes)
         self.env["res.config.settings"].create({"nudge_mcp_enabled": False}).execute()
         self.assertFalse(Mcp._is_enabled())
+
+    def test_a_call_whose_mark_finds_no_row_counts_through_its_place(self):
+        """Review odoo-tech #8: the first call of a person creates the log conversation in its own
+        request, not committed yet, so the mark written on another cursor finds no row. The place is
+        not handed over then: it stays claimed, and counts, until the call ends"""
+        Mcp = self.env["nudge.mcp"].with_user(self.agent)
+        mark = type(Mcp)._mark_call
+        self.assertTrue(mark(Mcp, False), "A conversation the other cursor sees is marked")
+        seen = []
+        original = tool_base.call
+
+        def spy(env, *args, **kwargs):
+            seen.append((self.places(env=env).mapped("state"), env["nudge.slot"].sudo()._taken()))
+            return original(env, *args, **kwargs)
+        self.patch(type(Mcp), "_mark_call", lambda model, active, provider=None: False)
+        self.patch(tool_base, "call", spy)
+        self.assertFalse(self.call("search_records", {"model": "res.partner"})["result"]["isError"])
+        self.assertEqual(seen, [(["claimed"], 1)], "Counted by its place while the tool works")
+        self.assertFalse(self.places())
+        self.assertEqual(self.env["nudge.slot"].sudo()._taken(), 0)
+        gone = self.env["nudge.conversation"].sudo().create({"user_id": self.agent.id, "name": "Gone"})
+        gone.unlink()
+        self.patch(type(Mcp), "_conversation", lambda model: gone)
+        self.assertFalse(mark(Mcp, True), "No row, no mark")
