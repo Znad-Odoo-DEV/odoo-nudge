@@ -1,5 +1,5 @@
 {
-    "name": "Nudge: Studio (Enterprise)",
+    "name": "Nudge for Studio",
     "summary": "Rules and guidance in Studio; installs itself (Enterprise)",
     "description": """
 Requires Odoo Enterprise (web_studio).

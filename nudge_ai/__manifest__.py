@@ -1,12 +1,12 @@
 {
-    "name": "Nudge: Odoo AI (Enterprise)",
+    "name": "Nudge for Odoo AI",
     "version": "19.0.1.0.9",
     "category": "Productivity",
     "summary": "AI app sources, agents, keys; installs itself (Enterprise)",
     "description": """
 Requires Odoo Enterprise (ai).
 
-Nudge: Odoo AI
+Nudge for Odoo AI
 ==============
 A bridge between Nudge and the AI app of Odoo Enterprise.
 

@@ -1,4 +1,4 @@
-# Nudge: WhatsApp and Telegram
+# Nudge WhatsApp & Telegram
 
 Ask [Nudge](../nudge/README.md) from your phone, on WhatsApp (Business Cloud API) or Telegram. Questions are
 answered in the chat; a change is never made there: Nudge prepares it and answers with a link, and the person

@@ -1,5 +1,5 @@
 {
-    "name": "Nudge: WhatsApp and Telegram",
+    "name": "Nudge WhatsApp & Telegram",
     "summary": "Ask Nudge from WhatsApp or Telegram; you say yes in Odoo",
     "description": """
 Nudge Messaging
