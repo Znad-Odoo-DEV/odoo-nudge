@@ -1,4 +1,1 @@
-# Optional: only needed for the "Anthropic Claude" provider.
-# OpenAI-compatible providers (Gemini, Groq, OpenRouter, Ollama) need nothing
-# beyond what Odoo already installs.
-anthropic>=1,<2
+anthropic>=1.0

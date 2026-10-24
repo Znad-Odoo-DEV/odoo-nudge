@@ -487,6 +487,7 @@ class NudgeRecipeEntry(models.Model):
                 continue
             Note.create({
                 "name": name, "kind": "lesson", "state": "proposed", "proposed_by": self.env.uid,
+                "company_id": False,
                 "body": self.env._(
                     "The recipe %(recipe)s fits %(app)s, which was installed this month. "
                     "Find it in Nudge / Configuration / Recipes / Marketplace.",
