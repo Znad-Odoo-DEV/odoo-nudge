@@ -372,6 +372,14 @@ another screen: the work goes on, and Odoo tells you from wherever you are.
 - Nudge looks at the screen when you send a message. Nothing is collected in the background.
 - What it is shown is what your screen shows: nothing you are not allowed to read.
 - Values of fields whose name looks like a secret (password, token, key) are hidden before leaving.
+- A field that a form shows as a password, a field you may not read, and fields named like a credential
+  (`*_key`, `hmac`, `signature`, `pin`, `client_secret`...) are hidden before leaving, whatever the name.
+- **Settings ‣ Nudge ‣ Personal Data** (off by default, per company): before anything goes to an AI provider
+  that does not run on your own server, emails, phone numbers, IBANs, Emirates ID, Saudi and Egyptian national
+  numbers and card numbers become tokens (EMAIL_1, PHONE_2) and the answer gets the real values back here.
+  The confirmation cards show the real values. It reduces what leaves; a number written in an unusual way
+  can be missed. A preview in the same place shows what a sample text becomes. Nothing is stored: the
+  tokens live for one request.
 - Each person can close the eye. An administrator can turn screen sharing off for everybody:
   **Settings ‣ Nudge ‣ Privacy**.
 - The microphone is open while you hold the shortcut, or from the press on the button to the end

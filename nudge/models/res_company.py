@@ -91,3 +91,11 @@ class ResCompany(models.Model):
         self.ensure_one()
         return [tile for tile, field, model_name in MOBILE_TILES
                 if self[field] and (not model_name or app_installed(self.env, model_name))]
+
+    # NP-13. Not required: the column is added to companies that exist
+    nudge_redact_pii = fields.Boolean(
+        string="Redact Personal Data", copy=False,
+        help="Before a question goes to an AI provider that does not run on your own server, emails, phone "
+             "numbers, IBANs, Emirates ID, national numbers and card numbers become tokens such as EMAIL_1. "
+             "The answer gets the real values back here. It reduces what is sent; it cannot promise to catch "
+             "every number.")

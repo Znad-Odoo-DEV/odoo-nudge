@@ -31,6 +31,17 @@
                             </div>
                         </setting>
                     </block>
+                    <block title="Personal Data" name="nudge_redact_container">
+                        <setting help="Before a question goes to an AI provider that does not run on your own server, emails, phone numbers, IBANs, Emirates ID, Saudi and Egyptian national numbers and card numbers become tokens such as EMAIL_1. The answer and the confirmation cards get the real values back here. It reduces what leaves; a number written in an unusual way can be missed. Off by default.">
+                            <field name="nudge_redact_pii"/>
+                            <div class="content-group mt8">
+                                <label for="nudge_redact_sample" class="o_light_label"/>
+                                <field name="nudge_redact_sample" placeholder="Type a text to see what would be masked"/>
+                                <label for="nudge_redact_preview" class="o_light_label"/>
+                                <field name="nudge_redact_preview"/>
+                            </div>
+                        </setting>
+                    </block>
                     <block title="Privacy" name="nudge_privacy_container">
                         <setting help="Nothing is sent to an AI provider that does not run on your own server (tick it on the provider). Quick search, the slash commands, the recorded tours, the explanations that need no AI, remembered answers and providers on your own server keep working. A lock shows in the panel.">
                             <field name="nudge_private_mode"/>
