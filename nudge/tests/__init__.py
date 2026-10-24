@@ -97,3 +97,4 @@ from . import test_summary
 from . import test_ui_preferences  # NP-23
 from . import test_skills
 from . import test_quality_gate
+from . import test_prompt_budget  # NP-03

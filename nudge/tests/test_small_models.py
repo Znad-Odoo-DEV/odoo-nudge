@@ -319,12 +319,14 @@ class TestSmallModels(NudgeCase, TransactionCase):
         self.order(self.agent, "And by country?", conversation_id=conversation.id)
         self.assertSheet({tool["name"] for tool in adapter.calls[0]["tools"]})
 
-    def test_a_large_model_has_every_tool_and_no_groups(self):
+    def test_a_large_model_has_the_tools_its_question_needs(self):
+        # NP-03: the core of its mode and the groups of the question, not every tool; more_tools for the rest
         adapter = self.use_adapter()
-        self.order(self.agent, "How many quotations do we have?")
+        self.order(self.agent, "How many quotations do we have? Put them in a spreadsheet")
         names = {tool["name"] for tool in adapter.calls[0]["tools"]}
         self.assertSheet(names)
-        self.assertNotIn("more_tools", names)
+        self.assertIn("more_tools", names)
+        self.assertNotIn("test_import", names)
 
     def test_words_of_the_groups(self):
         from odoo.addons.nudge.tools import groups  # noqa: PLC0415

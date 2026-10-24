@@ -396,14 +396,14 @@ class TestProfileTools(NudgeCase, TransactionCase):
         self.assertEqual(events[-1]["state"], "complete")
         result = adapter.calls[1]["turns"][-1]["results"][0]
         self.assertIn("custom module by Odoo S.A.", result["content"])
-        # NP-02: with the reading tools of the Ask tier
-        self.assertEqual(
-            [tool["name"] for tool in adapter.calls[0]["tools"]],
-            ["aggregate_records", "assess_database", "describe_model", "describe_module", "filter_screen",
-             "find_record", "find_screen", "locate_data", "match_import_columns", "open_record",
-             "open_screen", "read_configuration", "read_record", "read_settings", "record_changes",
-             "remember_lesson", "search_company_files", "search_database_profile",
-             "search_odoo_documentation", "search_products", "search_records", "show_chart",
-             "show_menu_path", "show_on_screen", "show_tour", "summarize_record_history", "test_import",
-             "use_skill", "write_in_field"],
-        )
+        # NP-02: with the reading tools of the Ask tier; NP-03: the core of Talk and the groups of the
+        # question (a module, a tour), not the tools of other work
+        offered = [tool["name"] for tool in adapter.calls[0]["tools"]]
+        self.assertLessEqual(
+            {"aggregate_records", "describe_model", "describe_module", "filter_screen", "find_record",
+             "find_screen", "locate_data", "more_tools", "open_record", "open_screen", "read_record",
+             "remember_lesson", "search_company_files", "search_database_profile", "search_odoo_documentation",
+             "search_records", "show_menu_path", "show_on_screen", "show_tour", "write_in_field"}, set(offered))
+        self.assertFalse({"test_import", "summarize_record_history", "search_products", "assess_database",
+                          "prepare_write", "prepare_create"} & set(offered), offered)
+        self.assertEqual(offered, sorted(offered), "In one order: the list is part of the cached prompt")

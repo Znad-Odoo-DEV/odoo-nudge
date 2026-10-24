@@ -259,7 +259,7 @@ def run(job, record):
             outcome.update(aborted=True, last_round=True, tool_calls=[])
         said = said or bool(outcome["text"])
         # Asking for more tools is not acting: what it says after may still be talk
-        acted = acted or any(call.get("name") != "more_tools" for call in outcome["tool_calls"])
+        acted = acted or any(call.get("name") not in ("more_tools", "use_skill") for call in outcome["tool_calls"])
 
         step = record(outcome)
         if not step.get("fallback"):
