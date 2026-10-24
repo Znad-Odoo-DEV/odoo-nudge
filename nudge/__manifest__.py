@@ -98,6 +98,7 @@ Without them the rest works and the feature says what is missing.
         "views/res_config_settings_plan_views.xml",
         "views/nudge_plugin_views.xml",
         "views/nudge_memory_menu.xml",
+        "views/nudge_provider_tier_views.xml",
     ],
     "assets": {
         "web.assets_backend": [

@@ -432,7 +432,8 @@ class NudgeConversation(models.Model):
         Provider = self.env["nudge.provider"].sudo()
         provider = Provider._get_for_mode(mode or MODE_TALK)
         if not provider:
-            provider = self.sudo().provider_id
+            # S6: the provider whose economy tier answered last time, not the economy tier itself
+            provider = self.sudo().main_provider_id or self.sudo().provider_id
             if provider and provider in (Provider._get_for_mode(MODE_AGENT) | Provider._get_for_mode(MODE_DEV)
                                          | Provider._get_fallback()):
                 # Answered by the provider of the work last time, or by the one standing in (NP-10):

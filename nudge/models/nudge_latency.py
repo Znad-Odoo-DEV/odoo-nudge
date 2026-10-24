@@ -13,6 +13,10 @@ else:
 # (streaming) and the wait in the queue (the waiting room, NP-04): add the Integer field with
 # one of these names (milliseconds) to nudge.message and the panel shows it on the next update.
 HOOK_COLUMNS = ("first_line_ms", "queue_wait_ms")
+# What the ledger tells of each answer: the provider, the tier that gave it and what that saved (S6)
+USAGE_BY_MESSAGE = (
+    "SELECT message_id, MIN(provider_id) AS provider_id, MIN(tier) AS tier, SUM(cost_saved) AS cost_saved "
+    "FROM nudge_usage WHERE message_id IS NOT NULL GROUP BY message_id")
 
 
 class NudgeLatencyReport(models.Model):
@@ -31,6 +35,12 @@ class NudgeLatencyReport(models.Model):
     provider_id = fields.Many2one("nudge.provider", string="Provider", readonly=True)
     user_id = fields.Many2one("res.users", string="Person", readonly=True)
     company_id = fields.Many2one("res.company", readonly=True)
+    # S6: which model answered, and what the economy tier saved (from the ledger of usage)
+    tier = fields.Selection([("main", "Main Model"), ("economy", "Economy Model")], readonly=True)
+    cost_saved = fields.Float(
+        string="Saved", digits=(12, 6), readonly=True,
+        help="What the economy tier saved: its tokens at the prices of the model of the provider, less "
+             "what they cost. An estimate.")
     answers = fields.Integer(readonly=True)
     timed_answers = fields.Integer(
         string="Timed Answers", readonly=True, help="Answers that called the provider and have a duration.")
@@ -82,6 +92,7 @@ class NudgeLatencyReport(models.Model):
                         u.provider_id AS provider_id,
                         c.user_id AS user_id,
                         c.company_id AS company_id,
+                        u.tier AS tier,
                         COUNT(*) AS answers,
                         COUNT(*) FILTER (WHERE m.duration_ms > 0) AS timed_answers,
                         COUNT(*) FILTER (WHERE m.state = 'error') AS errors,
@@ -89,6 +100,7 @@ class NudgeLatencyReport(models.Model):
                         COALESCE(SUM(COALESCE(m.input_tokens, 0) + COALESCE(m.output_tokens, 0)
                                      + COALESCE(m.cache_read_tokens, 0) + COALESCE(m.cache_write_tokens, 0)), 0)::int AS tokens,
                         COALESCE(SUM(m.cost), 0) AS cost,
+                        COALESCE(SUM(u.cost_saved), 0) AS cost_saved,
                         percentile_cont(0.5) WITHIN GROUP (ORDER BY m.duration_ms)
                             FILTER (WHERE m.duration_ms > 0) AS duration_p50,
                         percentile_cont(0.95) WITHIN GROUP (ORDER BY m.duration_ms)
@@ -102,12 +114,9 @@ class NudgeLatencyReport(models.Model):
                         {queue[2]} AS queue_wait_p95
                     FROM nudge_message m
                     JOIN nudge_conversation c ON c.id = m.conversation_id
-                    LEFT JOIN (
-                        SELECT message_id, MIN(provider_id) AS provider_id
-                        FROM nudge_usage WHERE message_id IS NOT NULL GROUP BY message_id
-                    ) u ON u.message_id = m.id
+                    LEFT JOIN ({USAGE_BY_MESSAGE}) u ON u.message_id = m.id
                     WHERE m.role = 'assistant'
-                    GROUP BY 1, 2, 3, 4, 5
+                    GROUP BY 1, 2, 3, 4, 5, 6
                 ) grouped
             )""")
 
@@ -120,7 +129,8 @@ class NudgeLatencyReport(models.Model):
         :param date_from: first day, included (a date or ``YYYY-MM-DD``)
         :param date_to: last day, included
         :return: ``{"by_mode": [...], "by_provider": [...], "by_user": [...], "by_company": [...],
-            "by_day": [...]}``; a row has its name, answers, errors, refusals, tokens, cost,
+            "by_day": [...], "by_tier": [...]}``; a row has its name, answers, errors, refusals, tokens,
+            cost, ``cost_saved`` (S6),
             ``duration_p50``, ``duration_p95``, and the first line and queue wait ones, which
             are None until the answers carry them"""
         if not self.env.user.has_group("nudge.group_nudge_manager"):
@@ -139,7 +149,7 @@ class NudgeLatencyReport(models.Model):
                        COUNT(*) FILTER (WHERE m.state = 'refused'),
                        COALESCE(SUM(COALESCE(m.input_tokens, 0) + COALESCE(m.output_tokens, 0)
                                     + COALESCE(m.cache_read_tokens, 0) + COALESCE(m.cache_write_tokens, 0)), 0),
-                       COALESCE(SUM(m.cost), 0),
+                       COALESCE(SUM(m.cost), 0), COALESCE(SUM(u.cost_saved), 0),
                        percentile_cont(0.5) WITHIN GROUP (ORDER BY m.duration_ms)
                            FILTER (WHERE m.duration_ms > 0),
                        percentile_cont(0.95) WITHIN GROUP (ORDER BY m.duration_ms)
@@ -147,16 +157,13 @@ class NudgeLatencyReport(models.Model):
                        {first[1]}, {first[2]}, {queue[1]}, {queue[2]}
                 FROM nudge_message m
                 JOIN nudge_conversation c ON c.id = m.conversation_id
-                LEFT JOIN (
-                    SELECT message_id, MIN(provider_id) AS provider_id
-                    FROM nudge_usage WHERE message_id IS NOT NULL GROUP BY message_id
-                ) u ON u.message_id = m.id
+                LEFT JOIN ({USAGE_BY_MESSAGE}) u ON u.message_id = m.id
                 {join}
                 WHERE m.role = 'assistant'
                   AND (m.create_date AT TIME ZONE 'UTC')::date BETWEEN %s AND %s
                   AND (c.company_id IS NULL OR c.company_id = ANY(%s))
                 GROUP BY 1 ORDER BY 1""", (str(date_from), str(date_to), companies))
-            keys = ("name", "answers", "errors", "refusals", "tokens", "cost",
+            keys = ("name", "answers", "errors", "refusals", "tokens", "cost", "cost_saved",
                     "duration_p50", "duration_p95", "first_line_p50", "first_line_p95",
                     "queue_wait_p50", "queue_wait_p95")
             return [dict(zip(keys, row)) for row in self.env.cr.fetchall()]
@@ -169,4 +176,6 @@ class NudgeLatencyReport(models.Model):
                 "LEFT JOIN res_users ru ON ru.id = c.user_id LEFT JOIN res_partner pa ON pa.id = ru.partner_id"),
             "by_company": group("COALESCE(co.name, '')", "LEFT JOIN res_company co ON co.id = c.company_id"),
             "by_day": group("(m.create_date AT TIME ZONE 'UTC')::date::text"),
+            # S6: the model of the provider and its economy tier, side by side
+            "by_tier": group("COALESCE(u.tier, '')"),
         }
