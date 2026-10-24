@@ -112,6 +112,14 @@ class TestNoaiFuzzy(BaseCase):
                 self.assertEqual((understood(parsed), parsed.kind), (intent, kind), parsed)
                 self.assertTrue(parsed.corrections, parsed)
 
+    def test_a_bare_name_with_a_slip_is_offered_as_open_never_acted_on(self):
+        for text, kind in (("sales ordrs", "sales_order"), ("qoutations", "quotation")):
+            with self.subTest(text=text):
+                parsed = grammar.parse(text, SCREEN)
+                self.assertEqual(understood(parsed), "", parsed)
+                self.assertEqual([(c["intent"], c["kind"]) for c in parsed.candidates], [("open", kind)])
+        self.assertEqual(grammar.parse("sales orders", SCREEN).candidates, [])
+
     def test_a_slip_in_a_phrase_finds_the_phrase(self):
         parsed = grammar.parse("how maney employes", SCREEN)
         self.assertEqual((understood(parsed), parsed.kind), ("aggregate", "employee"), parsed)
