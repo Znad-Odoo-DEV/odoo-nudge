@@ -8,7 +8,7 @@ cover is said to be unknown, not guessed.
 """
 import re
 
-from ..profile import activity
+from ..profile import activity, collectors
 from . import base
 
 WORD = re.compile(r"[\w]+", re.UNICODE)
@@ -139,8 +139,7 @@ def _page_for(env, words):
 
 def edition(env):
     """:return: "Enterprise" or "Community", what this database runs"""
-    Module = env["ir.module.module"].sudo()
-    return "Enterprise" if Module.search_count([("state", "=", "installed"), ("license", "=", "OEEL-1")]) else "Community"
+    return "Enterprise" if collectors.is_enterprise(env) else "Community"
 
 
 EDITION_NOTE = {
