@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_answer_cache_view_list" model="ir.ui.view">
+        <field name="name">nudge.answer.cache.view.list</field>
+        <field name="model">nudge.answer.cache</field>
+        <field name="arch" type="xml">
+            <list string="Cached Answers" create="0" edit="0">
+                <header>
+                    <button name="action_clear_all" type="object" string="Empty the cache" display="always"
+                            groups="nudge.group_nudge_manager"
+                            confirm="Every cached answer is deleted. The next questions ask the AI provider again."/>
+                </header>
+                <field name="question"/>
+                <field name="answer" optional="hide"/>
+                <field name="language" optional="show"/>
+                <field name="screen_model" optional="show"/>
+                <field name="view_type" optional="hide"/>
+                <field name="company_id" optional="show" groups="base.group_multi_company"/>
+                <field name="stored_on" optional="show"/>
+                <field name="hits" sum="Served"/>
+                <field name="near_hits" optional="hide"/>
+                <field name="tokens_saved" sum="Tokens Saved"/>
+                <field name="cost_saved" optional="show" sum="Cost Saved"/>
+                <field name="last_hit" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_answer_cache_view_form" model="ir.ui.view">
+        <field name="name">nudge.answer.cache.view.form</field>
+        <field name="model">nudge.answer.cache</field>
+        <field name="arch" type="xml">
+            <form string="Cached Answer" create="0" edit="0">
+                <sheet>
+                    <group>
+                        <field name="question"/>
+                        <field name="answer"/>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="language"/>
+                            <field name="mode"/>
+                            <field name="screen_model"/>
+                            <field name="view_type"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="version"/>
+                        </group>
+                        <group>
+                            <field name="stored_on"/>
+                            <field name="hits"/>
+                            <field name="near_hits"/>
+                            <field name="last_hit"/>
+                            <field name="tokens"/>
+                            <field name="tokens_saved"/>
+                            <field name="cost_saved"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_answer_cache_view_search" model="ir.ui.view">
+        <field name="name">nudge.answer.cache.view.search</field>
+        <field name="model">nudge.answer.cache</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="question"/>
+                <field name="answer"/>
+                <field name="screen_model"/>
+                <filter name="served" string="Served" domain="[('hits', '>', 0)]"/>
+                <group>
+                    <filter name="group_screen" string="Screen Model" context="{'group_by': 'screen_model'}"/>
+                    <filter name="group_language" string="Language" context="{'group_by': 'language'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_answer_cache_action" model="ir.actions.act_window">
+        <field name="name">Cached Answers</field>
+        <field name="res_model">nudge.answer.cache</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No answer is cached yet</p>
+            <p>
+                When someone asks how to do something and the AI provider explains it, the explanation is
+                kept here for a few days. The same question of someone with the same rights, in the same
+                company, on the same kind of screen, is then answered from here at once, without a call
+                to the provider and without cost. Nothing that touched a record, a person's data or a
+                secret is kept. Delete an answer you do not trust.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="nudge_menu_answer_cache" name="Cached Answers" sequence="23"
+              parent="nudge_menu_knowledge" action="nudge_answer_cache_action"
+              groups="nudge.group_nudge_manager"/>
+
+    <record id="nudge_answer_cache_rule_company" model="ir.rule">
+        <field name="name">Nudge Cached Answers: companies of the manager</field>
+        <field name="model_id" ref="model_nudge_answer_cache"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[Command.link(ref('nudge.group_nudge_manager'))]"/>
+    </record>
+
+    <record id="nudge_usage_view_search_cache" model="ir.ui.view">
+        <field name="name">nudge.usage.view.search.cache</field>
+        <field name="model">nudge.usage</field>
+        <field name="inherit_id" ref="nudge.nudge_usage_view_search"/>
+        <field name="arch" type="xml">
+            <filter name="memory" position="after">
+                <filter name="cache" string="Cached Answers" domain="[('kind', '=', 'cache')]"/>
+            </filter>
+        </field>
+    </record>
+
+    <record id="res_config_settings_view_form_cache" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.nudge.cache</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="nudge.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <block name="nudge_memory_container" position="after">
+                <block title="Answer Cache" name="nudge_cache_container">
+                    <setting help="The same question, asked again with the same rights, in the same company, on the same kind of screen, is answered from what was kept instead of asking the AI provider again. Only explanations that touched no record, no personal data and no secret are kept; a change of a skill, a lesson or a setting empties the cache; private mode never keeps anything.">
+                        <field name="nudge_cache_exact"/>
+                        <div class="content-group" invisible="not nudge_cache_exact">
+                            <div class="row mt8">
+                                <label for="nudge_cache_ttl_days" class="col-lg-6 o_light_label"/>
+                                <field name="nudge_cache_ttl_days" class="col-lg-6"/>
+                            </div>
+                            <div class="mt8">
+                                <button name="%(nudge_answer_cache_action)d" type="action"
+                                        string="Cached Answers" icon="oi-arrow-right" class="btn-link"/>
+                            </div>
+                        </div>
+                    </setting>
+                    <setting help="A question that nearly matches an earlier one is offered that answer, marked as an earlier answer to a very close question, with the button that asks the provider again. Off until you turn it on." invisible="not nudge_cache_exact">
+                        <field name="nudge_cache_near"/>
+                        <div class="content-group" invisible="not nudge_cache_near">
+                            <div class="row mt8">
+                                <label for="nudge_cache_near_threshold" class="col-lg-6 o_light_label"/>
+                                <field name="nudge_cache_near_threshold" class="col-lg-6"/>
+                            </div>
+                        </div>
+                    </setting>
+                </block>
+            </block>
+        </field>
+    </record>
+</odoo>

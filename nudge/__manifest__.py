@@ -68,6 +68,8 @@ Without them the rest works and the feature says what is missing.
         "views/nudge_latency_views.xml",
         "views/res_config_settings_views.xml",
         "views/nudge_menus.xml",
+        "views/nudge_answer_cache_views.xml",
+        "data/nudge_answer_cache_cron.xml",
         "views/nudge_latency_menu.xml",
         "views/nudge_setup_wizard_menu.xml",
         "views/nudge_home_views.xml",

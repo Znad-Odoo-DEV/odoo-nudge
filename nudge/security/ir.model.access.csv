@@ -77,3 +77,4 @@ access_nudge_coverage_manager,nudge.coverage manager,model_nudge_coverage,group_
 access_nudge_skill_user,nudge.skill user,model_nudge_skill,group_nudge_user,1,0,0,0
 access_nudge_skill_manager,nudge.skill manager,model_nudge_skill,group_nudge_manager,1,1,1,1
 access_nudge_skill_revision_manager,nudge.skill.revision manager,model_nudge_skill_revision,group_nudge_manager,1,0,0,0
+access_nudge_answer_cache_manager,nudge.answer.cache manager,model_nudge_answer_cache,group_nudge_manager,1,0,0,1

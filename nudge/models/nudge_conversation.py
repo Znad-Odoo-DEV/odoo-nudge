@@ -686,6 +686,12 @@ class NudgeConversation(models.Model):
             self, text, mode, focus, found, explain, background, snapshot, fresh=fresh)
         if understood:
             return understood
+        # S7: the same question of someone with the same rights, answered before and still fresh
+        cached = self.env["nudge.answer.cache"]._chat_serve(self, text, mode, snapshot, blocked=bool(
+            fresh or focus or found or background or spoken or read_aloud or answer_in or extra or report
+            or inner or explain == "screen"))
+        if cached:
+            return cached
         provider, notice = self._chat_choose(mode)
         slot = self.env["nudge.slot"]
         if not inner and not background:
