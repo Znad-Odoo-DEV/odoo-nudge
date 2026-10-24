@@ -641,9 +641,10 @@ class NudgeMcpOAuth(models.AbstractModel):
 
     def _usable_grant(self, grant):
         """:return: whether a grant may still be given tokens: not revoked,
-        the client and the person still active, the person still in the group"""
+        the client and the person still active, the person still in the group, an auditor before the last day"""
         user = grant.user_id
-        return bool(grant.active and grant.client_id.active and user.active and user.has_group(GROUP))
+        return bool(grant.active and grant.client_id.active and user.active and user.has_group(GROUP)
+                    and not self.env["res.users"]._nudge_auditor_expired(user.id))
 
     def _exchange_code(self, params, client):
         code = params.get("code")
