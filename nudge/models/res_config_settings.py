@@ -178,6 +178,8 @@ class ResConfigSettings(models.TransientModel):
     nudge_allow_recipe_index = fields.Boolean(
         related="company_id.nudge_allow_recipe_index", readonly=False,
         string="Allow Fetching Recipe Indexes")
+    nudge_egress_hosts = fields.Text(  # NP-15
+        related="company_id.nudge_egress_hosts", readonly=False, string="Allowed Destinations")
     # NP-13
     nudge_redact_pii = fields.Boolean(
         related="company_id.nudge_redact_pii", readonly=False, string="Redact Personal Data Before Sending")

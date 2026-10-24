@@ -43,6 +43,9 @@
                         </setting>
                     </block>
                     <block title="Privacy" name="nudge_privacy_container">
+                        <setting help="The only hosts Nudge may send to: AI providers, connectors, the recipe marketplace, the search model download and the compliance feed. One per line, for example api.anthropic.com, localhost:11434 or *.example.com. Empty: no restriction. Any other host is refused before the request.">
+                            <field name="nudge_egress_hosts" placeholder="api.anthropic.com"/>
+                        </setting>
                         <setting help="Nothing is sent to an AI provider that does not run on your own server (tick it on the provider). Quick search, the slash commands, the recorded tours, the explanations that need no AI, remembered answers and providers on your own server keep working. A lock shows in the panel.">
                             <field name="nudge_private_mode"/>
                             <div class="text-muted" invisible="not nudge_private_mode">

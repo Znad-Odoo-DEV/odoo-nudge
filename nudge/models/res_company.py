@@ -99,3 +99,10 @@ class ResCompany(models.Model):
              "numbers, IBANs, Emirates ID, national numbers and card numbers become tokens such as EMAIL_1. "
              "The answer gets the real values back here. It reduces what is sent; it cannot promise to catch "
              "every number.")
+
+    # NP-15. Not required: the column is added to companies that exist
+    nudge_egress_hosts = fields.Text(
+        string="Allowed Destinations", copy=False,
+        help="The hosts Nudge may send to: AI providers, connectors, the recipe marketplace, the search model "
+             "download and the compliance feed. One per line: a host (api.anthropic.com), a host with a port "
+             "(localhost:11434) or a domain (*.example.com). Empty: no restriction.")

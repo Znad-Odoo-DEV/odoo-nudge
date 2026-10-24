@@ -42,6 +42,7 @@ from . import res_users
 from . import res_partner
 from . import nudge_coach
 from . import nudge_home
+from . import nudge_egress  # NP-15
 from . import nudge_recipe_market
 from . import nudge_recipe_publish
 from . import nudge_setup_wizard

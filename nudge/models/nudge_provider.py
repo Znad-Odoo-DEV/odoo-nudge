@@ -479,6 +479,26 @@ class NudgeProvider(models.Model):
                     "server. Ask an administrator for a provider that does (Settings, Nudge), "
                     "or use quick search and the slash commands, which need no AI.",
                     provider.name))
+        self._check_egress()
+
+    def _check_egress(self):
+        """NP-15: the hosts of the provider (its address, or the one of its maker; the voice address) must be
+        on the list of allowed destinations of the company, when there is one.
+
+        :raise UserError: naming the host that is not allowed"""
+        egress = self.env["nudge.egress"]
+        if not egress._entries():
+            return
+        for provider in self:
+            egress.check(provider._egress_url(), "chat")
+            if provider.stt_url:
+                egress.check(provider.stt_url, "voice")
+
+    def _egress_url(self):
+        """:return: where the requests of this provider go: its address, or the public one of its maker"""
+        self.ensure_one()
+        url = (self.base_url or "").strip()
+        return url or ("https://api.anthropic.com" if self.kind == "anthropic" else "")
 
     @api.model
     def _complete(self, system, prompt, user, company, timeout=40, check_budget=True, **links):

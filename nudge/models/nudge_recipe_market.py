@@ -269,6 +269,7 @@ class NudgeRecipeSource(models.Model):
     @api.model
     def _get(self, url, cap=CAP):
         """:return: the bytes of ``url``, or raises a UserError with a sentence that says why not"""
+        self.env["nudge.egress"].check(url, "recipes")  # NP-15
         try:
             return _download(url, cap)
         except FetchError as error:

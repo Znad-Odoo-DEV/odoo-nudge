@@ -499,6 +499,8 @@ class NudgeEmbedding(models.Model):
                 self._commit()
 
         try:
+            for item in spec["files"]:  # NP-15
+                self.env["nudge.egress"].check(item["url"], "model")
             finished = embedder.download(
                 spec["files"], self._model_dir(), progress=progress, budget=DOWNLOAD_BUDGET)
         except Exception as error:  # noqa: BLE001 - said in the Settings, not lost in a log

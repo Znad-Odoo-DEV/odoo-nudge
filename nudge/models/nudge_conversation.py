@@ -390,6 +390,8 @@ class NudgeConversation(models.Model):
         snapshot = screen.sanitize(raw) if self._can_share_screen() else None
         if not snapshot:
             return {}, ""
+        if screen.has_masked_value(snapshot):  # NP-15: the administrators are told, once a day per screen
+            self.env["nudge.egress"].alert_credential_screen(snapshot)
         fingerprint = screen.fingerprint(snapshot)
         previous = self.env["nudge.message"].sudo().search([
             ("conversation_id", "=", self.id),
