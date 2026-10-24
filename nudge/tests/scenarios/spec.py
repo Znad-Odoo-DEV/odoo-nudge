@@ -13,9 +13,11 @@ MODES = (TALK, AGENT, DEV)
 LANGUAGES = ("en", "ar", "arabizi")
 
 # Largest request (system + turns + tools, about 4 characters a token) a scenario may send, by mode.
-# A scenario may set its own. Measured on 19.0.1.58.0 (largest request: talk 18.7k, agent 29.5k, dev 47.6k) plus about 8% room: a release that makes a
-# request heavier than this fails the gate until the budget is raised on purpose.
-DEFAULT_BUDGET = {TALK: 19500, AGENT: 32000, DEV: 52000}
+# A scenario may set its own. Measured on 19.0.1.59.0, skills and caching in (largest request: talk 16.4k, agent 22.6k,
+# dev 21.1k; 18.7k, 29.5k and 47.6k on 19.0.1.58.0) plus about 8% room, more for dev whose scenarios that need
+# base_automation are skipped without it: a release that makes a request heavier than this fails the gate until the
+# budget is raised on purpose.
+DEFAULT_BUDGET = {TALK: 17800, AGENT: 24500, DEV: 26000}
 
 
 def round_(text="", *calls):
