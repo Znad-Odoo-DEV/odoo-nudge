@@ -13328,6 +13328,9 @@ msgstr "لكل مليون رمز"
 #: model:ir.model.fields,help:nudge.field_nudge_provider__price_cache_write
 #: model:ir.model.fields,help:nudge.field_nudge_provider__price_input
 #: model:ir.model.fields,help:nudge.field_nudge_provider__price_output
+#: model:ir.model.fields,help:nudge.field_nudge_provider__economy_price_output
+#: model:ir.model.fields,help:nudge.field_nudge_provider__economy_price_cache_read
+#: model:ir.model.fields,help:nudge.field_nudge_provider__economy_price_cache_write
 msgid "Per million tokens."
 msgstr "لكل مليون رمز."
 
@@ -25261,3 +25264,245 @@ msgstr "كتبها مدير"
 #: model:ir.model.fields,help:nudge.field_nudge_memory_translation__language
 msgid "en, ar, fr..."
 msgstr "en وar وfr..."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__economy_model_name
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_usage__tier__economy
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_conversation__answer_tier__economy
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_latency_report__tier__economy
+msgid "Economy Model"
+msgstr "النموذج الاقتصادي"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_usage__tier__main
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_conversation__answer_tier__main
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_latency_report__tier__main
+msgid "Main Model"
+msgstr "النموذج الرئيسي"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_provider__economy_model_name
+msgid ""
+"A cheaper model of this provider, such as claude-haiku-5-5 beside claude-"
+"sonnet-5-5, a mini model beside the full one, Flash beside Pro. It answers "
+"the light work: questions in Talk, which change nothing, summaries, "
+"explanations and short texts. The model above answers what acts or builds, "
+"what is marked heavy, and once more what the economy model failed at. Empty:"
+" the economy provider of Settings, if any, else the model above answers "
+"everything, as before."
+msgstr ""
+"نموذج أرخص من هذا المزوّد، مثل claude-haiku-5-5 بجانب claude-sonnet-5-5، أو "
+"نموذج mini بجانب النموذج الكامل، أو Flash بجانب Pro. يجيب عن العمل الخفيف: "
+"أسئلة وضع الحوار التي لا تغيّر شيئًا، والملخصات، والشروح، والنصوص القصيرة. "
+"ويجيب النموذج أعلاه عمّا ينفّذ أو يبني، وعمّا وُسم بأنه ثقيل، ومرة أخرى عمّا"
+" فشل فيه النموذج الاقتصادي. فارغ: المزوّد الاقتصادي في الإعدادات إن وُجد، "
+"وإلا يجيب النموذج أعلاه عن كل شيء كما كان من قبل."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__economy_capabilities
+msgid "Economy Capabilities"
+msgstr "قدرات النموذج الاقتصادي"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__economy_price_input
+msgid "Economy Input Price"
+msgstr "سعر الإدخال للنموذج الاقتصادي"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_provider__economy_price_input
+msgid ""
+"Per million tokens. Filled from the price table of Nudge for the models it "
+"knows."
+msgstr "لكل مليون رمز. يُملأ من جدول أسعار Nudge للنماذج التي يعرفها."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__economy_price_output
+msgid "Economy Output Price"
+msgstr "سعر الإخراج للنموذج الاقتصادي"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__economy_price_cache_read
+msgid "Economy Cache Read Price"
+msgstr "سعر القراءة من الذاكرة المؤقتة للنموذج الاقتصادي"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__economy_price_cache_write
+msgid "Economy Cache Write Price"
+msgstr "سعر الكتابة في الذاكرة المؤقتة للنموذج الاقتصادي"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_usage__tier
+#: model:ir.model.fields,field_description:nudge.field_nudge_latency_report__tier
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_latency_view_search
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_search_tier
+msgid "Tier"
+msgstr "المستوى"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_usage__tier
+msgid ""
+"Which model answered: the model of the provider, or its economy tier, which "
+"answers the light work. Empty on the lines written before the tiers, and on "
+"what is not an answer."
+msgstr ""
+"أيّ نموذج أجاب: نموذج المزوّد، أو مستواه الاقتصادي الذي يجيب عن العمل "
+"الخفيف. فارغ في الأسطر المكتوبة قبل المستويات، وفيما ليس إجابة."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_usage__cost_saved
+#: model:ir.model.fields,field_description:nudge.field_nudge_latency_report__cost_saved
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_latency_view_list
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_list_tier
+msgid "Saved"
+msgstr "الموفَّر"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_usage__cost_saved
+msgid ""
+"What the economy tier saved on this call: its tokens at the prices of the "
+"model of the provider, less what they cost. An estimate; 0 when the price of"
+" the economy model is not known."
+msgstr ""
+"ما وفّره المستوى الاقتصادي في هذا الاستدعاء: رموزه بأسعار نموذج المزوّد ناقص"
+" ما كلّفته. تقدير؛ 0 حين يكون سعر النموذج الاقتصادي غير معروف."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_latency_report__cost_saved
+msgid ""
+"What the economy tier saved: its tokens at the prices of the model of the "
+"provider, less what they cost. An estimate."
+msgstr ""
+"ما وفّره المستوى الاقتصادي: رموزه بأسعار نموذج المزوّد ناقص ما كلّفته. "
+"تقدير."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_skill__is_heavy
+msgid "Heavy"
+msgstr "ثقيلة"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_skill__is_heavy
+msgid ""
+"A question given this skill is answered by the model of the provider, never "
+"by its economy tier: for work that needs the stronger model even in Talk."
+msgstr ""
+"السؤال الذي تُعطى له هذه المهارة يجيب عنه نموذج المزوّد، لا مستواه الاقتصادي"
+" أبدًا: لعمل يحتاج النموذج الأقوى حتى في وضع الحوار."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__answer_tier
+msgid "Answered By"
+msgstr "أجاب عنه"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_conversation__answer_tier
+msgid "The tier answering the question being answered."
+msgstr "المستوى الذي يجيب عن السؤال الجاري."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__main_provider_id
+msgid "Main Provider"
+msgstr "المزوّد الرئيسي"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_conversation__main_provider_id
+msgid ""
+"The provider whose economy tier answers the question being answered, and who"
+" answers instead when it fails."
+msgstr ""
+"المزوّد الذي يجيب مستواه الاقتصادي عن السؤال الجاري، والذي يجيب بدلًا منه "
+"حين يفشل."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__overview_hash
+msgid "Overview Hash"
+msgstr "بصمة النظرة العامة"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_conversation__overview_hash
+msgid "A digest of the overview of the database last given in full"
+msgstr "بصمة آخر نظرة عامة على قاعدة البيانات أُعطيت كاملة"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__overview_question_id
+msgid "Overview Question"
+msgstr "سؤال النظرة العامة"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_conversation__overview_question_id
+msgid "The question the overview of the database was last given in full with"
+msgstr "السؤال الذي أُعطيت معه النظرة العامة على قاعدة البيانات كاملة آخر مرة"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_economy_provider_id
+msgid "Economy Provider"
+msgstr "المزوّد الاقتصادي"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_economy_provider_id
+msgid ""
+"Answers the light work (questions in Talk, which change nothing, summaries, "
+"explanations, short texts) of every provider that has no economy model of "
+"its own, set on the provider. The provider of the conversation answers what "
+"acts or builds, what is marked heavy, and once more what this one failed at."
+" In private mode only if it runs on your own server. Empty: only the economy"
+" models set on the providers."
+msgstr ""
+"يجيب عن العمل الخفيف (أسئلة وضع الحوار التي لا تغيّر شيئًا، والملخصات، "
+"والشروح، والنصوص القصيرة) لكل مزوّد ليس له نموذج اقتصادي خاص به محدد على "
+"المزوّد. ويجيب مزوّد المحادثة عمّا ينفّذ أو يبني، وعمّا وُسم بأنه ثقيل، ومرة"
+" أخرى عمّا فشل فيه هذا المزوّد. في الوضع الخاص فقط إذا كان يعمل على خادمك. "
+"فارغ: النماذج الاقتصادية المحددة على المزوّدين فقط."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
+msgid ""
+"A cheaper model of this provider answers the light work: questions in Talk, "
+"which change nothing, summaries, explanations and short texts. The model "
+"above answers what acts or builds, what is marked heavy, and once more what "
+"the economy model failed at. Each answer in the usage list says which one "
+"answered."
+msgstr ""
+"نموذج أرخص من هذا المزوّد يجيب عن العمل الخفيف: أسئلة وضع الحوار التي لا "
+"تغيّر شيئًا، والملخصات، والشروح، والنصوص القصيرة. ويجيب النموذج أعلاه عمّا "
+"ينفّذ أو يبني، وعمّا وُسم بأنه ثقيل، ومرة أخرى عمّا فشل فيه النموذج "
+"الاقتصادي. وتذكر كل إجابة في قائمة الاستهلاك أيّهما أجاب."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid ""
+"A cheaper model answers the light work: questions in Talk, which change "
+"nothing, summaries, explanations and short texts. Set one on each provider "
+"(a cheaper model of the same provider, such as Claude Haiku beside Sonnet, a"
+" mini model beside the full one, Flash beside Pro), or choose here another "
+"provider for those that have none. The provider of the conversation answers "
+"what acts or builds, what is marked heavy, and once more what the cheaper "
+"model failed at. Latency and Cost shows the answers of each and about what "
+"was saved."
+msgstr ""
+"نموذج أرخص يجيب عن العمل الخفيف: أسئلة وضع الحوار التي لا تغيّر شيئًا، "
+"والملخصات، والشروح، والنصوص القصيرة. حدّد واحدًا على كل مزوّد (نموذج أرخص من"
+" المزوّد نفسه، مثل Claude Haiku بجانب Sonnet، أو نموذج mini بجانب النموذج "
+"الكامل، أو Flash بجانب Pro)، أو اختر هنا مزوّدًا آخر للمزوّدين الذين ليس لهم"
+" نموذج اقتصادي. ويجيب مزوّد المحادثة عمّا ينفّذ أو يبني، وعمّا وُسم بأنه "
+"ثقيل، ومرة أخرى عمّا فشل فيه النموذج الأرخص. وتعرض صفحة السرعة والتكلفة "
+"إجابات كلٍّ منهما وتقدير ما وُفّر."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "Answered by the main model (%s)"
+msgstr "أجاب النموذج الرئيسي (%s)"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__overview_rest
+msgid "Overview Rest"
+msgstr "بقية النظرة العامة"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_conversation__overview_rest
+msgid ""
+"What that question was given of the overview beyond what every call is given"
+msgstr "ما أُعطيه ذلك السؤال من النظرة العامة زيادةً على ما يُعطاه كل استدعاء"
