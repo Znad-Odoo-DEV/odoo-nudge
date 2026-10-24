@@ -112,6 +112,13 @@ TOO_MANY_STEPS = (
     "Nothing more can be done for this request: the limit of steps is reached. Tell the "
     "person what was done and what is left, so that they can ask for the rest."
 )
+# What one round may run outside a run (Talk), and read back in all: each result is replayed in the next rounds
+MAX_ROUND_CALLS = 10
+MAX_ROUND_CHARS = 60_000
+TOO_MANY_AT_ONCE = (
+    "Not run: too many tools at once in one step. Answer with what was found, or ask for the rest "
+    "a few at a time."
+)
 
 
 # The commands of the message box that look for a product
@@ -1252,6 +1259,7 @@ class NudgeConversation(models.Model):
         run = self.sudo().run_id
         results, events, must_read = [], [], False
         waiting = self.env["nudge.step"].sudo()
+        ran, read = 0, 0
         for call in calls:
             tool = tools.base.TOOLS.get(call["name"])
             is_action = isinstance(tool, tools.base.Action)
@@ -1264,6 +1272,14 @@ class NudgeConversation(models.Model):
                 results.append({
                     "id": call["id"], "name": call["name"],
                     "content": TOO_MANY_STEPS, "is_error": True,
+                })
+                must_read = True
+                continue
+            elif (not run and ran >= MAX_ROUND_CALLS) or read >= MAX_ROUND_CHARS:
+                # Forty records read one by one in one step would be replayed in every round after
+                results.append({
+                    "id": call["id"], "name": call["name"],
+                    "content": TOO_MANY_AT_ONCE, "is_error": True,
                 })
                 must_read = True
                 continue
@@ -1297,6 +1313,7 @@ class NudgeConversation(models.Model):
             # Everything a tool says is framed as data, errors included: they quote what people wrote
             content = tools.base.as_data(call["name"], result.content, result.is_error)
             results.append(dict(entry, content=content, is_error=result.is_error))
+            ran, read = ran + 1, read + len(content)
         return results, events, must_read, waiting
 
     def _chat_list_step(self, run):
