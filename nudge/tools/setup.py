@@ -508,9 +508,9 @@ class CurrencyStep(Step):
         currency = find_currency(env, answers.get("currency"), company.country_id)
         if not currency:
             raise Refused("No currency is named like this. Ask the person for its code (AED, SAR, USD...).")
+        # sudo: only whether an entry exists, never its content; Odoo refuses the change whatever the rights
         if currency != company.currency_id and "account.move.line" in env \
-                and env["account.move.line"].has_access("read") \
-                and env["account.move.line"].search_count([("company_id", "=", company.id)], limit=1):
+                and env["account.move.line"].sudo().search_count([("company_id", "=", company.id)], limit=1):
             raise Refused("The company has accounting entries already: its currency can no longer be "
                           "changed. Say so.")
         lines = [_line(env._("Company currency"), currency.name, company.currency_id.name)]
