@@ -10,6 +10,7 @@ what can be done without AI.
 """
 import datetime
 import copy
+import re
 import json
 import logging
 
@@ -535,7 +536,11 @@ class NudgeNoai(models.AbstractModel):
     def _left_name(self, parsed):
         """:return: the words of the sentence that name someone or something, once the kind, the states, the
         period and the verbs are taken out: "Raghad" in “how many invoices for Raghad”"""
-        spans = grammar.scan(grammar.normalise.tokenize(parsed.text))
+        # A word read as another ("qoutations" as quotation) is that word here too, never a name left over
+        text = parsed.text
+        for fix in getattr(parsed, "corrections", None) or []:
+            text = re.sub(r"(?<!\w)%s(?!\w)" % re.escape(fix["word"]), lambda _m, to=fix["to"]: to, text)
+        spans = grammar.scan(grammar.normalise.tokenize(text))
         return grammar._name_of(spans).strip()
 
     def _what_is_said(self, parsed):

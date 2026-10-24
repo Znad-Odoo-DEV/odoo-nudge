@@ -559,3 +559,11 @@ edit("nudge/static/src/context/snapshot.js", [
 # FIX-18 RULE 1: a test patches Partner._has_field_access (19); on 18 it patches the shim of the records tool
 sub("nudge/tests/test_redact.py", r"        real = Partner\._has_field_access\n", "        real = records.has_field_access\n")
 sub("nudge/tests/test_redact.py", r'patch\.object\(Partner, "_has_field_access",', 'patch.object(records, "has_field_access",')
+
+# FIX-TRIAL-2 RULE 1: the groups of a server action are group_ids in 19, groups_id in 18/17 (only on ir.actions.server records)
+for _dir, _dirs, _fs in os.walk(ROOT):
+    for _f in _fs:
+        if _f.endswith(".xml"):
+            _rel = os.path.relpath(os.path.join(_dir, _f), ROOT).replace(os.sep, "/")
+            sub(_rel, r'(<record id="[^"]+" model="ir\.actions\.server">(?:(?!</record>).)*?)name="group_ids"',
+                r'\1name="groups_id"', flags=re.S)

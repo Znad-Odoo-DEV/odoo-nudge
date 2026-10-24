@@ -314,6 +314,36 @@ class TestNoaiRun(NudgeCase, TransactionCase):
         _conversation, events = self.order(self.worker, "كم عدد جهات الاتصال")
         self.assertIn(f"{total:,}", self.last_text(events))
 
+    def _talk(self, text, snapshot=None):
+        """The question as the chat of the browser sends it: Talk, through ``_chat_prepare``"""
+        conversation = self.env["nudge.conversation"].with_user(self.worker)._chat_open(None)
+        job = conversation._chat_prepare(text, snapshot=snapshot, mode="talk")
+        return job, "".join(e.get("text", "") for e in job.get("first_events", []) if e["type"] == "delta")
+
+    def test_a_slip_in_a_count_is_answered_by_the_rules_with_a_provider_set_up(self):
+        # Found in the live trial: "how many qoutations" read right by the parser, but the word left over was
+        # taken for a name ("nothing called qoutations"), the plan failed and the AI was asked
+        if not self.has_sales:
+            self.skipTest("Sales is not installed")
+        self.provider.active = True
+        total = self.env["sale.order"].with_user(self.worker).search_count([("state", "in", ("draft", "sent"))])
+        for text in ("how many qoutations", "how many quotations", "how many sales ordrs"):
+            with self.subTest(text=text):
+                job, said = self._talk(text)
+                self.assertTrue(job.get("first_events") and job["answered"], "Answered by the rules: %s" % job)
+                if "quot" in text or "qout" in text:
+                    self.assertIn(f"{total:,}", said)
+                self.assertNotIn("nothing called", said.lower())
+
+    def test_a_bare_name_with_a_slip_is_offered_back_not_sent_to_the_ai(self):
+        if not self.has_sales:
+            self.skipTest("Sales is not installed")
+        self.provider.active = True
+        for text in ("sales ordrs", "qoutations"):
+            with self.subTest(text=text):
+                job, said = self._talk(text)
+                self.assertIn("Did you mean", said, job)
+
     def test_a_filter_opens_the_list_with_the_conditions(self):
         if not self.has_sales:
             self.skipTest("Sales is not installed")
