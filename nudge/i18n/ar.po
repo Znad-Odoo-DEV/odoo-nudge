@@ -3407,6 +3407,7 @@ msgstr "قاعدة أتمتة مع بريد، تُجرّب على سجل تجر�
 
 #. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_recipe_entry__state__new
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_market_view_search
 msgid "Available"
 msgstr "متاحة"
 
@@ -4409,8 +4410,10 @@ msgstr "العمود"
 #. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_prompt__origin__module
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_skill__origin__module
+#: code:addons/nudge/models/nudge_recipe_sign.py:35
+#: code:addons/nudge/models/nudge_recipe_catalogue.py:36
 msgid "Comes with Nudge"
-msgstr "يأتي مع نادج"
+msgstr "يأتي مع نودج"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__command
@@ -5856,8 +5859,9 @@ msgstr "الملف المحفوظ"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_digest_link__domain
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_market_view_search
 msgid "Domain"
-msgstr "النطاق"
+msgstr "المجال"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_health_finding__domain_json
@@ -6940,6 +6944,7 @@ msgstr ""
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_profile__fingerprint
 #: model:ir.model.fields,field_description:nudge.field_nudge_question__fingerprint
+#: code:addons/nudge/models/nudge_recipe_sign.py:34
 msgid "Fingerprint"
 msgstr "البصمة"
 
@@ -8241,6 +8246,7 @@ msgstr "رموز المدخلات"
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_entry_view_kanban
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_market_view_list
 msgid "Install"
 msgstr "تثبيت"
 
@@ -15678,6 +15684,7 @@ msgstr "الحجم"
 #: model:ir.model.fields,field_description:nudge.field_nudge_note__skill_id
 #: model:ir.model.fields,field_description:nudge.field_nudge_skill_revision__skill_id
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_market_view_form
 msgid "Skill"
 msgstr "مهارة"
 
@@ -19472,8 +19479,9 @@ msgstr "تحديث %s"
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_entry_view_search
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_market_view_search
 msgid "Update Available"
-msgstr "يتوفر تحديث"
+msgstr "تحديث متاح"
 
 #. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_recipe_entry__state__update
@@ -23451,3 +23459,302 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:nudge.nudge_answer_cache_action
 msgid "No answer is cached yet"
 msgstr "لا توجد إجابة مخزنة بعد"
+
+#. module: nudge
+#: model:ir.actions.act_window,name:nudge.nudge_skill_market_action
+#: model:ir.actions.server,name:nudge.nudge_skill_market_open
+#: model:ir.ui.menu,name:nudge.nudge_menu_skill_market
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_market_view_list
+msgid "Skill Catalogue"
+msgstr "كتالوج المهارات"
+
+#. module: nudge
+#: model:ir.actions.act_window,name:nudge.nudge_recipe_publisher_action
+#: model:ir.ui.menu,name:nudge.nudge_menu_recipe_publishers
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_publisher_view_list
+msgid "Trusted Publishers"
+msgstr "الناشرون الموثوقون"
+
+#. module: nudge
+#: model:ir.ui.menu,name:nudge.nudge_menu_recipe_signing_key
+msgid "Signing Key"
+msgstr "مفتاح التوقيع"
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_sign.py:134
+msgid "Recipe signing key"
+msgstr "مفتاح توقيع الوصفات"
+
+#. module: nudge
+#: model:ir.actions.act_window,name:nudge.nudge_recipe_signing_key_action
+msgid "Recipe Signing Key"
+msgstr "مفتاح توقيع الوصفات"
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_sign.py:31
+msgid "Shown as Signed by this name."
+msgstr "يظهر على شكل: موقّعة من هذا الاسم."
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_sign.py:33
+msgid "Public Key"
+msgstr "المفتاح العام"
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_sign.py:58
+msgid "This key is already in the list."
+msgstr "هذا المفتاح موجود في القائمة."
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_sign.py:66
+msgid "Publisher Name"
+msgstr "اسم الناشر"
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_sign.py:84
+msgid "Private Key (PEM)"
+msgstr "المفتاح الخاص (PEM)"
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_sign.py:87
+msgid "Public Key to Share"
+msgstr "المفتاح العام للمشاركة"
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_sign.py:89
+msgid "Key Now in Use"
+msgstr "المفتاح المستخدم حاليا"
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_sign.py:98
+msgid "Only a system administrator sets the signing key."
+msgstr "مدير النظام وحده يضبط مفتاح التوقيع."
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_sign.py:105
+msgid "Choose the private key file first."
+msgstr "اختر ملف المفتاح الخاص أولا."
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_sign.py:110
+msgid "This is not an unprotected Ed25519 private key in PEM form."
+msgstr "هذا ليس مفتاح Ed25519 خاصا غير محمي بصيغة PEM."
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_sign.py:168
+msgid "The signature of this recipe cannot be read: it is not imported."
+msgstr "لا يمكن قراءة توقيع هذه الوصفة: لن يتم استيرادها."
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_sign.py:174
+msgid ""
+"The signature does not match: the recipe was changed after %s signed it. It "
+"is not imported."
+msgstr "التوقيع لا يطابق: تم تغيير الوصفة بعد أن وقّعها %s. لن يتم استيرادها."
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_wizard.py:160
+msgid "Signed by %s."
+msgstr "موقّعة من %s."
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_wizard.py:162
+msgid "Signed with a key nobody here trusts: treated as unsigned."
+msgstr "موقّعة بمفتاح لا يثق به أحد هنا: تعامل كغير موقّعة."
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_wizard.py:164
+msgid "Unsigned."
+msgstr "غير موقّعة."
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_wizard.py:132
+msgid "What changes in the instructions:"
+msgstr "ما يتغير في التعليمات:"
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_wizard.py:135
+msgid "Tools it asks for:"
+msgstr "الأدوات التي تطلبها:"
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_wizard.py:182
+msgid ""
+"This recipe is not signed by a trusted publisher: only a system "
+"administrator may import it."
+msgstr ""
+"هذه الوصفة غير موقّعة من ناشر موثوق: مدير النظام وحده يستطيع استيرادها."
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_wizard.py:182
+msgid ""
+"This recipe is not signed by a trusted publisher. Read the skills below and "
+"tick I Read the Warning to import it; its skills come in as drafts."
+msgstr ""
+"هذه الوصفة غير موقّعة من ناشر موثوق. اقرأ المهارات أدناه وفعّل «قرأت "
+"التحذير» لاستيرادها؛ تدخل مهاراتها كمسودات."
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_wizard.py:101
+msgid "I Read the Warning"
+msgstr "قرأت التحذير"
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_wizard.py:104
+msgid "Skills in Full"
+msgstr "المهارات كاملة"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_import_view_form
+msgid "Skills in full"
+msgstr "المهارات كاملة"
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_wizard.py:98
+msgid "Who Made It"
+msgstr "من أعدّها"
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_wizard.py:34
+msgid "Sign it"
+msgstr "وقّعها"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_export_view_form
+msgid "Signature"
+msgstr "التوقيع"
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_wizard.py:35
+#: code:addons/nudge/models/nudge_recipe_catalogue.py:26
+msgid "Signed"
+msgstr "موقّعة"
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_wizard.py:96
+#: code:addons/nudge/models/nudge_recipe_catalogue.py:26
+msgid "Signed by an unknown key"
+msgstr "موقّعة بمفتاح مجهول"
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_wizard.py:96
+#: code:addons/nudge/models/nudge_recipe_catalogue.py:26
+msgid "Unsigned"
+msgstr "غير موقّعة"
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_catalogue.py:69
+msgid "Signed by %s"
+msgstr "موقّعة من %s"
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_catalogue.py:27
+msgid "Checked when installed"
+msgstr "يتم الفحص عند التثبيت"
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_catalogue.py:44
+msgid "Tools Used"
+msgstr "الأدوات المستخدمة"
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_catalogue.py:53
+msgid "Tools Not Installed Here"
+msgstr "أدوات غير مثبتة هنا"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_market_view_list
+msgid "Not Installed Here"
+msgstr "غير مثبتة هنا"
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_catalogue.py:59
+msgid "What Changes in the Instructions"
+msgstr "ما يتغير في التعليمات"
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_catalogue.py:96
+msgid "installed %s"
+msgstr "المثبتة %s"
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_catalogue.py:97
+msgid "new %s"
+msgstr "الجديدة %s"
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_catalogue.py:103
+msgid "This filter cannot be used on the state of a skill."
+msgstr "لا يمكن استخدام هذا المرشح على حالة المهارة."
+
+#. module: nudge
+#: code:addons/nudge/models/nudge_recipe_catalogue.py:186
+msgid ""
+"This skill uses tools this Nudge does not have (%s): install their module "
+"first."
+msgstr "تستخدم هذه المهارة أدوات ليست في نودج هذا (%s): ثبّت وحدتها أولا."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_market_view_list
+msgid "Update"
+msgstr "تحديث"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_market_view_search
+msgid "Publisher"
+msgstr "الناشر"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_signing_key_view_form
+msgid "Keep the key"
+msgstr "احتفظ بالمفتاح"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_signing_key_view_form
+msgid "Remove the key in use"
+msgstr "أزل المفتاح المستخدم"
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_skill_market_action
+msgid "No skill in the catalogue"
+msgstr "لا توجد مهارات في الكتالوج"
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_recipe_publisher_action
+msgid "No trusted publisher"
+msgstr "لا يوجد ناشر موثوق"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_market_view_form
+msgid ""
+"Installing makes a draft of your company. No model reads it until a manager "
+"reads its instructions and publishes it, and it never gives anybody a tool "
+"they do not already have."
+msgstr ""
+"التثبيت ينشئ مسودة لشركتك. لا يقرؤها أي نموذج حتى يقرأ المدير تعليماتها "
+"وينشرها، ولا تمنح أحدا أداة لا يملكها أصلا."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_market_view_form
+msgid ""
+"This skill uses tools this Nudge does not have. Install their module first:"
+msgstr "تستخدم هذه المهارة أدوات ليست في نودج هذا. ثبّت وحدتها أولا:"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_export_view_form
+msgid ""
+"No signing key is set: the recipe is exported unsigned. A system "
+"administrator uploads one in Nudge / Configuration / Recipes / Signing Key."
+msgstr ""
+"لم يُضبط مفتاح توقيع: تُصدَّر الوصفة غير موقّعة. يرفع مدير النظام مفتاحا من "
+"نودج / الإعدادات / الوصفات / مفتاح التوقيع."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_import_view_form
+msgid ""
+"Nobody here vouches for who made this file. Only a system administrator "
+"imports it, after reading what its skills tell the model (below). Its skills"
+" come in as drafts."
+msgstr ""
+"لا أحد هنا يضمن من أعدّ هذا الملف. مدير النظام وحده يستورده بعد قراءة ما "
+"تقوله مهاراته للنموذج (أدناه). تدخل مهاراته كمسودات."

@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- S2: the skill catalogue -->
+    <record id="nudge_skill_market_view_list" model="ir.ui.view">
+        <field name="name">nudge.skill.market.list</field>
+        <field name="model">nudge.skill.market</field>
+        <field name="arch" type="xml">
+            <list string="Skill Catalogue" create="0" edit="0" delete="0"
+                  decoration-muted="state == 'installed'" decoration-warning="tools_missing">
+                <field name="title"/>
+                <field name="domain"/>
+                <field name="languages"/>
+                <field name="tool_names" string="Tools"/>
+                <field name="tools_missing" string="Not Installed Here"/>
+                <field name="version"/>
+                <field name="publisher"/>
+                <field name="signed_label"/>
+                <field name="state" widget="badge" decoration-success="state == 'installed'"
+                       decoration-warning="state == 'update'" decoration-info="state == 'new'"/>
+                <button name="action_install" type="object" string="Install" class="btn-primary"
+                        invisible="state != 'new' or tools_missing"/>
+                <button name="action_install" type="object" string="Update" class="btn-primary"
+                        invisible="state != 'update' or tools_missing"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_skill_market_view_form" model="ir.ui.view">
+        <field name="name">nudge.skill.market.form</field>
+        <field name="model">nudge.skill.market</field>
+        <field name="arch" type="xml">
+            <form string="Skill" create="0" edit="0" delete="0">
+                <header>
+                    <button name="action_install" type="object" string="Install" class="btn-primary"
+                            invisible="state != 'new' or tools_missing"/>
+                    <button name="action_install" type="object" string="Update" class="btn-primary"
+                            invisible="state != 'update' or tools_missing"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="title"/></h1></div>
+                    <div class="alert alert-warning" role="alert" invisible="not tools_missing">
+                        This skill uses tools this Nudge does not have. Install their module first:
+                        <field name="tools_missing" class="fw-bold"/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="key"/>
+                            <field name="summary"/>
+                            <field name="domain"/>
+                            <field name="languages"/>
+                        </group>
+                        <group>
+                            <field name="version"/>
+                            <field name="installed_version"/>
+                            <field name="publisher"/>
+                            <field name="signed_label"/>
+                            <field name="source_kind"/>
+                            <field name="tool_names"/>
+                        </group>
+                    </group>
+                    <group string="What changes in the instructions" invisible="not diff">
+                        <field name="diff" nolabel="1" colspan="2"/>
+                    </group>
+                    <group string="Instructions" invisible="not instructions">
+                        <field name="instructions" nolabel="1" colspan="2"/>
+                    </group>
+                    <div class="text-muted">
+                        Installing makes a draft of your company. No model reads it until a manager reads its
+                        instructions and publishes it, and it never gives anybody a tool they do not already have.
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_skill_market_view_search" model="ir.ui.view">
+        <field name="name">nudge.skill.market.search</field>
+        <field name="model">nudge.skill.market</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name_en" string="Name" filter_domain="['|', ('name_en', 'ilike', self), ('name_ar', 'ilike', self)]"/>
+                <field name="domain"/>
+                <field name="tool_names" string="Tool"/>
+                <filter name="available" string="Available" domain="[('state', '=', 'new')]"/>
+                <filter name="updates" string="Update Available" domain="[('state', '=', 'update')]"/>
+                <group>
+                    <filter name="by_domain" string="Domain" context="{'group_by': 'domain'}"/>
+                    <filter name="by_publisher" string="Publisher" context="{'group_by': 'publisher'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_skill_market_action" model="ir.actions.act_window">
+        <field name="name">Skill Catalogue</field>
+        <field name="res_model">nudge.skill.market</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No skill in the catalogue</p>
+            <p>The skills that come with Nudge are listed here, and those of the recipe sources you enabled.</p>
+        </field>
+    </record>
+
+    <record id="nudge_skill_market_open" model="ir.actions.server">
+        <field name="name">Skill Catalogue</field>
+        <field name="model_id" ref="model_nudge_skill_market"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open()</field>
+    </record>
+
+    <!-- Trusted publishers: the system group only -->
+    <record id="nudge_recipe_publisher_view_list" model="ir.ui.view">
+        <field name="name">nudge.recipe.publisher.list</field>
+        <field name="model">nudge.recipe.publisher</field>
+        <field name="arch" type="xml">
+            <list string="Trusted Publishers">
+                <field name="name"/>
+                <field name="key_id"/>
+                <field name="builtin"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_recipe_publisher_view_form" model="ir.ui.view">
+        <field name="name">nudge.recipe.publisher.form</field>
+        <field name="model">nudge.recipe.publisher</field>
+        <field name="arch" type="xml">
+            <form string="Trusted Publisher">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="public_key" readonly="builtin"/>
+                        <field name="key_id"/>
+                        <field name="active"/>
+                        <field name="builtin" invisible="1"/>
+                    </group>
+                    <div class="text-muted">
+                        A recipe signed by this key shows Signed by this name, and a manager may import it. Skills
+                        of any recipe still come in as drafts.
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_recipe_publisher_action" model="ir.actions.act_window">
+        <field name="name">Trusted Publishers</field>
+        <field name="res_model">nudge.recipe.publisher</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No trusted publisher</p>
+            <p>Paste the public key of a publisher to trust its signed recipes.</p>
+        </field>
+    </record>
+
+    <!-- The key that signs our exports -->
+    <record id="nudge_recipe_signing_key_view_form" model="ir.ui.view">
+        <field name="name">nudge.recipe.signing.key.form</field>
+        <field name="model">nudge.recipe.signing.key</field>
+        <field name="arch" type="xml">
+            <form string="Recipe signing key">
+                <field name="stored" invisible="1"/>
+                <group invisible="stored">
+                    <field name="publisher_name"/>
+                    <field name="key_file" filename="key_file_name"/>
+                    <field name="key_file_name" invisible="1"/>
+                    <field name="current_key_id" invisible="not current_key_id"/>
+                </group>
+                <group invisible="not stored">
+                    <field name="key_id"/>
+                    <field name="public_key"/>
+                </group>
+                <div class="text-muted" invisible="stored">
+                    An Ed25519 private key in PEM form. It is kept where only a system administrator can read it,
+                    is never shown again, and signs the recipes your managers export. Without it they are
+                    exported unsigned. Give the other databases the public key shown after saving.
+                </div>
+                <footer>
+                    <button name="action_store" type="object" string="Keep the key" class="btn-primary" invisible="stored"/>
+                    <button name="action_remove" type="object" string="Remove the key in use"
+                            invisible="stored or not current_key_id"/>
+                    <button special="cancel" string="Close"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_recipe_signing_key_action" model="ir.actions.act_window">
+        <field name="name">Recipe Signing Key</field>
+        <field name="res_model">nudge.recipe.signing.key</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="nudge_menu_skill_market" name="Skill Catalogue" sequence="4"
+              parent="nudge_menu_recipes" action="nudge_skill_market_open"/>
+    <menuitem id="nudge_menu_recipe_publishers" name="Trusted Publishers" sequence="8"
+              parent="nudge_menu_recipes" action="nudge_recipe_publisher_action" groups="base.group_system"/>
+    <menuitem id="nudge_menu_recipe_signing_key" name="Signing Key" sequence="9"
+              parent="nudge_menu_recipes" action="nudge_recipe_signing_key_action" groups="base.group_system"/>
+</odoo>

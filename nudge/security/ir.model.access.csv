@@ -78,3 +78,8 @@ access_nudge_skill_user,nudge.skill user,model_nudge_skill,group_nudge_user,1,0,
 access_nudge_skill_manager,nudge.skill manager,model_nudge_skill,group_nudge_manager,1,1,1,1
 access_nudge_skill_revision_manager,nudge.skill.revision manager,model_nudge_skill_revision,group_nudge_manager,1,0,0,0
 access_nudge_answer_cache_manager,nudge.answer.cache manager,model_nudge_answer_cache,group_nudge_manager,1,0,0,1
+access_nudge_recipe_publisher_manager,nudge.recipe.publisher manager,model_nudge_recipe_publisher,group_nudge_manager,1,0,0,0
+access_nudge_recipe_publisher_system,nudge.recipe.publisher system,model_nudge_recipe_publisher,base.group_system,1,1,1,1
+access_nudge_recipe_signing_system,nudge.recipe.signing system,model_nudge_recipe_signing,base.group_system,1,1,1,1
+access_nudge_recipe_signing_key_system,nudge.recipe.signing.key system,model_nudge_recipe_signing_key,base.group_system,1,1,1,1
+access_nudge_skill_market_manager,nudge.skill.market manager,model_nudge_skill_market,group_nudge_manager,1,0,0,0
