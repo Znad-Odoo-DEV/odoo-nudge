@@ -129,11 +129,15 @@
         <field name="model">nudge.note</field>
         <field name="arch" type="xml">
             <tree string="Business Notes" editable="bottom"
-                  decoration-info="state == 'proposed'" decoration-muted="state == 'refused'">
+                  decoration-info="state == 'proposed'" decoration-muted="state == 'refused'"
+                  decoration-warning="not_sent">
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="body"/>
+                <field name="company_id" optional="show" groups="base.group_multi_company"/>
+                <field name="group_ids" widget="many2many_tags" optional="show"/>
                 <field name="kind"/>
+                <field name="not_sent" widget="boolean" optional="show"/>
                 <field name="state" widget="badge"
                        decoration-success="state == 'approved'" decoration-info="state == 'proposed'"/>
                 <field name="reason" optional="show"/>
@@ -158,6 +162,7 @@
                 <filter name="proposed" string="Waiting for Approval" domain="[('state', '=', 'proposed')]"/>
                 <filter name="lessons" string="Lessons" domain="[('kind', '=', 'lesson')]"/>
                 <filter name="notes" string="Notes" domain="[('kind', '=', 'note')]"/>
+                <field name="company_id"/>
             </search>
         </field>
     </record>

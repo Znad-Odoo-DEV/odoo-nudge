@@ -79,3 +79,4 @@ from . import test_meeting
 from . import test_mobile
 from . import test_nudge_app
 from . import test_compliance_feed
+from . import test_note_scope

@@ -1,0 +1,17 @@
+msgid "Company"
+msgstr "الشركة"
+
+msgid "The company whose conversations are told it. Empty: all of them."
+msgstr "الشركة التي تُخبَر محادثاتها بها. فارغ: كل الشركات."
+
+msgid "For the Groups"
+msgstr "للمجموعات"
+
+msgid "Who is told it. Empty: everybody who uses Nudge."
+msgstr "من يُخبَر بها. فارغ: كل من يستخدم Nudge."
+
+msgid "Not Sent"
+msgstr "غير مرسلة"
+
+msgid "The notes sent to Nudge hold at most 3000 characters: this one is left out for a person of the current company who reads every note of it. Shorten or archive notes to make room."
+msgstr "الملاحظات المرسلة إلى Nudge لا تتجاوز 3000 حرف: هذه الملاحظة متروكة لشخص من الشركة الحالية يقرأ كل ملاحظاتها. اختصر الملاحظات أو أرشفها لإفساح المجال."
