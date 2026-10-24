@@ -271,7 +271,7 @@
                 </button>
             </div>
             <div t-if="found.pages and found.pages.length" class="o_nudge_found_list">
-                <a t-foreach="found.pages" t-as="page" t-key="page.url" t-att-href="page.url" target="_blank"
+                <a t-foreach="found.pages" t-as="page" t-key="page.url" t-att-href="safeUrl(page.url)" target="_blank"
                    rel="noopener noreferrer" class="o_nudge_suggestion o_nudge_found_page">
                     <i class="fa fa-book"/> <strong t-esc="page.title"/>
                     <span class="o_nudge_quick_text" t-esc="page.snippet"/>
@@ -294,7 +294,7 @@
                 <blockquote t-foreach="found.passages" t-as="passage" t-key="passage.id" class="o_nudge_found_passage"
                             dir="auto">
                     <p t-esc="passage.text"/>
-                    <a t-att-href="passage.url" target="_blank" rel="noopener noreferrer" class="o_nudge_found_source">
+                    <a t-att-href="safeUrl(passage.url)" target="_blank" rel="noopener noreferrer" class="o_nudge_found_source">
                         <i class="fa fa-file-text-o"/> <t t-esc="passage.file"/>
                         <t t-if="passage.page">, <span>page</span> <t t-esc="passage.page"/></t>
                     </a>
