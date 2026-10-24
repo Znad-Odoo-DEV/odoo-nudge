@@ -57,6 +57,12 @@ NO_PROVIDER_FLOOR = 0.4
 # From here a reference is close enough to be offered as a choice
 NEAR_FLOOR = 0.5
 MAX_CHOICES = 3
+# What a question and a reference must share besides a score (see ``_fits``): of the things the question
+# names, the share the reference names too, to be answered with it and to be offered
+SERVE_COVER = 0.99
+OFFER_COVER = 0.75
+# A match by meaning alone (the local search model) is believed from here, scaled 0 to 1
+SEMANTIC_SURE = 0.8
 MAX_SEARCHED = 2000
 # Memories compared with a new one on each thumbs-up: the newest of the company
 MAX_KNOWN = 2000
@@ -179,6 +185,35 @@ def notions(text):
         if term.startswith("c:"):
             found.add("=" + term[2:])
     return frozenset(found), fuzzy.penalty(fixes)
+
+
+# What is done, as the notions of a question say it: the same thing whatever the dialect. The rest of
+# the notions are what it is done to (a quotation, a phone, a sales team)
+ACTION_NOTIONS = frozenset("=" + name for name in (
+    *grammar.VERBS, "create", "delete", "cancel", "confirm", "approve", "print", "send", "add", "edit",
+    "register", "search", "open", "view", "export", "import", "setup", "copy", "archive", "install", "upload"))
+FIELD_NOTIONS = frozenset("=" + name for name in grammar.FIELDS)
+
+
+def _fits(asked, theirs):
+    """Whether a reference is about what the question is about: sharing words is not enough ("create a
+    sales team" shares two of three with "create a quotation in Sales" and asks another thing).
+
+    :param asked: the notions of the question, :param theirs: those of the reference's question
+    :return: ``(sure, close)``: the reference may answer the question; it may be offered as close to it.
+        Both need the question's things to be named by the reference (all of them to answer, three
+        quarters to offer), the same fields on both sides (a phone is not a mail), and, when both say what
+        is done, the same thing done (to send is not to create)"""
+    asked, theirs = frozenset(asked or ()), frozenset(theirs or ())
+    things, others = asked - ACTION_NOTIONS, theirs - ACTION_NOTIONS
+    shared = things & others
+    if not shared or (things & FIELD_NOTIONS) != (others & FIELD_NOTIONS):
+        return False, False
+    done, theirs_done = asked & ACTION_NOTIONS, theirs & ACTION_NOTIONS
+    if done and theirs_done and not done & theirs_done:
+        return False, False
+    cover = len(shared) / len(things)
+    return cover >= SERVE_COVER, cover >= OFFER_COVER
 
 
 def english_words(text, extra_pairs=()):
@@ -818,6 +853,8 @@ class NudgeMemory(models.Model):
             forms = self._question_forms(text)
             asked = [notions(form) for form, _penalty in forms[:2]]
         candidates, concepts = [], {}
+        # The references that are about what is asked, not only worded alike (see ``_fits``)
+        sure_ids, close_ids = set(), set()
         for memory in pool:
             texts = memory._texts()
             candidates += [(memory.id, line) for line in texts]
@@ -826,17 +863,29 @@ class NudgeMemory(models.Model):
                 theirs, _cost = _cached(_notions_cache, line, notions)
                 for (mine, cost), (_form, penalty) in zip(asked, forms):
                     score = max(score, memory_match.dice(mine, theirs) - max(cost, penalty))
+                    sure, close = _fits(mine, theirs)
+                    if sure:
+                        sure_ids.add(memory.id)
+                    if close:
+                        close_ids.add(memory.id)
             if score > 0:
                 concepts[memory.id] = score
         # By meaning too, when the local search model is there; None otherwise
         semantic = self.env["nudge.embedding"]._semantic(self._name, text, ids=pool.ids)
+        for other, value in (semantic or {}).items():
+            if value >= SEMANTIC_SURE:
+                sure_ids.add(other)
+                close_ids.add(other)
         ranked = memory_match.rank_forms(forms, candidates, semantic=semantic, concepts=concepts)
         threshold = self._get_threshold()
         if floor:
-            key, score = memory_match.choose(ranked, min(threshold, NO_PROVIDER_FLOOR), margin=0.0)
+            key, score = memory_match.choose(
+                [pair for pair in ranked if pair[1] in close_ids], min(threshold, NO_PROVIDER_FLOOR), margin=0.0)
         else:
-            key, score = memory_match.choose(ranked, threshold, margin=0.05)
-        near = [] if key else [pool.browse(other) for value, other in ranked if value >= NEAR_FLOOR][:MAX_CHOICES]
+            key, score = memory_match.choose(
+                [pair for pair in ranked if pair[1] in sure_ids], threshold, margin=0.05)
+        near = [] if key else [
+            pool.browse(other) for value, other in ranked if value >= NEAR_FLOOR and other in close_ids][:MAX_CHOICES]
         return (pool.browse(key) if key else None), score, near
 
     @api.model

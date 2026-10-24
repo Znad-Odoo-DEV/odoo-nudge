@@ -255,6 +255,40 @@ class TestReferences(NudgeCase, TransactionCase):
         self.assertIn("quotation", create.variants.splitlines(), "Their words find it next time")
         self.assertEqual(self.Memory.with_user(self.user_b)._find("quotation")[0], create)
 
+    def keep_a_few(self):
+        return (
+            self.reference("How do I create a quotation in Sales?", "Open Sales, press New."),
+            self.reference("How do I create an invoice?", STEPS),
+            self.reference(PHONE, "Open the contact and edit Phone."))
+
+    def test_an_unrelated_question_is_neither_served_nor_offered(self):
+        self.keep_a_few()
+        unrelated = (
+            "How do I create a purchase order?", "how to create a sales team", "How do I create a contact?",
+            "How do I add an employee?", "Who are my top customers in Sales?", "Open the sales app",
+            "How do I send a quotation by email?", "What is the weather today?", "Why is my invoice red?",
+            "كيف اعمل امر شراء", "ازاي اضيف موظف", "kif a3mel amr shira2", "kif adif mawtha2")
+        for text in unrelated:
+            memory, _score, near = self.Memory.with_user(self.user_b)._match(text)
+            self.assertFalse(memory, text)
+            self.assertFalse(near, "Offered for: %s" % text)
+        adapter = self.use_adapter(reply="From the AI")
+        conversation, last = self.ask(self.user_b, "How do I create a purchase order?")
+        self.assertEqual(len(adapter.calls), 1, "It goes on to the provider")
+        self.assertFalse(last.get("memory"))
+        self.assertFalse(self.answers(conversation).filtered("is_remembered"))
+
+    def test_a_paraphrase_is_served_and_a_short_word_is_offered(self):
+        quotation, invoice, _phone = self.keep_a_few()
+        for text, expected in (
+                ("How do I create a quote?", quotation), ("make a quotation", quotation),
+                ("ازاي اعمل عرض سعر", quotation), ("how do i creat an invocie", invoice),
+                ("kif a3mel fatoora", invoice), ("كيف اضيف رقم هاتف", self.Memory.search([("question", "=", PHONE)]))):
+            self.assertEqual(self.Memory.with_user(self.user_b)._match(text)[0], expected, text)
+        memory, _score, near = self.Memory.with_user(self.user_b)._match("quotation")
+        self.assertFalse(memory)
+        self.assertEqual(near, [quotation], "One thing named, and a reference about it: offered")
+
     def test_agent_mode_does_not_explain_what_it_is_asked_to_do(self):
         self.reference()
         adapter = self.use_adapter(reply="From the AI")
