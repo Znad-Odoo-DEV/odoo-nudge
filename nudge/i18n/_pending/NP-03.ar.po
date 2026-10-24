@@ -599,3 +599,9 @@ msgstr "أدوات المهارة قائمة بالأسماء."
 #: code:addons/nudge/models/nudge_recipe.py:0
 msgid "Groups not found here (%s): the skill comes in archived."
 msgstr "مجموعات غير موجودة هنا (%s): تُستورد المهارة مؤرشفة."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill_learning.py:0
+msgid "What we learnt: %(app)s, for %(groups)s"
+msgstr "ما تعلّمناه: %(app)s، لـ %(groups)s"

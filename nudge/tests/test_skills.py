@@ -4,6 +4,7 @@ no AI; a skill never gives a tool; a draft never reaches a model; skills travel 
 approved lessons and are tested every week. Never a provider is reached."""
 import json
 from contextlib import closing
+from unittest.mock import patch
 
 from odoo import SUPERUSER_ID, api, sql_db
 from odoo.exceptions import AccessError, ValidationError
@@ -13,7 +14,7 @@ from odoo.addons.nudge.llm import base as llm, loop, prompt
 from odoo.addons.nudge.llm.anthropic_adapter import AnthropicAdapter
 from odoo.addons.nudge.models.nudge_conversation import DEVELOPER_PARAM
 from odoo.addons.nudge.models.nudge_recipe import checksum_of
-from odoo.addons.nudge.models.nudge_skill import INLINE_PARAM
+from odoo.addons.nudge.models.nudge_skill import INLINE_PARAM, MAX_INSTRUCTIONS
 from odoo.addons.nudge.tools import base, skills as skill_rules
 from odoo.addons.nudge.tools.sql import SQL_PARAM
 
@@ -434,6 +435,82 @@ class TestSkills(NudgeCase, TransactionCase):
             self.assertEqual((skill.state, skill.version, skill.active), ("published", "1.0.0", True))
             self.assertNotIn(HOSTILE, skill.instructions)
         self.assertNotIn(HOSTILE, json.dumps(self.on_contact(self.user_a, "A sales report please")))
+
+    def test_lessons_for_some_groups_make_a_skill_for_those_groups_only(self):
+        contacts = self.env.ref("base.group_partner_manager")
+        restricted = self.env["nudge.note"].browse([
+            self.lesson(f"On res.partner, secret rule {number} of Raghad.").id for number in range(3)])
+        restricted.group_ids = [(6, 0, contacts.ids)]
+        everyone = self.env["nudge.note"].browse([
+            self.lesson(f"On res.partner, open rule {number} of Ebrahim.").id for number in range(3)])
+        (restricted | everyone).with_user(self.manager).action_approve()
+        drafts = self.Skill.search([("origin", "=", "lessons")])
+        self.assertEqual(len(drafts), 2, "One draft per set of groups")
+        secret = drafts.filtered("group_ids")
+        self.assertEqual(secret.group_ids, contacts)
+        self.assertEqual(secret.lesson_ids, restricted)
+        self.assertNotIn("open rule", secret.instructions)
+        self.assertFalse((drafts - secret).group_ids)
+        drafts.with_user(self.manager).action_publish()
+        # Published, the lessons come with their skill only: never to a person outside its groups
+        sent = json.dumps(self.on_contact(self.user_a))
+        self.assertIn("open rule 0 of Ebrahim", sent)
+        self.assertNotIn("secret rule", sent)
+        self.assertNotIn("secret rule", self.env["nudge.note"].with_user(self.user_a).sudo()._get_text())
+        conversation = self.env["nudge.conversation"].with_user(self.user_a)._chat_open(None)
+        result = base.call(self.env(user=self.user_a, context={
+            "nudge_conversation_id": conversation.id, "nudge_mode": "talk"}), "use_skill", {"key": secret.key})
+        self.assertTrue(result.is_error, "Not by use_skill either")
+        self.assertIn("secret rule 0 of Raghad", json.dumps(self.on_contact(self.user_contacts)))
+
+    def test_a_lesson_refused_archived_changed_or_deleted_leaves_its_skill(self):
+        Note = self.env["nudge.note"]
+        first, second, third, fourth = lessons = Note.browse([self.lesson(f"On res.partner, {text}.").id for text in (
+            "a customer with a VAT number is a company", "the reference is the old code of the customer",
+            "Raghad keeps the contacts of the suppliers", "Ebrahim signs the credit notes")])
+        lessons.with_user(self.manager).action_approve()
+        skill = self.Skill.search([("origin", "=", "lessons")])
+        self.assertEqual(skill.lesson_ids, lessons)
+        skill.with_user(self.manager).action_publish()
+        first.with_user(self.manager).action_refuse()
+        self.assertNotIn("VAT number", skill.instructions)
+        self.assertFalse(first.skill_id)
+        self.assertEqual(skill.state, "published", "Taking a lesson away leaves only what was published")
+        second.with_user(self.manager).action_archive()
+        self.assertNotIn("old code", skill.instructions)
+        third.with_user(self.manager).write({"body": "On res.partner, Raghad keeps only the local suppliers."})
+        self.assertNotIn("Raghad keeps", skill.instructions)
+        self.assertFalse(third.skill_id)
+        self.assertIn("-- On res.partner, Raghad keeps the contacts", skill.revision_ids.sorted("id")[-1].diff)
+        self.assertIn("only the local suppliers", Note.with_user(self.user_a).sudo()._get_text(),
+                      "Changed, it is a note again, as it is now")
+        sent = json.dumps(self.on_contact(self.user_a))
+        for gone in ("VAT number", "old code", "keeps the contacts of the suppliers"):
+            self.assertNotIn(gone, sent)
+        self.assertIn("Ebrahim signs the credit notes", sent)
+        # The last lesson deleted: nothing is left to say, the skill is archived
+        fourth.with_user(self.manager).unlink()
+        self.assertFalse(skill.active)
+        self.assertNotIn("Ebrahim signs", json.dumps(self.on_contact(self.user_a)))
+
+    def test_lessons_too_long_for_one_skill_are_split_and_never_block_the_approval(self):
+        Note = self.env["nudge.note"]
+        words = "word " * 1100
+        lessons = Note.browse([self.lesson(f"On res.partner, rule {number} of Raghad: {words}").id for number in range(4)])
+        huge = self.lesson("On res.partner, the longest rule of Ebrahim: " + "word " * 2500)
+        (lessons | huge).with_user(self.manager).action_approve()
+        drafts = self.Skill.search([("origin", "=", "lessons")])
+        self.assertEqual(len(drafts), 2, "Cut in two drafts")
+        self.assertTrue(all(len(draft.instructions) <= MAX_INSTRUCTIONS for draft in drafts))
+        self.assertEqual(drafts.lesson_ids, lessons)
+        self.assertEqual(sorted(drafts.mapped("name"))[0][-5:], "(1/2)")
+        self.assertFalse(huge.skill_id, "Too long for any skill: it stays a business note")
+        self.assertEqual(huge.state, "approved")
+        late = self.lesson("On res.partner, one rule more.")
+        with patch.object(type(self.Skill), "_propose_from_lessons", side_effect=ValidationError("Too long")), \
+                self.assertLogs("odoo.addons.nudge.models.nudge_skill_learning", "ERROR"):
+            late.with_user(self.manager).action_approve()
+        self.assertEqual(late.state, "approved", "A draft that cannot be made never stops an approval")
 
     # ---------------------------------------------------------- the saving
     def test_the_saving_is_measured(self):
