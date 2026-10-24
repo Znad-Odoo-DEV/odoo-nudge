@@ -28,7 +28,7 @@ from odoo.addons.nudge.tools import base as tool_base
 from odoo.addons.nudge.tools import noai_commands
 from odoo.addons.nudge.tools.deadline import cap, until, window
 from odoo.addons.nudge.tools.bus import notify_user
-from odoo.addons.nudge.tools.base import MODE_AGENT
+from odoo.addons.nudge.tools.base import MODE_AGENT, MODE_TALK
 from odoo.addons.nudge.tools.urls import record_url
 from odoo.addons.nudge_mcp.models.nudge_mcp import READ_TOOLS
 
@@ -424,6 +424,8 @@ class NudgeMessaging(models.AbstractModel):
     # --- pictures and files -------------------------------------------
     def _from_file(self, run, channel, event, links):
         env = self.env
+        if self._mode() != MODE_AGENT:
+            raise UserError(_("Agent mode is not open to you. Ask your administrator."))
         if not env["nudge.noai"]._has_ai(None, MODE_AGENT):
             raise UserError(_(
                 "Reading a document needs the AI provider, which is not available now. Please send text."))
@@ -517,12 +519,19 @@ class NudgeMessaging(models.AbstractModel):
             "\"find Raghad\", \"create a task Call Ebrahim\".")
 
     # --- the AI --------------------------------------------------------
+    def _mode(self):
+        """:return: the mode of this person on a phone: Agent when Nudge may act for them (the
+        administrator's switch and the Agent group), else Talk, as in the panel"""
+        return MODE_AGENT if self.env["nudge.conversation"]._can_use_agent() else MODE_TALK
+
     def _tools(self):
-        """:return: ``{name: tool}`` of what this person may use from a phone: looking, summaries, preparing"""
+        """:return: ``{name: tool}`` of what this person may use from a phone: looking, summaries, and
+        preparing in Agent mode only; in Talk, what the panel offers there (the Ask tier)"""
+        mode = self._mode()
         found = {}
-        for name in READ_ONLY + PREPARE:
+        for name in READ_ONLY + (PREPARE if mode == MODE_AGENT else ()):
             tool = tool_base.TOOLS.get(name)
-            if tool is not None and tool.is_available(self.env, MODE_AGENT):
+            if tool is not None and tool.is_available(self.env, mode):
                 found[name] = tool
         return found
 
@@ -595,9 +604,10 @@ class NudgeMessaging(models.AbstractModel):
             return dict(entry, content=tool_base.as_data(call["name"], result.content, True),
                         is_error=result.is_error)
         started = time.monotonic()
+        mode = self._mode()
         context_env = env(context=dict(env.context, nudge_conversation_id=run.conversation_id.id,
-                                       nudge_mode=MODE_AGENT, nudge_messaging=True))
-        result = tool_base.call(context_env, call["name"], call["input"], None, MODE_AGENT)
+                                       nudge_mode=mode, nudge_messaging=True))
+        result = tool_base.call(context_env, call["name"], call["input"], None, mode)
         env["nudge.mcp"]._log_step(run, call["name"], tool.kind, "failed" if result.is_error else "done",
                                    call["input"], result, started)
         if result.records and len(links) < MAX_LINKS and not result.is_error:
@@ -613,6 +623,10 @@ class NudgeMessaging(models.AbstractModel):
         """Run a tool that only prepares. :return: ``(step, result)``; the step is the pending
         change when there is one (nothing was done), else an empty recordset"""
         env = self.env
+        if self._mode() != MODE_AGENT:
+            # The rules and a file prepare too: with Agent mode off, or for a person without it, nothing is
+            return env["nudge.step"].sudo(), tool_base.ToolResult(
+                _("Agent mode is not open to you. Ask your administrator."), is_error=True)
         tool = tool_base.TOOLS.get(name)
         started = time.monotonic()
         context_env = env(context=dict(env.context, nudge_conversation_id=run.conversation_id.id,
