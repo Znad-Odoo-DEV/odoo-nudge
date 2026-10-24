@@ -1,4 +1,4 @@
-"""The tools a small model is given beyond those of its mode.
+"""The tools a call is given beyond those every call of its mode carries.
 
 A model on a laptop reads a short list of tools faster, and picks the right
 one more often; but what it is not given, it cannot do. Each mode has its
@@ -6,6 +6,12 @@ tools (``base.ESSENTIAL_BY_MODE``); the others come in groups. A group is
 offered when the question holds one of its words, in Arabic or in English,
 or when the model asks for it with more_tools: from then on it is offered
 for the rest of the conversation.
+
+NP-03: every model works this way now, with a larger core (``base.CORE_BY_MODE``):
+a call carries the core of its mode and the groups its question needs
+(:func:`routed`), never the whole list. A tool named in no group stays in every
+call, so that nothing registered is out of reach; one the model calls without
+being offered still runs when the person may use it, and is offered from then on.
 """
 from . import base, commands
 
@@ -25,13 +31,13 @@ GROUPS = {
     },
     "reports": {
         "about": "a PDF report printed from a record, with the company's header",
-        "tools": ("prepare_report",),
+        "tools": ("prepare_report", "prepare_report_design"),
         "words": ("pdf", "print", "report", "طباع", "اطبع", "تقرير", "مطبوع"),
     },
     "modules": {
-        "about": "what a module does, and the code of a custom module",
-        "tools": ("describe_module", "read_module_code"),
-        "words": ("module", "addon", "source code", "موديول", "وحده", "مديول"),
+        "about": "what a module does, the code of a custom module, a new module",
+        "tools": ("describe_module", "read_module_code", "prepare_module_scaffold"),
+        "words": ("module", "addon", "source code", "scaffold", "موديول", "وحده", "مديول"),
     },
     "assessment": {
         "about": "assess the whole database: what is set up, used, missing or wrong",
@@ -95,7 +101,90 @@ GROUPS = {
         "tools": ("show_on_screen", "write_in_field"),
         "words": (),
     },
+    # NP-03: what was in every call and is now brought by its words, as the groups above
+    "automations": {
+        "about": "build and try automation rules, server actions, scheduled actions",
+        "tools": ("prepare_automation", "prepare_server_action", "prepare_scheduled_action", "try_automation"),
+        "words": ("automat", "rule", "trigger", "when", "whenever", "if", "server action", "scheduled", "schedule",
+                  "cron", "remind", "notify", "alert", "every day", "every morning", "every week", "every month",
+                  "each time", "تلقائي", "اوتوماتيك", "اتمته", "قاعده", "عندما", "حين", "تذكير", "ذكر", "نبه",
+                  "تنبيه", "اشعار", "كل يوم", "كل صباح", "كل اسبوع", "كل شهر", "كل ما"),
+    },
+    "emails": {
+        "about": "emails sent on an event, designed emails, templates",
+        "tools": ("prepare_email_template", "prepare_email_design", "prepare_email_review", "send_test_email"),
+        "words": ("email", "e-mail", "mail", "newsletter", "template", "ايميل", "بريد", "رساله", "رسايل", "قالب",
+                  "نشره"),
+    },
+    "screens": {
+        "about": "new fields, buttons, changes to a screen",
+        "tools": ("read_view", "prepare_view_change", "prepare_button", "prepare_field"),
+        "words": ("field", "view", "form", "button", "column", "tab", "screen", "kanban", "mandatory", "required",
+                  "readonly", "hide", "invisible", "حقل", "حقول", "شاشه", "زر", "زرار", "عمود", "واجهه", "تبويب",
+                  "اجباري", "اخفاء", "اخفي", "نموذج"),
+    },
+    "approvals": {
+        "about": "approval rules and flows",
+        "tools": ("prepare_approval_rule", "prepare_approval_flow", "read_approval_rules"),
+        "words": ("approv", "validat", "authoriz", "sign off", "who can", "موافق", "اعتماد", "يعتمد", "صلاحي",
+                  "توقيع", "يوافق"),
+    },
+    "debugging": {
+        "about": "why a rule or an action failed, and its fix",
+        "tools": ("diagnose_failure", "prepare_code_fix"),
+        "words": ("error", "fail", "broke", "traceback", "bug", "crash", "exception", "not working",
+                  "doesn't work", "does not work", "خطا", "غلط", "مشكله", "فشل", "عطل", "ما بيشتغل", "مش شغال",
+                  "ما يشتغل"),
+    },
+    "website": {
+        "about": "build, check and fix a website or a shop",
+        "tools": ("start_website_builder", "build_shop", "check_site", "fix_site"),
+        "words": ("website", "web site", "site", "web page", "landing", "shop", "ecommerce", "e-commerce",
+                  "online store", "موقع", "متجر", "ويب", "صفحه"),
+    },
+    "bulk": {
+        "about": "one change or AI work on many records",
+        "tools": ("prepare_plan", "bulk_apply"),
+        "words": ("bulk", "mass", "batch", "many records", "all", "every", "each", "جميع", "كافه", "كل",
+                  "بالجمله", "دفعه وحده"),
+    },
+    "tasks": {
+        "about": "AI work done again and again",
+        "tools": ("prepare_task",),
+        "words": ("every day", "every morning", "every week", "every month", "each morning", "daily", "weekly",
+                  "monthly", "whenever", "recurring", "كل يوم", "كل صباح", "كل اسبوع", "كل شهر", "يومي", "اسبوعي",
+                  "شهري", "دوري"),
+    },
+    "tours": {
+        "about": "a guided tour of an app",
+        "tools": ("show_tour",),
+        "words": ("tour", "walk me", "walkthrough", "guide me", "show me around", "training", "جوله", "علمني",
+                  "تدريب", "دلني"),
+    },
+    "studio": {
+        "about": "point inside Studio",
+        "tools": ("show_in_studio",),
+        "words": ("studio", "ستوديو", "استوديو"),
+    },
 }
+
+NP03_GROUPS = frozenset({"automations", "emails", "screens", "approvals", "debugging", "website", "bulk", "tasks",
+                         "tours", "studio"})
+# NP-03: Developer mode builds. A question of that mode that names none of these is given the
+# automations, the work it is most often for, rather than nothing to build with
+BUILDERS = frozenset({"automations", "emails", "screens", "reports", "approvals", "debugging", "modules", "website",
+                      "studio"})
+# A command typed by the person names its group: "/setting", "/import"
+COMMAND_GROUPS = {
+    "setting": "settings", "product": "products", "stock": "products", "debug": "debugging", "tour": "tours",
+    "health": "assessment", "import": "import", "sql": "data", "field": "screens", "rules": "automations",
+}
+
+
+def routed_tools():
+    """:return: the tools that come by a group, those a companion module adds included
+    (nudge_builder); every other tool is in every call"""
+    return {tool for group in GROUPS.values() for tool in group["tools"]}
 
 
 def _forms(word):
@@ -130,8 +219,9 @@ def asked(text):
     return found
 
 
-# The words that bring a group, not what it is about: left out of a search
-TRIGGERS = {form for forms in FORMS.values() for form in forms if " " not in form}
+# The words that bring a group, not what it is about: left out of a search (those of the groups of
+# NP-03, such as shop, field or email, are often what the search is about, and stay in it)
+TRIGGERS = {form for name, forms in FORMS.items() if name not in NP03_GROUPS for form in forms if " " not in form}
 
 
 def tools_of(names):
@@ -148,6 +238,39 @@ def offered(conversation, text):
     """:return: the tools a small model is given beyond those of its mode:
     the groups of the question, and those asked for in this conversation"""
     return tools_of(set(asked(text)) | set(kept(conversation)))
+
+
+def routed(conversation, mode, texts, screen=None, context="", command=None, attachment=False, called=()):
+    """NP-03: the tools a call is given beyond the core of its mode, with no AI.
+
+    :param texts: the question, and the one before it: an answer to a question of Nudge ("the sales
+        manager") goes on with the work of the question it answers
+    :param screen: the snapshot sent with the question: the Import screen brings the import tools
+    :param context: the context block of the question: a report asked as a spreadsheet, an
+        explanation asked on the screen
+    :param command: the command the question was typed with ("/import")
+    :param attachment: whether a file came with the question
+    :param called: the tools called lately in this conversation: the work goes on with them
+    :return: the names of the tools, sorted; each still passes ``Tool.is_available``"""
+    names = set(asked("\n".join(text for text in texts if text))) | set(kept(conversation))
+    screen = screen if isinstance(screen, dict) else {}
+    if screen.get("import"):
+        names.add("import")
+    if screen.get("studio"):
+        names.add("studio")
+    # The context block is the first line of the context of the question; a key is written "key":
+    context = (context or "").split("\n", 1)[0]
+    if '"report":' in context:
+        names.add("data")
+    if '"explain":' in context:
+        names.add("screen")
+    if attachment:
+        names |= {"documents", "products"}
+    if command in COMMAND_GROUPS:
+        names.add(COMMAND_GROUPS[command])
+    if mode == base.MODE_DEV and not names & BUILDERS:
+        names.add("automations")
+    return sorted(tools_of(names) | (set(called) & routed_tools()))
 
 
 def in_mode(tool, mode):

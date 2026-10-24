@@ -158,6 +158,20 @@ DEV_TOOLS = frozenset({
 ESSENTIAL_BY_MODE = {MODE_TALK: TALK_TOOLS, MODE_AGENT: AGENT_TOOLS, MODE_DEV: DEV_TOOLS}
 ESSENTIAL_TOOLS = TALK_TOOLS | AGENT_TOOLS | DEV_TOOLS | {"more_tools"}
 
+# NP-03: of the tools that come in groups (groups.py), those every call of the mode still carries,
+# whatever the question: finding and reading, showing on the screen, and in Agent mode changing a
+# record. The other tools of the groups come by the words of the question, its screen, its skills,
+# or when the model asks for them with more_tools; a tool named in no group is in every call.
+CORE_SHOWING = frozenset({"show_on_screen", "write_in_field"})
+CORE_BY_MODE = {
+    MODE_TALK: CORE_SHOWING | (ASK_TOOLS - {"show_chart"}) | {"search_database_profile", "more_tools"},
+    MODE_AGENT: CORE_SHOWING | {
+        "search_records", "read_record", "find_record", "aggregate_records", "filter_screen", "open_record",
+        "prepare_create", "prepare_write", "call_method", "search_database_profile", "more_tools"},
+    MODE_DEV: frozenset({
+        "search_records", "read_record", "prepare_write", "search_database_profile", "more_tools"}),
+}
+
 # Every result of a tool is read by the model inside a frame that says it is data:
 # information to reason about, never an instruction, whatever a note, a file, a
 # label or an error text quoting a field says. Only the tools below answer in
@@ -198,8 +212,10 @@ def register(tool_class):
 
 
 def available(env, mode=MODE_TALK, tool_set="full", extra=(), background=False):
-    """:param tool_set: "essential" keeps the tools of the mode, and ``extra``
-    :param extra: names of the tools of the groups a small model was given
+    """:param tool_set: "essential" keeps the tools of the mode, and ``extra``;
+        "core" (NP-03) every tool but those of the groups (groups.py) beyond the core of the
+        mode (``CORE_BY_MODE``), and ``extra``; "full" every tool
+    :param extra: names of the tools of the groups the question was given
     :return: tools offered to the current user. Sorted: the list is part
     of the prompt, and its order must not change between two requests."""
     if tool_set == "essential":
@@ -208,6 +224,10 @@ def available(env, mode=MODE_TALK, tool_set="full", extra=(), background=False):
             names |= ASK_TOOLS
     else:
         names = {name for name, tool in TOOLS.items() if not getattr(tool, "small_models_only", False)}
+        if tool_set == "core":
+            from . import groups  # noqa: PLC0415 - groups imports this module
+            core = CORE_BY_MODE.get(mode, CORE_BY_MODE[MODE_TALK])
+            names = (names - (groups.routed_tools() - core)) | (core & {"more_tools"}) | set(extra)
     # NP-03: the skills given with the question bring the tools they need (a small model gets them
     # without asking), and use_skill comes with their index only. Each name still passes is_available
     # below, as the person and in this mode: a skill narrows what is offered, it never gives a tool
