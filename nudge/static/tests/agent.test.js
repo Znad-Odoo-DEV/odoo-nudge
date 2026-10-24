@@ -13,7 +13,7 @@ import {
     webModels,
 } from "@web/../tests/web_test_helpers";
 
-import { asksHowTo, asksToDoIt } from "@nudge/core/nudge_service";
+import { asksForFigures, asksHowTo, asksToDoIt } from "@nudge/core/nudge_service";
 
 import { answered, lines, setupNudge, streamed } from "./voice_helpers";
 
@@ -714,6 +714,29 @@ test("a question of how is told from an order", () => {
         "أكّدلي عرض السعر S00002", "غيّرلي مدينة Raghad لحلب", ""]) {
         expect(asksHowTo(text)).toBe(false, { message: text });
     }
+});
+
+test("a question of figures is not asked how, a question of how still is", async () => {
+    for (const text of ["How many contacts do we have?", "how much do we owe", "كم عدد جهات الاتصال؟",
+        "قديش عدد الموظفين", "kam mowazaf 3andna", "addesh 3adad el fawateer"]) {
+        expect(asksForFigures(text)).toBe(true, { message: text });
+    }
+    for (const text of ["How do I count the contacts?", "كيف أعرف كم عدد الموظفين", "Create a contact", ""]) {
+        expect(asksForFigures(text)).toBe(false, { message: text });
+    }
+    const { asked, nudge } = await start({
+        settings: { nudge_explain: "ask" },
+        answer: answered({ type: "delta", text: "12 contacts." }),
+    });
+    nudge.open();
+    await animationFrame();
+    await nudge.send("How many contacts do we have?");
+    await animationFrame();
+    expect(".o_nudge_ask").toHaveCount(0, { message: "A count is answered, not asked how" });
+    expect(asked.messages.at(-1).message).toBe("How many contacts do we have?");
+    await nudge.send("How do I create a contact?");
+    await animationFrame();
+    expect(".o_nudge_ask").toHaveCount(1, { message: "A question of how still is" });
 });
 
 test("an order in Agent mode is the work, without asking how", async () => {
