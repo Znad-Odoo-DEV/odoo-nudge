@@ -18,8 +18,10 @@ import logging
 import os
 import re
 from collections import namedtuple
+from datetime import date
 
 from lxml import etree
+from odoo import fields
 
 
 from . import health
@@ -37,8 +39,12 @@ NESTED_QUANTIFIER = re.compile(r"[+*}]\)?[+*{]")
 CHECK_KEY = re.compile(r"[a-z][a-z0-9_]{1,60}")
 COUNTRY_CODE = re.compile(r"[A-Z]{2}")
 
-Pack = namedtuple("Pack", "id name countries reference checks source")
-Entry = namedtuple("Entry", "key check severity title explanation reference params")
+DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
+Pack = namedtuple("Pack", "id name countries reference checks source reviewed", defaults=("",))
+# NP-01: ``source`` is the address of the official page the rule was read on, ``reviewed`` the day somebody read it
+# again, ``deadline`` the day a duty starts (the daily notice counts down to it)
+Entry = namedtuple("Entry", "key check severity title explanation reference params source reviewed deadline",
+                   defaults=("", "", ""))
 
 
 class PackError(ValueError):
@@ -269,6 +275,13 @@ def _text(value, where):
     raise PackError(f"{where}: a text is a string, or {{\"en\": ..., \"ar\": ...}} with at least \"en\".")
 
 
+def _is_date(value):
+    try:
+        return bool(DATE.fullmatch(value)) and bool(date.fromisoformat(value))
+    except ValueError:
+        return False
+
+
 def load_pack(data, source="pack"):
     """:return: the :class:`Pack` made from the JSON object ``data``
     :raise PackError: when anything in it is not as described above, naming ``source`` and the check"""
@@ -325,13 +338,27 @@ def load_pack(data, source="pack"):
                 re.compile(params["pattern"])
             except re.error as error:
                 raise PackError(f"{where}: the pattern is not valid: {error}.") from None
+        extra = {}
+        for field in ("reviewed", "deadline"):
+            value = raw.get(field, "")
+            if value and (not isinstance(value, str) or not _is_date(value)):
+                raise PackError(f"{where}: \"{field}\" is a date written YYYY-MM-DD.")
+            extra[field] = value
+        link = raw.get("source", "")
+        if link and (not isinstance(link, str) or not link.startswith("https://") or len(link) > 500):
+            raise PackError(f"{where}: \"source\" is an https address of the official page.")
+        extra["source"] = link
         entries.append(Entry(
             key, name, severity, _text(raw.get("title"), where + ", title"),
             _text(raw.get("explanation"), where + ", explanation"),
-            _text(raw.get("reference", ""), where + ", reference") if raw.get("reference") else {"en": ""}, params))
+            _text(raw.get("reference", ""), where + ", reference") if raw.get("reference") else {"en": ""}, params,
+            extra["source"], extra["reviewed"], extra["deadline"]))
+    reviewed = data.get("reviewed", "")
+    if reviewed and (not isinstance(reviewed, str) or not _is_date(reviewed)):
+        raise PackError(f"{source}: \"reviewed\" is a date written YYYY-MM-DD.")
     return Pack(pack_id, _text(data.get("name", pack_id), f"{source}, name"), [code for code in countries],
                 _text(data.get("reference", ""), f"{source}, reference") if data.get("reference") else {"en": ""},
-                entries, source)
+                entries, source, reviewed)
 
 
 def load_file(path):
@@ -379,7 +406,34 @@ def load_all(env):
             refused.append((os.path.basename(path), f"the pack id {cached[1].id!r} is used by another file."))
         else:
             packs[cached[1].id] = cached[1]
+    packs.update(_approved(env))
     return packs, refused
+
+
+_APPROVED = {}
+
+
+def _approved(env):
+    """:return: ``{pack id: Pack}`` of the packs an administrator approved from the signed feed (NP-08), the latest
+    approval of a pack winning. They replace the bundled pack of the same id; the bundled file stays as the fallback
+    when nothing is approved, an approval is rolled back or a stored pack no longer loads."""
+    if "nudge.compliance.update" not in env:
+        return {}
+    # sudo: the packs are Nudge's own infrastructure data, read by everyone who runs a checklist
+    rows = env["nudge.compliance.update"].sudo().search([("state", "=", "applied")], order="id")
+    out = {}
+    for row in rows:
+        stamp = (row.id, row.write_date)
+        if _APPROVED.get(row.id, (None,))[0] != stamp:
+            try:
+                _APPROVED[row.id] = (stamp, load_pack(json.loads(row.payload), f"feed {row.pack_id}"))
+            except (ValueError, TypeError) as error:
+                _logger.warning("Nudge compliance: the approved pack %s no longer loads: %s", row.pack_id, error)
+                _APPROVED[row.id] = (stamp, None)
+        pack = _APPROVED[row.id][1]
+        if pack is not None:
+            out[pack.id] = pack
+    return out
 
 
 def packs_for(env, company=None):
@@ -486,6 +540,14 @@ class ComplianceCheck(Check):
         reference = pick(entry.reference, env) or pick(pack.reference, env)
         if reference:
             parts.append(env._("Reference: %s", reference))
+        if entry.deadline:
+            parts.append(env._("Date: %(date)s (%(days)s days left)", date=entry.deadline,
+                               days=(date.fromisoformat(entry.deadline) - fields.Date.context_today(env.user)).days))
+        if entry.source:
+            parts.append(env._("Official source: %s", entry.source))
+        reviewed = entry.reviewed or pack.reviewed
+        if reviewed:
+            parts.append(env._("Last reviewed: %s", reviewed))
         parts.append(env._("A checklist, not legal advice; confirm with the authority."))
         return "\n".join(part for part in parts if part)
 

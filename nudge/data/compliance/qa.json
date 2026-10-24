@@ -2,6 +2,7 @@
   "id": "qa",
   "name": {"en": "Qatar", "ar": "قطر"},
   "countries": ["QA"],
+  "reviewed": "2026-10-22",
   "reference": {
     "en": "General Tax Authority of Qatar. Qatar has signed the GCC VAT Framework Agreement but has not put a VAT in force; check the current position with the Authority. This is a checklist, not legal advice; confirm with the authority.",
     "ar": "الهيئة العامة للضرائب في قطر. وقّعت قطر الاتفاقية الموحدة لضريبة القيمة المضافة لدول الخليج لكنها لم تطبّق الضريبة؛ راجع الوضع الحالي لدى الهيئة. هذه قائمة فحص وليست استشارة قانونية؛ تأكد لدى الجهة المختصة."

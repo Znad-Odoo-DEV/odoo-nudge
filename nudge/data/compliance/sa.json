@@ -2,6 +2,7 @@
   "id": "sa",
   "name": {"en": "Saudi Arabia", "ar": "المملكة العربية السعودية"},
   "countries": ["SA"],
+  "reviewed": "2026-10-22",
   "reference": {
     "en": "VAT Law (Royal Decree No. M/113 of 1438H) and its Implementing Regulations, and the E-Invoicing Regulation, Zakat, Tax and Customs Authority (ZATCA). Check the current text with ZATCA before you rely on it. This is a checklist, not legal advice; confirm with the authority.",
     "ar": "نظام ضريبة القيمة المضافة (المرسوم الملكي رقم م/113 لعام 1438هـ) ولائحته التنفيذية ولائحة الفوترة الإلكترونية، هيئة الزكاة والضريبة والجمارك. راجع النص الحالي لدى الهيئة قبل الاعتماد عليه. هذه قائمة فحص وليست استشارة قانونية؛ تأكد لدى الجهة المختصة."
@@ -70,7 +71,7 @@
       "key": "qr_code",
       "check": "field_present",
       "severity": "warning",
-      "params": {"model": "account.move", "fields": ["l10n_sa_qr_code_str"], "modules": ["l10n_sa_edi"]},
+      "params": {"model": "account.move", "fields": ["l10n_sa_qr_code_str"], "modules": ["l10n_sa"]},
       "title": {"en": "Invoices can carry the QR code", "ar": "يمكن أن تحمل الفواتير رمز QR"},
       "explanation": {
         "en": "The QR code is compulsory on simplified invoices and is part of the e-invoice. Odoo computes it from the seller, the VAT number, the time, the total and the VAT; the field comes with the Saudi e-invoicing module.",
@@ -134,6 +135,25 @@
         "en": "Employers register their employees with the General Organization for Social Insurance (GOSI) with the national ID or the Iqama number. The payroll localisation (module l10n_sa_hr_payroll) computes the contributions. These employees have no ID number.",
         "ar": "يسجّل أصحاب العمل موظفيهم في المؤسسة العامة للتأمينات الاجتماعية برقم الهوية الوطنية أو الإقامة. تحسب وحدة توطين الرواتب (l10n_sa_hr_payroll) الاشتراكات. هؤلاء الموظفون بلا رقم هوية."
       }
+    },
+    {
+      "key": "zatca_wave",
+      "check": "note",
+      "severity": "warning",
+      "title": {
+        "en": "ZATCA phase 2: the company knows its wave and is onboarded",
+        "ar": "المرحلة الثانية لهيئة الزكاة: الشركة تعرف دفعتها وأنهت الربط"
+      },
+      "explanation": {
+        "en": "Phase 2 (integration with the Fatoora platform) is enforced in waves, and ZATCA notifies each taxpayer at least six months ahead. Wave 24 (taxable revenue above SAR 375,000 in 2022, 2023 or 2024) was due by 30 June 2026, so the announced waves have passed. Check the notice ZATCA sent to the company, and that the production CSID (the certificate) is issued and the invoices are cleared or reported. Nudge cannot see ZATCA's notice. Dates come from the authority and may change: confirm with the authority.",
+        "ar": "تُطبَّق المرحلة الثانية (الربط مع منصة فاتورة) على دفعات، وتُخطر الهيئة كل مكلّف قبل ستة أشهر على الأقل. وكانت الدفعة 24 (الإيرادات الخاضعة للضريبة فوق 375,000 ريال في 2022 أو 2023 أو 2024) مستحقة قبل 30 يونيو 2026، فالدفعات المعلنة انقضت. راجع إشعار الهيئة للشركة، وتأكد من إصدار شهادة الإنتاج (CSID) ومن أن الفواتير تُخلَّص أو يُبلَّغ عنها. لا يرى Nudge إشعار الهيئة. التواريخ مصدرها الجهة المختصة وقد تتغير: تأكد لدى الجهة المختصة."
+      },
+      "reference": {
+        "en": "ZATCA, E-Invoicing roll-out phases (phase 2 in waves; Official Gazette decision on wave 24, compliance until 30 June 2026).",
+        "ar": "هيئة الزكاة والضريبة والجمارك، مراحل تطبيق الفوترة الإلكترونية (المرحلة الثانية على دفعات؛ قرار الجريدة الرسمية للدفعة 24، الالتزام حتى 30 يونيو 2026)."
+      },
+      "source": "https://zatca.gov.sa/en/E-Invoicing/Introduction/Pages/Roll-out-phases.aspx",
+      "reviewed": "2026-10-22"
     }
   ]
 }
