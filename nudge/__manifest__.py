@@ -43,6 +43,7 @@ Without them the rest works and the feature says what is missing.
         "security/nudge_health_security.xml",
         "security/nudge_report_security.xml",
         "security/nudge_note_security.xml",
+        "security/nudge_credential_security.xml",
         "security/nudge_prompt_security.xml",
         "data/nudge_provider_data.xml",
         "data/nudge_cron_data.xml",

@@ -26,6 +26,9 @@ _logger = logging.getLogger(__name__)
 FEED_URL_PARAM = "nudge.compliance_feed_url"
 FEED_KEY_PARAM = "nudge.compliance_feed_key"
 THRESHOLDS = (90, 30, 7)
+CREDENTIAL_THRESHOLDS = (60, 30, 7, 0)  # NP-17: 0 is the day of the expiry itself, and after it
+CREDENTIAL_PACK = "credential"
+EXPIRED_STILL_NEWS = 30  # an expiry older than this many days is old news and is not told
 ACCOUNTING_MANAGERS = "account.group_account_manager"
 
 
@@ -82,6 +85,7 @@ class NudgeComplianceNotice(models.Model):
             try:
                 with self.env.cr.savepoint():
                     self.with_company(company)._deadlines_of(company, today)
+                    self.with_company(company)._credentials_of(company, today)
             except Exception:  # noqa: BLE001 - one company must not stop the others
                 _logger.exception("Nudge: the compliance deadlines of company %s could not be told", company.id)
             if not self.env.context.get("nudge_keep_transaction"):
@@ -105,6 +109,53 @@ class NudgeComplianceNotice(models.Model):
                     "company_id": company.id, "pack": pack.id, "check_key": entry.key, "threshold": threshold,
                     "deadline": entry.deadline, "title": compliance.pick(entry.title, self.env)})
                 notice._tell(company, entry, days)
+
+    @api.model
+    def _credential_threshold(self, days):
+        """:return: the tightest of 60, 30, 7 that ``days`` left has reached, 0 on the day and after it,
+        or None when the date is far (or expired long ago)"""
+        if days > CREDENTIAL_THRESHOLDS[0] or days < -EXPIRED_STILL_NEWS:
+            return None
+        return min(t for t in CREDENTIAL_THRESHOLDS if days <= t)
+
+    def _credentials_of(self, company, today):
+        """NP-17: tell, once for each threshold, the credentials and certificates of ``company`` that expire.
+        Only the date, the name and the company are read, never the certificate or the key."""
+        for source, record in self.env["nudge.credential"]._expiries(company):
+            days = (record["date"] - today).days
+            threshold = self._credential_threshold(days)
+            if threshold is None:
+                continue
+            # the date is part of the key: a renewed credential has a new date and is watched afresh
+            key = f"{source}:{record['id']}:{record['date'].isoformat()}"
+            # sudo: Nudge's own record of what was told; the managers only read it
+            Notice = self.sudo()
+            if Notice.search_count([("company_id", "=", company.id), ("pack", "=", CREDENTIAL_PACK),
+                                    ("check_key", "=", key), ("threshold", "<=", threshold)]):
+                continue
+            notice = Notice.create({
+                "company_id": company.id, "pack": CREDENTIAL_PACK, "check_key": key, "threshold": threshold,
+                "deadline": record["date"], "title": record["name"]})
+            notice._tell_credential(company, record["name"], days)
+
+    def _tell_credential(self, company, name, days):
+        self.ensure_one()
+        for user in self._recipients(company):
+            env = self.with_context(lang=user.lang or self.env.lang).env
+            if days > 0:
+                subject = _("%(name)s expires in %(days)s days", name=name, days=days)
+            elif days == 0:
+                subject = _("%(name)s expires today", name=name)
+            else:
+                subject = _("%(name)s has expired", name=name)
+            body = _("%(subject)s (%(date)s). Renew it before e-invoicing stops.",
+                         subject=subject, date=self.deadline)
+            try:
+                notify_user(user, "simple_notification", {"title": subject, "message": body, "type": "warning"})
+                if "mail.thread" in self.env:
+                    user.partner_id.message_notify(partner_ids=[user.partner_id.id], subject=subject, body=body)
+            except Exception:  # noqa: BLE001
+                _logger.info("Nudge: a manager could not be told of an expiring credential", exc_info=True)
 
     def _tell(self, company, entry, days):
         self.ensure_one()
