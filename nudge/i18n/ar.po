@@ -23296,3 +23296,13 @@ msgstr "الحقول والأزرار والشاشات"
 #: model:nudge.skill,name:nudge.skill_approval_flows
 msgid "Approvals on documents"
 msgstr "الموافقات على المستندات"
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_bulk_work
+msgid "Many records at once"
+msgstr "سجلات كثيرة دفعة واحدة"
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_recurring_tasks
+msgid "Recurring AI tasks"
+msgstr "مهام الذكاء الاصطناعي المتكررة"

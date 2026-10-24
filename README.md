@@ -434,6 +434,17 @@ version and a test sentence with the tool it expects.
   (`tests/test_prompt_budget.py`).
 - **Fallback.** Settings ‣ Nudge ‣ Skills ‣ Every Skill in Full sends every skill in full and every tool
   with every question, as before skills.
+- **Fallback.** Settings ‣ Nudge ‣ Skills ‣ Every Skill in Full sends every skill in full with every
+  question, as before skills.
+- **Skills that come with Nudge cover every tool.** Beyond a small core of tools for each mode, a question is
+  offered the tools of the skills it brings, so every tool of Agent and Developer mode that is not in the core
+  belongs to at least one skill, grouped by kind of work: database assessment, numbers and charts, finding and
+  changing records, many records at once, recurring tasks, records from a document, meeting minutes, history of
+  a record, finding products, setting a database up, showing the way on screen, automations, fields and screens,
+  approvals, and, in their own modules, spreadsheets, websites and Studio approval rules. Each skill holds the
+  instructions that were once in every call, its words in English and Arabic, a test sentence and the tool it
+  expects. `tests/test_skill_coverage.py` fails when a tool belongs to no skill, a skill names a tool that does
+  not exist, a test sentence no longer brings its skill, or an instruction passes the 12,000 characters.
 
 ### In the background
 
