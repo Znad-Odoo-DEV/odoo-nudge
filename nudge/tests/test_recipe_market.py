@@ -257,6 +257,22 @@ class TestRecipeMarket(NudgeCase, TransactionCase):
                 "source_id": entry.source_id.id, "entry_key": entry.key, "name": "x", "version": "1",
                 "company_id": active.company_id.id})
 
+    def test_an_install_that_cannot_see_the_line_of_another_is_run_again(self):
+        """Review odoo-tech #2: the second of two installs at once waited for the lock with an older
+        snapshot, which does not hold the line of the first: it is not archived, the database
+        refuses the new one, and the request is run again rather than fail"""
+        if market.ConcurrencyError is None:
+            self.skipTest("Odoo before 19 retries no ConcurrencyError")
+        files, _raw = self.market_files()
+        self.refresh(files)
+        entry = self.source.entry_ids
+        Installed = self.env["nudge.recipe.installed"].with_user(self.boss)
+        first = Installed._record(entry)
+        with patch.object(type(Installed), "search", lambda self, *args, **kwargs: self.browse()), \
+                mute_logger("odoo.sql_db"), self.assertRaises(market.ConcurrencyError):
+            Installed._record(entry)
+        self.assertEqual(Installed.search([("entry_key", "=", entry.key)]), first)
+
     def test_a_download_that_trickles_is_cut_after_the_total_time(self):
         clock = iter([0.0, 1.0, 100.0, 200.0])
         chunks = (b"a" * 10, b"b" * 10, b"c" * 10)
