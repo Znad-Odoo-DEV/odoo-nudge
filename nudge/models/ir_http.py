@@ -1,4 +1,5 @@
 from odoo import models
+from odoo.http import SessionExpiredException, request
 from odoo.modules.module import get_manifest
 
 from .. import tools
@@ -11,6 +12,16 @@ def nudge_version():
 
 class IrHttp(models.AbstractModel):
     _inherit = "ir.http"
+
+    @classmethod
+    def _authenticate(cls, endpoint):
+        """NP-16: the session of an auditor is of no use after the last day of their access, whatever
+        the cron has done yet: checked on each request, on the server."""
+        super()._authenticate(endpoint)
+        uid = request.session.uid
+        if uid and request.env["res.users"]._nudge_auditor_expired(uid):
+            request.session.logout(keep_db=True)
+            raise SessionExpiredException("The access of this auditor has ended")
 
     def session_info(self):
         result = super().session_info()

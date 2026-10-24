@@ -6,6 +6,7 @@ Current version: nudge 19.0.1.58.0, nudge_mcp 19.0.1.1.0, nudge_connect 19.0.1.0
 
 - NP-15 Allowed destinations: a per-company list of hosts (Settings, Nudge, Privacy) that providers, connectors, the recipe marketplace, the search model download and the compliance feed may reach; empty keeps today's behaviour, any other host is refused before the request with the host named; a shared screen that held a password field tells the system administrators once a day per screen model; Arabic in i18n/_pending/NP-15.ar.po
 - NP-04: the external assistants (MCP) and the messaging apps take their places in the same line as the panel (`nudge.slot._claim_channel`, `NudgeBusy`); Arabic in i18n/_pending/NP-04-channels.ar.po.
+- NP-16: Nudge Auditor, a time-boxed read-only persona: Ask the data plus the log of what Nudge did in their companies; access until a date (daily cron and a check on each request), their questions kept against retention and listed for managers, an admin wizard to add one; Arabic in i18n/_pending/NP-16.ar.po.
 - Help of Answers at the Same Time describes the waiting line; Arabic in i18n/_pending/LEAD-finish.ar.po.
 - SEC-01: a field named signature is hidden unless it is written text (HTML or text); keys, hashes and hmac stay hidden.
 - The picture reading takes the deadline of the answer.

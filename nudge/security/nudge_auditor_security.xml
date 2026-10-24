@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- NP-16: an outside auditor. A Nudge User (the Ask tier: reading tools in Talk) who can also read the
+         log of what Nudge did, in their companies. Never Agent, Manager or Developer: res.users refuses it.
+         No privilege/category on purpose: the group is the same on Odoo 17, 18 and 19. -->
+    <record id="group_nudge_auditor" model="res.groups">
+        <field name="name">Nudge Auditor</field>
+        <field name="comment">Time-boxed, read-only: asks questions of the data and reads the log of what Nudge did.</field>
+        <field name="implied_ids" eval="[Command.link(ref('group_nudge_user'))]"/>
+    </record>
+
+    <data noupdate="1">
+        <!-- The audit log, read only, of the companies the auditor is allowed (Odoo's own multi-company rule) -->
+        <record id="nudge_run_rule_auditor" model="ir.rule">
+            <field name="name">Nudge Run: auditor, companies of the user</field>
+            <field name="model_id" ref="model_nudge_run"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[Command.link(ref('group_nudge_auditor'))]"/>
+        </record>
+
+        <record id="nudge_step_rule_auditor" model="ir.rule">
+            <field name="name">Nudge Step: auditor, companies of the user</field>
+            <field name="model_id" ref="model_nudge_step"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[Command.link(ref('group_nudge_auditor'))]"/>
+        </record>
+
+        <record id="nudge_built_log_rule_auditor" model="ir.rule">
+            <field name="name">Nudge Made by Nudge Log: auditor, companies of the user</field>
+            <field name="model_id" ref="model_nudge_built_log"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[Command.link(ref('group_nudge_auditor'))]"/>
+        </record>
+    </data>
+</odoo>

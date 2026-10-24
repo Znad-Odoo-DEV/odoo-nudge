@@ -879,7 +879,9 @@ class NudgeConversation(models.Model):
             return 0
         limit = fields.Datetime.subtract(fields.Datetime.now(), days=days)
         Conversation = self.sudo().with_context(active_test=False)
+        # NP-16: what an auditor asked is kept for the company, whatever the days say
         idle = [("write_date", "<", limit), ("stream_started_at", "=", False), ("waiting_step_id", "=", False),
+                ("kept_for_audit", "=", False),
                 ("run_ids", "not any", [("step_ids.state", "=", "pending")])]
         acted = Conversation.search(idle + [("active", "=", True), ("run_ids", "!=", False)],
                                     order="write_date, id", limit=batch)
