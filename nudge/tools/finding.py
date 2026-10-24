@@ -10,6 +10,7 @@ from odoo.exceptions import AccessError, UserError
 
 from odoo.fields import Domain
 
+from ..llm.arabic import fold
 from ..profile import activity, retrieval
 from . import base
 from .actions import button_label, form_buttons, shown_button
@@ -22,13 +23,28 @@ MAX_CANDIDATES = 8
 REFERENCE_FIELDS = ("name", "ref", "code", "number", "reference", "sequence_number", "default_code", "barcode")
 
 
+# Kinds of records that are plumbing, never what a person calls by name
+TECHNICAL_PREFIXES = ("ir.", "mail.", "bus.", "base.", "res.config", "res.users.log", "web.", "base_import.")
+
+
+def has_real_name(model):
+    """:return: whether the records of ``model`` are called something: a name field of its own,
+    not the "model,id" an unnamed model falls back to, and not plumbing"""
+    if model._name.startswith(TECHNICAL_PREFIXES) or model._transient:
+        return False
+    rec_name = model._rec_name
+    return bool(rec_name) and rec_name in model._fields
+
+
 def _readable_models(env, names):
     found = []
     for name in names:
         try:
-            found.append(get_model(env, name))
+            model = get_model(env, name)
         except Refused:
             continue
+        if has_real_name(model):
+            found.append(model)
     return found
 
 
@@ -46,7 +62,12 @@ def candidate_models(env, topic, name):
         ]
         used.sort(key=lambda piece: (-activity.activity(piece.data), piece.key))
         names = [piece.model_name for piece in used if retrieval.can_read(env, piece)]
-    return _readable_models(env, names[:MAX_MODELS * 2])[:MAX_MODELS]
+    models = _readable_models(env, names[:MAX_MODELS * 3])
+    if not (topic or "").strip():
+        # With no kind said, a person is the likeliest
+        contacts = _readable_models(env, ["res.partner"])
+        models = contacts + [model for model in models if model._name != "res.partner"]
+    return models[:MAX_MODELS]
 
 
 def _reference_domain(model, text):
@@ -58,7 +79,26 @@ def _reference_domain(model, text):
     return Domain.OR(parts) if parts else None
 
 
-def look_in(model, text):
+def _holds_the_words(model, record, text, topic=""):
+    """:return: whether every word of ``text`` is in the name of ``record`` or in one of its
+    references, Arabic spelling made alike; a record the words do not touch is no match,
+    however the search of its model scored it"""
+    pieces = [record.display_name or ""]
+    for field_name in REFERENCE_FIELDS + ("email",):
+        field = model._fields.get(field_name)
+        if field is not None and field.type == "char" and model._has_field_access(field, "read"):
+            pieces.append(record[field_name] or "")
+    haystack = fold(" ".join(pieces))
+    # The words that name the kind ("leave" in "Ahmad's leave") are not held by the name
+    kind_words = set(fold(topic).split()) | set(fold(model._description).split())
+    words = [
+        word for word in (w.removesuffix("'s").removesuffix("’s") for w in fold(text).split())
+        if word and word not in kind_words
+    ]
+    return all(word in haystack for word in words)
+
+
+def look_in(model, text, topic=""):
     """:return: the records of ``model`` called ``text``, as the person sees
     them; what cannot be read is not found"""
     try:
@@ -66,7 +106,7 @@ def look_in(model, text):
         domain = _reference_domain(model, text)
         if domain is not None:
             found |= model.search(domain, limit=PER_MODEL)
-        return found.exists()
+        return found.exists().filtered(lambda record: _holds_the_words(model, record, text, topic))
     except (AccessError, UserError, ValueError, KeyError):
         return model.browse()
 
@@ -150,7 +190,7 @@ class FindRecord(base.Tool):
         cache = {}
         found = []
         for rank, model in enumerate(models):
-            for record in look_in(model, text):
+            for record in look_in(model, text, arguments.get("topic") or ""):
                 found.append((-_score(record, text), rank, model, record))
         found.sort(key=lambda item: item[:2])
         candidates = []
