@@ -41,6 +41,12 @@ SKILL_KEYS = frozenset((
     "state", "version", "active", "summary", "instructions", "trigger_words", "model_names", "tool_names",
     "modes", "group_ids", "company_id", "key"))
 NOTE_KEYS = frozenset(("name", "body", "state", "active", "group_ids", "company_id", "kind"))
+# Today's date as an answer may write it, besides the digits: the name of the month next to the day
+MONTHS = (
+    ("january", "يناير"), ("february", "فبراير"), ("march", "مارس"), ("april", "ابريل"), ("may", "مايو"),
+    ("june", "يونيو"), ("july", "يوليو"), ("august", "اغسطس"), ("september", "سبتمبر"), ("october", "اكتوبر"),
+    ("november", "نوفمبر"), ("december", "ديسمبر"))
+FOLDED = str.maketrans("٠١٢٣٤٥٦٧٨٩أإآ", "0123456789ااا")
 
 
 def _digest(*parts):
@@ -162,6 +168,8 @@ class NudgeAnswerCache(models.Model):
         scope = _digest(
             company.id, mode, language, where, sorted(self._groups_of(user).ids), version,
             self._skills_signature(user),
+            # The companies of the person are named to the model (the overview of the database)
+            sorted(user.company_ids.ids),
             # How the skills reach the model changes what it reads
             self.env["ir.config_parameter"].sudo().get_param(SKILLS_INLINE_PARAM))
         return {
@@ -297,7 +305,8 @@ class NudgeAnswerCache(models.Model):
                     or question.attachment_name or question.wants_pointer or question.noai_intent
                     or "<nudge_found>" in (question.context_text or ""))
                 or memory_match.language(answer) != key["language"]
-                or redact.Redactor().redact(answer) != answer or SECRET.search(answer)):
+                or redact.Redactor().redact(answer) != answer or SECRET.search(answer)
+                or self._personal(answer, conversation.user_id)):
             return
         assistants = later.filtered(lambda other: other.role == "assistant")
         tokens = sum(
@@ -312,6 +321,20 @@ class NudgeAnswerCache(models.Model):
             old[1:].unlink()
         else:
             self.create(values)
+
+    def _personal(self, answer, user):
+        """:return: whether ``answer`` repeats what the model was told of the asker alone, their name or
+        today's date: another person would be served someone else's name, or a day gone by"""
+        folded = answer.casefold().translate(FOLDED)
+        for part in (user.name or "").casefold().translate(FOLDED).split():
+            if len(part) >= 3 and re.search(rf"(?<!\w){re.escape(part)}(?!\w)", folded):
+                return True
+        today = fields.Date.context_today(self.with_user(user))
+        if any(today.strftime(form) in folded for form in ("%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y", "%d-%m-%Y", "%d.%m.%Y")):
+            return True
+        months = "|".join(MONTHS[today.month - 1])
+        return bool(re.search(
+            rf"(?<!\d)0?{today.day}(?:st|nd|rd|th)?\s+(?:of\s+)?(?:{months})|(?:{months})\s+0?{today.day}(?!\d)", folded))
 
     # ------------------------------------------------------------------
     # Invalidation, cleaning, the managers' list
