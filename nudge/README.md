@@ -491,3 +491,10 @@ The documentation of Odoo included in `data/odoo_docs.jsonl.gz` is © Odoo S.A.,
 the file says which branch of the documentation it was built from.
 - Installed and tested on Odoo.sh (Linux, several workers, behind its proxy): the server
   tests pass there; the browser features were tried there by hand.
+
+## Compliance dates and the signed pack feed
+
+Packs that carry a date (`deadline`, `source`, `reviewed` on a check; `reviewed` on a pack) are counted down by a daily job: the accounting managers of each company (the Nudge managers when Accounting is not installed) are told 90, 30 and 7 days before, once for each threshold, as a notification and, where Discuss is installed, a message in the inbox. **Nudge, Health Check, Compliance Deadlines** lists what was told. The dates come from the authorities and are marked "confirm with the authority"; they are information, not legal advice.
+
+The feed of updates is off on a new database (no address, no key). In **Settings, Nudge, Compliance Packs** an administrator sets the HTTPS address and the Ed25519 public key of the publisher. Once a day Nudge fetches that one file (never in private mode), checks the signature, validates each pack like a bundled one and lists the changes per country in **Nudge, Health Check, Compliance Pack Updates**. Only a system administrator approves, declines or rolls back an update; a pack is data (no code, no HTML). The feed is `{"format": 1, "payload": "<json text>", "signature": "<base64>"}`; sign it with `python -I scripts/sign_pack_feed.py --key <private.pem> --payload feed.json --out signed.json`. The private key never belongs on the server or in the repository.
+

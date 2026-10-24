@@ -1,0 +1,183 @@
+#. module: nudge
+msgid "%(title)s: %(date)s, %(days)s days left. A checklist, not legal advice; confirm with the authority."
+msgstr "%(title)s: %(date)s، تبقّى %(days)s يوماً. هذه قائمة فحص وليست استشارة قانونية؛ تأكد لدى الجهة المختصة."
+
+#. module: nudge
+msgid "Compliance deadline in %(days)s days"
+msgstr "موعد امتثال بعد %(days)s يوماً"
+
+#. module: nudge
+msgid "Date: %(date)s (%(days)s days left)"
+msgstr "التاريخ: %(date)s (تبقّى %(days)s يوماً)"
+
+#. module: nudge
+msgid "Official source: %s"
+msgstr "المصدر الرسمي: %s"
+
+#. module: nudge
+msgid "Last reviewed: %s"
+msgstr "آخر مراجعة: %s"
+
+#. module: nudge
+msgid "A deadline is told once for each threshold."
+msgstr "يُبلَّغ الموعد مرة واحدة عند كل حدّ."
+
+#. module: nudge
+msgid "Compliance Deadlines"
+msgstr "مواعيد الامتثال"
+
+#. module: nudge
+msgid "Compliance Pack Updates"
+msgstr "تحديثات حزم الامتثال"
+
+#. module: nudge
+msgid "No deadline has been told yet"
+msgstr "لم يُبلَّغ أي موعد بعد"
+
+#. module: nudge
+msgid "Managers are told 90, 30 and 7 days before a date in the checklist of their country. What was told is listed here."
+msgstr "يُبلَّغ المديرون قبل 90 و30 و7 أيام من أي تاريخ في قائمة فحص بلدهم. تُسرد هنا الإشعارات التي أُرسلت."
+
+#. module: nudge
+msgid "Told at (days)"
+msgstr "أُبلغ عند (أيام)"
+
+#. module: nudge
+msgid "No pack update"
+msgstr "لا يوجد تحديث للحزم"
+
+#. module: nudge
+msgid "The signed feed is off until an administrator sets its address and public key in the Nudge settings. An update waits here until an administrator approves it."
+msgstr "الخلاصة الموقّعة متوقفة إلى أن يضبط المسؤول عنوانها ومفتاحها العام في إعدادات Nudge. ويبقى التحديث هنا بانتظار موافقة المسؤول."
+
+#. module: nudge
+msgid "Approve"
+msgstr "موافقة"
+
+#. module: nudge
+msgid "Decline"
+msgstr "رفض"
+
+#. module: nudge
+msgid "Roll back"
+msgstr "تراجع"
+
+#. module: nudge
+msgid "This replaces the checklist of this country by the one below."
+msgstr "سيحلّ ما يلي محل قائمة فحص هذا البلد."
+
+#. module: nudge
+msgid "The previous pack, or the one that comes with Nudge, is put back."
+msgstr "تُعاد الحزمة السابقة أو الحزمة التي تأتي مع Nudge."
+
+#. module: nudge
+msgid "What Changes"
+msgstr "ما الذي يتغير"
+
+#. module: nudge
+msgid "Waiting for approval"
+msgstr "بانتظار الموافقة"
+
+#. module: nudge
+msgid "In force"
+msgstr "ساري"
+
+#. module: nudge
+msgid "Declined"
+msgstr "مرفوض"
+
+#. module: nudge
+msgid "Replaced by a newer one"
+msgstr "استُبدل بتحديث أحدث"
+
+#. module: nudge
+msgid "Rolled back"
+msgstr "تم التراجع عنه"
+
+#. module: nudge
+msgid "added"
+msgstr "مضاف"
+
+#. module: nudge
+msgid "removed"
+msgstr "محذوف"
+
+#. module: nudge
+msgid "changed"
+msgstr "معدَّل"
+
+#. module: nudge
+msgid "Nothing changes."
+msgstr "لا يتغير شيء."
+
+#. module: nudge
+msgid "Only a system administrator decides on a compliance pack update."
+msgstr "مسؤول النظام وحده يقرر في تحديث حزمة الامتثال."
+
+#. module: nudge
+msgid "The feed is off: set its address and the public key in the settings."
+msgstr "الخلاصة متوقفة: اضبط عنوانها والمفتاح العام في الإعدادات."
+
+#. module: nudge
+msgid "Private mode is on: the feed is not fetched."
+msgstr "الوضع الخاص مفعّل: لا تُجلب الخلاصة."
+
+#. module: nudge
+msgid "The feed could not be read (%s)."
+msgstr "تعذّرت قراءة الخلاصة (%s)."
+
+#. module: nudge
+msgid "The feed is refused: %s"
+msgstr "رُفضت الخلاصة: %s"
+
+#. module: nudge
+msgid "Compliance pack update available"
+msgstr "يتوفر تحديث لحزمة امتثال"
+
+#. module: nudge
+msgid "%(count)s pack(s) wait for approval: %(packs)s."
+msgstr "%(count)s حزمة بانتظار الموافقة: %(packs)s."
+
+#. module: nudge
+msgid "Only an update that waits for approval can be approved."
+msgstr "لا يمكن اعتماد إلا تحديث بانتظار الموافقة."
+
+#. module: nudge
+msgid "Only an update that waits for approval can be declined."
+msgstr "لا يمكن رفض إلا تحديث بانتظار الموافقة."
+
+#. module: nudge
+msgid "Only a pack in force can be rolled back."
+msgstr "لا يمكن التراجع إلا عن حزمة سارية."
+
+#. module: nudge
+msgid "Compliance Packs"
+msgstr "حزم الامتثال"
+
+#. module: nudge
+msgid "Compliance Feed Address"
+msgstr "عنوان خلاصة الامتثال"
+
+#. module: nudge
+msgid "Compliance Feed Public Key"
+msgstr "المفتاح العام لخلاصة الامتثال"
+
+#. module: nudge
+msgid "Check the Feed Now"
+msgstr "افحص الخلاصة الآن"
+
+#. module: nudge
+msgid "Pack Updates"
+msgstr "تحديثات الحزم"
+
+#. module: nudge
+msgid "Country checklists can be updated from a feed signed by its publisher. It is off while the address or the key is empty. Nudge then fetches one small file a day from that address only, checks its signature with the key below, and shows what would change: nothing is replaced until a system administrator approves it. The checklists that come with Nudge stay the fallback."
+msgstr "يمكن تحديث قوائم فحص الدول من خلاصة موقّعة من ناشرها. وهي متوقفة ما دام العنوان أو المفتاح فارغاً. عندها يجلب Nudge ملفاً صغيراً واحداً يومياً من ذلك العنوان فقط، ويتحقق من توقيعه بالمفتاح أدناه، ويعرض ما سيتغير: لا يُستبدل شيء إلا بعد موافقة مسؤول النظام. وتبقى قوائم الفحص المرفقة مع Nudge هي الاحتياط."
+
+#. module: nudge
+msgid "HTTPS address of a signed feed of country packs. Empty: the feed is off and Nudge calls nobody."
+msgstr "عنوان HTTPS لخلاصة موقّعة من حزم الدول. فارغ: الخلاصة متوقفة ولا يتصل Nudge بأحد."
+
+#. module: nudge
+msgid "The Ed25519 public key of the publisher (PEM, or the 32 bytes in base64). A feed signed by another key is refused."
+msgstr "المفتاح العام Ed25519 للناشر (PEM أو 32 بايتاً بترميز base64). تُرفض الخلاصة الموقّعة بمفتاح آخر."

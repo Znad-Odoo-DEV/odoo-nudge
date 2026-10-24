@@ -295,3 +295,21 @@ class ResConfigSettings(models.TransientModel):
             for key in validator.DEFAULTS:
                 switches[key] = bool(settings[f"nudge_validate_{key}"])
             settings.company_id.nudge_validator_switches = switches
+
+    # NP-08: the signed feed of the compliance packs; off while the address or the key is empty
+    nudge_compliance_feed_url = fields.Char(
+        string="Compliance Feed Address", config_parameter="nudge.compliance_feed_url",
+        help="HTTPS address of a signed feed of country packs. Empty: the feed is off and Nudge calls nobody.")
+    nudge_compliance_feed_key = fields.Char(
+        string="Compliance Feed Public Key", config_parameter="nudge.compliance_feed_key",
+        help="The Ed25519 public key of the publisher (PEM, or the 32 bytes in base64). A feed signed by "
+             "another key is refused.")
+
+    def action_nudge_compliance_feed_check(self):
+        """Read the feed now (a system administrator, with the address and key as saved)
+        :return: the list of the pack updates"""
+        return self.env["nudge.compliance.update"].action_check_now()
+
+    def action_nudge_compliance_feed_list(self):
+        return self.env["ir.actions.actions"]._for_xml_id("nudge.nudge_compliance_update_action")
+
