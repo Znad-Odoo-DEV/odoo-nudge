@@ -5,7 +5,7 @@ import { useService } from "@web/core/utils/hooks";
 
 const SITE = "nudge.builder.site";
 // The pages are made in the background by the scheduled action; the bar asks how far it got
-export const POLL = { ms: 2000 };
+export const POLL = { ms: 2000, retries: 5 };
 
 /**
  * Shows the build that the scheduled action makes one step at a time: the bar is
@@ -26,9 +26,21 @@ export class NudgeBuilderRun extends Component {
     }
 
     async run() {
+        let failures = 0;
         try {
             while (!this.state.stopped) {
-                const result = await this.orm.call(SITE, "action_build_status", [[this.siteId]]);
+                let result;
+                try {
+                    result = await this.orm.call(SITE, "action_build_status", [[this.siteId]]);
+                    failures = 0;
+                } catch (error) {
+                    // A brief loss of the connection does not end a build that goes on in the server
+                    if (++failures >= POLL.retries) {
+                        throw error;
+                    }
+                    await new Promise((resolve) => setTimeout(resolve, POLL.ms));
+                    continue;
+                }
                 this.state.progress = result.progress;
                 this.state.text = result.text;
                 if (result.stopped) {
