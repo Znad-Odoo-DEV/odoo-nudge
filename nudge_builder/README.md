@@ -35,6 +35,32 @@ CC0). Private mode refuses the picture model and the AI writing before anything 
 
 The privacy and terms pages are a starting template. Have a lawyer read them before the site is published.
 
+## Editing a built site from the chat
+
+Four tools of the website skill (Agent mode, a Nudge agent who is also a website designer) work on the pages the
+builder made. Each change shows a card with the exact before and after, is made only after the person's yes, and
+keeps a revision (listed on the site under *Changes after the build*, each with **Undo**).
+
+- `read_site_page`: the pages of the site with their sections and SEO, or the numbered sections of one page.
+- `edit_page_section`: `add`, `replace`, `edit` (texts, button, picture, keeping the design), `move_up`,
+  `move_down` or `remove` one section of a named page, from the snippets the builder knows. The other sections are
+  not touched; the section text is shown as plain text on the card.
+- `change_page_seo`: the SEO title, description or keywords of a page in one language of the site (the
+  limits are 70 and 170 characters). The build itself now writes the SEO of every page: the template's title and
+  description in each language, or a title made of the page name and the company and a description made of the
+  first words of the page when the template has none.
+- `undo_site_change`: the latest change that is not undone, or a named one. It is refused when the page or the
+  setting was changed again since (nothing newer is lost).
+
+**Publish all pages** keeps a revision too: the pages that were not published, the previous home page and the
+menu order. **Undo publish** (on the site, and in the green banner after publishing) puts them back; a home page or
+page changed by someone since is left as it is and the log says so. A second publish after edits is a new revision.
+
+What a person types is data: texts go through the same cleaning as the words of the AI writer (no tags, no
+directive, no `javascript:` address), pictures are a bundled name or a `/path` or `https://` address. A page is
+written only by a website designer who may write it, as that person, and the right is checked again at the yes.
+The SEO fields are `website_meta_title`, `website_meta_description` and `website_meta_keywords` on Odoo 17, 18 and 19.
+
 ## Rights
 
 Access rows: a website designer reads and writes sites, pages and Site Check reports; an administrator has all.
