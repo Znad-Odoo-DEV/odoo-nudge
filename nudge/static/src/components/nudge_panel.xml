@@ -321,7 +321,7 @@
                         </t>
                         <t t-if="quick.results.pages.length">
                             <p class="o_nudge_quick_head">Odoo documentation</p>
-                            <a t-foreach="quick.results.pages" t-as="page" t-key="page.url" t-att-href="page.url"
+                            <a t-foreach="quick.results.pages" t-as="page" t-key="page.url" t-att-href="safeUrl(page.url)"
                                target="_blank" rel="noopener noreferrer" class="o_nudge_suggestion o_nudge_quick_page">
                                 <i class="fa fa-book"/> <strong t-esc="page.title"/>
                                 <span class="o_nudge_quick_text" t-esc="page.snippet"/>

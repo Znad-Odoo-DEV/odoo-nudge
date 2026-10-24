@@ -23,6 +23,7 @@ Current version: nudge 19.0.1.59.1, nudge_mcp 19.0.1.1.0, nudge_connect 19.0.1.0
 - Review: Yes, do it on a plan card is disabled while a value is being typed, so a value not yet saved is not dropped by the run.
 - Review: the Arabic words of the mail rules (problem, price, invoice, question) count only as whole words: a mail wishing a happy holiday (عطلة) is no longer filed as a ticket.
 - Review: the report question is no longer asked for the Arabic word interview (مقابلة), which held the word versus; a figures question after a prefix (وكم) is read.
+- Review: the address of a documentation page or passage becomes a link only when it is a safe one.
 ## 19.0.1.59.0
 
 - Fix, found in the live trial: on a real server every question failed with "Record does not exist or has been deleted (nudge.slot)". The place a question claims (NP-04) is committed on a cursor of its own, and the request, whose snapshot is older (repeatable read), read it back. `_handover` and `_waited_ms` now work on a cursor of their own; the place stops counting once the request commits (both count for that instant, never one place too many), at once for the external assistants and the messaging apps whose mark is committed already. The tests share one transaction, which is why they never saw it.
