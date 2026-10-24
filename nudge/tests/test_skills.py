@@ -230,7 +230,7 @@ class TestSkills(NudgeCase, TransactionCase):
     # --------------------------------------------------------------- recipes
     def test_a_skill_travels_in_a_recipe_and_comes_back_a_draft(self):
         skill = self.made(tool_names="search_records", test_sentence="sales reports please", test_expect="search_records",
-                          trigger_words="sales report")
+                          trigger_words="sales report", company_id=self.env.company.id)
         Recipe = self.env["nudge.recipe"].with_user(self.manager)
         package = Recipe._export(["skill"])
         items = [item for item in package["recipe"]["items"] if item["kind"] == "skill"]
@@ -347,6 +347,14 @@ class TestSkills(NudgeCase, TransactionCase):
         self.assertEqual(skill._self_test()[0], "failed")
 
     # ------------------------------------------------------ review fixes
+    def on_contact(self, user, text="Tell me about this contact"):
+        """Ask on the form of a contact. :return: the system blocks of the call"""
+        adapter = self.use_adapter()
+        conversation = self.env["nudge.conversation"].with_user(user)._chat_open(None)
+        job = conversation._chat_prepare(text, snapshot={"model": "res.partner", "view_type": "form"})
+        list(loop.run(job, conversation._chat_record))
+        return adapter.calls[0]["system"]
+
     def test_the_skills_of_a_question_never_rewrite_the_cached_prefix(self):
         self.made(key="raghad-reports", trigger_words="raghad", instructions="## Reports of Raghad\n- By week.\n")
         self.made(key="ebrahim-reports", trigger_words="ebrahim", instructions="## Reports of Ebrahim\n- By month.\n")
@@ -398,6 +406,34 @@ class TestSkills(NudgeCase, TransactionCase):
                 answer.rollback()
                 other.execute("DELETE FROM nudge_skill WHERE id = %s", [skill_id])
                 other.commit()
+
+    def test_a_recipe_never_changes_a_shared_or_another_companys_skill(self):
+        other = self.env["res.company"].create({"name": "Your Other Company"})
+        self.manager.company_ids = [(4, other.id)]
+        shared = self.made(key="shared-reports", trigger_words="sales report")
+        theirs = self.Skill.create({"name": "Theirs", "key": "their-reports", "summary": "x", "instructions": "## Theirs\n",
+                                    "state": "published", "company_id": other.id, "recipe_key": "nudge-skill-theirs1"})
+        Recipe = self.env["nudge.recipe"].with_user(self.manager)
+        package = Recipe._export(["skill"])
+        item = next(item for item in package["recipe"]["items"] if item["data"]["key"] == "shared-reports")
+        self.assertNotIn("their-reports", json.dumps(package), "Another company's skill is not exported here")
+        body = dict(package["recipe"], items=[
+            {"kind": "skill", "key": item["key"], "name": "Shared",
+             "data": dict(item["data"], version="2.0.0", instructions=HOSTILE)},
+            {"kind": "skill", "key": "nudge-skill-theirs1", "name": "Theirs",
+             "data": dict(Recipe._data("skill", theirs), version="2.0.0", instructions=HOSTILE)}])
+        plan = Recipe._plan(Recipe._read(json.dumps({"recipe": body, "checksum": checksum_of(body)})))
+        self.assertEqual([line["action"] for line in plan], ["create", "create"], "A copy here, never theirs")
+        for line in body["items"]:
+            copy, created = Recipe._apply("skill", line["key"], line["data"])
+            self.assertTrue(created)
+            self.assertEqual((copy.company_id, copy.state, copy.recipe_key), (self.env.company, "draft", line["key"]))
+            # Imported again, the copy of this company is the one updated
+            self.assertEqual(Recipe._apply("skill", line["key"], dict(line["data"], version="2.1.0")), (copy, False))
+        for skill in (shared, theirs):
+            self.assertEqual((skill.state, skill.version, skill.active), ("published", "1.0.0", True))
+            self.assertNotIn(HOSTILE, skill.instructions)
+        self.assertNotIn(HOSTILE, json.dumps(self.on_contact(self.user_a, "A sales report please")))
 
     # ---------------------------------------------------------- the saving
     def test_the_saving_is_measured(self):
