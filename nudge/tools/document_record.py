@@ -167,7 +167,12 @@ def day(value):
 
 
 def text_of(value, size=200):
-    return " ".join(str(value).split())[:size] if value not in (None, False) else ""
+    """:return: one clean line; letters a PDF spread apart ("INV -TRIAL", "W ood V arnish") come back together"""
+    if value in (None, False):
+        return ""
+    from .document_catalogue import _despace  # noqa: PLC0415 - the catalogue imports this module
+
+    return _despace(" ".join(str(value).split()))[:size]
 
 
 def normalise(data):
@@ -350,7 +355,10 @@ def resolve_partner(env, data, override=None):
     found, how = Partner.browse(), ""
     if vat and _vat_key(vat):
         key = _vat_key(vat)
-        found = Partner.search([("vat", "ilike", key[-8:])], limit=20).filtered(lambda p: _vat_key(p.vat) == key)
+        # a stored VAT may carry spaces or dots ("BE 0123.456.789"): the last characters are looked for in order,
+        # with anything between them, and the keys are compared after
+        pattern = "%" + "%".join(key[-6:]) + "%"
+        found = Partner.search([("vat", "ilike", pattern)], limit=200).filtered(lambda p: _vat_key(p.vat) == key)
         how = "vat"
     if not found and email:
         found = Partner.search([("email", "=ilike", email)], limit=20)
@@ -408,9 +416,15 @@ def resolve_product(env, line, chosen=None):
     return {"state": "found", "product": Product.browse(items[0]["id"]), "candidates": []}
 
 
-def resolve_taxes(env, text, target, rate=None):
+def _preferred(taxes):
+    """The taxes a document is most likely meant to use, first: not price-included, not a reverse charge"""
+    return taxes.sorted(lambda tax: (bool(tax.price_include), "reverse" in (tax.name or "").lower(), tax.sequence, tax.id))
+
+
+def resolve_taxes(env, text, target, rate=None, alternatives=None):
     """:return: the taxes of the company named by ``text``, or the one at
-    ``rate`` percent; an empty recordset when there is none"""
+    ``rate`` percent; an empty recordset when there is none. When several taxes fit and one is taken,
+    ``alternatives`` (a list) gets ``(text, tax taken, how many fit)``"""
     if "account.tax" not in env or target not in TAX_USE:
         return None
     Tax = get_model(env, "account.tax")
@@ -421,15 +435,24 @@ def resolve_taxes(env, text, target, rate=None):
     text = (text or "").strip()
     if not text and rate is None:
         return None
-    if re.fullmatch(r"(?i)\s*(exempt|zero|none|no tax|nil|0(\.0+)?\s*%?)\s*", text):
+    if re.fullmatch(r"(?i)\s*(exempt(?:ed)?|zero(?:[\s-]+rated)?|none|no tax|nil(?:[\s-]+rated)?|0(\.0+)?\s*%?)\s*", text):
         zero = taxes.filtered(lambda tax: tax.amount_type == "percent" and not tax.amount)
+        # the returns of UAE and KSA keep zero-rated and exempt supplies apart: the name says which
+        word = "exempt" if re.search(r"(?i)exempt", text) else "zero" if re.search(r"(?i)zero|nil", text) else ""
+        named = zero.filtered(lambda tax: word and word in (tax.name or "").lower())
+        zero = _preferred(named or zero)
+        if len(zero) > 1 and alternatives is not None:
+            alternatives.append((text, zero[0], len(zero)))
         return zero[:1]
     found = re.search(r"(\d+(?:[.,]\d+)?)\s*%", text)
     percent = number(found.group(1)) if found else rate
     if percent is not None:
         same = taxes.filtered(lambda tax: tax.amount_type == "percent" and abs(tax.amount - percent) < 0.001)
         named = same.filtered(lambda tax: tax.name and _plain(tax.name) and _plain(tax.name) in _plain(text))
-        return (named or same)[:1]
+        chosen = _preferred(named or same)
+        if len(chosen) > 1 and alternatives is not None:
+            alternatives.append((text or f"{percent:g}%", chosen[0], len(chosen)))
+        return chosen[:1]
     named = taxes.filtered(lambda tax: _plain(tax.name) == _plain(text))
     return named[:1]
 
@@ -525,7 +548,21 @@ def unmatched_as_note(target):
     return target in ("sales_order", "purchase_order") and release.version_info[0] < 18
 
 
-def build(env, target, data, partner, new_partner, rows, currency):
+def quotation_pricelist(env, currency):
+    """:return: a pricelist in ``currency`` for a quotation (its currency comes from its pricelist), or an empty
+    recordset when the currency is the company's or there is none"""
+    if "product.pricelist" not in env:
+        return None
+    Pricelist = env["product.pricelist"]
+    if not currency or currency == env.company.currency_id:
+        return Pricelist
+    domain = [("currency_id", "=", currency.id)]
+    if "company_id" in Pricelist._fields:
+        domain += [("company_id", "in", [False, env.company.id])]
+    return Pricelist.search(domain, limit=1)
+
+
+def build(env, target, data, partner, new_partner, rows, currency, pricelist=None):
     """:return: ``(header values, line values)`` for the model of the target"""
     model_name, fixed, _label = TARGETS[target]
     model = env[model_name]
@@ -547,6 +584,7 @@ def build(env, target, data, partner, new_partner, rows, currency):
         put("date_order", data["date"] and f"{data['date']} 08:00:00")
         put("validity_date", data["due_date"])
         put("client_order_ref", data["reference"])
+        put("pricelist_id", pricelist.id if pricelist else False)
     elif target == "purchase_order":
         put("partner_id", partner_id)
         put("date_order", data["date"] and f"{data['date']} 08:00:00")
@@ -762,7 +800,8 @@ class DocumentToRecord(base.Action):
                             "description": "bom: the person wants one more bill of materials for a product that has one."},
             "insist": {"type": "boolean",
                        "description": "The person wants Nudge to read a vendor bill even though Odoo's own "
-                                      "digitisation is installed."},
+                                      "digitisation is installed, or to make a record of the same contact and "
+                                      "reference as one that exists already."},
         },
     }
 
@@ -841,9 +880,25 @@ class DocumentToRecord(base.Action):
         currency, note = resolve_currency(env, data["currency"])
         if note:
             notes.append(note)
+        pricelist = None
+        if target == "sales_order" and currency and currency != env.company.currency_id:
+            # the currency of a quotation is the one of its pricelist: without one in that currency the
+            # amounts would be written in the company's currency, so the card does not claim another
+            pricelist = quotation_pricelist(env, currency)
+            if not pricelist:
+                notes.append(env._(
+                    "No pricelist is in %(currency)s: the quotation is made in the currency of its pricelist, "
+                    "with the amounts of the document as they are written.", currency=currency.name))
+                currency = None
+        duplicate = self._duplicate(env, target, data, partner["partner"])
+        if duplicate and not arguments.get("insist"):
+            return base.ToolResult(
+                f"{duplicate} exists already. Nothing was made. Tell the person; only if they want another one "
+                "anyway, call again with insist true.")
         rows, asking = [], []
         chosen = {item["line"]: item["product_id"] for item in arguments.get("product_choices") or []}
         rate = None
+        alternatives = []
         totals = data["totals"]
         if (all(not line["tax"] for line in data["lines"]) and totals.get("untaxed")
                 and totals.get("tax") and totals["untaxed"] > 0):
@@ -855,7 +910,7 @@ class DocumentToRecord(base.Action):
                     {"id": record.id, "name": cut(record.display_name, 100), "code": record.default_code or ""}
                     for record in found["candidates"]]})
                 continue
-            taxes = resolve_taxes(env, line["tax"], target, rate if not line["tax"] else None)
+            taxes = resolve_taxes(env, line["tax"], target, rate if not line["tax"] else None, alternatives)
             unknown = ""
             if taxes is None or (not taxes and line["tax"]):
                 # Not named, or not found: the tax the product carries, else none
@@ -878,7 +933,10 @@ class DocumentToRecord(base.Action):
                 notes.append(env._("Tax %(tax)s is not among the taxes of the company: the tax of the product "
                                    "is used, or none.", tax=row["tax_text"]))
                 break
-        values, lines = build(env, target, data, partner["partner"], new_partner, rows, currency)
+        for text_, tax_, count_ in list(dict.fromkeys((a[0], a[1], a[2]) for a in alternatives))[:3]:
+            notes.append(env._("%(count)s taxes fit %(text)s: %(tax)s was taken. Change it on the draft if another "
+                               "one applies.", count=count_, text=text_, tax=tax_.name))
+        values, lines = build(env, target, data, partner["partner"], new_partner, rows, currency, pricelist)
         if new_partner and target != "contact":
             values.pop("partner_id", None)
         shown = card(env, target, label, data, partner, rows, currency, computed, diffs, notes, source,
@@ -899,6 +957,29 @@ class DocumentToRecord(base.Action):
                 "preview": {"records": [], "lines": shown},
             },
         )
+
+    @staticmethod
+    def _duplicate(env, target, data, partner):
+        """:return: a sentence naming the record of the same contact and reference that exists already, or ''"""
+        reference = (data.get("reference") or "").strip()
+        if not reference or not partner or target not in ("vendor_bill", "purchase_order", "sales_order"):
+            return ""
+        model_name = TARGETS[target][0]
+        label = kind_label(env, target)
+        field = {"vendor_bill": "ref", "purchase_order": "partner_ref", "sales_order": "client_order_ref"}[target]
+        model = env[model_name]
+        if field not in model._fields:
+            return ""
+        domain = [("partner_id", "=", partner.id), (field, "=ilike", reference)]
+        if target == "vendor_bill":
+            domain += [("move_type", "in", ("in_invoice", "in_refund")), ("state", "!=", "cancel")]
+        elif "state" in model._fields:
+            domain += [("state", "!=", "cancel")]
+        found = model.search(domain, limit=3)
+        if not found:
+            return ""
+        return env._("A %(kind)s from %(partner)s with the reference %(ref)s: %(names)s", kind=label,
+                     partner=partner.display_name, ref=reference, names=", ".join(found.mapped("display_name")))
 
     def _check_target(self, env, target):
         if target in CATALOGUE:
