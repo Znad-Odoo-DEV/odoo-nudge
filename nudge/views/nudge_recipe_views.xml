@@ -50,6 +50,7 @@
                         <field name="with_memories"/>
                         <field name="with_files"/>
                         <field name="with_screens"/>
+                        <field name="with_prompts"/>
                         <field name="include_files" invisible="not with_files"/>
                     </group>
                 </group>
@@ -98,7 +99,7 @@
                     <tree string="Items" create="0" delete="0" editable="bottom"
                           decoration-muted="action in ('same', 'skip')" decoration-danger="result == 'failed'">
                         <field name="selected" readonly="action in ('same', 'skip') or parent.state == 'done'"/>
-                        <field name="kind" readonly="1"/>
+                        <field name="kind_label" string="Kind" readonly="1"/>
                         <field name="name" readonly="1"/>
                         <field name="action" readonly="1"/>
                         <field name="note" readonly="1"/>

@@ -192,6 +192,7 @@
                         <field name="with_memories"/>
                         <field name="with_files"/>
                         <field name="with_screens"/>
+                        <field name="with_prompts"/>
                         <field name="include_files" invisible="not with_files"/>
                     </group>
                 </group>

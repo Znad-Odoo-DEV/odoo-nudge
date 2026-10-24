@@ -36,7 +36,7 @@ The file is a JSON object with a list of recipes (a bare list of recipes is read
 | --- | --- |
 | `key` | Lower case letters, digits, `.`, `_`, `-`; up to 64. Names the recipe for good: an update keeps it. |
 | `name`, `description` | `{"en": ..., "ar": ...}`; a plain string is taken as English. Shown in the language of the person. |
-| `kind` | `tour`, `rules`, `lexicon`, `answers` or `pack` (a mix). Any other value is refused. |
+| `kind` | `tour`, `rules`, `lexicon`, `answers`, `prompts` or `pack` (a mix). Any other value is refused. |
 | `apps` | Technical names of the modules the recipe needs. A card shows the ones not installed here. |
 | `odoo` | Series the recipe is for (`19.0`). Empty means any. A recipe for another series is marked and cannot be installed. |
 | `author`, `licence` | Free text. |
