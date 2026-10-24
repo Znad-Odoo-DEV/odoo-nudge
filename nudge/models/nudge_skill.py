@@ -14,6 +14,8 @@ tools it names are offered only when the person may use them in that mode anyway
 import difflib
 import logging
 
+from psycopg2 import OperationalError
+
 from odoo import api, fields, models
 from odoo.exceptions import AccessError, ValidationError
 
@@ -272,13 +274,19 @@ class NudgeSkill(models.Model):
                 for skill in self]
 
     def _count_given(self):
-        """Count the question each of these skills was given to. Never waits: a skill another question is
-        counting at this instant is not counted twice over (SKIP LOCKED), the figure is an indication"""
+        """Count the question each of these skills was given to. Never waits and never fails: a skill
+        another question is counting at this instant (SKIP LOCKED), or counted since this one began
+        (a serialization error), is not counted this time; the figure is an indication"""
         if not self:
             return
-        self.env.cr.execute(
-            "UPDATE nudge_skill SET load_count = COALESCE(load_count, 0) + 1 WHERE id IN ("
-            " SELECT id FROM nudge_skill WHERE id IN %s ORDER BY id FOR UPDATE SKIP LOCKED)", [tuple(self.ids)])
+        try:
+            with self.env.cr.savepoint():
+                self.env.cr.execute(
+                    "UPDATE nudge_skill SET load_count = COALESCE(load_count, 0) + 1 WHERE id IN ("
+                    " SELECT id FROM nudge_skill WHERE id IN %s ORDER BY id FOR UPDATE SKIP LOCKED)",
+                    [tuple(self.ids)], log_exceptions=False)
+        except OperationalError:
+            _logger.info("Nudge: skills %s counted by another question at the same time, left uncounted", self.ids)
         self.invalidate_recordset(["load_count"])
 
     # ------------------------------------------------------------ self-tests
@@ -359,16 +367,18 @@ class NudgeConversation(models.Model):
         self.sudo().skill_keys = ",".join([*keys, skill.key][-skill_rules.MAX_KEPT:])
 
     def _skill_plan(self, mode, compact=False):
-        """:return: what the skills add to the call for the question being answered: ``index`` (the
-        one-line list, not for a small model), ``text`` (the full instructions of the skills given),
-        ``given`` (those skills) and ``offer`` (for tools.base.available)"""
+        """:return: what the skills add to the call for the question being answered: ``index`` (what
+        is the same for every question of this person: the one-line list, not for a small model, or
+        every skill in full in the fallback), ``text`` (the full instructions of the skills of this
+        question, a list), ``given`` (the skills given in full) and ``offer`` (for tools.base.available)"""
         self.ensure_one()
         Skill = self.env["nudge.skill"]
-        plan = {"index": "", "text": "", "given": Skill, "offer": {}}
+        plan = {"index": "", "text": [], "given": Skill, "offer": {}}
         visible = Skill._visible(mode)
         if not visible:
             return plan
-        if Skill._inline():
+        inline = Skill._inline()
+        if inline:
             # The fallback: every skill in full, as the instructions were before skills
             given, entries = visible, []
         else:
@@ -381,9 +391,11 @@ class NudgeConversation(models.Model):
             by_key = {skill.key: skill for skill in visible}
             given = Skill.browse([by_key[key].id for key in keys if key in by_key])
             entries = [] if compact else [(skill.key, skill.summary) for skill in visible]
+        texts = given.mapped("instructions")
         plan.update(
-            index=prompt.render_skill_index(entries),
-            text=prompt.render_skills(given.mapped("instructions")),
+            # Every skill in full is the same text for every question: it stays in the cached prefix
+            index=prompt.render_skills(texts) if inline else prompt.render_skill_index(entries),
+            text=[] if inline else texts,
             given=given,
             offer={"tools": sorted({name for skill in given for name in skill_rules.split_names(skill.tool_names)}),
                    "index": bool(entries)})
@@ -395,7 +407,7 @@ class NudgeConversation(models.Model):
                 return self._skill_plan(mode, compact)
         except Exception:  # noqa: BLE001 - a skill that cannot be read never stops an answer
             _logger.exception("Nudge: the skills of conversation %s could not be read", self.id)
-            return {"index": "", "text": "", "given": self.env["nudge.skill"], "offer": {}}
+            return {"index": "", "text": [], "given": self.env["nudge.skill"], "offer": {}}
 
     def _chat_tools(self, mode, tool_set):
         # The tools of the skills given with the question, and use_skill with their index
@@ -417,22 +429,24 @@ class NudgeConversation(models.Model):
         return job
 
     def _chat_record(self, outcome):
-        before = set(filter(None, (self.sudo().skill_keys or "").split(",")))
+        calls = [call for call in outcome.get("tool_calls") or () if call.get("name") == "use_skill"]
+        if not calls:
+            return super()._chat_record(outcome)
+        mode = self._chat_mode()
+        # What the question was given before the calls run: use_skill answers that these are there
+        # already (tools/skills.py); every other skill it names joins, newly kept or kept from before
+        loaded = set(self._skill_plan_or_nothing(mode, False)["given"].mapped("key"))
         step = super()._chat_record(outcome)
-        if "turns" not in step or "event" in step or not any(
-                call.get("name") == "use_skill" for call in outcome.get("tool_calls") or ()):
+        if "turns" not in step or "event" in step:
             return step
         # use_skill: the skill joins the instructions from the next step of this answer, with its tools,
-        # as a system block (llm/loop.py), never as a tool result
+        # as a system block (llm/loop.py), never as a tool result; a text already there is not given twice
         self.invalidate_recordset(["skill_keys"])
-        asked = {key for key in (self.sudo().skill_keys or "").split(",") if key and key not in before}
-        if not asked:
-            return step
-        mode = self._chat_mode()
+        asked = {str((call.get("input") or {}).get("key") or "").strip().lower() for call in calls} - loaded
         given = self.env["nudge.skill"]._visible(mode).filtered(lambda skill: skill.key in asked)
         if given:
             provider = self.sudo().provider_id
-            step["skills"] = prompt.render_skills(given.mapped("instructions"))
+            step["skills"] = given.mapped("instructions")
             step["tools"] = self._chat_tools(mode, provider.tool_set if provider else "full")
             given._count_given()
         return step
