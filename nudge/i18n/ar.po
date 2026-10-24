@@ -23087,3 +23087,164 @@ msgstr "لم تُثبَّت أي وصفة بعد"
 msgid "The recipes you install from a source are listed here, with their version."
 msgstr "الوصفات التي تثبّتها من أحد المصادر تظهر هنا مع إصدارها."
 
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "%s is not in Odoo: no vendor line is made."
+msgstr "%s غير موجود في أودو: لن يُنشأ سطر مورّد."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "Create %(count)s products from %(file)s"
+msgstr "إنشاء %(count)s منتجات من %(file)s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "%s (a new product)"
+msgstr "%s (منتج جديد)"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "Create a bill of materials of %(product)s from %(file)s"
+msgstr "إنشاء قائمة مواد للمنتج %(product)s من %(file)s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "reference: Odoo %(odoo)s, file %(file)s"
+msgstr "المرجع: في أودو %(odoo)s، وفي الملف %(file)s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "name: Odoo %(odoo)s, file %(file)s"
+msgstr "الاسم: في أودو %(odoo)s، وفي الملف %(file)s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "sales price: Odoo %(odoo)s, file %(file)s"
+msgstr "سعر البيع: في أودو %(odoo)s، وفي الملف %(file)s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "cost: Odoo %(odoo)s, file %(file)s"
+msgstr "التكلفة: في أودو %(odoo)s، وفي الملف %(file)s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "unit: Odoo %(odoo)s, file %(file)s"
+msgstr "الوحدة: في أودو %(odoo)s، وفي الملف %(file)s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "vendor price: Odoo %(odoo)s, file %(file)s"
+msgstr "سعر المورّد: في أودو %(odoo)s، وفي الملف %(file)s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "Several contacts are like %s: no vendor line is made."
+msgstr "عدة جهات اتصال تشبه %s: لن يُنشأ سطر مورّد."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "Already in Odoo as %s: not changed"
+msgstr "موجود في أودو باسم %s: لم يتغيّر"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "%(count)s new products (%(known)s already in Odoo are not touched)"
+msgstr "%(count)s منتجات جديدة (و%(known)s موجودة في أودو ولن تُمَسّ)"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "%(qty)s × %(product)s"
+msgstr "%(qty)s × %(product)s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "%(qty)s × %(product)s (a new product is made)"
+msgstr "%(qty)s × %(product)s (يُنشأ منتج جديد)"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "A bill of materials of %(product)s with %(lines)s lines, and %(new)s new products"
+msgstr "قائمة مواد للمنتج %(product)s بـ %(lines)s سطرًا، و%(new)s منتجات جديدة"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "Left out: the person unticked this row."
+msgstr "مُستبعَد: ألغى المستخدم تحديد هذا الصف."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "Left out: it looks like %s. Say 'include row %s' to make it as a new product."
+msgstr "مُستبعَد: يشبه %s. قل «أضف الصف %s» لإنشائه كمنتج جديد."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "Components"
+msgstr "المكوّنات"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "differs"
+msgstr "يختلف"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "reference %s"
+msgstr "المرجع %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "sales price %s"
+msgstr "سعر البيع %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "cost %s"
+msgstr "التكلفة %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "vendor line: %(vendor)s at %(price)s"
+msgstr "سطر مورّد: %(vendor)s بسعر %(price)s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "Rows"
+msgstr "الصفوف"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_catalogue.py:0
+msgid "unit %s not found: Odoo's default"
+msgstr "الوحدة %s غير موجودة: تُستخدم وحدة أودو الافتراضية"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/document_record.py:0
+msgid "bill of materials"
+msgstr "قائمة مواد"
