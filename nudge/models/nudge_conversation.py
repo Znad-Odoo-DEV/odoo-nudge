@@ -541,6 +541,7 @@ class NudgeConversation(models.Model):
                 # A small model reads the short instructions
                 compact=tool_set == "essential",
                 background=bool(conversation.run_id.is_background),
+                ask_data=tools.base.ask_tier_applies(self.env),
                 work="\n\n".join(block for block in (
                     self._chat_where_the_work_is(), self.env["nudge.source"]._get_text()) if block)),
             "tools": self._chat_tools(mode, tool_set),

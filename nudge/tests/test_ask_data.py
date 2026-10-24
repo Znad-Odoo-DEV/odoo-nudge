@@ -6,7 +6,7 @@ from odoo.exceptions import UserError
 from odoo.tests import TransactionCase, new_test_user, tagged
 
 from odoo.addons.nudge import tools
-from odoo.addons.nudge.llm import loop
+from odoo.addons.nudge.llm import loop, prompt
 from odoo.addons.nudge.tools import base
 
 from .common import NudgeCase
@@ -208,3 +208,30 @@ class TestAskData(NudgeCase, TransactionCase):
         self.assertFalse(self.env["nudge.noai"].with_user(self.user_a).suggest("how many contacts"))
         self.assertLessEqual(base.ASK_TOOLS, self.names_for(self.agent, "agent"))
         self.assertFalse(self.env["res.config.settings"].create({}).nudge_ask_data)
+
+    # -- what Talk is told ---------------------------------------------------
+    def test_talk_is_told_it_may_read_and_never_change(self):
+        asked = "\n".join(prompt.build_system_blocks(mode="talk", can_use_agent=True, ask_data=True))
+        self.assertIn("read, count, chart and open", asked)
+        self.assertIn("never change anything", asked)
+        self.assertIn("suggest Agent mode", asked)
+        self.assertNotIn("cannot count", asked)
+        self.assertNotIn("cannot count", "\n".join(prompt.build_system_blocks(mode="talk", ask_data=True)))
+        # Switched off, or not for the person: the old words
+        old = "\n".join(prompt.build_system_blocks(mode="talk", can_use_agent=True))
+        self.assertIn("cannot count their orders", old)
+        self.assertNotIn("read, count, chart and open", old)
+
+    def test_the_conversation_chooses_the_words_by_the_switch(self):
+        self.provider.active = True
+        self.use_adapter()
+        conversation = self.env["nudge.conversation"].with_user(self.user_a)._chat_open(None)
+        job = conversation._chat_prepare("Hello Nudge")
+        self.assertTrue(job["system"][-1].startswith(prompt.TALK_MODE_ASK))
+        self.env["res.config.settings"].create({"nudge_ask_data": False}).set_values()
+        self.env["nudge.conversation"].sudo().search([("user_id", "=", self.user_a.id)]).write(
+            {"stream_started_at": False})
+        conversation = self.env["nudge.conversation"].with_user(self.user_a)._chat_open(None)
+        job = conversation._chat_prepare("Hello again")
+        self.assertTrue(job["system"][-1].startswith(prompt.TALK_MODE))
+        self.assertNotIn("read, count, chart and open", job["system"][-1])
