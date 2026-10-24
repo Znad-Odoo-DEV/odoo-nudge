@@ -100,6 +100,7 @@ class TestMcp(HttpCase):
         response = self.rpc("initialize")
         self.assertEqual(response.status_code, 401)
         self.assertIn("Bearer", response.headers["WWW-Authenticate"])
+        self.assertIn("resource_metadata=", response.headers["WWW-Authenticate"])
         self.assertEqual(self.rpc("initialize", key="0" * 40).status_code, 401)
         # A key of another scope does not open it; a person out of the group has none
         self.assertEqual(self.rpc("initialize", key=self.make_key(self.agent, scope="rpc")).status_code, 401)
@@ -267,22 +268,20 @@ class TestMcp(HttpCase):
         self.assertTrue(self.call("confirm", {"token": token})["result"]["isError"])
         self.assertEqual(self.env["res.partner"].search_count([("name", "=", "Ebrahim Asked")]), 0)
 
-    def test_self_confirm_is_a_choice_and_never_for_sensitive(self):
+    def test_a_key_never_confirms_alone(self):
+        """The company switch of before is gone: a key (legacy) waits for the
+        person whatever the allow-list says, which is for OAuth sign-ins only"""
         self.writes_on()
-        self.assertFalse(self.env["res.company"]._fields["nudge_mcp_self_confirm"].default)
-        self.env.company.nudge_mcp_self_confirm = True
+        self.assertNotIn("nudge_mcp_self_confirm", self.env["res.company"]._fields)
+        self.env["nudge.mcp.self.confirm"].create({
+            "tool": "prepare_create", "model_id": self.env.ref("base.model_res_partner").id})
         token = self.token_of(self.prepare("Ebrahim Alone"))
-        self.assertFalse(self.call("confirm", {"token": token})["result"]["isError"])
-        self.assertEqual(self.env["res.partner"].search_count([("name", "=", "Ebrahim Alone")]), 1)
-        # A sensitive step is the person's alone, whatever the choice
-        token = self.token_of(self.prepare("Ebrahim Sensitive"))
-        self.step_of(token).is_sensitive = True
-        answer = self.call("confirm", {"token": token})
-        self.assertTrue(answer["result"]["isError"])
-        self.assertEqual(self.env["res.partner"].search_count([("name", "=", "Ebrahim Sensitive")]), 0)
+        self.assertTrue(self.call("confirm", {"token": token})["result"]["isError"])
+        self.assertEqual(self.env["res.partner"].search_count([("name", "=", "Ebrahim Alone")]), 0)
         self.approve(token)
         self.assertFalse(self.call("confirm", {"token": token})["result"]["isError"])
-        self.assertEqual(self.env["res.partner"].search_count([("name", "=", "Ebrahim Sensitive")]), 1)
+        self.assertEqual(self.env["res.partner"].search_count([("name", "=", "Ebrahim Alone")]), 1)
+        self.assertFalse(self.step_of(token).mcp_self_confirmed)
 
     def test_writes_refused_when_off(self):
         # Exposure read
@@ -542,7 +541,10 @@ class TestMcp(HttpCase):
         self.assertTrue(page.server_url.endswith("/nudge/mcp"))
         self.assertIn("mcp-remote", page.claude_config)
         self.assertIn(page.server_url, page.claude_config)
-        self.assertIn("Authorization", page.generic_config)
+        # Signed in with OAuth: no key in the configurations, only in the one of keys (legacy)
+        self.assertNotIn("Authorization", page.claude_config + page.generic_config)
+        self.assertIn(page.server_url, page.claude_code_command)
+        self.assertIn("Authorization", page.legacy_config)
         page.test_key = self.key
         page.action_test()
         self.assertIn("It works", page.test_result)

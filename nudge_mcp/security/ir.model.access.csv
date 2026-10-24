@@ -1,3 +1,10 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_nudge_mcp_help,nudge.mcp.help,model_nudge_mcp_help,base.group_user,1,1,1,1
 access_nudge_mcp_key,nudge.mcp.key,model_nudge_mcp_key,base.group_user,1,1,1,1
+access_nudge_mcp_client_system,nudge.mcp.client.system,model_nudge_mcp_client,base.group_system,1,1,1,0
+access_nudge_mcp_client_user,nudge.mcp.client.user,model_nudge_mcp_client,nudge_mcp.group_nudge_mcp,1,0,0,0
+access_nudge_mcp_grant_system,nudge.mcp.grant.system,model_nudge_mcp_grant,base.group_system,1,0,0,0
+access_nudge_mcp_grant_user,nudge.mcp.grant.user,model_nudge_mcp_grant,nudge_mcp.group_nudge_mcp,1,0,0,0
+access_nudge_mcp_token_system,nudge.mcp.token.system,model_nudge_mcp_token,base.group_system,1,0,0,0
+access_nudge_mcp_code_system,nudge.mcp.code.system,model_nudge_mcp_code,base.group_system,1,0,0,0
+access_nudge_mcp_self_confirm_system,nudge.mcp.self.confirm.system,model_nudge_mcp_self_confirm,base.group_system,1,1,1,1

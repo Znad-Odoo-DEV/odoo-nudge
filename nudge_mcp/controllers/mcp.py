@@ -4,8 +4,12 @@ import time
 
 from odoo import http
 from odoo.http import Response, request
+from odoo.tools import frozendict
 
-from ..models.nudge_mcp import INVALID_REQUEST, PARSE_ERROR, clean_client, error_response
+from ..models.nudge_mcp import (
+    AUTH_CONTEXT, INVALID_REQUEST, PARSE_ERROR, InsufficientScope, clean_client, error_response, legacy_auth,
+)
+from ..models.nudge_mcp_oauth import ACCESS_PREFIX
 
 _logger = logging.getLogger(__name__)
 
@@ -39,7 +43,8 @@ def _recent(name):
 
 
 def _throttled(address, key=""):
-    """:return: whether wrong keys came too often for this key id, or from this address"""
+    """:return: whether wrong keys came too often for this key id, or from this address.
+    An access token of OAuth has no key id: 256 random bits are not guessed, its address counts"""
     return (len(_recent(("key", key[:KEY_ID_SIZE]))) >= MAX_FAILURES if key else False)         or len(_recent(("address", address))) >= MAX_FAILURES_ADDRESS
 
 
@@ -59,9 +64,12 @@ class NudgeMcpController(http.Controller):
     def mcp(self, **kwargs):
         """MCP, Streamable HTTP, answered one request at a time with JSON.
 
-        The key travels in ``Authorization: Bearer``; there is no cookie and
-        nothing to forge across sites. The server does not open a stream to
-        the client (GET answers 405), which the protocol allows."""
+        The credential travels in ``Authorization: Bearer``: an access token
+        of OAuth 2.1, or a key of before (legacy). There is no cookie and
+        nothing to forge across sites. A missing or wrong credential is
+        answered 401 with where to sign in (RFC 9728); a token without the
+        scope of a tool, 403 with the scopes to ask for. The server does not
+        open a stream to the client (GET answers 405), which the protocol allows."""
         httprequest = request.httprequest
         if httprequest.method != "POST":
             return Response(status=405, headers=[("Allow", "POST")])
@@ -77,15 +85,23 @@ class NudgeMcpController(http.Controller):
         key = key.strip()
         # Looked at after the key, not before: wrong keys of a scanner at the same address
         # must not shut out the people who hold right ones
-        user = Mcp._authenticate(key) if scheme.lower() == "bearer" else env["res.users"]
+        OAuth = env["nudge.mcp.oauth"]
+        is_token = scheme.lower() == "bearer" and key.startswith(ACCESS_PREFIX)
+        user, auth = env["res.users"], None
+        if is_token:
+            user, auth = OAuth._authenticate_access(key)
+        elif scheme.lower() == "bearer":
+            user, auth = Mcp._authenticate(key), legacy_auth()
+        key_id = "" if is_token else key
         if not user:
-            if _throttled(address, key):
+            if _throttled(address, key_id):
                 return _reply(error_response(None, -32001, env._("Too many wrong keys. Wait a minute.")),
                               status=429, headers=[("Retry-After", str(FAILURE_WINDOW))])
-            _failed(address, key)
-            _logger.info("Nudge MCP: refused a key from %s", address)
+            _failed(address, key_id)
+            _logger.info("Nudge MCP: refused a credential from %s", address)
+            challenge = OAuth._challenge(error="invalid_token" if key else None)
             return _reply(error_response(None, -32001, env._("The key is missing or not valid.")),
-                          status=401, headers=[("WWW-Authenticate", 'Bearer realm="nudge_mcp"')])
+                          status=401, headers=[("WWW-Authenticate", challenge)])
         if (httprequest.content_length or 0) > MAX_BODY_BYTES:
             return _reply(error_response(None, INVALID_REQUEST, env._("The message is too large.")), status=413)
         try:
@@ -101,14 +117,24 @@ class NudgeMcpController(http.Controller):
 
         # The person who holds the key, with their companies and rights: never sudo
         person = user.sudo()
-        user_env = env(user=user.id, context={"lang": person.lang, "tz": person.tz})
+        # What the credential opens travels in the context, frozen: nothing downstream changes it
+        user_env = env(user=user.id, context={"lang": person.lang, "tz": person.tz, AUTH_CONTEXT: frozendict(auth)})
         dispatcher = user_env["nudge.mcp"]
-        client = dispatcher._session_client(user.id, httprequest.headers.get("Mcp-Session-Id")) \
+        # Signed in with OAuth, the assistant is the client the person allowed, not what it says it is
+        client = auth["client_name"] or dispatcher._session_client(
+            user.id, httprequest.headers.get("Mcp-Session-Id")) \
             or clean_client(httprequest.headers.get("User-Agent", "").split("/")[0])
         answers, headers = [], []
         for message in messages:
             try:
                 answer, extra = dispatcher._dispatch(message, client)
+            except InsufficientScope as error:
+                return _reply(error_response(
+                    message.get("id") if isinstance(message, dict) else None, -32001,
+                    env._("This needs more than the assistant was allowed: %s. Sign it in again.",
+                          " ".join(error.scopes))),
+                    status=403, headers=[("WWW-Authenticate", OAuth._challenge(
+                        error="insufficient_scope", scopes=error.scopes))])
             except Exception:  # noqa: BLE001
                 _logger.exception("Nudge MCP: a message could not be answered")
                 answer = error_response(

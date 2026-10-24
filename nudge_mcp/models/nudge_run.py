@@ -11,6 +11,10 @@ class NudgeRun(models.Model):
         string="Origin", index="btree_not_null", readonly=True,
         help="Where the request came from when it was not the chat of Nudge: MCP and the name "
              "of the assistant.")
+    mcp_client_id = fields.Many2one(
+        "nudge.mcp.client", string="Assistant", index="btree_not_null", readonly=True, ondelete="set null",
+        help="The assistant signed in with OAuth that made the call. Empty for a key of before (legacy), "
+             "whose name is what the assistant says of itself.")
 
 
 class NudgeStep(models.Model):
@@ -19,6 +23,9 @@ class NudgeStep(models.Model):
     state = fields.Selection(
         selection_add=[("approved", "Approved in Odoo")], ondelete={"approved": "set default"})
     origin = fields.Char(related="run_id.origin", store=True, string="Origin")
+    mcp_self_confirmed = fields.Boolean(
+        string="Confirmed by the Assistant", readonly=True,
+        help="Made without the person's yes in Odoo, because the allow-list of the company names this change.")
 
     def _mcp_open_for_person(self):
         """:raise: unless this step is a change an external assistant prepared

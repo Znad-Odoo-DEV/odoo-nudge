@@ -18,8 +18,11 @@ class NudgeMcpHelp(models.TransientModel):
     server_url = fields.Char(compute="_compute_texts")
     is_enabled = fields.Boolean(compute="_compute_texts")
     can_create_key = fields.Boolean(compute="_compute_texts")
+    is_https = fields.Boolean(compute="_compute_texts")
     claude_config = fields.Text(string="Claude Desktop", compute="_compute_texts")
+    claude_code_command = fields.Text(string="Claude Code", compute="_compute_texts")
     generic_config = fields.Text(string="Other Assistants", compute="_compute_texts")
+    legacy_config = fields.Text(string="With a Key (legacy)", compute="_compute_texts")
     curl_example = fields.Text(string="Check from a Terminal", compute="_compute_texts")
     test_key = fields.Char(
         string="Key to Test", help="Paste a key here to see that it works. It is not kept.")
@@ -33,14 +36,17 @@ class NudgeMcpHelp(models.TransientModel):
             page.server_url = url
             page.is_enabled = Mcp._is_enabled()
             page.can_create_key = self.env.user.has_group(GROUP)
+            page.is_https = url.startswith("https://")
+            # Signed in with OAuth: the address is all an assistant needs
             page.claude_config = json.dumps({"mcpServers": {"odoo-nudge": {
+                "command": "npx", "args": ["-y", "mcp-remote", url],
+            }}}, indent=2)
+            page.claude_code_command = f"claude mcp add --transport http odoo-nudge {url}"
+            page.generic_config = json.dumps({"mcpServers": {"odoo-nudge": {"type": "http", "url": url}}}, indent=2)
+            page.legacy_config = json.dumps({"mcpServers": {"odoo-nudge": {
                 "command": "npx",
                 "args": ["-y", "mcp-remote", url, "--header", "Authorization:${NUDGE_AUTH}"],
                 "env": {"NUDGE_AUTH": f"Bearer {KEY_PLACEHOLDER}"},
-            }}}, indent=2)
-            page.generic_config = json.dumps({"mcpServers": {"odoo-nudge": {
-                "type": "http", "url": url,
-                "headers": {"Authorization": f"Bearer {KEY_PLACEHOLDER}"},
             }}}, indent=2)
             page.curl_example = (
                 f"curl -s {url} \\\n"
@@ -98,7 +104,8 @@ class NudgeMcpHelp(models.TransientModel):
 
 class NudgeMcpKey(models.TransientModel):
     """Makes the key of the person who asks, of the scope ``nudge_mcp``: it
-    opens the assistants and nothing else of Odoo."""
+    opens the assistants and nothing else of Odoo. Legacy: an assistant that
+    signs in with OAuth needs no key; keys stay for those that cannot."""
     _name = "nudge.mcp.key"
     _description = "Nudge MCP Key"
 
@@ -118,7 +125,7 @@ class NudgeMcpKey(models.TransientModel):
     def _reopen(self, wizard):
         return {
             "type": "ir.actions.act_window",
-            "name": self.env._("New Key for an Assistant"),
+            "name": self.env._("New Key for an Assistant (legacy)"),
             "res_model": self._name,
             "res_id": wizard.id,
             "view_mode": "form",
