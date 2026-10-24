@@ -2,6 +2,7 @@
   "id": "ae",
   "name": {"en": "United Arab Emirates", "ar": "الإمارات العربية المتحدة"},
   "countries": ["AE"],
+  "reviewed": "2026-10-22",
   "reference": {
     "en": "Federal Decree-Law No. (8) of 2017 on Value Added Tax and its Executive Regulation (Cabinet Decision No. (52) of 2017), Federal Tax Authority (FTA). Check the current text with the FTA before you rely on it. This is a checklist, not legal advice; confirm with the authority.",
     "ar": "المرسوم بقانون اتحادي رقم (8) لسنة 2017 بشأن ضريبة القيمة المضافة ولائحته التنفيذية (قرار مجلس الوزراء رقم (52) لسنة 2017)، الهيئة الاتحادية للضرائب. راجع النص الحالي لدى الهيئة قبل الاعتماد عليه. هذه قائمة فحص وليست استشارة قانونية؛ تأكد لدى الجهة المختصة."
@@ -140,6 +141,58 @@
         "en": "Federal Decree-Law No. (47) of 2022 on the Taxation of Corporations and Businesses.",
         "ar": "المرسوم بقانون اتحادي رقم (47) لسنة 2022 في شأن الضريبة على الشركات والأعمال."
       }
+    },
+    {
+      "key": "einvoicing_asp",
+      "check": "note",
+      "severity": "warning",
+      "title": {
+        "en": "E-invoicing: an accredited service provider is appointed (revenue of AED 50 million or more)",
+        "ar": "الفوترة الإلكترونية: تعيين مزوّد خدمة معتمد (إيرادات 50 مليون درهم فأكثر)"
+      },
+      "explanation": {
+        "en": "Businesses with revenue of AED 50 million or more must appoint an accredited service provider (ASP) of the Peppol network by 30 October 2026 (Ministerial Decision No. 66 of 2026 amending Decision No. 244 of 2025; the earlier date was 31 July 2026). Smaller businesses have until 31 March 2027. Nudge cannot see this in the database: check that a provider is appointed, that the company TRN is right, and that the Peppol ID is registered with the provider. Dates come from the authority and may change: confirm with the authority.",
+        "ar": "على المنشآت التي تبلغ إيراداتها 50 مليون درهم فأكثر تعيين مزوّد خدمة معتمد (ASP) على شبكة Peppol قبل 30 أكتوبر 2026 (القرار الوزاري رقم 66 لسنة 2026 المعدِّل للقرار رقم 244 لسنة 2025؛ وكان التاريخ السابق 31 يوليو 2026). وأمام المنشآت الأصغر حتى 31 مارس 2027. لا يرى Nudge ذلك في قاعدة البيانات: تأكد من تعيين المزوّد وصحة الرقم الضريبي للشركة وتسجيل معرّف Peppol لدى المزوّد. التواريخ مصدرها الجهة المختصة وقد تتغير: تأكد لدى الجهة المختصة."
+      },
+      "reference": {
+        "en": "Ministry of Finance, Ministerial Decisions No. 243 and 244 of 2025 on electronic invoicing, amended by Ministerial Decision No. 66 of 2026.",
+        "ar": "وزارة المالية، القرارات الوزارية رقم 243 و244 لسنة 2025 في شأن الفوترة الإلكترونية، المعدَّلة بالقرار الوزاري رقم 66 لسنة 2026."
+      },
+      "deadline": "2026-10-30",
+      "source": "https://mof.gov.ae/en/about-us/initiatives/einvoicing/",
+      "reviewed": "2026-10-22"
+    },
+    {
+      "key": "einvoicing_large",
+      "check": "note",
+      "severity": "warning",
+      "title": {
+        "en": "E-invoicing is mandatory from 1 January 2027 (revenue of AED 50 million or more)",
+        "ar": "الفوترة الإلكترونية إلزامية من 1 يناير 2027 (إيرادات 50 مليون درهم فأكثر)"
+      },
+      "explanation": {
+        "en": "After the pilot that began on 1 July 2026, businesses with revenue of AED 50 million or more issue and receive e-invoices through the Peppol network from 1 January 2027. The Ministry kept this date when it moved the provider deadline. Check that your ERP can send the UAE format through your provider. Dates come from the authority and may change: confirm with the authority.",
+        "ar": "بعد المرحلة التجريبية التي بدأت في 1 يوليو 2026، تُصدر المنشآت التي تبلغ إيراداتها 50 مليون درهم فأكثر الفواتير الإلكترونية وتستقبلها عبر شبكة Peppol اعتباراً من 1 يناير 2027. أبقت الوزارة هذا التاريخ عندما مدّدت مهلة المزوّد. تأكد أن نظامك قادر على إرسال الصيغة الإماراتية عبر مزوّدك. التواريخ مصدرها الجهة المختصة وقد تتغير: تأكد لدى الجهة المختصة."
+      },
+      "deadline": "2027-01-01",
+      "source": "https://mof.gov.ae/en/about-us/initiatives/einvoicing/",
+      "reviewed": "2026-10-22"
+    },
+    {
+      "key": "einvoicing_others",
+      "check": "note",
+      "severity": "info",
+      "title": {
+        "en": "E-invoicing is mandatory from 1 July 2027 (revenue below AED 50 million)",
+        "ar": "الفوترة الإلكترونية إلزامية من 1 يوليو 2027 (إيرادات أقل من 50 مليون درهم)"
+      },
+      "explanation": {
+        "en": "Other businesses follow from 1 July 2027 and government entities from 1 October 2027, according to the Ministry's decisions. Dates come from the authority and may change: confirm with the authority.",
+        "ar": "تلتزم المنشآت الأخرى اعتباراً من 1 يوليو 2027 والجهات الحكومية اعتباراً من 1 أكتوبر 2027 وفق قرارات الوزارة. التواريخ مصدرها الجهة المختصة وقد تتغير: تأكد لدى الجهة المختصة."
+      },
+      "deadline": "2027-07-01",
+      "source": "https://mof.gov.ae/en/about-us/initiatives/einvoicing/",
+      "reviewed": "2026-10-22"
     }
   ]
 }
