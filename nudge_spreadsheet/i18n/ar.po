@@ -139,3 +139,9 @@ msgstr "صورة مصغرة"
 #: model:nudge.skill,name:nudge_spreadsheet.skill_spreadsheets
 msgid "Spreadsheets of figures"
 msgstr "جداول البيانات"
+
+#. module: nudge_spreadsheet
+#. odoo-python
+#: code:addons/nudge_spreadsheet/models/nudge_spreadsheet.py:0
+msgid "A spreadsheet stays with the person it was made for."
+msgstr "يبقى جدول البيانات للشخص الذي أُعدّ له."

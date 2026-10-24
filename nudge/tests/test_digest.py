@@ -212,6 +212,8 @@ class TestDigest(BackgroundCase, TransactionCase):
         self.assertEqual(self.env["sale.order"].with_user(self.seller).search_count(action["domain"]), 1)
         with self.assertRaises(AccessError):
             link.with_user(self.user_a).action_open()
+        with self.assertRaises(AccessError):
+            link.with_user(self.seller).write({"user_id": self.user_a.id})
         # Another digest replaces the links of the last one
         self.run_digest(task)
         self.assertFalse(link.exists())

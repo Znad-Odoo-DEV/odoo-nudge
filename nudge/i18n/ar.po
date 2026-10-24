@@ -25755,7 +25755,6 @@ msgstr "جهّزت مهمة"
 msgid "Started a tour"
 msgstr "بدأت جولة"
 
-
 #. odoo-python
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "Prepared an email design"
@@ -25814,25 +25813,26 @@ msgstr "جهّزت التراجع عن تعديل في الموقع"
 #. module: nudge
 #: code:addons/nudge/models/nudge_conversation.py:0
 #, python-format
-msgid "%(refusal)s The model chosen to stand in (%(model)s) is not on the list either."
+msgid ""
+"%(refusal)s The model chosen to stand in (%(model)s) is not on the list "
+"either."
 msgstr "%(refusal)s والنموذج البديل (%(model)s) ليس على القائمة أيضاً."
 
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/approval_flow.py:0
 msgid ""
-"changed after it was approved: the approval was for a smaller amount. "
-"Press Request approval again."
+"changed after it was approved: the approval was for a smaller amount. Press "
+"Request approval again."
 msgstr ""
-"تغيّر بعد الموافقة عليه: كانت الموافقة على مبلغ أصغر. اضغط طلب الموافقة "
-"من جديد."
+"تغيّر بعد الموافقة عليه: كانت الموافقة على مبلغ أصغر. اضغط طلب الموافقة من "
+"جديد."
 
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/approval_flow.py:0
 msgid ""
-"You made this document: another member of the group %s has to approve "
-"it."
+"You made this document: another member of the group %s has to approve it."
 msgstr "أنت من أنشأ هذا المستند: يجب أن يوافق عليه عضو آخر من المجموعة %s."
 
 #. module: nudge
@@ -25857,22 +25857,21 @@ msgstr "المستندات الخاصة"
 #. odoo-python
 #: code:addons/nudge/tools/approval_flow.py:0
 msgid ""
-"Limits are in the currency of the company and a document in another "
-"currency is converted at its date. An approval holds for the amount it "
-"was given for: a document changed to a larger amount has to be approved "
-"again."
+"Limits are in the currency of the company and a document in another currency"
+" is converted at its date. An approval holds for the amount it was given "
+"for: a document changed to a larger amount has to be approved again."
 msgstr ""
-"الحدود بعملة الشركة، والمستند بعملة أخرى يُحوَّل بسعر تاريخه. تسري "
-"الموافقة على المبلغ الذي مُنحت له فقط: المستند الذي يتغير إلى مبلغ أكبر "
-"يحتاج موافقة جديدة."
+"الحدود بعملة الشركة، والمستند بعملة أخرى يُحوَّل بسعر تاريخه. تسري الموافقة "
+"على المبلغ الذي مُنحت له فقط: المستند الذي يتغير إلى مبلغ أكبر يحتاج موافقة "
+"جديدة."
 
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/approval_flow.py:0
 msgid ""
-"What the system does on its own is not stopped: scheduled actions "
-"(automatic posting, recurring documents) and a website visitor or portal "
-"customer who pays or signs online."
+"What the system does on its own is not stopped: scheduled actions (automatic"
+" posting, recurring documents) and a website visitor or portal customer who "
+"pays or signs online."
 msgstr ""
 "لا يُوقَف ما يفعله النظام وحده: الإجراءات المجدولة (الترحيل التلقائي "
 "والمستندات المتكررة) وزائر الموقع أو عميل البوابة الذي يدفع أو يوقّع عبر "
@@ -25882,8 +25881,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/tools/approval_flow.py:0
 msgid ""
-"Who made a document cannot approve it, unless they are the only one in "
-"the approving group."
+"Who made a document cannot approve it, unless they are the only one in the "
+"approving group."
 msgstr ""
 "من أنشأ المستند لا يمكنه الموافقة عليه، إلا إذا كان الوحيد في مجموعة "
 "الموافقة."
@@ -25892,12 +25891,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/tools/report_explain.py:0
 msgid ""
-"The amounts of this report are in several currencies (%(names)s), so a "
-"total or a comparison would add different money together. Filter one "
-"currency, or group the report by currency."
+"The amounts of this report are in several currencies (%(names)s), so a total"
+" or a comparison would add different money together. Filter one currency, or"
+" group the report by currency."
 msgstr ""
-"مبالغ هذا التقرير بعدة عملات (%(names)s)، فأي إجمالي أو مقارنة ستجمع "
-"أموالاً مختلفة معاً. صفِّ حسب عملة واحدة أو جمّع التقرير حسب العملة."
+"مبالغ هذا التقرير بعدة عملات (%(names)s)، فأي إجمالي أو مقارنة ستجمع أموالاً"
+" مختلفة معاً. صفِّ حسب عملة واحدة أو جمّع التقرير حسب العملة."
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_setup_wizard__redact_pii
@@ -25907,13 +25906,13 @@ msgstr "إخفاء البيانات الشخصية قبل إرسالها"
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_setup_wizard__redact_pii
 msgid ""
-"Emails, phone numbers, IBANs and ID numbers become tokens before a "
-"question goes to a provider that does not run on your server. It reduces "
-"what is sent; it cannot promise to catch every number."
+"Emails, phone numbers, IBANs and ID numbers become tokens before a question "
+"goes to a provider that does not run on your server. It reduces what is "
+"sent; it cannot promise to catch every number."
 msgstr ""
-"تتحول البريد الإلكتروني وأرقام الهاتف وأرقام الآيبان وأرقام الهوية إلى "
-"رموز قبل أن يذهب السؤال إلى مزود لا يعمل على خادمك. هذا يقلل ما يُرسل، "
-"لكنه لا يضمن التقاط كل رقم."
+"تتحول البريد الإلكتروني وأرقام الهاتف وأرقام الآيبان وأرقام الهوية إلى رموز "
+"قبل أن يذهب السؤال إلى مزود لا يعمل على خادمك. هذا يقلل ما يُرسل، لكنه لا "
+"يضمن التقاط كل رقم."
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_setup_wizard__data_ack
@@ -25923,26 +25922,26 @@ msgstr "أفهم ما يُرسل إلى المزود"
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_setup_wizard__data_ack
 msgid ""
-"Required for a provider outside your server: questions and the records "
-"they need leave it."
+"Required for a provider outside your server: questions and the records they "
+"need leave it."
 msgstr "مطلوب لمزود خارج خادمك: الأسئلة والسجلات التي تحتاجها تغادر الخادم."
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_setup_wizard_view_form
 msgid ""
 "Data sent to the provider: the question and the records it needs, from "
-"everyone who uses Nudge. Private Mode (Settings) stops anything leaving "
-"your server."
+"everyone who uses Nudge. Private Mode (Settings) stops anything leaving your"
+" server."
 msgstr ""
-"البيانات المرسلة إلى المزود: السؤال والسجلات التي يحتاجها، من كل من "
-"يستخدم Nudge. الوضع الخاص (في الإعدادات) يمنع خروج أي شيء من خادمك."
+"البيانات المرسلة إلى المزود: السؤال والسجلات التي يحتاجها، من كل من يستخدم "
+"Nudge. الوضع الخاص (في الإعدادات) يمنع خروج أي شيء من خادمك."
 
 #. module: nudge
 #: models/nudge_setup_wizard.py
 msgid ""
 "Tick that you understand what is sent to the provider: questions and the "
-"records they need leave your server. Private Mode in Settings stops "
-"anything leaving it."
+"records they need leave your server. Private Mode in Settings stops anything"
+" leaving it."
 msgstr ""
 "علّم أنك تفهم ما يُرسل إلى المزود: الأسئلة والسجلات التي تحتاجها تغادر "
 "خادمك. الوضع الخاص في الإعدادات يمنع خروج أي شيء."
@@ -25951,18 +25950,18 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/tools/document_record.py:0
 msgid ""
-"No pricelist is in %(currency)s: the quotation is made in the currency "
-"of its pricelist, with the amounts of the document as they are written."
+"No pricelist is in %(currency)s: the quotation is made in the currency of "
+"its pricelist, with the amounts of the document as they are written."
 msgstr ""
-"لا توجد قائمة أسعار بعملة %(currency)s: يُنشأ عرض السعر بعملة قائمة "
-"أسعاره، بمبالغ المستند كما هي مكتوبة."
+"لا توجد قائمة أسعار بعملة %(currency)s: يُنشأ عرض السعر بعملة قائمة أسعاره، "
+"بمبالغ المستند كما هي مكتوبة."
 
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/document_record.py:0
 msgid ""
-"%(count)s taxes fit %(text)s: %(tax)s was taken. Change it on the draft "
-"if another one applies."
+"%(count)s taxes fit %(text)s: %(tax)s was taken. Change it on the draft if "
+"another one applies."
 msgstr ""
 "هناك %(count)s ضرائب تناسب %(text)s: أُخذت %(tax)s. غيّرها في المسودة إن "
 "كانت أخرى هي المقصودة."
@@ -25983,13 +25982,13 @@ msgstr "سعر البيع %s (الافتراضي في أودو، الملف لا
 #. odoo-python
 #: code:addons/nudge/tools/document_catalogue.py:0
 msgid ""
-"The file is in %(currency)s: costs and prices of the products are "
-"converted to %(company)s at today's rate (1 %(currency)s = %(rate)s "
-"%(company)s); the vendor line keeps %(currency)s."
+"The file is in %(currency)s: costs and prices of the products are converted "
+"to %(company)s at today's rate (1 %(currency)s = %(rate)s %(company)s); the "
+"vendor line keeps %(currency)s."
 msgstr ""
-"الملف بعملة %(currency)s: تُحوَّل تكاليف المنتجات وأسعارها إلى "
-"%(company)s بسعر اليوم (1 %(currency)s = %(rate)s %(company)s)؛ وسطر "
-"المورّد يبقى بـ %(currency)s."
+"الملف بعملة %(currency)s: تُحوَّل تكاليف المنتجات وأسعارها إلى %(company)s "
+"بسعر اليوم (1 %(currency)s = %(rate)s %(company)s)؛ وسطر المورّد يبقى بـ "
+"%(currency)s."
 
 #. module: nudge
 #. odoo-python
@@ -26005,3 +26004,21 @@ msgstr "كل من يستخدم %s، والمستندات المطبوعة: هذ�
 msgid "Settings > Translations > Languages (there is no Undo for this)"
 msgstr "الإعدادات > الترجمات > اللغات (لا يوجد تراجع لهذا)"
 
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/ir_model.py:0
+#, python-format
+msgid "You are not allowed to access '%s' records."
+msgstr "لا يُسمح لك بالوصول إلى سجلات '%s'."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_prompt.py:0
+msgid "A private prompt stays with its owner."
+msgstr "يبقى الطلب الخاص لمالكه."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_digest.py:0
+msgid "This list stays with the person it was made for."
+msgstr "تبقى هذه القائمة للشخص الذي أُعدّت له."
