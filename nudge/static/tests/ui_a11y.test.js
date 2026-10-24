@@ -182,3 +182,24 @@ test("the question mark lists the commands and Escape closes it (NP-23)", async 
     expect(".o_nudge_shortcuts").toHaveCount(0);
     expect(".o_nudge_panel").toHaveCount(1, { message: "Escape closes the list, not Nudge" });
 });
+
+test("the shortcuts overlay is modal: focus goes in, Tab stays in, Escape gives it back (NP-23)", async () => {
+    const { nudge } = await start();
+    nudge.open();
+    await animationFrame();
+    await click(".o_nudge_help");
+    await animationFrame();
+    expect(".o_nudge_shortcuts").toHaveAttribute("aria-modal", "true");
+    expect(".o_nudge_help_close").toBeFocused();
+    // The close button is the only stop: Tab and Shift+Tab stay on it
+    queryOne(".o_nudge_help_close").dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true, cancelable: true }));
+    expect(".o_nudge_help_close").toBeFocused();
+    queryOne(".o_nudge_help_close").dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Tab", shiftKey: true, bubbles: true, cancelable: true })
+    );
+    expect(".o_nudge_help_close").toBeFocused();
+    queryOne(".o_nudge_panel").dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    await animationFrame();
+    expect(".o_nudge_shortcuts").toHaveCount(0);
+    expect(".o_nudge_input").toBeFocused();
+});
