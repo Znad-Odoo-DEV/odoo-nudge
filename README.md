@@ -409,6 +409,18 @@ version and a test sentence with the tool it expects.
   a draft until a manager reads it and publishes it; a tool this database does not have refuses the item.
   An import only ever creates or updates a skill of the current company: one shared by every company, or
   of another company, is left as it is and a copy of this company is made instead.
+- **Skill marketplace (S2).** *Nudge ‣ Configuration ‣ Recipes ‣ Skill Catalogue* lists the skills that come
+  with the module (`data/skill_catalogue.json`, signed with the Nudge publisher key) and those of the recipe
+  sources an administrator enabled (index entries of kind `skills`, fetched through the allowed destinations of
+  NP-15): domain, languages, the tools it uses (flagged when this Nudge has no such tool, and Install is refused
+  until its module is installed), version, publisher, and *Signed by <publisher>*. Install and Update are the import
+  of the recipe as a draft; an update shows what changes in the instructions and comes back as a draft again.
+  A recipe file may carry an Ed25519 signature of its canonical JSON; it is *Signed by* a name only when it verifies
+  against a trusted publisher (Settings side: *Trusted Publishers*, system group, the Nudge key preloaded). A file
+  changed after signing is refused. An unsigned file, or one signed by a key nobody here trusts, is imported only by a
+  system administrator who read the skills in full and ticked the warning. An administrator uploads the private key
+  (*Signing Key*; kept where only the system group reads it, never logged or sent to a model) and then the export
+  signs; with no key it exports unsigned. `scripts/build_skill_catalogue.py` rebuilds and signs the shipped catalogue.
 - **Proposals and tests (NP-19).** Three approved lessons about one app (the model they name, or the
   screen they were learnt on) become a draft skill, with a line in Business Notes for the managers
   (Review opens the draft; Refuse on the line archives it; publishing it approves the line). Once the

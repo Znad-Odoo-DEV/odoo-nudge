@@ -48,6 +48,17 @@ The file is a JSON object with a list of recipes (a bare list of recipes is read
 An entry that breaks a rule (bad `sha256`, unknown `kind`, an address that is not HTTPS, a key listed twice)
 is refused and named in the result of the refresh; the others are listed.
 
+## Skills and signatures
+
+An entry of kind `skills` is one skill and may add `domain`, `languages` (codes), `tools` (names), `version` and
+`publisher`; they are shown in the Skill Catalogue before the file is fetched, and the file is what counts.
+
+A recipe file may carry a `signature` next to `recipe` and `checksum`:
+`{"format": 1, "algorithm": "ed25519", "key_id": "<first 16 hex of the sha256 of the raw public key>", "value": "<base64>"}`,
+the Ed25519 signature of the canonical JSON of `recipe` (sorted keys, separators `,` and `:`, no ASCII escaping).
+The name shown is the one of the trusted publisher whose key matches `key_id` and verifies; the file never names
+itself. `scripts/build_skill_catalogue.py` is a worked example of the signing.
+
 ## The recipe file
 
 The file `url` points to is a normal Nudge recipe (the output of **Export**): a version header, the
