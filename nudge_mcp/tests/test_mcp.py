@@ -404,24 +404,129 @@ class TestMcp(HttpCase):
         run = self.env["nudge.run"].sudo().search([("user_id", "=", self.agent.id)], order="id desc", limit=1)
         self.assertEqual(run.state, "failed")
 
-    def test_stream_cap(self):
+    # ------------------------------------------------------------------
+    # The places of the line (NP-04): the calls share them with the panel
+    # ------------------------------------------------------------------
+    def places(self, *states, env=None):
+        # ``env``: the one of the request, whose writes the environment of the test does not see before it ends
+        return (env or self.env)["nudge.slot"].sudo().search([("state", "in", states or ("claimed", "streaming"))])
+
+    def hold(self, user, provider=None):
+        """A conversation of ``user`` that is answering: it holds a place"""
+        values = {"user_id": user.id, "name": "Busy", "stream_started_at": fields.Datetime.now()}
+        if provider:
+            values["provider_id"] = provider.id
+        return self.env["nudge.conversation"].sudo().create(values)
+
+    def test_a_call_past_the_limit_is_told_to_come_back(self):
         self.env["ir.config_parameter"].sudo().set_param("nudge.max_streams", "1")
-        self.env["nudge.conversation"].sudo().create({
-            "user_id": self.other.id, "name": "Busy", "stream_started_at": fields.Datetime.now()})
-        answer = self.call("search_records", {"model": "res.partner"})
-        self.assertTrue(answer["result"]["isError"])
-        self.assertIn("answering other people", self.text(answer))
+        self.hold(self.other)
+        response = self.rpc("tools/call", {"name": "search_records", "arguments": {"model": "res.partner"}},
+                            key=self.key, session=self.session)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers["Retry-After"], str(response.json()["error"]["data"]["retryAfter"]))
+        error = response.json()["error"]
+        self.assertEqual(error["code"], nudge_mcp.SERVER_ERROR)
+        self.assertIn("answering other people", error["message"])
+        self.assertEqual(error["data"]["reason"], "busy")
+        self.assertGreaterEqual(error["data"]["retryAfter"], 1)
+        self.assertFalse(self.places(), "A refused call holds no place")
+        run = self.env["nudge.run"].sudo().search([("user_id", "=", self.agent.id)], order="id desc", limit=1)
+        self.assertEqual(run.state, "failed")
 
     def test_calls_count_in_the_stream_cap_through_the_table(self):
         self.env["ir.config_parameter"].sudo().set_param("nudge.max_streams", "1")
         Mcp = self.env["nudge.mcp"].with_user(self.other)
         Mcp._mark_call(True)
         self.addCleanup(Mcp._mark_call, False)
-        answer = self.call("search_records", {"model": "res.partner"})
-        self.assertTrue(answer["result"]["isError"])
-        self.assertIn("answering other people", self.text(answer))
+        self.assertIn("error", self.call("search_records", {"model": "res.partner"}))
         Mcp._mark_call(False)
         self.assertFalse(self.call("search_records", {"model": "res.partner"})["result"]["isError"])
+
+    def test_a_call_claims_a_place_and_gives_it_back(self):
+        seen = []
+        original = tool_base.call
+
+        def spy(env, *args, **kwargs):
+            seen.append(self.places(env=env).mapped("state"))
+            return original(env, *args, **kwargs)
+        self.patch(tool_base, "call", spy)
+        self.assertFalse(self.call("search_records", {"model": "res.partner"})["result"]["isError"])
+        self.assertEqual(seen, [["streaming"]], "One place while the tool works")
+        self.assertFalse(self.places())
+        self.assertEqual(self.env["nudge.slot"].sudo()._taken(), 0)
+        slot = self.places("done")
+        self.assertEqual(slot.user_id, self.agent)
+        conversation = self.env["nudge.conversation"].sudo().with_context(active_test=False).search(
+            [("user_id", "=", self.agent.id), ("name", "=", nudge_mcp.CONVERSATION_TITLE)])
+        self.assertFalse(conversation.stream_started_at)
+
+    def test_the_place_is_given_back_when_the_tool_fails(self):
+        def refuse(env, *args, **kwargs):
+            raise UserError("The tool failed.")
+        self.patch(tool_base, "call", refuse)
+        self.assertTrue(self.call("search_records", {"model": "res.partner"})["result"]["isError"])
+        self.assertFalse(self.places())
+        self.assertEqual(self.env["nudge.slot"].sudo()._taken(), 0)
+
+        def crash(env, *args, **kwargs):
+            raise ValueError("Unexpected")
+        self.patch(tool_base, "call", crash)
+        response = self.rpc("tools/call", {"name": "search_records", "arguments": {"model": "res.partner"}},
+                            key=self.key, session=self.session)
+        self.assertEqual(response.json()["error"]["code"], -32603)
+        self.assertFalse(self.places())
+        self.assertEqual(self.env["nudge.slot"].sudo()._taken(), 0)
+
+    def test_stop_frees_the_place_of_a_call_at_once(self):
+        stopped = []
+        original = tool_base.call
+
+        def stop_then_work(env, *args, **kwargs):
+            slot = self.places(env=env)
+            self.assertEqual(env["nudge.slot"].sudo()._taken(), 1)
+            env["nudge.slot"]._stop(slot.mapped("conversation_ref"))
+            stopped.append((slot.state, env["nudge.slot"].sudo()._taken()))
+            return original(env, *args, **kwargs)
+        self.patch(tool_base, "call", stop_then_work)
+        self.call("search_records", {"model": "res.partner"})
+        self.assertEqual(stopped, [("stopped", 0)])
+        self.assertEqual(len(self.places("stopped")), 1, "Giving it back afterwards does not undo the stop")
+
+    def test_no_place_is_held_while_the_person_decides(self):
+        self.writes_on()
+        self.env["ir.config_parameter"].sudo().set_param("nudge.max_streams", "1")
+        token = self.token_of(self.prepare("Ebrahim Waiting Contact"))
+        self.assertEqual(self.step_of(token).state, "pending")
+        self.assertFalse(self.places(), "The change waits for the yes of the person, with no place")
+        self.assertEqual(self.env["nudge.slot"].sudo()._taken(), 0)
+        # Other calls and the panel are served meanwhile
+        self.assertFalse(self.call("search_records", {"model": "res.partner"}, key=self.other_key)["result"]["isError"])
+        self.approve(token)
+        self.assertFalse(self.call("confirm", {"token": token})["result"]["isError"])
+        self.assertFalse(self.places())
+
+    def test_a_call_does_not_go_before_the_questions_waiting_in_line(self):
+        self.env["ir.config_parameter"].sudo().set_param("nudge.max_streams", "1")
+        now = fields.Datetime.now()
+        waiting = self.env["nudge.slot"].sudo().create({
+            "user_id": self.other.id, "state": "waiting", "waiting_since": now, "seen_at": now})
+        response = self.rpc("tools/call", {"name": "search_records", "arguments": {"model": "res.partner"}},
+                            key=self.key, session=self.session)
+        self.assertEqual(response.json()["error"]["data"]["reason"], "busy")
+        self.assertEqual(waiting.state, "ready", "The free place went to the first in line")
+
+    def test_the_limit_of_the_provider_applies(self):
+        provider = self.env["nudge.provider"].sudo().create({
+            "name": "One at a time", "kind": "openai_compatible", "base_url": "https://llm.invalid/v1",
+            "api_key": "sk-test-secret", "model_name": "test-model", "max_parallel": 1})
+        self.env["nudge.provider"].sudo().search([("id", "!=", provider.id)]).active = False
+        self.env["ir.config_parameter"].sudo().set_param("nudge.max_streams", "5")
+        self.env["ir.config_parameter"].sudo().set_param("nudge.default_provider_id", str(provider.id))
+        self.hold(self.other, provider)
+        self.assertIn("error", self.call("search_records", {"model": "res.partner"}))
+        self.env["nudge.conversation"].sudo().search([("name", "=", "Busy")]).unlink()
+        self.assertNotIn("error", self.call("search_records", {"model": "res.partner"}))
 
     def test_calls_per_minute(self):
         self.env["ir.config_parameter"].sudo().set_param(nudge_mcp.CALLS_PARAM, "2")

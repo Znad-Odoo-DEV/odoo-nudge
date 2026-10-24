@@ -81,6 +81,15 @@ class NudgeInLine(UserError):
         self.line = line
 
 
+class NudgeBusy(UserError):
+    """No place is free for a caller that cannot wait in the line of the browsers (an external
+    assistant, a messaging app). ``retry_after``: about how many seconds until one frees."""
+
+    def __init__(self, message, retry_after=ANSWER_SECONDS):
+        super().__init__(message)
+        self.retry_after = retry_after
+
+
 class NudgeSlot(models.Model):
     _name = "nudge.slot"
     _description = "Nudge Answer Slot"
@@ -291,6 +300,44 @@ class NudgeSlot(models.Model):
             # What the question started is rolled back (an error after the claim): its place is
             # given back at once. A test claims in its own transaction, rolled back with it
             self.env.cr.postrollback.add(lambda: self._release(slot_id))
+        return self.sudo().browse(slot_id)
+
+    @api.model
+    def _claim_channel(self, conversation, provider):
+        """Take a place for a call that does not come from the browser of the person: a tool call
+        of an external assistant (MCP), an answer to a message on a phone. It shares the places and
+        the order of the line with the browsers: it never goes before a question that waits. It does
+        not wait itself (nobody keeps asking for it): the caller is told to come back, and decides
+        how (MCP answers "busy", messaging keeps the message for its cron).
+
+        :param conversation: the log conversation of the call (a stop of it frees the place)
+        :param provider: the provider that answers, empty when the call uses none
+        :return: the place, in sudo; give it back with :meth:`_finish`
+        :raise NudgeBusy: when no place is free for this provider"""
+        user = self.env.user
+        retry = None
+        slot_id = None
+        with self._own() as Slot:
+            Slot._lock()
+            Slot._sweep()
+            given, fits = Slot._hand_out(provider=provider)
+            Slot._give_turns(given)
+            if fits:
+                now = fields.Datetime.now()
+                slot_id = Slot.create({
+                    "user_id": user.id, "company_id": self.env.company.id,
+                    "conversation_ref": conversation.id, "provider_id": provider.id or False,
+                    "state": "claimed", "started_at": now, "seen_at": now}).id
+            else:
+                ahead = Slot.search_count([("state", "=", "waiting")]) + 1
+                places = self.env["nudge.conversation"]._get_max_streams()
+                limit = provider._get_max_parallel() if provider else 0
+                if limit:
+                    places = min(places, limit)
+                retry = math.ceil(ahead / max(1, places)) * Slot._answer_seconds()
+        if retry is not None:
+            raise NudgeBusy(_(
+                "Nudge is answering other people right now. Try again in %(seconds)s seconds.", seconds=retry), retry)
         return self.sudo().browse(slot_id)
 
     @api.model

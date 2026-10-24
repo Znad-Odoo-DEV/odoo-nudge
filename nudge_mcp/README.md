@@ -138,7 +138,11 @@ which is gone: after the update every change waits for the person until an admin
 - Private mode of the company applies: MCP itself runs on your server and is allowed, a tool that
   would call an AI provider is refused when the provider does not run on your own server.
 - The budgets of the person and of the company are checked on every call. The limit of answers at the
-  same time (`nudge.max_streams`) counts the answers of Nudge and the calls of the assistants together.
+  same time (`nudge.max_streams`, and the limit of the provider) counts the answers of Nudge and the calls of the
+  assistants together, and they share one line: a call takes a place for its work only (never while the
+  person decides on a change) and, when none is free, gets a JSON-RPC error `-32000` with
+  `data: {"reason": "busy", "retryAfter": <seconds>}` and a `Retry-After` header; it does not wait, and
+  never goes before a question waiting in the panel.
 
 ## Tests
 

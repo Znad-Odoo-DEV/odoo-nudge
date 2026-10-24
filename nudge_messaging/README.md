@@ -68,6 +68,14 @@ routes avoid the words `mcp` and `sse` on purpose: some proxies rewrite those pa
 - **Audit**: every message is a Request in *What Nudge Did*, with the origin `WhatsApp` or `Telegram`; every
   prepared change is a step with the same origin.
 
+## The line of answers
+
+An answer that needs the AI provider, a voice note or a file takes a place in the same line as the answers of the
+panel (`nudge.slot`, limits of Nudge and of the provider), and gives it back at the end, on error or on Stop. When
+none is free the message stays in the queue, not answered and not counted as a try: the scheduled action takes it
+up again when a place frees (a few seconds later), and it never goes before a question waiting in the panel. A
+change prepared for the person's yes holds no place while it waits. Messages answered by rules need no place.
+
 ## Tests
 
 ```
