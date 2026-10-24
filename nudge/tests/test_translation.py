@@ -28,7 +28,8 @@ class TranslatingAdapter(FakeAdapter):
 
     def stream_chat(self, system, turns, deadline=None, tools=None, tool_choice=None):
         text = turns[0]["text"]
-        self.questions.append({"system": system, "text": text})
+        # oneshot.ask hands the system prompt over as a list of texts
+        self.questions.append({"system": " ".join(base.system_texts(system)), "text": text})
         rows = json.loads(re.match(r'<data source="module_translation">(.*)</data>$', text, re.S)
                           .group(1).replace("&lt;", "<"))
         answers = {}
