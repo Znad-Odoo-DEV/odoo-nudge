@@ -517,7 +517,8 @@ class TestEngine(MessagingCase, HttpCase):
         self.assertNotIn("Remembered", self.receive("كم فاتورة متأخرة"))
         text = self.receive("اعمل عرض سعر لراغد")
         self.assertNotIn("Remembered", text)
-        self.assertIn("/nudge.step/", text, "The change is prepared")
+        # The link to the step: /odoo/nudge.step/<id> on 18 and 19, /web#...model=nudge.step on 17
+        self.assertIn("nudge.step", text, "The change is prepared")
         self.assertIn("Remembered", self.receive("How do I create an invoice?"))
 
     def test_a_tool_outside_the_list_is_refused_to_the_model(self):
