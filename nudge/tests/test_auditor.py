@@ -143,6 +143,18 @@ class TestAuditor(NudgeCase, HttpCase):
         both = self.env(user=self.auditor, context={"allowed_company_ids": [self.company_one.id, self.company_two.id]})
         self.assertEqual(both["nudge.run"].search([("id", "in", self.runs.ids)]), self.runs)
 
+    def test_a_row_with_no_company_is_hidden_from_the_auditor(self):
+        conversation = self.env["nudge.conversation"].sudo().create({"user_id": self.user_a.id})
+        run = self.env["nudge.run"].sudo().create({
+            "name": "Change a contact", "conversation_id": conversation.id, "user_id": self.user_a.id,
+            "company_id": False, "state": "done"})
+        step = self.env["nudge.step"].sudo().create({
+            "run_id": run.id, "company_id": False, "tool": "prepare_write", "kind": "write",
+            "summary": "Change Ebrahim", "values": {}, "arguments": {}})
+        as_auditor = self.env(user=self.auditor)
+        self.assertFalse(as_auditor["nudge.run"].search([("id", "=", run.id)]))
+        self.assertFalse(as_auditor["nudge.step"].search([("id", "=", step.id)]))
+
     def test_made_by_nudge_is_scoped_by_company_too(self):
         Built = self.env["nudge.built"].sudo()
         mine = Built.create({"name": "Rule A", "kind": "automation", "res_model": "base.automation", "res_id": 1,
