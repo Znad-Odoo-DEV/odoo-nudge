@@ -146,6 +146,8 @@ class TestRecipeMarket(NudgeCase, TransactionCase):
         self.assertTrue(self.source.entry_ids.compatible or self.env["nudge.recipe"]._series() != "19.0")
 
     def test_text_in_the_language_of_the_user_and_apps_marked(self):
+        # The language is installed here, whatever the database came with
+        self.env["res.lang"]._activate_lang("ar_001")
         files, _raw = self.market_files(apps=["sale", "no_such_app_here"])
         self.refresh(files)
         found = self.source.entry_ids
