@@ -160,6 +160,15 @@ class TestAnswerCache(NudgeCase, TransactionCase):
         entry = self.Cache.search([])
         self.assertEqual(entry.answer, STEPS)
 
+    def test_live_counts_of_one_person_are_not_kept(self):
+        """Review (ai #2): locate_data counts the records as the person sees them, under their rules."""
+        adapter = self.use_adapter(script=[
+            [llm.tool_use_event("call_1", "locate_data", {"topic": "contacts"}), llm.stop_event(llm.STOP_TOOL_USE)],
+            [llm.text_event("Contacts are in Contacts: 42 records, 5 changed lately."), llm.stop_event(llm.STOP_END)]])
+        self.ask_as(self.user_a, "Where do we keep our contacts?")
+        self.assertFalse(self.Cache.search([]))
+        self.assertEqual(len(adapter.calls), 2)
+
     def test_a_screen_with_what_is_looked_at_is_not_kept(self):
         adapter = self.use_adapter(reply=STEPS)
         shown = dict(SCREEN, fields=[{"name": "partner_id", "value": "Deco Addict", "on_screen": True}])
