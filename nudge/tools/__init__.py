@@ -1,6 +1,7 @@
 from . import schema
 from . import deadline
 from . import base
+from . import registry  # EXT-01 / L3: the tools of this database, and the plugins
 from . import commands
 from . import guidance
 from . import navigation
