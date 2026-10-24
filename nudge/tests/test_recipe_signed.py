@@ -170,6 +170,19 @@ class TestRecipeSigned(NudgeCase, TransactionCase):
             self.assertEqual((skill.state, skill.origin), ("draft", "recipe"), "A draft either way")
             skill.unlink()
 
+    def test_the_wizard_fields_written_over_rpc_change_nothing(self):
+        # Unsigned, marked signed by the manager: the file is checked again
+        wizard = self.importer(package_of(skill_data()), self.mgr)
+        wizard.write({"signature_state": "signed", "acknowledged": True})
+        with self.assertRaises(AccessError):
+            wizard.action_import()
+        # Signed, with the text of a line changed after the review: what the file says comes in
+        wizard = self.importer(package_of(skill_data(), self.pem), self.mgr)
+        line = wizard.line_ids.filtered(lambda l: l.kind == "skill")
+        line.payload = json.dumps(dict(json.loads(line.payload), instructions="## X\n- " + HOSTILE))
+        wizard.action_import()
+        self.assertNotIn(HOSTILE, self.skill().instructions)
+
     def test_what_comes_from_a_recipe_never_reaches_the_model_until_published(self):
         wizard = self.importer(package_of(skill_data(instructions="## X\n- " + HOSTILE, trigger_words="hello")), self.boss)
         wizard.acknowledged = True
