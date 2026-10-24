@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- NP-16: the wizard of the administrator -->
+    <record id="nudge_auditor_wizard_view_form" model="ir.ui.view">
+        <field name="name">nudge.auditor.wizard.form</field>
+        <field name="model">nudge.auditor.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Add an Auditor">
+                <p class="text-muted">
+                    An auditor asks questions of the data and reads the log of what Nudge did, in the companies
+                    chosen. Nothing can be changed. The access ends after the last day.
+                </p>
+                <group>
+                    <field name="name" placeholder="e.g. Raghad"/>
+                    <field name="login" placeholder="e.g. raghad@example.com"/>
+                    <field name="company_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                    <field name="until"/>
+                    <field name="read_group_ids" widget="many2many_tags" options="{'no_create': True}"
+                           domain="[('share', '=', False)]"/>
+                    <field name="send_invitation"/>
+                </group>
+                <footer>
+                    <button name="action_create" type="object" string="Add the Auditor" class="btn-primary" data-hotkey="q"/>
+                    <button string="Cancel" special="cancel" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_auditor_wizard_action" model="ir.actions.act_window">
+        <field name="name">Add an Auditor</field>
+        <field name="res_model">nudge.auditor.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- On the user: until when, how many questions, revoke -->
+    <record id="res_users_view_form_nudge_auditor" model="ir.ui.view">
+        <field name="name">res.users.form.nudge.auditor</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Nudge Auditor" name="nudge_auditor" groups="base.group_system">
+                    <group>
+                        <field name="nudge_auditor_until"/>
+                        <field name="nudge_auditor_ended_on"/>
+                        <field name="nudge_auditor_questions"/>
+                    </group>
+                    <button name="action_nudge_revoke_auditor" type="object" string="Revoke the Access"
+                            class="btn-secondary" invisible="not nudge_auditor_until or not active"
+                            confirm="The auditor is archived now and cannot sign in again."/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- What auditors asked: a list for the managers -->
+    <record id="nudge_auditor_question_view_list" model="ir.ui.view">
+        <field name="name">nudge.message.list.auditor</field>
+        <field name="model">nudge.message</field>
+        <field name="arch" type="xml">
+            <list string="Questions of Auditors" create="0" edit="0" delete="0">
+                <field name="create_date" string="Asked on"/>
+                <field name="user_id" widget="many2one_avatar"/>
+                <field name="content" string="Question"/>
+                <field name="conversation_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_auditor_question_view_search" model="ir.ui.view">
+        <field name="name">nudge.message.search.auditor</field>
+        <field name="model">nudge.message</field>
+        <field name="arch" type="xml">
+            <search string="Questions of Auditors">
+                <field name="content"/>
+                <field name="user_id"/>
+                <group>
+                    <filter name="by_auditor" string="Auditor" context="{'group_by': 'user_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_auditor_question_action" model="ir.actions.act_window">
+        <field name="name">Questions of Auditors</field>
+        <field name="res_model">nudge.message</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="nudge_auditor_question_view_list"/>
+        <field name="search_view_id" ref="nudge_auditor_question_view_search"/>
+        <field name="domain">[('role', '=', 'user'), ('conversation_id.kept_for_audit', '=', True)]</field>
+        <field name="context">{'search_default_by_auditor': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No auditor has asked a question yet</p>
+            <p>Every question an auditor asks is kept here for the company, even when old conversations are deleted.</p>
+        </field>
+    </record>
+
+    <menuitem id="nudge_menu_auditor_questions" name="Questions of Auditors" sequence="40"
+              parent="nudge_menu_agent" action="nudge_auditor_question_action"
+              groups="nudge.group_nudge_manager"/>
+
+    <menuitem id="nudge_menu_auditor_add" name="Add an Auditor" sequence="40"
+              parent="nudge_menu_configuration" action="nudge_auditor_wizard_action"
+              groups="base.group_system"/>
+
+    <!-- What the auditor sees: the log of what Nudge did, in their companies, to read -->
+    <menuitem id="nudge_menu_audit" name="Audit Log" sequence="15"
+              parent="nudge_menu_root" groups="nudge.group_nudge_auditor"/>
+    <menuitem id="nudge_menu_audit_runs" name="Requests" sequence="10"
+              parent="nudge_menu_audit" action="nudge_run_action"/>
+    <menuitem id="nudge_menu_audit_steps" name="Changes" sequence="20"
+              parent="nudge_menu_audit" action="nudge_step_action"/>
+    <menuitem id="nudge_menu_audit_built" name="Made by Nudge" sequence="30"
+              parent="nudge_menu_audit" action="nudge_built_server_action"/>
+</odoo>

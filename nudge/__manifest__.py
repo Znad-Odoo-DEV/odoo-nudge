@@ -37,6 +37,7 @@ Without them the rest works and the feature says what is missing.
     "depends": ["web", "bus"],
     "data": [
         "security/nudge_security.xml",
+        "security/nudge_auditor_security.xml",
         "security/ir.model.access.csv",
         "security/nudge_tour_security.xml",
         "security/nudge_health_security.xml",
@@ -78,8 +79,10 @@ Without them the rest works and the feature says what is missing.
         "views/nudge_compliance_feed_views.xml",
         "views/nudge_prompt_views.xml",
         "data/nudge_prompt_data.xml",
+        "data/nudge_auditor_cron.xml",
         "views/nudge_built_views.xml",
         "views/nudge_slot_views.xml",
+        "views/nudge_auditor_views.xml",
     ],
     "assets": {
         "web.assets_backend": [
