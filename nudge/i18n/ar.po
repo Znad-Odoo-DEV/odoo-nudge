@@ -13317,7 +13317,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/tools/digest.py:0
 msgid "People off today"
-msgstr "الغائبون اليوم"
+msgstr "في إجازة اليوم"
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
@@ -25990,4 +25990,18 @@ msgstr ""
 "الملف بعملة %(currency)s: تُحوَّل تكاليف المنتجات وأسعارها إلى "
 "%(company)s بسعر اليوم (1 %(currency)s = %(rate)s %(company)s)؛ وسطر "
 "المورّد يبقى بـ %(currency)s."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/setup.py:0
+msgid ""
+"Everyone who uses %s, and printed documents: it is a setting of the "
+"language, not of one person."
+msgstr "كل من يستخدم %s، والمستندات المطبوعة: هذا إعداد للغة وليس لشخص واحد."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/setup.py:0
+msgid "Settings > Translations > Languages (there is no Undo for this)"
+msgstr "الإعدادات > الترجمات > اللغات (لا يوجد تراجع لهذا)"
 

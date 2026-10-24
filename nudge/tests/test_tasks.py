@@ -99,6 +99,15 @@ class TestTasks(BackgroundCase, TransactionCase):
         self.assertEqual(task.user_id, self.agent)
         self.assertGreater(task.next_run, fields.Datetime.now())
 
+    def test_the_next_run_keeps_the_hour_across_a_change_of_summer_time(self):
+        """Review (functional 20): the day after the clocks went back, the task ran an hour off"""
+        self.agent.tz = "Europe/Berlin"
+        task = self.make(interval_type="days", hour=9)
+        # 10:00 on 24 Oct 2026 is summer time (UTC+2); on the 25th the clocks go back and 09:00 is UTC+1
+        self.assertEqual(task._next_after(datetime(2026, 10, 24, 8, 0)), datetime(2026, 10, 25, 8, 0))
+        # and the other way: 26 Mar 2026 09:00 is UTC+1, the 29th at 09:00 is UTC+2
+        self.assertEqual(task._next_after(datetime(2026, 3, 28, 9, 0)), datetime(2026, 3, 29, 7, 0))
+
     def test_the_next_run_follows_the_clock_of_the_owner(self):
         self.agent.tz = "Asia/Dubai"
         task = self.make(interval_type="days", hour=8)
