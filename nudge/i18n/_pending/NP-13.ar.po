@@ -1,0 +1,32 @@
+#. NP-13 pending translations, to be merged into ar.po by the lead
+msgid ""
+msgstr ""
+"Language: ar
+"
+"Content-Type: text/plain; charset=UTF-8
+"
+
+msgid "Redact Personal Data Before Sending"
+msgstr "إخفاء البيانات الشخصية قبل الإرسال"
+
+msgid "Redact Personal Data"
+msgstr "إخفاء البيانات الشخصية"
+
+msgid "Personal Data"
+msgstr "البيانات الشخصية"
+
+msgid "Sample Text"
+msgstr "نص تجريبي"
+
+msgid "What Would Be Sent"
+msgstr "ما الذي سيُرسل"
+
+msgid "Not saved: shows what would be replaced by a token."
+msgstr "لا يُحفظ: يعرض ما سيُستبدل برمز."
+
+msgid "Type a text to see what would be masked"
+msgstr "اكتب نصًا لترى ما الذي سيُخفى"
+
+msgid "Before a question goes to an AI provider that does not run on your own server, emails, phone numbers, IBANs, Emirates ID, Saudi and Egyptian national numbers and card numbers become tokens such as EMAIL_1. The answer and the confirmation cards get the real values back here. It reduces what leaves; a number written in an unusual way can be missed. Off by default."
+msgstr "قبل إرسال أي سؤال إلى مزود ذكاء اصطناعي لا يعمل على خادمك الخاص، تتحول عناوين البريد وأرقام الهواتف وأرقام الآيبان والهوية الإماراتية والأرقام الوطنية السعودية والمصرية وأرقام البطاقات إلى رموز مثل EMAIL_1. وتعود القيم الحقيقية هنا إلى الإجابة وإلى بطاقات التأكيد. هذا يقلل ما يخرج ولا يضمن التقاط كل رقم، فقد يفوت رقم مكتوب بصيغة غير معتادة. معطّل افتراضيًا."
+

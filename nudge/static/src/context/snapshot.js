@@ -23,6 +23,7 @@ export const LIMITS = {
     notices: 5,
 };
 
+const HIDDEN = "[hidden]";
 const SKIPPED_TYPES = new Set(["binary", "image", "json", "properties", "properties_definition"]);
 
 function truncate(text, size = LIMITS.text) {
@@ -203,7 +204,9 @@ function describeRow(record, names) {
             continue;
         }
         const isRelation = field.type === "one2many" || field.type === "many2many";
-        const value = isRelation
+        const value = isPasswordField(info)
+            ? (record.data[name] ? HIDDEN : null)
+            : isRelation
             ? { count: record.data[name]?.count ?? 0 }
             : formatValue(field, record.data[name], record.data);
         if (value === undefined || value === null || value === "") {
@@ -255,6 +258,12 @@ document.addEventListener("focusin", (event) => {
     }
 });
 
+// A field the view shows as a password holds a credential, whatever it is called
+function isPasswordField(info, node) {
+    const attr = node?.getAttribute?.("password") ?? info?.attrs?.password ?? info?.password;
+    return info?.widget === "password" || (attr !== undefined && attr !== null && !/^(false|0)?$/i.test(String(attr)));
+}
+
 function describeFormFields(controller, record, root) {
     const context = record.evalContextWithVirtualIds;
     const fields = [];
@@ -273,9 +282,12 @@ function describeFormFields(controller, record, root) {
             continue;
         }
         seen.add(info.name);
-        const value = isTotals
-            ? describeTaxTotals(record.data[info.name], field, record.data)
-            : formatValue(field, record.data[info.name], record.data);
+        const secret = isPasswordField(info, node);
+        const value = secret
+            ? (record.data[info.name] ? HIDDEN : null)
+            : isTotals
+              ? describeTaxTotals(record.data[info.name], field, record.data)
+              : formatValue(field, record.data[info.name], record.data);
         if (value === undefined) {
             continue;
         }
@@ -287,6 +299,9 @@ function describeFormFields(controller, record, root) {
             value,
             on_screen: isShown(widget),
         };
+        if (secret) {
+            entry.masked = true;
+        }
         const tab = pageOf(node);
         if (tab) {
             entry.tab = truncate(tab, 60);

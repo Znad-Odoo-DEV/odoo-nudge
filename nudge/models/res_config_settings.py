@@ -171,6 +171,13 @@ class ResConfigSettings(models.TransientModel):
     nudge_allow_recipe_index = fields.Boolean(
         related="company_id.nudge_allow_recipe_index", readonly=False,
         string="Allow Fetching Recipe Indexes")
+    # NP-13
+    nudge_redact_pii = fields.Boolean(
+        related="company_id.nudge_redact_pii", readonly=False, string="Redact Personal Data Before Sending")
+    nudge_redact_sample = fields.Text(
+        string="Sample Text", default="Raghad: raghad@example.com, +971 50 123 4567, AE07 0331 2345 6789 0123 456",
+        help="Not saved: shows what would be replaced by a token.")
+    nudge_redact_preview = fields.Text(string="What Would Be Sent", compute="_compute_redact_preview")
     nudge_validate_partner_duplicate = fields.Boolean(
         string="Warn About a Duplicate Contact", compute="_compute_validator_switches",
         inverse="_inverse_validator_switches",
@@ -313,3 +320,10 @@ class ResConfigSettings(models.TransientModel):
     def action_nudge_compliance_feed_list(self):
         return self.env["ir.actions.actions"]._for_xml_id("nudge.nudge_compliance_update_action")
 
+    @api.depends("nudge_redact_sample")
+    def _compute_redact_preview(self):  # NP-13
+        from ..llm import redact  # noqa: PLC0415
+        for settings in self:
+            masked, found = redact.preview(settings.nudge_redact_sample)
+            lines = [f"{token} = {value}" for token, value in found.items()]
+            settings.nudge_redact_preview = ("\n\n").join([masked, ("\n").join(lines)]) if lines else masked
