@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- S4: connector calls in the usage report, as a kind of their own -->
+    <record id="nudge_usage_view_search_connect" model="ir.ui.view">
+        <field name="name">nudge.usage.view.search.connect</field>
+        <field name="model">nudge.usage</field>
+        <field name="inherit_id" ref="nudge.nudge_usage_view_search"/>
+        <field name="arch" type="xml">
+            <filter name="noai" position="after">
+                <filter name="connector" string="Connector Calls" domain="[('kind', '=', 'connector')]"/>
+            </filter>
+        </field>
+    </record>
+</odoo>

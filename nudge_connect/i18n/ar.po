@@ -965,3 +965,161 @@ msgstr "https://mcp.example.com/mcp"
 #: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
 msgid "sister"
 msgstr "sister"
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid "Recommended scopes: %s."
+msgstr "النطاقات الموصى بها: %s."
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid "Come in as Read when the server offers them: %s."
+msgstr "تدخل كقراءة إذا قدّمها الخادم: %s."
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid "Usually Write (never allowed by the preset): %s."
+msgstr "عادةً كتابة (لا يسمح بها القالب أبدًا): %s."
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid "Choose a preset from the catalogue first."
+msgstr "اختر قالبًا من الكتالوج أولًا."
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid "Remembering reads is between 0 (off) and %s seconds."
+msgstr "حفظ القراءات بين 0 (مُعطّل) و %s ثانية."
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_usage.py:0
+msgid "You used all of your Nudge connector calls for today. Try again tomorrow, or ask your administrator."
+msgstr "استهلكت كل مكالمات موصلات Nudge لهذا اليوم. حاول غدًا، أو اسأل مسؤول النظام."
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_usage.py:0
+msgid "Your company used all of its Nudge connector calls for this month. Ask your administrator."
+msgstr "استهلكت شركتك كل مكالمات موصلات Nudge لهذا الشهر. اسأل مسؤول النظام."
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__cache_ttl
+msgid "Remember Reads (Seconds)"
+msgstr "حفظ القراءات (بالثواني)"
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_nudge_connector__cache_ttl
+msgid "A Read tool's answer is kept this long for the same person, company and arguments, so that asking again in a conversation does not reach the server. 0 is off (the default); 60 is a good start; at most 3600. Writes are never kept, and what is kept is still data, never an instruction."
+msgstr "يُحفظ جواب أداة القراءة هذه المدة لنفس الشخص والشركة والمعطيات، فلا يصل السؤال المتكرر في المحادثة إلى الخادم. 0 معطّل (الافتراضي)؛ 60 بداية جيدة؛ 3600 كحد أقصى. لا تُحفظ الكتابة أبدًا، وما يُحفظ يبقى بيانات وليس تعليمات."
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__preset
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "From Catalogue"
+msgstr "من الكتالوج"
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_nudge_connector__preset
+msgid "A ready-made starting point: it fills the address, the kind of credential and the tools that come in as Read. It does not promise the server exists: the tools are read from the server, and every one comes in Not Allowed except those the preset marks Read."
+msgstr "نقطة بداية جاهزة: تملأ العنوان ونوع الاعتماد والأدوات التي تدخل كقراءة. لا تَعِد بوجود الخادم: تُقرأ الأدوات من الخادم، وتدخل كلها غير مسموحة إلا ما يعلّمه القالب كقراءة."
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__preset_note
+msgid "About This Preset"
+msgstr "عن هذا القالب"
+
+#. module: nudge_connect
+#: model:ir.model.fields.selection,name:nudge_connect.selection__nudge_connector_call__state__hit
+msgid "Answered From What Was Kept"
+msgstr "أُجيب من المحفوظ"
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_res_config_settings__nudge_connect_budget_user_calls
+msgid "Connector Calls per Person and per Day"
+msgstr "مكالمات الموصلات لكل شخص في اليوم"
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_res_config_settings__nudge_connect_budget_company_calls
+msgid "Connector Calls per Company and per Month"
+msgstr "مكالمات الموصلات لكل شركة في الشهر"
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "Fill From Catalogue"
+msgstr "املأ من الكتالوج"
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "This replaces the address and the kind of credential with the preset's. Fill?"
+msgstr "سيستبدل هذا العنوان ونوع الاعتماد بما في القالب. هل تملأ؟"
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "Pick the kind of system to start from: the address, the credential and the tools that come in as Read are filled in. A preset is a starting point, not a promise that the server exists: the tools are read from the server, and every one comes in Not Allowed except those the preset marks Read. Never a Write."
+msgstr "اختر نوع النظام لتبدأ منه: يُملأ العنوان والاعتماد والأدوات التي تدخل كقراءة. القالب نقطة بداية وليس وعدًا بوجود الخادم: تُقرأ الأدوات من الخادم، وتدخل كلها غير مسموحة إلا ما يعلّمه القالب كقراءة. وليس كتابة أبدًا."
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "Remember Reads: 0 is off. 60 seconds keeps a repeated read in one conversation from reaching the server. Writes are never kept."
+msgstr "حفظ القراءات: 0 معطّل. 60 ثانية تمنع القراءة المتكررة في محادثة واحدة من الوصول إلى الخادم. لا تُحفظ الكتابة أبدًا."
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.res_config_settings_view_form_connect
+msgid "A call to a connector costs no tokens but counts as one call. A person who reached the limit is told, and nothing is sent. A kept answer is not a call. 0 is no limit."
+msgstr "مكالمة الموصل لا تكلّف رموزًا لكنها تُحسب مكالمة واحدة. يُبلَّغ من بلغ الحد ولا يُرسل شيء. الجواب المحفوظ ليس مكالمة. 0 بلا حد."
+
+#. module: nudge_connect
+#: model:ir.cron,name:nudge_connect.cron_connector_cache_purge
+msgid "Nudge: forget the kept answers of connectors"
+msgstr "Nudge: نسيان أجوبة الموصلات المحفوظة"
+
+#. module: nudge_connect
+#: model:ir.model,name:nudge_connect.model_nudge_connector_cache
+msgid "Nudge Connector Kept Answer"
+msgstr "جواب محفوظ لموصل Nudge"
+
+#. module: nudge_connect
+#: code:addons/nudge_connect/presets.py:0
+msgid "Another Odoo database (sister company)"
+msgstr "قاعدة بيانات أودو أخرى (شركة شقيقة)"
+
+#. module: nudge_connect
+#: code:addons/nudge_connect/presets.py:0
+msgid "Google Calendar"
+msgstr "تقويم Google"
+
+#. module: nudge_connect
+#: code:addons/nudge_connect/presets.py:0
+msgid "Gmail"
+msgstr "Gmail"
+
+#. module: nudge_connect
+#: code:addons/nudge_connect/presets.py:0
+msgid "Slack"
+msgstr "Slack"
+
+#. module: nudge_connect
+#: code:addons/nudge_connect/presets.py:0
+msgid "Microsoft Teams"
+msgstr "Microsoft Teams"
+
+#. module: nudge_connect
+#: code:addons/nudge_connect/presets.py:0
+msgid "GitHub"
+msgstr "GitHub"
+
+#. module: nudge_connect
+#: code:addons/nudge_connect/presets.py:0
+msgid "Notion"
+msgstr "Notion"
+
+#. module: nudge_connect
+#: code:addons/nudge_connect/presets.py:0
+msgid "Another MCP server"
+msgstr "خادم MCP آخر"

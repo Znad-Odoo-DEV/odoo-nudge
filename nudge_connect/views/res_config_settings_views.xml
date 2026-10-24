@@ -21,6 +21,16 @@
                     <setting help="In this company a connector only reads during the month after it was first made active: its write tools are not offered before then.">
                         <field name="nudge_connect_read_only_first_month"/>
                     </setting>
+                    <setting help="A call to a connector costs no tokens but counts as one call. A person who reached the limit is told, and nothing is sent. A kept answer is not a call. 0 is no limit.">
+                        <div class="row">
+                            <label for="nudge_connect_budget_user_calls" class="col-lg-6 o_light_label"/>
+                            <field name="nudge_connect_budget_user_calls" class="col-lg-6"/>
+                        </div>
+                        <div class="row">
+                            <label for="nudge_connect_budget_company_calls" class="col-lg-6 o_light_label"/>
+                            <field name="nudge_connect_budget_company_calls" class="col-lg-6"/>
+                        </div>
+                    </setting>
                 </block>
             </xpath>
         </field>

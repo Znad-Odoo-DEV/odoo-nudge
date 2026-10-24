@@ -33,6 +33,33 @@ When a tool's description or arguments change on the server, the next **Read the
 permission back: it is offered again only once an administrator has allowed it again. A tool the
 server no longer lists is kept, marked No Longer Offered, and is not offered.
 
+## From the catalogue
+
+On a new connector, pick **From Catalogue**: another Odoo database (through its own Nudge MCP server),
+Google Calendar, Gmail, Slack, Microsoft Teams, GitHub, Notion or a generic MCP server. The address, the
+kind of credential and a note with the recommended scopes are filled in (names and keys you already typed are
+kept); on a saved connector the **Fill From Catalogue** button does the same. The table is `presets.py`.
+
+A preset is a starting point, not a promise that the remote exists or still has that address. The handshake
+reads the real tools; every one comes in Not Allowed, except a new tool the preset names as Read that the
+server does not say writes or deletes. A preset never allows a Write tool.
+
+## Budgets and the usage ledger
+
+Every call that reaches a connector's server is a line of the usage ledger with the kind **Connector Call**
+(no tokens, no cost, one call), visible in Settings, Nudge, What Was Spent. Settings, Connectors (MCP) holds the
+limits **Connector Calls per Person and per Day** and **per Company and per Month** (0 is no limit). At a limit
+or when the token or cost budget of Nudge is used up, the call is refused with the same kind of message as a
+call to a provider, nothing is sent, and the refusal is in the connector's log.
+
+## Remembering reads
+
+**Remember Reads (Seconds)** on a connector (0 is off; 60 is a good start, 3600 at most) keeps the answer of a
+Read tool for the same connector, tool, arguments, person and company, so that asking again in a conversation
+does not reach the server. A kept answer is logged as a hit, is not a call for the budget, and is framed as data
+exactly like a fresh one. Writes and failures are never kept; changing the connector or one of its tools forgets
+what was kept; an hourly action forgets what ran out. Private Mode changes nothing here.
+
 ## Settings
 
 Settings, Nudge, Connectors (MCP):

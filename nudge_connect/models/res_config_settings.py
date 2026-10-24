@@ -15,3 +15,11 @@ class ResConfigSettings(models.TransientModel):
 
     def action_nudge_connectors(self):
         return self.env["ir.actions.act_window"]._for_xml_id("nudge_connect.nudge_connector_action")
+
+    nudge_connect_budget_user_calls = fields.Integer(
+        string="Connector Calls per Person and per Day", config_parameter="nudge_connect.budget_user_calls",
+        help="The most calls one person may make to connectors in a day: a call costs no tokens but counts "
+             "as one call. A kept answer is not a call. 0 is no limit.")
+    nudge_connect_budget_company_calls = fields.Integer(
+        string="Connector Calls per Company and per Month", config_parameter="nudge_connect.budget_company_calls",
+        help="The most calls the company may make to connectors in a month. 0 is no limit.")
