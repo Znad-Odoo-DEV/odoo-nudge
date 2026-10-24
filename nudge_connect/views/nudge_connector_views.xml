@@ -26,6 +26,15 @@
                 <header>
                     <button name="action_sync_tools" type="object" string="Read the Tools" class="btn-primary"/>
                     <button name="action_test" type="object" string="Test the Connection"/>
+                    <button name="action_discover_oauth" type="object" string="Find How to Sign In"
+                            invisible="auth_type != 'oauth_user'"/>
+                    <button name="action_sign_in" type="object" string="Sign In" class="btn-secondary"
+                            invisible="auth_type != 'oauth_user' or not id"/>
+                    <button name="action_sign_out" type="object" string="Sign Out"
+                            invisible="auth_type != 'oauth_user' or not signed_in"/>
+                    <button name="action_revoke_all" type="object" string="Sign Everybody Out"
+                            invisible="auth_type != 'oauth_user'"
+                            confirm="Everybody who signed in to this connector will have to sign in again. Go on?"/>
                     <button name="action_activate" type="object" string="Activate" invisible="state == 'active'"/>
                     <button name="action_stop" type="object" string="Stop Now" invisible="state != 'active'"
                             confirm="Nothing more is sent to this connector, from now on. Stop it?"/>
@@ -73,12 +82,24 @@
                             <field name="auth_type"/>
                             <field name="bearer_token" password="True" invisible="auth_type != 'bearer'"
                                    required="auth_type == 'bearer' and not has_secret"/>
-                            <field name="oauth_token_url" invisible="auth_type != 'oauth'"
+                            <field name="oauth_authorize_url" invisible="auth_type != 'oauth_user'"
+                                   placeholder="https://auth.example.com/authorize"/>
+                            <field name="oauth_token_url" invisible="auth_type not in ('oauth', 'oauth_user')"
                                    required="auth_type == 'oauth'" placeholder="https://auth.example.com/token"/>
-                            <field name="oauth_client_id" invisible="auth_type != 'oauth'"
+                            <field name="oauth_registration_url" invisible="auth_type != 'oauth_user'"/>
+                            <field name="oauth_client_id" invisible="auth_type not in ('oauth', 'oauth_user')"
                                    required="auth_type == 'oauth'"/>
-                            <field name="oauth_client_secret" password="True" invisible="auth_type != 'oauth'"/>
-                            <field name="oauth_scope" invisible="auth_type != 'oauth'"/>
+                            <field name="oauth_client_secret" password="True"
+                                   invisible="auth_type not in ('oauth', 'oauth_user')"/>
+                            <field name="oauth_scope" invisible="auth_type not in ('oauth', 'oauth_user')"/>
+                            <field name="oauth_redirect_uri" widget="CopyClipboardChar"
+                                   invisible="auth_type != 'oauth_user'"/>
+                            <div class="text-muted" colspan="2" invisible="auth_type != 'oauth_user'">
+                                Each person signs in once, with their own account at the provider: Nudge keeps
+                                their tokens for them alone and never uses another person's. Create the client
+                                at the provider with the redirect address above, or read how the server wants
+                                it (Find How to Sign In), which also registers a client when the server allows.
+                            </div>
                             <field name="has_secret" invisible="auth_type == 'none'"/>
                             <div class="text-muted" colspan="2">
                                 The credential is sent to this server only. It never reaches the AI, and it is
@@ -121,6 +142,16 @@
                                     <field name="needs_review" optional="show"/>
                                     <field name="missing" optional="show"/>
                                     <field name="access"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Signed-In People" name="signed_in" invisible="auth_type != 'oauth_user'">
+                            <field name="signed_in" invisible="1"/>
+                            <field name="token_ids" readonly="1">
+                                <tree create="false">
+                                    <field name="user_id"/>
+                                    <field name="scope"/>
+                                    <field name="expires"/>
                                 </tree>
                             </field>
                         </page>
