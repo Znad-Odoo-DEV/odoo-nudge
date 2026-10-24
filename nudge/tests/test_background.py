@@ -95,8 +95,7 @@ class TestBackground(BackgroundCase, TransactionCase):
         self.assertEqual(run.step_ids[0].summary, "Looked up: Contact")
         self.assertEqual(run.progress, "Looked up: Contact")
         self.assertFalse(self.made(), "A run in the background never decides for the person")
-        self.assertIn("## Mode: Agent", "
-".join(base.system_texts(adapter.calls[0]["system"])))
+        self.assertIn("## Mode: Agent", "\n".join(base.system_texts(adapter.calls[0]["system"])))
         self.assertEqual(conversation.message_ids.mapped("role"), ["user", "assistant", "tool", "assistant"])
         self.assertEqual(conversation.message_ids[-1].state, "waiting")
 
