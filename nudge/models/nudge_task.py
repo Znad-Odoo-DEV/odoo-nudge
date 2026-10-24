@@ -19,6 +19,7 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models, release
 from odoo.exceptions import AccessError, UserError, ValidationError
+from markupsafe import Markup
 from odoo.tools import plaintext2html
 
 _logger = logging.getLogger(__name__)
@@ -41,6 +42,34 @@ UNITS = {
     "weeks": "weeks",
     "months": "months",
 }
+
+
+def result_html(text):
+    """:return: the result of a run as HTML: a table written with pipes becomes a table, the rest keeps its lines"""
+    out, rows = [], []
+
+    def cells(row, tag):
+        return Markup("").join(Markup("<%s>%s</%s>") % (tag, cell, tag) for cell in row)
+
+    def flush():
+        if rows:
+            body = Markup("").join(Markup("<tr>%s</tr>") % cells(row, "td") for row in rows[1:])
+            out.append(Markup('<table class="table table-sm table-bordered"><thead><tr>%s</tr></thead>'
+                              "<tbody>%s</tbody></table>") % (cells(rows[0], "th"), body))
+            rows.clear()
+
+    for line in str(text or "").splitlines():
+        stripped = line.strip()
+        if stripped.startswith("|") and stripped.count("|") >= 2:
+            row = [cell.strip() for cell in stripped.strip("|").split("|")]
+            if not all(set(cell) <= set(":- ") for cell in row):
+                rows.append(row)
+            continue
+        flush()
+        if stripped:
+            out.append(Markup("<p>%s</p>") % stripped)
+    flush()
+    return Markup("").join(out)
 
 
 class NudgeTask(models.Model):
@@ -116,11 +145,17 @@ class NudgeTask(models.Model):
     last_check = fields.Datetime(
         readonly=True, help="When records appear: records created after it are new.")
     last_result = fields.Text(readonly=True)
+    last_result_html = fields.Html(string="Last Result", compute="_compute_last_result_html", sanitize=False)
     run_count = fields.Integer(string="Runs", readonly=True)
     skip_count = fields.Integer(
         string="Nothing to Do", readonly=True,
         help="Times the conditions matched nothing: the AI was not asked, nothing was spent.")
     conversation_id = fields.Many2one("nudge.conversation", readonly=True, ondelete="set null")
+
+    @api.depends("last_result")
+    def _compute_last_result_html(self):
+        for task in self:
+            task.last_result_html = result_html(task.last_result)
 
     @api.depends("conditions", "match")
     def _compute_conditions_text(self):

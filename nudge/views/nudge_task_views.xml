@@ -94,7 +94,8 @@
                         <field name="last_run"/>
                         <field name="run_count"/>
                         <field name="skip_count"/>
-                        <field name="last_result"/>
+                        <field name="last_result" invisible="1"/>
+                        <field name="last_result_html" readonly="1"/>
                         <field name="user_id" groups="nudge.group_nudge_manager"/>
                         <field name="conversation_id" invisible="1"/>
                     </group>
