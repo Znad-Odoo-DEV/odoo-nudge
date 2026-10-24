@@ -619,7 +619,9 @@ class NudgeProvider(models.Model):
         try:
             provider._check_private()
             if check_budget:
-                self.with_user(user.id).env["nudge.usage"]._check_budget()
+                # The budget of the company the call is for and counted to (the mail of company 2, sorted by
+                # OdooBot), not the one the caller is in; sudo: OdooBot need not be a member of it
+                self.env["nudge.usage"].with_user(user.id).sudo().with_company(company)._check_budget()
         except UserError:
             return ""
         economy = None if heavy else provider._get_economy()

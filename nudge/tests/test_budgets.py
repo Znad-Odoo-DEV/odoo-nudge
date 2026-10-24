@@ -138,6 +138,18 @@ class TestUsage(BackgroundCase, TransactionCase):
         conversation, _event = self.ask(self.user_a, "Elsewhere")
         self.assertEqual(conversation.company_id, other)
 
+    def test_a_call_for_another_company_counts_against_that_company(self):
+        """Review (ai #16): the mail of company 2, sorted by the cron as OdooBot, was checked against company 1."""
+        adapter = self.use_adapter(reply='{"kind": "lead", "confidence": 0.9}')
+        other = self.env["res.company"].create({"name": "Raghad Mail Co"})
+        robot = self.env.ref("base.user_root")
+        self.Usage._add("chat", {"input_tokens": 5000, "output_tokens": 0}, 0.0, robot, other)
+        self.set_budgets(company_tokens=3000)
+        Provider = self.env["nudge.provider"].sudo()
+        self.assertEqual(Provider._complete("Sort.", "A mail.", robot, other), "", "Company 2 used its tokens")
+        self.assertEqual(adapter.calls, [])
+        self.assertTrue(Provider._complete("Sort.", "A mail.", robot, self.env.company), "Company 1 did not")
+
     def spend(self, user, tokens=1000):
         """What the person spent already, whatever the adapter says"""
         return self.Usage._add(
