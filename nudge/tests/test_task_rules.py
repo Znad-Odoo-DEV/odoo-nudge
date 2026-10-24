@@ -130,6 +130,9 @@ class TestTaskRules(BackgroundCase, TransactionCase):
         # A search on anything but names and types is refused as before: no path to the code of a field
         with self.assertRaises(AccessError):
             Model.name_search("", [("field_id.compute", "!=", False)])
+        with self.assertRaises(AccessError):
+            self.env["ir.model.fields"].with_user(self.agent).name_search(
+                "", [("model_id", "any", [("field_id.compute", "!=", False)])])
         Fields = self.env["ir.model.fields"].with_user(self.agent)
         color = self.env["ir.model.fields"]._get("res.partner", "color")
         numbers = dict(Fields.name_search("", [("model_id", "=", partner.id), ("ttype", "in", ["integer", "float"])]))
