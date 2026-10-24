@@ -189,6 +189,23 @@ class TestAssistant(WebsiteCase, TransactionCase):
         self.assertTrue(self.ask("shipping to Dubai")["used_ai"])
         self.assertTrue(self.ask("shipping to Dubai")["used_ai"], "and the place is free again")
 
+    def test_a_place_is_let_go_when_the_transaction_fails(self):
+        # Review odoo-tech #7: a session lock could not be unlocked in a failed transaction, and the
+        # place stayed taken for the life of the pooled connection
+        dbname = self.env.cr.dbname
+        with db_connect(dbname).cursor() as cr:
+            env = api.Environment(cr, SUPERUSER_ID, {})
+            with self.assertRaises(psycopg2.errors.DivisionByZero), mute_logger("odoo.sql_db"):
+                with assistant.ai_slot(env):
+                    cr.execute("SELECT 1 / 0")
+            cr.rollback()
+            with db_connect(dbname).cursor() as other:
+                other.execute("SELECT pg_try_advisory_lock(hashtext(%s), 0)", (assistant.LOCK_KEY,))
+                free = other.fetchone()[0]
+                other.execute("SELECT pg_advisory_unlock_all()")
+            cr.execute("SELECT pg_advisory_unlock_all()")
+        self.assertTrue(free, "The place of the failed request is free")
+
     # ------------------------------------------------------------------
     # The visitor log: who is who, and how long it stays
     # ------------------------------------------------------------------
