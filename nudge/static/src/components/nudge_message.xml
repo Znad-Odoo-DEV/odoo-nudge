@@ -23,7 +23,11 @@
                 <div t-if="props.spoken" class="o_nudge_seen o_nudge_said">
                     <i class="fa fa-microphone"/> <span>Said</span>
                 </div>
-                <div t-if="props.screen" class="o_nudge_seen" t-att-title="props.screen">
+                <!-- An answer: who gave it, when the model standing in did (NP-10) -->
+                <div t-if="props.screen and isAssistant" class="o_nudge_seen o_nudge_fallback" t-att-title="props.screen">
+                    <i class="fa fa-server" aria-hidden="true"/> <span t-esc="props.screen"/>
+                </div>
+                <div t-elif="props.screen" class="o_nudge_seen" t-att-title="props.screen">
                     <i class="fa fa-eye"/> <span t-esc="props.screen"/>
                 </div>
                 <div t-if="props.guidance and props.guidance.length" class="o_nudge_steps">
@@ -82,6 +86,22 @@
                     <t t-set="found" t-value="props.found"/>
                 </t>
                 <t t-if="props.card" t-call="nudge.Card"/>
+                <!-- NP-04: every place is taken: the question waits for its turn, without holding the server -->
+                <div t-if="props.state === 'in_line'" class="o_nudge_background o_nudge_line" role="status" aria-live="polite">
+                    <div class="o_nudge_background_head">
+                        <i class="fa fa-hourglass-half" aria-hidden="true"/>
+                        <span>Nudge is answering other people. Your question waits for its turn.</span>
+                    </div>
+                    <div t-if="props.progress" class="o_nudge_background_progress o_nudge_line_place" dir="auto" t-esc="props.progress"/>
+                    <button type="button" class="btn btn-sm btn-link o_nudge_line_cancel" t-on-click="cancelLine">
+                        <i class="fa fa-times" aria-hidden="true"/> Cancel
+                    </button>
+                </div>
+                <div t-if="props.state === 'line_expired'" class="o_nudge_line">
+                    <button type="button" class="btn btn-sm btn-link o_nudge_line_retry" t-on-click="retryLine">
+                        <i class="fa fa-repeat" aria-hidden="true"/> Try again
+                    </button>
+                </div>
                 <div t-if="isInBackground" class="o_nudge_background" role="status">
                     <div class="o_nudge_background_head">
                         <i class="fa fa-circle-o-notch fa-spin"/>

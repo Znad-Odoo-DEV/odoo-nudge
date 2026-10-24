@@ -49,3 +49,4 @@ from . import nudge_compliance_feed
 from . import nudge_prompt
 from . import nudge_built
 from . import nudge_latency
+from . import nudge_slot

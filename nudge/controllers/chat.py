@@ -9,6 +9,7 @@ from odoo.http import Response, request
 from odoo.modules.registry import Registry
 
 from ..llm import attachments, loop
+from ..models.nudge_slot import NudgeInLine
 
 _logger = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ class NudgeChat(http.Controller):
     @http.route("/nudge/chat/stream", type="http", auth="user", methods=["POST"])
     def chat_stream(self, message=None, conversation_id=None, snapshot=None, spoken=None,
                     read_aloud=None, mode=None, background=None, explain=None, file=None,
-                    report=None, fresh=None, **kwargs):
+                    report=None, fresh=None, slot=None, **kwargs):
         """Answer one message as a stream of JSON lines.
 
         :param snapshot: JSON description of the screen, when the user shares it
@@ -48,10 +49,13 @@ class NudgeChat(http.Controller):
             on the server and given to the model as data
         :param report: "sheet" or "chat", how the user wants a comparison
             or a report; anything else leaves it to the model
+        :param slot: the place in line the question waited in, when its turn came
 
         Events: ``start``, then ``delta`` and what tools do on the screen
         (``guidance``, ``navigate``, ``write``, ``open``, ``confirm``) in any
-        number, then ``done``, ``waiting``, ``queued`` or ``error``.
+        number, then ``done``, ``waiting``, ``queued`` or ``error``. Or one
+        ``in_line`` alone: every place is taken, the question waits for its
+        turn (``slot_id``, ``position``, ``seconds``) and is asked again then.
         """
         env = request.env
         if not env.user.has_group("nudge.group_nudge_user"):
@@ -63,7 +67,13 @@ class NudgeChat(http.Controller):
                 mode=mode if mode in ("agent", "dev") else "talk", background=background == "1",
                 explain=explain if explain in ("screen", "text") else None,
                 attachment=self._read_upload(file),
-                report=report if report in ("sheet", "chat") else None, fresh=fresh == "1")
+                report=report if report in ("sheet", "chat") else None, fresh=fresh == "1",
+                slot_id=self._to_id(slot))
+        except NudgeInLine as waiting:
+            # Nothing of the question is kept but its place in line: no worker waits with it
+            env.cr.rollback()
+            line = env["nudge.slot"]._wait(waiting.line)
+            return Response(_line(dict(line, type="in_line", message=str(waiting))), headers=STREAM_HEADERS)
         except (UserError, AccessError) as exc:
             return self._reject(exc)
         return self._respond(job)
@@ -173,11 +183,39 @@ class NudgeChat(http.Controller):
         # sent, and ``request`` is unbound: the stream opens its own cursor.
         env = request.env
         job.update(dbname=env.cr.dbname, uid=env.uid, context=dict(env.context))
+        if job.get("serial"):
+            # PERF-02: the stop of the person, read between the words of the provider
+            job["cancelled"] = lambda: self._stopped(job)
         return Response(self._stream(job), headers=STREAM_HEADERS, direct_passthrough=True)
 
     def _stream(self, job):
-        for event in loop.run(job, lambda outcome: self._record(job, outcome)):
-            yield _line(event)
+        try:
+            for event in loop.run(job, lambda outcome: self._record(job, outcome)):
+                yield _line(event)
+        finally:
+            if job.get("slot_id"):
+                self._finish(job)
+
+    @staticmethod
+    def _stopped(job):
+        """:return: whether the person stopped the answer, on a cursor of its own"""
+        try:
+            with Registry(job["dbname"]).cursor() as cr:
+                env = api.Environment(cr, job["uid"], job["context"])
+                return env["nudge.conversation"].browse(job["conversation_id"])._chat_stopped(job["serial"])
+        except Exception:  # noqa: BLE001
+            _logger.warning("Nudge: could not read whether the answer was stopped", exc_info=True)
+            return False
+
+    @staticmethod
+    def _finish(job):
+        """The answer is over however it ended: its place goes to the next in line"""
+        try:
+            with Registry(job["dbname"]).cursor() as cr:
+                env = api.Environment(cr, job["uid"], job["context"])
+                env["nudge.slot"]._finish(job["slot_id"])
+        except Exception:  # noqa: BLE001
+            _logger.exception("Nudge: the place of conversation %s could not be freed", job["conversation_id"])
 
     def _record(self, job, outcome):
         """Store one answer of the model and run its tools, in a transaction

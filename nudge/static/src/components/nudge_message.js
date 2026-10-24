@@ -19,7 +19,8 @@ export class NudgeMessage extends Component {
         content: String,
         state: String,
         error: { type: String, optional: true },
-        // What Nudge was shown with this message, in a few words
+        // What Nudge was shown with this message, in a few words; for an answer, the model
+        // standing in that gave it (NP-10)
         screen: { type: String, optional: true },
         // Steps the answer points at on the screen
         guidance: { type: Array, optional: true },
@@ -112,6 +113,16 @@ export class NudgeMessage extends Component {
 
     get isInBackground() {
         return this.props.state === "queued";
+    }
+
+    /** NP-04: the person no longer waits for their turn */
+    cancelLine() {
+        this.env.services.nudge?.cancelLine();
+    }
+
+    /** NP-04: the question waited too long: asked again, as it was */
+    retryLine() {
+        this.env.services.nudge?.retryLine();
     }
 
     get html() {

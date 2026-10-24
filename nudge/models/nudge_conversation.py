@@ -2,7 +2,6 @@ import base64
 import json
 import logging
 import time
-from datetime import timedelta
 
 from odoo import _, api, fields, models
 from psycopg2 import errors as pg_errors
@@ -47,6 +46,13 @@ STREAM_SAFETY_MARGIN = 30
 MAX_STREAMS_PARAM = "nudge.max_streams"
 # A server without workers (threaded) serves many requests at once: a cap all the same
 THREADED_MAX_STREAMS = 8
+# NP-10: what the model standing in is asked for: the provider could not answer at all. Not a
+# request it refused, nor one too large for it: the one standing in would do the same
+FALLBACK_ERRORS = frozenset({
+    base.ERROR_AUTH, base.ERROR_WORKSPACE, base.ERROR_MODEL_NOT_FOUND, base.ERROR_RATE_LIMIT,
+    base.ERROR_UNAVAILABLE, base.ERROR_NETWORK, base.ERROR_TIMEOUT, base.ERROR_MISSING_LIBRARY,
+    base.ERROR_UNKNOWN,
+})
 
 USER_WRITABLE_FIELDS = frozenset({"name", "active"})
 
@@ -142,6 +148,10 @@ class NudgeConversation(models.Model):
     output_tokens = fields.Integer(compute="_compute_totals", store=True)
     cost = fields.Float(compute="_compute_totals", store=True, digits=(12, 6))
     stream_started_at = fields.Datetime(string="Answering Since", copy=False, index="btree_not_null")
+    # PERF-02: every answer streamed is numbered; Stop writes the number it stopped, which the
+    # stream reads between the words of the provider and before the tools it calls
+    stream_serial = fields.Integer(copy=False)
+    stream_stopped = fields.Integer(copy=False)
     # What the model read of a document the person sent, kept with the conversation (not in the
     # memory of one worker) so that the answer to its question finds it: {key: [when, data]}
     document_kept = fields.Json(copy=False, groups="base.group_system")
@@ -245,29 +255,39 @@ class NudgeConversation(models.Model):
             raise AccessError(_("This conversation is not yours."))
         return conversation
 
-    def _chat_check_not_busy(self):
-        Provider = self.env["nudge.provider"].sudo()
-        longest = max(self._get_stream_seconds(provider)
-                      for provider in (Provider._get_default(), Provider._get_for_mode("dev")))
-        limit = fields.Datetime.now() - timedelta(seconds=longest)
-        Conversation = self.sudo().with_context(active_test=False)
-        busy = Conversation.search_count([
-            ("user_id", "=", self.env.uid),
-            ("stream_started_at", ">=", limit),
-        ], limit=1)
-        if busy:
+    def _chat_check_not_busy(self, cap=True):
+        """:param cap: refuse past the cap of the answers at the same time; a question of the chat
+            claims its place later, atomically, and waits in line rather than being refused
+            (``nudge.slot``)"""
+        Slot = self.env["nudge.slot"].sudo()
+        if Slot._is_answering(self.env.user):
             raise UserError(_("Nudge is still answering your previous message."))
         # Everybody's answers: each holds one http worker while it streams, and
-        # a few at once leave none for the screens of everyone else. Counted
-        # here, before the provider is called, in the transaction of the
-        # question; two questions that arrive in the same instant may both
-        # pass, and one answer too many is accepted rather than locking the
-        # table. Work in the background holds no http worker and carries no
-        # mark; the mark of a worker that died mid-answer expires with the window
-        streaming = Conversation.search_count([("stream_started_at", ">=", limit)])
-        if streaming >= self._get_max_streams():
+        # a few at once leave none for the screens of everyone else. Work in the
+        # background holds no http worker and carries no mark; the mark of a
+        # worker that died mid-answer expires with the window
+        if cap and Slot._taken() >= self._get_max_streams():
             raise UserError(_(
                 "Nudge is answering other people right now. Try again in a moment."))
+
+    def action_stop_answer(self):
+        """PERF-02: the person stops the answer being written. The worker is let go and the place
+        freed at once: the stream reads the stop within a second, even from a provider that says
+        nothing, keeps what was written and is recorded as stopped. Their own conversations only."""
+        for conversation in self:
+            if conversation.user_id != self.env.user:
+                raise AccessError(_("This conversation is not yours."))
+        self.env["nudge.slot"]._stop(self.ids)
+        return True
+
+    def _chat_stopped(self, serial):
+        """:return: whether the answer numbered ``serial`` was stopped, read from the database:
+        the stop comes through another worker"""
+        self.ensure_one()
+        self.flush_recordset(["stream_stopped"])
+        self.env.cr.execute("SELECT stream_stopped FROM nudge_conversation WHERE id = %s", [self.id])
+        row = self.env.cr.fetchone()
+        return bool(row and serial and (row[0] or 0) >= serial)
 
     def _chat_context_values(self, spoken=False, read_aloud=False, model_name=None,
                              explain=None, attachment=None, report=None, answer_in=None):
@@ -387,8 +407,13 @@ class NudgeConversation(models.Model):
         provider = Provider._get_for_mode(mode or MODE_TALK)
         if not provider:
             provider = self.sudo().provider_id
-            if provider and provider in (Provider._get_for_mode(MODE_AGENT) | Provider._get_for_mode(MODE_DEV)):
-                # Answered by the provider of the work last time: Talk goes back to the default
+            if provider and provider in (Provider._get_for_mode(MODE_AGENT) | Provider._get_for_mode(MODE_DEV)
+                                         | Provider._get_fallback()):
+                # Answered by the provider of the work last time, or by the one standing in (NP-10):
+                # Talk goes back to the default
+                provider = provider.browse()
+            elif provider and Provider._is_private_mode() and not provider.runs_locally:
+                # Started before private mode: what follows goes to a provider of our own server
                 provider = provider.browse()
         if not provider.is_configured or not provider.active:
             provider = self.env["nudge.provider"].sudo()._get_default()
@@ -397,6 +422,37 @@ class NudgeConversation(models.Model):
                 "Nudge is not set up yet. Ask your administrator to configure an AI provider."))
         provider._ensure_capabilities()
         return provider
+
+    def _chat_choose(self, mode=None):
+        """NP-10: the provider answering, and whether it stands in for the one the administrator
+        named. The model chosen to stand in answers when the named one cannot (no key, archived,
+        private mode), and when the person's budget is used up if it runs on our own server: it
+        costs nothing. Nothing goes to a provider the administrator did not choose.
+
+        :return: (provider in sudo, the event telling the person, or None)
+        :raise UserError: when none can answer, or the budget is used up and none of our own stands in"""
+        Provider = self.env["nudge.provider"].sudo()
+        try:
+            self.env["nudge.usage"]._check_budget()
+        except UserError:
+            fallback = Provider._get_fallback()
+            if not fallback.runs_locally:
+                raise
+            fallback._ensure_capabilities()
+            return fallback, self._chat_fallback_notice(fallback, "budget")
+        provider = self._chat_provider(mode)
+        named = Provider._get_named(mode or MODE_TALK)
+        if named and provider != named and provider == Provider._get_fallback():
+            private = Provider._is_private_mode() and not named.runs_locally
+            return provider, self._chat_fallback_notice(provider, "private" if private else "not_ready")
+        return provider, None
+
+    @api.model
+    def _chat_fallback_notice(self, provider, reason):
+        """:param reason: why it stands in: "error", "not_ready", "private" or "budget"
+        :return: the event telling the person who answers, kept with the answer"""
+        return {"type": "fallback", "provider": provider.name or "", "model": provider.model_name or "",
+                "local": bool(provider.runs_locally), "reason": reason}
 
     def _chat_check_not_at_work(self):
         """What is worked on in the background is made of questions and
@@ -411,8 +467,9 @@ class NudgeConversation(models.Model):
         """:return: what a piece of work in the background needs
         :raise UserError: when the person may not spend more"""
         self.ensure_one()
-        self.env["nudge.usage"]._check_budget()
-        job = self._chat_job(self._chat_provider(self._chat_mode()), self._chat_mode(), AGENT_MAX_ROUNDS)
+        provider, notice = self._chat_choose(self._chat_mode())
+        job = self._chat_job(provider, self._chat_mode(), AGENT_MAX_ROUNDS)
+        job["fell_back"] = notice
         job["seconds"] = self.env["nudge.run"]._get_piece_seconds()
         if self.sudo().run_id.step_ids:
             # A piece that follows what was already done, or said yes to: what
@@ -497,7 +554,29 @@ class NudgeConversation(models.Model):
 
     def _chat_prepare(self, text, snapshot=None, spoken=False, read_aloud=False, mode=MODE_TALK,
                       background=False, explain=None, attachment=None, report=None, focus=None,
-                      extra=None, fresh=False, answer_in=None, inner=False):
+                      extra=None, fresh=False, answer_in=None, inner=False, slot_id=None):
+        """See :meth:`_chat_prepare_question`. A question refused after it claimed its place
+        gives the place back at once (the rollback of the request does it too)."""
+        claimed = []
+        # When the question reached the server: the first words of the answer are timed from it
+        received = time.monotonic()
+        try:
+            job = self._chat_prepare_question(
+                text, snapshot=snapshot, spoken=spoken, read_aloud=read_aloud, mode=mode,
+                background=background, explain=explain, attachment=attachment, report=report,
+                focus=focus, extra=extra, fresh=fresh, answer_in=answer_in, inner=inner,
+                slot_id=slot_id, claimed=claimed)
+        except Exception:
+            if claimed:
+                self.env["nudge.slot"]._release(claimed[0])
+            raise
+        job.setdefault("received", received)
+        return job
+
+    def _chat_prepare_question(self, text, snapshot=None, spoken=False, read_aloud=False, mode=MODE_TALK,
+                               background=False, explain=None, attachment=None, report=None, focus=None,
+                               extra=None, fresh=False, answer_in=None, inner=False, slot_id=None,
+                               claimed=None):
         """Validate the message, store it and gather everything the stream
         needs.
 
@@ -514,8 +593,11 @@ class NudgeConversation(models.Model):
         :param report: "sheet" or "chat": how the person wants a comparison
             or a report this time; None leaves it to the model
         :param answer_in: the language the answer is written in, when it is not that of ``text``
+        :param slot_id: the place in line the question waited in, when it comes for its turn (NP-04)
+        :param list claimed: where the place claimed is told, to be given back if the question fails
         :return: dict describing the job; with ``queued`` when the work is
             left to the background and there is nothing to stream
+        :raise NudgeInLine: when every place is taken: the question waits for its turn
         """
         self.ensure_one()
         text = (text or "").strip()
@@ -560,8 +642,9 @@ class NudgeConversation(models.Model):
         if not inner:
             # ``inner``: a one-off call made by a tool inside the person's own answer (the summary
             # of a record), not a second question of theirs, and no stream of its own for the http
-            # workers. An argument, not a key of the context, which a request could carry
-            self._chat_check_not_busy()
+            # workers. An argument, not a key of the context, which a request could carry.
+            # Past the cap the question is not refused: it claims its place below, or waits
+            self._chat_check_not_busy(cap=False)
         self._chat_check_not_at_work()
         limit = AGENT_MAX_MESSAGES if self.sudo().run_ids else MAX_MESSAGES
         if self.message_count >= limit:
@@ -571,8 +654,14 @@ class NudgeConversation(models.Model):
             self, text, mode, focus, found, explain, background, snapshot, fresh=fresh)
         if understood:
             return understood
-        self.env["nudge.usage"]._check_budget()
-        provider = self._chat_provider(mode)
+        provider, notice = self._chat_choose(mode)
+        slot = self.env["nudge.slot"]
+        if not inner and not background:
+            # One answer holds one http worker: a place among those streaming, claimed at once for
+            # every worker to see, or a place in line (NP-04, PERF-04)
+            slot = slot._claim(self, provider, slot_id=slot_id)
+            if claimed is not None:
+                claimed.append(slot.id)
         if found and found["image"] and not provider._can_see_pictures():
             # A model of the server that sees reads it; without one, said
             # before anything is sent: the model would refuse the picture
@@ -601,12 +690,15 @@ class NudgeConversation(models.Model):
         values = {
             "stream_started_at": False if background else fields.Datetime.now(),
             "run_id": False,
+            "stream_serial": conversation.stream_serial + 1,
         }
         if conversation.provider_id != provider or conversation.model_name != provider.model_name:
             values.update(provider_id=provider.id, model_name=provider.model_name)
         if not conversation.name:
             values["name"] = text[:TITLE_CHARS].strip()
         conversation.write(values)
+        # Committed with the mark: the place stops counting as the mark starts to
+        slot._handover()
         screen_values, screen_text = self._chat_screen(snapshot)
         voice = self.env["nudge.voice"]._is_allowed()
         spoken = bool(spoken) and voice
@@ -737,6 +829,13 @@ class NudgeConversation(models.Model):
             # tool, not for a list
             tool_choice="required" if focus == "count" or explain == "screen" or is_product_command(text) or (
                 report == "sheet" and self._can_make_spreadsheet()) else None,
+            # The number of this answer, which Stop names, and its place among those streaming
+            serial=conversation.stream_serial,
+            slot_id=slot.id or None,
+            # The model chosen to stand in answers: the person is told (NP-10)
+            fell_back=notice,
+            # How long it waited in line, kept with its answer for the latency panel
+            queue_wait_ms=slot._waited_ms(),
         )
 
     def _chat_overview(self):
@@ -1114,6 +1213,40 @@ class NudgeConversation(models.Model):
             "a model with tools on the provider.")
         return messages.get(code, _("Something went wrong while answering."))
 
+    def _chat_fall_back(self, outcome):
+        """NP-10: the provider failed before it wrote or did anything: the model the administrator
+        chose to stand in is asked instead, once. It reads what the provider would have read, no
+        more; private mode keeps it to our own server (``nudge.provider._get_fallback``).
+
+        :return: what the stream needs to ask it, or None"""
+        error = outcome.get("error")
+        if (not error or error.get("code") not in FALLBACK_ERRORS or not outcome.get("may_fall_back")
+                or outcome.get("text") or outcome.get("tool_calls") or outcome.get("aborted")):
+            return None
+        conversation = self.sudo()
+        failed = conversation.provider_id
+        fallback = self.env["nudge.provider"].sudo()._get_fallback()
+        if not fallback or fallback == failed:
+            return None
+        # The call that failed is written down all the same
+        self.env["nudge.usage"]._add(
+            "chat", base.normalize_usage(None), 0.0, conversation.user_id, conversation.company_id,
+            conversation_id=self.id, provider_id=failed.id, model_name=failed.model_name)
+        _logger.info("Nudge: %s failed (%s) in conversation %s, the fallback %s answers",
+                     failed.name, error.get("code"), self.id, fallback.name)
+        conversation.write({"provider_id": fallback.id, "model_name": fallback.model_name})
+        if conversation.run_id:
+            conversation.run_id.model_name = fallback.model_name
+        fallback._ensure_capabilities()
+        job = self._chat_job(fallback, self._chat_mode(), 1)
+        return {
+            "adapter": job["adapter"],
+            "system": job["system"],
+            "tools": job["tools"],
+            "turns": job["turns"],
+            "notice": self._chat_fallback_notice(fallback, "error"),
+        }
+
     def _chat_record(self, outcome):
         """Store what the model answered, run the tools it called, and tell
         what comes next.
@@ -1127,6 +1260,14 @@ class NudgeConversation(models.Model):
         """
         self.ensure_one()
         conversation = self.sudo()
+        if outcome.get("aborted") and outcome.get("serial") and conversation.stream_serial != outcome["serial"]:
+            # PERF-02: stopped, and the person asked again since: the new answer is theirs (its
+            # mark, its run); what the stopped one had written is left
+            return {"screen_events": [], "event": {
+                "type": "done", "message_id": False, "state": "aborted", "message": ""}}
+        switch = self._chat_fall_back(outcome)
+        if switch:
+            return {"fallback": switch}
         provider = conversation.provider_id
         run = conversation.run_id
         stop = outcome.get("stop") or {}
@@ -1215,7 +1356,8 @@ class NudgeConversation(models.Model):
             "tool_calls": [
                 {key: call[key] for key in ("id", "name", "input", "extra")} for call in calls
             ] or False,
-            "screen_events": screen_events or False,
+            # Answered by the model standing in: said again when the conversation is read (NP-10)
+            "screen_events": ([outcome["fell_back"]] if outcome.get("fell_back") else []) + screen_events or False,
             "pending_results": results if waiting else False,
             "state": state,
             "error_code": error["code"] if error else False,
@@ -1226,6 +1368,8 @@ class NudgeConversation(models.Model):
             "model_name": stop.get("model") or conversation.model_name,
             "request_id": stop.get("request_id"),
             "duration_ms": outcome.get("duration_ms") or 0,
+            "queue_wait_ms": outcome.get("queue_wait_ms") or 0,
+            "first_line_ms": outcome.get("first_line_ms") or 0,
             "cost": provider._compute_cost(usage) if provider else 0.0,
             **usage,
         })
@@ -1403,11 +1547,10 @@ class NudgeConversation(models.Model):
         self._chat_check_not_busy()
         # What was understood without AI needs no model after the yes
         noai = bool(step.message_id.noai_intent)
-        provider = None
+        provider = notice = None
         if not noai:
             # What follows the yes is a call to the model
-            self.env["nudge.usage"]._check_budget()
-            provider = self._chat_provider(self._chat_mode())
+            provider, notice = self._chat_choose(self._chat_mode())
 
         events = []
         tool = tools.base.TOOLS.get(step.tool)
@@ -1486,11 +1629,13 @@ class NudgeConversation(models.Model):
                 "first_events": first_events,
             }
         run.state = "running"
-        conversation.write({"stream_started_at": fields.Datetime.now(), "run_id": run.id})
+        conversation.write({"stream_started_at": fields.Datetime.now(), "run_id": run.id,
+                            "stream_serial": conversation.stream_serial + 1})
 
         # What bounds a run is the number of things done for it
         job = self._chat_job(provider, self._chat_mode(), AGENT_MAX_ROUNDS)
         job["first_events"] = first_events
+        job.update(serial=conversation.stream_serial, fell_back=notice)
         # The person said yes or no: what the model says of it is not talk
         # instead of work, and is never pushed into the same card again; unless
         # what was said yes to leaves work to do: told "Call prepare_button now",

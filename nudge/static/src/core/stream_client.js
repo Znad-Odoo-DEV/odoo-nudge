@@ -60,6 +60,8 @@ export async function streamRequest(url, fields, { signal, onEvent }) {
  * @param {string} [params.mode] "agent" when Nudge is asked to do the work, "dev" to build
  * @param {boolean} [params.background] the work is done while the person
  *   does something else
+ * @param {number|null} [params.slot] the place in line the question waited
+ *   in, when its turn came
  * @param {AbortSignal} [params.signal]
  * @param {(event: Object) => void} params.onEvent
  */
@@ -75,6 +77,7 @@ export function streamChat({
     file,
     report,
     fresh,
+    slot,
     signal,
     onEvent,
 }) {
@@ -93,6 +96,7 @@ export function streamChat({
             report: report || null,
             // Ask the provider, not the memory of answers
             fresh: Boolean(fresh),
+            slot: slot || null,
         },
         { signal, onEvent }
     );
