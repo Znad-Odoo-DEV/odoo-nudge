@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Connected assistants: what each person allowed, with Revoke -->
+    <record id="nudge_mcp_grant_view_list" model="ir.ui.view">
+        <field name="name">nudge.mcp.grant.view.list</field>
+        <field name="model">nudge.mcp.grant</field>
+        <field name="arch" type="xml">
+            <list string="Connected Assistants" create="0" delete="0" edit="0">
+                <field name="client_id"/>
+                <field name="user_id" optional="show"/>
+                <field name="registration" optional="hide"/>
+                <field name="redirect_host"/>
+                <field name="scope_names"/>
+                <field name="last_used"/>
+                <field name="signed_in_until" optional="show"/>
+                <field name="active" column_invisible="True"/>
+                <button name="action_revoke" type="object" string="Revoke" icon="fa-ban" class="btn-link"
+                        invisible="not active" confirm="The assistant will have to ask you again. Revoke it?"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_mcp_grant_view_search" model="ir.ui.view">
+        <field name="name">nudge.mcp.grant.view.search</field>
+        <field name="model">nudge.mcp.grant</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="client_id"/>
+                <field name="user_id"/>
+                <filter name="revoked" string="Revoked" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_client" string="Assistant" context="{'group_by': 'client_id'}"/>
+                    <filter name="group_user" string="Person" context="{'group_by': 'user_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_mcp_grant_action" model="ir.actions.act_window">
+        <field name="name">Connected Assistants</field>
+        <field name="res_model">nudge.mcp.grant</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No assistant is connected</p>
+            <p>An assistant appears here once a person signs it in and allows it. Revoke one and it has to ask again.</p>
+        </field>
+    </record>
+
+    <!-- The assistants registered for sign-in -->
+    <record id="nudge_mcp_client_view_list" model="ir.ui.view">
+        <field name="name">nudge.mcp.client.view.list</field>
+        <field name="model">nudge.mcp.client</field>
+        <field name="arch" type="xml">
+            <list string="Registered Assistants">
+                <field name="name"/>
+                <field name="registration"/>
+                <field name="redirect_hosts"/>
+                <field name="grant_count"/>
+                <field name="create_date" string="Registered On"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_mcp_client_view_form" model="ir.ui.view">
+        <field name="name">nudge.mcp.client.view.form</field>
+        <field name="model">nudge.mcp.client</field>
+        <field name="arch" type="xml">
+            <form string="Registered Assistant">
+                <sheet>
+                    <field name="active" invisible="1"/>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <group>
+                        <field name="name"/>
+                        <field name="client_id" readonly="1" invisible="not id" widget="CopyClipboardChar"/>
+                        <field name="registration" readonly="1"/>
+                        <field name="auth_method" readonly="1"/>
+                        <field name="redirect_uris" placeholder="https://claude.ai/api/mcp/auth_callback"/>
+                        <field name="client_uri" readonly="1" invisible="not client_uri"/>
+                        <field name="grant_count"/>
+                    </group>
+                    <div class="text-muted">
+                        Give the Client ID to the assistant that asks for one. It opens nothing alone: each person
+                        signs in and allows the assistant. Archive it and nobody can sign it in any more.
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_mcp_client_action" model="ir.actions.act_window">
+        <field name="name">Registered Assistants</field>
+        <field name="res_model">nudge.mcp.client</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No assistant is registered</p>
+            <p>Claude and most assistants register themselves the first time someone connects them. Register one here
+                for an assistant that asks for a Client ID.</p>
+        </field>
+    </record>
+
+    <!-- The changes an assistant may confirm alone: empty, every change waits for the person -->
+    <record id="nudge_mcp_self_confirm_view_list" model="ir.ui.view">
+        <field name="name">nudge.mcp.self.confirm.view.list</field>
+        <field name="model">nudge.mcp.self.confirm</field>
+        <field name="arch" type="xml">
+            <list string="Changes Assistants May Confirm Alone" editable="bottom">
+                <field name="tool"/>
+                <field name="model_id" options="{'no_create': True}"/>
+                <field name="method" readonly="tool != 'call_method'" required="tool == 'call_method'"/>
+                <field name="client_id" options="{'no_create': True}" placeholder="Any assistant signed in"/>
+                <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
+                <field name="note"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_mcp_self_confirm_action" model="ir.actions.act_window">
+        <field name="name">Changes Assistants May Confirm Alone</field>
+        <field name="res_model">nudge.mcp.self.confirm</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'active_test': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Every change waits for the person</p>
+            <p>Add a line only for a change that is easy to take back: the assistant signed in with OAuth may then
+                confirm it without the person's yes in Odoo. Posting, paying, confirming, accounting, stock,
+                users and rights always wait for the person, and keys of before never confirm alone.</p>
+        </field>
+    </record>
+
+    <!-- The person's own connected assistants, in their preferences -->
+    <record id="res_users_view_form_preferences_mcp" model="ir.ui.view">
+        <field name="name">res.users.preferences.form.nudge.mcp</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Connected Assistants" name="nudge_mcp_assistants" groups="nudge_mcp.group_nudge_mcp">
+                    <p class="text-muted">
+                        The assistants you signed in to Nudge (Claude, ChatGPT and others). Each one works as you,
+                        with your rights. Revoke one and it has to ask you again. Keys made before sign-in existed
+                        (legacy) are listed in Account Security, as API keys.
+                    </p>
+                    <field name="nudge_mcp_grant_ids" readonly="1" nolabel="1">
+                        <list create="0" delete="0" edit="0">
+                            <field name="client_id"/>
+                            <field name="redirect_host"/>
+                            <field name="scope_names"/>
+                            <field name="last_used"/>
+                            <field name="signed_in_until"/>
+                            <field name="active" column_invisible="True"/>
+                            <button name="action_revoke" type="object" string="Revoke" icon="fa-ban" class="btn-link"
+                                    invisible="not active"
+                                    confirm="The assistant will have to ask you again. Revoke it?"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
