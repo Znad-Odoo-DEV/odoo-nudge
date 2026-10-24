@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- The styles of the pages below: Bootstrap of the frontend, no script -->
+    <template id="oauth_head" name="Nudge: Assistant Sign-in Head">
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <t t-call-assets="web.assets_frontend" t-js="false"/>
+    </template>
+
+    <!-- The page an assistant sends the person to, to sign it in -->
+    <template id="oauth_consent" name="Nudge: Allow an Assistant">
+        <!-- web.layout, not the frontend layout: the page stands alone, with or without Website -->
+        <t t-call="web.layout">
+            <t t-set="title">Allow an assistant</t>
+            <t t-set="head"><t t-call="nudge_mcp.oauth_head"/></t>
+            <t t-set="body_classname" t-value="'bg-100'"/>
+            <main class="container py-5">
+                <div class="row justify-content-center">
+                    <div class="col-md-9 col-lg-7 col-xl-6">
+                        <div class="card shadow-sm">
+                            <div class="card-body p-4">
+                                <h1 class="h4 mb-1">An assistant wants to use Nudge as you</h1>
+                                <p class="h5 mb-3" t-out="client_name"/>
+                                <p class="text-muted small mb-3" t-if="self_registered">
+                                    This is the name the assistant gave itself when it registered: check
+                                    that you are connecting it yourself, now.
+                                </p>
+                                <dl class="row mb-3">
+                                    <dt class="col-sm-5">Signed in to Odoo as</dt>
+                                    <dd class="col-sm-7"><t t-out="user_name"/> (<t t-out="user_login"/>)</dd>
+                                    <dt class="col-sm-5">After your answer you go to</dt>
+                                    <dd class="col-sm-7"><strong t-out="redirect_host"/></dd>
+                                </dl>
+                                <div class="alert alert-warning" role="alert" t-if="is_local">
+                                    The assistant runs on this computer. Allow it only if you started the connection
+                                    from an application of yours.
+                                </div>
+                                <div class="alert alert-danger" role="alert" t-if="not can_connect">
+                                    You cannot connect assistants: ask an administrator to add you to the
+                                    group External Assistant.
+                                </div>
+                                <form method="post" t-att-action="action">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <t t-foreach="hidden" t-as="field">
+                                        <input type="hidden" t-att-name="field[0]" t-att-value="field[1]"/>
+                                    </t>
+                                    <fieldset class="mb-3" t-if="can_connect">
+                                        <legend class="h6">It may, with your rights, record rules and companies:</legend>
+                                        <t t-foreach="scopes" t-as="scope">
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="checkbox" name="granted"
+                                                       t-att-id="'scope_%s' % scope_index"
+                                                       t-att-value="scope['name']"
+                                                       t-att-checked="scope['available'] or None"
+                                                       t-att-disabled="(scope['locked'] or not scope['available']) or None"/>
+                                                <label class="form-check-label" t-att-for="'scope_%s' % scope_index">
+                                                    <strong t-out="scope['label']"/>
+                                                    <span class="d-block text-muted small" t-out="scope['help']"/>
+                                                    <span class="d-block text-muted small" t-if="not scope['available']">
+                                                        Not open to you here: it stays off.
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        </t>
+                                    </fieldset>
+                                    <p class="text-muted small">
+                                        You can revoke it at any time in your preferences, Connected Assistants.
+                                        It never gets your password.
+                                    </p>
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <button type="submit" name="decision" value="deny" class="btn btn-secondary">
+                                            Refuse
+                                        </button>
+                                        <button type="submit" name="decision" value="allow" class="btn btn-primary"
+                                                t-att-disabled="not can_connect or None">
+                                            Allow
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </t>
+    </template>
+
+    <!-- What went wrong: the person stays here, nobody is sent anywhere -->
+    <template id="oauth_message" name="Nudge: Assistant Sign-in">
+        <t t-call="web.layout">
+            <t t-set="head"><t t-call="nudge_mcp.oauth_head"/></t>
+            <t t-set="body_classname" t-value="'bg-100'"/>
+            <main class="container py-5">
+                <div class="row justify-content-center">
+                    <div class="col-md-9 col-lg-7 col-xl-6">
+                        <div class="card shadow-sm">
+                            <div class="card-body p-4">
+                                <h1 class="h4 mb-3" t-out="title"/>
+                                <p class="mb-3" t-out="message"/>
+                                <p class="text-muted small mb-0">
+                                    Close this page and start again from the assistant.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </t>
+    </template>
+</odoo>

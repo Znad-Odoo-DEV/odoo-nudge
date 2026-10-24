@@ -9,9 +9,11 @@ Desktop, ChatGPT and others. They look up records, read the documentation of
 Odoo and the company files, and, when you allow it, prepare changes.
 
 - Off until an administrator turns it on (Settings, Nudge).
-- Each person makes a key of their own; the assistant acts as that person,
-  with their access rights, record rules and companies. Nothing runs as
-  an administrator.
+- The assistant signs in with OAuth 2.1 (PKCE): the person allows it in
+  Odoo, chooses what it may do (read, prepare changes, read what developers
+  build) and can revoke it in their preferences. Keys made before still
+  work (legacy). The assistant acts as that person, with their access
+  rights, record rules and companies. Nothing runs as an administrator.
 - Reading and writing are separate. A change is never made at once: the
   assistant gets a token, shows the person what will change, and the change
   is made only when it calls confirm with that token.
@@ -35,6 +37,8 @@ Installed from Apps by an administrator who wants it, with Nudge.
         "security/ir.model.access.csv",
         "views/nudge_mcp_views.xml",
         "views/res_config_settings_views.xml",
+        "views/nudge_mcp_oauth_views.xml",
+        "views/nudge_mcp_oauth_templates.xml",
     ],
     "assets": {
         "web.assets_unit_tests": [

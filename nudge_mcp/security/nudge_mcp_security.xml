@@ -6,4 +6,24 @@
         <field name="comment">Can make a key for an assistant outside Odoo (Claude Desktop, ChatGPT) that uses Nudge's tools with their rights.</field>
         <field name="implied_ids" eval="[Command.link(ref('nudge.group_nudge_user'))]"/>
     </record>
+
+    <!-- A person sees the assistants they connected; an administrator sees them all, to revoke one -->
+    <record id="nudge_mcp_grant_rule_own" model="ir.rule">
+        <field name="name">Nudge MCP: own connected assistants</field>
+        <field name="model_id" ref="model_nudge_mcp_grant"/>
+        <field name="domain_force">[('user_id', '=', user.id)]</field>
+        <field name="groups" eval="[Command.link(ref('nudge_mcp.group_nudge_mcp'))]"/>
+    </record>
+    <record id="nudge_mcp_grant_rule_system" model="ir.rule">
+        <field name="name">Nudge MCP: every connected assistant, for administrators</field>
+        <field name="model_id" ref="model_nudge_mcp_grant"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[Command.link(ref('base.group_system'))]"/>
+    </record>
+    <!-- The changes assistants may confirm alone: each company has its own -->
+    <record id="nudge_mcp_self_confirm_rule_company" model="ir.rule">
+        <field name="name">Nudge MCP: changes confirmed alone, by company</field>
+        <field name="model_id" ref="model_nudge_mcp_self_confirm"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
 </odoo>

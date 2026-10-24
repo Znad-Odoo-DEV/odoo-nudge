@@ -5,6 +5,12 @@ The controller authenticates the key and hands each message to
 with their rights, their record rules and their companies, never in sudo for
 data. Only the log (``nudge.run`` and ``nudge.step``) is written in sudo, as
 Nudge itself does: nobody else can write it.
+
+Two kinds of credentials open it: the access tokens of OAuth 2.1
+(``nudge_mcp_oauth.py``), each limited to scopes, and the API keys of the
+scope ``nudge_mcp`` made before (legacy), which open reading and preparing
+changes as they always did. The controller puts what the credential opens in
+the context (``nudge_mcp_auth``); nothing the assistant sends can set it.
 """
 import base64
 import json
@@ -34,13 +40,15 @@ CONVERSATION_TITLE = "MCP"
 
 PROTOCOLS = ("2025-06-18", "2025-03-26", "2024-11-05")
 
-# What an assistant may use: closed lists, the tools for developers never
+# What an assistant may use: closed lists. Of the tools for developers only those that read,
+# for administrators, with the scope nudge.developer; none that builds or runs code
 READ_TOOLS = (
     "search_odoo_documentation", "search_company_files", "describe_model", "locate_data",
     "search_database_profile", "find_screen", "show_menu_path", "search_records", "read_record",
     "find_record", "aggregate_records", "search_products", "find_products",
 )
 WRITE_TOOLS = ("prepare_create", "prepare_write", "call_method")
+DEV_READ_TOOLS = ("read_automations", "read_view", "check_python_code")
 CONFIRM_TOOL = "confirm"
 DECLINE_TOOL = "decline"
 
@@ -58,9 +66,48 @@ CALLS_PARAM = "nudge_mcp.calls_per_minute"
 LOCAL_PARAM = "nudge_mcp.assistant_is_local"
 RESULT_PREVIEW = 500
 
+# What a credential may open: a group of tools each. Writing and the tools for developers
+# include reading: a broader scope implies the narrower one
+SCOPE_READ = "nudge.read"
+SCOPE_WRITE = "nudge.write"
+SCOPE_DEVELOPER = "nudge.developer"
+SCOPES = (SCOPE_READ, SCOPE_WRITE, SCOPE_DEVELOPER)
+IMPLIED = {SCOPE_WRITE: {SCOPE_READ}, SCOPE_DEVELOPER: {SCOPE_READ}}
+LEGACY_SCOPES = (SCOPE_READ, SCOPE_WRITE)
+AUTH_CONTEXT = "nudge_mcp_auth"
+# The prompts of the company, when a module offers some (_mcp_prompts): the longest value of an argument
+MAX_PROMPT_ARGUMENT = 2000
+
 
 class BadParams(UserError):
     """The parameters of a message are wrong: told as a protocol error"""
+
+
+class InsufficientScope(Exception):
+    """The token is good, but does not open this tool: told with HTTP 403 and
+    the scopes to ask for, so that the assistant asks the person again"""
+
+    def __init__(self, scopes):
+        super().__init__(" ".join(scopes))
+        self.scopes = scopes
+
+
+def expand(scopes):
+    """:return: the known scopes among ``scopes``, with those they imply"""
+    found = {scope for scope in scopes if scope in SCOPES}
+    for scope in list(found):
+        found |= IMPLIED.get(scope, set())
+    return found
+
+
+def ordered(scopes):
+    """:return: the known scopes among ``scopes``, from the narrowest"""
+    return [scope for scope in SCOPES if scope in scopes]
+
+
+def legacy_auth():
+    """What a key of before OAuth opens: reading and preparing changes, as it always did"""
+    return {"legacy": True, "grant": False, "client": False, "client_name": False, "scopes": LEGACY_SCOPES}
 
 
 def error_response(message_id, code, text):
@@ -86,9 +133,10 @@ class NudgeMcp(models.AbstractModel):
 
     @api.model
     def _exposure(self):
-        """:return: "write" or "read", what the assistants may use"""
+        """:return: "read", "write" or "develop", what the assistants may use;
+        each includes the one before"""
         value = self.env["ir.config_parameter"].sudo().get_param(EXPOSURE_PARAM)
-        return "write" if value == "write" else "read"
+        return value if value in ("write", "develop") else "read"
 
     @api.model
     def _writes_open(self):
@@ -97,16 +145,46 @@ class NudgeMcp(models.AbstractModel):
         person is an Agent User"""
         env = self.env
         return (
-            self._exposure() == "write"
+            self._exposure() in ("write", "develop")
             and bool(env.company.sudo().nudge_mcp_allow_writes)
             and env["nudge.conversation"]._is_agent_allowed()
             and env.user.has_group(AGENT_GROUP))
 
     @api.model
-    def _self_confirm_open(self):
-        """:return: whether the company let assistants confirm their own changes
-        (unsafe): never for a sensitive one"""
-        return bool(self.env.company.sudo().nudge_mcp_self_confirm)
+    def _develop_open(self):
+        """:return: whether this person's assistants may read what developers
+        build: the administrator allows it, and the person may use Developer mode"""
+        return self._exposure() == "develop" and self.env["nudge.conversation"]._can_develop()
+
+    # ------------------------------------------------------------------
+    # What the credential opens
+    # ------------------------------------------------------------------
+    def _auth(self):
+        """:return: what the credential of this request opens, set by the
+        controller; a call made inside Odoo (the test of the help page) is
+        taken as a key of before"""
+        auth = self.env.context.get(AUTH_CONTEXT)
+        return auth if isinstance(auth, dict) else legacy_auth()
+
+    def _scopes(self):
+        return set(self._auth().get("scopes") or ())
+
+    @staticmethod
+    def _scope_of(name):
+        """:return: the scope a tool of the server needs"""
+        if name in DEV_READ_TOOLS:
+            return SCOPE_DEVELOPER
+        if name in WRITE_TOOLS or name in (CONFIRM_TOOL, DECLINE_TOOL):
+            return SCOPE_WRITE
+        return SCOPE_READ
+
+    def _group_open(self, scope):
+        """:return: whether the server and the person open the tools of ``scope``"""
+        if scope == SCOPE_WRITE:
+            return self._writes_open()
+        if scope == SCOPE_DEVELOPER:
+            return self._develop_open()
+        return True
 
     @api.model
     def _server_url(self):
@@ -189,6 +267,8 @@ class NudgeMcp(models.AbstractModel):
             "resources/list": self._rpc_resources_list,
             "resources/templates/list": lambda params, client: ({"resourceTemplates": []}, {}),
             "resources/read": self._rpc_resources_read,
+            "prompts/list": self._rpc_prompts_list,
+            "prompts/get": self._rpc_prompts_get,
         }.get(method)
         if handler is None:
             return error_response(message_id, METHOD_NOT_FOUND, _("Nothing answers to %s.", method)), {}
@@ -204,12 +284,15 @@ class NudgeMcp(models.AbstractModel):
         info = params.get("clientInfo") if isinstance(params.get("clientInfo"), dict) else {}
         client = clean_client(info.get("name"))
         wanted = params.get("protocolVersion")
+        capabilities = {
+            "tools": {"listChanged": False},
+            "resources": {"subscribe": False, "listChanged": False},
+        }
+        if self._mcp_prompts():
+            capabilities["prompts"] = {"listChanged": False}
         result = {
             "protocolVersion": wanted if wanted in PROTOCOLS else PROTOCOLS[0],
-            "capabilities": {
-                "tools": {"listChanged": False},
-                "resources": {"subscribe": False, "listChanged": False},
-            },
+            "capabilities": capabilities,
             "serverInfo": {"name": "Nudge", "title": "Nudge for Odoo", "version": self._version()},
             "instructions": _(
                 "Nudge works inside Odoo as the person whose key you hold: it sees only what they "
@@ -227,20 +310,28 @@ class NudgeMcp(models.AbstractModel):
 
     # --- tools --------------------------------------------------------
     def _visible_tools(self):
-        """:return: ``{name: tool}`` of Nudge this person's assistants may call now"""
+        """:return: ``{name: tool}`` of Nudge this person's assistants may call
+        now: what the server and the person open, within the scopes of the credential"""
+        scopes = self._scopes()
         names = list(READ_TOOLS)
-        if self._writes_open():
+        if SCOPE_WRITE in scopes and self._writes_open():
             names += WRITE_TOOLS
+        if SCOPE_DEVELOPER in scopes and self._develop_open():
+            names += DEV_READ_TOOLS
         found = {}
         for name in names:
             tool = tool_base.TOOLS.get(name)
-            if tool is not None and tool.is_available(self.env, tool_base.MODE_AGENT):
+            if tool is not None and tool.is_available(self.env, self._mode_of(name)):
                 found[name] = tool
         return found
 
+    @staticmethod
+    def _mode_of(name):
+        return tool_base.MODE_DEV if name in DEV_READ_TOOLS else tool_base.MODE_AGENT
+
     def _local_tools(self):
         """:return: the two tools of this module, which settle a prepared change"""
-        if not self._writes_open():
+        if SCOPE_WRITE not in self._scopes() or not self._writes_open():
             return {}
         return {
             CONFIRM_TOOL: _(
@@ -287,6 +378,11 @@ class NudgeMcp(models.AbstractModel):
             raise BadParams(_("A tool call needs a name and its arguments as an object."))
         visible, local = self._visible_tools(), self._local_tools()
         if name not in visible and name not in local:
+            needed = self._scope_of(name)
+            known = name in READ_TOOLS + WRITE_TOOLS + DEV_READ_TOOLS + (CONFIRM_TOOL, DECLINE_TOOL)
+            if known and not self._auth()["legacy"] and needed not in self._scopes() and self._group_open(needed):
+                # The server and the person open it, the token does not: the assistant asks again
+                raise InsufficientScope(ordered(self._scopes() | expand([needed])))
             raise BadParams(_("There is no tool named %s.", name))
         started = time.monotonic()
         self._check_private()
@@ -359,12 +455,13 @@ class NudgeMcp(models.AbstractModel):
             raise UserError(_(
                 "Private mode is on: this tool needs an AI provider, and nothing is sent to one "
                 "that does not run on your own server."))
+        mode = self._mode_of(tool.name)
         env = env(context=dict(
             env.context, nudge_conversation_id=run.conversation_id.id,
-            nudge_mode=tool_base.MODE_AGENT, nudge_mcp=True))
+            nudge_mode=mode, nudge_mcp=True))
         self._mark_call(True)
         try:
-            result = tool_base.call(env, tool.name, arguments, None, tool_base.MODE_AGENT)
+            result = tool_base.call(env, tool.name, arguments, None, mode)
         finally:
             self._mark_call(False)
         if result.pending and not result.is_error:
@@ -393,8 +490,17 @@ class NudgeMcp(models.AbstractModel):
 
     def _may_confirm_alone(self, step):
         """:return: whether the assistant may confirm this step without the
-        person's yes in Odoo: only when the company chose so, never for a sensitive one"""
-        return self._self_confirm_open() and not step.is_sensitive
+        person's yes in Odoo. Only an assistant signed in with OAuth, with the
+        scope to prepare changes, for the very change it prepared, when the
+        allow-list of the company names this tool on this model (and this
+        method, for a button) for any assistant or for this one; never for a
+        sensitive change, never for a key of before"""
+        auth = self._auth()
+        if (auth["legacy"] or step.is_sensitive or SCOPE_WRITE not in self._scopes()
+                or step.tool not in WRITE_TOOLS or not step.res_model
+                or step.sudo().run_id.mcp_client_id.id != auth["client"]):
+            return False
+        return self.env["nudge.mcp.self.confirm"]._allows(step, auth["client"])
 
     def _ask_person(self, step, run):
         """Tell the person, wherever they are in Odoo, that an assistant waits for their yes"""
@@ -423,6 +529,7 @@ class NudgeMcp(models.AbstractModel):
             "company_id": self.env.company.id,
             "state": "running",
             "origin": f"MCP: {client}",
+            "mcp_client_id": self._auth()["client"] or False,
         })
 
     def _log_step(self, run, name, kind, state, arguments, result, started):
@@ -516,6 +623,8 @@ class NudgeMcp(models.AbstractModel):
         step.invalidate_recordset(["state"])
         if step.state not in ("pending", "approved"):
             return finish("failed", gone)
+        # Still pending after the lock: nobody said yes in Odoo, the allow-list did
+        alone = step.state == "pending"
         user_env = env(context=dict(
             env.context, nudge_conversation_id=prepared.conversation_id.id,
             nudge_mode=tool_base.MODE_AGENT, nudge_mcp=True))
@@ -530,6 +639,8 @@ class NudgeMcp(models.AbstractModel):
             "result": self._preview(result.content),
             "error": result.content if result.is_error else False,
             "decided_at": fields.Datetime.now(),
+            # Kept apart in the log: no person said yes to this one, the allow-list did
+            "mcp_self_confirmed": alone,
         }
         if result.records:
             values["res_ids"] = list(result.records[1])[:50]
@@ -592,3 +703,44 @@ class NudgeMcp(models.AbstractModel):
         self._log_step(run, "resources/read", "read", "done", {"uri": uri}, uri, started)
         run._end("done")
         return {"contents": [{"uri": uri, "mimeType": "text/plain", "text": text}]}, {}
+
+    # --- prompts ------------------------------------------------------
+    def _mcp_prompts(self):
+        """:return: the prompts this person's assistants may use, as dicts
+        ``{name, title, description, arguments: [{name, description, required}],
+        text}``, where ``{argument}`` in the text is replaced by its value. None
+        here: a module with a library of prompts extends this, with what the
+        person may see. The capability is announced only when there are some."""
+        return []
+
+    def _rpc_prompts_list(self, params, client):
+        return {"prompts": [{
+            "name": prompt["name"],
+            "title": prompt.get("title") or prompt["name"],
+            "description": prompt.get("description") or "",
+            "arguments": [{
+                "name": argument["name"], "description": argument.get("description") or "",
+                "required": bool(argument.get("required")),
+            } for argument in prompt.get("arguments") or []],
+        } for prompt in self._mcp_prompts()]}, {}
+
+    def _rpc_prompts_get(self, params, client):
+        env = self.env
+        self._check_private()
+        name = params.get("name")
+        prompt = next((prompt for prompt in self._mcp_prompts() if prompt["name"] == name), None)
+        if prompt is None:
+            raise BadParams(_("There is no prompt named %s.", name))
+        values = params.get("arguments") if isinstance(params.get("arguments"), dict) else {}
+        missing = [argument["name"] for argument in prompt.get("arguments") or []
+                   if argument.get("required") and values.get(argument["name"]) in (None, "")]
+        if missing:
+            raise BadParams(_("The prompt %(prompt)s needs %(names)s.", prompt=name, names=", ".join(missing)))
+        # Each placeholder is replaced in one pass: a value that holds "{...}" stays as it is
+        names = {argument["name"] for argument in prompt.get("arguments") or []}
+        text = re.sub(r"\{(\w+)\}", lambda found: str(values.get(found.group(1), ""))[:MAX_PROMPT_ARGUMENT]
+                      if found.group(1) in names else found.group(0), prompt["text"])
+        return {
+            "description": prompt.get("description") or "",
+            "messages": [{"role": "user", "content": {"type": "text", "text": text}}],
+        }, {}
