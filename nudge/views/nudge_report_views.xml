@@ -12,6 +12,7 @@
                 <field name="user_id" groups="nudge.group_nudge_manager" optional="show"/>
                 <field name="company_id" groups="base.group_multi_company"/>
                 <button name="action_open_report" type="object" string="Open" icon="fa-bar-chart"/>
+                <button name="action_explain" type="object" string="Explain" icon="fa-comment-o"/>
             </tree>
         </field>
     </record>
@@ -23,6 +24,7 @@
             <form string="Report" create="0" delete="0">
                 <header>
                     <button name="action_open_report" type="object" string="Open" class="btn-primary"/>
+                    <button name="action_explain" type="object" string="Explain"/>
                 </header>
                 <sheet>
                     <group>
@@ -33,6 +35,34 @@
                         <field name="company_id" groups="base.group_multi_company"/>
                     </group>
                 </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_report_explain_form" model="ir.ui.view">
+        <field name="name">nudge.report.explain.form</field>
+        <field name="model">nudge.report.explain</field>
+        <field name="arch" type="xml">
+            <form string="Explain This Report" create="0" delete="0">
+                <sheet>
+                    <h2><field name="report_id" readonly="1" options="{'no_open': True}"/></h2>
+                    <field name="state" invisible="1"/>
+                    <field name="can_summarise" invisible="1"/>
+                    <field name="facts_html"/>
+                    <group invisible="not summary">
+                        <field name="summary" nolabel="1" colspan="2"/>
+                    </group>
+                    <div class="alert alert-info" role="status" invisible="not note">
+                        <field name="note" nolabel="1"/>
+                    </div>
+                </sheet>
+                <footer>
+                    <button name="action_summarise" type="object" string="Add a summary" class="btn-primary"
+                            invisible="not can_summarise or state != 'facts'"/>
+                    <button name="action_refresh" type="object" string="Refresh" class="btn-primary"
+                            invisible="state != 'writing'"/>
+                    <button string="Close" special="cancel" class="btn-secondary"/>
+                </footer>
             </form>
         </field>
     </record>

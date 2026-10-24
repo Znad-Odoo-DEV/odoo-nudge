@@ -28,6 +28,7 @@ from . import nudge_tour
 from . import nudge_quick_tour
 from . import nudge_health
 from . import nudge_report
+from . import nudge_report_explain
 from . import nudge_quick_import
 from . import nudge_embedding
 from . import nudge_history
