@@ -138,6 +138,31 @@ class TestEgressPaths(NudgeCase, TransactionCase):
         with patch(MARKET, return_value=b"{}"):
             self.assertEqual(source._get("https://recipes.example.test/index.json"), b"{}")
 
+    def test_a_redirect_to_an_unlisted_host_is_refused_too(self):
+        from odoo.addons.nudge.models import nudge_recipe_market as market
+
+        class Answer:
+            status_code, headers = 302, {"Location": "https://elsewhere.test/index.json"}
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+        asked = []
+
+        def get(url, **kwargs):
+            asked.append(url)
+            return Answer()
+
+        self.env.company.nudge_egress_hosts = "recipes.example.test"
+        with patch.object(market, "_require_https", lambda url: None), patch("requests.get", get), \
+                self.assertRaises(UserError) as error:
+            self.env["nudge.recipe.source"]._get("https://recipes.example.test/index.json")
+        self.assertEqual(asked, ["https://recipes.example.test/index.json"])
+        self.assertIn("elsewhere.test", str(error.exception))
+
     def test_the_compliance_feed_is_refused_when_not_listed(self):
         Parameter = self.env["ir.config_parameter"].sudo()
         Parameter.set_param("nudge.compliance_feed_url", "https://feed.example.test/feed.json")

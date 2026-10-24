@@ -89,12 +89,16 @@ def _require_https(url):
     _public_only(parsed.hostname)
 
 
-def _download(url, cap=CAP, timeout=TIMEOUT):
+def _download(url, cap=CAP, timeout=TIMEOUT, check=None):
     """:return: the bytes of ``url``, HTTPS only (redirects too), at most ``cap`` of them
+    :param check: called with every address, the first and each redirect, before it is asked (the allowed
+        destinations of the company); it raises to refuse
     :raise FetchError: when it is refused, too big, slow or unreachable"""
     limit = time.monotonic() + worker_cap(TOTAL_SECONDS)
     for _hop in range(MAX_REDIRECTS + 1):
         _require_https(url)
+        if check:
+            check(url)
         try:
             with requests.get(url, stream=True, timeout=timeout, allow_redirects=False,
                               headers={"User-Agent": "Nudge-recipes"}) as response:
@@ -283,7 +287,7 @@ class NudgeRecipeSource(models.Model):
         """:return: the bytes of ``url``, or raises a UserError with a sentence that says why not"""
         self.env["nudge.egress"].check(url, "recipes")  # NP-15
         try:
-            return _download(url, cap)
+            return _download(url, cap, check=lambda hop: self.env["nudge.egress"].check(hop, "recipes"))
         except FetchError as error:
             raise UserError(self._fetch_message(error)) from None
 
