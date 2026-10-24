@@ -1271,3 +1271,14 @@ msgstr ""
 #: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
 msgid "sender not verified"
 msgstr "المرسل غير موثّق"
+
+#. module: nudge_mail
+#: model_terms:ir.actions.act_window,help:nudge_mail.nudge_mail_rule_action
+msgid "Nothing learned yet"
+msgstr "لم يتعلّم شيئًا بعد"
+
+#. module: nudge_mail
+#: model_terms:ir.actions.act_window,help:nudge_mail.nudge_mail_rule_action
+msgid "When you correct how the Mail Agent sorts a message, the rule it learned is listed here."
+msgstr "عندما تصحّح طريقة فرز وكيل البريد لرسالة ما، تظهر هنا القاعدة التي تعلّمها."
+

@@ -1916,3 +1916,24 @@ msgstr "توقف البناء بسبب خطأ: انظر إلى سجل الموق
 #: code:addons/nudge_builder/models/nudge_builder_site.py:0
 msgid "The website %s is built. Nothing is published yet."
 msgstr "تم بناء الموقع الإلكتروني %s. لم يُنشر شيء بعد."
+
+#. module: nudge_builder
+#: model_terms:ir.actions.act_window,help:nudge_builder.nudge_builder_check_action
+msgid "No site check yet"
+msgstr "لا يوجد فحص موقع بعد"
+
+#. module: nudge_builder
+#: model_terms:ir.actions.act_window,help:nudge_builder.nudge_builder_check_action
+msgid "Each check of a built site is kept here with what it found."
+msgstr "كل فحص لموقع مبني يُحفظ هنا مع ما وجده."
+
+#. module: nudge_builder
+#: model_terms:ir.actions.act_window,help:nudge_builder.nudge_builder_action_sites
+msgid "No site built yet"
+msgstr "لم يُبنَ أي موقع بعد"
+
+#. module: nudge_builder
+#: model_terms:ir.actions.act_window,help:nudge_builder.nudge_builder_action_sites
+msgid "Ask Nudge in Developer mode to build a website: it appears here."
+msgstr "اطلب من Nudge في وضع المطوّر بناء موقع إلكتروني: سيظهر هنا."
+

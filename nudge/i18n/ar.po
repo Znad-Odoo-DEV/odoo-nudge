@@ -2476,7 +2476,7 @@ msgstr "وضع الوكيل"
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_agent_provider_id
 msgid "Agent Provider"
-msgstr "مزوّد وضع Agent"
+msgstr "مزوّد وضع الوكيل"
 
 #. module: nudge
 #: model:res.groups,name:nudge.group_nudge_agent
@@ -5663,7 +5663,7 @@ msgstr "وضع المطوّر"
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_developer_provider_id
 msgid "Developer Provider"
-msgstr "مزوّد وضع Developer"
+msgstr "مزوّد وضع المطوّر"
 
 #. module: nudge
 #. odoo-python
@@ -13708,7 +13708,7 @@ msgid ""
 "Provider building in Developer mode. Empty: the one of Agent mode, or the "
 "default one."
 msgstr ""
-"المزوّد الذي يبني في وضع Developer. فارغ: مزوّد وضع Agent، أو المزوّد "
+"المزوّد الذي يبني في وضع المطوّر. فارغ: مزوّد وضع الوكيل، أو المزوّد "
 "الافتراضي."
 
 #. module: nudge
@@ -13717,7 +13717,7 @@ msgid ""
 "Provider doing the work in Agent mode, and the scheduled tasks. Empty: the "
 "default one."
 msgstr ""
-"المزوّد الذي يعمل في وضع Agent والمهام المجدولة. فارغ: المزوّد الافتراضي."
+"المزوّد الذي يعمل في وضع الوكيل والمهام المجدولة. فارغ: المزوّد الافتراضي."
 
 #. module: nudge
 #: model:ir.ui.menu,name:nudge.nudge_menu_recipe_publish
@@ -23046,3 +23046,44 @@ msgstr ""
 #: code:addons/nudge/tools/bulk.py:0
 msgid "“%s” is the name of two values."
 msgstr "«%s» اسم لقيمتين."
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_health_report_action
+msgid "No health report yet"
+msgstr "لا يوجد تقرير صحة بعد"
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_health_report_action
+msgid "A health report checks the setup of Nudge and lists what needs a fix. Run one from the Nudge menu."
+msgstr "يفحص تقرير الصحة إعداد Nudge ويسرد ما يحتاج إلى إصلاح. شغّل واحدًا من قائمة Nudge."
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_upgrade_report_action
+msgid "No upgrade report yet"
+msgstr "لا يوجد تقرير ترقية بعد"
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_upgrade_report_action
+msgid "An upgrade report tells what a new Odoo version changes for your Nudge setup. Run the upgrade check to get one."
+msgstr "يوضح تقرير الترقية ما يغيّره إصدار Odoo الجديد في إعداد Nudge لديك. شغّل فحص الترقية للحصول على واحد."
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_recipe_source_action
+msgid "No recipe source yet"
+msgstr "لا يوجد مصدر وصفات بعد"
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_recipe_source_action
+msgid "A recipe source is a place Nudge reads shared recipes from. Add one to browse and install its recipes."
+msgstr "مصدر الوصفات هو مكان يقرأ منه Nudge الوصفات المشتركة. أضف مصدرًا لتصفح وصفاته وتثبيتها."
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_recipe_installed_action
+msgid "No recipe installed yet"
+msgstr "لم تُثبَّت أي وصفة بعد"
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_recipe_installed_action
+msgid "The recipes you install from a source are listed here, with their version."
+msgstr "الوصفات التي تثبّتها من أحد المصادر تظهر هنا مع إصدارها."
+

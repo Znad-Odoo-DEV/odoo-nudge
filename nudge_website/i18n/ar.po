@@ -563,3 +563,24 @@ msgstr "بريدك الإلكتروني"
 #: model_terms:ir.ui.view,arch_db:nudge_website.assistant_bubble
 msgid "Your name"
 msgstr "اسمك"
+
+#. module: nudge_website
+#: model_terms:ir.actions.act_window,help:nudge_website.nudge_web_message_action
+msgid "No visitor question yet"
+msgstr "لا توجد أسئلة زوار بعد"
+
+#. module: nudge_website
+#: model_terms:ir.actions.act_window,help:nudge_website.nudge_web_message_action
+msgid "What visitors ask the website assistant is listed here."
+msgstr "ما يسأله الزوار لمساعد الموقع يظهر هنا."
+
+#. module: nudge_website
+#: model_terms:ir.actions.act_window,help:nudge_website.nudge_usage_website_action
+msgid "Nothing spent by the website assistant yet"
+msgstr "لم ينفق مساعد الموقع شيئًا بعد"
+
+#. module: nudge_website
+#: model_terms:ir.actions.act_window,help:nudge_website.nudge_usage_website_action
+msgid "Every call the website assistant makes to an AI provider is written here, with its tokens and its cost."
+msgstr "كل استدعاء يجريه مساعد الموقع لمزوّد الذكاء الاصطناعي يُكتب هنا مع رموزه وتكلفته."
+
