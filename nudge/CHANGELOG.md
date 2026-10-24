@@ -4,6 +4,7 @@ Current version: nudge 19.0.1.58.0, nudge_mcp 19.0.1.1.0, nudge_connect 19.0.1.0
 
 ## 19.0.1.58.0 (unreleased)
 
+- Help of Answers at the Same Time describes the waiting line; Arabic in i18n/_pending/LEAD-finish.ar.po.
 - SEC-01: a field named signature is hidden unless it is written text (HTML or text); keys, hashes and hmac stay hidden.
 - The picture reading takes the deadline of the answer.
 - LEAD-03: the default provider is only the one named, or the designated fallback (NP-10); first install with one provider unchanged.
