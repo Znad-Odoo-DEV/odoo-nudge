@@ -74,7 +74,7 @@ and in private mode. Nothing is spent, and every change still waits for a yes on
 
 | Feature | What the person does, and what happens |
 |---|---|
-| **Answer memory** | Press the thumbs-up on an explanation. A manager approves it in **Nudge ‣ What Nudge Knows ‣ Remembered Answers**. From then on the same question of someone else, who may see what it is about, is answered at once, marked as a remembered answer, with a button **Ask the AI instead**. The usage report shows it with zero tokens and zero cost. An answer that changed data or quoted values of the database is never kept. With no provider, the best remembered answer above the floor is offered above the search. **Settings ‣ Nudge ‣ Answer Memory** switches it off and sets **Confidence Required** (0.75 by default). |
+| **Answer memory** | A manager presses **Save as reference** under any answer of Nudge (or the thumbs-up), checks and edits it, and from then on the same question, in any language or dialect, is answered at once from **Nudge ‣ What Nudge Knows ‣ Nudge Memory**, with no AI provider, marked “From Nudge's memory, approved by … on …” with a button **Ask the AI instead**. A question that asks for live figures is never answered from memory. The usage report shows each hit with zero tokens and zero cost. With no provider, the best remembered answer above the floor is offered above the search. See [Nudge memory](#nudge-memory-approved-answers). **Settings ‣ Nudge ‣ Answer Memory** switches it off and sets **Confidence Required** (0.75 by default). |
 | **Explainers** | `/why` (`/لماذا`): why this form cannot be saved: the required fields, including the conditional ones, the refused values, the last message, locked fields, missing rights, the company. `/field customer` (`/حقل`): what a field is, in words. `/here` (`/هنا`): what this screen is, its state and its buttons. Each line is shown with the pointer. They are read from Odoo's own metadata and the form as it is, with what was typed, and they are offered in place of the error when there is no provider or it fails. |
 | **Rule tasks** | **Nudge ‣ What Nudge Did ‣ Scheduled Tasks**, **Done By: Rule (no AI)**. Pick the record type (a model you may read), a filter, **Measure** (Count, Sum or Average of a number field), an optional grouping, and when to report: **Always**, **Above a Threshold**, **Below a Threshold** or **Changed Since the Last Run**. It runs read-only as its owner and answers in the top bar and by email, with a link that opens the filtered list. It counts in the same limit of tasks per person. |
 | **Private mode** | **Settings ‣ Nudge ‣ Privacy ‣ Private Mode: Never Send Data to an External AI Provider**, per company, and the tick **Runs on Our Own Server** on a provider (Ollama on your own machine, for instance). The server refuses every call to a provider that is not ticked, before anything leaves: answers, pictures, voice, connection tests and the embeddings of Nudge for Odoo AI. Providers on your own server are preferred, and a lock shows in the panel. Quick search, slash commands, tours and remembered answers keep working. Voice typing by the browser still sends the sound to the maker of the browser: choose the AI provider as the engine of the voice. |
@@ -617,6 +617,42 @@ The administrator is a Manager after installation. Give access to others from
   for whom, on which records, what was written, what the person was shown, and what they
   answered. This log cannot be changed or deleted from the interface, and a conversation in
   which Nudge acted can be archived but not deleted.
+
+### Nudge memory (approved answers)
+
+Nudge answers the questions a manager approved once, with no AI provider, in any language or dialect, and
+grows them into skills.
+
+- **Save as reference**: under any answer of Nudge (Talk, a reading answer of Agent mode, the steps of an
+  explanation of the screen), a manager presses **Save as reference**. A form shows the question, the other
+  ways it is known to be asked, the answer (edit it as you like), its language and mode, the screen and menu
+  it is about, and the steps on the screen, which are kept as a recorded tour and replayed with no AI. An
+  answer that changed data is refused; an answer made from records says so, to keep only what stays true for
+  everybody. Keys and passwords typed into it are removed before it is kept.
+- **Who is answered**: the people of its company, in its groups, who may open the screen it is about. An
+  answer saved from a screen with **Only on Its Screen** ticked is given only to someone asking from that
+  screen (“this button”).
+- **How a question is matched**, with no AI: as typed; with its slips and Arabic written in Latin letters
+  read right (“kif a3mel fatoora”, “invocie”); carried to English by the term bridge, so an Arabic question
+  finds an English reference; by the notions it names in every dialect; and by the TF-IDF of the answer
+  memory. A sure match answers at once; close ones are offered to choose from, with **Ask the AI instead**.
+  The words of the person who picks one find it next time. A question that asks for live figures (how many,
+  how much, a list of records) is never answered from memory: its tool or rule answers it as before.
+- **Another language**: an answer kept in English and asked for in Arabic (or the other way round) is
+  translated once, by one very short request to the provider (the source text only), kept under
+  **Translations** for a manager to review, and free from then on. In private mode nothing is sent: the
+  original is offered with a note.
+- **Suggestions from likes** (off by default): **Settings ‣ Nudge ‣ Answer Memory ‣ Suggest From Likes**.
+  An answer liked by enough different people (3 by default) waits in **Nudge ‣ What Nudge Knows ‣ Suggested
+  References** for a manager's one-click approval. Nothing is served before that yes.
+- **Skills**: when one app, or the questions of one published skill, gathers enough approved answers (5 by
+  default, **Answers per Draft Skill**), they are put together as a draft skill, its test sentence one of their
+  questions, with a business note for the managers. It stays a draft, read by no model, until a manager
+  publishes it. The answers keep answering their questions first, with no AI.
+- **The ledger**: each hit is a line of **Nudge ‣ Usage** of kind Remembered Answer with zero tokens and zero
+  cost; **Nudge Memory** lists the hits of each answer, when it was last used and its languages, to edit or
+  archive.
+- What an approved answer says is shown to the person, never given to a model as instructions.
 
 ## API keys
 
