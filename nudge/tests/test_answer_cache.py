@@ -226,6 +226,25 @@ class TestAnswerCache(NudgeCase, TransactionCase):
         self.assertEqual(len(adapter.calls), 2)
         self.assertEqual(self.Cache.search([]).mapped("company_id"), self.env.company | other)
 
+    def test_what_the_model_was_told_of_the_asker_alone_is_not_served_to_another(self):
+        """Review (ai #3): the name, today's date and the companies of the asker reach the model."""
+        today = fields.Date.context_today(self.env["nudge.answer.cache"].with_user(self.user_a))
+        self.user_a.name = "Raghad Ebrahim"
+        for question, reply in (
+                ("What is my name in this database?", "Your name is Raghad Ebrahim."),
+                ("What is the date of today please?", f"Today is {today.isoformat()}."),
+                ("Which day of the month is it today?", f"It is {today.strftime('%B')} {today.day}.")):
+            self.use_adapter(reply=reply)
+            self.ask_as(self.user_a, question)
+            self.assertFalse(self.Cache.search([]), reply)
+        adapter = self.use_adapter(reply=STEPS)
+        other = self.env["res.company"].create({"name": "A company of Ebrahim alone"})
+        self.ask_as(self.user_a, HOW)
+        self.assertTrue(self.Cache.search([]), "An answer that names nobody is kept")
+        self.user_b.company_ids = [(4, other.id)]
+        self.ask_as(self.user_b, HOW)
+        self.assertEqual(len(adapter.calls), 2, "Other companies, which the overview names: not served")
+
     def test_a_changed_skill_note_or_setting_empties_the_cache(self):
         self.use_adapter(reply=STEPS)
         Skill = self.env["nudge.skill"].sudo()
