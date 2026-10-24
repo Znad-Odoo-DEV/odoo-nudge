@@ -86,6 +86,8 @@ class TestHardening(NudgeCase, TransactionCase):
             run.sudo().unlink()
 
     def test_the_retention_forgets_only_the_old_ones_that_are_idle(self):
+        # The cron commits after each batch; a test is one transaction it undoes
+        self.patch(type(self.env["ir.cron"]), "_commit_progress", lambda cron, *args, **kwargs: 10 ** 6)
         Conversation = self.env["nudge.conversation"].sudo().with_context(active_test=False)
         old = Conversation.create({"user_id": self.agent.id, "name": "Raghad old"})
         acted, _run, _step = self._conversation_with_run(self.agent, state="done")
@@ -114,6 +116,29 @@ class TestHardening(NudgeCase, TransactionCase):
         self.assertFalse(acted.active, "and the conversation put away")
         self.assertEqual((streaming | waiting | recent).exists(), streaming | waiting | recent)
         self.assertTrue(all((streaming | waiting | recent).mapped("active")))
+
+    def test_the_retention_goes_on_until_nothing_older_is_left(self):
+        """Review (odoo-tech #4): a fixed batch a day never caught up with a database that makes more."""
+        committed = []
+        self.patch(type(self.env["ir.cron"]), "_commit_progress",
+                   lambda cron, processed=0, **kwargs: committed.append(processed) or 10 ** 6)
+        Conversation = self.env["nudge.conversation"].sudo().with_context(active_test=False)
+        old = Conversation.create([{"user_id": self.agent.id, "name": f"Raghad old {index}"} for index in range(5)])
+        acted = Conversation.browse()
+        for _index in range(3):
+            conversation, _run, _step = self._conversation_with_run(self.agent, state="done")
+            acted |= conversation
+        self.env.flush_all()
+        self.env.cr.execute(
+            "UPDATE nudge_conversation SET write_date = %s WHERE id IN %s",
+            (fields.Datetime.subtract(fields.Datetime.now(), days=100), tuple((old | acted).ids)))
+        self.env.invalidate_all()
+        self.env["ir.config_parameter"].sudo().set_param("nudge.retention_days", "30")
+        done = Conversation._cron_apply_retention(batch=2)
+        self.assertGreaterEqual(done, 8)
+        self.assertFalse(old.exists(), "Every batch of old ones, in one pass")
+        self.assertFalse(any(acted.mapped("active")), "Every log put away")
+        self.assertTrue(committed, "Each full batch is committed")
 
     def test_one_step_of_talk_runs_a_bounded_number_of_tools(self):
         """Review (ai #9): forty reads asked at once in Talk were all run and replayed in every round after."""

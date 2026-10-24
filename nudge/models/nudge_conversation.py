@@ -15,6 +15,7 @@ from ..llm import attachments, ollama
 from ..llm import snapshot as screen
 from ..profile import retrieval
 from .ir_http import nudge_version
+from ..tools.batches import in_batches
 from ..tools.deadline import until
 from ..tools.base import MODE_AGENT, MODE_DEV, MODE_TALK
 
@@ -929,8 +930,9 @@ class NudgeConversation(models.Model):
     @api.model
     def _cron_apply_retention(self, batch=200):
         """Forget the conversations whose last activity is older than the days set in Settings
-        (0: never), a batch at a time: deleted, or archived when the Agent acted in them, since
-        its log is kept. One that is answering, or has a step waiting for a yes, is left.
+        (0: never), a batch at a time, each committed, until none is left or the time of the pass
+        is up (the next pass goes on at once): deleted, or archived when the Agent acted in them,
+        since its log is kept. One that is answering, or has a step waiting for a yes, is left.
 
         :return: how many were deleted or archived"""
         days = int(float(self.env["ir.config_parameter"].sudo().get_param("nudge.retention_days") or 0))
@@ -942,12 +944,20 @@ class NudgeConversation(models.Model):
         idle = [("write_date", "<", limit), ("stream_started_at", "=", False), ("waiting_step_id", "=", False),
                 ("kept_for_audit", "=", False),
                 ("run_ids", "not any", [("step_ids.state", "=", "pending")])]
-        acted = Conversation.search(idle + [("active", "=", True), ("run_ids", "!=", False)],
-                                    order="write_date, id", limit=batch)
-        acted.write({"active": False})
-        gone = Conversation.search(idle + [("run_ids", "=", False)], order="write_date, id", limit=batch)
-        gone.unlink()
-        return len(acted) + len(gone)
+
+        def archive(size):
+            acted = Conversation.search(idle + [("active", "=", True), ("run_ids", "!=", False)],
+                                        order="write_date, id", limit=size)
+            acted.write({"active": False})
+            return len(acted)
+
+        def delete(size):
+            gone = Conversation.search(idle + [("run_ids", "=", False)], order="write_date, id", limit=size)
+            gone.unlink()
+            return len(gone)
+
+        cron = "nudge.cron_conversation_retention"
+        return in_batches(self.env, cron, archive, batch) + in_batches(self.env, cron, delete, batch)
 
     @api.model
     def _cron_forget_meeting_audio(self):
