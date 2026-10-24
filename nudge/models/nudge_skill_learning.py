@@ -5,6 +5,10 @@ the screens of the app as the words that bring it. Grouping is by rules: the app
 first part of a model it names ("sale.order" is the sale app), or of the screen of the conversation it
 was learnt in. A draft is never sent to a model before a manager publishes it.
 
+A skill keeps what its lessons allow: lessons told to some groups only make a draft of their own, for
+those groups; a lesson refused, archived, deleted or changed afterwards leaves its skill, which then
+says only what its other lessons say, and the lesson follows its own state and groups as a note again.
+
 The weekly health check runs the test sentence of every active skill, without any AI, and writes a
 red line in the business notes for each one that fails. A red line is for the managers: it is never
 sent to a model.
@@ -15,12 +19,16 @@ import re
 from odoo import api, fields, models
 
 from ..tools import skills as skill_rules
+from .nudge_skill import MAX_INSTRUCTIONS
 
 _logger = logging.getLogger(__name__)
 
 LESSONS_PER_SKILL = 3
 # A technical model name inside a lesson: "sale.order", "account.move.line"
 MODEL_NAME = re.compile(r"\b([a-z][a-z0-9_]*(?:\.[a-z0-9_]+)+)\b")
+# What a lesson put into a skill cannot change without leaving it: its text, whether it counts, who and
+# which company it is told to
+LEAVES_THE_SKILL = frozenset({"body", "state", "active", "group_ids", "company_id"})
 
 
 class NudgeNote(models.Model):
@@ -47,8 +55,38 @@ class NudgeNote(models.Model):
     def action_approve(self):
         result = super().action_approve()
         if any(note.kind == "lesson" for note in self):
-            self.env["nudge.skill"]._propose_from_lessons()
+            try:
+                with self.env.cr.savepoint():
+                    self.env["nudge.skill"]._propose_from_lessons()
+            except Exception:  # noqa: BLE001 - a draft that cannot be made never stops an approval
+                _logger.exception("Nudge: no draft skill could be made from the lessons of company %s",
+                                  self.env.company.id)
         return result
+
+    def write(self, vals):
+        moving = self.browse()
+        if LEAVES_THE_SKILL & vals.keys() and "skill_id" not in vals:
+            moving = self.filtered(lambda note: note.kind == "lesson" and note.skill_id)
+        before = {note.id: note._skill_terms() for note in moving}
+        result = super().write(vals)
+        moved = moving.filtered(lambda note: note._skill_terms() != before[note.id])
+        if moved:
+            skills = moved.skill_id
+            # The skill stops carrying them: as notes, they follow their own state, groups and company again
+            moved.write({"skill_id": False})
+            skills._rebuild_from_lessons()
+        return result
+
+    def unlink(self):
+        skills = self.filtered(lambda note: note.kind == "lesson").skill_id
+        result = super().unlink()
+        skills._rebuild_from_lessons()
+        return result
+
+    def _skill_terms(self):
+        """:return: what of this lesson its skill depends on"""
+        self.ensure_one()
+        return (self.body, self.state, self.active, frozenset(self.group_ids.ids), self.company_id.id)
 
     def action_refuse(self):
         result = super().action_refuse()
@@ -125,10 +163,35 @@ class NudgeSkill(models.Model):
         return key
 
     @api.model
+    def _lessons_header(self, label):
+        return f"## What this company taught about {label}\n"
+
+    @api.model
+    def _lessons_parts(self, header, lessons):
+        """Cut the lessons into texts a skill may hold (MAX_INSTRUCTIONS), in their order.
+
+        :return: ``[(text, lessons in it)]``; a lesson too long for a skill alone is in none of them:
+            it stays a business note"""
+        parts, text, taken = [], header, self.env["nudge.note"]
+        for lesson in lessons:
+            line = f"- {' '.join((lesson.body or '').split())}\n"
+            if len(header) + len(line) > MAX_INSTRUCTIONS:
+                continue
+            if len(text) + len(line) > MAX_INSTRUCTIONS:
+                parts.append((text, taken))
+                text, taken = header, self.env["nudge.note"]
+            text += line
+            taken |= lesson
+        if taken:
+            parts.append((text, taken))
+        return parts
+
+    @api.model
     def _propose_from_lessons(self):
-        """Group the approved lessons not yet in a skill by app; three or more about one app become a
-        draft skill, with a business note that waits for a manager. No AI: the lessons are put together
-        as they were approved.
+        """Group the approved lessons not yet in a skill by app, company and the groups they are told to;
+        three or more of one group become a draft skill for those groups only, with a business note that
+        waits for a manager (several drafts when they do not fit in one). No AI: the lessons are put
+        together as they were approved.
 
         :return: the draft skills made"""
         Note = self.env["nudge.note"]
@@ -139,11 +202,15 @@ class NudgeSkill(models.Model):
         for lesson in lessons:
             app, names = lesson._app_and_models()
             if app:
-                entry = by_app.setdefault((app, lesson.company_id.id), {"lessons": Note, "models": set()})
+                # A lesson told to some groups only never reaches a person outside them: one draft per
+                # set of groups, restricted to it
+                entry = by_app.setdefault((app, lesson.company_id.id, tuple(sorted(lesson.group_ids.ids))),
+                                          {"lessons": Note, "models": set()})
                 entry["lessons"] |= lesson
                 entry["models"].update(names)
         made = self.browse()
-        for (app, company_id), entry in sorted(by_app.items(), key=lambda item: (item[0][0], item[0][1] or 0)):
+        for (app, company_id, group_ids), entry in sorted(
+                by_app.items(), key=lambda item: (item[0][0], item[0][1] or 0, item[0][2])):
             if len(entry["lessons"]) < LESSONS_PER_SKILL:
                 continue
             models_named = sorted(entry["models"])
@@ -152,33 +219,62 @@ class NudgeSkill(models.Model):
             # The name of the app brings it only when it is one: "res" of res.partner would bring it to "reset"
             words = sorted({*([app] if is_module else []), *models_named,
                             *(part.strip() for text in descriptions for part in (text or "").split("/") if part.strip())})
-            skill = self.create({
-                "key": self._free_key(f"lessons-{app.replace('_', '-')}")[:63],
-                "name": self.env._("What we learnt: %s", label),
-                "summary": f"Rules this company taught Nudge about {label}: read them before answering about it."[
-                    :skill_rules.MAX_SUMMARY],
-                "instructions": f"## What this company taught about {label}\n" + "".join(
-                    f"- {' '.join((lesson.body or '').split())}\n" for lesson in entry["lessons"]),
-                "trigger_words": ", ".join(words),
-                "model_names": ",".join(models_named),
-                "modes": "talk,agent,dev",
-                "company_id": company_id or False,
-                "state": "draft",
-                "origin": "lessons",
-                "test_sentence": descriptions[0] if descriptions else models_named[0],
-            })
-            entry["lessons"].write({"skill_id": skill.id})
-            Note.create({
-                "name": self.env._("Draft skill from %(count)s lessons: %(app)s", count=len(entry["lessons"]),
-                                   app=label)[:200],
-                "body": self.env._(
-                    "Lessons about %(app)s were put together as a draft skill. Review it, publish it or reject "
-                    "it: until it is published, no model reads it.", app=label),
-                "kind": "skill", "state": "proposed", "skill_id": skill.id, "company_id": company_id or False,
-                "proposed_by": self.env.uid, "reason": self.env._("From approved lessons."),
-            })
-            made |= skill
+            groups = self.env["res.groups"].browse(group_ids)
+            name = self.env._("What we learnt: %s", label)
+            if groups:
+                name = self.env._("What we learnt: %(app)s, for %(groups)s", app=label,
+                                  groups=", ".join(sorted(groups.mapped("display_name"))))
+            parts = self._lessons_parts(self._lessons_header(label), entry["lessons"])
+            for number, (text, taken) in enumerate(parts, 1):
+                skill = self.create({
+                    "key": self._free_key(f"lessons-{app.replace('_', '-')}")[:63],
+                    "name": (f"{name} ({number}/{len(parts)})" if len(parts) > 1 else name)[:200],
+                    "summary": f"Rules this company taught Nudge about {label}: read them before answering about it."[
+                        :skill_rules.MAX_SUMMARY],
+                    "instructions": text,
+                    "trigger_words": ", ".join(words),
+                    "model_names": ",".join(models_named),
+                    "modes": "talk,agent,dev",
+                    "group_ids": [(6, 0, list(group_ids))],
+                    "company_id": company_id or False,
+                    "state": "draft",
+                    "origin": "lessons",
+                    "test_sentence": descriptions[0] if descriptions else models_named[0],
+                })
+                taken.write({"skill_id": skill.id})
+                Note.create({
+                    "name": self.env._("Draft skill from %(count)s lessons: %(app)s", count=len(taken),
+                                       app=label)[:200],
+                    "body": self.env._(
+                        "Lessons about %(app)s were put together as a draft skill. Review it, publish it or reject "
+                        "it: until it is published, no model reads it.", app=label),
+                    "kind": "skill", "state": "proposed", "skill_id": skill.id, "company_id": company_id or False,
+                    "proposed_by": self.env.uid, "reason": self.env._("From approved lessons."),
+                })
+                made |= skill
         return made
+
+    def _rebuild_from_lessons(self):
+        """A lesson left these skills (refused, archived, deleted or changed): each now says only what the
+        lessons it still holds say, as the draft was made; one with no lesson left is archived, and its
+        proposal refused. Removing a lesson only takes away from what a manager published."""
+        for skill in self.exists().filtered(lambda record: record.active and record.origin == "lessons"):
+            lessons = skill.lesson_ids.filtered(lambda lesson: lesson.state == "approved")
+            parts = []
+            if lessons:
+                app = lessons[:1]._app_and_models()[0]
+                label = self._app_label(app, skill_rules.split_names(skill.model_names))[0] if app else skill.name
+                parts = self._lessons_parts(self._lessons_header(label), lessons)
+            if not parts:
+                skill.write({"active": False, "state": "draft"})
+                skill._close_proposals("refused")
+                continue
+            text, taken = parts[0]
+            if skill.lesson_ids - taken:
+                # What does not fit in one skill any more leaves it too, back to the notes
+                (skill.lesson_ids - taken).write({"skill_id": False})
+            if text != skill.instructions:
+                skill.write({"instructions": text})
 
     # ------------------------------------------------------------ the week
     @api.model

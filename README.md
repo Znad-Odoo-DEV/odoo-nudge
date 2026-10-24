@@ -407,7 +407,11 @@ version and a test sentence with the tool it expects.
 - **Proposals and tests (NP-19).** Three approved lessons about one app (the model they name, or the
   screen they were learnt on) become a draft skill, with a line in Business Notes for the managers
   (Review opens the draft; Refuse on the line archives it; publishing it approves the line). Once the
-  skill is published, its lessons come with it when a question needs it, no longer with every question. The
+  skill is published, its lessons come with it when a question needs it, no longer with every question.
+  Lessons limited to some groups make a draft of their own, limited to those groups; a draft holds at most
+  12,000 characters (more lessons make more drafts). A lesson refused, archived, deleted or changed leaves
+  its skill, which then says only what its other lessons say (archived when none is left), and the lesson
+  is a business note again with its own state and groups. The
   weekly health check runs the test sentence of every active skill without any AI (does it still bring
   the skill, is its tool still here) and writes a red line in Business Notes for each that fails; red
   lines and proposals are never sent to a model.
