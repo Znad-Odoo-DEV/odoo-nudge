@@ -121,11 +121,13 @@ export function asksToDoIt(text) {
 }
 
 // A question of how, or of where: the steps, written or shown, may be what
-// the person wants, even in Agent mode
+// the person wants, even in Agent mode. The Arabic words stand alone (a "و" may lead): "فين" is
+// not "الموظفين"
 const HOW_TO = new RegExp(
     "(\\b(how (do|can|could|would|should|to|is|are|does)|where (do|can|is|are|should|does)|show me|teach me|" +
         "walk me through|what are the steps)\\b" +
-        "|كيف|كيفية|شلون|ازاي|إزاي|وين|فين|فرجيني|ورجيني|وريني|علمني|خطوات|شو الطريقة|ما الطريقة)",
+        "|(^|[^\\u0600-\\u06FF])و?(كيف|كيفية|شلون|ازاي|إزاي|وين|فين|فرجيني|ورجيني|وريني|علمني|خطوات|شو الطريقة|ما الطريقة)" +
+        "(?=$|[^\\u0600-\\u06FF]))",
     "i"
 );
 
