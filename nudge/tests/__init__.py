@@ -90,3 +90,4 @@ from . import test_fallback
 from . import test_ask_data
 from . import test_egress  # NP-15
 from . import test_auditor
+from . import test_credential_expiry
