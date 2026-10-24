@@ -67,7 +67,10 @@ class Tool:
     def is_available(self, env, mode=MODE_TALK):
         # What the agent may do, the developer may do too
         offered = mode in self.modes or (mode == MODE_DEV and MODE_AGENT in self.modes)
-        return offered and env.user.has_group(self.group)
+        if offered and env.user.has_group(self.group):
+            return True
+        # NP-02: a person without the Agent group is offered the reading tools, and only those
+        return self.name in ASK_TOOLS and mode == MODE_TALK and ask_tier_applies(env)
 
     def definition(self):
         return {
@@ -99,6 +102,28 @@ class Action(Tool):
 
 
 TOOLS = {}
+
+# NP-02, Ask the data: what a person of the group Nudge User may ask of the data in Talk, whatever else their
+# groups give them. The names are the whole tier: reading and counting under the rights of the person, and
+# taking them to the list or the record. Nothing that creates, writes, presses a button, plans, runs code or
+# reads the database is named here, so in Talk it is not in the schema at all, not only refused. A tool is added
+# to the tier by naming it here, never by its group.
+ASK_TOOLS = frozenset({
+    "search_records", "read_record", "find_record", "aggregate_records", "show_chart", "filter_screen",
+    "open_record",
+})
+ASK_DATA_PARAM = "nudge.ask_data"
+
+
+def ask_data_enabled(env):
+    """:return: whether the administrator keeps the Ask tier on (it is, until switched off)"""
+    return env["ir.config_parameter"].sudo().get_param(ASK_DATA_PARAM) != "no"
+
+
+def ask_tier_applies(env):
+    """:return: whether the current user is offered the tier: a Nudge User, and the tier is on"""
+    return env.user.has_group("nudge.group_nudge_user") and ask_data_enabled(env)
+
 
 # The tools a small model is given when its provider asks for the essential
 # ones: finding, reading, showing, and in each mode what it is for. A model
@@ -179,6 +204,8 @@ def available(env, mode=MODE_TALK, tool_set="full", extra=(), background=False):
     of the prompt, and its order must not change between two requests."""
     if tool_set == "essential":
         names = ESSENTIAL_BY_MODE.get(mode, TALK_TOOLS) | set(extra) | {"more_tools"}
+        if mode == MODE_TALK and ask_tier_applies(env):
+            names |= ASK_TOOLS
     else:
         names = {name for name, tool in TOOLS.items() if not getattr(tool, "small_models_only", False)}
     if background:

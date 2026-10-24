@@ -96,7 +96,8 @@ class TestAnalytics(NudgeCase, TransactionCase):
     def test_only_the_agent_in_agent_mode(self):
         env = self.env(user=self.agent)
         self.assertIn("aggregate_records", [tool.name for tool in tools.base.available(env, "agent")])
-        self.assertNotIn("aggregate_records", [tool.name for tool in tools.base.available(env, "talk")])
+        # NP-02: Talk has the reading tools of the Ask tier; Agent mode is still the Agent group's alone
+        self.assertIn("aggregate_records", [tool.name for tool in tools.base.available(env, "talk")])
         self.assertNotIn(
             "aggregate_records",
             [tool.name for tool in tools.base.available(self.env(user=self.user_a), "agent")],

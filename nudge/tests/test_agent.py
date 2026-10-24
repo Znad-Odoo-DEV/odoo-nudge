@@ -327,7 +327,8 @@ class TestReading(AgentCase, TransactionCase):
 
     def test_for_those_who_may(self):
         arguments = {"model": "res.partner"}
-        self.assertIn("no tool named", self.run_tool("search_records", arguments, mode="talk").content)
+        # NP-02: the reading tools are the Ask tier's, in Talk; in Agent mode they are the Agent group's alone
+        self.assertNotIn("no tool named", self.run_tool("search_records", arguments, mode="talk").content)
         self.assertIn("no tool named", self.run_tool("search_records", arguments, user=self.user_contacts).content)
         self.assertIn("no tool named", self.run_tool("prepare_create", arguments, mode="talk").content)
         talk = [tool.name for tool in tools.base.available(self.env(user=self.agent), "talk")]
@@ -338,10 +339,12 @@ class TestReading(AgentCase, TransactionCase):
             "open_record", "prepare_create", "prepare_plan", "prepare_revert", "prepare_task", "prepare_write", "read_record", "save_report", "search_records", "show_chart"]
         # Other modules add their own agent tools
         expected += [name for name in ("make_spreadsheet", "build_shop", "check_site", "fix_site") if name in tools.base.TOOLS]
+        expected = [name for name in expected if name not in tools.base.ASK_TOOLS]
         self.assertEqual(sorted(set(agent) - set(talk)), sorted(expected))
         self.assertEqual(set(talk) - set(agent), set())
         plain = [tool.name for tool in tools.base.available(self.env(user=self.user_a), "agent")]
-        self.assertEqual(plain, talk, "Asking for a mode does not give it")
+        self.assertEqual(plain, [name for name in talk if name not in tools.base.ASK_TOOLS],
+                         "Asking for a mode does not give it")
 
 
 @tagged("post_install", "-at_install")
