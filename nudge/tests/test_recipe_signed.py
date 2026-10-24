@@ -322,7 +322,10 @@ class TestSkillCatalogue(NudgeCase, TransactionCase):
         Recipe = self.env["nudge.recipe"].with_user(self.mgr)
         for package, item, _trust in self.Market._bundled():
             plan = Recipe._plan(Recipe._read(text_of(package)))
-            self.assertEqual([line["action"] for line in plan], ["create"], item["key"])
+            # A skill whose tools this database lacks (no spreadsheet app on Odoo 17) is skipped, never made
+            tools = package["recipe"]["items"][0]["data"]["tools"]
+            expected = "create" if all(name in base.TOOLS for name in tools) else "skip"
+            self.assertEqual([line["action"] for line in plan], [expected], item["key"])
 
     def test_a_changed_catalogue_file_is_not_listed(self):
         package = self.Market._bundled()[0][0]
@@ -334,10 +337,12 @@ class TestSkillCatalogue(NudgeCase, TransactionCase):
 
     def test_a_tool_that_is_not_installed_is_flagged_and_blocks_the_install(self):
         line = self.line("spreadsheet-summary")
-        self.assertFalse(line.tools_missing, "The spreadsheet app is installed in this database")
         with patch.dict(base.TOOLS):
-            base.TOOLS.pop("make_spreadsheet")
-            line.invalidate_recordset(["tools_missing"])
+            # Odoo 17 has no spreadsheet app: the tool is missing already
+            if "make_spreadsheet" in base.TOOLS:
+                self.assertFalse(line.tools_missing, "The spreadsheet app is installed in this database")
+                base.TOOLS.pop("make_spreadsheet")
+                line.invalidate_recordset(["tools_missing"])
             self.assertEqual(line.tools_missing, "make_spreadsheet")
             with self.assertRaises(UserError) as caught:
                 line.action_install()
