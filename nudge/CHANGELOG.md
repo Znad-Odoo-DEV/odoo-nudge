@@ -20,6 +20,7 @@ Current version: nudge 19.0.1.59.1, nudge_mcp 19.0.1.1.0, nudge_connect 19.0.1.0
 - Review: a link written /\host in an answer is no longer opened (a browser reads the backslash as a slash and leaves the site); the same check in the website bubble.
 - Review: on Odoo 17 every Nudge scheduled action ran once and switched itself off (numbercall defaults to 1 there); the 17 port adds numbercall -1 to every cron record and to the ones Developer mode creates, and a migration switches the stopped ones on again.
 - Review: in the 18 and 17 ports the lock that refuses a second click runs in a savepoint, so the client is told it is being done already and not given an internal error.
+- Review: Yes, do it on a plan card is disabled while a value is being typed, so a value not yet saved is not dropped by the run.
 ## 19.0.1.59.0
 
 - Fix, found in the live trial: on a real server every question failed with "Record does not exist or has been deleted (nudge.slot)". The place a question claims (NP-04) is committed on a cursor of its own, and the request, whose snapshot is older (repeatable read), read it back. `_handover` and `_waited_ms` now work on a cursor of their own; the place stops counting once the request commits (both count for that instant, never one place too many), at once for the external assistants and the messaging apps whose mark is committed already. The tests share one transaction, which is why they never saw it.

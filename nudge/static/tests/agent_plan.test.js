@@ -142,6 +142,16 @@ test("a step taken out, a value corrected", async () => {
     expect(".o_nudge_plan_step:nth-child(1) .o_nudge_card_value").toHaveText("Raghad Corner");
 });
 
+test("the yes waits while a value is being typed", async () => {
+    await start();
+    await click(".o_nudge_plan_edit");
+    await animationFrame();
+    expect(".o_nudge_confirm").toHaveAttribute("disabled", "");
+    await click(".o_nudge_plan_cancel");
+    await animationFrame();
+    expect(".o_nudge_confirm").not.toHaveAttribute("disabled");
+});
+
 test("after the yes each change shows its own card, and the plan can be stopped", async () => {
     const answers = [
         streamed(
