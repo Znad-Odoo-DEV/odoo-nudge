@@ -19,6 +19,10 @@ FIELD_COLUMNS = frozenset((
 # What a list of "Search More..." shows them
 MODEL_SHOWN = frozenset(("id", "name", "model", "display_name"))
 FIELD_SHOWN = frozenset(("id", "name", "field_description", "model", "model_id", "ttype", "display_name"))
+# Comparisons only: "any" would carry a search of its own on what the column points to
+OPERATORS = frozenset((
+    "=", "!=", "in", "not in", "like", "not like", "ilike", "not ilike", "=like", "=ilike", "<", ">", "<=", ">=",
+))
 
 
 def picked_in_sudo(records):
@@ -31,7 +35,8 @@ def picked_in_sudo(records):
 def within(records, domain, columns):
     """:return: ``domain`` as a Domain when it filters on ``columns`` only, else refused as Odoo does"""
     domain = Domain(domain or Domain.TRUE)
-    if all(condition.field_expr in columns for condition in domain.iter_conditions()):
+    if all(condition.field_expr in columns and condition.operator in OPERATORS
+           for condition in domain.iter_conditions()):
         return domain
     raise AccessError(records.env._("You are not allowed to access '%s' records.", records._description))
 
