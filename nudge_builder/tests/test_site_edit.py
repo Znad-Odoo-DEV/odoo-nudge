@@ -6,7 +6,7 @@ from odoo.exceptions import AccessError, UserError
 from odoo.tests import TransactionCase, new_test_user, tagged
 
 from odoo.addons.nudge.tools import base
-from odoo.addons.nudge_builder.tools import compat, library, sections
+from odoo.addons.nudge_builder.tools import compat, library, sections, site_edit
 
 MEAN = "<script>alert(1)</script><img src=x onerror=alert(1)>Hello {{ 1 }} ${x} t-esc=\"x\" onclick=boom()"
 
@@ -107,6 +107,28 @@ class TestSiteEdit(TransactionCase):
         self.assertFalse(undone.is_error, undone.content)
         self.assertEqual(about.view_id.with_context(lang="en_US").website_meta_title, before)
         self.assertEqual(revision.state, "undone")
+
+    def test_the_description_card_shows_the_new_text_after(self):
+        site = self.make()
+        about = self.page(site, "about")
+        text = "We build villas and towers across the Emirates since 1998."
+        result = self.tool("change_page_seo", {"page": "about", "description": text})
+        values = {line["label"]: line["value"] for line in result.pending["preview"]["lines"]}
+        self.assertEqual(values["SEO description: after"], text)
+        self.assertEqual(result.pending["values"]["changes"]["website_meta_description"], text)
+        self.assertFalse(self.confirm("change_page_seo", result).is_error)
+        self.assertEqual(about.view_id.with_context(lang="en_US").website_meta_description, text)
+
+    def test_the_id_of_the_site_given_as_website_id_finds_the_site(self):
+        site = self.make()
+        found = site_edit.find_site(self.env_d, {"website_id": site.id})
+        self.assertEqual(found, site)
+        self.assertEqual(site_edit.find_site(self.env_d, {"website_id": site.website_id.id}), site)
+        result = self.tool("read_site_page", {"website_id": site.id})
+        self.assertFalse(result.is_error, result.content)
+        with self.assertRaises(UserError) as caught:
+            site_edit.find_site(self.env_d, {"site_id": 999999})
+        self.assertIn("site_id %s" % site.id, str(caught.exception))
 
     def test_the_seo_description_in_arabic_and_the_limits(self):
         site = self.make()
