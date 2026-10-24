@@ -88,6 +88,36 @@ export class NudgePanel extends Component {
         this.commandMenu = useState({ index: 0, closedFor: null });
         // NP-23: the overlay that lists the commands
         this.help = useState({ open: false });
+        this.shortcutsRef = useRef("shortcuts");
+        // The overlay is a modal dialog: focus moves in, Tab stays inside, and
+        // closing it (Escape included) gives the focus back to the textarea
+        useEffect(
+            (open) => {
+                const overlay = this.shortcutsRef.el;
+                if (!open || !overlay) {
+                    return;
+                }
+                const focusable = () => [...overlay.querySelectorAll("button, [href], [tabindex]:not([tabindex='-1'])")];
+                focusable()[0]?.focus();
+                const trap = (ev) => {
+                    if (ev.key !== "Tab") {
+                        return;
+                    }
+                    const items = focusable();
+                    const edge = ev.shiftKey ? items[0] : items.at(-1);
+                    if (ev.target === edge || !overlay.contains(ev.target)) {
+                        ev.preventDefault();
+                        (ev.shiftKey ? items.at(-1) : items[0])?.focus();
+                    }
+                };
+                overlay.addEventListener("keydown", trap);
+                return () => {
+                    overlay.removeEventListener("keydown", trap);
+                    this.inputRef.el?.focus();
+                };
+            },
+            () => [this.help.open]
+        );
 
         useEffect(
             () => this.inputRef.el?.focus(),

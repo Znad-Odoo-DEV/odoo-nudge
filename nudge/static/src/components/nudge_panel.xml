@@ -49,7 +49,8 @@
             </header>
 
             <!-- NP-23: what can be typed, in one place -->
-            <div t-if="help.open" class="o_nudge_shortcuts" role="dialog" aria-label="Commands and shortcuts">
+            <div t-if="help.open" t-ref="shortcuts" class="o_nudge_shortcuts" role="dialog" aria-modal="true"
+                 aria-label="Commands and shortcuts">
                 <div class="o_nudge_shortcuts_head">
                     <strong>Commands and shortcuts</strong>
                     <button type="button" class="o_nudge_icon_button o_nudge_help_close" title="Close" aria-label="Close"
