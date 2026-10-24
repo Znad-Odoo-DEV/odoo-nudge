@@ -83,3 +83,4 @@ from . import test_compliance_feed
 from . import test_note_scope
 from . import test_prompts
 from . import test_built
+from . import test_redact

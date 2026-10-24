@@ -21,7 +21,10 @@ HIDDEN = "[hidden]"
 
 SENSITIVE_NAME = re.compile(
     r"pass(word|wd)?|secret|token|api_?key|private_?key|totp|otp|signup|oauth|credential"
-    r"|cvv|cvc|card_?number|iban|ssn",
+    r"|cvv|cvc|card_?number|iban|ssn"
+    # NP-13 / SEC-01: gateway and signing credentials that carry no word of the list above
+    r"|_key(?:_|$)|hash_?key|hmac|signature|(?:^|_)pin$|consumer_(?:key|secret)|client_secret"
+    r"|private_?cert|(?:^|_)(?:p12|pfx)(?:_|$)|csid|_csr$",
     re.IGNORECASE,
 )
 CONTROL_CHARS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
@@ -67,7 +70,8 @@ def _clean(value, depth=0):
 def _hide_named_value(entry):
     """``{"name": "api_key", "value": "..."}``: the name is in a value, not in a key."""
     name = entry.get("name")
-    if isinstance(name, str) and "value" in entry and SENSITIVE_NAME.search(name):
+    if "value" in entry and (entry.get("masked") is True or (isinstance(name, str) and SENSITIVE_NAME.search(name))):
+        # ``masked``: the screen said so (a password widget), whatever the field is called
         entry["value"] = HIDDEN
 
 

@@ -460,7 +460,13 @@ class NudgeProvider(models.Model):
     def _get_adapter(self):
         self.ensure_one()
         self._check_private()
-        return base.get_adapter(self._get_config())
+        adapter = base.get_adapter(self._get_config())
+        # NP-13: a provider beyond the company's own server gets tokens for personal data, not the data
+        # sudo: the switch is Nudge's own setting; a person who may ask Nudge may not read companies
+        if not self.runs_locally and self.env.company.sudo().nudge_redact_pii:
+            from ..llm.redact import RedactingAdapter  # noqa: PLC0415
+            adapter = RedactingAdapter(adapter)
+        return adapter
 
     def _compute_cost(self, usage):
         """:param dict usage: normalized token counts

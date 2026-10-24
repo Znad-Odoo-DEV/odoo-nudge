@@ -155,6 +155,47 @@ def is_secret(field):
     return bool(SENSITIVE_NAME.search(field.name))
 
 
+PASSWORD_ATTRIBUTE = re.compile(r"""<field\b[^>]*\bpassword\s*=\s*["']?(?!false|0)\w""", re.IGNORECASE)
+PASSWORD_FIELD_NAME = re.compile(r"""\bname\s*=\s*["']([A-Za-z_][\w.]*)["']""")
+
+
+def password_fields(model):
+    """NP-13 / SEC-01: the fields that a form view of ``model`` shows as a password.
+
+    The widget says it is a credential whatever the field is called, so the name list need not know it.
+    :return: set of field names (cached until a view of the model changes)"""
+    env = model.env
+    cache = env.registry.__dict__.setdefault("_nudge_password_fields", {})
+    env["ir.ui.view"].flush_model()
+    env.cr.execute("SELECT COUNT(*), MAX(write_date) FROM ir_ui_view WHERE model = %s", [model._name])
+    stamp = tuple(env.cr.fetchone())
+    cached = cache.get(model._name)
+    if cached and cached[0] == stamp:
+        return cached[1]
+    names = set()
+    try:
+        # sudo: reading the view of the model is not reading data; a view is not secret
+        arch = model.sudo().get_view(view_type="form")["arch"]
+    except Exception:  # noqa: BLE001 - a model without a form view has no password field
+        arch = ""
+    for node in re.findall(r"<field\b[^>]*>", arch or ""):
+        if PASSWORD_ATTRIBUTE.search(node) or re.search(r"""widget\s*=\s*["']password["']""", node):
+            found = PASSWORD_FIELD_NAME.search(node)
+            if found:
+                names.add(found.group(1))
+    cache[model._name] = (stamp, names)
+    return names
+
+
+def is_hidden_field(model, field):
+    """:return: whether the value of ``field`` must never leave: it is named like a secret, a view shows it as a
+    password, or this person may not read it (``groups``)"""
+    return bool(
+        is_secret(field)
+        or field.name in password_fields(model)
+        or not model._has_field_access(field, "read"))
+
+
 def get_records(model, ids, operation="read"):
     """:return: the records, which exist and which this person may use
     :raise Refused: when one of them is not"""
@@ -237,14 +278,16 @@ def describe(env, records, names):
     """:return: the records as lists of plain values, as this person reads them"""
     fields = records._fields
     rows = []
-    for values in records.read(names):
+    # A field this person may not read is not even asked for
+    blocked = {name for name in names if name != "id" and not records._has_field_access(fields[name], "read")}
+    for values in records.read([name for name in names if name not in blocked] or ["id"]):
         row = {"id": values["id"]}
         # A parameter named like a secret keeps its value to itself
         secret_row = records._name == "ir.config_parameter" and SECRET_KEY.search(values.get("key") or "")
         for name in names:
             if name == "id" or fields[name].type in SKIPPED_TYPES:
                 continue
-            if is_secret(fields[name]) or (secret_row and name == "value"):
+            if name in blocked or is_hidden_field(records, fields[name]) or (secret_row and name == "value"):
                 row[name] = HIDDEN
             else:
                 row[name] = format_value(env, fields[name], values.get(name))
@@ -344,7 +387,7 @@ def build_domain(model, conditions, match="all"):
     for condition in conditions:
         path, operator = condition["field"], condition["operator"]
         field = target_field(model, path)
-        if is_secret(field):
+        if is_secret(field) or field.name in password_fields(model.env[field.model_name]):
             raise Refused(f"Nothing can be looked for in {path}.")
         if operator in ("is set", "is not set"):
             value = False
