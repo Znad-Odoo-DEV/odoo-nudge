@@ -876,12 +876,23 @@ def read_action(env, model, action, position=1):
     return dict(values, name=name), None, lines
 
 
-def make_action(env, values, template):
-    """Create the server action and, when it comes with one, its template."""
+def register(env, record, name, step=None):
+    """Tag and list what Developer mode made (see ``building.register``); building imports this module."""
+    from .building import register as register_built  # noqa: PLC0415
+    register_built(env, record, name, step)
+
+
+def make_action(env, values, template, step=None):
+    """Create the server action and, when it comes with one, its template;
+    both are tagged and listed in "Made by Nudge"."""
     values = dict(values)
     if template:
-        values["template_id"] = env["mail.template"].create(addressed(template)).id
-    return env["ir.actions.server"].create(values)
+        made = env["mail.template"].create(addressed(template))
+        register(env, made, f"email_template_{made.name}", step)
+        values["template_id"] = made.id
+    action = env["ir.actions.server"].create(values)
+    register(env, action, f"server_action_{action.name}", step)
+    return action
 
 
 class Building(base.Action):
@@ -955,15 +966,16 @@ def read_rule(env, arguments):
     return values, actions, templates, lines
 
 
-def make_rule(env, values):
+def make_rule(env, values, step=None):
     """:param values: what ``read_rule`` gave, as the step keeps it
     :return: the rule, with its actions"""
     rule_values = dict(values.get("rule") or {})
     if rule_values.get("trigger_field_ids"):
         rule_values["trigger_field_ids"] = [Command.set(rule_values["trigger_field_ids"])]
     rule = env["base.automation"].create(rule_values)
+    register(env, rule, f"automation_{rule.name}", step)
     for action_values, template in zip(values.get("actions") or [], values.get("templates") or []):
-        make_action(env, dict(action_values, base_automation_id=rule.id), template)
+        make_action(env, dict(action_values, base_automation_id=rule.id), template, step)
     return rule
 
 
@@ -1039,7 +1051,7 @@ class PrepareAutomation(Building):
         values = step.values or {}
         if not (values.get("rule") or {}).get("name"):
             return base.ToolResult("This rule cannot be made.", is_error=True)
-        rule = make_rule(env, values)
+        rule = make_rule(env, values, step)
         return base.ToolResult(
             f"Made: automation rule #{rule.id} {rule.name!r} with {len(rule.action_server_ids)} action(s). "
             "It is in Settings ‣ Technical ‣ Automation Rules.",
@@ -1104,7 +1116,7 @@ class PrepareServerAction(Building):
         values = step.values or {}
         if not (values.get("action") or {}).get("name"):
             return base.ToolResult("This action cannot be made.", is_error=True)
-        action = make_action(env, values["action"], values.get("template"))
+        action = make_action(env, values["action"], values.get("template"), step)
         where = " It is in the Actions menu." if action.binding_model_id else ""
         told = (f"Made: server action #{action.id} {action.name!r} ({action.state}).{where} "
                 "It is in Settings ‣ Technical ‣ Server Actions.")
@@ -1196,6 +1208,7 @@ class PrepareEmailTemplate(Building):
         if not values.get("name"):
             return base.ToolResult("This template cannot be made.", is_error=True)
         template = env["mail.template"].create(addressed(values))
+        register(env, template, f"email_template_{template.name}", step)
         return base.ToolResult(
             f"Made: email template #{template.id} {template.name!r}. "
             "It is in Settings ‣ Technical ‣ Email Templates.",
@@ -2112,6 +2125,7 @@ class PrepareScheduledAction(Building):
         if not values.get("name") or values.get("user_id") != env.uid:
             return base.ToolResult("This scheduled action cannot be made.", is_error=True)
         cron = env["ir.cron"].create(values)
+        register(env, cron, f"scheduled_action_{cron.cron_name}", step)
         return base.ToolResult(
             f"Made: scheduled action #{cron.id} {cron.cron_name!r}, every {cron.interval_number} "
             f"{cron.interval_type}, first on {cron.nextcall}. It is in Settings ‣ Technical ‣ "

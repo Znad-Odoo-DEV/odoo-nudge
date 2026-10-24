@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_built_view_list" model="ir.ui.view">
+        <field name="name">nudge.built.view.list</field>
+        <field name="model">nudge.built</field>
+        <field name="arch" type="xml">
+            <list string="Made by Nudge" create="0" edit="0" delete="0" decoration-muted="state != 'active'">
+                <header>
+                    <button name="action_switch_off" type="object" string="Switch off" display="always"/>
+                </header>
+                <field name="kind"/>
+                <field name="name"/>
+                <field name="user_id" widget="many2one_avatar" optional="show"/>
+                <field name="made_on" optional="show"/>
+                <field name="conversation_id" optional="show"/>
+                <field name="step_id" optional="hide"/>
+                <field name="can_undo" optional="show"/>
+                <field name="state" widget="badge" decoration-success="state == 'active'" decoration-muted="state != 'active'"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                <field name="can_switch_off" column_invisible="True"/>
+                <button name="action_open_record" type="object" string="Open" icon="fa-external-link"/>
+                <button name="action_switch_off" type="object" string="Switch off" icon="fa-power-off"
+                        invisible="not can_switch_off"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_built_view_form" model="ir.ui.view">
+        <field name="name">nudge.built.view.form</field>
+        <field name="model">nudge.built</field>
+        <field name="arch" type="xml">
+            <form string="Made by Nudge" create="0" edit="0" delete="0">
+                <header>
+                    <button name="action_switch_off" type="object" string="Switch off" class="btn-primary"
+                            invisible="not can_switch_off"/>
+                    <button name="action_open_record" type="object" string="Open"/>
+                    <button name="action_open_step" type="object" string="Step" invisible="not step_id"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Switched off" bg_color="text-bg-warning" invisible="state != 'archived'"/>
+                    <widget name="web_ribbon" title="Deleted" bg_color="text-bg-danger" invisible="state != 'gone'"/>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="kind"/>
+                            <field name="user_id"/>
+                            <field name="made_on"/>
+                            <field name="source"/>
+                        </group>
+                        <group>
+                            <field name="conversation_id"/>
+                            <field name="run_id"/>
+                            <field name="step_id"/>
+                            <field name="can_undo"/>
+                            <field name="state"/>
+                            <field name="can_switch_off" invisible="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Log" name="log">
+                            <field name="log_ids">
+                                <list>
+                                    <field name="create_date"/>
+                                    <field name="user_id"/>
+                                    <field name="action"/>
+                                    <field name="summary"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_built_view_search" model="ir.ui.view">
+        <field name="name">nudge.built.view.search</field>
+        <field name="model">nudge.built</field>
+        <field name="arch" type="xml">
+            <search string="Made by Nudge">
+                <field name="name"/>
+                <field name="user_id"/>
+                <field name="conversation_id"/>
+                <filter name="mine" string="Asked by me" domain="[('user_id', '=', uid)]"/>
+                <separator/>
+                <filter name="rules" string="Rules and Actions"
+                        domain="[('kind', 'in', ('automation', 'server_action', 'scheduled_action'))]"/>
+                <filter name="screens" string="Fields, Views and Buttons"
+                        domain="[('kind', 'in', ('field', 'view', 'button'))]"/>
+                <filter name="documents" string="Reports and Emails"
+                        domain="[('kind', 'in', ('report', 'email_template'))]"/>
+                <group>
+                    <filter name="by_kind" string="Type" context="{'group_by': 'kind'}"/>
+                    <filter name="by_user" string="Asked by" context="{'group_by': 'user_id'}"/>
+                    <filter name="by_day" string="Day" context="{'group_by': 'made_on:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_built_action" model="ir.actions.act_window">
+        <field name="name">Made by Nudge</field>
+        <field name="res_model">nudge.built</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Nothing was built by Nudge yet</p>
+            <p>The automations, fields, views, buttons, reports, emails and scheduled actions that Nudge
+               builds in Developer mode are listed here, with who asked and when. You can switch
+               each one off; nothing is deleted.</p>
+        </field>
+    </record>
+
+    <!-- The menu finds what was made before this list existed, then opens it -->
+    <record id="nudge_built_server_action" model="ir.actions.server">
+        <field name="name">Made by Nudge</field>
+        <field name="model_id" ref="model_nudge_built"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open()</field>
+    </record>
+
+    <record id="nudge_built_switch_view_form" model="ir.ui.view">
+        <field name="name">nudge.built.switch.view.form</field>
+        <field name="model">nudge.built.switch</field>
+        <field name="arch" type="xml">
+            <form string="Switch Off What Nudge Built">
+                <sheet>
+                    <p>This is what will be switched off. Nothing is deleted, and what you switch off keeps its
+                       data. You can see it again in the list.</p>
+                    <field name="summary"/>
+                    <field name="edited" invisible="1"/>
+                    <group invisible="not edited">
+                        <field name="understood"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_confirm" type="object" string="Switch off" class="btn-primary"
+                            data-hotkey="q"/>
+                    <button string="Cancel" special="cancel" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <menuitem id="nudge_menu_built" name="Made by Nudge" sequence="40"
+              parent="nudge_menu_agent" action="nudge_built_server_action"
+              groups="nudge.group_nudge_manager,base.group_system"/>
+</odoo>

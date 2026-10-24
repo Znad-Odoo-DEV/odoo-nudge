@@ -158,6 +158,12 @@
             <field name="groups" eval="[Command.link(ref('group_nudge_manager'))]"/>
         </record>
 
+        <record id="nudge_built_rule_company" model="ir.rule">
+            <field name="name">Nudge Made by Nudge: companies of the user</field>
+            <field name="model_id" ref="model_nudge_built"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
         <record id="nudge_memory_rule_company" model="ir.rule">
             <field name="name">Nudge Answer Memory: companies of the manager</field>
             <field name="model_id" ref="model_nudge_memory"/>

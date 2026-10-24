@@ -618,7 +618,7 @@ class PrepareApprovalFlow(Building):
                 raise Refused(f"{build['what']}: {result.content}")
             tool = base.TOOLS[build["tool"]]
             done = tool.execute(env, SimpleNamespace(values=result.pending["values"], res_model=result.pending["res_model"],
-                                                     res_ids=[], run_id=run))
+                                                     res_ids=[], run_id=run, tool=build["tool"]))
             if done.is_error:
                 raise Refused(f"{build['what']}: {done.content}")
             record_model, ids, names = done.records
