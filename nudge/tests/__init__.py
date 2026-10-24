@@ -95,3 +95,4 @@ from . import test_didyoumean
 from . import test_summary
 from . import test_ui_preferences  # NP-23
 from . import test_skills
+from . import test_quality_gate
