@@ -1,4 +1,7 @@
+from unittest.mock import patch
+
 from odoo.exceptions import AccessError
+from odoo.modules import module as odoo_module
 from odoo.tests import TransactionCase, tagged
 
 from odoo.addons.nudge.llm import summary
@@ -203,6 +206,59 @@ class TestSummary(NudgeCase, TransactionCase):
             self.ask(self.user_a, f"Question {number}", conversation_id=conversation.id)
         self.assertEqual(conversation.summary_text, "Raghad compared two quotations; keep it short.")
         self.assertIn("Question 7", conversation.summary_extra)
+
+    def test_the_row_is_let_go_before_the_provider_is_asked(self):
+        conversation = self.aged()
+        self.use_adapter(reply="Improved")
+        order = []
+        cr = self.env.cr
+        complete = type(self.env["nudge.provider"])._complete
+
+        def spy(this, *args, **kwargs):
+            order.append("call")
+            return complete(this, *args, **kwargs)
+
+        with patch.object(odoo_module, "current_test", False),                 patch.object(cr, "commit", lambda: order.append("commit")),                 patch.object(type(self.env["nudge.provider"]), "_complete", spy):
+            self.assertEqual(self.env["nudge.conversation"]._cron_improve_summaries(), 1)
+        self.assertEqual(order[:2], ["commit", "call"], "The dirty flag is committed before the call")
+        self.assertEqual(order.count("call"), 1)
+        self.assertTrue(conversation.summary_ai)
+
+    def test_a_row_another_question_holds_is_not_waited_for(self):
+        conversation = self.aged()
+        conversation.summary_dirty = True
+        adapter = self.use_adapter(reply="Improved")
+        text = conversation.summary_text
+        busy = type(conversation)
+        with patch.object(busy, "_summary_lock", lambda this: False):
+            self.assertEqual(self.env["nudge.conversation"]._cron_improve_summaries(), 0)
+            upto = conversation.summary_upto_id
+            conversation._summary_refresh()
+        self.assertEqual(conversation.summary_text, text, "The improvement is dropped, not forced over a writer")
+        self.assertEqual(conversation.summary_upto_id, upto, "A refresh that finds the row busy writes nothing")
+        self.assertTrue(conversation.sudo()._summary_lock(), "A free row is taken")
+        self.assertEqual(len(adapter.calls), 1)
+
+    def test_two_refreshes_in_turn_do_not_repeat_a_line(self):
+        conversation = self.chat(6)
+        conversation._summary_refresh()
+        once = conversation.summary_text
+        conversation._summary_refresh()
+        self.assertEqual(conversation.summary_text, once)
+        self.assertEqual(once.count("Question 1"), 1)
+
+    def test_a_manager_cannot_create_a_conversation_with_a_summary_for_someone_else(self):
+        Conversation = self.env["nudge.conversation"].with_user(self.manager)
+        with self.assertRaises(AccessError):
+            Conversation.create({"user_id": self.user_a.id, "summary_text": "Raghad agreed to everything."})
+        with self.assertRaises(AccessError):
+            Conversation.create({"summary_count": 5})
+        own = Conversation.create({"summary_text": "My own note"})
+        self.assertTrue(own.sudo().summary_edited)
+        self.assertEqual(own.sudo().user_id, self.manager)
+        # The owner may still start one with a note of their own
+        mine = self.env["nudge.conversation"].with_user(self.user_a).create({"summary_text": "Raghad's note"})
+        self.assertEqual(mine.sudo().user_id, self.user_a)
 
     def test_emptying_the_summary_makes_it_again(self):
         conversation = self.aged()

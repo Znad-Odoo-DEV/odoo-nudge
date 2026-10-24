@@ -164,6 +164,47 @@ class TestCoverage(NudgeCase, TransactionCase):
         entries = self.env["nudge.lexicon.entry"].search([("synonym", "=", "zorb")])
         self.assertEqual(len(entries), 1)
 
+    def test_a_key_a_password_or_a_number_typed_in_a_question_is_not_kept(self):
+        secrets = (
+            "please zorb the invoices with key sk-ant-api03-AbCdEf123456789xyz",
+            "please zorb the invoices password hunter2 for Raghad",
+            "please zorb the invoices for ebrahim@example.com on 0501234567",
+            "please zorb the invoices token AbCdEfGh1234567890XyZq",
+        )
+        for text in secrets:
+            self.env["nudge.question"].with_user(self.manager)._record(text)
+        samples = self.env["nudge.question"].search([("sample", "like", "zorb")]).mapped("sample")
+        self.assertTrue(samples)
+        for sample in samples:
+            for leaked in ("sk-ant", "hunter2", "ebrahim@", "0501234567", "AbCdEfGh1234567890"):
+                self.assertNotIn(leaked, sample)
+        self.assertTrue(all(sample.startswith("please zorb the invoices") for sample in samples))
+
+    def test_nothing_is_recorded_in_private_mode(self):
+        self.provider.active = True
+        self.provider.runs_locally = True
+        self.env["ir.config_parameter"].sudo().set_param("nudge.default_provider", str(self.provider.id))
+        self.use_adapter()
+        self.env.company.nudge_private_mode = True
+        before = self.env["nudge.question"].search_count([])
+        self.ask(self.user_a, "please zorb the invoices of Raghad twice")
+        self.assertEqual(self.env["nudge.question"].search_count([]), before)
+        self.env.company.nudge_private_mode = False
+        self.ask(self.user_a, "please zorb the invoices of Raghad twice")
+        self.assertEqual(self.env["nudge.question"].search_count([]), before + 1)
+
+    def test_a_manager_sees_only_the_sentences_of_their_companies(self):
+        other = self.env["res.company"].create({"name": "Another company"})
+        self.missed("please zorb the invoices", 3)
+        self.env["nudge.question"].with_company(other)._record("please blorp the quotations")
+        row = self.env["nudge.question"].sudo().search([("sample", "=", "please blorp the quotations")])
+        self.assertEqual(row.company_id, other)
+        seen = self.env["nudge.question"].with_user(self.manager).search([]).mapped("sample")
+        self.assertIn("please zorb the invoices", seen)
+        self.assertNotIn("please blorp the quotations", seen)
+        self.Coverage.with_user(self.manager).action_open()
+        self.assertNotIn("please blorp the quotations", self.lines().mapped("sample"))
+
     def test_a_remembered_answer_is_saved_from_the_page(self):
         self.missed("please zorb the invoices", 4)
         self.Coverage.with_user(self.manager).action_open()
