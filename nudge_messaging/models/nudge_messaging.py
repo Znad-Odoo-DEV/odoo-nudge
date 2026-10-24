@@ -23,6 +23,7 @@ from odoo import api, fields, models, tools
 from odoo.exceptions import AccessError, UserError
 
 from odoo.addons.nudge.llm import base as llm
+from odoo.addons.nudge.models.nudge_slot import NudgeBusy
 from odoo.addons.nudge.tools import base as tool_base
 from odoo.addons.nudge.tools import noai_commands
 from odoo.addons.nudge.tools.deadline import cap, until, window
@@ -53,6 +54,8 @@ PROVIDER_SECONDS = 40
 # begun again, and how many times
 CRON_SECONDS = 50
 RETRY_SECONDS = 120
+# A message that finds no place free is looked at again in about this long at most
+BUSY_MAX_SECONDS = 60
 MAX_TRIES = 3
 STATES = ("received", "limited", "unknown", "linked", "answered", "failed", "wrong_code")
 APPROVAL_HOURS = 24
@@ -171,6 +174,11 @@ class NudgeMessaging(models.AbstractModel):
         try:
             with env.cr.savepoint():
                 state = self._answer(line, channel, event)
+        except NudgeBusy as busy:
+            # No place is free: the message stays in the queue, untouched and not counted as a try,
+            # and the cron comes back to it when a place frees (nothing is sent to the person)
+            self._defer(line, busy.retry_after)
+            return "busy"
         except Exception:  # noqa: BLE001 - a database error inside must not take the queue with it
             _logger.exception("Nudge messaging: a message could not be answered")
             state = "failed"
@@ -181,6 +189,18 @@ class NudgeMessaging(models.AbstractModel):
             except Exception:  # noqa: BLE001
                 _logger.info("Nudge messaging: the failure could not be told")
         line.write({"state": state if state in STATES else "answered", "payload": False})
+
+    @api.model
+    def _defer(self, line, seconds):
+        """Keep a message in the queue for ``seconds`` more: the cron takes up again what began more
+        than ``RETRY_SECONDS`` ago, so the beginning is dated that much earlier than now."""
+        seconds = min(max(1, int(seconds)), BUSY_MAX_SECONDS)
+        line.write({
+            "tries": max(0, line.tries - 1),
+            "started_at": fields.Datetime.now() - timedelta(seconds=RETRY_SECONDS - seconds)})
+        cron = self.env.ref("nudge_messaging.cron_answer", raise_if_not_found=False)
+        if cron:
+            cron.sudo()._trigger(at=fields.Datetime.now() + timedelta(seconds=seconds))
 
     @api.model
     def _answer(self, line, channel, event):
@@ -207,6 +227,8 @@ class NudgeMessaging(models.AbstractModel):
             with env.cr.savepoint():
                 answer = user_env["nudge.messaging"]._converse(channel, event)
             state = "answered"
+        except NudgeBusy:
+            raise
         except Exception:  # noqa: BLE001 - the person is told, the log keeps the cause
             _logger.exception("Nudge messaging: a message could not be answered")
             answer = self._in(lang)._("Something went wrong on the server. Try again in a moment.")
@@ -287,6 +309,8 @@ class NudgeMessaging(models.AbstractModel):
             body = self._dispatch(run, channel, event, text, links)
             if run.state in ("running",):
                 run._end("done")
+        except NudgeBusy:
+            raise
         except (UserError, AccessError) as error:
             body = str(error)
             if run.state in ("running", "waiting"):
@@ -318,7 +342,6 @@ class NudgeMessaging(models.AbstractModel):
         env = self.env
         kind = event.get("kind") or "text"
         if kind == "audio":
-            env["nudge.mcp"]._check_capacity()
             with self._streaming(channel):
                 text = self._hear(channel, event)
         elif kind in ("image", "file"):
@@ -329,13 +352,24 @@ class NudgeMessaging(models.AbstractModel):
         return self._from_text(run, channel, text, links)
 
     @contextlib.contextmanager
-    def _streaming(self, channel):
-        """The work of a voice note or a file holds a worker like an answer: it counts in the same limit"""
-        self._mark(channel, True)
+    def _streaming(self, channel, provider=None):
+        """The work of a voice note, a file or an answer holds a worker: it takes a place in the same
+        line as the answers of the panel (``nudge.slot``), under the limit of Nudge and of its
+        provider, and counts in the same limit through its mark. Both are given back at the end,
+        whatever ends it. Never held while a person is waited for: a change is only prepared here.
+
+        :raise NudgeBusy: when no place is free; the message stays in the queue"""
+        provider = provider or self.env["nudge.provider"].sudo()._get_for_mode(MODE_AGENT)             or self.env["nudge.provider"].sudo()._get_default()
+        slot = self.env["nudge.slot"]._claim_channel(self._conversation(channel), provider)
         try:
-            yield
+            self._mark(channel, True, provider)
+            slot._handover()
+            yield slot
         finally:
-            self._mark(channel, False)
+            try:
+                self._mark(channel, False)
+            finally:
+                self.env["nudge.slot"]._finish(slot.id)
 
     # --- voice --------------------------------------------------------
     def _hear(self, channel, event):
@@ -392,7 +426,6 @@ class NudgeMessaging(models.AbstractModel):
             "conversation_id": conversation.id, "role": "user", "mode": "agent",
             "content": event.get("text") or name, "attachment_id": attachment.id, "attachment_name": name})
         env["nudge.usage"]._check_budget()
-        env["nudge.mcp"]._check_capacity()
         step, result = self._prepare(run, "document_to_record", {"target": "guess"})
         if step:
             return self._waiting(step, links)
@@ -491,7 +524,6 @@ class NudgeMessaging(models.AbstractModel):
     def _by_ai(self, run, channel, text, links):
         env = self.env
         env["nudge.usage"]._check_budget()
-        env["nudge.mcp"]._check_capacity()
         provider = self._provider()
         adapter = provider._get_adapter()
         tools = self._tools()
@@ -501,8 +533,7 @@ class NudgeMessaging(models.AbstractModel):
         deadline = until(PROVIDER_SECONDS)
         steps_pending = []
         said = ""
-        self._mark(channel, True)
-        try:
+        with self._streaming(channel, provider):
             for _round in range(MAX_ROUNDS):
                 texts, calls, stop = [], [], None
                 for event in adapter.stream_chat(
@@ -529,8 +560,6 @@ class NudgeMessaging(models.AbstractModel):
                                   tool_calls=[{"id": call["id"], "name": call["name"], "input": call["input"],
                                                "extra": call.get("extra")} for call in calls]))
                 turns.append({"role": "tool", "results": results})
-        finally:
-            self._mark(channel, False)
         for step in steps_pending:
             links.append((env._("Approve in Odoo"), self._url(record_url("nudge.step", step.id))))
         if steps_pending and not said:
@@ -627,13 +656,16 @@ class NudgeMessaging(models.AbstractModel):
         })
 
     @api.model
-    def _mark(self, channel, active):
-        """Mark (or clear) the call in the table, committed at once, so the other workers count it"""
+    def _mark(self, channel, active, provider=None):
+        """Mark (or clear) the call in the table, committed at once, so the other workers count it
+        (and count it against its provider)"""
         conversation = self._conversation(channel)
         with self.env.registry.cursor() as cr:
-            cr.execute("UPDATE nudge_conversation SET stream_started_at = %s WHERE id = %s",
-                       [fields.Datetime.now() if active else None, conversation.id])
-        conversation.invalidate_recordset(["stream_started_at"])
+            cr.execute("UPDATE nudge_conversation SET stream_started_at = %s, "
+                       "provider_id = COALESCE(%s, provider_id) WHERE id = %s",
+                       [fields.Datetime.now() if active else None, provider.id if provider else None,
+                        conversation.id])
+        conversation.invalidate_recordset(["stream_started_at", "provider_id"])
 
     @api.model
     def _turn(self, role, text):

@@ -13,6 +13,7 @@ changes as they always did. The controller puts what the credential opens in
 the context (``nudge_mcp_auth``); nothing the assistant sends can set it.
 """
 import base64
+import contextlib
 import json
 import logging
 import re
@@ -26,6 +27,7 @@ from odoo.exceptions import AccessError, UserError
 from odoo.addons.base.models.res_users import INDEX_SIZE
 from odoo.tools.misc import hmac as odoo_hmac
 
+from odoo.addons.nudge.models.nudge_slot import NudgeBusy
 from odoo.addons.nudge.tools import base as tool_base
 from odoo.addons.nudge.tools.bus import notify_user
 
@@ -110,8 +112,11 @@ def legacy_auth():
     return {"legacy": True, "grant": False, "client": False, "client_name": False, "scopes": LEGACY_SCOPES}
 
 
-def error_response(message_id, code, text):
-    return {"jsonrpc": "2.0", "id": message_id, "error": {"code": code, "message": text}}
+def error_response(message_id, code, text, data=None):
+    error = {"code": code, "message": text}
+    if data:
+        error["data"] = data
+    return {"jsonrpc": "2.0", "id": message_id, "error": error}
 
 
 def clean_client(name):
@@ -274,6 +279,10 @@ class NudgeMcp(models.AbstractModel):
             return error_response(message_id, METHOD_NOT_FOUND, env._("Nothing answers to %s.", method)), {}
         try:
             result, headers = handler(params, client)
+        except NudgeBusy as error:
+            # No place is free: the assistant is told to come back, and when
+            return error_response(message_id, SERVER_ERROR, str(error), {
+                "reason": "busy", "retryAfter": error.retry_after}), {"Retry-After": str(error.retry_after)}
         except BadParams as error:
             return error_response(message_id, INVALID_PARAMS, str(error)), {}
         except (UserError, AccessError) as error:
@@ -389,12 +398,18 @@ class NudgeMcp(models.AbstractModel):
         self._check_rate()
         run = self._open_run(client, name)
         try:
-            self._check_capacity()
             self.env["nudge.usage"]._check_budget()
-            if name in local:
-                text, is_error = self._settle(run, name, arguments, started)
-            else:
-                text, is_error = self._run_tool(run, visible[name], arguments, started)
+            # A place among the answers of Nudge for the work of the call, and no longer: the call
+            # that prepares a change ends at once, and the person's yes is waited for with no place
+            with self._seat(name, run):
+                if name in local:
+                    text, is_error = self._settle(run, name, arguments, started)
+                else:
+                    text, is_error = self._run_tool(run, visible[name], arguments, started)
+        except NudgeBusy:
+            if run.state == "running":
+                run._end("failed")
+            raise
         except (UserError, AccessError) as error:
             text, is_error = str(error), True
             if run.state == "running":
@@ -425,29 +440,39 @@ class NudgeMcp(models.AbstractModel):
         if recent >= limit:
             raise UserError(self.env._("Too many calls in a minute. Wait a moment."))
 
-    def _check_capacity(self):
-        """The answers of Nudge and the calls of the assistants hold the same
-        workers of the server: the limit of Nudge applies to them together.
-        A call in progress is a mark on the log's conversation, as a stream is
-        on its own: every worker reads the same table, and the mark expires."""
-        Conversation = self.env["nudge.conversation"].sudo().with_context(active_test=False)
-        Provider = self.env["nudge.provider"].sudo()
-        longest = max(Conversation._get_stream_seconds(provider)
-                      for provider in (Provider._get_default(), Provider._get_for_mode("dev")))
-        busy = Conversation.search_count([
-            ("stream_started_at", ">=", fields.Datetime.now() - timedelta(seconds=longest))])
-        if busy >= Conversation._get_max_streams():
-            raise UserError(self.env._("Nudge is answering other people right now. Try again in a moment."))
+    @contextlib.contextmanager
+    def _seat(self, name, run):
+        """A place for one call: the calls of the assistants hold the same workers of the server as
+        the answers of Nudge, so they take their places in the same line (``nudge.slot``), under
+        the limit of Nudge and of the provider that answers them. The call is marked on the log's
+        conversation as a stream is on its own (every worker reads the same table, and the mark
+        expires). Both are given back at the end, whatever ends the call.
 
-    def _mark_call(self, active):
+        :raise NudgeBusy: when no place is free; the caller is told when to come back"""
+        conversation = self._conversation()
+        Provider = self.env["nudge.provider"].sudo()
+        provider = Provider._get_for_mode(self._mode_of(name)) or Provider._get_default()
+        slot = self.env["nudge.slot"]._claim_channel(conversation, provider)
+        try:
+            self._mark_call(True, provider)
+            slot._handover()
+            yield slot
+        finally:
+            try:
+                self._mark_call(False)
+            finally:
+                self.env["nudge.slot"]._finish(slot.id)
+
+    def _mark_call(self, active, provider=None):
         """Mark (or clear) the call in the table, committed at once on a cursor of its own
         so that the other workers see it before this one has finished"""
         conversation = self._conversation()
         with self.env.registry.cursor() as cr:
             cr.execute(
-                "UPDATE nudge_conversation SET stream_started_at = %s WHERE id = %s",
-                [fields.Datetime.now() if active else None, conversation.id])
-        conversation.invalidate_recordset(["stream_started_at"])
+                "UPDATE nudge_conversation SET stream_started_at = %s, provider_id = COALESCE(%s, provider_id) "
+                "WHERE id = %s",
+                [fields.Datetime.now() if active else None, provider.id if provider else None, conversation.id])
+        conversation.invalidate_recordset(["stream_started_at", "provider_id"])
 
     def _run_tool(self, run, tool, arguments, started):
         env = self.env
@@ -459,11 +484,7 @@ class NudgeMcp(models.AbstractModel):
         env = env(context=dict(
             env.context, nudge_conversation_id=run.conversation_id.id,
             nudge_mode=mode, nudge_mcp=True))
-        self._mark_call(True)
-        try:
-            result = tool_base.call(env, tool.name, arguments, None, mode)
-        finally:
-            self._mark_call(False)
+        result = tool_base.call(env, tool.name, arguments, None, mode)
         if result.pending and not result.is_error:
             step = self._log_step(run, tool.name, tool.kind, "pending", arguments, result, started)
             run.state = "waiting"

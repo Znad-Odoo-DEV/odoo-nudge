@@ -2,6 +2,7 @@
 
 ## 19.0.1.1.0 (unreleased)
 
+- NP-04: a tool call takes a place in the same line as the answers of the panel (`nudge.slot`), under the limit of Nudge and of its provider, and gives it back at the end or on error; it never goes before a question that waits. When the line is full the assistant gets a JSON-RPC error (`-32000`, `data.reason` `busy`, `data.retryAfter` in seconds) and a `Retry-After` header. A change waiting for the yes of the person holds no place.
 - NP-14: assistants sign in with OAuth 2.1 (MCP authorization, revision 2026-07-28): protected resource
   and authorization server metadata, dynamic registration, a page of consent in Odoo, PKCE with S256
   only, access tokens of 60 minutes and refresh tokens that change at every use (a reuse ends the
