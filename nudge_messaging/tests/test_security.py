@@ -2,11 +2,15 @@ import time
 from datetime import timedelta
 from unittest.mock import patch
 
+import requests
+
 from odoo import fields
 from odoo.exceptions import UserError
 from odoo.tests import TransactionCase, new_test_user, tagged
 
-from .test_messaging import MessagingCase, RAGHAD_PHONE
+from odoo.addons.nudge_messaging.hooks import uninstall_hook
+
+from .test_messaging import BOT_TOKEN, MessagingCase, RAGHAD_PHONE
 
 
 @tagged("post_install", "-at_install", "nudge_messaging")
@@ -60,6 +64,25 @@ class TestRelease2Security(MessagingCase, TransactionCase):
         self.assertEqual(self.receive(code, "971599", "m-late"), "limited")
         self.assertTrue(all(Code.sudo().search([("user_id", "=", self.ebrahim.id)]).mapped("used")))
         self.assertEqual(self.receive(code, "971598", "m-later"), "limited")
+
+    def test_uninstalling_takes_the_keys_away_and_the_webhook_off_telegram(self):
+        """Review odoo-tech #10: the keys of the channels do not outlive the module, and a Telegram out of
+        reach does not stop the uninstall"""
+        Parameter = self.env["ir.config_parameter"].sudo()
+        called = []
+
+        def unreachable(url, **kwargs):
+            called.append(url)
+            raise requests.ConnectionError("Telegram is out of reach")
+        with patch.object(requests, "post", unreachable):
+            uninstall_hook(self.env)
+        self.assertEqual(called, [f"https://api.telegram.org/bot{BOT_TOKEN}/deleteWebhook"])
+        self.assertFalse(Parameter.search([("key", "=like", "nudge_messaging.%")]))
+        self.assertEqual(Parameter.get_param("nudge.noai_first"), "1", "The parameters of Nudge stay")
+        # No token: Telegram is not called
+        with patch.object(requests, "post", unreachable):
+            uninstall_hook(self.env)
+        self.assertEqual(len(called), 1)
 
     def test_one_phone_or_two_cannot_close_linking_for_everybody(self):
         """Review S5: a try the guard refused is not a wrong code, and each phone weighs three wrong codes
