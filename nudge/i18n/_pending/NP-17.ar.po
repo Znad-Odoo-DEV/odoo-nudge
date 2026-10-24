@@ -31,3 +31,24 @@ msgstr "أدخل اسم وتاريخ انتهاء رمز أو تسجيل لا ي
 
 msgid "Managers are told 90, 30 and 7 days before a date in the checklist of their country, and 60, 30 and 7 days before a certificate or credential expires. What was told is listed here."
 msgstr "يُبلَّغ المديرون قبل 90 و30 و7 أيام من موعد في قائمة التحقق لبلدهم، وقبل 60 و30 و7 أيام من انتهاء شهادة أو اعتماد. ما أُبلِغ به مدرج هنا."
+
+msgid "Renew it before e-invoicing stops."
+msgstr "جدّدها قبل أن تتوقف الفوترة الإلكترونية."
+
+msgid "Renew it before it stops working."
+msgstr "جدّدها قبل أن تتوقف عن العمل."
+
+msgid "Renew it today: e-invoicing stops after today."
+msgstr "جدّدها اليوم: تتوقف الفوترة الإلكترونية بعد اليوم."
+
+msgid "Renew it today: it stops working after today."
+msgstr "جدّدها اليوم: تتوقف عن العمل بعد اليوم."
+
+msgid "Renew it now: e-invoicing is no longer possible with it."
+msgstr "جدّدها الآن: لم تعد الفوترة الإلكترونية ممكنة بها."
+
+msgid "Renew it now: it no longer works."
+msgstr "جدّدها الآن: لم تعد تعمل."
+
+msgid "%(subject)s (%(date)s). %(advice)s"
+msgstr "%(subject)s (%(date)s). %(advice)s"

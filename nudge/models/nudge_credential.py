@@ -74,10 +74,31 @@ class NudgeCredential(models.Model):
             # only these two fields are read (the company is in the domain): never the certificate or the key
             fields_read = [source.date_field, source.name_field]
             domain = [(source.company_field, "=", company.id), (source.date_field, "!=", False)]
-            for record in model.search_read(domain, fields_read):
+            records = model.search_read(domain, fields_read)
+            if source.key == "certificate":
+                records = self._certificates_in_use(model, records, source)
+            for record in records:
                 value = record[source.date_field]
                 if not value or (source.key == "certificate" and record["id"] in already):
                     continue
                 day = value.date() if hasattr(value, "date") else value
                 rows.append((source.key, {"id": record["id"], "date": day, "name": record[source.name_field]}))
         return rows
+
+    @api.model
+    def _certificates_in_use(self, model, records, source):
+        """:return: ``records`` without the certificates already replaced: a company keeps the old
+        certificates it renewed, and those are not the ones to warn about. A certificate is replaced when
+        another one of the same kind (scope and subject) ends later."""
+        kind_fields = [name for name in ("scope", "subject_common_name") if name in model._fields]
+        kinds = {}
+        if kind_fields:
+            kinds = {row["id"]: tuple(row[name] for name in kind_fields)
+                     for row in model.browse([record["id"] for record in records]).read(kind_fields)}
+        latest = {}
+        for record in records:
+            if record[source.date_field]:
+                kind = kinds.get(record["id"])
+                latest[kind] = max(latest.get(kind, record[source.date_field]), record[source.date_field])
+        return [record for record in records
+                if not record[source.date_field] or record[source.date_field] >= latest[kinds.get(record["id"])]]
