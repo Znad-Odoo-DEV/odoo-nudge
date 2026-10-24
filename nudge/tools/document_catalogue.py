@@ -46,7 +46,7 @@ The shape:
 "supplier" is the vendor whose price list it is; leave it empty for a catalogue or a bill of materials.
 "product" is the finished product a bill of materials makes (its name or code, how many it makes); leave it empty otherwise.
 "rows" are the products of the list, or the components of the bill of materials, one per line of the table.
-"price" is the selling price, "cost" the buying or cost price; when a vendor's list gives one unit price, put it in "price"."""
+"price" is the selling price, "cost" the buying or cost price; when a vendor's list gives one unit price, put it in "price"; in a bill of materials the unit price of a component is its "cost"."""
 
 PICTURE_PROMPT = (
     "Copy every word and number of this document as plain text, line by line, in reading order. "
@@ -64,16 +64,39 @@ HEADERS = {
     "cost": ("cost", "unitcost", "costprice", "purchaseprice", "standardcost", "buyprice", "التكلفة", "سعرالشراء",
              "التكلفه"),
 }
-UNIT_WORDS = {"pcs", "pc", "piece", "pieces", "each", "unit", "units", "nos", "no", "ea", "قطعة", "قطع", "حبة"}
+UNIT_WORDS = {"pcs", "pc", "piece", "pieces", "each", "unit", "units", "nos", "no", "ea", "set", "sets",
+              "قطعة", "قطع", "حبة", "طقم"}
+# Spellings of a unit of measure the file may use, and the names Odoo gives it (the first that exists wins)
+UNIT_ALIASES = {
+    "m2": ("m²", "m2"), "sqm": ("m²", "m2"), "sq m": ("m²", "m2"), "m^2": ("m²", "m2"), "م2": ("m²", "m2"),
+    "m3": ("m³", "m3"), "cbm": ("m³", "m3"), "m^3": ("m³", "m3"),
+    "l": ("L", "Liter", "Liters"), "ltr": ("L", "Liter", "Liters"), "lt": ("L", "Liter", "Liters"),
+    "litre": ("L", "Liter", "Liters"), "litres": ("L", "Liter", "Liters"),
+    "liter": ("L", "Liter", "Liters"), "liters": ("L", "Liter", "Liters"),
+    "mtr": ("m", "Meter", "Meters"), "meter": ("m", "Meter", "Meters"), "meters": ("m", "Meter", "Meters"),
+    "metre": ("m", "Meter", "Meters"), "metres": ("m", "Meter", "Meters"), "kgs": ("kg",),
+}
 
 
 def _key(text):
     return re.sub(r"[\W_]+", "", str(text or "").lower())
 
 
+def _despace(text):
+    """Letters a PDF spread apart come back together: "W ood V arnish" is Wood Varnish, "INV -TRIAL" INV-TRIAL,
+    "T R I A L" TRIAL. A lone "A" or "I" is a word, so it is left alone"""
+    text = re.sub(r"(?<=\w) -(?=\w)", "-", text)
+    pattern = re.compile(r"\b([B-HJ-Z]) (?=[a-z]{2})")
+    # "Grade B steel" is a name; two or more such breaks in one text are the extraction's
+    if len(pattern.findall(text)) > 1 or pattern.match(text):
+        text = pattern.sub(r"\1", text)
+    return re.sub(r"\b(?:[A-Za-z] ){3,}[A-Za-z]\b", lambda match: match.group(0).replace(" ", ""), text)
+
+
 def _text(value, size=MAX_NAME):
-    """:return: one clean line: no control characters, no more than ``size``"""
-    return " ".join(re.sub(r"[\x00-\x1f\x7f]", " ", str(value if value is not None else "")).split())[:size]
+    """:return: one clean line: no control characters, no spread letters, no more than ``size``"""
+    line = " ".join(re.sub(r"[\x00-\x1f\x7f]", " ", str(value if value is not None else "")).split())
+    return _despace(line)[:size]
 
 
 def _number(value):
@@ -269,6 +292,10 @@ def find_uom(env, text):
         return Uom
     if text.lower() in UNIT_WORDS:
         return Uom.search([("name", "ilike", "unit")], limit=1, order="id")
+    for name in UNIT_ALIASES.get(" ".join(text.lower().split()), ()):
+        found = Uom.search([("name", "=ilike", name)], limit=1)
+        if found:
+            return found
     return Uom.search([("name", "=ilike", text)], limit=1) or Uom.search([("name", "ilike", text)], limit=1)
 
 
@@ -419,6 +446,10 @@ def run(action, env, arguments, screen, target):
     source, data = read_for(env, arguments, screen, target)
     if not data["rows"]:
         raise Refused("No row could be read in the file. Ask the person for a clearer file, or for the rows typed.")
+    if target == "bom":
+        # The one number beside a component of a bill of materials is what it costs, never its selling price
+        data = dict(data, rows=[
+            dict(row, cost=row["price"] if row["cost"] is None else row["cost"], price=None) for row in data["rows"]])
     skip = set(arguments.get("skip_rows") or [])
     include = set(arguments.get("include_rows") or [])
     chosen = {item["line"]: item["product_id"] for item in arguments.get("product_choices") or []}
