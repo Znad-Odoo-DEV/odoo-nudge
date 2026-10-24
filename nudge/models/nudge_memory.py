@@ -93,7 +93,8 @@ LIVE_INTENTS = frozenset(("find", "filter", "chart"))
 # A question that asks how or where, not for the records themselves
 HOW_TO = re.compile(
     r"^\W*(?:how\b(?!\s+(?:many|much)\b)|where\b|what\s+(?:is|are|does|do)\b|why\b|explain\b|"
-    r"كيف|ازاي|شلون|كيفاش|كيفيه|وين|فين|اين|ليش|ليه|لماذا|ما\s+(?:هو|هي)|ماذا|شو\s+يعني|"
+    # An Arabic word stands alone: "اين" is not the start of "ايناس", nor "ليه" of "ليهم"
+    r"(?:كيف|ازاي|شلون|كيفاش|كيفيه|وين|فين|اين|ليش|ليه|لماذا|ما\s+(?:هو|هي)|ماذا|شو\s+يعني)(?![\u0600-\u06FF])|"
     r"kif\b|keef\b|kaif\b|ezay\b|izay\b|ezzay\b|shlon\b|wein\b|fein\b)", re.IGNORECASE)
 # Arabic written in Latin letters: a digit inside a word ("a3mel", "3ard")
 ARABIZI = re.compile(r"[a-z][2356789]|[2356789][a-z]", re.IGNORECASE)
