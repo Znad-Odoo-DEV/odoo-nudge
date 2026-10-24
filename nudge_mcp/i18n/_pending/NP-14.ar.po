@@ -1,0 +1,1157 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid "%(client)s: %(summary)s. Say yes or no in Nudge, Assistant Approvals."
+msgstr "%(client)s: %(summary)s. قل نعم أو لا في Nudge، موافقات المساعدين."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_oauth.py:0
+msgid "%(uri)s: %(error)s"
+msgstr "%(uri)s: %(error)s"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid "1. Give the assistant this address"
+msgstr "1. أعطِ المساعد هذا العنوان"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid "2. See and revoke what you connected"
+msgstr "2. اطّلع على ما ربطته وألغِه"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/controllers/mcp.py:0
+msgid "A batch holds at most %s messages."
+msgstr "تحمل الدفعة %s رسالة على الأكثر."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,help:nudge_mcp.field_nudge_mcp_token__used
+msgid "A refresh token already exchanged for new tokens."
+msgstr "رمز تحديث استُبدل من قبل برموز جديدة."
+
+#. module: nudge_mcp
+#: model:ir.model.fields.selection,name:nudge_mcp.selection__nudge_mcp_token__kind__access
+msgid "Access"
+msgstr "وصول"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_client__active
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_grant__active
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_self_confirm__active
+msgid "Active"
+msgstr "نشط"
+
+#. module: nudge_mcp
+#: model_terms:ir.actions.act_window,help:nudge_mcp.nudge_mcp_self_confirm_action
+msgid ""
+"Add a line only for a change that is easy to take back: the assistant signed in with OAuth may then\n"
+"                confirm it without the person's yes in Odoo. Posting, paying, confirming, accounting, stock,\n"
+"                users and rights always wait for the person, and keys of before never confirm alone."
+msgstr ""
+"أضف سطراً فقط لتعديل يسهل التراجع عنه: يستطيع عندها المساعد المسجّل دخوله "
+"عبر OAuth تأكيده دون موافقة الشخص في أودو. الترحيل والدفع والتأكيد والمحاسبة"
+" والمخزون والمستخدمون والصلاحيات تنتظر الشخص دائماً، ولا تؤكد المفاتيح "
+"القديمة شيئاً وحدها أبداً."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.oauth_consent
+msgid "After your answer you go to"
+msgstr "بعد إجابتك تنتقل إلى"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.oauth_consent
+msgid "Allow"
+msgstr "اسمح"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.oauth_consent
+msgid "Allow an assistant"
+msgstr "اسمح لمساعد"
+
+#. module: nudge_mcp
+#: model:ir.model.fields.selection,name:nudge_mcp.selection__res_config_settings__nudge_mcp_exposure__develop
+msgid "Also read what developers build (administrators)"
+msgstr "وأيضاً قراءة ما يبنيه المطورون (للمسؤولين)"
+
+#. module: nudge_mcp
+#: model_terms:ir.actions.act_window,help:nudge_mcp.nudge_mcp_grant_action
+msgid ""
+"An assistant appears here once a person signs it in and allows it. Revoke "
+"one and it has to ask again."
+msgstr ""
+"يظهر المساعد هنا بعد أن يسجّل الشخص دخوله ويسمح له. ألغِ أحدها وسيضطر إلى "
+"الطلب من جديد."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.oauth_consent
+msgid "An assistant wants to use Nudge as you"
+msgstr "مساعد يريد استخدام Nudge بصفتك"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid "An external assistant wants to make a change"
+msgstr "مساعد خارجي يريد إجراء تعديل"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_self_confirm_view_list
+msgid "Any assistant signed in"
+msgstr "أي مساعد مسجّل الدخول"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_run.py:0
+msgid "Approved"
+msgstr "تمت الموافقة"
+
+#. module: nudge_mcp
+#: model:ir.model.fields.selection,name:nudge_mcp.selection__nudge_step__state__approved
+msgid "Approved in Odoo"
+msgstr "تمت الموافقة في أودو"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_client_view_form
+msgid "Archived"
+msgstr "مؤرشف"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_grant__client_id
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_self_confirm__client_id
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_run__mcp_client_id
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_grant_view_search
+msgid "Assistant"
+msgstr "المساعد"
+
+#. module: nudge_mcp
+#: model:ir.ui.menu,name:nudge_mcp.nudge_mcp_menu_approvals
+msgid "Assistant Approvals"
+msgstr "موافقات المساعدين"
+
+#. module: nudge_mcp
+#: model:ir.model,name:nudge_mcp.model_nudge_mcp_grant
+msgid "Assistant Connected to Odoo"
+msgstr "مساعد مرتبط بأودو"
+
+#. module: nudge_mcp
+#: model:ir.model,name:nudge_mcp.model_nudge_mcp_client
+msgid "Assistant Registered for Sign-in"
+msgstr "مساعد مسجَّل لتسجيل الدخول"
+
+#. module: nudge_mcp
+#: model:ir.model,name:nudge_mcp.model_nudge_mcp_code
+msgid "Assistant Sign-in Code"
+msgstr "رمز تفويض المساعد"
+
+#. module: nudge_mcp
+#: model:ir.model,name:nudge_mcp.model_nudge_mcp_token
+msgid "Assistant Sign-in Token"
+msgstr "رمز دخول المساعد"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.res_config_settings_view_form_mcp
+msgid ""
+"Assistants connect with the address of the server: the person signs in to "
+"Odoo and allows them. Keys made before still work (legacy)."
+msgstr ""
+"يتصل المساعدون بعنوان الخادم: يسجّل الشخص دخوله إلى أودو ويسمح لهم. المفاتيح"
+" المنشأة من قبل ما زالت تعمل (قديمة)."
+
+#. module: nudge_mcp
+#: model:ir.model.fields.selection,name:nudge_mcp.selection__res_config_settings__nudge_mcp_oauth_registration__open
+msgid "Assistants register themselves"
+msgstr "يسجّل المساعدون أنفسهم"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_client__auth_method
+msgid "Authentication"
+msgstr "المصادقة"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_self_confirm__method
+msgid "Button"
+msgstr "الزر"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_self_confirm__tool
+#: model:ir.model.fields.selection,name:nudge_mcp.selection__nudge_mcp_self_confirm__tool__prepare_write
+msgid "Change"
+msgstr "تعديل"
+
+#. module: nudge_mcp
+#: model:ir.model,name:nudge_mcp.model_nudge_mcp_self_confirm
+msgid "Change an Assistant May Confirm Alone"
+msgstr "تعديل يستطيع المساعد تأكيده وحده"
+
+#. module: nudge_mcp
+#: model:ir.actions.act_window,name:nudge_mcp.nudge_step_action_mcp_approvals
+msgid "Changes Assistants Ask For"
+msgstr "تعديلات يطلبها المساعدون"
+
+#. module: nudge_mcp
+#: model:ir.actions.act_window,name:nudge_mcp.nudge_mcp_self_confirm_action
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_self_confirm_view_list
+msgid "Changes Assistants May Confirm Alone"
+msgstr "تعديلات يستطيع المساعدون تأكيدها وحدهم"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.res_config_settings_view_form_mcp
+msgid "Changes They May Confirm Alone"
+msgstr "تعديلات يستطيعون تأكيدها وحدهم"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_self_confirm.py:0
+msgid ""
+"Changes on %s always wait for the person: they move money or goods, or open "
+"rights."
+msgstr ""
+"التعديلات على %s تنتظر الشخص دائماً: فهي تحرّك مالاً أو بضاعة أو تفتح "
+"صلاحيات."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid ""
+"Claude (claude.ai and Claude Desktop): Settings, Connectors, Add custom connector, and paste\n"
+"                        the address above. ChatGPT and other assistants: add an MCP server by its address. The\n"
+"                        assistant then opens Odoo: sign in, read what it asks, and press Allow. You choose there\n"
+"                        whether it may only read or also prepare changes. Only people of the group External\n"
+"                        Assistant can allow one."
+msgstr ""
+"Claude ‏(claude.ai وClaude Desktop): الإعدادات، الموصلات، إضافة موصل مخصص، "
+"ثم الصق العنوان أعلاه. ChatGPT وغيره من المساعدين: أضف خادم MCP بعنوانه. "
+"يفتح المساعد بعدها أودو: سجّل دخولك واقرأ ما يطلبه واضغط اسمح. تختار هناك هل"
+" يقرأ فقط أم يجهّز التعديلات أيضاً. لا يسمح لمساعد إلا أفراد مجموعة المساعد "
+"الخارجي."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_help__claude_code_command
+msgid "Claude Code"
+msgstr "Claude Code"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid "Claude Code, in a terminal:"
+msgstr "Claude Code، في الطرفية:"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid ""
+"Claude Desktop through a configuration file (claude_desktop_config.json; needs\n"
+"                        Node.js, for npx and mcp-remote, which signs in the same way):"
+msgstr ""
+"Claude Desktop عبر ملف إعداد (claude_desktop_config.json؛ يحتاج إلى Node.js "
+"من أجل npx وmcp-remote، الذي يسجّل الدخول بالطريقة نفسها):"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid ""
+"Claude Desktop, ChatGPT and other assistants that speak MCP can then look up\n"
+"                        records and the documentation, and prepare changes, as you: with your rights,\n"
+"                        your record rules and your companies. A change is made only after you have said yes\n"
+"                        to it in Odoo."
+msgstr ""
+"يستطيع بعدها Claude Desktop وChatGPT وغيرهما من المساعدين الذين يتحدثون MCP "
+"البحث في السجلات والتوثيق وتجهيز التعديلات بصفتك: بصلاحياتك وقواعد سجلاتك "
+"وشركاتك. لا يُنفَّذ تعديل إلا بعد موافقتك عليه في أودو."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,help:nudge_mcp.field_res_config_settings__nudge_mcp_enabled
+msgid ""
+"Claude Desktop, ChatGPT and other assistants that speak MCP can use the "
+"tools of Nudge, as the person who signed them in."
+msgstr ""
+"يمكن لـ Claude Desktop وChatGPT وغيرهما من المساعدين الذين يتحدثون MCP "
+"استخدام أدوات Nudge بصفة الشخص الذي سجّل دخولهم."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.res_config_settings_view_form_mcp
+msgid ""
+"Claude Desktop, ChatGPT and other assistants that speak MCP can use the "
+"tools of Nudge, as the person who signed them in: with that person's rights,"
+" record rules and companies. Each person of the group External Assistant "
+"signs their assistant in. Everything they do is kept in What Nudge Did."
+msgstr ""
+"يمكن لـ Claude Desktop وChatGPT وغيرهما من المساعدين الذين يتحدثون MCP "
+"استخدام أدوات Nudge بصفة الشخص الذي سجّل دخولهم: بصلاحياته وقواعد سجلاته "
+"وشركاته. كل فرد في مجموعة المساعد الخارجي يسجّل دخول مساعده بنفسه. كل ما "
+"يفعلونه محفوظ في ماذا فعل Nudge."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,help:nudge_mcp.field_res_config_settings__nudge_mcp_oauth_registration
+msgid ""
+"Claude and most assistants register themselves the first time someone "
+"connects them (dynamic client registration). A registration alone opens "
+"nothing: each person signs in and allows the assistant."
+msgstr ""
+"يسجّل Claude ومعظم المساعدين أنفسهم أول مرة يربطهم فيها أحد (التسجيل "
+"الديناميكي للعميل). التسجيل وحده لا يفتح شيئاً: كل شخص يسجّل دخوله ويسمح "
+"للمساعد."
+
+#. module: nudge_mcp
+#: model_terms:ir.actions.act_window,help:nudge_mcp.nudge_mcp_client_action
+msgid ""
+"Claude and most assistants register themselves the first time someone connects them. Register one here\n"
+"                for an assistant that asks for a Client ID."
+msgstr ""
+"يسجّل Claude ومعظم المساعدين أنفسهم أول مرة يربطهم فيها أحد. سجّل هنا "
+"مساعداً يطلب معرّف عميل."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_client__client_id
+msgid "Client ID"
+msgstr "معرّف العميل"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.oauth_message
+msgid "Close this page and start again from the assistant."
+msgstr "أغلق هذه الصفحة وابدأ من جديد من المساعد."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_code__code_challenge
+msgid "Code Challenge"
+msgstr "تحدي الرمز"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_code__code_hash
+msgid "Code Hash"
+msgstr "بصمة الرمز"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_self_confirm__company_id
+msgid "Company"
+msgstr "الشركة"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_step__mcp_self_confirmed
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_step_view_search_mcp
+msgid "Confirmed by the Assistant"
+msgstr "أكّده المساعد"
+
+#. module: nudge_mcp
+#: model:ir.actions.act_window,name:nudge_mcp.nudge_mcp_grant_action
+#: model:ir.model.fields,field_description:nudge_mcp.field_res_users__nudge_mcp_grant_ids
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_grant_view_list
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.res_config_settings_view_form_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.res_users_view_form_preferences_mcp
+msgid "Connected Assistants"
+msgstr "المساعدون المرتبطون"
+
+#. module: nudge_mcp
+#: model:ir.model.fields.selection,name:nudge_mcp.selection__nudge_mcp_self_confirm__tool__prepare_create
+msgid "Create"
+msgstr "إنشاء"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,help:nudge_mcp.field_nudge_mcp_self_confirm__client_id
+msgid ""
+"Empty: any assistant signed in with OAuth. Keys of before (legacy) never "
+"confirm alone."
+msgstr ""
+"فارغ: أي مساعد مسجّل الدخول عبر OAuth. المفاتيح القديمة لا تؤكد شيئاً وحدها "
+"أبداً."
+
+#. module: nudge_mcp
+#: model_terms:ir.actions.act_window,help:nudge_mcp.nudge_mcp_self_confirm_action
+msgid "Every change waits for the person"
+msgstr "كل تعديل ينتظر الشخص"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_code__expires_at
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_token__expires_at
+msgid "Expires At"
+msgstr "ينتهي في"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_code__family
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_token__family
+msgid "Family"
+msgstr "العائلة"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,help:nudge_mcp.field_nudge_mcp_self_confirm__method
+msgid ""
+"For a button: the name of its method (action_..., button_...). Required "
+"then."
+msgstr "للزر: اسم دالته (action_... أو button_...). مطلوب عندها."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid ""
+"For an assistant that cannot sign in. A key opens reading and preparing changes until it\n"
+"                        expires; it is shown once, and you see and delete your keys in your preferences, Account\n"
+"                        Security. A change prepared with a key always waits for your yes in Odoo."
+msgstr ""
+"لمساعد لا يستطيع تسجيل الدخول. يفتح المفتاح القراءة وتجهيز التعديلات حتى "
+"تنتهي صلاحيته؛ يظهر مرة واحدة، وترى مفاتيحك وتحذفها من تفضيلاتك، أمان "
+"الحساب. التعديل المجهّز بمفتاح ينتظر موافقتك في أودو دائماً."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_oauth.py:0
+msgid "Give one to %s redirect addresses."
+msgstr "أعطِ من عنوان إلى %s عناوين إعادة توجيه."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_client_view_form
+msgid ""
+"Give the Client ID to the assistant that asks for one. It opens nothing alone: each person\n"
+"                        signs in and allows the assistant. Archive it and nobody can sign it in any more."
+msgstr ""
+"أعطِ معرّف العميل للمساعد الذي يطلبه. لا يفتح شيئاً وحده: كل شخص يسجّل دخوله"
+" ويسمح للمساعد. أرشفه ولن يستطيع أحد تسجيل دخوله بعد ذلك."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_self_confirm.py:0
+msgid "Give the method of the button, as action_done."
+msgstr "أعطِ دالة الزر، مثل action_done."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_code__grant_id
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_token__grant_id
+msgid "Grant"
+msgstr "التفويض"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_help__is_https
+msgid "Is Https"
+msgstr "يستخدم https"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.oauth_consent
+msgid "It may, with your rights, record rules and companies:"
+msgstr "يستطيع، بصلاحياتك وقواعد سجلاتك وشركاتك:"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_key_view_form
+msgid ""
+"Keys are kept for assistants that cannot sign in. Claude, ChatGPT and most others sign in\n"
+"                        with the address of the server instead: no key to copy, and you can revoke them one by one."
+msgstr ""
+"المفاتيح باقية للمساعدين الذين لا يستطيعون تسجيل الدخول. يسجّل Claude "
+"وChatGPT ومعظم غيرهما الدخول بعنوان الخادم بدلاً منها: لا مفتاح تنسخه، "
+"ويمكنك إلغاؤهم واحداً واحداً."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_token__kind
+msgid "Kind"
+msgstr "النوع"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_grant__last_used
+msgid "Last Used"
+msgstr "آخر استخدام"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,help:nudge_mcp.field_res_company__nudge_mcp_allow_writes
+#: model:ir.model.fields,help:nudge_mcp.field_res_config_settings__nudge_mcp_allow_writes
+msgid ""
+"Let the assistants that connect through MCP prepare changes in this company."
+" Each change waits for the person to approve it in Odoo (Nudge, Assistant "
+"Approvals), unless the allow-list of changes they may confirm alone names "
+"it."
+msgstr ""
+"اسمح للمساعدين المتصلين عبر MCP بتجهيز تعديلات في هذه الشركة. ينتظر كل تعديل"
+" موافقة الشخص في أودو (Nudge، موافقات المساعدين)، إلا إذا ذكرته قائمة "
+"التعديلات التي يستطيعون تأكيدها وحدهم."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_oauth.py:0
+msgid ""
+"Look up records, screens, the documentation of Odoo and the company files, "
+"as you: only what you may see."
+msgstr ""
+"البحث في السجلات والشاشات وتوثيق أودو وملفات الشركة بصفتك: ما يحق لك رؤيته "
+"فقط."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,help:nudge_mcp.field_nudge_step__mcp_self_confirmed
+msgid ""
+"Made without the person's yes in Odoo, because the allow-list of the company"
+" names this change."
+msgstr ""
+"نُفّذ دون موافقة الشخص في أودو، لأن قائمة السماح للشركة تذكر هذا التعديل."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid "Make a Key (legacy)"
+msgstr "أنشئ مفتاحاً (قديم)"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid ""
+"Make the change a prepare tool described, after the person approved it in "
+"Odoo. Give the token the prepare tool returned. It is refused until they "
+"have approved; nothing is changed before this."
+msgstr ""
+"نفّذ التعديل الذي وصفته أداة التجهيز، بعد أن يوافق عليه الشخص في أودو. أعطِ "
+"الرمز الذي أرجعته أداة التجهيز. يُرفض حتى يوافق؛ لا يتغير شيء قبل هذا."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_grant__scope_names
+msgid "May"
+msgstr "يستطيع"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_self_confirm__model_id
+msgid "Model"
+msgstr "النموذج"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_help.py:0
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_key_view_form
+msgid "New Key for an Assistant (legacy)"
+msgstr "مفتاح جديد لمساعد (قديم)"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_step_view_form_mcp
+msgid "No"
+msgstr "لا"
+
+#. module: nudge_mcp
+#: model_terms:ir.actions.act_window,help:nudge_mcp.nudge_mcp_grant_action
+msgid "No assistant is connected"
+msgstr "لا يوجد مساعد مرتبط"
+
+#. module: nudge_mcp
+#: model_terms:ir.actions.act_window,help:nudge_mcp.nudge_mcp_client_action
+msgid "No assistant is registered"
+msgstr "لا يوجد مساعد مسجَّل"
+
+#. module: nudge_mcp
+#: model_terms:ir.actions.act_window,help:nudge_mcp.nudge_step_action_mcp_approvals
+msgid "No assistant is waiting for you"
+msgstr "لا يوجد مساعد ينتظرك"
+
+#. module: nudge_mcp
+#: model:ir.model.fields.selection,name:nudge_mcp.selection__nudge_mcp_client__auth_method__none
+msgid "None (an application on a computer)"
+msgstr "بلا (تطبيق على حاسوب)"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.oauth_consent
+msgid "Not open to you here: it stays off."
+msgstr "غير متاح لك هنا: يبقى مغلقاً."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid ""
+"Nothing has been changed yet. This is what would change:\n"
+"%(lines)s\n"
+"\n"
+"The person has been asked in Odoo (Nudge, Assistant Approvals). Tell them it waits for their yes there. Once they have approved it, call confirm with the token %(token)s ; confirm is refused until then. If they do not agree, call decline with it. The token is good for %(minutes)s minutes."
+msgstr ""
+"لم يتغير شيء بعد. هذا ما سيتغير:\n"
+"%(lines)s\n"
+"\n"
+"سُئل الشخص في أودو (Nudge، موافقات المساعدين). أخبره أن الأمر ينتظر موافقته هناك. بعد أن يوافق، استدعِ confirm بالرمز %(token)s ؛ يُرفض confirm حتى ذلك الحين. إن لم يوافق، استدعِ decline به. الرمز صالح لمدة %(minutes)s دقيقة."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid ""
+"Nothing is changed by this call: it returns a token and what will change, "
+"and asks the person in Odoo. Once they have approved it there, call confirm "
+"with the token."
+msgstr ""
+"لا يتغير شيء بهذا الاستدعاء: يرجع رمزاً وما سيتغير، ويسأل الشخص في أودو. بعد"
+" أن يوافق هناك، استدعِ confirm بالرمز."
+
+#. module: nudge_mcp
+#: model:ir.model,name:nudge_mcp.model_nudge_mcp_oauth
+msgid "Nudge MCP Sign-in"
+msgstr "تسجيل دخول Nudge MCP"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid ""
+"Nudge works inside Odoo as the person whose key you hold: it sees only what "
+"they may see. Look up records and documentation freely. A change is never "
+"made at once: the prepare tools return a token and what will change, and the"
+" person is asked in Odoo. Tell them it waits for them there; call confirm "
+"with the token only after they have said yes in Odoo. Confirm refuses a "
+"change they have not approved."
+msgstr ""
+"يعمل Nudge داخل أودو بصفة الشخص الذي تحمل مفتاحه: لا يرى إلا ما يحق له "
+"رؤيته. ابحث في السجلات والتوثيق بحرية. لا يُنفَّذ تعديل فوراً أبداً: ترجع "
+"أدوات التجهيز رمزاً وما سيتغير، ويُسأل الشخص في أودو. أخبره أن الأمر ينتظره "
+"هناك؛ واستدعِ confirm بالرمز فقط بعد موافقته في أودو. يرفض confirm أي تعديل "
+"لم يوافق عليه."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.res_config_settings_view_form_mcp
+msgid ""
+"Off by default: every change waits for the person's yes in Odoo. List here "
+"only changes that are easy to take back, per change, model and assistant. "
+"Posting, paying, confirming, users and rights always wait."
+msgstr ""
+"مغلق افتراضياً: كل تعديل ينتظر موافقة الشخص في أودو. اذكر هنا فقط تعديلات "
+"يسهل التراجع عنها، لكل تعديل ونموذج ومساعد. الترحيل والدفع والتأكيد "
+"والمستخدمون والصلاحيات تنتظر دائماً."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,help:nudge_mcp.field_nudge_mcp_client__redirect_uris
+msgid "One per line: https, or http on localhost (any port)."
+msgstr "واحد في كل سطر: https، أو http على localhost (أي منفذ)."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_self_confirm.py:0
+msgid "Only a button has a method."
+msgstr "الزر وحده له دالة."
+
+#. module: nudge_mcp
+#: model:ir.model.fields.selection,name:nudge_mcp.selection__res_config_settings__nudge_mcp_oauth_registration__closed
+msgid "Only assistants an administrator registered"
+msgstr "المساعدون الذين سجّلهم المسؤول فقط"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_oauth.py:0
+msgid "Only the authorization code is answered here."
+msgstr "لا يُجاب هنا إلا برمز التفويض."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid "Other assistants, in a configuration file:"
+msgstr "المساعدون الآخرون، في ملف إعداد:"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_oauth.py:0
+msgid "PKCE with S256 is required."
+msgstr "يلزم PKCE مع S256."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_client__grant_count
+msgid "People"
+msgstr "الأشخاص"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_grant__user_id
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_grant_view_search
+msgid "Person"
+msgstr "الشخص"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_oauth.py:0
+msgid "Prepare changes"
+msgstr "تجهيز التعديلات"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_oauth.py:0
+msgid ""
+"Prepare creations, changes and button presses. Each one waits for your yes "
+"in Odoo (Nudge, Assistant Approvals), unless an administrator allowed that "
+"very change."
+msgstr ""
+"تجهيز الإنشاءات والتعديلات وضغطات الأزرار. ينتظر كل منها موافقتك في أودو "
+"(Nudge، موافقات المساعدين)، إلا إذا سمح المسؤول بذلك التعديل بعينه."
+
+#. module: nudge_mcp
+#: model:ir.model.fields.selection,name:nudge_mcp.selection__nudge_mcp_self_confirm__tool__call_method
+msgid "Press a button"
+msgstr "ضغط زر"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid ""
+"Private mode is on: what Nudge answers would leave your server for the "
+"assistant. An administrator can say that the assistant runs on your own "
+"server."
+msgstr ""
+"الوضع الخاص مفعّل: ما يجيب به Nudge سيغادر خادمك إلى المساعد. يستطيع المسؤول"
+" أن يحدد أن المساعد يعمل على خادمك."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_oauth.py:0
+msgid "Read"
+msgstr "القراءة"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_oauth.py:0
+msgid ""
+"Read automation rules, server actions and the definition of screens. For "
+"administrators; it never builds anything."
+msgstr ""
+"قراءة قواعد الأتمتة وإجراءات الخادم وتعريف الشاشات. للمسؤولين؛ لا يبني شيئاً"
+" أبداً."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_oauth.py:0
+msgid "Read what developers build"
+msgstr "قراءة ما يبنيه المطورون"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,help:nudge_mcp.field_res_config_settings__nudge_mcp_exposure
+msgid ""
+"Reading: records, screens, the documentation, the company files. Changes "
+"also need the group Agent User for the person and the switch of the company "
+"below. Developers: automation rules, server actions and screen definitions, "
+"read only, for administrators with Developer mode; the tools that build or "
+"run code are never offered."
+msgstr ""
+"القراءة: السجلات والشاشات والتوثيق وملفات الشركة. وتحتاج التعديلات أيضاً إلى"
+" مجموعة مستخدم الوكيل للشخص ومفتاح الشركة أدناه. المطورون: قواعد الأتمتة "
+"وإجراءات الخادم وتعريفات الشاشات، للقراءة فقط، للمسؤولين الذين لديهم وضع "
+"المطور؛ الأدوات التي تبني أو تشغّل الشيفرة لا تُعرض أبداً."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_client__redirect_uris
+msgid "Redirect Addresses"
+msgstr "عناوين إعادة التوجيه"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_code__redirect_uri
+msgid "Redirect Uri"
+msgstr "عنوان إعادة التوجيه"
+
+#. module: nudge_mcp
+#: model:ir.model.fields.selection,name:nudge_mcp.selection__nudge_mcp_token__kind__refresh
+msgid "Refresh"
+msgstr "تحديث"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.oauth_consent
+msgid "Refuse"
+msgstr "ارفض"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_client_view_form
+msgid "Registered Assistant"
+msgstr "مساعد مسجَّل"
+
+#. module: nudge_mcp
+#: model:ir.actions.act_window,name:nudge_mcp.nudge_mcp_client_action
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_client_view_list
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.res_config_settings_view_form_mcp
+msgid "Registered Assistants"
+msgstr "المساعدون المسجَّلون"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_client_view_list
+msgid "Registered On"
+msgstr "سُجّل في"
+
+#. module: nudge_mcp
+#: model:ir.model.fields.selection,name:nudge_mcp.selection__nudge_mcp_client__registration__manual
+msgid "Registered by an administrator"
+msgstr "سجّله المسؤول"
+
+#. module: nudge_mcp
+#: model:ir.model.fields.selection,name:nudge_mcp.selection__nudge_mcp_client__registration__dynamic
+msgid "Registered itself"
+msgstr "سجّل نفسه"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_client__registration
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_grant__registration
+msgid "Registration"
+msgstr "التسجيل"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid "Replace YOUR_NUDGE_KEY with your key:"
+msgstr "استبدل YOUR_NUDGE_KEY بمفتاحك:"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_code__resource
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_token__resource
+msgid "Resource"
+msgstr "المورد"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_grant_view_list
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.res_users_view_form_preferences_mcp
+msgid "Revoke"
+msgstr "إلغاء"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_token__revoked
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_grant_view_search
+msgid "Revoked"
+msgstr "ملغى"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_grant__revoked_at
+msgid "Revoked On"
+msgstr "أُلغي في"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_code__scopes
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_grant__scopes
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_token__scopes
+msgid "Scopes"
+msgstr "النطاقات"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_client__secret_hash
+msgid "Secret Hash"
+msgstr "بصمة السر"
+
+#. module: nudge_mcp
+#: model:ir.model.fields.selection,name:nudge_mcp.selection__nudge_mcp_client__auth_method__client_secret_basic
+msgid "Secret in the header"
+msgstr "السر في الترويسة"
+
+#. module: nudge_mcp
+#: model:ir.model.fields.selection,name:nudge_mcp.selection__nudge_mcp_client__auth_method__client_secret_post
+msgid "Secret in the request"
+msgstr "السر في الطلب"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_client__redirect_hosts
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_grant__redirect_host
+msgid "Sends You Back To"
+msgstr "يعيدك إلى"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.res_config_settings_view_form_mcp
+msgid "Sign-in (OAuth)"
+msgstr "تسجيل الدخول (OAuth)"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_res_config_settings__nudge_mcp_oauth_registration
+msgid "Sign-in Registration"
+msgstr "تسجيل المساعدين للدخول"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_client__grant_ids
+msgid "Sign-ins"
+msgstr "عمليات الدخول"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_grant__signed_in_until
+msgid "Signed In Until"
+msgstr "مسجّل الدخول حتى"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.oauth_consent
+msgid "Signed in to Odoo as"
+msgstr "مسجّل الدخول إلى أودو باسم"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_step__state
+msgid "State"
+msgstr "الحالة"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_self_confirm__model
+msgid "Technical Name"
+msgstr "الاسم التقني"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_oauth.py:0
+msgid "The PKCE challenge is missing or malformed."
+msgstr "تحدي PKCE مفقود أو غير صحيح."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid ""
+"The address of this Odoo does not start with https: assistants such as Claude refuse to\n"
+"                        sign in to it. Set the address of the server (web.base.url) to its https address."
+msgstr ""
+"عنوان أودو هذا لا يبدأ بـ https: يرفض مساعدون مثل Claude تسجيل الدخول إليه. "
+"اضبط عنوان الخادم (web.base.url) على عنوانه بـ https."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_oauth.py:0
+msgid "The address to send you back to is not the one registered."
+msgstr "عنوان إعادتك ليس العنوان المسجَّل."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_run.py:0
+msgid "The assistant can make the change now."
+msgstr "يستطيع المساعد إجراء التعديل الآن."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.oauth_consent
+msgid ""
+"The assistant runs on this computer. Allow it only if you started the connection\n"
+"                                    from an application of yours."
+msgstr ""
+"يعمل المساعد على هذا الحاسوب. اسمح له فقط إن كنت بدأت الاتصال من تطبيق خاص "
+"بك."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,help:nudge_mcp.field_nudge_run__mcp_client_id
+msgid ""
+"The assistant signed in with OAuth that made the call. Empty for a key of "
+"before (legacy), whose name is what the assistant says of itself."
+msgstr ""
+"المساعد المسجّل الدخول عبر OAuth الذي أجرى الاستدعاء. فارغ للمفتاح القديم، "
+"الذي يكون اسمه ما يقوله المساعد عن نفسه."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_grant_view_list
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.res_users_view_form_preferences_mcp
+msgid "The assistant will have to ask you again. Revoke it?"
+msgstr "سيضطر المساعد إلى الطلب منك من جديد. هل تلغيه؟"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_res_config_settings__nudge_mcp_assistant_is_local
+msgid "The assistants run on my own server"
+msgstr "المساعدون يعملون على خادمي"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,help:nudge_mcp.field_res_users__nudge_mcp_grant_ids
+msgid "The assistants you allowed to use Nudge as you, signed in with OAuth."
+msgstr ""
+"المساعدون الذين سمحت لهم باستخدام Nudge بصفتك، بتسجيل الدخول عبر OAuth."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.res_users_view_form_preferences_mcp
+msgid ""
+"The assistants you signed in to Nudge (Claude, ChatGPT and others). Each one works as you,\n"
+"                        with your rights. Revoke one and it has to ask you again. Keys made before sign-in existed\n"
+"                        (legacy) are listed in Account Security, as API keys."
+msgstr ""
+"المساعدون الذين سجّلت دخولهم إلى Nudge ‏(Claude وChatGPT وغيرهما). يعمل كل "
+"منهم بصفتك وبصلاحياتك. ألغِ أحدهم وسيضطر إلى الطلب منك من جديد. المفاتيح "
+"المنشأة قبل وجود تسجيل الدخول (القديمة) مدرجة في أمان الحساب كمفاتيح API."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_self_confirm.py:0
+msgid ""
+"The button %s cannot be taken back with a click: it always waits for the "
+"person."
+msgstr "لا يمكن التراجع عن الزر %s بنقرة: ينتظر الشخص دائماً."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,help:nudge_mcp.field_nudge_mcp_client__name
+msgid "The name the assistant gave itself."
+msgstr "الاسم الذي أعطاه المساعد لنفسه."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid ""
+"The person has not approved this yet. They are asked in Odoo (Nudge, "
+"Assistant Approvals). Nothing was changed. Wait for their yes, then confirm "
+"again."
+msgstr ""
+"لم يوافق الشخص على هذا بعد. سُئل في أودو (Nudge، موافقات المساعدين). لم "
+"يتغير شيء. انتظر موافقته ثم أكّد من جديد."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid "The prompt %(prompt)s needs %(names)s."
+msgstr "الطلب %(prompt)s يحتاج إلى %(names)s."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_oauth.py:0
+msgid "The resource asked for is not this server."
+msgstr "المورد المطلوب ليس هذا الخادم."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_oauth.py:0
+msgid "The state is too long."
+msgstr "قيمة state طويلة جداً."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,help:nudge_mcp.field_nudge_mcp_code__family
+msgid "The tokens it was exchanged for."
+msgstr "الرموز التي استُبدل بها."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.res_config_settings_view_form_mcp
+msgid ""
+"The tools that build or run code are never offered. A change is never made at once:\n"
+"                                the assistant gets a token, the person is asked in Odoo (Nudge, Assistant\n"
+"                                Approvals) and sees what will change, and the assistant can confirm with the\n"
+"                                token only after the person has approved it there."
+msgstr ""
+"الأدوات التي تبني أو تشغّل الشيفرة لا تُعرض أبداً. لا يُنفَّذ تعديل فوراً "
+"أبداً: يحصل المساعد على رمز، ويُسأل الشخص في أودو (Nudge، موافقات المساعدين)"
+" ويرى ما سيتغير، ولا يستطيع المساعد التأكيد بالرمز إلا بعد موافقة الشخص "
+"هناك."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid "There is no prompt named %s."
+msgstr "لا يوجد طلب باسم %s."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/controllers/oauth.py:0
+msgid "This assistant cannot be connected"
+msgstr "لا يمكن ربط هذا المساعد"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_oauth.py:0
+msgid "This assistant is not registered here."
+msgstr "هذا المساعد غير مسجَّل هنا."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_run.py:0
+msgid "This has expired. Ask the assistant to prepare it again."
+msgstr "انتهت صلاحية هذا. اطلب من المساعد تجهيزه من جديد."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_run.py:0
+msgid "This is not waiting for you."
+msgstr "هذا لا ينتظرك."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_oauth.py:0
+msgid "This is not yours to revoke."
+msgstr "ليس لك أن تلغي هذا."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.oauth_consent
+msgid ""
+"This is the name the assistant gave itself when it registered: check\n"
+"                                    that you are connecting it yourself, now."
+msgstr ""
+"هذا هو الاسم الذي أعطاه المساعد لنفسه عند تسجيله: تحقق أنك أنت من يربطه "
+"الآن."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/controllers/mcp.py:0
+msgid "This needs more than the assistant was allowed: %s. Sign it in again."
+msgstr "يحتاج هذا إلى أكثر مما سُمح به للمساعد: %s. سجّل دخوله من جديد."
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp_oauth.py:0
+msgid ""
+"This page was not shown to you, or it was changed. Start again from the "
+"assistant."
+msgstr "هذه الصفحة لم تُعرض عليك، أو جرى تغييرها. ابدأ من جديد من المساعد."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_token__token_hash
+msgid "Token Hash"
+msgstr "بصمة الرمز"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid "Too many calls in a minute. Wait a moment."
+msgstr "استدعاءات كثيرة في دقيقة. انتظر لحظة."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_code__used
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_token__used
+msgid "Used"
+msgstr "مستخدم"
+
+#. module: nudge_mcp
+#: model:ir.model,name:nudge_mcp.model_res_users
+msgid "User"
+msgstr "المستخدم"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_client__client_uri
+msgid "Website"
+msgstr "الموقع الإلكتروني"
+
+#. module: nudge_mcp
+#: model_terms:ir.actions.act_window,help:nudge_mcp.nudge_step_action_mcp_approvals
+msgid ""
+"When an external assistant wants to change something, it waits here until "
+"you say yes."
+msgstr "عندما يريد مساعد خارجي تغيير شيء، ينتظر هنا حتى توافق."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,help:nudge_mcp.field_nudge_mcp_grant__signed_in_until
+msgid "When the assistant has to ask you again, unless it is used before."
+msgstr "متى سيضطر المساعد إلى الطلب منك من جديد، ما لم يُستخدم قبل ذلك."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_self_confirm__note
+msgid "Why"
+msgstr "السبب"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,help:nudge_mcp.field_res_config_settings__nudge_mcp_assistant_is_local
+msgid ""
+"With Private Mode on, assistants are refused unless they run on your own "
+"server or computer: what they read from Odoo would leave it otherwise."
+msgstr ""
+"مع تفعيل الوضع الخاص، يُرفض المساعدون ما لم يعملوا على خادمك أو حاسوبك: وإلا"
+" غادر ما يقرؤونه من أودو."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.res_config_settings_view_form_mcp
+msgid ""
+"With Private Mode on, assistants are refused unless they run on your own "
+"server."
+msgstr "مع تفعيل الوضع الخاص، يُرفض المساعدون ما لم يعملوا على خادمك."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_nudge_mcp_help__legacy_config
+msgid "With a Key (legacy)"
+msgstr "بمفتاح (قديم)"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid "With a key (legacy)"
+msgstr "بمفتاح (قديم)"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_step_view_form_mcp
+msgid "Yes, let the assistant do it"
+msgstr "نعم، دع المساعد يفعلها"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.oauth_consent
+msgid ""
+"You can revoke it at any time in your preferences, Connected Assistants.\n"
+"                                        It never gets your password."
+msgstr ""
+"يمكنك إلغاؤه في أي وقت من تفضيلاتك، المساعدون المرتبطون. لا يحصل على كلمة "
+"مرورك أبداً."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.oauth_consent
+msgid ""
+"You cannot connect assistants: ask an administrator to add you to the\n"
+"                                    group External Assistant."
+msgstr ""
+"لا يمكنك ربط مساعدين: اطلب من المسؤول إضافتك إلى مجموعة المساعد الخارجي."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
+msgid ""
+"Your preferences, Connected Assistants: each assistant you allowed, what it may do, and when\n"
+"                        it was last used. Revoke one and it has to ask you again."
+msgstr ""
+"تفضيلاتك، المساعدون المرتبطون: كل مساعد سمحت له، وما يستطيع فعله، ومتى "
+"استُخدم آخر مرة. ألغِ أحدهم وسيضطر إلى الطلب منك من جديد."
