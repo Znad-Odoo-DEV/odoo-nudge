@@ -33,14 +33,25 @@ def _frame(text):
 def find_site(env, arguments):
     """:return: the site asked for, else the newest built site of the website (the first website by default)"""
     Site = env["nudge.builder.site"]
+    built = [("state", "in", ("built", "published"))]
     if arguments.get("site_id"):
         site = Site.browse(arguments["site_id"]).exists()
     else:
-        domain = [("state", "in", ("built", "published"))]
+        domain = list(built)
         if arguments.get("website_id"):
             domain.append(("website_id", "=", arguments["website_id"]))
         site = Site.search(domain, limit=1)
+        if not site and arguments.get("website_id"):
+            # The model often passes the id of the site (read_site_page names it) as website_id
+            site = Site.search(built + [("id", "=", arguments["website_id"])], limit=1)
     if not site:
+        known = Site.search(built, limit=10)
+        if known:
+            raise UserError(_(
+                "No site built by the Website Builder matches. site_id is the id of the site and website_id the id "
+                "of its website. Sites: %(sites)s.",
+                sites="; ".join("site_id %s (%s, website_id %s)" % (one.id, one.name, one.website_id.id)
+                                for one in known)))
         raise UserError(_("There is no site built by the Website Builder to edit."))
     return site
 
