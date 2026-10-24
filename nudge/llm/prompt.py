@@ -705,7 +705,7 @@ def render_context(values):
 def render_attachment(found):
     """:return: the text of a file sent with the question, as a block of
     its own after the context block; the closing tag cannot appear inside"""
-    text = found["text"].replace("</nudge_attachment", "<\\/nudge_attachment")
+    text = found["text"].replace("</", "<\\/")
     name = " ".join(found["name"].split()).replace('"', "'")
     return f'<nudge_attachment name="{name}">\n{text}\n</nudge_attachment>'
 
@@ -714,7 +714,7 @@ def render_found(found):
     """:return: what Nudge found for the question by itself, as a block of
     its own after the context block; the closing tag cannot appear inside"""
     payload = json.dumps(found, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
-    payload = payload.replace("</nudge_found", "<\\/nudge_found")
+    payload = payload.replace("</", "<\\/")
     return f"<nudge_found>{payload}</nudge_found>"
 
 
