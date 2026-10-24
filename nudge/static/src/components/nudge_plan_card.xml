@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!-- S10: several changes asked at once, as numbered steps. Nothing is done before the yes. -->
+    <t t-name="nudge.PlanCard">
+        <div class="o_nudge_card o_nudge_plan_card" t-att-data-state="props.cardState" t-att-data-phase="phase"
+             t-att-class="{ o_nudge_card_sensitive: card.sensitive }" role="group" t-att-aria-label="card.title">
+            <div class="o_nudge_card_title">
+                <i t-if="card.sensitive" class="fa fa-exclamation-triangle"
+                   title="Check it twice: some of it is not taken back with a click"/>
+                <i t-else="" class="fa fa-list-ol" aria-hidden="true"/>
+                <span t-esc="card.title"/>
+            </div>
+            <p t-if="canChange" class="o_nudge_plan_intro" t-esc="intro"/>
+            <ol class="o_nudge_plan_steps">
+                <li t-foreach="card.plan_steps" t-as="step" t-key="step.n" class="o_nudge_plan_step"
+                    t-att-data-state="step.state" t-att-aria-current="waitsFor(step) ? 'step' : undefined">
+                    <div class="o_nudge_plan_step_head">
+                        <span class="o_nudge_plan_step_number" aria-hidden="true" t-esc="step.n"/>
+                        <i t-att-class="'fa o_nudge_plan_step_icon ' + stepIcon(step)" t-att-title="stepStateLabel(step)"
+                           aria-hidden="true"/>
+                        <span class="o_nudge_plan_step_title" dir="auto" t-esc="step.title"/>
+                        <span class="visually-hidden" t-esc="stepStateLabel(step)"/>
+                        <button t-if="canChange and step.state === 'todo'" type="button"
+                                class="btn btn-sm btn-link o_nudge_plan_remove" t-att-title="removeLabel(step)"
+                                t-att-aria-label="removeLabel(step)" t-att-disabled="edit.busy"
+                                t-on-click="() => this.remove(step)">
+                            <i class="fa fa-times" aria-hidden="true"/>
+                        </button>
+                    </div>
+                    <t t-if="step.state !== 'removed'">
+                        <p t-if="step.refs.length" class="o_nudge_plan_note o_nudge_plan_uses" t-esc="refsText(step)"/>
+                        <ul t-if="step.records.length" class="o_nudge_card_records">
+                            <li t-foreach="step.records" t-as="record" t-key="record_index" dir="auto" t-esc="record.name"/>
+                        </ul>
+                        <dl t-if="step.lines.length" class="o_nudge_card_lines">
+                            <t t-foreach="step.lines" t-as="line" t-key="line_index">
+                                <dt t-esc="line.label"/>
+                                <dd t-if="line.lines" class="o_nudge_card_nested">
+                                    <t t-call="nudge.CardLines">
+                                        <t t-set="lines" t-value="line.lines"/>
+                                    </t>
+                                </dd>
+                                <dd t-elif="isEditing(step, line)" class="o_nudge_plan_editing">
+                                    <input type="text" class="form-control form-control-sm o_nudge_plan_input"
+                                           t-ref="editInput" t-model="edit.value" t-att-aria-label="editLabel(line)"
+                                           t-att-disabled="edit.busy" t-on-keydown="onEditKeydown"/>
+                                    <button type="button" class="btn btn-sm btn-primary o_nudge_plan_save"
+                                            t-att-disabled="edit.busy" t-on-click="saveEdit">Save</button>
+                                    <button type="button" class="btn btn-sm btn-light o_nudge_plan_cancel"
+                                            t-on-click="cancelEdit">Cancel</button>
+                                </dd>
+                                <dd t-else="" dir="auto">
+                                    <t t-if="'before' in line">
+                                        <del class="o_nudge_card_before" t-esc="show(line.before)"/>
+                                        <i class="fa fa-long-arrow-right o_nudge_card_arrow"/>
+                                    </t>
+                                    <span t-att-class="line.ref ? 'o_nudge_plan_ref' : 'o_nudge_card_value'"
+                                          t-esc="show(line.value)"/>
+                                    <button t-if="canEdit(step, line)" type="button"
+                                            class="btn btn-sm btn-link o_nudge_plan_edit" t-att-title="editLabel(line)"
+                                            t-att-aria-label="editLabel(line)" t-on-click="() => this.startEdit(step, line)">
+                                        <i class="fa fa-pencil" aria-hidden="true"/>
+                                    </button>
+                                </dd>
+                            </t>
+                        </dl>
+                    </t>
+                    <p t-else="" class="o_nudge_plan_note" t-esc="removedText(step)"/>
+                    <div t-if="step.error" class="o_nudge_card_error" dir="auto" t-esc="step.error"/>
+                    <t t-if="step.verify" t-call="nudge.Verify">
+                        <t t-set="verify" t-value="step.verify"/>
+                    </t>
+                    <div t-if="waitsFor(step)" class="o_nudge_card_actions">
+                        <button type="button" class="btn btn-sm btn-primary o_nudge_confirm"
+                                t-on-click="() => this.decide('confirm')">Yes, do it</button>
+                        <button type="button" class="btn btn-sm btn-light o_nudge_decline"
+                                t-on-click="() => this.decide('decline')">No</button>
+                    </div>
+                </li>
+            </ol>
+            <div t-if="canChange" class="o_nudge_card_actions">
+                <button type="button" class="btn btn-sm btn-primary o_nudge_confirm" t-att-disabled="!todoCount or edit.busy"
+                        t-on-click="() => this.decide('confirm')">
+                    <t t-esc="confirmLabel"/>
+                </button>
+                <button type="button" class="btn btn-sm btn-light o_nudge_decline"
+                        t-on-click="() => this.decide('decline')">No</button>
+            </div>
+            <div t-elif="waitsForStep or stopped" class="o_nudge_card_actions o_nudge_plan_actions">
+                <button t-if="stopped" type="button" class="btn btn-sm btn-primary o_nudge_plan_resume"
+                        t-on-click="() => this.decide('resume')">Resume the plan</button>
+                <button t-if="waitsForStep" type="button" class="btn btn-sm btn-link o_nudge_plan_stop"
+                        t-on-click="() => this.decide('stop')">Stop the plan</button>
+            </div>
+            <div t-if="outcome" class="o_nudge_card_outcome" role="status" aria-live="polite">
+                <i t-if="running" class="fa fa-circle-o-notch fa-spin" aria-hidden="true"/>
+                <i t-elif="card.undone" class="fa fa-undo" aria-hidden="true"/>
+                <i t-elif="props.cardState === 'done'" class="fa fa-check" aria-hidden="true"/>
+                <i t-elif="props.cardState === 'failed'" class="fa fa-times" aria-hidden="true"/>
+                <span t-esc="outcome"/>
+            </div>
+            <button t-if="card.can_undo and props.onUndo and !running" type="button" class="btn btn-sm btn-link o_nudge_undo"
+                    title="Write back what was there before, the last step first"
+                    t-on-click="() => props.onUndo(card.step_id)">
+                <i class="fa fa-undo" aria-hidden="true"/> Undo the steps done
+            </button>
+        </div>
+    </t>
+
+    <!-- S11: what was read again after a change: never told as done when a field did not end as asked -->
+    <t t-name="nudge.Verify">
+        <div t-if="verify.fields and verify.fields.length" class="o_nudge_verify" role="alert">
+            <div class="o_nudge_verify_head">
+                <i class="fa fa-exclamation-circle" aria-hidden="true"/>
+                <span>Read again after writing, not everything is as asked:</span>
+            </div>
+            <ul class="o_nudge_verify_fields">
+                <li t-foreach="verify.fields" t-as="entry" t-key="entry_index" dir="auto">
+                    <strong t-esc="entry.label"/> · <t t-esc="entry.record"/>:
+                    <span class="o_nudge_verify_asked"><t t-esc="show(entry.asked)"/></span>
+                    <i class="fa fa-long-arrow-right o_nudge_card_arrow" title="is now"/>
+                    <span class="o_nudge_verify_actual" t-esc="show(entry.actual)"/>
+                </li>
+            </ul>
+            <button type="button" class="btn btn-sm btn-link o_nudge_verify_fix" t-on-click="() => this.fix(verify)">
+                <i class="fa fa-pencil" aria-hidden="true"/> Set it again
+            </button>
+        </div>
+        <div t-elif="verify.ok and verify.checked" class="o_nudge_verified">
+            <i class="fa fa-check-circle" aria-hidden="true"/>
+            <span>Read again after writing: as asked.</span>
+        </div>
+    </t>
+
+</templates>

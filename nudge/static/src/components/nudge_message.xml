@@ -85,7 +85,9 @@
                 <t t-if="props.found" t-call="nudge.Found">
                     <t t-set="found" t-value="props.found"/>
                 </t>
-                <t t-if="props.card" t-call="nudge.Card"/>
+                <NudgePlanCard t-if="props.card and props.card.kind === 'plan'" card="props.card"
+                               cardState="props.cardState" onDecide="props.onDecide" onUndo="props.onUndo"/>
+                <t t-elif="props.card" t-call="nudge.Card"/>
                 <!-- NP-04: every place is taken: the question waits for its turn, without holding the server -->
                 <div t-if="props.state === 'in_line'" class="o_nudge_background o_nudge_line" role="status" aria-live="polite">
                     <div class="o_nudge_background_head">
@@ -372,6 +374,9 @@
             </div>
             <div t-if="props.cardError and props.cardState === 'failed'" class="o_nudge_card_error"
                  t-esc="props.cardError"/>
+            <t t-if="props.card.verify and props.cardState === 'done'" t-call="nudge.Verify">
+                <t t-set="verify" t-value="props.card.verify"/>
+            </t>
             <button t-if="props.cardCanUndo and props.onUndo" type="button"
                     class="btn btn-sm btn-link o_nudge_undo" title="Write back what was there before"
                     t-on-click="() => props.onUndo(props.card.step_id)">
