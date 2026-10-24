@@ -8,6 +8,7 @@ import { useBus, useService } from "@web/core/utils/hooks";
 
 import { DICTATION_HOTKEYS, hotkeyLabel, HOTKEYS, NO_HOTKEY } from "../core/hotkeys";
 import { THEMES } from "../core/looks";
+import { isSafeUrl } from "../core/markdown";
 import { speechApi } from "../voice/speech_api";
 import { createMeetingRecorder, TRANSCRIPT_NAME } from "../voice/meeting_recorder";
 import { ARABIC_VARIANTS, ENGLISH_VARIANTS, LANGUAGE_AUTO, shortName } from "../voice/languages";
@@ -132,6 +133,11 @@ export class NudgePanel extends Component {
             },
             () => [this.state.view, this.state.messages.length, this.state.messages.at(-1)?.content]
         );
+    }
+
+    safeUrl(url) {
+        // The address of a page comes from the server: only a safe one becomes a link
+        return isSafeUrl(url) ? url : undefined;
     }
 
     get bulkTarget() {

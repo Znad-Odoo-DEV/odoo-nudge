@@ -2,7 +2,7 @@ import { Component, useEffect, useRef, useState } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
 
-import { renderMarkdown } from "../core/markdown";
+import { isSafeUrl, renderMarkdown } from "../core/markdown";
 import { NudgeChart } from "./nudge_chart";
 import { NudgePlanCard, draftFix } from "./nudge_plan_card";
 
@@ -122,6 +122,11 @@ export class NudgeMessage extends Component {
     /** NP-04: the question waited too long: asked again, as it was */
     retryLine() {
         this.env.services.nudge?.retryLine();
+    }
+
+    safeUrl(url) {
+        // The address of a page or a passage comes from the server: only a safe one becomes a link
+        return isSafeUrl(url) ? url : undefined;
     }
 
     get html() {
