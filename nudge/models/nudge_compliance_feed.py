@@ -190,6 +190,7 @@ class NudgeComplianceUpdate(models.Model):
                 return self.browse()
             raise UserError(self.env._("Private mode is on: the feed is not fetched."))
         try:
+            self.env["nudge.egress"].check(url, "feed")  # NP-15
             raw = _download(url, compliance_feed.MAX_FEED_BYTES)
             issued, packs = compliance_feed.verify(raw, key)
         except FetchError as error:

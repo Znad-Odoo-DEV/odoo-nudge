@@ -277,6 +277,12 @@ class NudgeConnector(models.Model):
     def _client(self):
         """:return: a client for one piece of work with the server, with its credential"""
         self.ensure_one()
+        # NP-15: the list of allowed destinations of the company, before the token request or the call
+        try:
+            for url in filter(None, (self.url, self.auth_type == "oauth" and self.oauth_token_url)):
+                self.env["nudge.egress"].check(url, "connector")
+        except UserError as refused:
+            raise mcp_client.McpError("egress", refused.args[0]) from None
         era = mcp_client.MODERN if self.protocol_version == mcp_client.PROTOCOL else (
             self.protocol_version if self.protocol_version in mcp_client.LEGACY_PROTOCOLS else None)
         return mcp_client.Client(self.url, headers=self._auth_headers(), seconds=self._seconds(),
@@ -343,6 +349,7 @@ class NudgeConnector(models.Model):
         _ = self.env._
         words = {
             "scheme": _("The address must start with https:// (http:// only for this machine)."),
+            "egress": _("The address is not on the list of allowed destinations of your company."),
             "private": _("The address is on a private network or this machine, and the connector is not "
                          "marked as running on your own network."),
             "network": _("The server cannot be reached."),
@@ -381,6 +388,11 @@ class NudgeConnector(models.Model):
         if env["nudge.provider"]._is_private_mode() and not connector.runs_locally:
             raise Refused(f"Private mode is on: nothing is sent to {connector.name}, which does not run on "
                           "your own network.")
+        try:  # NP-15
+            for url in filter(None, (connector.url, connector.auth_type == "oauth" and connector.oauth_token_url)):
+                env["nudge.egress"].check(url, "connector")
+        except UserError as refused:
+            raise Refused(f"{refused.args[0]} Nothing was sent.") from None
 
     def _is_for(self, user):
         """:return: whether ``user`` is of one of the groups of the connector"""

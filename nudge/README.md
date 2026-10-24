@@ -586,3 +586,16 @@ Cancel, and starts by itself when a place frees; Stop lets the server go at once
 provider says nothing; a fallback model chosen in Settings answers once when the provider fails,
 has no key, the budget is used up (only one on your own server) or private mode is on (only one on
 your own server). See doc/busy-times.md.
+
+
+## Allowed destinations (egress)
+
+**Settings > Nudge > Privacy > Allowed Destinations** (per company) lists the only hosts Nudge may send to:
+AI providers (chat, voice, pictures), connectors, the recipe marketplace, the search model download and the
+compliance pack feed. One entry per line: a host (`api.anthropic.com`), a host with a port (`localhost:11434`,
+the port must then match) or a domain (`*.example.com`, the domain and everything under it). Empty means no
+restriction, as before. Any other host is refused before the request, and the message names the host and
+where to allow it. Private mode stays stricter: with both on, a provider must run on your own server and be
+on the list. The list matches host names as written; it does not resolve them, so a name that points
+somewhere else is for the network firewall. When a shared screen held a password or key field (its value is
+hidden before sending), the system administrators of the company get one notice a day per screen model.
