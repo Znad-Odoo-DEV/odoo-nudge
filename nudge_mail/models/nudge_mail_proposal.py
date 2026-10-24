@@ -360,7 +360,8 @@ class NudgeMailProposal(models.Model):
             if not draft:
                 proposal.draft_text = False
                 continue
-            label = self.env["ir.model"]._get(draft.get("model", ""))
+            # sudo: only the name of the model is read, which the agents no longer may read themselves
+            label = self.env["ir.model"].sudo()._get(draft.get("model", ""))
             if draft.get("reply"):
                 proposal.draft_text = self.env._("A reply to %s, written by Nudge for you to read and send.", proposal.email_from)
             elif draft.get("document"):
