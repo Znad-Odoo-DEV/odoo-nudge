@@ -335,9 +335,11 @@ class TestTierRules(TransactionCase):
         self.assertEqual(tier.escalation({"stop": base.stop_event(base.STOP_REFUSAL), "text": "", "tool_calls": []}, True), "refusal")
         self.assertEqual(tier.escalation({"stop": base.stop_event(base.STOP_DEADLINE), "text": "", "tool_calls": []}, True), "")
         self.assertTrue(tier.tool_failed([{"is_error": False}, {"is_error": True}]))
-    def test_a_refusal_after_some_text_still_goes_to_the_main_model(self):
-        refused = {"stop": base.stop_event(base.STOP_REFUSAL), "text": "I cannot", "tool_calls": []}
-        self.assertEqual(tier.escalation(refused, True), "refusal")
-        answered = {"stop": base.stop_event(base.STOP_END), "text": "Here.", "tool_calls": []}
-        self.assertEqual(tier.escalation(answered, True), "")
         self.assertFalse(tier.tool_failed([{"is_error": False, "content": '"is_error": true'}]))
+
+    def test_a_refusal_after_some_text_is_not_handed_over(self):
+        """Review (ai #13), kept as designed: the text was shown already, and the panel would add the
+        answer of the main model after it; the refusal is recorded as refused and its text dropped"""
+        refused = {"stop": base.stop_event(base.STOP_REFUSAL), "text": "I cannot", "tool_calls": []}
+        self.assertEqual(tier.escalation(refused, True), "")
+        self.assertEqual(tier.escalation(dict(refused, text=""), True), "refusal")
