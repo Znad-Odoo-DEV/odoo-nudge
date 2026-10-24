@@ -47,6 +47,8 @@ from . import nudge_home
 from . import nudge_egress  # NP-15
 from . import nudge_recipe_market
 from . import nudge_recipe_publish
+from . import nudge_recipe_sign
+from . import nudge_recipe_catalogue
 from . import nudge_setup_wizard
 from . import nudge_compliance_feed
 from . import nudge_credential

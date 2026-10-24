@@ -69,6 +69,7 @@ from . import test_bulk
 from . import test_core_review
 from . import test_recipes
 from . import test_recipe_market
+from . import test_recipe_signed  # S2
 from . import test_translation
 from . import test_recurring
 from . import test_setup

@@ -31,7 +31,7 @@ _logger = logging.getLogger(__name__)
 INDEX_FORMAT = 1
 INDEX_KINDS = [
     ("tour", "Recorded Tours"), ("rules", "Rules"), ("lexicon", "Command Words"),
-    ("answers", "Remembered Answers"), ("pack", "Pack"), ("prompts", "Prompts"),
+    ("answers", "Remembered Answers"), ("pack", "Pack"), ("prompts", "Prompts"), ("skills", "Skill"),
 ]
 DEFAULT_URL = "https://znad-odoo-dev.github.io/nudge/recipes/index.json"
 CAP = 2 * 1024 * 1024
@@ -198,6 +198,12 @@ def parse_index(raw, base_url=""):
             "key": key, "name": _words(item.get("name")), "description": _words(item.get("description")),
             "kind": item["kind"], "apps": list(item.get("apps") or []), "odoo": _versions(item.get("odoo")),
             "author": str(item.get("author") or "")[:200], "licence": str(item.get("licence") or "")[:100],
+            "domain": str(item.get("domain") or "")[:60], "version": str(item.get("version") or "")[:20],
+            "publisher": str(item.get("publisher") or "")[:100],
+            "languages": ",".join(w for w in (item.get("languages") or []) if isinstance(w, str) and re.fullmatch(r"[a-z]{2,3}", w))
+            if isinstance(item.get("languages"), list) else "",
+            "tools": ",".join(w for w in (item.get("tools") or []) if isinstance(w, str) and re.fullmatch(r"[a-z0-9_]{1,64}", w))
+            if isinstance(item.get("tools"), list) else "",
             "url": urljoin(base_url, str(item["url"])), "sha256": item["sha256"].lower(),
             "size": size if isinstance(size, int) and size >= 0 else 0, "updated": str(item["updated"])[:10],
         })
@@ -370,6 +376,12 @@ class NudgeRecipeEntry(models.Model):
     odoo_versions = fields.Char(string="Odoo Versions")
     author = fields.Char()
     licence = fields.Char()
+    # Skills of a catalogue (S2): what the index says before the file is fetched; the file is what counts
+    domain = fields.Char()
+    languages = fields.Char(help="Language codes separated by commas.")
+    tools = fields.Char(help="Tools the skill uses, separated by commas.")
+    version = fields.Char()
+    publisher = fields.Char(string="Publisher (as the Index Says)")
     url = fields.Char()
     sha256 = fields.Char(string="Checksum")
     size = fields.Integer()
@@ -429,6 +441,8 @@ class NudgeRecipeEntry(models.Model):
                 "description_en": item["description"]["en"], "description_ar": item["description"]["ar"],
                 "kind": item["kind"], "apps": ",".join(item["apps"]), "odoo_versions": ",".join(item["odoo"]),
                 "author": item["author"], "licence": item["licence"], "url": item["url"],
+                "domain": item["domain"], "languages": item["languages"], "tools": item["tools"],
+                "version": item["version"], "publisher": item["publisher"],
                 "sha256": item["sha256"], "size": item["size"], "updated": item["updated"], "active": True,
             }
             if item["key"] in existing:
