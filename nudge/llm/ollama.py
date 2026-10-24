@@ -10,7 +10,7 @@ import re
 
 import requests
 
-from . import base
+from . import base, resilience
 
 CONNECT_TIMEOUT = 5
 READ_TIMEOUT = 20
@@ -53,13 +53,17 @@ def _headers(api_key):
     return {"Authorization": f"Bearer {api_key}"} if api_key else {}
 
 
-def _call(method, base_url, path, api_key="", payload=None, timeout=READ_TIMEOUT):
-    """:return: the JSON answer
+def _call(method, base_url, path, api_key="", payload=None, timeout=READ_TIMEOUT, deadline=None):
+    """:param deadline: a ``time.monotonic()`` value the call must end by: the
+        connection and the wait for the answer are cut to what is left of it
+    :return: the JSON answer
     :raise base.AdapterError: what went wrong, in the words of the adapters"""
+    if deadline is not None:
+        timeout = base.remaining(deadline, timeout)
     try:
         response = requests.request(
             method, root_of(base_url) + path, json=payload, headers=_headers(api_key),
-            timeout=(CONNECT_TIMEOUT, timeout))
+            timeout=(resilience.connect_timeout(deadline, CONNECT_TIMEOUT), timeout))
     except requests.exceptions.ReadTimeout as exc:
         raise base.AdapterError(base.ERROR_TIMEOUT, type(exc).__name__) from exc
     except requests.exceptions.RequestException as exc:
@@ -87,10 +91,11 @@ def _detail(response):
     return str(body.get("error") if isinstance(body, dict) else body)[:300]
 
 
-def read_picture(base_url, model, data, question="", api_key="", prompt=PICTURE_PROMPT):
+def read_picture(base_url, model, data, question="", api_key="", prompt=PICTURE_PROMPT, deadline=None):
     """:param data: the picture, in base64
     :param question: what the person asked with it
     :param prompt: what the model is asked of the picture, the question in it
+    :param deadline: a ``time.monotonic()`` value the reading must end by
     :return: ``(text, usage)``: what the model read in the picture, and the
         tokens it took
     :raise base.AdapterError: when the server could not read it"""
@@ -104,7 +109,7 @@ def read_picture(base_url, model, data, question="", api_key="", prompt=PICTURE_
         }],
         "options": {"temperature": 0.1},
     }
-    body = _call("POST", base_url, "/api/chat", api_key, payload, timeout=PICTURE_TIMEOUT)
+    body = _call("POST", base_url, "/api/chat", api_key, payload, timeout=PICTURE_TIMEOUT, deadline=deadline)
     text = ((body.get("message") or {}).get("content") or "").strip()
     if not text:
         raise base.AdapterError(base.ERROR_BAD_REQUEST, f"{model} read nothing in the picture")

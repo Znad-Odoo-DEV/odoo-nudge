@@ -436,6 +436,10 @@ rewritten into a file path.
 ## Known limits
 
 - One answer at a time per user. An answer is cut after 90 seconds.
+- A provider that answers "busy" (limit reached, overloaded) is left alone for the time it asks,
+  at most a minute, by every request of the same server: the next questions are told at once
+  "The provider is busy, try again in N s". Waits and retries never go past the deadline of the
+  answer, and Claude's SDK does not retry on its own.
 - In Agent mode the model is called 8 times at most between two of your answers, and a request
   takes 25 steps at most. Past that, Nudge tells what was done and what is left.
 - Agent mode was tried with `gemini-3.5-flash-lite`, on Sales and Contacts, in English and in
