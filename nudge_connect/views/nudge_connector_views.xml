@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Connectors -->
+    <record id="nudge_connector_view_list" model="ir.ui.view">
+        <field name="name">nudge.connector.view.list</field>
+        <field name="model">nudge.connector</field>
+        <field name="arch" type="xml">
+            <list string="Connectors" decoration-muted="state != 'active'">
+                <field name="name"/>
+                <field name="key"/>
+                <field name="url"/>
+                <field name="allowed_count"/>
+                <field name="protocol_version" optional="hide"/>
+                <field name="last_sync" optional="show"/>
+                <field name="state" widget="badge" decoration-success="state == 'active'"
+                       decoration-danger="state == 'stopped'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_connector_view_form" model="ir.ui.view">
+        <field name="name">nudge.connector.view.form</field>
+        <field name="model">nudge.connector</field>
+        <field name="arch" type="xml">
+            <form string="Connector">
+                <header>
+                    <button name="action_sync_tools" type="object" string="Read the Tools" class="btn-primary"/>
+                    <button name="action_test" type="object" string="Test the Connection"/>
+                    <button name="action_activate" type="object" string="Activate" invisible="state == 'active'"/>
+                    <button name="action_stop" type="object" string="Stop Now" invisible="state != 'active'"
+                            confirm="Nothing more is sent to this connector, from now on. Stop it?"/>
+                    <button name="action_draft" type="object" string="Back to Draft" invisible="state != 'stopped'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Sister company Odoo"/></h1>
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="not last_error">
+                        <field name="last_error" class="mb-0"/>
+                    </div>
+                    <group>
+                        <group string="Server" name="server">
+                            <field name="key" placeholder="sister"/>
+                            <field name="url" placeholder="https://mcp.example.com/mcp"/>
+                            <field name="runs_locally"/>
+                            <field name="protocol_version"/>
+                            <field name="server_name"/>
+                            <field name="last_sync"/>
+                            <field name="activated_on"/>
+                        </group>
+                        <group string="Credential" name="credential">
+                            <field name="auth_type"/>
+                            <field name="bearer_token" password="True" invisible="auth_type != 'bearer'"
+                                   required="auth_type == 'bearer' and not has_secret"/>
+                            <field name="oauth_token_url" invisible="auth_type != 'oauth'"
+                                   required="auth_type == 'oauth'" placeholder="https://auth.example.com/token"/>
+                            <field name="oauth_client_id" invisible="auth_type != 'oauth'"
+                                   required="auth_type == 'oauth'"/>
+                            <field name="oauth_client_secret" password="True" invisible="auth_type != 'oauth'"/>
+                            <field name="oauth_scope" invisible="auth_type != 'oauth'"/>
+                            <field name="has_secret" invisible="auth_type == 'none'"/>
+                            <div class="text-muted" colspan="2">
+                                The credential is sent to this server only. It never reaches the AI, and it is
+                                taken out of the log, the errors and the answers.
+                            </div>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Who May Use It" name="access">
+                            <field name="group_ids" widget="many2many_tags"/>
+                            <field name="company_ids" widget="many2many_tags"/>
+                        </group>
+                        <group string="Limits" name="limits">
+                            <field name="timeout"/>
+                            <field name="max_result_chars"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Tools" name="tools">
+                            <div class="text-muted mb-2">
+                                A tool comes in Not Allowed. Open it, read what it says and what it takes, and
+                                allow it as Read (runs at once for the person) or Write (the person sees exactly
+                                what is sent and says yes first). A tool whose description changes on the server
+                                is not allowed any more until it is allowed again.
+                            </div>
+                            <field name="tool_ids">
+                                <list editable="bottom" create="false" delete="false"
+                                      decoration-muted="missing" decoration-warning="needs_review">
+                                    <field name="remote_name"/>
+                                    <field name="title" optional="hide"/>
+                                    <field name="description" optional="show"/>
+                                    <field name="local_name" optional="hide"/>
+                                    <field name="read_only_hint" optional="show"/>
+                                    <field name="destructive_hint" optional="show"/>
+                                    <field name="needs_review" optional="show"/>
+                                    <field name="missing" optional="show"/>
+                                    <field name="access"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Calls" name="calls">
+                            <field name="call_ids" readonly="1">
+                                <list>
+                                    <field name="create_date" string="On"/>
+                                    <field name="user_id"/>
+                                    <field name="tool_name"/>
+                                    <field name="access"/>
+                                    <field name="state"/>
+                                    <field name="result_chars"/>
+                                    <field name="duration_ms"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_connector_view_search" model="ir.ui.view">
+        <field name="name">nudge.connector.view.search</field>
+        <field name="model">nudge.connector</field>
+        <field name="arch" type="xml">
+            <search string="Connectors">
+                <field name="name"/>
+                <field name="key"/>
+                <field name="url"/>
+                <filter name="active_state" string="Active" domain="[('state', '=', 'active')]"/>
+                <filter name="stopped" string="Stopped" domain="[('state', '=', 'stopped')]"/>
+                <separator/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_connector_action" model="ir.actions.act_window">
+        <field name="name">Connectors</field>
+        <field name="res_model">nudge.connector</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Connect Nudge to an outside system</p>
+            <p>A connector is an outside system that speaks MCP: a sister company's Odoo, a calendar, a chat,
+                a document store. Add its address, read its tools, and allow the ones Nudge may use: reads run
+                for the person, writes wait for their yes.</p>
+        </field>
+    </record>
+
+    <!-- One tool, read before it is allowed -->
+    <record id="nudge_connector_tool_view_form" model="ir.ui.view">
+        <field name="name">nudge.connector.tool.view.form</field>
+        <field name="model">nudge.connector.tool</field>
+        <field name="arch" type="xml">
+            <form string="Connector Tool" create="false" delete="false">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="remote_name"/></h1>
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="not needs_review">
+                        Its description or arguments changed on the server since it was allowed. Read them
+                        again, then allow it again.
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="not hint_warning">
+                        <field name="hint_warning" class="mb-0"/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="connector_id" readonly="1"/>
+                            <field name="title"/>
+                            <field name="local_name"/>
+                            <field name="access"/>
+                        </group>
+                        <group>
+                            <field name="read_only_hint"/>
+                            <field name="destructive_hint"/>
+                            <field name="needs_review"/>
+                            <field name="missing"/>
+                        </group>
+                    </group>
+                    <group string="What the Server Says It Does">
+                        <field name="description" nolabel="1" colspan="2"/>
+                    </group>
+                    <group string="What It Takes">
+                        <field name="input_schema_text" nolabel="1" colspan="2" class="font-monospace"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- The log of the calls -->
+    <record id="nudge_connector_call_view_list" model="ir.ui.view">
+        <field name="name">nudge.connector.call.view.list</field>
+        <field name="model">nudge.connector.call</field>
+        <field name="arch" type="xml">
+            <list string="Connector Calls" create="false" edit="false" delete="false"
+                  decoration-danger="state == 'failed'" decoration-muted="state == 'refused'">
+                <field name="create_date" string="On"/>
+                <field name="user_id"/>
+                <field name="connector_id"/>
+                <field name="tool_name"/>
+                <field name="access"/>
+                <field name="state"/>
+                <field name="result_chars"/>
+                <field name="duration_ms"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_connector_call_view_form" model="ir.ui.view">
+        <field name="name">nudge.connector.call.view.form</field>
+        <field name="model">nudge.connector.call</field>
+        <field name="arch" type="xml">
+            <form string="Connector Call" create="false" edit="false" delete="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="connector_id"/>
+                            <field name="tool_name"/>
+                            <field name="access"/>
+                            <field name="state"/>
+                        </group>
+                        <group>
+                            <field name="create_date" string="On"/>
+                            <field name="user_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="conversation_id"/>
+                            <field name="result_chars"/>
+                            <field name="duration_ms"/>
+                        </group>
+                    </group>
+                    <group string="Sent">
+                        <field name="arguments_text" nolabel="1" colspan="2" class="font-monospace"/>
+                    </group>
+                    <group invisible="not error">
+                        <field name="error"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_connector_call_view_search" model="ir.ui.view">
+        <field name="name">nudge.connector.call.view.search</field>
+        <field name="model">nudge.connector.call</field>
+        <field name="arch" type="xml">
+            <search string="Connector Calls">
+                <field name="connector_id"/>
+                <field name="user_id"/>
+                <filter name="writes" string="Writes" domain="[('access', '=', 'write')]"/>
+                <filter name="failed" string="Failed or Refused" domain="[('state', 'in', ('failed', 'refused'))]"/>
+                <separator/>
+                <filter name="by_connector" string="Connector" context="{'group_by': 'connector_id'}"/>
+                <filter name="by_user" string="Asked By" context="{'group_by': 'user_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_connector_call_action" model="ir.actions.act_window">
+        <field name="name">Connector Calls</field>
+        <field name="res_model">nudge.connector.call</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No call to a connector yet</p>
+            <p>Every call Nudge makes to a connector is kept here: who asked, what was sent (secrets masked),
+                the size of the answer and the time it took.</p>
+        </field>
+    </record>
+
+    <menuitem id="nudge_connect_menu_connectors" name="Connectors" parent="nudge.nudge_menu_configuration"
+              action="nudge_connector_action" sequence="40" groups="base.group_system"/>
+    <menuitem id="nudge_connect_menu_calls" name="Connector Calls" parent="nudge.nudge_menu_agent"
+              action="nudge_connector_call_action" sequence="40"
+              groups="base.group_system,nudge.group_nudge_manager"/>
+</odoo>
