@@ -871,3 +871,10 @@ msgstr "لم يُربط أي هاتف بعد"
 msgid "A user links a phone number from their Nudge preferences: the link is listed here."
 msgstr "يربط المستخدم رقم هاتفه من تفضيلات Nudge: يظهر الربط هنا."
 
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+#: code:addons/nudge_messaging/models/nudge_step.py:0
+msgid "Agent mode is not open to you. Ask your administrator."
+msgstr "وضع الوكيل غير متاح لك. تواصل مع مسؤول النظام."
+

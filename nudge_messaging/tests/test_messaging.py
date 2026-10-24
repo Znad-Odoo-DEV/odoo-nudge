@@ -470,6 +470,38 @@ class TestEngine(MessagingCase, HttpCase):
         self.assertIn("search_odoo_documentation", names)
         self.assertFalse(names & {"prepare_create", "prepare_write", "call_method", "document_to_record"})
 
+    def test_with_agent_mode_off_the_phone_only_looks(self):
+        """Review ai #6: the administrator's Agent Mode switch holds on the phone: the AI is offered what
+        Talk offers (the Ask tier), the rules and a file prepare nothing, and a yes given in Odoo to a
+        change prepared before is refused"""
+        self.env["res.partner"].create({"name": "راغد"})
+        self.link(self.raghad)
+        self.receive("اعمل عرض سعر لراغد")
+        Step = self.env["nudge.step"].sudo()
+        step = Step.search([("origin", "=", "WhatsApp")])
+        self.assertEqual(step.state, "pending")
+        self.env["ir.config_parameter"].sudo().set_param("nudge.agent", "no")
+        with self.assertRaises(UserError):
+            step.with_user(self.raghad).action_messaging_apply()
+        self.assertEqual(step.state, "pending")
+        text = self.receive("اعمل عرض سعر لراغد")
+        self.assertEqual(Step.search_count([("origin", "=", "WhatsApp")]), 1, "The rules prepared nothing")
+        self.assertNotIn("/nudge.step/", text)
+        self.assertTrue("Agent mode" in text or "وضع الوكيل" in text, text)
+        adapter = self.use_adapter(reply="Nothing to prepare.")
+        self.receive("tell me something about the weather in the database please")
+        names = {tool["name"] for tool in adapter.calls[0]["tools"]}
+        self.assertFalse(names & {"prepare_create", "prepare_write", "call_method", "document_to_record"})
+        self.assertFalse(names & {"find_products", "search_products"}, "No tool of Agent mode only")
+        self.assertIn("search_records", names, "The Ask tier is offered, as in Talk")
+        downloads = []
+        self.patch(type(self.env["nudge.messaging.api"]), "_download", lambda model, channel, media: (
+            downloads.append(media) or (b"\x89PNG\r\n\x1a\n" + b"0" * 40, "image/png")))
+        text = self.receive("", kind="image", media={"id": "m1", "mime": "image/png"})
+        self.assertFalse(downloads, "A file is not even downloaded")
+        self.assertIn("Agent mode", text)
+        self.assertEqual(Step.search_count([("origin", "=", "WhatsApp")]), 1)
+
     def test_a_tool_outside_the_list_is_refused_to_the_model(self):
         self.link(self.raghad)
         adapter = self.use_adapter(script=[
