@@ -138,8 +138,36 @@ class TestFallback(NudgeCase, TransactionCase):
         self.assertFalse(self.env["nudge.provider"].sudo()._get_fallback())
         _adapters, asked = self.answer_with()
         with self.assertRaisesRegex(UserError, "Private mode is on"):
-            self.question(self.user_a, "Where are quotations?")
+            self.question(self.user_a, "Why is the sky blue in the afternoon?")
         self.assertEqual(asked, [])
+
+    def test_lead_03_a_default_that_cannot_answer_never_switches_to_another_provider(self):
+        Provider = self.env["nudge.provider"].sudo()
+        self.Parameter.set_param(FALLBACK_PROVIDER_PARAM, "")
+        self.provider.api_key = False
+        self.assertFalse(Provider._get_default(), "The cloud provider nobody chose is not used")
+        self.provider.api_key = "sk-primary"
+        self.provider.active = False
+        self.assertFalse(Provider._get_default())
+        conversation = self.env["nudge.conversation"].with_user(self.user_a)._chat_open(None)
+        with self.assertRaisesRegex(UserError, "not set up"):
+            conversation._chat_provider()
+        # The one the administrator chose to stand in still answers
+        self.Parameter.set_param(FALLBACK_PROVIDER_PARAM, str(self.local.id))
+        self.assertEqual(Provider._get_default(), self.local)
+
+    def test_lead_03_first_install_uses_the_only_provider_and_private_mode_the_local_one(self):
+        Provider = self.env["nudge.provider"].sudo()
+        self.Parameter.set_param(DEFAULT_PROVIDER_PARAM, "")
+        self.assertFalse(Provider._get_default(), "Several configured and none named: none chosen for them")
+        (Provider.search([]) - self.other).write({"active": False})
+        self.assertEqual(Provider._get_default(), self.other, "Exactly one configured: first install")
+        self.other.active = True
+        self.local.active = True
+        self.provider.active = True
+        self.Parameter.set_param(DEFAULT_PROVIDER_PARAM, str(self.provider.id))
+        self.env.company.nudge_private_mode = True
+        self.assertEqual(Provider._get_default(), self.local, "Private mode: our own server first, as before")
 
     def test_private_mode_is_the_company_s(self):
         other_company = self.env["res.company"].create({"name": "Your Company (Branch)"})

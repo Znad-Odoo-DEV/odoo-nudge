@@ -4,6 +4,7 @@ Current version: nudge 19.0.1.58.0, nudge_mcp 19.0.1.1.0, nudge_connect 19.0.1.0
 
 ## 19.0.1.58.0 (unreleased)
 
+- LEAD-03: the default provider is only the one named, or the designated fallback (NP-10); first install with one provider unchanged.
 - Talk instructions match the reading tools of Ask the data; the old words stay when the setting is off.
 - Ask the data: the answer links the list behind a figure with a Show list button, opened as the person.
 - SEC-02 The Python sandbox of the Agent can no longer be pinned by `x = x * x`, `s = s + s` or a huge `round`/`ljust`/`bytes`: steps on computed values are size-checked before they run and the memory is watched with the deadline
