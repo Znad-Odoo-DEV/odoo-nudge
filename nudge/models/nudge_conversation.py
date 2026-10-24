@@ -682,6 +682,8 @@ class NudgeConversation(models.Model):
             # In private mode nothing of a question is kept for the managers to read
             # Counted by the meaning of the words, for the recurring questions: nobody is kept with it
             self.env["nudge.question"]._record(text)
+        # An answer from memory too would land in the middle of work going on in the background
+        self._chat_check_not_at_work()
         served = self.env["nudge.memory"]._chat_serve(
             self, text, mode, focus, found, explain, background, fresh=fresh, snapshot=snapshot)
         if served:
@@ -692,7 +694,6 @@ class NudgeConversation(models.Model):
             # workers. An argument, not a key of the context, which a request could carry.
             # Past the cap the question is not refused: it claims its place below, or waits
             self._chat_check_not_busy(cap=False)
-        self._chat_check_not_at_work()
         limit = AGENT_MAX_MESSAGES if self.sudo().run_ids else MAX_MESSAGES
         if self.message_count >= limit:
             raise UserError(self.env._("This conversation is getting long. Start a new one."))
