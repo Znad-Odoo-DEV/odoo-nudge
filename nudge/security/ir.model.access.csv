@@ -74,3 +74,6 @@ access_nudge_built_log_auditor,nudge.built.log auditor,model_nudge_built_log,gro
 access_nudge_auditor_wizard_system,nudge.auditor.wizard system,model_nudge_auditor_wizard,base.group_system,1,1,1,1
 access_nudge_credential_manager,nudge.credential manager,model_nudge_credential,group_nudge_manager,1,1,1,1
 access_nudge_coverage_manager,nudge.coverage manager,model_nudge_coverage,group_nudge_manager,1,1,1,1
+access_nudge_skill_user,nudge.skill user,model_nudge_skill,group_nudge_user,1,0,0,0
+access_nudge_skill_manager,nudge.skill manager,model_nudge_skill,group_nudge_manager,1,1,1,1
+access_nudge_skill_revision_manager,nudge.skill.revision manager,model_nudge_skill_revision,group_nudge_manager,1,0,0,0

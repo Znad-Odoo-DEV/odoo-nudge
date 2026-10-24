@@ -94,3 +94,4 @@ from . import test_credential_expiry
 from . import test_didyoumean
 from . import test_summary
 from . import test_ui_preferences  # NP-23
+from . import test_skills

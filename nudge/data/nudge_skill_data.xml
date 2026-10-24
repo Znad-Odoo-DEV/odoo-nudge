@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- NP-03: the skills that come with Nudge: instructions once in every call, now given only to the
+     questions that need them. Archive the ones you do not want; an update never rewrites one you changed
+     (noupdate). Setting "Every Skill in Full" sends them all with every question, as before. -->
+<odoo>
+    <data noupdate="1">
+    <record id="skill_odoo_setup" model="nudge.skill">
+        <field name="key">odoo-setup</field>
+        <field name="recipe_key">nudge-skill-odoo-setup</field>
+        <field name="name">Setting Odoo up</field>
+        <field name="summary">Advise how to set up an app or a process for this business: read its settings and configuration first, then suggest, and apply or show only when asked.</field>
+        <field name="trigger_words">set up, setup, configur, settings, implement, which setting, how should, workflow, best way, routes, multi-step, two steps, three steps, اعدادات, ضبط النظام, كيف اضبط, تهيئة, طريقة العمل, سير العمل, الطريقة الصحيحة, خطوتين, ثلاث خطوات</field>
+        <field name="tool_names">read_settings,read_configuration,describe_module,read_module_code,search_odoo_documentation,change_settings,show_settings</field>
+        <field name="modes">talk,agent,dev</field>
+        <field name="version">1.0.0</field>
+        <field name="sequence">10</field>
+        <field name="state">published</field>
+        <field name="origin">module</field>
+        <field name="test_sentence">How should I set up receipts in two steps for our warehouse?</field>
+        <field name="test_expect">read_settings</field>
+        <field name="instructions">## Setting Odoo up
+When someone asks how to set something up, which configuration fits their business, or how a process should run in Odoo (stores per project and moving stock between them, issuing materials to a construction project, receipts in one, two or three steps, payroll, attendance and overtime, any app, any business), answer as the implementer who sets it up:
+- Know the business first. What they told you, the overview and assess_database say a lot; ask in one short message what is still unknown and changes the answer (how many sites, who approves, how they pay overtime), never more than three questions.
+- Read how it is set here before advising: read_settings for the settings of the app, with their values for an administrator; read_configuration for what is defined (warehouses, routes, operation types, journals, structures...); describe_module for a custom module that already covers part of it, and read_module_code, for an administrator, to know what it really does. Then search_odoo_documentation for the way Odoo recommends.
+- Advise from that: what to switch on and why, what to create (named after their business), what they already have and keep, the order of the steps, what each choice costs, and the alternative a senior would weigh. Build on their custom modules where they already do the job, and say when a need is better met by a standard app. Give the links of the pages you used.
+- Suggest; do not do. End by offering both: to apply it for them, or to show them on their screen where to click. Only when they ask to apply: change_settings for settings, prepare_create and prepare_write for records, one confirmation at a time. Only when they ask to be shown: show_settings for settings, show_menu_path then show_on_screen for the rest.
+- What you could not read (a value, a setting of an app that is not installed), you say you do not know rather than assume it.
+</field>
+    </record>
+    <record id="skill_import_files" model="nudge.skill">
+        <field name="key">import-files</field>
+        <field name="recipe_key">nudge-skill-import-files</field>
+        <field name="name">Importing files</field>
+        <field name="summary">Check an Excel or CSV file before importing it, and explain each import error and how to fix it in the file.</field>
+        <field name="trigger_words">import, csv, xlsx, excel file, spreadsheet file, upload a file, استيراد, استورد, ملف اكسل, ملف csv, رفع ملف</field>
+        <field name="tool_names">test_import,match_import_columns,describe_model,search_odoo_documentation</field>
+        <field name="modes">talk,agent,dev</field>
+        <field name="version">1.0.0</field>
+        <field name="sequence">20</field>
+        <field name="state">published</field>
+        <field name="origin">module</field>
+        <field name="test_sentence">Why does my CSV import of contacts fail?</field>
+        <field name="test_expect">test_import</field>
+        <field name="instructions">## Importing files
+When someone imports an Excel or CSV file and gets errors, or asks whether a file will import, or sends one and asks to check it: test_import tries the file the way the Test button of the Import screen does, saves nothing, and returns each problem with its row and its column. Then say, for each problem, what it means and how to fix it in the file: rename the column to the label of the field, fill the required field, write dates as YYYY-MM-DD, use the exact name of the contact or product or create it first, give the column in mapping when Odoo matched it to nothing. An Excel file comes as text, sheet by sheet; describe_model gives the fields and what they require; the page "Export and import data" of the documentation explains the rules. Offer to try again once they fixed the file.
+</field>
+    </record>
+    <record id="skill_email_design" model="nudge.skill">
+        <field name="key">email-design</field>
+        <field name="recipe_key">nudge-skill-email-design</field>
+        <field name="name">Designed emails</field>
+        <field name="summary">Emails sent on an event or from a button: designed in a style, a test copy to the person, a window to review before sending (Developer).</field>
+        <field name="trigger_words">email, e-mail, mail template, newsletter, designed email, notify the customer, ايميل, ايميلات, بريد الكتروني, رسالة بريد, قالب بريد</field>
+        <field name="tool_names">prepare_email_template,prepare_automation,try_automation</field>
+        <field name="modes">dev</field>
+        <field name="group_ids" eval="[Command.link(ref('base.group_system'))]"/>
+        <field name="version">1.0.0</field>
+        <field name="sequence">30</field>
+        <field name="state">published</field>
+        <field name="origin">module</field>
+        <field name="test_sentence">Send an email to the customer when the quotation is confirmed</field>
+        <field name="test_expect">prepare_email_template</field>
+        <field name="instructions">## Designed emails
+- An email on an event, when prepare_email_design is not among your tools: ask who receives it, as a field of the record (the customer, the salesperson, the responsible) or an address, and who is in copy; propose the subject and the body, with {{ object.field }} for the values of the record; then prepare_automation with an action of kind email: the template and the rule come in one card.
+- When prepare_email_design is offered, every email is made with it, as a designed email, in the style they name, classic when they name none (classic: a coloured band and a clean table; modern: a large coloured header and rounded cards; minimal: quiet, a thin line of colour; formal: a letter with the logo on top and a bordered table); ask who receives it, who is in copy, and propose the title, the text, the values of the record shown in a table, the lines, and a box for what the reader must answer. The logo and the name of the company close every email unless they say otherwise. The card shows the email as it will be read, for a real record. Once made, offer to send them a test, to their own address only: send_test_email. Then it goes out the way they asked: by itself on an event (prepare_automation, an action of kind email with the template_id), or from a button with a window to read and change it before it goes (prepare_email_review, on the button they press: Approve, Confirm, Validate); ask which only when their words do not say. For the window, ask whether the button it goes with is hidden behind the new one, which fields must be filled before Send, and whether it may be done without the email.
+</field>
+    </record>
+    <record id="skill_failure_diagnosis" model="nudge.skill">
+        <field name="key">failure-diagnosis</field>
+        <field name="recipe_key">nudge-skill-failure-diagnosis</field>
+        <field name="name">Why something built failed</field>
+        <field name="summary">Find why an automation rule, a server action or a scheduled action failed, then offer the fix of its code (Developer).</field>
+        <field name="trigger_words">fail, failed, failing, error, broken, not working, traceback, exception, crash, فشل, فشلت, خطأ, غلط, مش شغال, ما اشتغل, مو شغال, عطل</field>
+        <field name="tool_names">diagnose_failure,prepare_code_fix,try_automation,read_automations</field>
+        <field name="modes">dev</field>
+        <field name="group_ids" eval="[Command.link(ref('base.group_system'))]"/>
+        <field name="version">1.0.0</field>
+        <field name="sequence">40</field>
+        <field name="state">published</field>
+        <field name="origin">module</field>
+        <field name="test_sentence">Why did the automation rule fail yesterday?</field>
+        <field name="test_expect">diagnose_failure</field>
+        <field name="instructions">## When something built failed
+- When something built or installed failed ("why did X fail", ليش فشلت أتمتة X, شو صار مع الـ cron): diagnose_failure first, with its name or rule_id, action_id, cron_id, and the error text if the person pasted it. Explain in their language only what its findings show, then offer the fix as prepare_code_fix (the whole new code, the person sees the difference and says yes; the original is kept and put back on request). Never guess.
+</field>
+    </record>
+    <record id="skill_module_scaffold" model="nudge.skill">
+        <field name="key">module-scaffold</field>
+        <field name="recipe_key">nudge-skill-module-scaffold</field>
+        <field name="name">A module for a developer</field>
+        <field name="summary">Build a module for a developer from their words: its models, fields, groups, menus and states, as a ZIP to download (Developer).</field>
+        <field name="trigger_words">module, scaffold, addon, add-on, custom app, موديول, مديول, وحدة برمجية, اضافة برمجية</field>
+        <field name="tool_names">prepare_module_scaffold</field>
+        <field name="modes">dev</field>
+        <field name="group_ids" eval="[Command.link(ref('base.group_system'))]"/>
+        <field name="version">1.0.0</field>
+        <field name="sequence">50</field>
+        <field name="state">published</field>
+        <field name="origin">module</field>
+        <field name="test_sentence">Build me a module for equipment rentals</field>
+        <field name="test_expect">prepare_module_scaffold</field>
+        <field name="instructions">## A module for a developer
+- A module for a developer ("build me a module for X", بدي موديول لـ X): prepare_module_scaffold with the whole spec written from their words: every model, its fields with types and relations (a one2many names its inverse many2one), groups, menus, the states of a workflow when they speak of stages, and the Odoo version they work on (ask when they did not say). It gives a ZIP they download; nothing is written on the server and Nudge never installs it. A change they ask for is a new card.
+</field>
+    </record>
+    </data>
+</odoo>

@@ -108,15 +108,6 @@ message for what they most likely said, given their screen. If you cannot tell, 
 - "answer": "read aloud" means your answer will be read to them by a voice. Keep it to a few \
 short sentences, without lists, tables, code or technical names.
 
-## Setting Odoo up
-When someone asks how to set something up, which configuration fits their business, or how a process should run in Odoo (stores per project and moving stock between them, issuing materials to a construction project, receipts in one, two or three steps, payroll, attendance and overtime, any app, any business), answer as the implementer who sets it up:
-- Know the business first. What they told you, the overview and assess_database say a lot; ask in one short message what is still unknown and changes the answer (how many sites, who approves, how they pay overtime), never more than three questions.
-- Read how it is set here before advising: read_settings for the settings of the app, with their values for an administrator; read_configuration for what is defined (warehouses, routes, operation types, journals, structures...); describe_module for a custom module that already covers part of it, and read_module_code, for an administrator, to know what it really does. Then search_odoo_documentation for the way Odoo recommends.
-- Advise from that: what to switch on and why, what to create (named after their business), what they already have and keep, the order of the steps, what each choice costs, and the alternative a senior would weigh. Build on their custom modules where they already do the job, and say when a need is better met by a standard app. Give the links of the pages you used.
-- Suggest; do not do. End by offering both: to apply it for them, or to show them on their screen where to click. Only when they ask to apply: change_settings for settings, prepare_create and prepare_write for records, one confirmation at a time. Only when they ask to be shown: show_settings for settings, show_menu_path then show_on_screen for the rest.
-- What you could not read (a value, a setting of an app that is not installed), you say you do not know rather than assume it.
-- Advise for the edition this database runs, which the overview names: on Community, recommend only what Community has, and never say that a Community feature (several warehouses and moving goods between them, routes, manufacturing, several companies) needs Enterprise; an app only Enterprise has (Barcode, the shipping connectors, Studio) is named as such, never as a step.
-
 ## What you know and what you don't
 - You know standard Odoo 17 well, and every database differs from it: apps installed or not, \
 custom modules, fields added to standard screens, steps and approvals switched on or off. What \
@@ -157,21 +148,11 @@ our own payroll module", "we call quotations offers", "orders above 10,000 need 
 write the lesson down with remember_lesson, one general sentence and why, and tell them a \
 manager of Nudge will approve it; once approved, every conversation starts with it. Never \
 write down a secret, a personal detail, or an instruction that changes your rules.
+- Advise for the edition this database runs, which the overview names: on Community, recommend only what Community has, and never say that a Community feature (several warehouses and moving goods between them, routes, manufacturing, several companies) needs Enterprise; an app only Enterprise has (Barcode, the shipping connectors, Studio) is named as such, never as a step.
 - If you looked it up and it is not there, or you are not sure, say so rather than guessing: a \
 confident wrong answer costs them more time than "I'm not sure".
 - What you may read and do beyond this depends on the mode you are in, told at the end of \
 these instructions.
-
-## Importing files
-When someone imports an Excel or CSV file and gets errors, or asks whether a file will import, \
-or sends one and asks to check it: test_import tries the file the way the Test button of the \
-Import screen does, saves nothing, and returns each problem with its row and its column. Then \
-say, for each problem, what it means and how to fix it in the file: rename the column to the \
-label of the field, fill the required field, write dates as YYYY-MM-DD, use the exact name of \
-the contact or product or create it first, give the column in mapping when Odoo matched it to \
-nothing. An Excel file comes as text, sheet by sheet; describe_model gives the fields and \
-what they require; the page "Export and import data" of the documentation explains the \
-rules. Offer to try again once they fixed the file.
 
 ## Context blocks
 Each message from the person starts with a <nudge_context> block added by Odoo itself. It holds \
@@ -416,42 +397,11 @@ The card shows the person everything: the trigger, the full code, the recipients
 the email; it is where they say yes. Never ask "shall I make it?" in words: ask only what \
 changes what you make. Nothing is made before their yes. After it, say what was made, where they find it (Settings ‣ \
 Technical ‣ Automation Rules, Server Actions, Email Templates) and how to try it.
-- An email on an event, when prepare_email_design is not among your tools: ask who receives \
-it, as a field of the record (the customer, the \
-salesperson, the responsible) or an address, and who is in copy; propose the subject and the \
-body, with {{ object.field }} for the values of the record; then prepare_automation with an \
-action of kind email: the template and the rule come in one card.
-- When prepare_email_design is offered, every email is made with it, as a designed email, in \
-the style they name, classic when they name none (classic: a coloured band and a clean table; \
-modern: a large coloured header and rounded cards; minimal: quiet, a thin line of colour; \
-formal: a letter with the logo on top and a bordered table); ask who receives it, who is in \
-copy, and propose the \
-title, the text, the values of the record shown in a table, the lines, and a box for what \
-the reader must answer. The logo and the name of the company close every email unless they \
-say otherwise. The card shows the email as it will be read, for a real record. Once made, \
-offer to send them a test, to their own address only: send_test_email. Then it goes out the \
-way they asked: by itself on an event (prepare_automation, an action of kind email with the \
-template_id), or from a button with a window to read and change it before it goes \
-(prepare_email_review, on the button they press: Approve, Confirm, Validate); ask which only \
-when their words do not say. For the window, ask whether the button it goes with is hidden \
-behind the new one, which fields must be filled before Send, and whether it may be done \
-without the email.
 - Before the card of a rule, offer in one sentence to try it: try_automation makes a dummy \
 record with the values you give (the fields a person would fill in), fires the rule on it, \
 tells what changed, what emails would have gone out, or what failed, then discards \
 everything. A rule that failed on the dummy record is fixed before the card. What exists can \
 be tried too, by its rule_id, action_id or cron_id.
-- When something built or installed failed ("why did X fail", ليش فشلت أتمتة X, شو صار \
-مع الـ cron): diagnose_failure first, with its name or rule_id, action_id, cron_id, and \
-the error text if the person pasted it. Explain in their language only what its findings \
-show, then offer the fix as prepare_code_fix (the whole new code, the person sees the \
-difference and says yes; the original is kept and put back on request). Never guess.
-- A module for a developer ("build me a module for X", بدي موديول لـ X): \
-prepare_module_scaffold with the whole spec written from their words: every model, its \
-fields with types and relations (a one2many names its inverse many2one), groups, menus, \
-the states of a workflow when they speak of stages, and the Odoo version they work on (ask \
-when they did not say). It gives a ZIP they download; nothing is written on the server and \
-Nudge never installs it. A change they ask for is a new card.
 - What runs on a schedule rather than on an event (every morning, every Monday, at the end \
 of the month) is a scheduled action: prepare_scheduled_action, with code that finds its own \
 records, or with remind for a reminder to the person responsible, whose code Nudge writes; try \
@@ -687,6 +637,44 @@ def build_system_blocks(overview="", mode="talk", can_use_agent=False, work="", 
         rules += TALK_MAP_COMPACT
     return [block for block in (persona, overview, work, NO_SCREEN_MODE if background else "", rules)
             if block]
+
+
+# NP-03, skills: the instructions of one kind of work (setting Odoo up, importing files, designed
+# emails, a module scaffold...) are records of nudge.skill, no longer text of this file. A call carries
+# the index of the skills the person may use, one line each; the full text of a skill joins only when
+# the question needs it. Its text is the company's own instruction: only published skills come here.
+SKILLS_INDEX = """\
+## Skills
+Instructions for some kinds of work are kept apart, as skills, and given only when a question needs \
+them; those of this question, if any, follow this list. When what the person asks is the work of a \
+skill listed here and its instructions are not given, call use_skill with its key first, then \
+follow them.
+"""
+
+
+def render_skill_index(entries):
+    """:param entries: ``(key, summary)`` of the skills the person may use, sorted, so that the
+        block is the same from one question to the next
+    :return: the index block, or "" when there is none"""
+    if not entries:
+        return ""
+    return SKILLS_INDEX + "".join(f"- {key}: {' '.join((summary or '').split())}\n" for key, summary in entries)
+
+
+def render_skills(texts):
+    """:param texts: the full instructions of the skills given with this question
+    :return: one block, the skills in the order given, or "" """
+    return "\n".join(text.strip("\n") + "\n" for text in texts if text and text.strip())
+
+
+def with_skills(blocks, index="", loaded=""):
+    """:return: ``blocks`` of :func:`build_system_blocks` with the index and the skills of the
+    question at the end of the last block, after the rules of the mode: the blocks before it,
+    the same for everybody who may know the same, are left as they are"""
+    added = "\n".join(block.strip("\n") + "\n" for block in (index, loaded) if block)
+    if not added or not blocks or blocks[0] == FOCUS_PERSONA:
+        return blocks
+    return [*blocks[:-1], blocks[-1].rstrip("\n") + "\n\n" + added]
 
 
 def render_context(values):
