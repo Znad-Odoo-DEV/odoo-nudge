@@ -468,7 +468,7 @@ class PrepareReportDesign(Building):
         earlier = self._earlier_designs(env, root)
         earlier.write({"active": False})
         view = env["ir.ui.view"].create(values)
-        register(env, view, f"report_design_{root.key or root.id}")
+        register(env, view, f"report_design_{root.key or root.id}", step)
         env.registry.clear_cache("templates")
         told = (f" The earlier design{'s' if len(earlier) > 1 else ''} "
                 f"({', '.join(earlier.mapped('name'))}) {'are' if len(earlier) > 1 else 'is'} switched off."

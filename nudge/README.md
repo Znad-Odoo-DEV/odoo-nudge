@@ -407,6 +407,13 @@ The administrator is a Manager after installation. Give access to others from
   version, and what changed. Any piece can be corrected; corrections survive a refresh.
 - **Nudge ‣ What Nudge Knows ‣ Business Notes**: how your business names things and works. A note (or an approved lesson) belongs to a company, or to all of them when the company is empty, and may be limited to some groups: a conversation is told only the notes of its current company and of the groups of its person. The notes sent hold at most 3,000 characters; a note left out by the limit is marked in the list (column Not Sent) and the log says so, so that nothing is dropped unseen.
 - **Nudge ‣ Conversations**: who asked what, tokens and cost.
+- **Nudge ‣ What Nudge Did ‣ Made by Nudge** (managers and administrators): everything Developer mode built, in
+  one list: automation rules, server actions, scheduled actions, email templates, fields, views, buttons, reports
+  and approval flows, with who asked, when, the conversation and step, whether it can be undone and whether it is
+  still active. **Switch off** opens a card that says exactly what will be archived (or taken out of the menus);
+  if the thing was changed since Nudge made it, the card says by whom and asks you to tick a box. It runs with
+  your own rights, it never deletes, and it is written to the log with the values before and after. What was made
+  before the list existed is found from the done steps of the log and from the tag, never by its name.
 - **Nudge ‣ Usage**: every call to an AI provider, conversation or speech, by person and by
   day, with tokens and cost. **Settings ‣ Nudge ‣ Budgets** sets what may be spent: tokens or
   cost, per person and per day, per company and per month; 0 is no limit. Past a limit, Nudge
@@ -439,10 +446,21 @@ the server.
 
 ## Uninstall
 
-Approval flows, automations, tours and reports that Nudge made for a company stay by design: they belong to
-the company (list them under Settings ‣ Technical ‣ External Identifiers, module `nudge_custom`). The menus of
-saved reports go with the Nudge menu; their window actions, the search vectors and the model downloaded for
-the search by meaning (about 135 MB in the filestore) are not removed with the module, and can be deleted by hand.
+Uninstalling Nudge keeps your business data and switches off what Nudge built; nothing is deleted.
+
+- **Switched off:** the automation rules, scheduled actions and extension views (buttons, fields on forms) that
+  Developer mode made are archived. What Odoo cannot archive loses its entry points: a server action leaves the
+  Actions menu and the buttons that run it go off the form, a report leaves the Print menu. Each one is written to
+  the log of Made by Nudge with its values before and after.
+- **Kept:** every record and value of your business, the custom fields with their data, the email templates, and
+  the tag `nudge_custom` on everything Nudge made (Settings ‣ Technical ‣ External Identifiers), so a later
+  install finds it again. Approval flows made for a company are among them: they belong to the company.
+- **Removed:** Nudge's own leftovers: the sequence `nudge_embedding_version_seq`, the five `nudge_partner_*_key_idx`
+  indexes on contacts and every `nudge.*` system parameter.
+- Not removed with the module: the saved reports' window actions, the search vectors and the model downloaded for
+  the search by meaning (about 135 MB in the filestore); delete them by hand.
+
+To switch off one thing only, without uninstalling, use **Nudge ‣ What Nudge Did ‣ Made by Nudge**.
 
 ## Tests
 
@@ -518,9 +536,9 @@ rewritten into a file path.
   within its rights (say, writing a text the note told it to write) is up to the model, and
   the person who says yes.
 - What Developer mode builds (rules, server actions, email templates, scheduled actions, fields,
-  views, reports) is registered under the xml-id module `nudge_custom`, so it stays when Nudge is
-  uninstalled: list it under Settings ‣ Technical ‣ External Identifiers, filtered on the module
-  `nudge_custom`, or, while Nudge is there, with `/rules` and the model.
+  views, reports) is registered under the xml-id module `nudge_custom` and listed in Made by Nudge.
+  Uninstalling Nudge switches it off and keeps it (see Uninstall). Only the email templates cannot be
+  switched off by themselves: Odoo cannot archive them, so switch off the action that sends them.
 - Dark mode is prepared but only takes effect on Odoo Enterprise; it has not been tested.
 - The blur behind a guided step needs `backdrop-filter`; on a browser without it, the rest
   of the screen is only dimmed.

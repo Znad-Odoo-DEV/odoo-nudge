@@ -240,22 +240,22 @@ def preview_change(env, model, root, view_type, arch_before, name, xpath=None, p
     return values, diff
 
 
-def register(env, record, name):
+def register(env, record, name, step=None, listed=True):
     """What Nudge makes carries an xml id of its own module, so that it is
-    found again, exported, and never overwritten by an update."""
-    slug = re.sub(r"[^a-z0-9_]+", "_", name.lower()).strip("_")[:60] or "record"
-    env["ir.model.data"].sudo().create({
-        "module": CUSTOM_MODULE,
-        "name": f"{slug}_{record.id}",
-        "model": record._name,
-        "res_id": record.id,
-        "noupdate": True,
-    })
+    found again, exported, and never overwritten by an update; and it is
+    listed in "Made by Nudge" with who asked, when and in which step.
+
+    :param step: the step that made it, when the caller has it
+    :param listed: False for what is part of another thing (the template of a report)"""
+    built = env["nudge.built"]
+    built._tag(record, name)
+    if listed:
+        built._note(record, step)
 
 
-def make_view(env, values):
+def make_view(env, values, step=None):
     view = env["ir.ui.view"].create(values)
-    register(env, view, f"view_{values['model']}_{values['type']}")
+    register(env, view, f"view_{values['model']}_{values['type']}", step)
     env.registry.clear_cache("templates")
     return view
 
@@ -329,7 +329,7 @@ class PrepareViewChange(Building):
         values = (step.values or {}).get("view") or {}
         if not values.get("inherit_id") or not values.get("arch_db"):
             return base.ToolResult("This change cannot be made.", is_error=True)
-        view = make_view(env, values)
+        view = make_view(env, values, step)
         return base.ToolResult(
             f"Made: extension view #{view.id} {view.name!r} on {view.model}. The screen is reloaded. "
             "It is in Settings ‣ Technical ‣ Views; switched off with active false, or deleted.",
@@ -761,13 +761,13 @@ class PrepareField(Building):
         if values.get("selection_ids"):
             values["selection_ids"] = [tuple(command) if isinstance(command, list) else command for command in values["selection_ids"]]
         field = env["ir.model.fields"].create(values)
-        register(env, field, f"field_{values['model']}_{values['name']}")
+        register(env, field, f"field_{values['model']}_{values['name']}", step)
         told = f"Made: field {field.field_description!r} ({field.name}, {field.ttype}) on {field.model}."
         view_values = (step.values or {}).get("view")
         if view_values:
             try:
                 with env.cr.savepoint():
-                    view = make_view(env, view_values)
+                    view = make_view(env, view_values, step)
                 told += f" Added to the form by extension view #{view.id}."
             except (ValidationError, UserError, ValueError) as error:
                 told += (" It could not be added to the form: " + cut(" ".join(str(error).split()), 300)

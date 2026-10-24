@@ -266,9 +266,9 @@ class PrepareReport(Building):
             arch = check_template(values["report_name"], arch)
         view = env["ir.ui.view"].create({
             "name": values["name"], "type": "qweb", "key": values["report_name"], "mode": "primary", "arch_db": arch})
-        register(env, view, f"template_{values['report_name'].split('.')[-1]}")
+        register(env, view, f"template_{values['report_name'].split('.')[-1]}", step, listed=False)
         report = env["ir.actions.report"].create(values)
-        register(env, report, f"report_{values['report_name'].split('.')[-1]}")
+        register(env, report, f"report_{values['report_name'].split('.')[-1]}", step)
         env.registry.clear_cache("templates")
         return base.ToolResult(
             f"Made: report #{report.id} {report.name!r} on {report.model}, in the Print menu of its records; "
