@@ -3,3 +3,4 @@ access_nudge_connector_system,nudge.connector.system,model_nudge_connector,base.
 access_nudge_connector_tool_system,nudge.connector.tool.system,model_nudge_connector_tool,base.group_system,1,1,0,0
 access_nudge_connector_call_system,nudge.connector.call.system,model_nudge_connector_call,base.group_system,1,0,0,0
 access_nudge_connector_call_manager,nudge.connector.call.manager,model_nudge_connector_call,nudge.group_nudge_manager,1,0,0,0
+access_nudge_connector_cache_system,nudge.connector.cache.system,model_nudge_connector_cache,base.group_system,1,0,0,0

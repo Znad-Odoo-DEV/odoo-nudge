@@ -36,7 +36,9 @@ Installed from Apps by an administrator who wants it, with Nudge.
     "data": [
         "security/nudge_connect_security.xml",
         "security/ir.model.access.csv",
+        "data/nudge_connect_cron.xml",
         "views/nudge_connector_views.xml",
+        "views/nudge_usage_views.xml",
         "views/res_config_settings_views.xml",
     ],
     "auto_install": False,

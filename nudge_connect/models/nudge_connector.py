@@ -27,7 +27,7 @@ from odoo.exceptions import UserError
 from odoo.addons.nudge.tools.deadline import cap as worker_cap
 from odoo.addons.nudge.tools.records import Refused
 
-from .. import mcp_client
+from .. import mcp_client, presets
 from ..tools import connectors
 
 _logger = logging.getLogger(__name__)
@@ -44,6 +44,7 @@ DEFAULT_RESULT_CHARS = 4000
 MAX_RESULT_CHARS = 5000
 FIRST_MONTH_DAYS = 30
 MAX_DESCRIPTION = 2000
+MAX_CACHE_TTL = 3600
 # Access tokens of OAuth client credentials: in the memory of the process only, never in the database
 _tokens = {}
 _tokens_lock = threading.Lock()
@@ -102,6 +103,18 @@ class NudgeConnector(models.Model):
     activated_on = fields.Date(
         readonly=True, copy=False,
         help="The day it was first made active: the first month of a company that asks for it counts from there.")
+    cache_ttl = fields.Integer(
+        string="Remember Reads (Seconds)", default=0,
+        help=f"A Read tool's answer is kept this long for the same person, company and arguments, so that "
+             f"asking again in a conversation does not reach the server. 0 is off (the default); 60 is a "
+             f"good start; at most {MAX_CACHE_TTL}. Writes are never kept, and what is kept is still data, "
+             f"never an instruction.")
+    preset = fields.Selection(
+        presets.CHOICES, string="From Catalogue", copy=False,
+        help="A ready-made starting point: it fills the address, the kind of credential and the tools that "
+             "come in as Read. It does not promise the server exists: the tools are read from the server, "
+             "and every one comes in Not Allowed except those the preset marks Read.")
+    preset_note = fields.Text(string="About This Preset", compute="_compute_preset_note")
     tool_ids = fields.One2many("nudge.connector.tool", "connector_id", string="Tools")
     call_ids = fields.One2many("nudge.connector.call", "connector_id", string="Calls")
     tool_count = fields.Integer(compute="_compute_counts")
@@ -113,6 +126,48 @@ class NudgeConnector(models.Model):
             connector.has_secret = bool(
                 (connector.auth_type == "bearer" and connector.bearer_token)
                 or (connector.auth_type == "oauth" and connector.oauth_client_id and connector.oauth_client_secret))
+
+    @api.depends("preset")
+    def _compute_preset_note(self):
+        _ = self.env._
+        for connector in self:
+            row = presets.get(connector.preset)
+            if not row:
+                connector.preset_note = False
+                continue
+            lines = [row["note"]]
+            if row["scopes"]:
+                lines.append(_("Recommended scopes: %s.", row["scopes"]))
+            if row["read"]:
+                lines.append(_("Come in as Read when the server offers them: %s.", ", ".join(row["read"])))
+            if row["write"]:
+                lines.append(_("Usually Write (never allowed by the preset): %s.", ", ".join(row["write"])))
+            connector.preset_note = "\n".join(lines)
+
+    def _preset_values(self, preset_id):
+        """:return: the values a preset fills in a connector (never a name or key already chosen)"""
+        row = presets.get(preset_id)
+        if not row:
+            return {}
+        values = {"url": row["url"], "auth_type": row["auth"], "runs_locally": False}
+        if not self.name:
+            values["name"] = row["label"]
+        if not self.key and row["key"]:
+            values["key"] = row["key"]
+        return values
+
+    @api.onchange("preset")
+    def _onchange_preset(self):
+        for connector in self:
+            for name, value in connector._preset_values(connector.preset).items():
+                connector[name] = value
+
+    def action_apply_preset(self):
+        """Fill the address and the credential kind from the chosen preset"""
+        self.ensure_one()
+        if not self.preset:
+            raise UserError(self.env._("Choose a preset from the catalogue first."))
+        self.write(self._preset_values(self.preset))
 
     @api.depends("tool_ids.access", "tool_ids.missing")
     def _compute_counts(self):
@@ -143,6 +198,12 @@ class NudgeConnector(models.Model):
                         "%s: the address must start with https:// (http:// only for this machine, localhost).",
                         url)) from None
 
+    @api.constrains("cache_ttl")
+    def _check_cache_ttl(self):
+        for connector in self:
+            if not 0 <= connector.cache_ttl <= MAX_CACHE_TTL:
+                raise UserError(self.env._("Remembering reads is between 0 (off) and %s seconds.", MAX_CACHE_TTL))
+
     @api.constrains("timeout", "max_result_chars")
     def _check_limits(self):
         for connector in self:
@@ -166,6 +227,8 @@ class NudgeConnector(models.Model):
         result = super().write(vals)
         if set(vals) - {"protocol_version", "server_name", "last_sync", "last_error"}:
             self._connect_changed()
+            # What was kept answered under the old setup (address, credential, groups, state, time)
+            self.env["nudge.connector.cache"]._forget(self)
         return result
 
     @api.model
@@ -224,7 +287,7 @@ class NudgeConnector(models.Model):
             seen.add(values["remote_name"])
             tool = mine.get(values["remote_name"])
             if not tool:
-                fresh.append(dict(values, connector_id=self.id))
+                fresh.append(dict(values, connector_id=self.id, **self._preset_access(values, described)))
                 continue
             if tool.definition_hash != values["definition_hash"] and tool.access != "off":
                 values.update(access="off", needs_review=True)
@@ -243,6 +306,15 @@ class NudgeConnector(models.Model):
         told = self.env._("%(count)s tools read: %(new)s new, %(changed)s changed and no longer allowed, "
                           "%(gone)s gone.", count=len(seen), new=len(fresh), changed=changed, gone=len(gone))
         return self._notify(told, "warning" if changed else "success")
+
+    def _preset_access(self, values, described):
+        """:return: ``{"access": "read"}`` for a new tool the preset marks Read when the server does not
+        say it may delete or that it writes; nothing otherwise: a write is never allowed by a preset"""
+        annotations = described.get("annotations") if isinstance(described.get("annotations"), dict) else {}
+        if (values["remote_name"] in presets.read_names(self.preset)
+                and not values["destructive_hint"] and annotations.get("readOnlyHint") is not False):
+            return {"access": "read"}
+        return {}
 
     def _notify(self, message, kind):
         return {
@@ -481,6 +553,7 @@ class NudgeConnectorTool(models.Model):
                 super(NudgeConnectorTool, tool).write({"reviewed_hash": tool.definition_hash, "needs_review": False})
         result = super().write(vals)
         self.env["nudge.connector"]._connect_changed()
+        self.env["nudge.connector.cache"]._forget(self.mapped("connector_id"), tools=self)
         return result
 
     @api.model
@@ -609,10 +682,28 @@ class NudgeConnectorTool(models.Model):
     def _connect_call(self, arguments):
         """Call the tool on its server, as the person, and write it down.
 
+        A Read answer may come from what was kept for this person, company and arguments (the
+        connector's time to remember, 0 is off): it is logged as a hit and costs no call. Every call
+        that reaches the server is a line of the usage ledger of its own kind, and is refused at a limit
+        as a call to a provider is. A Write is never kept.
+
         :return: ``(text, is_error)``: the answer, without the connector's secrets and cut to the size
             the connector allows, or why it failed"""
         self.ensure_one()
         connector = self.connector_id
+        Cache = self.env["nudge.connector.cache"]
+        keeps = self.access == "read" and connector.cache_ttl > 0
+        if keeps:
+            kept = Cache._lookup(self, arguments)
+            if kept is not None:
+                self._connect_log(arguments, "hit", size=len(kept))
+                return kept, False
+        try:
+            self.env["nudge.usage"]._check_budget()
+            self.env["nudge.usage"]._check_call_budget()
+        except UserError as refused:
+            self._connect_log(arguments, "refused", error=refused.args[0])
+            return refused.args[0] + " Nothing was sent.", True
         started = time.monotonic()
         size = 0
         try:
@@ -632,6 +723,10 @@ class NudgeConnectorTool(models.Model):
             is_error, state, error = True, "failed", text
         duration_ms = int((time.monotonic() - started) * 1000)
         self._connect_log(arguments, state, size=size, duration_ms=duration_ms, error=error)
+        self.env["nudge.usage"]._add_connector_call(
+            self.env.user, self.env.company, conversation_id=self.env.context.get("nudge_conversation_id") or False)
+        if keeps and state == "done":
+            Cache._store(self, arguments, text)
         return text, is_error
 
     def _connect_log(self, arguments, state, size=0, duration_ms=0, error=False):
@@ -661,7 +756,7 @@ class NudgeConnectorTool(models.Model):
         if not conversation_id:
             return []
         calls = self.env["nudge.connector.call"].sudo().search([
-            ("conversation_id", "=", conversation_id), ("access", "=", "read"), ("state", "=", "done"),
+            ("conversation_id", "=", conversation_id), ("access", "=", "read"), ("state", "in", ("done", "hit")),
             ("connector_id", "!=", self.connector_id.id)])
         return sorted(set(calls.mapped("connector_id.name")))
 
@@ -688,7 +783,8 @@ class NudgeConnectorCall(models.Model):
     arguments = fields.Json(help="What was sent, with the values named like a secret masked.")
     arguments_text = fields.Text(string="Sent", compute="_compute_arguments_text")
     state = fields.Selection(
-        [("done", "Done"), ("failed", "Failed"), ("refused", "Refused")], required=True, index=True)
+        [("done", "Done"), ("hit", "Answered From What Was Kept"), ("failed", "Failed"), ("refused", "Refused")],
+        required=True, index=True)
     result_chars = fields.Integer(string="Answer Size (Characters)")
     duration_ms = fields.Integer(string="Duration (ms)")
     error = fields.Char()
@@ -697,3 +793,64 @@ class NudgeConnectorCall(models.Model):
     def _compute_arguments_text(self):
         for call in self:
             call.arguments_text = json.dumps(call.arguments or {}, ensure_ascii=False, indent=2, sort_keys=True)
+
+
+class NudgeConnectorCache(models.Model):
+    """What a Read tool answered, kept for a while for the same connector, tool, arguments, person and
+    company. Nudge's own infrastructure: nobody reads or writes it but through the call, in sudo; the
+    answer is already without the connector's secrets and cut to size."""
+    _name = "nudge.connector.cache"
+    _description = "Nudge Connector Kept Answer"
+    _order = "id desc"
+
+    connector_id = fields.Many2one("nudge.connector", required=True, index=True, ondelete="cascade")
+    tool_id = fields.Many2one("nudge.connector.tool", required=True, index=True, ondelete="cascade")
+    args_hash = fields.Char(required=True)
+    user_id = fields.Many2one("res.users", required=True, ondelete="cascade")
+    company_id = fields.Many2one("res.company", required=True, ondelete="cascade")
+    text = fields.Text()
+    expires = fields.Datetime(required=True, index=True)
+
+    @api.model
+    def _hash(self, arguments):
+        return hashlib.sha256(json.dumps(arguments or {}, sort_keys=True, ensure_ascii=False,
+                                         default=str).encode()).hexdigest()
+
+    @api.model
+    def _key(self, tool, arguments):
+        return [("tool_id", "=", tool.id), ("args_hash", "=", self._hash(arguments)),
+                ("user_id", "=", tool.env.uid), ("company_id", "=", tool.env.company.id)]
+
+    @api.model
+    def _lookup(self, tool, arguments):
+        """:return: the kept answer of this person, company and arguments, or None when there is none or
+        it ran out"""
+        # sudo: Nudge's own store; the key holds the person and the company
+        found = self.sudo().search(self._key(tool, arguments) + [("expires", ">", fields.Datetime.now())], limit=1)
+        return found.text if found else None
+
+    @api.model
+    def _store(self, tool, arguments, text):
+        # sudo: see _lookup
+        Cache = self.sudo()
+        now = fields.Datetime.now()
+        Cache.search([("tool_id", "=", tool.id), ("expires", "<=", now)]).unlink()
+        Cache.search(self._key(tool, arguments)).unlink()
+        Cache.create({
+            "connector_id": tool.connector_id.id, "tool_id": tool.id, "args_hash": self._hash(arguments),
+            "user_id": tool.env.uid, "company_id": tool.env.company.id, "text": text,
+            "expires": now + timedelta(seconds=tool.connector_id.cache_ttl),
+        })
+
+    @api.model
+    def _forget(self, connectors_, tools=None):
+        """Drop what was kept of ``connectors_`` (or of ``tools``): their setup changed"""
+        domain = [("connector_id", "in", connectors_.ids)]
+        if tools is not None:
+            domain = [("tool_id", "in", tools.ids)]
+        self.sudo().search(domain).unlink()
+
+    @api.model
+    def _cron_purge(self):
+        """Forget what ran out"""
+        self.sudo().search([("expires", "<=", fields.Datetime.now())]).unlink()

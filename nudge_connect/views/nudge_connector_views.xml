@@ -42,6 +42,23 @@
                     <div class="alert alert-warning" role="alert" invisible="not last_error">
                         <field name="last_error" class="mb-0"/>
                     </div>
+                    <group string="From Catalogue" name="catalogue" invisible="state != 'draft'">
+                        <group>
+                            <field name="preset"/>
+                            <button name="action_apply_preset" type="object" string="Fill From Catalogue"
+                                    class="btn-secondary" invisible="not preset or not id"
+                                    confirm="This replaces the address and the kind of credential with the preset's. Fill?"/>
+                        </group>
+                        <group>
+                            <field name="preset_note" nolabel="1" colspan="2" invisible="not preset"/>
+                            <div class="text-muted" colspan="2" invisible="preset">
+                                Pick the kind of system to start from: the address, the credential and the
+                                tools that come in as Read are filled in. A preset is a starting point, not a
+                                promise that the server exists: the tools are read from the server, and every
+                                one comes in Not Allowed except those the preset marks Read. Never a Write.
+                            </div>
+                        </group>
+                    </group>
                     <group>
                         <group string="Server" name="server">
                             <field name="key" placeholder="sister"/>
@@ -77,6 +94,11 @@
                         <group string="Limits" name="limits">
                             <field name="timeout"/>
                             <field name="max_result_chars"/>
+                            <field name="cache_ttl"/>
+                            <div class="text-muted" colspan="2">
+                                Remember Reads: 0 is off. 60 seconds keeps a repeated read in one
+                                conversation from reaching the server. Writes are never kept.
+                            </div>
                         </group>
                     </group>
                     <notebook>
