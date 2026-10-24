@@ -76,6 +76,13 @@ def _core_directories():
     return directories
 
 
+def is_enterprise(env):
+    """:return: whether this database runs Enterprise: its ``web_enterprise`` module is installed. The
+    licence of a module says nothing (Community ships modules under OEEL-1, such as project_hr_skills)."""
+    return bool(env["ir.module.module"].sudo().search_count(
+        [("name", "=", "web_enterprise"), ("state", "=", "installed")]))
+
+
 def custom_module_names(env):
     """:return: installed modules that are not part of Odoo itself"""
     core = _core_directories()
@@ -125,7 +132,7 @@ def collect_modules(env, custom):
     Module = env["ir.module.module"].sudo()
     modules = Module.search([("state", "=", "installed")], order="name")
     apps = modules.filtered("application")
-    is_enterprise = bool(modules.filtered(lambda module: module.license == "OEEL-1"))
+    enterprise = is_enterprise(env)
     companies = env["res.company"].sudo().search([])
     languages = env["res.lang"].sudo().search([("active", "=", True)])
 
@@ -133,7 +140,7 @@ def collect_modules(env, custom):
     custom_modules = modules.filtered(lambda module: module.name in business)
     data = {
         "odoo_version": release.major_version,
-        "edition": "Enterprise" if is_enterprise else "Community",
+        "edition": "Enterprise" if enterprise else "Community",
         "installed_modules": len(modules),
         "apps": [{"name": app.name, "title": app.shortdesc} for app in apps if app.name != OWN_MODULE],
         "custom_modules": [
