@@ -61,6 +61,19 @@ def _error_code(status):
     return base.ERROR_BAD_REQUEST
 
 
+def _chunk_error_code(error):
+    """:return: the code of an error sent inside the stream, from its status or code"""
+    if isinstance(error, dict):
+        for key in ("status", "code"):
+            try:
+                return _error_code(int(error.get(key)))
+            except (TypeError, ValueError):
+                continue
+        if "rate" in str(error.get("code") or error.get("type") or "").lower():
+            return base.ERROR_RATE_LIMIT
+    return base.ERROR_UNAVAILABLE
+
+
 def _error_detail(response):
     try:
         body = response.json()
@@ -386,6 +399,7 @@ class OpenAICompatAdapter(base.BaseAdapter):
         model = ""
         calls = {}
         finished = False
+        refused = False
         for raw in self._lines(response, deadline):
             if base.expired(deadline):
                 yield base.stop_event(base.STOP_DEADLINE, usage=usage, model=model)
@@ -408,7 +422,7 @@ class OpenAICompatAdapter(base.BaseAdapter):
             if chunk.get("error"):
                 error = chunk["error"]
                 detail = error.get("message") if isinstance(error, dict) else error
-                yield base.error_event(base.ERROR_UNAVAILABLE, detail)
+                yield base.error_event(_chunk_error_code(error), detail)
                 return
             model = chunk.get("model") or model
             if chunk.get("usage"):
@@ -419,12 +433,18 @@ class OpenAICompatAdapter(base.BaseAdapter):
                 if isinstance(text, str) and text:
                     yield base.text_event(text)
                 self._collect_calls(calls, delta.get("tool_calls") or [])
+                if delta.get("refusal"):
+                    refused = True
                 finish = choice.get("finish_reason") or finish
         if not finished and finish is None and base.expired(deadline):
             # The watchdog closed the stream: the answer stopped for lack of time
             yield base.stop_event(base.STOP_DEADLINE, usage=usage, model=model)
             return
-        reason = FINISH_REASONS.get(finish, base.STOP_END)
+        if not finished and finish is None and not refused:
+            # Closed by the server half way: not an answer that ended
+            yield base.error_event(base.ERROR_NETWORK, "the stream ended before its end")
+            return
+        reason = base.STOP_REFUSAL if refused else FINISH_REASONS.get(finish, base.STOP_END)
         # Cut short or refused: what was written of a call is not to be run.
         # Otherwise a call is a call, whatever reason the provider gives:
         # Gemini says "stop" where OpenAI says "tool_calls".

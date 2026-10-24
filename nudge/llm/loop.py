@@ -279,8 +279,9 @@ def run(job, record):
             _logger.info(
                 "Nudge: empty answer in round %s for conversation %s, asked once more",
                 round_number, job["conversation_id"])
-        if spent and "stop" in outcome:
-            outcome["stop"] = add_usage(outcome["stop"], spent)
+        if spent:
+            # An error after a billed empty call: the call is still paid for
+            outcome["stop"] = add_usage(outcome.get("stop") or base.stop_event(base.STOP_END), spent)
         last_duration = time.monotonic() - round_started
         outcome["duration_ms"] = int(last_duration * 1000)
         outcome["last_round"] = round_number == job["rounds"] or base.expired(deadline)
