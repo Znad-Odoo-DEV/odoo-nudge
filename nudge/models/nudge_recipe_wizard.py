@@ -140,14 +140,7 @@ class NudgeRecipeImport(models.TransientModel):
         self.ensure_one()
         Recipe = self.env["nudge.recipe"]
         Recipe._check_manager()
-        if not self.file:
-            raise UserError(self.env._("Choose the recipe file first."))
-        try:
-            text = base64.b64decode(self.file).decode("utf-8")
-        except (ValueError, UnicodeDecodeError):
-            raise UserError(self.env._("This file is not a Nudge recipe.")) from None
-        body = Recipe._read(text)
-        trust = Recipe._verify(text)  # a signature that does not match refuses the file here
+        body, trust = self._checked()
         plan = Recipe._plan(body)
         self.line_ids.unlink()
         summary = self.env._("From %(company)s, made with Nudge %(version)s on Odoo %(series)s.",
@@ -170,12 +163,27 @@ class NudgeRecipeImport(models.TransientModel):
         })
         return self._reopen()
 
+    def _checked(self):
+        """:return: ``(body, trust)`` of the file of the wizard, read and its signature checked"""
+        if not self.file:
+            raise UserError(self.env._("Choose the recipe file first."))
+        try:
+            text = base64.b64decode(self.file).decode("utf-8")
+        except (ValueError, UnicodeDecodeError):
+            raise UserError(self.env._("This file is not a Nudge recipe.")) from None
+        body = self.env["nudge.recipe"]._read(text)
+        trust = self.env["nudge.recipe"]._verify(text)  # a signature that does not match refuses the file here
+        return body, trust
+
     def action_import(self):
         """Make or update what is ticked, each item on its own: one that fails does not stop the others."""
         self.ensure_one()
         Recipe = self.env["nudge.recipe"]
         Recipe._check_manager()
-        if self.signature_state != "signed":
+        # Read and checked again: the fields of the wizard (its signature, its lines) are written by whoever opens it
+        body, trust = self._checked()
+        planned = {(line["kind"], line["key"]): line for line in Recipe._plan(body)}
+        if trust["state"] != "signed":
             # Anything but the signature of a trusted publisher: an administrator, after the warning
             if not self.env.user.has_group("base.group_system"):
                 raise AccessError(self.env._(
@@ -185,10 +193,14 @@ class NudgeRecipeImport(models.TransientModel):
                     "This recipe is not signed by a trusted publisher. Read the skills below and tick "
                     "I Read the Warning to import it; its skills come in as drafts."))
         created = []
-        for line in self.line_ids.filtered(lambda l: l.selected and l.action in ("create", "update")):
+        for line in self.line_ids.filtered(lambda l: l.selected):
+            item = planned.get((line.kind, line.key))
+            if not item or item["action"] not in ("create", "update"):
+                continue
             try:
                 with self.env.cr.savepoint():
-                    record, was_created = Recipe._apply(line.kind, line.key, json.loads(line.payload))
+                    # What the file says, never what was written on the line since
+                    record, was_created = Recipe._apply(line.kind, line.key, json.loads(item["payload"]))
                     if was_created:
                         created.append([record._name, record.id])
                 line.write({"result": "done", "message": ""})
