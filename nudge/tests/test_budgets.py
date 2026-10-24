@@ -50,9 +50,10 @@ class TestUsage(BackgroundCase, TransactionCase):
         self.assertEqual(usage.model_name, "fake-model")
         self.assertEqual((usage.input_tokens, usage.output_tokens, usage.cache_read_tokens), (1000, 500, 200))
         self.assertEqual(usage.tokens, 1700)
-        # 1000 at 2 per million, 500 at 10 per million, 200 at 0 per million
-        self.assertAlmostEqual(usage.cost, 0.007)
-        self.assertAlmostEqual(conversation.cost, 0.007, msg="The conversation keeps its own total")
+        # 1000 at 2 per million, 500 at 10 per million, 200 read from the cache at 1 per million: the cache
+        # price left empty follows the input price, half of it on an OpenAI-compatible server (S8)
+        self.assertAlmostEqual(usage.cost, 0.0072)
+        self.assertAlmostEqual(conversation.cost, 0.0072, msg="The conversation keeps its own total")
 
     def test_one_line_per_call_to_the_model(self):
         self.use_adapter(script=[asking(CREATE), saying("Done.")])

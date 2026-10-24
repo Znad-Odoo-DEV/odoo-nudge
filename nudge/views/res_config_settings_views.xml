@@ -356,6 +356,12 @@
                             </div>
                         </setting>
                     </block>
+                    <!-- S6 -->
+                    <block title="Economy Model" name="nudge_economy_container">
+                        <setting help="A cheaper model answers the light work: questions in Talk, which change nothing, summaries, explanations and short texts. Set one on each provider (a cheaper model of the same provider, such as Claude Haiku beside Sonnet, a mini model beside the full one, Flash beside Pro), or choose here another provider for those that have none. The provider of the conversation answers what acts or builds, what is marked heavy, and once more what the cheaper model failed at. Latency and Cost shows the answers of each and about what was saved.">
+                            <field name="nudge_economy_provider_id" options="{'no_create': True, 'no_open': True}"/>
+                        </setting>
+                    </block>
                 </app>
             </xpath>
         </field>

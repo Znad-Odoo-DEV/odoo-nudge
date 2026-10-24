@@ -112,6 +112,24 @@
                                 </group>
                             </group>
                         </page>
+                        <!-- S6 -->
+                        <page string="Economy Model" name="economy">
+                            <div class="text-muted mb-2">
+                                A cheaper model of this provider answers the light work: questions in Talk, which change nothing, summaries, explanations and short texts. The model above answers what acts or builds, what is marked heavy, and once more what the economy model failed at. Each answer in the usage list says which one answered.
+                            </div>
+                            <group>
+                                <group string="Model" name="economy_model">
+                                    <field name="economy_model_name" placeholder="claude-haiku-5-5"/>
+                                </group>
+                                <group string="Per Million Tokens" name="economy_prices"
+                                       invisible="not economy_model_name">
+                                    <field name="economy_price_input"/>
+                                    <field name="economy_price_output"/>
+                                    <field name="economy_price_cache_read"/>
+                                    <field name="economy_price_cache_write"/>
+                                </group>
+                            </group>
+                        </page>
                     </notebook>
                 </sheet>
             </form>

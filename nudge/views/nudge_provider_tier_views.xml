@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- S6: a skill whose questions the model of the provider answers, never its economy model -->
+    <record id="nudge_skill_view_form_tier" model="ir.ui.view">
+        <field name="name">nudge.skill.view.form.tier</field>
+        <field name="model">nudge.skill</field>
+        <field name="inherit_id" ref="nudge.nudge_skill_view_form"/>
+        <field name="arch" type="xml">
+            <field name="modes" position="after">
+                <field name="is_heavy"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- S6: each call of the ledger says which tier answered, and what the economy tier saved -->
+    <record id="nudge_usage_view_list_tier" model="ir.ui.view">
+        <field name="name">nudge.usage.view.list.tier</field>
+        <field name="model">nudge.usage</field>
+        <field name="inherit_id" ref="nudge.nudge_usage_view_list"/>
+        <field name="arch" type="xml">
+            <field name="model_name" position="after">
+                <field name="tier" optional="show"/>
+            </field>
+            <field name="cost" position="after">
+                <field name="cost_saved" sum="Saved" optional="show"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="nudge_usage_view_search_tier" model="ir.ui.view">
+        <field name="name">nudge.usage.view.search.tier</field>
+        <field name="model">nudge.usage</field>
+        <field name="inherit_id" ref="nudge.nudge_usage_view_search"/>
+        <field name="arch" type="xml">
+            <filter name="group_kind" position="after">
+                <filter name="group_tier" string="Tier" context="{'group_by': 'tier'}"/>
+            </filter>
+        </field>
+    </record>
+</odoo>

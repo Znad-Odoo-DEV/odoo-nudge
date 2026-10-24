@@ -365,3 +365,11 @@ class ResConfigSettings(models.TransientModel):
         help="When Nudge answers as many people as it may at once, the next questions wait in line "
              "and start as soon as an answer ends; the person sees their place and can cancel. "
              "Past this many waiting, a question is refused.")
+    # S6: another provider answering the light work of every provider without an economy model of its own
+    nudge_economy_provider_id = fields.Many2one(
+        "nudge.provider", string="Economy Provider", config_parameter="nudge.economy_provider_id",
+        help="Answers the light work (questions in Talk, which change nothing, summaries, explanations, "
+             "short texts) of every provider that has no economy model of its own, set on the provider. "
+             "The provider of the conversation answers what acts or builds, what is marked heavy, and once "
+             "more what this one failed at. In private mode only if it runs on your own server. Empty: "
+             "only the economy models set on the providers.")

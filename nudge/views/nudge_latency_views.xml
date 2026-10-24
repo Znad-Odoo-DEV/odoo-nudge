@@ -8,6 +8,7 @@
                 <field name="date"/>
                 <field name="mode"/>
                 <field name="provider_id"/>
+                <field name="tier" optional="show"/>
                 <field name="user_id" widget="many2one_avatar" optional="hide"/>
                 <field name="company_id" groups="base.group_multi_company" optional="hide"/>
                 <field name="answers" sum="Answers"/>
@@ -19,6 +20,7 @@
                 <field name="queue_wait_p95" widget="integer" optional="hide"/>
                 <field name="tokens" sum="Tokens"/>
                 <field name="cost" sum="Cost"/>
+                <field name="cost_saved" sum="Saved" optional="show"/>
                 <field name="errors" sum="Errors"/>
                 <field name="refusals" sum="Refusals"/>
             </tree>
@@ -49,6 +51,7 @@
                 <field name="duration_p95" type="measure"/>
                 <field name="tokens" type="measure"/>
                 <field name="cost" type="measure"/>
+                <field name="cost_saved" type="measure"/>
                 <field name="errors" type="measure"/>
                 <field name="refusals" type="measure"/>
             </pivot>
@@ -74,6 +77,7 @@
                 <group>
                     <filter name="group_mode" string="Mode" context="{'group_by': 'mode'}"/>
                     <filter name="group_provider" string="Provider" context="{'group_by': 'provider_id'}"/>
+                    <filter name="group_tier" string="Tier" context="{'group_by': 'tier'}"/>
                     <filter name="group_user" string="Person" context="{'group_by': 'user_id'}"/>
                     <filter name="group_company" string="Company" context="{'group_by': 'company_id'}"/>
                     <filter name="group_day" string="Day" context="{'group_by': 'date:day'}"/>
