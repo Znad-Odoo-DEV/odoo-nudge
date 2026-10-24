@@ -64,6 +64,7 @@ Current version: nudge 18.0.1.59.1, nudge_mcp 18.0.1.1.0, nudge_connect 18.0.1.0
 - Review: the usage of a billed empty answer is kept when the call asked again then fails (ai #14).
 - Review: an error chunk inside an OpenAI-compatible stream keeps its kind (429 is a rate limit, with its cooldown), and a stream that ends with no `[DONE]` and no finish reason is a network error instead of a complete answer (ai #15).
 - Review: attached files and found data can no longer close their own block with a closing tag of any name or case (ai #17).
+- Review: Nudge WhatsApp & Telegram keep to the allowed destinations of the company (NP-15): a message, a file and the Telegram webhook are refused before anything is sent to a host off the list, and the WhatsApp access token is sent with a file only to Meta's file servers (`lookaside.fbsbx.com`, `*.fbsbx.com`, `*.fbcdn.net`, https), never to another address the Graph answer would name (security S10).
 
 - Review: a link written /\host in an answer is no longer opened (a browser reads the backslash as a slash and leaves the site); the same check in the website bubble.
 - Review: on Odoo 17 every Nudge scheduled action ran once and switched itself off (numbercall defaults to 1 there); the 17 port adds numbercall -1 to every cron record and to the ones Developer mode creates, and a migration switches the stopped ones on again.
