@@ -108,6 +108,10 @@
         <field name="name">Sites built</field>
         <field name="res_model">nudge.builder.site</field>
         <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No site built yet</p>
+            <p>Ask Nudge in Developer mode to build a website: it appears here.</p>
+        </field>
     </record>
 
     <record id="nudge_builder_shop_confirm_view_form" model="ir.ui.view">
