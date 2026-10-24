@@ -705,6 +705,16 @@ msgid "%(done)s done, %(failed)s did not go through"
 msgstr "تم %(done)s، ولم ينجح %(failed)s"
 
 #. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.js:0
+msgid ""
+"%(done)s of %(total)s steps done. Step %(step)s did not work; the steps "
+"after it were not done."
+msgstr ""
+"تمّت %(done)s من %(total)s خطوات. لم تنجح الخطوة %(step)s، ولم تُنفَّذ "
+"الخطوات التي بعدها."
+
+#. module: nudge
 #. odoo-python
 #: code:addons/nudge/models/nudge_translation.py:0
 msgid "%(done)s of %(total)s terms asked"
@@ -1665,6 +1675,12 @@ msgstr "صورة"
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/models/nudge_agent_plan.py:0
+msgid "A plan of %s steps"
+msgstr "خطة من %s خطوات"
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/tools/revert.py:0
 msgid "A posted entry is never changed by Nudge: reverse it in Accounting."
 msgstr "القيد المرحَّل لا يغيّره نادج أبداً: اعكسه من المحاسبة."
@@ -2444,6 +2460,16 @@ msgstr ""
 "الرسائل في اللوحة. القيمة 0 تُبقي السجل كاملاً."
 
 #. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.js:0
+msgid ""
+"After your yes, each change shows its own card before it is done. Take out "
+"a step, or correct a value, first."
+msgstr ""
+"بعد موافقتك، يعرض كل تغيير بطاقته الخاصة قبل تنفيذه. أزل خطوة أو صحّح قيمة "
+"أولاً إن أردت."
+
+#. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/report_explain.py:0
 msgid "Against the period before (%(was)s) the total is down %(change)s."
@@ -2485,6 +2511,7 @@ msgstr "مستخدم الوكيل"
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/models/nudge_agent_plan.py:0
 #: code:addons/nudge/models/nudge_bulk.py:0
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "Agent mode is not open to you. Ask your administrator."
@@ -2501,6 +2528,12 @@ msgstr "تنبيه عند تأكيد طلب كبير"
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_task__match__all
 msgid "All"
 msgstr "الكل"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.js:0
+msgid "All %s steps done."
+msgstr "تمّت الخطوات الـ%s كلها."
 
 #. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_task__outlier_family__all
@@ -3890,6 +3923,7 @@ msgstr "يمكنه التحدث مع Nudge واتباع إرشاداته."
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_message.xml:0
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
+#: code:addons/nudge/static/src/components/nudge_plan_card.xml:0
 #: code:addons/nudge/static/src/prompts/prompt_forms.xml:0
 #: code:addons/nudge/static/src/tours/tour_bar.xml:0
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_auditor_wizard_view_form
@@ -3973,6 +4007,7 @@ msgstr "تغيير الإعدادات"
 #. odoo-python
 #: code:addons/nudge/models/nudge_noai.py:0
 #: code:addons/nudge/tools/actions.py:0
+#: code:addons/nudge/tools/agent_plan.py:0
 msgid "Change: %s"
 msgstr "تعديل: %s"
 
@@ -4005,6 +4040,11 @@ msgstr "تغيّر بعد ذلك بواسطة %(user)s في %(date)s."
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_search
 msgid "Changes"
 msgstr "التغييرات"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_plan_writes
+msgid "Changes Before a Plan"
+msgstr "عدد التغييرات قبل الخطة"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_compliance_update__changes_json
@@ -4080,6 +4120,12 @@ msgstr "افحص ملف CSV أو Excel بدون ذكاء اصطناعي"
 #: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_validate_email_syntax
 msgid "Check an Email Address"
 msgstr "فحص عنوان البريد الإلكتروني"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.xml:0
+msgid "Check it twice: some of it is not taken back with a click"
+msgstr "تحقّق مرتين: بعض هذا لا يُتراجع عنه بنقرة"
 
 #. module: nudge
 #. odoo-javascript
@@ -4840,6 +4886,12 @@ msgid "Copy to"
 msgstr "نسخة إلى"
 
 #. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.js:0
+msgid "Correct %s"
+msgstr "صحّح %s"
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_profile_slice__override_summary
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_slice_view_form
 msgid "Correction"
@@ -5037,6 +5089,7 @@ msgstr "أنشئ أول عرض سعر"
 #. odoo-python
 #: code:addons/nudge/models/nudge_noai.py:0
 #: code:addons/nudge/tools/actions.py:0
+#: code:addons/nudge/tools/agent_plan.py:0
 msgid "Create: %s"
 msgstr "إنشاء: %s"
 
@@ -5681,6 +5734,12 @@ msgid "Dialect"
 msgstr "اللهجة"
 
 #. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.js:0
+msgid "Did not work"
+msgstr "لم تنجح"
+
+#. module: nudge
 #. odoo-python
 #: code:addons/nudge/models/nudge_noai.py:0
 msgid "Did you mean: %s?"
@@ -5873,6 +5932,7 @@ msgstr "نطاق (Json)"
 #. odoo-python
 #: code:addons/nudge/static/src/components/nudge_message.js:0
 #: code:addons/nudge/static/src/components/nudge_panel.js:0
+#: code:addons/nudge/static/src/components/nudge_plan_card.js:0
 #: code:addons/nudge/static/src/guidance/nudge_guide.xml:0
 #: code:addons/nudge/static/src/home/nudge_home.xml:0
 #: code:addons/nudge/static/src/voice/nudge_dictation.xml:0
@@ -5898,6 +5958,12 @@ msgstr "يُنفَّذ بواسطة"
 #: code:addons/nudge/static/src/coach/coach_card.xml:0
 msgid "Done with training"
 msgstr "أنهيت التدريب"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.js:0
+msgid "Done, but not everything is as asked: look at the steps marked."
+msgstr "تمّ، لكن ليس كل شيء كما طُلب: راجع الخطوات المعلَّمة."
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_import_view_form
@@ -6418,6 +6484,13 @@ msgid ""
 msgstr ""
 "كل سجل ينشئه Nudge أو يعدّله، وكل زر يضغطه، يُكتب هنا:\n"
 "               لمن، وعلى أي سجلات، وبماذا أجاب صاحب الطلب عندما سُئل."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_plan.py:0
+msgid ""
+"Every step was taken out: there is nothing to do. Say no, or ask again."
+msgstr "أُزيلت كل الخطوات: لا يوجد ما يُنفَّذ. قل لا، أو اطلب من جديد."
 
 #. module: nudge
 #: model:nudge.prompt,body:nudge.prompt_agent_morning_brief_task
@@ -9054,6 +9127,12 @@ msgid "Left undecided"
 msgstr "تُرك بلا قرار"
 
 #. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.js:0
+msgid "Left undecided: %(done)s of %(total)s steps done."
+msgstr "تُرك بلا قرار: تمّت %(done)s من %(total)s خطوات."
+
+#. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_note__kind__lesson
 msgid "Lesson"
 msgstr "درس"
@@ -9853,6 +9932,7 @@ msgstr "الرسائل لكل مستخدم في اليوم"
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/actions.py:0
+#: code:addons/nudge/tools/agent_plan.py:0
 msgid "Method"
 msgstr "الدالة"
 
@@ -10050,6 +10130,16 @@ msgstr "الرموز الشهرية"
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_task__interval_type__months
 msgid "Months"
 msgstr "أشهر"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_plan_writes
+msgid ""
+"More changes than this asked at once, or two kinds of change (a customer, "
+"then their quotation), are shown first as one plan with numbered steps. At "
+"most 10."
+msgstr ""
+"عند طلب تغييرات أكثر من هذا العدد دفعةً واحدة، أو نوعين من التغيير (عميل ثم "
+"عرض سعره)، تُعرض أولاً كخطة واحدة بخطوات مرقّمة. 10 على الأكثر."
 
 #. module: nudge
 #. odoo-python
@@ -10339,6 +10429,8 @@ msgstr "التشغيل القادم"
 #: code:addons/nudge/models/nudge_task.py:0
 #: code:addons/nudge/static/src/components/nudge_message.js:0
 #: code:addons/nudge/static/src/components/nudge_message.xml:0
+#: code:addons/nudge/static/src/components/nudge_plan_card.js:0
+#: code:addons/nudge/static/src/components/nudge_plan_card.xml:0
 #: code:addons/nudge/tools/saved_reports.py:0
 msgid "No"
 msgstr "لا"
@@ -10644,6 +10736,11 @@ msgstr "لم يغيّر أحد أي حقل متتبَّع في هذا السجل
 #: model_terms:ir.actions.act_window,help:nudge.nudge_coach_action
 msgid "Nobody is in training"
 msgstr "لا أحد في التدريب"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form_plan
+msgid "Nobody: a card for each change"
+msgstr "لا أحد: بطاقة لكل تغيير"
 
 #. module: nudge
 #. odoo-javascript
@@ -12076,6 +12173,11 @@ msgid "One SELECT, read only, at most 50 rows"
 msgstr "استعلام SELECT واحد، قراءة فقط، 50 صفًا على الأكثر"
 
 #. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_plan_one_yes_group_ids
+msgid "One Yes for a Whole Plan"
+msgstr "موافقة واحدة للخطة كلها"
+
+#. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
 msgid ""
 "One answer holds one worker of the server while it streams; a few at once "
@@ -12128,6 +12230,16 @@ msgstr "طلب واحد يُعمل عليه في الخلفية."
 #: model:ir.model.fields,help:nudge.field_nudge_question__sample
 msgid "One way the question was asked, without addresses or long numbers."
 msgstr "إحدى صيغ السؤال، بلا عناوين بريد أو أرقام طويلة."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.js:0
+msgid ""
+"One yes does every step below, as it is shown. Take out a step, or correct "
+"a value, first."
+msgstr ""
+"موافقة واحدة تنفّذ كل الخطوات أدناه كما هي معروضة. أزل خطوة أو صحّح قيمة "
+"أولاً إن أردت."
 
 #. module: nudge
 #. odoo-python
@@ -13259,6 +13371,12 @@ msgid "Pivot table"
 msgstr "جدول محوري"
 
 #. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__plan_id
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_step__kind__plan
+msgid "Plan"
+msgstr "خطة"
+
+#. module: nudge
 #: model:nudge.prompt,name:nudge.prompt_agent_pos_day_close
 msgid "Point of Sale: today's close"
 msgstr "نقاط البيع: إقفال اليوم"
@@ -13430,6 +13548,7 @@ msgstr "ضغط «%(button)s» على %(count)s × %(model)s"
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/actions.py:0
+#: code:addons/nudge/tools/agent_plan.py:0
 msgid "Press “%(button)s”: %(model)s"
 msgstr "ضغط “%(button)s”: %(model)s"
 
@@ -13999,6 +14118,18 @@ msgstr "قرأ مستنداً"
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "Read a screen's definition"
 msgstr "قرأ تعريف شاشة"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.xml:0
+msgid "Read again after writing, not everything is as asked:"
+msgstr "بعد إعادة القراءة إثر الكتابة، ليس كل شيء كما طُلب:"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.xml:0
+msgid "Read again after writing: as asked."
+msgstr "أُعيدت القراءة بعد الكتابة: كما طُلب."
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_slice_view_form
@@ -14720,6 +14851,12 @@ msgid "Results of the calls of an answer that waits for the person to decide."
 msgstr "نتائج استدعاءات إجابة تنتظر قرار المستخدم."
 
 #. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.xml:0
+msgid "Resume the plan"
+msgstr "استأنف الخطة"
+
+#. module: nudge
 #: model:nudge.prompt,name:nudge.prompt_ind_retail_slow_movers
 msgid "Retail: slow movers in stock"
 msgstr "التجزئة: الأصناف بطيئة الحركة"
@@ -14986,6 +15123,7 @@ msgstr "السبت"
 
 #. module: nudge
 #. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.xml:0
 #: code:addons/nudge/static/src/tours/tour_bar.xml:0
 #: model:nudge.tour.step,label:nudge.tour_create_contact_5
 #: model:nudge.tour.step,label:nudge.tour_create_product_5
@@ -15069,6 +15207,7 @@ msgstr ""
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/models/nudge_agent_plan.py:0
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "Say yes or no."
 msgstr "قل نعم أو لا."
@@ -15321,6 +15460,12 @@ msgid "Server action"
 msgstr "إجراء الخادم"
 
 #. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.js:0
+msgid "Set %(field)s of “%(record)s” to %(value)s again."
+msgstr "اضبط %(field)s في «%(record)s» على %(value)s مرة أخرى."
+
+#. module: nudge
 #. odoo-python
 #: code:addons/nudge/models/nudge_provider.py:0
 msgid "Set a model first."
@@ -15331,6 +15476,12 @@ msgstr "حدد نموذجًا أولًا."
 #: code:addons/nudge/models/nudge_provider.py:0
 msgid "Set an API key first."
 msgstr "أدخل مفتاح API أولًا."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.xml:0
+msgid "Set it again"
+msgstr "اضبطه مرة أخرى"
 
 #. module: nudge
 #: model:nudge.tour.step,note:nudge.tour_create_product_3
@@ -15419,6 +15570,24 @@ msgid ""
 "Setup advisor: reads the settings and suggests what to switch on, without "
 "changing anything."
 msgstr "مستشار الإعداد: يقرأ الإعدادات ويقترح ما يُفعّل دون أن يغيّر شيئاً."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form_plan
+msgid ""
+"Several changes asked at once (a customer, the quotation with its lines, "
+"then sending it) are shown first as one card with numbered steps: the "
+"person takes a step out or corrects a value, says yes once, then each "
+"change still shows its own card. A single change has no plan. A step that "
+"fails stops the plan and says what was done and what was not, with Undo for "
+"what was done; after each change, Nudge reads the records again and says so "
+"when a field did not end as asked."
+msgstr ""
+"التغييرات المتعددة المطلوبة دفعةً واحدة (عميل، ثم عرض السعر بسطوره، ثم "
+"إرساله) تُعرض أولاً في بطاقة واحدة بخطوات مرقّمة: يزيل الشخص خطوة أو يصحّح "
+"قيمة، ويوافق مرة واحدة، ثم يعرض كل تغيير بطاقته الخاصة. التغيير الواحد لا "
+"خطة له. الخطوة التي تفشل توقف الخطة وتبيّن ما تمّ وما لم يتمّ، مع التراجع "
+"عمّا تمّ؛ وبعد كل تغيير يعيد Nudge قراءة السجلات وينبّه إن لم ينتهِ حقل كما "
+"طُلب."
 
 #. module: nudge
 #. odoo-python
@@ -15946,6 +16115,12 @@ msgstr "الخطوة"
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/models/nudge_agent_plan.py:0
+msgid "Step %(n)s: %(message)s"
+msgstr "الخطوة %(n)s: %(message)s"
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/tools/setup.py:0
 msgid "Step %(number)s of %(total)s — %(title)s."
 msgstr "الخطوة %(number)s من %(total)s — %(title)s."
@@ -15954,6 +16129,11 @@ msgstr "الخطوة %(number)s من %(total)s — %(title)s."
 #: model:ir.model.fields,field_description:nudge.field_nudge_tour__step_count
 msgid "Step Count"
 msgstr "عدد الخطوات"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_step__plan_index
+msgid "Step of the Plan"
+msgstr "رقم الخطوة في الخطة"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__step_ids
@@ -16001,6 +16181,12 @@ msgstr "أوقف القراءة"
 
 #. module: nudge
 #. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.xml:0
+msgid "Stop the plan"
+msgstr "أوقف الخطة"
+
+#. module: nudge
+#. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.js:0
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_message__state__aborted
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_run__state__stopped
@@ -16025,6 +16211,15 @@ msgstr "تم الإيقاف."
 #: code:addons/nudge/tools/setup.py:0
 msgid "Stopped. Say “%s” to go on from here."
 msgstr "توقفت. قل «%s» لنكمل من هنا."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.js:0
+msgid ""
+"Stopped: %(done)s of %(total)s steps done. What is done stays; resume to go "
+"on."
+msgstr ""
+"متوقّفة: تمّت %(done)s من %(total)s خطوات. ما تمّ يبقى؛ استأنف للمتابعة."
 
 #. module: nudge
 #. odoo-python
@@ -16271,6 +16466,12 @@ msgstr "الوسوم"
 
 #. module: nudge
 #. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.js:0
+msgid "Take step %s out of the plan"
+msgstr "أزل الخطوة %s من الخطة"
+
+#. module: nudge
+#. odoo-javascript
 #: code:addons/nudge/static/src/coach/coach_card.xml:0
 msgid "Take the tour"
 msgstr "ابدأ الجولة"
@@ -16288,6 +16489,12 @@ msgid "Taken off the screens: %s"
 msgstr "أُزيل من الشاشات: %s"
 
 #. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.js:0
+msgid "Taken out"
+msgstr "أُزيلت"
+
+#. module: nudge
 #. odoo-python
 #: code:addons/nudge/models/nudge_built.py:0
 msgid "Taken out of the Actions menu."
@@ -16298,6 +16505,18 @@ msgstr "أُخرج من قائمة الإجراءات."
 #: code:addons/nudge/models/nudge_built.py:0
 msgid "Taken out of the Print menu."
 msgstr "أُخرج من قائمة الطباعة."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.js:0
+msgid "Taken out with step %s: it uses what that step makes."
+msgstr "أُزيلت مع الخطوة %s: فهي تستخدم ما تنشئه تلك الخطوة."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.js:0
+msgid "Taken out: it will not be done."
+msgstr "أُزيلت: لن تُنفَّذ."
 
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_res_company__nudge_mobile_tile_photo
@@ -17740,6 +17959,17 @@ msgid "The people of these groups are never reminded."
 msgstr "أفراد هذه المجموعات لا يُذكَّرون أبداً."
 
 #. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_plan_one_yes_group_ids
+msgid ""
+"The people of these groups say one yes for a whole plan: its card shows "
+"every change in full, and each change is still written in What Nudge Did. "
+"Everybody else sees the card of each change."
+msgstr ""
+"أفراد هذه المجموعات يوافقون مرة واحدة على الخطة كلها: تعرض بطاقتها كل تغيير "
+"كاملاً، ويُسجَّل كل تغيير مع ذلك في «ما فعله Nudge». أما غيرهم فيرون بطاقة "
+"كل تغيير."
+
+#. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/validator.py:0
 msgid "The phone number %(value)s is not a valid number for %(country)s."
@@ -17750,6 +17980,17 @@ msgstr "رقم الهاتف %(value)s ليس رقماً صالحاً في %(coun
 #: code:addons/nudge/models/nudge_recipe_publish.py:0
 msgid "The place you will host it must be an HTTPS address."
 msgstr "مكان الاستضافة يجب أن يكون عنوان HTTPS."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_plan.py:0
+msgid "The plan can be changed only before your yes."
+msgstr "لا يمكن تغيير الخطة إلا قبل موافقتك."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_step__plan_id
+msgid "The plan of several changes this step is one of."
+msgstr "خطة التغييرات المتعددة التي تنتمي إليها هذه الخطوة."
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_compliance_update_form
@@ -18255,6 +18496,12 @@ msgstr "لا يوجد سجل للطباعة بعد: يُعرض التصميم ل
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/models/nudge_agent_plan.py:0
+msgid "There is no such step to take out."
+msgstr "لا توجد خطوة كهذه لإزالتها."
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/models/nudge_quick_tour.py:0
 msgid "There is no tour yet."
 msgstr "لا توجد جولات بعد."
@@ -18297,6 +18544,7 @@ msgstr "لا شيء للترجمة."
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/models/nudge_agent_plan.py:0
 #: code:addons/nudge/models/nudge_run.py:0
 msgid "There is nothing to undo here."
 msgstr "لا يوجد شيء للتراجع عنه هنا."
@@ -18426,9 +18674,16 @@ msgstr "أصبحت هذه المحادثة طويلة. ابدأ محادثة ج�
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/models/nudge_agent_plan.py:0
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "This conversation is not yours."
 msgstr "هذه المحادثة ليست لك."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.js:0
+msgid "This could not be changed."
+msgstr "تعذّر تغيير هذا."
 
 #. module: nudge
 #. odoo-python
@@ -18495,6 +18750,7 @@ msgstr "لا يمكن استعمال هذا المرشّح على حالة ال�
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/models/nudge_agent_plan.py:0
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "This is being done already."
 msgstr "هذا الإجراء قيد التنفيذ بالفعل."
@@ -18502,6 +18758,7 @@ msgstr "هذا الإجراء قيد التنفيذ بالفعل."
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/controllers/chat.py:0
+#: code:addons/nudge/models/nudge_agent_plan.py:0
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "This is no longer waiting for you."
 msgstr "هذا الإجراء لم يعد ينتظر قرارك."
@@ -18516,9 +18773,16 @@ msgstr "هذا غير متاح لك."
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/models/nudge_agent_plan.py:0
 #: code:addons/nudge/models/nudge_run.py:0
 msgid "This is not yours to undo."
 msgstr "هذا ليس لك لتتراجع عنه."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_plan.py:0
+msgid "This is not yours."
+msgstr "هذا ليس لك."
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_view_form
@@ -18713,6 +18977,12 @@ msgstr "لا يمكن قبول هذه الترجمة: %s"
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/models/nudge_agent_plan.py:0
+msgid "This value cannot be corrected here: take the step out, or ask again."
+msgstr "لا يمكن تصحيح هذه القيمة هنا: أزل الخطوة، أو اطلب من جديد."
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/models/nudge_run.py:0
 msgid ""
 "This was prepared in %s, a company you no longer belong to. Nothing was "
@@ -18869,6 +19139,12 @@ msgstr "بانتظار المراجعة"
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_translation_line__state__todo
 msgid "To Translate"
 msgstr "للترجمة"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.js:0
+msgid "To do"
+msgstr "للتنفيذ"
 
 #. module: nudge
 #. odoo-python
@@ -19337,6 +19613,12 @@ msgid "Undo available"
 msgstr "التراجع متاح"
 
 #. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.xml:0
+msgid "Undo the steps done"
+msgstr "تراجع عن الخطوات المنفَّذة"
+
+#. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_import_view_form
 msgid "Undo this import"
 msgstr "التراجع عن هذا الاستيراد"
@@ -19350,6 +19632,7 @@ msgstr "تراجع عمّا بُني: %s عنصر"
 #. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_message.js:0
+#: code:addons/nudge/static/src/components/nudge_plan_card.js:0
 msgid "Undone"
 msgstr "تم التراجع"
 
@@ -19604,6 +19887,12 @@ msgid "Users created: %s."
 msgstr "المستخدمون المنشأون: %s."
 
 #. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.js:0
+msgid "Uses what step %s makes"
+msgstr "تستخدم ما تنشئه الخطوة %s"
+
+#. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/report_design.py:0
 msgid "VAT"
@@ -19779,6 +20068,12 @@ msgstr "ما ينتظرك اليوم:"
 #. odoo-javascript
 #: code:addons/nudge/static/src/home/nudge_home.js:0
 msgid "Waiting for your approval"
+msgstr "بانتظار موافقتك"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.js:0
+msgid "Waiting for your yes"
 msgstr "بانتظار موافقتك"
 
 #. module: nudge
@@ -21099,6 +21394,12 @@ msgstr "أيام العمل في الشهر"
 
 #. module: nudge
 #. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.js:0
+msgid "Working on it: %(done)s of %(total)s steps done."
+msgstr "جارٍ التنفيذ: تمّت %(done)s من %(total)s خطوات."
+
+#. module: nudge
+#. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_message.js:0
 msgid "Working on it…"
 msgstr "جارٍ التنفيذ…"
@@ -21135,6 +21436,12 @@ msgstr "اكتب كلمة أو عبارة."
 #: code:addons/nudge/static/src/components/nudge_message.xml:0
 msgid "Write back what was there before"
 msgstr "أرجِع ما كان موجودًا قبلها"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.xml:0
+msgid "Write back what was there before, the last step first"
+msgstr "أعِد ما كان من قبل، بدءاً بآخر خطوة"
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_translation_view_form
@@ -21239,10 +21546,17 @@ msgstr "كُتب في “%s”:"
 
 #. module: nudge
 #. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.js:0
+msgid "Written, but not everything is as asked"
+msgstr "كُتب، لكن ليس كل شيء كما طُلب"
+
+#. module: nudge
+#. odoo-javascript
 #. odoo-python
 #: code:addons/nudge/models/nudge_task.py:0
 #: code:addons/nudge/static/src/components/nudge_message.js:0
 #: code:addons/nudge/static/src/components/nudge_message.xml:0
+#: code:addons/nudge/static/src/components/nudge_plan_card.js:0
 #: code:addons/nudge/tools/saved_reports.py:0
 msgid "Yes"
 msgstr "نعم"
@@ -21262,8 +21576,21 @@ msgstr "نعم، كلها"
 #. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_message.xml:0
+#: code:addons/nudge/static/src/components/nudge_plan_card.xml:0
 msgid "Yes, do it"
 msgstr "نعم، نفّذ"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.js:0
+msgid "Yes, do the %s steps"
+msgstr "نعم، نفّذ الخطوات الـ%s"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.js:0
+msgid "Yes, go through the plan"
+msgstr "نعم، امضِ في الخطة"
 
 #. module: nudge
 #. odoo-javascript
@@ -21394,6 +21721,7 @@ msgstr "فتحت"
 #. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_message.js:0
+#: code:addons/nudge/static/src/components/nudge_plan_card.js:0
 msgid "You said no"
 msgstr "قلتَ لا"
 
@@ -22142,6 +22470,12 @@ msgid ""
 msgstr "تتم الموافقة عليه بالزرين طلب الموافقة وموافقة، لا بكتابة الحقول."
 
 #. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_plan_card.xml:0
+msgid "is now"
+msgstr "أصبح الآن"
+
+#. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/approval_flow.py:0
 msgid "is waiting for an approval already."
@@ -22812,6 +23146,12 @@ msgstr "عدد السجلات"
 #: code:addons/nudge/models/nudge_egress.py:0
 msgid "the recipe marketplace"
 msgstr "سوق الوصفات"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/agent_plan.py:0
+msgid "the record step %s makes"
+msgstr "السجل الذي تنشئه الخطوة %s"
 
 #. module: nudge
 #. odoo-python
