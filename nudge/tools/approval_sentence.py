@@ -24,6 +24,8 @@ KINDS = (
         "عرض سعر", "عروض اسعار", "عرض اسعار", "طلبيه مبيعات", "امر البيع", "طلب البيع")),
     ("account.move", "vendor_bill", (
         "vendor bill", "vendor bills", "supplier bill", "supplier bills", "bill", "bills",
+        "vendor invoice", "vendor invoices", "supplier invoice", "supplier invoices", "purchase invoice",
+        "purchase invoices",
         "فاتوره مورد", "فاتوره المورد", "فواتير الموردين", "فواتير مورد", "فاتوره شراء", "فاتوره مشتريات",
         "فواتير شراء", "فواتير المشتريات")),
     ("account.move", "customer_invoice", (

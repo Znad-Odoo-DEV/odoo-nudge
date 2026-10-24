@@ -25816,3 +25816,75 @@ msgstr "جهّزت التراجع عن تعديل في الموقع"
 #, python-format
 msgid "%(refusal)s The model chosen to stand in (%(model)s) is not on the list either."
 msgstr "%(refusal)s والنموذج البديل (%(model)s) ليس على القائمة أيضاً."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/approval_flow.py:0
+msgid ""
+"changed after it was approved: the approval was for a smaller amount. "
+"Press Request approval again."
+msgstr ""
+"تغيّر بعد الموافقة عليه: كانت الموافقة على مبلغ أصغر. اضغط طلب الموافقة "
+"من جديد."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/approval_flow.py:0
+msgid ""
+"You made this document: another member of the group %s has to approve "
+"it."
+msgstr "أنت من أنشأ هذا المستند: يجب أن يوافق عليه عضو آخر من المجموعة %s."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/approval_flow.py:0
+msgid "Approved amount"
+msgstr "المبلغ المعتمد"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/approval_flow.py:0
+msgid "Not stopped"
+msgstr "لا يُوقَف"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/approval_flow.py:0
+msgid "Own documents"
+msgstr "المستندات الخاصة"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/approval_flow.py:0
+msgid ""
+"Limits are in the currency of the company and a document in another "
+"currency is converted at its date. An approval holds for the amount it "
+"was given for: a document changed to a larger amount has to be approved "
+"again."
+msgstr ""
+"الحدود بعملة الشركة، والمستند بعملة أخرى يُحوَّل بسعر تاريخه. تسري "
+"الموافقة على المبلغ الذي مُنحت له فقط: المستند الذي يتغير إلى مبلغ أكبر "
+"يحتاج موافقة جديدة."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/approval_flow.py:0
+msgid ""
+"What the system does on its own is not stopped: scheduled actions "
+"(automatic posting, recurring documents) and a website visitor or portal "
+"customer who pays or signs online."
+msgstr ""
+"لا يُوقَف ما يفعله النظام وحده: الإجراءات المجدولة (الترحيل التلقائي "
+"والمستندات المتكررة) وزائر الموقع أو عميل البوابة الذي يدفع أو يوقّع عبر "
+"الإنترنت."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/approval_flow.py:0
+msgid ""
+"Who made a document cannot approve it, unless they are the only one in "
+"the approving group."
+msgstr ""
+"من أنشأ المستند لا يمكنه الموافقة عليه، إلا إذا كان الوحيد في مجموعة "
+"الموافقة."
+

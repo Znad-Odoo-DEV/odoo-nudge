@@ -25,19 +25,20 @@ NAME_PREFIX = "Nudge approval"
 STATE_FIELD = "x_nudge_approval_state"
 APPROVER_FIELD = "x_nudge_approver_id"
 LEVEL_FIELD = "x_nudge_approval_level"
+AMOUNT_FIELD = "x_nudge_approved_amount"
 MAX_LEVELS = 4
-MAX_NOTIFIED = 10
+MAX_NOTIFIED = 50
 GENERAL = "CEO"
 
 # What a document is, the amount it is judged by, the states that mean "confirmed", the button
 PROFILES = {
     "purchase_order": {
         "model": "purchase.order", "amount": "amount_total", "states": ["to approve", "purchase"],
-        "conditions": [], "button": "button_confirm",
+        "conditions": [], "button": "button_confirm", "date": "date_order",
         "lines": ("order_line", "product_qty", "price_unit")},
     "sales_order": {
         "model": "sale.order", "amount": "amount_total", "states": ["sale"],
-        "conditions": [], "button": "action_confirm",
+        "conditions": [], "button": "action_confirm", "date": "date_order",
         "lines": ("order_line", "product_uom_qty", "price_unit")},
     "vendor_bill": {
         "model": "account.move", "amount": "amount_total", "states": ["posted"],
@@ -189,8 +190,29 @@ def _levels_literal(levels):
         f"[{float(level['amount'])!r}, {level['group'].id}, {level['group'].display_name!r}]" for level in levels) + "]"
 
 
-def _needed(amount):
-    return f"len([level for level in LEVELS if (record.{amount} or 0) > level[0]])"
+def _amount_lines(profile):
+    """The lines that put the amount of ``record`` in the currency of its company in ``amount``: a limit said as
+    "50,000" is the company's money, whatever the currency of the document"""
+    if profile["model"] == "account.move":
+        value = "abs(record.amount_total_signed or 0)"
+    else:
+        value = (f"record.currency_id._convert(record.{profile['amount']} or 0, company.currency_id, company, "
+                 f"record.{profile['date']})")
+    return (
+        "    company = record.company_id or env.company\n"
+        f"    amount = {value}\n"
+        "    cur = company.currency_id.name\n")
+
+
+def _needed():
+    return "len([level for level in LEVELS if amount > level[0]])"
+
+
+def _system_skip():
+    """The lines that leave alone what the company did not ask to stop: the system itself (scheduled actions run
+    as OdooBot) and a visitor or portal customer (a website order paid online, a quotation signed and paid on the
+    portal). The block is for the people who work in the back office."""
+    return "    if env.uid == 1 or env.user.share:\n        continue\n"
 
 
 def block_code(env, profile, levels, kind):
@@ -200,17 +222,23 @@ def block_code(env, profile, levels, kind):
         "above": _("(above"),
         "go_on": _("before it can be %(done)s. Press Request approval; they approve it from the form.",
                        done=verb_label(env, kind)),
+        "changed": _("changed after it was approved: the approval was for a smaller amount. "
+                         "Press Request approval again."),
     }
     return (
         f"LEVELS = {_levels_literal(levels)}\n"
         "for record in records:\n"
-        f"    needed = {_needed(profile['amount'])}\n"
+        + _system_skip()
+        + _amount_lines(profile)
+        + f"    needed = {_needed()}\n"
         f"    done = record.{LEVEL_FIELD} or 0\n"
+        f"    if needed and done >= needed and amount > (record.{AMOUNT_FIELD} or 0) + 0.005:\n"
+        f"        raise UserError(record.display_name + ' ' + {words['changed']!r})\n"
         "    if needed and done < needed:\n"
         f"        if record.{STATE_FIELD} == 'refused':\n"
         f"            raise UserError(record.display_name + ' ' + {words['refused']!r})\n"
         f"        raise UserError(record.display_name + ' ' + {words['needs']!r} + ' ' + LEVELS[done][2] + ' ' "
-        f"+ {words['above']!r} + ' ' + '{{:,.2f}}'.format(LEVELS[done][0]) + ') ' + {words['go_on']!r})\n")
+        f"+ {words['above']!r} + ' ' + '{{:,.2f}}'.format(LEVELS[done][0]) + ' ' + cur + ') ' + {words['go_on']!r})\n")
 
 
 def guard_code(env, token):
@@ -220,7 +248,7 @@ def guard_code(env, token):
     return (
         "for record in records:\n"
         f"    if env.context.get('nudge_approval_step') != {token!r} and (\n"
-        f"            record.{STATE_FIELD} or record.{LEVEL_FIELD} or record.{APPROVER_FIELD}):\n"
+        f"            record.{STATE_FIELD} or record.{LEVEL_FIELD} or record.{APPROVER_FIELD} or record.{AMOUNT_FIELD}):\n"
         f"        raise UserError(record.display_name + ' ' + {refusal!r})\n")
 
 
@@ -228,11 +256,11 @@ def _schedule(env, who, profile, indent="    "):
     """The lines that ask the users of the group of level ``who`` (a python expression) to approve."""
     users = users_field(env)
     lines = [
-        f"for person in env['res.groups'].browse(LEVELS[{who}][1])['{users}'][:{MAX_NOTIFIED}]:",
+        f"for person in env['res.groups'].browse(LEVELS[{who}][1])['{users}'].sorted('id')[:{MAX_NOTIFIED}]:",
         "    record.activity_schedule(",
         "        'mail.mail_activity_data_todo', user_id=person.id,",
         f"        summary={APPROVAL_TAG!r} + ' ' + record.display_name + ' ' + SUMMARY + ' ' + "
-        f"'{{:,.2f}}'.format(record.{profile['amount']} or 0),",
+        "'{:,.2f}'.format(amount) + ' ' + cur,",
         "        note=NOTE + ' ' + env.user.name)",
     ]
     return "".join(f"{indent}{line}" + chr(10) for line in lines)
@@ -263,8 +291,13 @@ def request_code(env, profile, levels, token=""):
         f"NOTE = {words['note']!r}\n"
         "for record in records:\n"
         + _lock()
-        + f"    needed = {_needed(profile['amount'])}\n"
+        + _amount_lines(profile)
+        + f"    needed = {_needed()}\n"
         f"    done = record.{LEVEL_FIELD} or 0\n"
+        f"    if done and amount > (record.{AMOUNT_FIELD} or 0) + 0.005:\n"
+        f"        record.with_context(nudge_approval_step={token!r}).write({{\n"
+        f"            '{LEVEL_FIELD}': 0, '{APPROVER_FIELD}': False, '{STATE_FIELD}': False, '{AMOUNT_FIELD}': 0}})\n"
+        "        done = 0\n"
         "    if not needed:\n"
         f"        raise UserError(record.display_name + ' ' + {words['not_needed']!r})\n"
         "    if done >= needed:\n"
@@ -276,7 +309,7 @@ def request_code(env, profile, levels, token=""):
         + _schedule(env, "done", profile)
         + f"    record.with_context(nudge_approval_step={token!r}).write({{'{STATE_FIELD}': 'pending'}})\n"
         f"    record.message_post(body={words['posted']!r} + ' ' + LEVELS[done][2] + ' (' "
-        f"+ '{{:,.2f}}'.format(record.{profile['amount']} or 0) + ')')\n")
+        "+ '{:,.2f}'.format(amount) + ' ' + cur + ')')\n")
 
 
 def approve_code(env, profile, levels, token=""):
@@ -285,27 +318,32 @@ def approve_code(env, profile, levels, token=""):
         "note": _("Approval asked by"),
         "none": _("was not sent for approval. Press Request approval first."),
         "only": _("Only the group %s approves this step."),
+        "self": _("You made this document: another member of the group %s has to approve it."),
         "approved": _("Approved by"),
         "done": _("Approved"),
         "feedback": _("Approved"),
     }
     groups = groups_field(env)
+    users = users_field(env)
     return (
         f"LEVELS = {_levels_literal(levels)}\n"
         f"SUMMARY = {words['summary']!r}\n"
         f"NOTE = {words['note']!r}\n"
         "for record in records:\n"
         + _lock()
-        + f"    needed = {_needed(profile['amount'])}\n"
+        + _amount_lines(profile)
+        + f"    needed = {_needed()}\n"
         f"    done = record.{LEVEL_FIELD} or 0\n"
         f"    if record.{STATE_FIELD} != 'pending' or done >= needed:\n"
         f"        raise UserError(record.display_name + ' ' + {words['none']!r})\n"
         f"    if LEVELS[done][1] not in env.user['{groups}'].ids:\n"
         f"        raise UserError({words['only']!r} % LEVELS[done][2])\n"
+        f"    if record.create_uid == env.user and env['res.groups'].browse(LEVELS[done][1])['{users}'] - env.user:\n"
+        f"        raise UserError({words['self']!r} % LEVELS[done][2])\n"
         "    done += 1\n"
         "    last = done >= needed\n"
         f"    record.with_context(nudge_approval_step={token!r}).write({{\n"
-        f"        '{LEVEL_FIELD}': done, '{APPROVER_FIELD}': env.user.id,\n"
+        f"        '{LEVEL_FIELD}': done, '{APPROVER_FIELD}': env.user.id, '{AMOUNT_FIELD}': amount,\n"
         f"        '{STATE_FIELD}': 'approved' if last else 'pending'}})\n"
         "    mine = env['mail.activity'].search([\n"
         "        ('res_model', '=', record._name), ('res_id', '=', record.id), ('user_id', '=', env.user.id),\n"
@@ -334,7 +372,7 @@ def refuse_code(env, profile, levels, token=""):
         f"    if LEVELS[done][1] not in env.user['{groups}'].ids:\n"
         f"        raise UserError({words['only']!r} % LEVELS[done][2])\n"
         f"    record.with_context(nudge_approval_step={token!r}).write({{\n"
-        f"        '{LEVEL_FIELD}': 0, '{APPROVER_FIELD}': env.user.id, '{STATE_FIELD}': 'refused'}})\n"
+        f"        '{LEVEL_FIELD}': 0, '{APPROVER_FIELD}': env.user.id, '{STATE_FIELD}': 'refused', '{AMOUNT_FIELD}': 0}})\n"
         "    asked = env['mail.activity'].search([\n"
         "        ('res_model', '=', record._name), ('res_id', '=', record.id), ('user_id', '=', env.user.id),\n"
         f"        ('summary', '=like', {APPROVAL_TAG + '%'!r})])\n"
@@ -397,6 +435,8 @@ def _field_builds(env, model, profile):
                           "relation": "res.users", "readonly": True, "copy": False}),
         (LEVEL_FIELD, {"model": model._name, "label": _("Approval level"), "type": "integer", "name": LEVEL_FIELD,
                        "readonly": True, "copy": False}),
+        (AMOUNT_FIELD, {"model": model._name, "label": _("Approved amount"), "type": "float", "name": AMOUNT_FIELD,
+                        "readonly": True, "copy": False}),
     ]
     return [(name, arguments) for name, arguments in fields_ if name not in model._fields]
 
@@ -491,7 +531,7 @@ class PrepareApprovalFlow(Building):
             "tool": "prepare_automation",
             "arguments": {
                 "name": guard_name, "model": model._name, "trigger": "on_create_or_write",
-                "fields": [STATE_FIELD, LEVEL_FIELD, APPROVER_FIELD],
+                "fields": [STATE_FIELD, LEVEL_FIELD, APPROVER_FIELD, AMOUNT_FIELD],
                 "match": "all",
                 "actions": [{"kind": "code", "name": guard_name, "code": guard_code(env, token)}]},
             "what": guard_name, "key": "guard"})
@@ -536,6 +576,15 @@ class PrepareApprovalFlow(Building):
                 stops = _("Posting without the approval is refused with a clear message.")
             lines += [
                 {"label": _("Stops"), "value": stops},
+                {"label": _("Amount"), "value": _(
+                    "Limits are in the currency of the company and a document in another currency is converted "
+                    "at its date. An approval holds for the amount it was given for: a document changed to a "
+                    "larger amount has to be approved again.")},
+                {"label": _("Not stopped"), "value": _(
+                    "What the system does on its own is not stopped: scheduled actions (automatic posting, "
+                    "recurring documents) and a website visitor or portal customer who pays or signs online.")},
+                {"label": _("Own documents"), "value": _(
+                    "Who made a document cannot approve it, unless they are the only one in the approving group.")},
                 {"label": _("Asks"), "value": _(
                     "Request approval puts an activity, with the amount, on each user of the group of the level, "
                     "and a note in the chatter. Approve and Refuse close it and write a note too.")},
