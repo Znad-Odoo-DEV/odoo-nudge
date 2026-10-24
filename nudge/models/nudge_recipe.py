@@ -2,7 +2,7 @@
 
 A recipe holds recorded tours, rule tasks, task presets, the health check, the
 words a company added to the no-AI commands, remembered answers, the
-company files and the prompts of the library. Every record carries a ``recipe_key`` made at the first export,
+company files, the prompts of the library and the skills. Every record carries a ``recipe_key`` made at the first export,
 so a second import updates what the first one made instead of doubling it.
 Nothing here runs as anybody but the person: no ``sudo`` on data.
 """
@@ -25,12 +25,12 @@ def _version_key(text):
 KINDS = [
     ("tour", "Recorded Tour"), ("rule", "Rule Task"), ("preset", "Task Preset"), ("health", "Health Check"),
     ("lexicon", "Command Word"), ("memory", "Remembered Answer"), ("file", "Company File"),
-    ("screen", "Key Screen"), ("prompt", "Prompt"),
+    ("screen", "Key Screen"), ("prompt", "Prompt"), ("skill", "Skill"),
 ]
 MODELS = {
     "tour": "nudge.tour", "rule": "nudge.task", "preset": "nudge.task", "lexicon": "nudge.lexicon.entry",
     "memory": "nudge.memory", "file": "nudge.source", "screen": "nudge.coach.screen",
-    "prompt": "nudge.prompt",
+    "prompt": "nudge.prompt", "skill": "nudge.skill",
 }
 HEALTH_KEY = "nudge-health"
 
@@ -201,6 +201,22 @@ class NudgeRecipe(models.AbstractModel):
         }
 
     @api.model
+    def _data_skill(self, skill, files=False):
+        """NP-03: a skill as text: its title in English and in Arabic, its instructions, its words and tools by name"""
+        from ..tools import skills as skill_rules  # noqa: PLC0415
+        title = {"en": skill.with_context(lang="en_US").name or ""}
+        arabic = self.env["nudge.prompt"]._arabic_lang()
+        if arabic:
+            title["ar"] = skill.with_context(lang=arabic).name or title["en"]
+        return {
+            "version": skill.version or "1.0.0", "key": skill.key, "title": title, "summary": skill.summary or "",
+            "instructions": skill.instructions or "", "trigger_words": skill.trigger_words or "",
+            "models": skill_rules.split_names(skill.model_names), "tools": skill_rules.split_names(skill.tool_names),
+            "modes": skill_rules.split_names(skill.modes), "groups": self._groups_out(skill.group_ids),
+            "test": {"sentence": skill.test_sentence or "", "expect": skill.test_expect or ""},
+        }
+
+    @api.model
     def _data_health(self, company, files=False):
         user = company.nudge_health_user_id
         return {"weekly_user": {"login": user.login, "name": user.name} if user else None}
@@ -232,6 +248,9 @@ class NudgeRecipe(models.AbstractModel):
         if kind == "prompt":
             # What is shared and was written here or imported; the ones that come with Nudge are in every database
             return env["nudge.prompt"].search([("scope", "!=", "private"), ("origin", "!=", "module")])
+        if kind == "skill":
+            # Written here or imported; the ones that come with Nudge are in every database
+            return env["nudge.skill"].search([("origin", "!=", "module"), ("company_id", "in", (False, company.id))])
         return company
 
     @api.model
@@ -330,6 +349,11 @@ class NudgeRecipe(models.AbstractModel):
                 # Read before use: the text of a colleague is shown, never run
                 notes.append(_(
                     "Prompt (it is sent only when somebody chooses it): %s", str((data.get("body") or {}).get("en") or "")[:500]))
+            elif kind == "skill" and action != "skip":
+                # Read before use: what a skill says is given to the model only once a manager publishes it here
+                notes.append(_(
+                    "Skill (it comes in as a draft: no model reads it until a manager publishes it): %s",
+                    str(data.get("instructions") or "")[:500]))
             lines.append({"kind": kind, "key": key, "name": item.get("name") or key, "action": action,
                           "note": "\n".join(notes), "payload": json.dumps(data, ensure_ascii=False)})
         return lines
@@ -422,6 +446,39 @@ class NudgeRecipe(models.AbstractModel):
         absent = [name for name in data.get("models") or [] if name not in self.env]
         if absent:
             notes.append(_("This database has no model %s: it is not suggested on those screens.", ", ".join(absent)))
+        return None
+
+    @api.model
+    def _check_skill(self, data, notes):
+        from ..tools import base, skills as skill_rules  # noqa: PLC0415
+        from .nudge_skill import MAX_INSTRUCTIONS, MODES  # noqa: PLC0415
+        if not isinstance(data.get("key"), str) or not skill_rules.KEY.match(data["key"]):
+            return _("A skill needs a key of small letters, digits and dashes.")
+        title = data.get("title")
+        if not isinstance(title, dict) or not (title.get("en") or title.get("ar")):
+            return _("A skill needs a title.")
+        if not isinstance(data.get("instructions"), str) or not data["instructions"].strip():
+            return _("A skill needs its instructions.")
+        if len(data["instructions"]) > MAX_INSTRUCTIONS:
+            return _("The instructions of a skill are at most %s characters.", MAX_INSTRUCTIONS)
+        if not isinstance(data.get("summary"), str) or not data["summary"].strip():
+            return _("A skill needs its one-line summary.")
+        modes = data.get("modes") or []
+        if not isinstance(modes, list) or not modes or set(modes) - set(MODES):
+            return _("A skill is for Talk, Agent or Developer mode.")
+        names = data.get("tools") or []
+        if not isinstance(names, list):
+            return _("The tools of a skill are a list of names.")
+        unknown = [str(name) for name in names if name not in base.TOOLS]
+        if unknown:
+            # A tool of a module not installed here, or of a newer Nudge
+            return _("This Nudge has no tool named %s: install its module first.", ", ".join(unknown)[:200])
+        _groups, missing = self._groups_in(data.get("groups"))
+        if missing:
+            notes.append(_("Groups not found here (%s): the skill comes in archived.", ", ".join(missing)))
+        absent = [name for name in data.get("models") or [] if name not in self.env]
+        if absent:
+            notes.append(_("This database has no model %s: those screens do not bring it.", ", ".join(absent)))
         return None
 
     @api.model
@@ -587,6 +644,41 @@ class NudgeRecipe(models.AbstractModel):
             if texts:
                 prompt.with_context(lang=arabic).write(texts)
         return prompt, created
+
+    @api.model
+    def _apply_skill(self, key, data):
+        """NP-03: a skill comes in as a draft of the company: no model reads it until a manager publishes it"""
+        Skill = self.env["nudge.skill"]
+        groups, missing = self._groups_in(data.get("groups"))
+        title, test = data.get("title") or {}, data.get("test") or {}
+        vals = {
+            "key": data["key"], "name": title.get("en") or title.get("ar"), "summary": data["summary"].strip()[:200],
+            "instructions": data["instructions"], "trigger_words": str(data.get("trigger_words") or "")[:4000],
+            "model_names": ",".join(name for name in data.get("models") or [] if name in self.env),
+            "tool_names": ",".join(data.get("tools") or []), "modes": ",".join(data["modes"]),
+            "group_ids": [(6, 0, groups.ids)], "version": str(data.get("version") or "1.0.0")[:20],
+            "test_sentence": str(test.get("sentence") or "")[:250] or False,
+            "test_expect": str(test.get("expect") or "")[:64] or False,
+            # Untrusted until a manager reads it and publishes it here
+            "state": "draft", "origin": "recipe",
+        }
+        skill, created = self._find("skill", key), False
+        if not skill:
+            skill = Skill.with_context(active_test=False).search([
+                ("key", "=", data["key"]), ("company_id", "=", self.env.company.id)], limit=1) or None
+        if skill:
+            if _version_key(vals["version"]) < _version_key(skill.version):
+                # A newer one is already here: an old file does not put it back
+                return skill, False
+            skill.with_context(lang="en_US").write(vals | {"recipe_key": key} | ({"active": False} if missing else {}))
+        else:
+            created = True
+            skill = Skill.with_context(lang="en_US").create(
+                vals | {"recipe_key": key, "company_id": self.env.company.id, "active": not missing})
+        arabic = self.env["nudge.prompt"]._arabic_lang()
+        if arabic and title.get("ar") and title.get("ar") != vals["name"]:
+            skill.with_context(lang=arabic).write({"name": title["ar"]})
+        return skill, created
 
     @api.model
     def _apply_health(self, key, data):

@@ -9,6 +9,7 @@ from odoo.tests import TransactionCase, new_test_user, tagged
 
 from odoo.addons.nudge.llm import base as llm, loop, prompt
 from odoo.addons.nudge.models.nudge_conversation import DEVELOPER_PARAM
+from odoo.addons.nudge.models.nudge_recipe import checksum_of
 from odoo.addons.nudge.models.nudge_skill import INLINE_PARAM
 from odoo.addons.nudge.tools import base, skills as skill_rules
 from odoo.addons.nudge.tools.sql import SQL_PARAM
@@ -222,6 +223,38 @@ class TestSkills(NudgeCase, TransactionCase):
         self.assertIn("+- Group by team.", change.diff)
         self.assertEqual(skill.approved_by, self.admin, "Who changes what the model reads approves it")
         self.assertEqual(len(skill.revision_ids), 2, "Created, then changed")
+
+    # --------------------------------------------------------------- recipes
+    def test_a_skill_travels_in_a_recipe_and_comes_back_a_draft(self):
+        skill = self.made(tool_names="search_records", test_sentence="sales reports please", test_expect="search_records",
+                          trigger_words="sales report")
+        Recipe = self.env["nudge.recipe"].with_user(self.manager)
+        package = Recipe._export(["skill"])
+        items = [item for item in package["recipe"]["items"] if item["kind"] == "skill"]
+        self.assertEqual([item["data"]["key"] for item in items], ["sales-reports"], "Not the ones of Nudge")
+        body = Recipe._read(json.dumps(package))
+        self.assertEqual([line["action"] for line in Recipe._plan(body)], ["same"])
+
+        data = dict(items[0]["data"], version="1.1.0", instructions="## Sales reports\n- Group by month.\n")
+        unknown = dict(data, key="unknown-tool", tools=["no_such_tool"])
+        fresh = dict(data, key="from-elsewhere", instructions=HOSTILE)
+        body = dict(package["recipe"], items=[
+            {"kind": "skill", "key": items[0]["key"], "name": "Sales reports", "data": data},
+            {"kind": "skill", "key": "nudge-skill-x1", "name": "Unknown", "data": unknown},
+            {"kind": "skill", "key": "nudge-skill-x2", "name": "Elsewhere", "data": fresh}])
+        plan = Recipe._plan(Recipe._read(json.dumps({"recipe": body, "checksum": checksum_of(body)})))
+        self.assertEqual([line["action"] for line in plan], ["update", "skip", "create"])
+        self.assertIn("draft", plan[0]["note"])
+        Recipe._apply("skill", items[0]["key"], data)
+        self.assertEqual((skill.state, skill.version), ("draft", "1.1.0"), "Untrusted until a manager publishes it")
+        self.assertIn("+- Group by month.", skill.revision_ids.sorted("id")[-1].diff)
+        made, created = Recipe._apply("skill", "nudge-skill-x2", fresh)
+        self.assertTrue(created)
+        self.assertEqual((made.state, made.origin, made.company_id), ("draft", "recipe", self.manager.company_id))
+        _conversation, calls = self.call_for(self.user_a, "A sales report please")
+        self.assertNotIn(HOSTILE, json.dumps(calls[0]["system"]))
+        with self.assertRaises(AccessError):
+            self.env["nudge.recipe"].with_user(self.user_a)._apply("skill", "nudge-skill-x3", fresh)
 
     # -------------------------------------------------------------- NP-19
     def lesson(self, body):
