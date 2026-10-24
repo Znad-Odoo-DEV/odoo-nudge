@@ -868,3 +868,33 @@ When people ask the AI the same thing again and again, Nudge proposes a rule so 
 - **Privacy.** Only the shape is kept: the pattern with `{slots}`, the template of the arguments with the same slots, counts. A value the AI used that the sentence did not say (a record id, a name it looked up, a date that is not today) makes the turn unfit to be learned. No answer, no record, nobody who asked. Turns said in private mode (flag `nudge.message.private_mode`, set when the message is written), commands and files are never read, nor are turns before the job was first run (`nudge.rules_observe_from`). A sentence is data: it is stored and matched as text, never run.
 - **Tests.** `/nudge:TestLearnedPattern,/nudge:TestRecurringRequests`.
 
+## Economy model and prompt caching
+
+**A cheaper model for the light work.** On a provider, **Economy Model** names a cheaper model of the
+same provider and key (claude-haiku-5-5 beside claude-sonnet-5-5, a mini model beside the full one,
+Flash beside Pro); **Settings, Nudge, Economy Model** can name another provider for those that have
+none (a cloud provider, or one on your own server: one more option, never needed). It answers the
+light work: questions in Talk, which change nothing, the commands that explain, the summaries of long
+conversations and the other short texts. The model of the provider answers Agent and Developer
+modes, a question marked heavy (a skill ticked **Heavy**, a file or a picture, a long question, words
+that ask for an analysis or a comparison, in English, French or Arabic), and once more, in the same
+answer, what the economy model failed at (an error of the model, an empty answer, a refusal, a tool
+that failed): the person sees "Answered by the main model". An error of the account (key, limit,
+network) goes to the fallback model instead, as before. Private mode is obeyed for both. With no
+economy model everything is as before. Each line of the usage list says which tier answered and,
+for the economy model, about what it saved at the prices of the main one (the economy prices come
+from the price table of Nudge for the Claude models, else type them on the provider); **Latency and
+Cost** groups by tier and sums the saving; the budgets count both.
+
+**Caching.** A request keeps what does not change first: the tools every question of the mode is
+offered (the tools of the question come after them), the instructions, then the skills of the
+question. Claude gets a read point after those tools and one after the instructions (three of its
+four); OpenAI, Gemini, Groq, DeepSeek and OpenRouter cache a prefix by themselves, and the tokens
+they read from it are counted as cache reads. A cache price left empty on a provider follows its
+input price (Claude: a tenth to read, a quarter more to write; others: half to read). The overview
+of the database is sent once in a conversation: the instructions of every call keep its first lines
+(version, edition, apps), the notes of the administrators and where the rest is
+(search_database_profile), the same from one question and one conversation to the next; the rest
+(custom modules, languages, companies, automation, access) goes with the first question of a
+conversation, and again with the question after which it changed. A short overview stays whole in
+the instructions, as before. A summary of the earlier turns changes nothing of it.
