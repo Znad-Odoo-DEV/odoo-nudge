@@ -371,7 +371,8 @@ class TestRecipeMarket(NudgeCase, TransactionCase):
 
         def slow(source):
             done.append(source.id)
-            time.sleep(0.06)
+            # Well past the budget: the clock of Windows moves by about 16 ms
+            time.sleep(0.12)
 
         with patch.object(type(self.source), "_refresh_one", slow), patch.object(market, "CRON_BUDGET", 0.05):
             self.source._cron_refresh()
