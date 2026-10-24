@@ -1,0 +1,28 @@
+// S15: what is said under an answer of Nudge's memory
+.o_nudge_reference_label {
+    margin-block-start: 0.25rem;
+    font-size: 0.8em;
+    opacity: 0.8;
+}
+
+.o_nudge_reference_choices {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
+    margin-block-start: 0.4rem;
+
+    .o_nudge_reference_choice {
+        text-align: start;
+        white-space: normal;
+    }
+}
+
+.o_nudge_reference_save_row {
+    margin-block-start: 0.15rem;
+
+    .o_nudge_reference_save {
+        padding-inline: 0;
+        font-size: 0.85em;
+    }
+}
