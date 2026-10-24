@@ -15,6 +15,8 @@ import json
 import logging
 import re
 
+from psycopg2 import OperationalError
+
 from odoo import api, fields, models
 from odoo.exceptions import AccessError
 
@@ -246,10 +248,17 @@ class NudgeAnswerCache(models.Model):
         answer = Message.create({
             "conversation_id": conversation.id, "role": "assistant", "content": content,
             "state": "complete", "is_remembered": True})
-        # One statement: two people served at once both count, and no row is held for the request
-        self.env.cr.execute(
-            "UPDATE nudge_answer_cache SET hits = COALESCE(hits, 0) + %s, near_hits = COALESCE(near_hits, 0) + %s, "
-            "last_hit = now() at time zone 'utc' WHERE id = %s", (0 if offered else 1, 1 if offered else 0, entry.id))
+        # Never waits and never fails, as nudge.skill._count_given: an entry counted by another answer at this
+        # instant, or since this one began (repeatable read), is not counted this time
+        try:
+            with self.env.cr.savepoint():
+                self.env.cr.execute(
+                    "UPDATE nudge_answer_cache SET hits = COALESCE(hits, 0) + %s, "
+                    "near_hits = COALESCE(near_hits, 0) + %s, last_hit = now() at time zone 'utc' "
+                    "WHERE id IN (SELECT id FROM nudge_answer_cache WHERE id = %s FOR UPDATE SKIP LOCKED)",
+                    (0 if offered else 1, 1 if offered else 0, entry.id), log_exceptions=False)
+        except OperationalError:
+            _logger.info("Nudge: cached answer %s counted by another answer at the same time, left uncounted", entry.id)
         entry.invalidate_recordset(["hits", "near_hits", "last_hit"])
         # A call that cost nothing: the usage report shows how many the cache answered
         self.env["nudge.usage"]._add(

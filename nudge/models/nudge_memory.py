@@ -28,6 +28,8 @@ import json
 import logging
 import re
 
+from psycopg2 import OperationalError
+
 from odoo import api, fields, models
 from odoo.exceptions import AccessError, UserError
 from odoo.tools.misc import format_date
@@ -1186,10 +1188,17 @@ class NudgeMemory(models.Model):
 
     @api.model
     def _count_use(self, memory, conversation=None, message=None):
-        # One statement: two people served at once both count, and no row is held for the request
-        self.env.cr.execute(
-            "UPDATE nudge_memory SET uses = COALESCE(uses, 0) + 1, last_used = now() at time zone 'utc' WHERE id = %s",
-            (memory.id,))
+        # Never waits and never fails, as nudge.skill._count_given: a memory another answer is counting at this
+        # instant (SKIP LOCKED), or counted since this one began (a serialization error under repeatable read, which
+        # ended a phone's answer in "Something went wrong"), is not counted this time; the figure is an indication
+        try:
+            with self.env.cr.savepoint():
+                self.env.cr.execute(
+                    "UPDATE nudge_memory SET uses = COALESCE(uses, 0) + 1, last_used = now() at time zone 'utc' "
+                    "WHERE id IN (SELECT id FROM nudge_memory WHERE id = %s FOR UPDATE SKIP LOCKED)",
+                    (memory.id,), log_exceptions=False)
+        except OperationalError:
+            _logger.info("Nudge: memory %s counted by another answer at the same time, left uncounted", memory.id)
         memory.invalidate_recordset(["uses", "last_used"])
         # A call that cost nothing: the usage report shows how many the memory answered
         links = {}
