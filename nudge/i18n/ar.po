@@ -15238,13 +15238,13 @@ msgstr "إرسال رسالة بريد فيها رابط اختيار كلمة �
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_skills_inline
 msgid ""
-"Send the full text of every skill with every question, as before skills: "
-"longer and costlier calls. Off: a one-line list, and the full text of the "
-"skills a question needs."
+"Send the full text of every skill and every tool with every question, as "
+"before skills: longer and costlier calls. Off: a one-line list, the full text "
+"of the skills a question needs, and the tools it needs."
 msgstr ""
-"إرسال النص الكامل لكل مهارة مع كل سؤال كما كان قبل المهارات: استدعاءات أطول "
-"وأكثر كلفة. عند الإيقاف: قائمة بسطر واحد لكل مهارة، والنص الكامل للمهارات "
-"التي يحتاجها السؤال فقط."
+"إرسال النص الكامل لكل مهارة وكل أداة مع كل سؤال كما كان قبل المهارات: "
+"استدعاءات أطول وأكثر كلفة. عند الإيقاف: قائمة بسطر واحد لكل مهارة، والنص "
+"الكامل للمهارات التي يحتاجها السؤال، والأدوات التي يحتاجها فقط."
 
 #. module: nudge
 #. odoo-python

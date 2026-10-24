@@ -366,26 +366,54 @@ class NudgeConversation(models.Model):
         # sudo: the conversation is the person's own, as with more_tools (tool_groups)
         self.sudo().skill_keys = ",".join([*keys, skill.key][-skill_rules.MAX_KEPT:])
 
+    def _skill_questions(self):
+        """:return: the question being answered and the one before it (sudo: the conversation is the
+        person's own, as everywhere it is read to answer)"""
+        questions = self.env["nudge.message"].sudo().search([
+            ("conversation_id", "=", self.id), ("role", "=", "user")], order="id desc", limit=2)
+        return questions[:1], questions[1:2]
+
+    def _tool_route(self, mode, question, previous):
+        """NP-03: the tools of the groups the question needs, beyond the core of the mode
+        (tools/groups.py, with no AI): by its words and those of the question before it, which it may
+        answer, by its screen, its context, its command and its file, and the tools called since the
+        question before it, so that the work goes on with them"""
+        answers = self.env["nudge.message"].sudo().search([
+            ("conversation_id", "=", self.id), ("role", "=", "assistant"),
+            ("id", ">", previous.id if previous else 0)], order="id desc", limit=50)
+        called = {call.get("name") for answer in answers for call in (answer.tool_calls or ())
+                  if isinstance(call, dict)}
+        return tools.groups.routed(
+            self, mode, [question.content, previous.content], screen=question.snapshot,
+            context=question.context_text, command=question.command,
+            attachment=bool(question.attachment_name), called=called)
+
     def _skill_plan(self, mode, compact=False):
         """:return: what the skills add to the call for the question being answered: ``index`` (what
         is the same for every question of this person: the one-line list, not for a small model, or
         every skill in full in the fallback), ``text`` (the full instructions of the skills of this
-        question, a list), ``given`` (the skills given in full) and ``offer`` (for tools.base.available)"""
+        question, a list), ``given`` (the skills given in full) and ``offer`` (for tools.base.available:
+        the tools of the skills, and for a model that is not small the tools its question needs
+        beyond the core of the mode, ``route``; none in the fallback, which offers every tool)"""
         self.ensure_one()
         Skill = self.env["nudge.skill"]
         plan = {"index": "", "text": [], "given": Skill, "offer": {}}
+        inline = Skill._inline()
+        question, previous = self._skill_questions()
+        if not inline and not compact and question:
+            plan["offer"] = {"route": self._tool_route(mode, question, previous)}
         visible = Skill._visible(mode)
         if not visible:
             return plan
-        inline = Skill._inline()
         if inline:
             # The fallback: every skill in full, as the instructions were before skills
             given, entries = visible, []
         else:
-            question = self.env["nudge.message"].sudo().search([
-                ("conversation_id", "=", self.id), ("role", "=", "user")], order="id desc", limit=1)
             screen = question.snapshot if isinstance(question.snapshot, dict) else {}
-            keys = skill_rules.pick(visible._router_entries(), question.content or "", screen.get("model"))
+            entries = visible._router_entries()
+            keys = skill_rules.pick(entries, question.content or "", screen.get("model"))
+            # An answer to a question of Nudge goes on with the skills of the question it answers
+            keys += [key for key in skill_rules.pick(entries, previous.content or "") if key not in keys]
             kept = [key for key in reversed((self.sudo().skill_keys or "").split(",")) if key and key not in keys]
             keys = (keys + kept)[:skill_rules.MAX_LOADED]
             by_key = {skill.key: skill for skill in visible}
@@ -397,7 +425,8 @@ class NudgeConversation(models.Model):
             index=prompt.render_skills(texts) if inline else prompt.render_skill_index(entries),
             text=[] if inline else texts,
             given=given,
-            offer={"tools": sorted({name for skill in given for name in skill_rules.split_names(skill.tool_names)}),
+            offer={**plan["offer"],
+                   "tools": sorted({name for skill in given for name in skill_rules.split_names(skill.tool_names)}),
                    "index": bool(entries)})
         return plan
 
@@ -414,6 +443,11 @@ class NudgeConversation(models.Model):
         offer = self.env.context.get("nudge_skill_offer")
         if offer is None:
             offer = self._skill_plan_or_nothing(mode, tool_set == "essential")["offer"]
+        if tool_set == "full" and offer.get("route") is not None:
+            # NP-03: the core of the mode, the tools of the groups the question needs and those of its
+            # skills, rather than every tool; each still passes Tool.is_available (tools/base.py)
+            tool_set = "core"
+            offer = {**offer, "tools": sorted(set(offer.get("tools") or ()) | set(offer["route"]))}
         return super(NudgeConversation, self.with_context(nudge_skills=offer))._chat_tools(mode, tool_set)
 
     def _chat_job(self, provider, mode, rounds):
@@ -431,7 +465,7 @@ class NudgeConversation(models.Model):
     def _chat_record(self, outcome):
         calls = [call for call in outcome.get("tool_calls") or () if call.get("name") == "use_skill"]
         if not calls:
-            return super()._chat_record(outcome)
+            return self._chat_record_routed(outcome, super()._chat_record(outcome))
         mode = self._chat_mode()
         # What the question was given before the calls run: use_skill answers that these are there
         # already (tools/skills.py); every other skill it names joins, newly kept or kept from before
@@ -449,6 +483,22 @@ class NudgeConversation(models.Model):
             step["skills"] = given.mapped("instructions")
             step["tools"] = self._chat_tools(mode, provider.tool_set if provider else "full")
             given._count_given()
+        return self._chat_record_routed(outcome, step)
+
+    def _chat_record_routed(self, outcome, step):
+        """NP-03: a tool of a group that the model called without being offered it (named in the
+        instructions, or known from before) ran as any call does when the person may use it; it is
+        offered from the next step of this answer, with its schema, rather than called blind again"""
+        if "turns" not in step or "event" in step or step.get("tools"):
+            return step
+        mode = self._chat_mode()
+        beyond = tools.groups.routed_tools() - tools.base.CORE_BY_MODE.get(mode, set())
+        if not any(call.get("name") in beyond for call in outcome.get("tool_calls") or ()):
+            return step
+        provider = self.sudo().provider_id
+        tool_set = provider.tool_set if provider else "full"
+        if tool_set == "full":
+            step["tools"] = self._chat_tools(mode, tool_set)
         return step
 
 
@@ -469,5 +519,5 @@ class ResConfigSettings(models.TransientModel):
 
     nudge_skills_inline = fields.Boolean(
         string="Every Skill in Full", config_parameter=INLINE_PARAM,
-        help="Send the full text of every skill with every question, as before skills: longer and costlier calls. "
-             "Off: a one-line list, and the full text of the skills a question needs.")
+        help="Send the full text of every skill and every tool with every question, as before skills: longer and "
+             "costlier calls. Off: a one-line list, the full text of the skills a question needs, and the tools it needs.")
