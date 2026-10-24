@@ -96,3 +96,28 @@ test("a remembered answer reopened from the history keeps its badge, without the
     expect(".o_nudge_remembered").toHaveCount(1);
     expect(".o_nudge_remembered_ask").toHaveCount(0);
 });
+
+test("ask the AI instead under an offer of close references asks the same question to the AI", async () => {
+    let calls = 0;
+    const OFFER = streamed(
+        { type: "start", conversation_id: 9, message_id: 1, title: "Quotes" },
+        { type: "delta", text: "I have approved answers to questions close to yours." },
+        {
+            type: "done",
+            message_id: 2,
+            state: "complete",
+            message: "",
+            memory: { id: false, choices: [{ id: 7, question: "How do I create a quotation?" }] },
+        }
+    );
+    const { asked, nudge } = await start({ answer: () => (++calls === 1 ? OFFER() : SECOND()) });
+    await nudge.send("quotation");
+    await animationFrame();
+    await click(".o_nudge_remembered_ask");
+    await animationFrame();
+
+    expect(asked.messages).toHaveLength(2);
+    expect(asked.messages[1].message).toBe("quotation");
+    expect(asked.messages[1].fresh).toBe("1");
+    expect(".o_nudge_message_assistant .o_nudge_markdown:last").toHaveText("From the AI: 30 days.");
+});
