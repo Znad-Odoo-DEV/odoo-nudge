@@ -30,6 +30,8 @@ DEFAULT_TASKS = 5
 MAX_TASK_MESSAGES = 60
 # Records named to the model when a watched kind of record has new ones
 MAX_NEW_IDS = 50
+# New records counted at most for the model ("over 10000" past it)
+MAX_NEW_COUNTED = 10000
 # Rows of a grouped measure kept in the answer of a rule
 MAX_RULE_ROWS = 25
 # Seconds a pass of the scheduled action works before the rest waits for the next pass
@@ -407,9 +409,11 @@ class NudgeTask(models.Model):
             model = get_model(env, task.model_name)
             domain = build_domain(model, task.conditions or [], task.match)
             if task.kind == "watch":
-                # What was created since the last look, among which what matches
-                created = model.search([("create_date", ">", task.last_check or now)], order="id")
-                found = created.filtered_domain(domain)
+                # What matches among what was created since the last look, found and counted by
+                # the database, never read whole: a task paused for long, or a busy model, has
+                # more new records than a worker can load
+                new = [("create_date", ">", task.last_check or now)] + domain
+                found = model.search(new, order="id", limit=MAX_NEW_IDS + 1)
                 values["last_check"] = now
             else:
                 found = model.search(domain, limit=MAX_NEW_IDS + 1)
@@ -418,7 +422,11 @@ class NudgeTask(models.Model):
                                 last_result=self.env._("Nothing matched: the AI was not asked.")))
                 return
             if task.kind == "watch":
-                more = f" (and more: {len(found)} in all)" if len(found) > MAX_NEW_IDS else ""
+                more = ""
+                if len(found) > MAX_NEW_IDS:
+                    total = model.search_count(new, limit=MAX_NEW_COUNTED + 1)
+                    counted = f"over {MAX_NEW_COUNTED}" if total > MAX_NEW_COUNTED else total
+                    more = f" (and more: {counted} in all)"
                 note = (f"\n\n[New {model._name} records since the last check: ids "
                         f"{', '.join(map(str, found[:MAX_NEW_IDS].ids))}{more}]")
         conversation = task.conversation_id
