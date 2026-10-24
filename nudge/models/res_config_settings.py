@@ -327,3 +327,9 @@ class ResConfigSettings(models.TransientModel):
             masked, found = redact.preview(settings.nudge_redact_sample)
             lines = [f"{token} = {value}" for token, value in found.items()]
             settings.nudge_redact_preview = ("\n\n").join([masked, ("\n").join(lines)]) if lines else masked
+    # NP-20
+    nudge_usage_retention_months = fields.Integer(
+        string="Keep Usage For (Months)", config_parameter="nudge.usage_retention_months",
+        help="Calls to the AI provider older than this many whole months are removed from the usage list every "
+             "day, a batch at a time. The current month is always kept, so budgets read the same totals. "
+             "0 keeps everything.")

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_latency_view_list" model="ir.ui.view">
+        <field name="name">nudge.latency.report.view.list</field>
+        <field name="model">nudge.latency.report</field>
+        <field name="arch" type="xml">
+            <list string="Latency and Cost" create="0" edit="0" delete="0">
+                <field name="date"/>
+                <field name="mode"/>
+                <field name="provider_id"/>
+                <field name="user_id" widget="many2one_avatar" optional="hide"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                <field name="answers" sum="Answers"/>
+                <field name="duration_p50" widget="integer" optional="show"/>
+                <field name="duration_p95" widget="integer" optional="show"/>
+                <field name="first_line_p50" widget="integer" optional="hide"/>
+                <field name="first_line_p95" widget="integer" optional="hide"/>
+                <field name="queue_wait_p50" widget="integer" optional="hide"/>
+                <field name="queue_wait_p95" widget="integer" optional="hide"/>
+                <field name="tokens" sum="Tokens"/>
+                <field name="cost" sum="Cost"/>
+                <field name="errors" sum="Errors"/>
+                <field name="refusals" sum="Refusals"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_latency_view_graph" model="ir.ui.view">
+        <field name="name">nudge.latency.report.view.graph</field>
+        <field name="model">nudge.latency.report</field>
+        <field name="arch" type="xml">
+            <graph string="Latency and Cost" type="bar">
+                <field name="mode"/>
+                <field name="duration_p95" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="nudge_latency_view_pivot" model="ir.ui.view">
+        <field name="name">nudge.latency.report.view.pivot</field>
+        <field name="model">nudge.latency.report</field>
+        <field name="arch" type="xml">
+            <pivot string="Latency and Cost">
+                <field name="mode" type="row"/>
+                <field name="provider_id" type="row"/>
+                <field name="date" interval="month" type="col"/>
+                <field name="answers" type="measure"/>
+                <field name="duration_p50" type="measure"/>
+                <field name="duration_p95" type="measure"/>
+                <field name="tokens" type="measure"/>
+                <field name="cost" type="measure"/>
+                <field name="errors" type="measure"/>
+                <field name="refusals" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="nudge_latency_view_search" model="ir.ui.view">
+        <field name="name">nudge.latency.report.view.search</field>
+        <field name="model">nudge.latency.report</field>
+        <field name="arch" type="xml">
+            <search string="Latency and Cost">
+                <field name="user_id"/>
+                <field name="provider_id"/>
+                <filter name="last_30" string="Last 30 Days"
+                        domain="[('date', '&gt;=', (context_today() - relativedelta(days=30)).strftime('%Y-%m-%d'))]"/>
+                <filter name="this_month" string="This Month"
+                        domain="[('date', '&gt;=', (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter name="with_errors" string="With Errors" domain="[('errors', '&gt;', 0)]"/>
+                <filter name="with_refusals" string="With Refusals" domain="[('refusals', '&gt;', 0)]"/>
+                <separator/>
+                <filter name="date" string="Date" date="date"/>
+                <group>
+                    <filter name="group_mode" string="Mode" context="{'group_by': 'mode'}"/>
+                    <filter name="group_provider" string="Provider" context="{'group_by': 'provider_id'}"/>
+                    <filter name="group_user" string="Person" context="{'group_by': 'user_id'}"/>
+                    <filter name="group_company" string="Company" context="{'group_by': 'company_id'}"/>
+                    <filter name="group_day" string="Day" context="{'group_by': 'date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_latency_action" model="ir.actions.act_window">
+        <field name="name">Latency and Cost</field>
+        <field name="res_model">nudge.latency.report</field>
+        <field name="view_mode">graph,pivot,list</field>
+        <field name="context">{'search_default_last_30': 1, 'search_default_group_mode': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No answer to measure yet</p>
+            <p>How long Nudge takes to answer, in each mode and at each provider, and what the
+               answers cost: the median (p50) and the slowest 5 in 100 (p95), in milliseconds.
+               Only numbers are read here, never the text of a message.</p>
+        </field>
+    </record>
+
+    <menuitem id="nudge_menu_latency" name="Latency and Cost" sequence="35"
+              parent="nudge_menu_root" action="nudge_latency_action"
+              groups="nudge.group_nudge_manager"/>
+</odoo>

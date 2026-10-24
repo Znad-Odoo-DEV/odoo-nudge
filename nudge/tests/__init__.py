@@ -84,3 +84,4 @@ from . import test_note_scope
 from . import test_prompts
 from . import test_built
 from . import test_redact
+from . import test_latency
