@@ -296,21 +296,23 @@ class NudgeTask(models.Model):
             # Watched records are looked at whenever the scheduled action passes
             return moment
         zone = pytz.timezone(self.user_id.tz or "UTC")
-        local = pytz.utc.localize(moment).astimezone(zone)
         number = max(1, self.interval_number or 1)
         if self.interval_type == "hours":
-            following = local + relativedelta(hours=number)
-        else:
-            step = relativedelta(**{UNITS[self.interval_type or "days"]: number})
-            # The digests of one hour do not all start in the same pass: each owner has their
-            # own minute inside the hour, so the provider is not asked for all at once
-            minute = self.user_id.id % DIGEST_SPREAD_MINUTES if self.engine == "digest" else 0
-            following = local.replace(hour=self.hour or 0, minute=minute, second=0, microsecond=0)
-            if self.interval_type == "weeks" and self.weekday:
-                following += timedelta(days=(int(self.weekday) - following.weekday()) % 7)
-            while following <= local:
-                following += step
-        return following.astimezone(pytz.utc).replace(tzinfo=None)
+            # whole hours are counted on the clock of the server, which has no summer time
+            return moment + relativedelta(hours=number)
+        # The wall clock of the person is worked out without a zone and put in it at the end: a step added to a
+        # zoned time keeps the old offset across a change of summer time and runs an hour off
+        local = pytz.utc.localize(moment).astimezone(zone).replace(tzinfo=None)
+        step = relativedelta(**{UNITS[self.interval_type or "days"]: number})
+        # The digests of one hour do not all start in the same pass: each owner has their
+        # own minute inside the hour, so the provider is not asked for all at once
+        minute = self.user_id.id % DIGEST_SPREAD_MINUTES if self.engine == "digest" else 0
+        following = local.replace(hour=self.hour or 0, minute=minute, second=0, microsecond=0)
+        if self.interval_type == "weeks" and self.weekday:
+            following += timedelta(days=(int(self.weekday) - following.weekday()) % 7)
+        while following <= local:
+            following += step
+        return zone.localize(following).astimezone(pytz.utc).replace(tzinfo=None)
 
     def action_run_now(self):
         for task in self:

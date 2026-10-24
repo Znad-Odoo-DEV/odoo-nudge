@@ -254,6 +254,22 @@ class TestValidator(NudgeCase, TransactionCase):
         fine = form("sale.order", lines={"order_line": [{"product_id": one(steel), "price_unit": 90.0, "discount": 5}]})
         self.assertNotIn("price_below_cost", self.keys(fine))
 
+    def test_a_sale_line_is_compared_with_the_cost_in_its_own_unit(self):
+        """Review (functional 18): a dozen at 48 against a cost of 5 a unit (60 a dozen) gave no warning"""
+        if "sale.order" not in self.env:
+            self.skipTest("sale is not installed")
+        dozen = self.env.ref("uom.product_uom_dozen", raise_if_not_found=False)
+        if not dozen:
+            self.skipTest("The unit Dozens is not there")
+        steel = self.product(standard_price=5)
+        field = "product_uom_id" if "product_uom_id" in self.env["sale.order.line"]._fields else "product_uom"
+        payload = form("sale.order", lines={"order_line": [
+            {"product_id": one(steel), "price_unit": 48.0, "discount": 0, field: one(dozen)}]})
+        self.assertIn("price_below_cost", self.keys(payload))
+        fine = form("sale.order", lines={"order_line": [
+            {"product_id": one(steel), "price_unit": 120.0, "discount": 0, field: one(steel.uom_id)}]})
+        self.assertNotIn("price_below_cost", self.keys(fine))
+
     def test_a_purchase_line_far_above_the_last_purchases(self):
         if "purchase.order" not in self.env:
             self.skipTest("purchase is not installed")

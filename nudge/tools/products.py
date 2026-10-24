@@ -86,6 +86,9 @@ def _quantities(product, warehouses):
     """:return: what is in stock of ``product``, as the person sees it"""
     if "qty_available" not in product._fields:
         return {}
+    if "is_storable" in product._fields and not product.is_storable:
+        # Odoo 19 keeps no quantity for what is not storable: 0 on hand would read as out of stock
+        return {"stock": "not tracked: this product has no stock quantity"}
     try:
         found = {
             "on_hand": product.qty_available,
