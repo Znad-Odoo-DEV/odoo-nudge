@@ -2,6 +2,7 @@
 
 ## 19.0.1.59.1 (unreleased)
 
+- Review: the answer of a token address is read as a stream, at most 256 KB and within one deadline for the whole answer (not per read), and the connection is closed; the client-credentials token request had no cap at all, the sign-in requests no total deadline.
 - Review: the reads of one conversation send at most 5000 characters of arguments to outside systems in all (1000 each as before), so text smuggled in by an outside answer cannot loop reads to carry Odoo data out; past it a read is refused with "Nothing was sent".
 - Review: two requests near the end of an OAuth token no longer both send its refresh token: the row is locked for the renewal, read again after the lock, and a request that finds it locked uses the token while it still lasts; a refusal of a refresh token already spent can no longer delete the token the first request just stored.
 - Fix, found in the live trial: Test the Connection against a server that answers "method not found" to `server/discover` in an HTTP 200 JSON-RPC error (Nudge's own MCP server) now falls back to the standard `initialize` handshake, as it did for a 400, 404 or 405.
