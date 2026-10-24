@@ -424,7 +424,9 @@ class TestSkillCatalogue(NudgeCase, TransactionCase):
         files = {INDEX_URL: json.dumps(index).encode(),
                  "https://skills.example.test/nudge/recipes/remote-skill.json": recipe}
 
-        def download(url, cap=market.CAP, timeout=market.TIMEOUT):
+        def download(url, cap=market.CAP, timeout=market.TIMEOUT, check=None):
+            if check:
+                check(url)
             if url not in files:
                 raise market.FetchError("notfound")
             return files[url]
