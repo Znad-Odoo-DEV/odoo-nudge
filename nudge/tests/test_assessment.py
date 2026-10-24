@@ -62,7 +62,9 @@ class TestAssessment(NudgeCase, TransactionCase):
         for mode in ("talk", "agent"):
             names = [tool.name for tool in tools.base.available(self.env(user=self.user_a), mode)]
             self.assertIn("assess_database", names)
-        self.assertIn("assess_database", prompt.SYSTEM_PERSONA)
+        # NP-03: its instructions are a skill, and the words of an assessment bring the tool to every call
+        self.assertNotIn("assess_database judges", prompt.SYSTEM_PERSONA)
+        self.assertIn("assessment", tools.groups.asked("Assess this database for a trading company"))
         self.assertIn("senior", prompt.SYSTEM_PERSONA.lower())
 
     def test_advice_is_for_the_edition_of_this_database(self):
