@@ -2,6 +2,7 @@
 
 ## 19.0.1.1.0 (unreleased)
 
+- Review: the first tool call of a person counted nowhere against the stream cap: its log conversation was created by the request, not committed yet, so the mark written on another cursor found no row and the place was handed over at once. `_mark_call` now says whether it wrote the mark, and without one the place stays claimed, and counts, until the call ends. Its docstring says the call must not write the log's conversation after the mark (repeatable read refuses a row changed meanwhile).
 - NP-04: a tool call takes a place in the same line as the answers of the panel (`nudge.slot`), under the limit of Nudge and of its provider, and gives it back at the end or on error; it never goes before a question that waits. When the line is full the assistant gets a JSON-RPC error (`-32000`, `data.reason` `busy`, `data.retryAfter` in seconds) and a `Retry-After` header. A change waiting for the yes of the person holds no place.
 - NP-14: assistants sign in with OAuth 2.1 (MCP authorization, revision 2026-07-28): protected resource
   and authorization server metadata, dynamic registration, a page of consent in Odoo, PKCE with S256

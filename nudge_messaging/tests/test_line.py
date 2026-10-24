@@ -55,12 +55,34 @@ class TestMessagingLine(MessagingCase, HttpCase):
         adapter.stream_chat = stream_chat
         line = self.receive()
         self.assertEqual(line.state, "answered")
-        self.assertEqual(seen, [["streaming"]], "One place while the provider answers")
+        self.assertEqual(seen, [["claimed"]], "One place, claimed, while the provider answers")
         self.assertFalse(self.places())
         self.assertEqual(self.Slot._taken(), 0)
         slot = self.places("done")
         self.assertEqual((slot.user_id, slot.provider_id), (self.raghad, self.provider))
         self.assertFalse(self.marked())
+
+    def test_the_place_counts_the_call_and_only_the_answer_writes_the_log_conversation(self):
+        """Review odoo-tech #6 and #8: the answer writes the log conversation (its messages and their
+        totals), so no other cursor may change that row meanwhile (repeatable read: the second message
+        of a phone failed); the call counts through its place, from the first message of a phone, whose
+        conversation is new, as from the second"""
+        seen = []
+        adapter = self.use_adapter(reply="Done.")
+        original = adapter.stream_chat
+
+        def stream_chat(*args, **kwargs):
+            seen.append((self.Slot._taken(), self.Slot._taken(provider=self.provider), bool(self.marked())))
+            return original(*args, **kwargs)
+        adapter.stream_chat = stream_chat
+        first = self.receive()
+        second = self.receive(AI_QUESTION + " once more")
+        self.assertEqual((first.state, second.state), ("answered", "answered"))
+        self.assertEqual(seen, [(1, 1, False), (1, 1, False)], "Counted by the place, never by a mark")
+        conversation = self.env["nudge.messaging"].with_user(self.raghad)._conversation("whatsapp")
+        self.assertFalse(conversation.provider_id, "Nothing but the answer wrote the conversation")
+        self.assertEqual(conversation.message_count, 4)
+        self.assertEqual(self.Slot._taken(), 0)
 
     def test_at_the_limit_the_message_stays_queued_and_is_answered_when_a_place_frees(self):
         holder = self.hold(self.ebrahim)

@@ -511,15 +511,19 @@ class TestEngine(MessagingCase, HttpCase):
 
     def test_a_voice_note_or_a_file_counts_in_the_limit_of_simultaneous_answers(self):
         self.link(self.raghad)
-        marks = []
-        messaging = type(self.env["nudge.messaging"])
-        original = messaging._mark
-        self.patch(messaging, "_mark", lambda model, channel, active, provider=None: (marks.append(active), original(model, channel, active, provider))[1])
+        taken = []
+        Slot = self.env["nudge.slot"].sudo()
+
+        def transcribe(model, audio, language="", hints=None):
+            taken.append((Slot._taken(), Slot.search([("state", "in", ("claimed", "streaming"))]).mapped("state")))
+            return "hello"
         self.patch(type(self.env["nudge.messaging.api"]), "_download",
                    lambda model, channel, media: (b"RIFFxxxxWAVE", "audio/ogg"))
-        self.patch(type(self.env["nudge.voice"]), "_transcribe", lambda model, audio, language="", hints=None: "hello")
+        self.patch(type(self.env["nudge.voice"]), "_transcribe", transcribe)
+        self.use_adapter(reply="Hello.")
         self.receive("", kind="audio", media={"id": "m1", "mime": "audio/ogg"})
-        self.assertEqual(marks[:2], [True, False])
+        self.assertEqual(taken, [(1, ["claimed"])], "Its place counts while the note is written out")
+        self.assertEqual(Slot._taken(), 0)
 
     def test_an_error_in_the_database_inside_an_answer_is_the_messages_and_the_queue_goes_on(self):
         self.link(self.raghad)
