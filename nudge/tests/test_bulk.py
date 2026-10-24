@@ -1,10 +1,12 @@
 import json
 import re
 
+from odoo.exceptions import UserError
 from odoo.tests import TransactionCase, tagged
 
 from odoo.addons.nudge import tools
-from odoo.addons.nudge.llm import base
+from odoo.addons.nudge.llm import base, loop
+from odoo.addons.nudge.models import nudge_bulk
 from odoo.addons.nudge.llm.fake_adapter import FakeAdapter
 from odoo.addons.nudge.tools import bulk
 
@@ -30,6 +32,8 @@ class PerRecordAdapter(FakeAdapter):
             yield from super().stream_chat(system, turns, deadline=deadline, tools=tools, tool_choice=tool_choice)
             return
         text = turns[0]["text"]
+        # oneshot.ask hands the system prompt over as a list of texts
+        system = " ".join(base.system_texts(system))
         self.questions.append({"system": system, "text": text})
         rows = json.loads(re.match(r'<data source="bulk_apply">(.*)</data>$', text, re.S).group(1).replace("&lt;", "<"))
         answers = {}
@@ -379,10 +383,107 @@ class TestBulk(BackgroundCase, TransactionCase):
         job = self.env["nudge.bulk"].with_user(self.agent)._start(
             conversation, {"model": "res.partner", "operation": "classify", "field": "type"},
             ids=self.partners[:3].ids)
+        self.streaming_cursors()
+        events = self.stream(job)
         step = conversation.sudo().waiting_step_id
         self.assertEqual(step.tool, "bulk_apply")
         self.assertEqual(job["answered"]["type"], "waiting")
+        self.assertEqual(events[-1]["type"], "waiting")
         self.assertFalse(self.env["nudge.usage"].sudo().search([("kind", "=", "noai"), ("intent", "=", "bulk")]))
+
+    def stream(self, job):
+        """The stream of the controller: dbname, user and context are added, then the loop is read"""
+        env = self.env
+        job.update(dbname=env.cr.dbname, uid=env.uid, context=dict(env.context))
+        return list(loop.run(job, lambda outcome: self.fail("the model is not called")))
+
+    def streaming_cursors(self):
+        """The stream opens its cursors from the registry: in the test they are the cursor of the
+        test, and each opening is noted.
+        :return: the list of the openings"""
+        opened, cr = [], self.env.cr
+
+        class Opening:
+            def __enter__(self):
+                opened.append(cr)
+                return cr
+
+            def __exit__(self, *exc):
+                return False
+
+        class TestRegistry:
+            def __init__(self, dbname):
+                pass
+
+            def cursor(self):
+                return Opening()
+
+        self.patch(nudge_bulk, "Registry", TestRegistry)
+        return opened
+
+    def test_the_sample_is_asked_in_the_stream_not_in_the_request(self):
+        adapter = self.adapter()
+        opened = self.streaming_cursors()
+        seen = []
+        ask = bulk.ask_batch
+
+        def watching(env, provider, conversation_id, system, rows, ids):
+            seen.append(len(opened))
+            mark = self.env["nudge.conversation"].sudo().browse(conversation_id).stream_started_at
+            seen.append(mark)
+            return ask(env, provider, conversation_id, system, rows, ids)
+
+        self.patch(bulk, "ask_batch", watching)
+        agent = self.env["nudge.bulk"].with_user(self.agent)
+        conversation = self.env["nudge.conversation"].with_user(self.agent)._chat_open(None)
+        job = agent._start(
+            conversation, {"model": "res.partner", "operation": "classify", "field": "category_id"},
+            ids=self.partners[:3].ids)
+        # The request ends here: nothing was asked, the mark is set, nothing else is written
+        self.assertFalse(adapter.questions, "No call to the provider in the request")
+        self.assertFalse(seen)
+        self.assertFalse(opened, "No cursor of the stream is open yet")
+        self.assertTrue(conversation.sudo().stream_started_at, "The place in the cap is taken first")
+        self.assertFalse(conversation.sudo().waiting_step_id)
+        self.assertFalse(self.env["nudge.step"].sudo().search([("run_id", "=", conversation.sudo().run_id.id)]))
+        self.assertFalse(self.tagged(), "Nothing is written before the yes")
+        events = self.stream(job)
+        self.assertEqual(len(adapter.questions), 1)
+        self.assertEqual(seen[0], 1, "The provider is asked inside the cursor the stream opened")
+        self.assertTrue(seen[1], "The mark was there while the provider was asked")
+        self.assertEqual(events[-1]["type"], "waiting")
+        self.assertEqual(conversation.sudo().waiting_step_id.tool, "bulk_apply")
+        self.assertFalse(self.tagged(), "Nothing is written before the yes")
+
+    def test_the_start_counts_in_the_cap_on_the_answers(self):
+        self.adapter()
+        Conversation = type(self.env["nudge.conversation"])
+        self.patch(Conversation, "_get_max_streams", lambda self: 1)
+        first = self.env["nudge.conversation"].with_user(self.agent)._chat_open(None)
+        self.env["nudge.bulk"].with_user(self.agent)._start(
+            first, {"model": "res.partner", "operation": "classify", "field": "category_id"},
+            ids=self.partners[:3].ids)
+        other = self.env["nudge.conversation"].with_user(self.user_a)._chat_open(None)
+        with self.assertRaisesRegex(UserError, "answering other people"):
+            other._chat_check_not_busy()
+        with self.assertRaisesRegex(UserError, "still answering"):
+            first._chat_check_not_busy()
+
+    def test_a_preview_that_fails_frees_its_place_and_says_so(self):
+        self.adapter()
+
+        def breaking(*args, **kwargs):
+            raise ValueError("boom")
+
+        self.patch(bulk, "ask_batch", breaking)
+        self.streaming_cursors()
+        conversation = self.env["nudge.conversation"].with_user(self.agent)._chat_open(None)
+        job = self.env["nudge.bulk"].with_user(self.agent)._start(
+            conversation, {"model": "res.partner", "operation": "classify", "field": "category_id"},
+            ids=self.partners[:3].ids)
+        events = self.stream(job)
+        self.assertNotEqual(events[-1]["type"], "waiting")
+        self.assertFalse(conversation.sudo().stream_started_at, "The place is free again")
 
     def test_those_who_may_not_write_cannot_start_it(self):
         self.adapter()
