@@ -349,7 +349,8 @@ class TestValidator(NudgeCase, TransactionCase):
     def test_a_field_the_company_requires_and_who_is_exempt(self):
         model = self.env["ir.model"]._get("res.partner")
         field = self.env["ir.model.fields"]._get("res.partner", "function")
-        policy = self.env["nudge.validator.policy"].create({
+        # Set by a Nudge manager, who has no right on ir.model and ir.model.fields
+        policy = self.env["nudge.validator.policy"].with_user(self.manager).create({
             "model_id": model.id, "field_id": field.id, "message": "Raghad, fill in the job position."})
         payload = form("res.partner", {"name": "Ebrahim Stores", "function": ""})
         item = next(item for item in self.warnings(payload) if item["key"] == "policy_required.function")

@@ -167,21 +167,16 @@ class NudgeTask(models.Model):
             task.conditions_text = (" or " if task.match == "any" else " and ").join(parts)
 
     def _compute_available_models(self):
-        from ..tools.records import is_closed  # noqa: PLC0415
-        # sudo: the list of models is read to be filtered; what is offered is
-        # only what the person may read (rights, and the models Nudge keeps closed)
-        models = self.env["ir.model"].sudo().search([("transient", "=", False)])
-        offered = models.filtered(lambda line: line.model in self.env
-                                  and not self.env[line.model]._abstract
-                                  and not is_closed(self.env, line.model)
-                                  and self.env[line.model].has_access("read"))
+        # Only what the person may read (rights, and the models Nudge keeps closed)
+        offered = self.env["ir.model"]._nudge_readable()
         for task in self:
             task.available_model_ids = offered
 
     @api.onchange("rule_model_id")
     def _onchange_rule_model(self):
         for task in self:
-            task.model_name = task.rule_model_id.model or False
+            # sudo: the owner has no right on ir.model, only on the models it names
+            task.model_name = task.rule_model_id.sudo().model or False
             task.rule_domain = "[]"
             task.rule_field_id = task.rule_groupby_id = False
 
@@ -507,14 +502,15 @@ class NudgeTask(models.Model):
         domain = self._rule_domain_list()
         if self.kind == "watch":
             domain = domain + [("create_date", ">", self.last_check or fields.Datetime.now())]
-        measure, field = self.rule_measure or "count", self.rule_field_id
+        # sudo: the names of the fields only; the owner has no right on ir.model.fields
+        measure, field = self.rule_measure or "count", self.rule_field_id.sudo()
         if measure != "count":
             if not field or field.name not in model._fields or is_secret(model._fields[field.name]):
                 raise UserError(self.env._("The field to add up cannot be read."))
             aggregate = f"{field.name}:{'sum' if measure == 'sum' else 'avg'}"
         else:
             aggregate = "__count"
-        group = self.rule_groupby_id
+        group = self.rule_groupby_id.sudo()
         total = self.env._("Total")
         if not group:
             if measure == "count":

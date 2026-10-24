@@ -89,7 +89,7 @@ class NudgeEmailFlow(models.Model):
         if not self.active:
             raise UserError(self.env._("This email is switched off."))
         if len(record) != 1 or record._name != self.model:
-            raise UserError(self.env._("Open one %s to send this email.", self.model_id.name))
+            raise UserError(self.env._("Open one %s to send this email.", self.model_id.sudo().name))
         if self.button_groups and not self.env.user.has_groups(self.button_groups):
             raise UserError(self.env._("This button is not yours to press."))
         record.check_access("read")

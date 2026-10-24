@@ -315,7 +315,7 @@ class SendTestEmail(Mailing):
             raise Refused(f"Template #{template.id} is not on a model of this database.")
         record = sample_of(get_model(env, template.model), record_id)
         if not record:
-            raise Refused(f"There is no {template.model_id.name} yet to render it for.")
+            raise Refused(f"There is no {template.model_id.sudo().name} yet to render it for.")
         if not env.user.email:
             raise Refused("Your user has no email address: set it in your preferences, the test goes there.")
         return template, record
