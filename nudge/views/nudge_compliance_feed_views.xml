@@ -22,7 +22,7 @@
         <field name="view_mode">list</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">No deadline has been told yet</p>
-            <p>Managers are told 90, 30 and 7 days before a date in the checklist of their country. What was told is listed here.</p>
+            <p>Managers are told 90, 30 and 7 days before a date in the checklist of their country, and 60, 30 and 7 days before a certificate or credential expires. What was told is listed here.</p>
         </field>
     </record>
 
@@ -81,8 +81,33 @@
         </field>
     </record>
 
+    <record id="nudge_credential_list" model="ir.ui.view">
+        <field name="name">nudge.credential.list</field>
+        <field name="model">nudge.credential</field>
+        <field name="arch" type="xml">
+            <list editable="bottom" decoration-danger="days_left &lt; 0" decoration-warning="0 &lt;= days_left and days_left &lt;= 30">
+                <field name="name"/>
+                <field name="expiry_date"/>
+                <field name="days_left"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_credential_action" model="ir.actions.act_window">
+        <field name="name">Credential Expiry</field>
+        <field name="res_model">nudge.credential</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No credential to watch</p>
+            <p>Enter the name and the expiry date of a token or registration that Odoo does not store, such as an ETA token or a Peppol registration. Managers are told 60, 30 and 7 days before and on the day. The ZATCA certificate and the certificates of Odoo are watched by themselves. Only dates are kept here: never type the secret.</p>
+        </field>
+    </record>
+
     <menuitem id="nudge_menu_health_compliance_deadlines" name="Compliance Deadlines" sequence="16"
               parent="nudge_menu_health" action="nudge_compliance_notice_action"/>
     <menuitem id="nudge_menu_health_compliance_updates" name="Compliance Pack Updates" sequence="17"
               parent="nudge_menu_health" action="nudge_compliance_update_action" groups="base.group_system"/>
+    <menuitem id="nudge_menu_health_credentials" name="Credential Expiry" sequence="18"
+              parent="nudge_menu_health" action="nudge_credential_action"/>
 </odoo>
