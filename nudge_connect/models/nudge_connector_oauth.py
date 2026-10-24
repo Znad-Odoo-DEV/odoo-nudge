@@ -57,6 +57,10 @@ class NudgeConnector(models.Model):
         string="Sign-In Address", help="The page of the provider where a person signs in and agrees (HTTPS).")
     oauth_registration_url = fields.Char(
         string="Registration Address", help="Where Nudge may register itself as a client (RFC 7591), when the server offers it.")
+    oauth_revocation_url = fields.Char(
+        string="Sign-Out Address",
+        help="Where a token is revoked when a person signs out (RFC 7009), when the server offers it.")
+    sign_in_status = fields.Char(string="Your Sign-In", compute="_compute_signed_in")
     oauth_redirect_uri = fields.Char(
         string="Redirect Address", compute="_compute_oauth_redirect_uri",
         help="Give this address to the provider when you create the client: it is where the person comes back to.")
@@ -69,18 +73,23 @@ class NudgeConnector(models.Model):
 
     @api.depends_context("uid")
     def _compute_signed_in(self):
-        mine = {row.connector_id.id for row in self.env["nudge.connector.token"].sudo().search([
+        mine = {row.connector_id.id: row for row in self.env["nudge.connector.token"].sudo().search([
             ("connector_id", "in", self.ids), ("user_id", "=", self.env.uid)])}
         for connector in self:
             connector.signed_in = connector.id in mine
+            row = mine.get(connector.id)
+            connector.sign_in_status = (
+                _("Signed in as of %s", (row.write_date or row.create_date).date().isoformat())
+                if row else _("Not signed in"))
 
-    @api.constrains("oauth_authorize_url", "oauth_registration_url", "oauth_token_url", "auth_type", "runs_locally")
+    @api.constrains("oauth_authorize_url", "oauth_registration_url", "oauth_revocation_url", "oauth_token_url",
+                    "auth_type", "runs_locally")
     def _check_oauth_urls(self):
         for connector in self:
             if connector.auth_type != "oauth_user":
                 continue
             for url in filter(None, (connector.oauth_authorize_url, connector.oauth_registration_url,
-                                     connector.oauth_token_url)):
+                                     connector.oauth_revocation_url, connector.oauth_token_url)):
                 try:
                     mcp_client.check_url(url, allow_private=True)
                 except mcp_client.McpError:
@@ -136,8 +145,7 @@ class NudgeConnector(models.Model):
     def action_sign_out(self):
         """Sign the person out of this connector: their tokens are forgotten here"""
         self.ensure_one()
-        self.env["nudge.connector.token"].sudo().search([
-            ("connector_id", "=", self.id), ("user_id", "=", self.env.uid)]).unlink()
+        self._oauth_forget(self.env.user)
         return self._notify(_("You are signed out of %s.", self.sudo().name), "success")
 
     def action_revoke_all(self):
@@ -145,8 +153,29 @@ class NudgeConnector(models.Model):
         self.ensure_one()
         if not self.env.user.has_group("base.group_system"):
             raise AccessError(_("Only an administrator may sign everybody out."))
-        self.env["nudge.connector.token"].sudo().search([("connector_id", "=", self.id)]).unlink()
+        self._oauth_forget()
         return self._notify(_("Everybody is signed out of %s.", self.sudo().name), "success")
+
+    def _oauth_forget(self, user=None):
+        """Forget the tokens of ``user`` (everybody when None) for this connector. When the server publishes
+        a revocation endpoint (RFC 7009) it is told too: best effort, a failure is only logged."""
+        self.ensure_one()
+        connector = self.sudo()
+        domain = [("connector_id", "=", connector.id)] + ([("user_id", "=", user.id)] if user else [])
+        rows = self.env["nudge.connector.token"].sudo().search(domain)
+        if connector.oauth_revocation_url:
+            for row in rows:
+                token, hint = ((row.refresh_token, "refresh_token") if row.refresh_token
+                               else (row.access_token, "access_token"))
+                data = {"token": token, "token_type_hint": hint, "client_id": connector.oauth_client_id}
+                if connector.oauth_client_secret:
+                    data["client_secret"] = connector.oauth_client_secret
+                try:
+                    connector._oauth_http(connector.oauth_revocation_url, "POST", data=data)
+                except mcp_client.McpError as failure:
+                    _logger.warning("Nudge connector %s: the provider did not revoke a token (%s)",
+                                    connector.key, failure.code)
+        rows.unlink()
 
     def action_discover_oauth(self):
         """Read how the server wants people to sign in (RFC 9728, RFC 8414) and, when there is no client yet
@@ -156,8 +185,10 @@ class NudgeConnector(models.Model):
             raise AccessError(_("Only an administrator may set up the sign-in."))
         try:
             found = self._oauth_discover()
+            # Only what differs: a write of the same address would sign everybody out
             values = {name: found[name] for name in
-                      ("oauth_authorize_url", "oauth_token_url", "oauth_registration_url") if found.get(name)}
+                      ("oauth_authorize_url", "oauth_token_url", "oauth_registration_url", "oauth_revocation_url")
+                      if found.get(name) and found[name] != self[name]}
             if values:
                 self.write(values)
             registered = False
@@ -229,7 +260,8 @@ class NudgeConnector(models.Model):
                 break
         found = {}
         for name, key in (("oauth_authorize_url", "authorization_endpoint"), ("oauth_token_url", "token_endpoint"),
-                          ("oauth_registration_url", "registration_endpoint")):
+                          ("oauth_registration_url", "registration_endpoint"),
+                          ("oauth_revocation_url", "revocation_endpoint")):
             value = metadata.get(key)
             if isinstance(value, str) and value:
                 try:
@@ -330,16 +362,23 @@ class NudgeConnectorOauthState(models.Model):
         self.sudo().search([("expires", "<=", fields.Datetime.now())]).unlink()
 
     @api.model
-    def _consume(self, state):
+    def _consume(self, state, user_id=None):
         """:return: ``(connector, user_id, verifier)`` of the sign-in begun with ``state``, which can then
         never be used again: the row is deleted by the statement that reads it, so that two requests with
         the same state cannot both succeed
+        :param user_id: when given, only a sign-in begun by that person is used up: another person's try
+            leaves it valid for its owner
         :raise UserError: when there is no such sign-in or it ran out"""
         self.flush_model()
+        hashed = self._hash(state or "")
         self.env.cr.execute(
-            "DELETE FROM nudge_connector_oauth_state WHERE state_hash = %s "
-            "RETURNING connector_id, user_id, verifier, expires", (self._hash(state or ""),))
+            "DELETE FROM nudge_connector_oauth_state WHERE state_hash = %s AND (%s IS NULL OR user_id = %s) "
+            "RETURNING connector_id, user_id, verifier, expires", (hashed, user_id, user_id))
         row = self.env.cr.fetchone()
+        if not row and user_id:
+            self.env.cr.execute("SELECT 1 FROM nudge_connector_oauth_state WHERE state_hash = %s", (hashed,))
+            if self.env.cr.fetchone():
+                raise UserError(_("This sign-in was begun by someone else."))
         self.invalidate_model()
         if not row or fields.Datetime.to_datetime(row[3]) <= fields.Datetime.now():
             raise UserError(_("This sign-in link is not valid or ran out. Start again from Nudge."))
@@ -351,9 +390,7 @@ class NudgeConnectorOauthState(models.Model):
         exchanged for tokens, which are kept for this person and the connector of the state.
 
         :return: the connector"""
-        connector, user_id, verifier = self._consume(state)
-        if user_id != self.env.uid:
-            raise UserError(_("This sign-in was begun by someone else."))
+        connector, _user_id, verifier = self._consume(state, self.env.uid)
         if not connector.exists() or not connector.active or connector.auth_type != "oauth_user":
             raise UserError(_("This connector no longer uses a sign-in."))
         if not code:

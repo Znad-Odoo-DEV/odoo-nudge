@@ -33,6 +33,7 @@
                     <button name="action_sign_out" type="object" string="Sign Out"
                             invisible="auth_type != 'oauth_user' or not signed_in"/>
                     <button name="action_revoke_all" type="object" string="Sign Everybody Out"
+                            groups="base.group_system"
                             invisible="auth_type != 'oauth_user'"
                             confirm="Everybody who signed in to this connector will have to sign in again. Go on?"/>
                     <button name="action_activate" type="object" string="Activate" invisible="state == 'active'"/>
@@ -87,11 +88,13 @@
                             <field name="oauth_token_url" invisible="auth_type not in ('oauth', 'oauth_user')"
                                    required="auth_type == 'oauth'" placeholder="https://auth.example.com/token"/>
                             <field name="oauth_registration_url" invisible="auth_type != 'oauth_user'"/>
+                            <field name="oauth_revocation_url" invisible="auth_type != 'oauth_user'"/>
                             <field name="oauth_client_id" invisible="auth_type not in ('oauth', 'oauth_user')"
                                    required="auth_type == 'oauth'"/>
                             <field name="oauth_client_secret" password="True"
                                    invisible="auth_type not in ('oauth', 'oauth_user')"/>
                             <field name="oauth_scope" invisible="auth_type not in ('oauth', 'oauth_user')"/>
+                            <field name="sign_in_status" invisible="auth_type != 'oauth_user'"/>
                             <field name="oauth_redirect_uri" widget="CopyClipboardChar"
                                    invisible="auth_type != 'oauth_user'"/>
                             <div class="text-muted" colspan="2" invisible="auth_type != 'oauth_user'">

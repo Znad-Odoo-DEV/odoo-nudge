@@ -2,11 +2,11 @@
 import json
 import logging
 from datetime import timedelta
-from urllib.parse import parse_qs, urlsplit
+from urllib.parse import parse_qs, urlencode, urlsplit
 
 from odoo import fields
 from odoo.exceptions import AccessError, UserError
-from odoo.tests import TransactionCase, new_test_user, tagged
+from odoo.tests import HttpCase, TransactionCase, new_test_user, tagged
 
 from odoo.addons.nudge import tools as nudge_tools
 
@@ -18,8 +18,7 @@ from .test_connect import READ, ConnectCase, asking, call, saying
 BASE = "https://odoo.example.com"
 
 
-@tagged("post_install", "-at_install", "nudge_connect")
-class TestConnectorSignIn(ConnectCase, TransactionCase):
+class SignInCase(ConnectCase):
 
     def setUp(self):
         super().setUp()
@@ -61,7 +60,11 @@ class TestConnectorSignIn(ConnectCase, TransactionCase):
         domain = [("connector_id", "=", self.signin.id)] + ([("user_id", "=", user.id)] if user else [])
         return self.env["nudge.connector.token"].sudo().search(domain)
 
-    # ------------------------------------------------------------------
+
+
+@tagged("post_install", "-at_install", "nudge_connect")
+class TestConnectorSignIn(SignInCase, TransactionCase):
+
     def test_the_sign_in_address(self):
         url, query = self.begin(self.agent)
         self.assertTrue(url.startswith(self.server.url[:-len("/mcp")] + "/authorize?"))
@@ -274,3 +277,113 @@ class TestConnectorSignIn(ConnectCase, TransactionCase):
         self.assertEqual((connector.auth_type, connector.oauth_token_url),
                          ("oauth_user", "https://oauth2.googleapis.com/token"))
         self.assertIn("calendar", connector.oauth_scope)
+
+    def test_sign_out_tells_the_provider_when_it_can(self):
+        self.signin.write({"oauth_revocation_url": self.server.url[:-len("/mcp")] + "/revoke"})
+        self.sign_in(self.agent)
+        refresh = self.tokens(self.agent).refresh_token
+        self.signin.with_user(self.agent).action_sign_out()
+        self.assertEqual(self.server.revoked, [refresh])
+        self.assertEqual(self.server.calls("revoke")[0]["body"]["token_type_hint"], "refresh_token")
+        self.assertFalse(self.tokens(self.agent))
+
+    def test_a_provider_that_fails_to_revoke_does_not_stop_the_sign_out(self):
+        self.signin.write({"oauth_revocation_url": "http://127.0.0.1:1/revoke"})
+        self.sign_in(self.agent)
+        with self.assertLogs("odoo.addons.nudge_connect.models.nudge_connector_oauth", "WARNING") as logged:
+            self.signin.with_user(self.agent).action_sign_out()
+        self.assertFalse(self.tokens(self.agent))
+        self.assertNotIn("secret", "\n".join(logged.output))
+
+    def test_the_status_of_the_person(self):
+        self.assertEqual(self.signin.with_env(self.env(user=self.agent)).sudo().sign_in_status, "Not signed in")
+        self.sign_in(self.agent)
+        self.env.invalidate_all()
+        status = self.signin.with_env(self.env(user=self.agent)).sudo().sign_in_status
+        self.assertTrue(status.startswith("Signed in as of "), status)
+        self.assertEqual(self.signin.with_env(self.env(user=self.other)).sudo().sign_in_status, "Not signed in")
+
+
+@tagged("post_install", "-at_install", "nudge_connect")
+class TestConnectorSignInHttp(SignInCase, HttpCase):
+    """The real callback route, over HTTP; the token address is the fake server of the tests"""
+
+    def setUp(self):
+        super().setUp()
+        self.boss = new_test_user(
+            self.env, login="nudge_boss", groups="base.group_system,nudge.group_nudge_agent")
+
+    def callback(self, user, state, code="x", **extra):
+        self.authenticate(user.login, user.login)
+        query = urlencode(dict({"state": state, "code": code}, **extra))
+        return self.url_open("/nudge_connect/oauth/callback?" + query, allow_redirects=False)
+
+    def started(self, user, connector=None):
+        connector = connector or self.signin
+        query = {key: values[0] for key, values in parse_qs(
+            urlsplit(connector.with_user(user)._oauth_begin()).query).items()}
+        return query["state"], self.server.code_for(query["code_challenge"], query["redirect_uri"])
+
+    def test_the_right_person_with_a_valid_state(self):
+        state, code = self.started(self.boss)
+        response = self.callback(self.boss, state, code)
+        self.assertEqual(response.status_code, 303)
+        self.assertIn(f"id={self.signin.id}", response.headers["Location"])
+        self.assertIn("model=nudge.connector", response.headers["Location"])
+        self.assertEqual(self.tokens(self.boss).user_id, self.boss)
+        # A person who cannot open the form is told, not sent to it
+        state, code = self.started(self.agent)
+        page = self.callback(self.agent, state, code)
+        self.assertEqual(page.status_code, 200)
+        self.assertIn("You are signed in to Calendar of Raghad", page.text)
+        self.assertTrue(self.tokens(self.agent))
+
+    def test_a_return_address_in_the_request_is_ignored(self):
+        state, code = self.started(self.agent)
+        response = self.callback(self.agent, state, code, redirect_uri="https://evil.example.com/steal")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("evil.example.com", response.text)
+        self.assertEqual(self.server.calls("token")[-1]["body"]["redirect_uri"], BASE + "/nudge_connect/oauth/callback")
+
+    def test_another_person_is_refused_and_the_state_stays_valid_for_its_owner(self):
+        state, code = self.started(self.agent)
+        refused = self.callback(self.other, state, code)
+        self.assertEqual(refused.status_code, 400)
+        self.assertIn("begun by someone else", refused.text)
+        self.assertFalse(self.tokens())
+        accepted = self.callback(self.agent, state, code)
+        self.assertEqual(accepted.status_code, 200)
+        self.assertEqual(self.tokens().user_id, self.agent)
+
+    def test_a_state_that_ran_out_is_refused(self):
+        state, code = self.started(self.agent)
+        State = self.env["nudge.connector.oauth.state"].sudo()
+        State.search([("state_hash", "=", State._hash(state))]).expires = fields.Datetime.now() - timedelta(seconds=1)
+        self.assertEqual(self.callback(self.agent, state, code).status_code, 400)
+        self.assertFalse(self.tokens())
+
+    def test_a_state_is_used_once(self):
+        state, code = self.started(self.agent)
+        self.assertEqual(self.callback(self.agent, state, code).status_code, 200)
+        again = self.callback(self.agent, state, self.server.code_for("c", BASE + "/nudge_connect/oauth/callback"))
+        self.assertEqual(again.status_code, 400)
+        self.assertEqual(len(self.tokens()), 1)
+
+    def test_a_state_of_a_connector_that_no_longer_signs_in_is_refused(self):
+        state, code = self.started(self.agent)
+        self.signin.write({"auth_type": "bearer", "bearer_token": "sk-connector-raghad-7f3a9c"})
+        refused = self.callback(self.agent, state, code)
+        self.assertEqual(refused.status_code, 400)
+        self.assertIn("no longer uses a sign-in", refused.text)
+        self.assertFalse(self.env["nudge.connector.token"].sudo().search([]))
+
+    def test_a_state_nobody_gave_is_refused(self):
+        self.assertEqual(self.callback(self.agent, "made-up", "x").status_code, 400)
+        self.assertEqual(self.callback(self.agent, "", "").status_code, 400)
+
+    def test_the_provider_saying_no_spends_the_state(self):
+        state, code = self.started(self.agent)
+        response = self.callback(self.agent, state, code="", error="access_denied")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(self.callback(self.agent, state, code).status_code, 400)
+        self.assertFalse(self.tokens())

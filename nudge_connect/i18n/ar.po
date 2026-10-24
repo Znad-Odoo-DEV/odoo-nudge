@@ -1299,3 +1299,30 @@ msgstr "تقويم Google (معاينة للمطورين)"
 #: code:addons/nudge_connect/presets.py:0
 msgid "Gmail (Developer Preview)"
 msgstr "Gmail (معاينة للمطورين)"
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector_oauth.py:0
+msgid "Signed in as of %s"
+msgstr "مسجّل الدخول منذ %s"
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector_oauth.py:0
+msgid "Not signed in"
+msgstr "غير مسجّل الدخول"
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__sign_in_status
+msgid "Your Sign-In"
+msgstr "تسجيل دخولك"
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__oauth_revocation_url
+msgid "Sign-Out Address"
+msgstr "عنوان تسجيل الخروج"
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_nudge_connector__oauth_revocation_url
+msgid "Where a token is revoked when a person signs out (RFC 7009), when the server offers it."
+msgstr "حيث يُلغى الرمز عند تسجيل خروج الشخص (RFC 7009) إذا قدّم الخادم ذلك."
