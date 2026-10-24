@@ -2373,3 +2373,13 @@ msgstr "قسم"
 #: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_revision__kind__seo
 msgid "SEO"
 msgstr "SEO"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+msgid ""
+"No site built by the Website Builder matches. site_id is the id of the site "
+"and website_id the id of its website. Sites: %(sites)s."
+msgstr ""
+"لا يوجد موقع بناه منشئ المواقع يطابق ذلك. site_id هو رقم الموقع و website_id "
+"رقم موقعه الإلكتروني. المواقع: %(sites)s."
