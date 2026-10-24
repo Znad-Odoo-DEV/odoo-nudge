@@ -74,6 +74,8 @@ subscriptions.
 - **Writes wait for the person.** A write is a Nudge Action: a card with the exact payload, nothing
   sent before the yes. A card also names the other connectors read in the same conversation, so data
   leaving one system for another is seen. A tool the server marks destructive gives a sensitive card.
+  A read, which runs without a card, sends at most 1000 characters of arguments, so that records of
+  Odoo cannot leave through it.
 - **What comes back is data.** Every answer is framed as data, `<` escaped, cut to size, with the
   connector's secrets taken out, before the AI reads it; the description of a tool reaches the AI
   after Nudge's own words and marked as coming from outside.

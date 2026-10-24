@@ -251,6 +251,11 @@ class TestConnectorUse(ConnectCase, TransactionCase):
         self.assertTrue(result.is_error)
         self.assertIsNone(result.pending)
         self.assertIn("too long to show", result.content)
+        # A read carries little out, without a card: the records of Odoo do not leave through its arguments
+        result = self.run_tool(READ, {"query": "Raghad " * 200})
+        self.assertTrue(result.is_error)
+        self.assertIn("Nothing was sent", result.content)
+        self.assertFalse(self.server.calls("tools/call"))
 
     def test_kill_switches(self):
         ICP = self.env["ir.config_parameter"].sudo()
