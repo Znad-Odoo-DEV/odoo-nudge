@@ -144,11 +144,12 @@ class TestFallback(NudgeCase, TransactionCase):
         self.assertEqual(events[-1]["state"], "complete")
         answer = self.env["nudge.message"].sudo().browse(events[-1]["message_id"])
         self.assertEqual(answer.content, "From the local model.")
-        # A fallback the list refuses too leaves the plain refusal
+        # A fallback the list refuses too: the refusal, saying the stand-in was refused as well
         self.env.company.nudge_egress_hosts = "other.invalid"
         _adapters, asked = self.answer_with()
-        with self.assertRaisesRegex(UserError, "not on the list of allowed destinations"):
+        with self.assertRaisesRegex(UserError, "not on the list of allowed destinations") as caught:
             self.question(self.user_a, "And invoices?")
+        self.assertIn("The model chosen to stand in (qwen-local) is not on the list either", str(caught.exception))
         self.assertEqual(asked, [])
 
     def test_in_private_mode_a_fallback_outside_is_never_used(self):
