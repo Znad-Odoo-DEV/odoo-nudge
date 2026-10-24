@@ -963,5 +963,5 @@ msgid "The prompt could not be kept."
 msgstr "تعذر الاحتفاظ بالطلب."
 
 #. module: nudge
-msgid "Kept as a prompt. It is in the Prompts menu."
-msgstr "تم الاحتفاظ بالطلب. تجده في قائمة الطلبات الجاهزة."
+msgid "Kept as a prompt: it is offered as a chip on screens like this one."
+msgstr "حُفظ كطلب: سيظهر كاقتراح في الشاشات المشابهة لهذه."
