@@ -42,6 +42,7 @@ Without them the rest works and the feature says what is missing.
         "security/nudge_health_security.xml",
         "security/nudge_report_security.xml",
         "security/nudge_note_security.xml",
+        "security/nudge_prompt_security.xml",
         "data/nudge_provider_data.xml",
         "data/nudge_cron_data.xml",
         "data/nudge_compliance_cron.xml",
@@ -72,6 +73,8 @@ Without them the rest works and the feature says what is missing.
         "views/nudge_coach_views.xml",
         "views/nudge_recipe_market_views.xml",
         "views/nudge_compliance_feed_views.xml",
+        "views/nudge_prompt_views.xml",
+        "data/nudge_prompt_data.xml",
     ],
     "assets": {
         "web.assets_backend": [
