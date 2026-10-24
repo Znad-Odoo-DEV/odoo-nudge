@@ -31,7 +31,7 @@ _logger = logging.getLogger(__name__)
 INDEX_FORMAT = 1
 INDEX_KINDS = [
     ("tour", "Recorded Tours"), ("rules", "Rules"), ("lexicon", "Command Words"),
-    ("answers", "Remembered Answers"), ("pack", "Pack"),
+    ("answers", "Remembered Answers"), ("pack", "Pack"), ("prompts", "Prompts"),
 ]
 DEFAULT_URL = "https://znad-odoo-dev.github.io/nudge/recipes/index.json"
 CAP = 2 * 1024 * 1024

@@ -20,6 +20,7 @@ from .nudge_recipe_wizard import FLAGS
 INDEX_KIND_OF = {
     "tour": "tour", "rule": "rules", "preset": "rules", "lexicon": "lexicon", "memory": "answers",
     "health": "pack", "file": "pack", "screen": "pack",
+    "prompt": "prompts",
 }
 
 
@@ -47,6 +48,7 @@ class NudgeRecipePublish(models.TransientModel):
     with_memories = fields.Boolean(string="Remembered answers (approved)", default=False)
     with_files = fields.Boolean(string="Company files (their description)", default=False)
     with_screens = fields.Boolean(string="Key screens of the training of new users", default=False)
+    with_prompts = fields.Boolean(string="Prompts (shared ones)", default=False)
     include_files = fields.Boolean(string="Include the files themselves")
     file = fields.Binary(string="ZIP", readonly=True, attachment=False)
     file_name = fields.Char(readonly=True)
@@ -85,7 +87,7 @@ class NudgeRecipePublish(models.TransientModel):
         kinds = [kind for flag, kind in FLAGS.items() if self[flag]]
         labels = {
             "tour": self.env._("Tours"), "rules": self.env._("Rules"), "lexicon": self.env._("Command words"),
-            "answers": self.env._("Answers"), "pack": self.env._("Pack")}
+            "answers": self.env._("Answers"), "pack": self.env._("Pack"), "prompts": self.env._("Prompts")}
         today = fields.Date.to_string(fields.Date.context_today(self))
         files, entries = {}, []
         for index_kind, group in self._groups(kinds):

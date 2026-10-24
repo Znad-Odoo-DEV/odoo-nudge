@@ -1,8 +1,8 @@
 """Shared recipes: the setup of one database, as one file another can read.
 
 A recipe holds recorded tours, rule tasks, task presets, the health check, the
-words a company added to the no-AI commands, remembered answers and the
-company files. Every record carries a ``recipe_key`` made at the first export,
+words a company added to the no-AI commands, remembered answers, the
+company files and the prompts of the library. Every record carries a ``recipe_key`` made at the first export,
 so a second import updates what the first one made instead of doubling it.
 Nothing here runs as anybody but the person: no ``sudo`` on data.
 """
@@ -16,14 +16,21 @@ from odoo import api, fields, models
 from odoo.exceptions import AccessError, UserError
 
 FORMAT = 1
+
+
+def _version_key(text):
+    return tuple(int(piece) if piece.isdigit() else 0 for piece in str(text or "0").split("."))
+
+
 KINDS = [
     ("tour", "Recorded Tour"), ("rule", "Rule Task"), ("preset", "Task Preset"), ("health", "Health Check"),
     ("lexicon", "Command Word"), ("memory", "Remembered Answer"), ("file", "Company File"),
-    ("screen", "Key Screen"),
+    ("screen", "Key Screen"), ("prompt", "Prompt"),
 ]
 MODELS = {
     "tour": "nudge.tour", "rule": "nudge.task", "preset": "nudge.task", "lexicon": "nudge.lexicon.entry",
     "memory": "nudge.memory", "file": "nudge.source", "screen": "nudge.coach.screen",
+    "prompt": "nudge.prompt",
 }
 HEALTH_KEY = "nudge-health"
 
@@ -171,6 +178,29 @@ class NudgeRecipe(models.AbstractModel):
         return data
 
     @api.model
+    def _data_prompt(self, prompt, files=False):
+        """A prompt as the library file shows it: text in English and in Arabic, typed variables, no record data"""
+        Prompt = self.env["nudge.prompt"]
+
+        def words(field):
+            texts = {"en": prompt.with_context(lang="en_US")[field] or ""}
+            arabic = Prompt._arabic_lang()
+            if arabic:
+                texts["ar"] = prompt.with_context(lang=arabic)[field] or texts["en"]
+            return texts
+
+        def listed(text):
+            return [part.strip() for part in (text or "").split(",") if part.strip()]
+
+        return {
+            "version": prompt.version or "1.0.0", "mode": prompt.mode, "title": words("name"),
+            "description": words("description"), "body": words("body"), "variables": prompt.variables or [],
+            "apps": listed(prompt.apps), "models": listed(prompt.model_names), "tags": listed(prompt.tags),
+            "groups": self._groups_out(prompt.group_ids), "noai": bool(prompt.noai),
+            "expects": prompt.expects or {},
+        }
+
+    @api.model
     def _data_health(self, company, files=False):
         user = company.nudge_health_user_id
         return {"weekly_user": {"login": user.login, "name": user.name} if user else None}
@@ -199,6 +229,9 @@ class NudgeRecipe(models.AbstractModel):
             return env["nudge.memory"].search([("state", "=", "approved"), ("company_id", "in", (False, company.id))])
         if kind == "file":
             return env["nudge.source"].search([])
+        if kind == "prompt":
+            # What is shared and was written here or imported; the ones that come with Nudge are in every database
+            return env["nudge.prompt"].search([("scope", "!=", "private"), ("origin", "!=", "module")])
         return company
 
     @api.model
@@ -260,9 +293,10 @@ class NudgeRecipe(models.AbstractModel):
         if not isinstance(body.get("format"), int) or body["format"] > FORMAT:
             raise UserError(self.env._(
                 "This recipe was made by a newer Nudge (format %s): update Nudge to read it.", body.get("format")))
-        known = {kind for kind, _label in KINDS}
+        # A kind this Nudge does not know is not an error: a newer Nudge may add kinds to format 1, and the
+        # plan skips those items with a warning. An item that is not even shaped like one still refuses the file.
         for item in items:
-            if (not isinstance(item, dict) or item.get("kind") not in known or not isinstance(item.get("key"), str)
+            if (not isinstance(item, dict) or not isinstance(item.get("kind"), str) or not isinstance(item.get("key"), str)
                     or not isinstance(item.get("data"), dict)):
                 raise UserError(self.env._("This recipe has an item that cannot be read."))
         return body
@@ -273,6 +307,14 @@ class NudgeRecipe(models.AbstractModel):
         lines = []
         for item in body["items"]:
             kind, key, data = item["kind"], item["key"], item["data"]
+            if kind not in dict(KINDS):
+                lines.append({
+                    "kind": kind[:40], "key": key, "name": str(item.get("name") or key)[:200], "action": "skip",
+                    "note": self.env._(
+                        "This Nudge does not know the kind “%s”: the item is skipped. Update Nudge to import it.",
+                        kind[:40]),
+                    "payload": "{}"})
+                continue
             existing = self.env.company if kind == "health" else self._find(kind, key)
             action, notes = ("update" if existing else "create"), []
             refusal = getattr(self, f"_check_{kind}")(data, notes)
@@ -284,6 +326,10 @@ class NudgeRecipe(models.AbstractModel):
                 notes.append(self.env._("Answer (it waits for your approval): %s", str(data.get("answer") or "")[:500]))
             elif kind == "preset" and data.get("instruction") and action != "skip":
                 notes.append(self.env._("Instruction (the task starts switched off): %s", str(data["instruction"])[:500]))
+            elif kind == "prompt" and action != "skip":
+                # Read before use: the text of a colleague is shown, never run
+                notes.append(self.env._(
+                    "Prompt (it is sent only when somebody chooses it): %s", str((data.get("body") or {}).get("en") or "")[:500]))
             lines.append({"kind": kind, "key": key, "name": item.get("name") or key, "action": action,
                           "note": "\n".join(notes), "payload": json.dumps(data, ensure_ascii=False)})
         return lines
@@ -352,6 +398,30 @@ class NudgeRecipe(models.AbstractModel):
             notes.append(self.env._("Groups not found here (%s): the file comes in archived.", ", ".join(missing)))
         if not data.get("file_b64"):
             notes.append(self.env._("The file itself is not in the recipe: it comes in archived until you upload it."))
+        return None
+
+    @api.model
+    def _check_prompt(self, data, notes):
+        from ..tools import prompt_vars  # noqa: PLC0415
+        body = data.get("body")
+        if not isinstance(body, dict) or not isinstance(body.get("en") or body.get("ar"), str):
+            return self.env._("A prompt needs its text.")
+        if not isinstance(data.get("title"), dict) or not (data["title"].get("en") or data["title"].get("ar")):
+            return self.env._("A prompt needs a title.")
+        if any(len(str(text or "")) > prompt_vars.MAX_BODY for text in body.values()):
+            return self.env._("A prompt is at most %s characters.", prompt_vars.MAX_BODY)
+        if data.get("mode") not in ("talk", "agent", "dev"):
+            return self.env._("A prompt is for Talk, Agent or Developer mode.")
+        try:
+            prompt_vars.clean_definitions(data.get("variables") or [])
+        except prompt_vars.Invalid as error:
+            return str(error)
+        _groups, missing = self._groups_in(data.get("groups"))
+        if missing:
+            notes.append(self.env._("Groups not found here (%s): the prompt comes in archived.", ", ".join(missing)))
+        absent = [name for name in data.get("models") or [] if name not in self.env]
+        if absent:
+            notes.append(self.env._("This database has no model %s: it is not suggested on those screens.", ", ".join(absent)))
         return None
 
     @api.model
@@ -480,6 +550,43 @@ class NudgeRecipe(models.AbstractModel):
             return source, False
         vals.update(recipe_key=key, active=not missing and bool(data.get("file_b64")))
         return self.env["nudge.source"].create(vals), True
+
+    @api.model
+    def _apply_prompt(self, key, data):
+        """A prompt comes in for the company, as text. It is not run, sent or put in any system prompt."""
+        from ..tools import prompt_vars  # noqa: PLC0415
+        Prompt = self.env["nudge.prompt"]
+        groups, missing = self._groups_in(data.get("groups"))
+        title, body, description = data.get("title") or {}, data.get("body") or {}, data.get("description") or {}
+        vals = {
+            "name": title.get("en") or title.get("ar"), "body": body.get("en") or body.get("ar"),
+            "description": description.get("en") or description.get("ar") or False,
+            "variables": prompt_vars.clean_definitions(data.get("variables") or []),
+            "mode": data["mode"], "version": str(data.get("version") or "1.0.0")[:20],
+            "model_names": ",".join(name for name in data.get("models") or [] if name in self.env),
+            "apps": ",".join(str(name) for name in data.get("apps") or []),
+            "tags": ",".join(str(name) for name in data.get("tags") or []),
+            "group_ids": [(6, 0, groups.ids)], "noai": False, "expects": data.get("expects") or False,
+        }
+        prompt, created = self._find("prompt", key), False
+        English = Prompt.with_context(lang="en_US")
+        if prompt:
+            if _version_key(vals["version"]) < _version_key(prompt.version):
+                # A newer one is already here: an old file does not put it back
+                return prompt, False
+            prompt.with_context(lang="en_US").write(vals | ({"active": False} if missing else {}))
+        else:
+            created = True
+            prompt = English.create(vals | {
+                "recipe_key": key, "scope": "company", "company_id": self.env.company.id, "user_id": False,
+                "origin": "recipe", "active": not missing})
+        arabic = Prompt._arabic_lang()
+        if arabic:
+            texts = {"name": title.get("ar"), "body": body.get("ar"), "description": description.get("ar")}
+            texts = {field: text for field, text in texts.items() if text and text != vals.get(field)}
+            if texts:
+                prompt.with_context(lang=arabic).write(texts)
+        return prompt, created
 
     @api.model
     def _apply_health(self, key, data):

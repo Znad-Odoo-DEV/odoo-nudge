@@ -9,7 +9,7 @@ from .nudge_recipe import KINDS, MODELS, canonical
 FLAGS = {
     "with_tours": "tour", "with_rules": "rule", "with_presets": "preset", "with_health": "health",
     "with_lexicon": "lexicon", "with_memories": "memory", "with_files": "file",
-    "with_screens": "screen",
+    "with_screens": "screen", "with_prompts": "prompt",
 }
 
 
@@ -25,6 +25,7 @@ class NudgeRecipeExport(models.TransientModel):
     with_memories = fields.Boolean(string="Remembered answers (approved)", default=True)
     with_files = fields.Boolean(string="Company files (their description)", default=True)
     with_screens = fields.Boolean(string="Key screens of the training of new users", default=True)
+    with_prompts = fields.Boolean(string="Prompts (shared ones)", default=True)
     include_files = fields.Boolean(
         string="Include the files themselves",
         help="Only the files that are public go in. The others come with their description only.")
@@ -151,7 +152,9 @@ class NudgeRecipeImportLine(models.TransientModel):
 
     wizard_id = fields.Many2one("nudge.recipe.import", required=True, ondelete="cascade")
     selected = fields.Boolean(string="Import")
-    kind = fields.Selection(KINDS, required=True)
+    # Not a selection: a file may carry a kind this Nudge does not know, listed as skipped
+    kind = fields.Char(required=True)
+    kind_label = fields.Char(compute="_compute_kind_label")
     key = fields.Char(required=True)
     name = fields.Char()
     action = fields.Selection(
@@ -161,3 +164,9 @@ class NudgeRecipeImportLine(models.TransientModel):
     payload = fields.Text()
     result = fields.Selection([("done", "Done"), ("failed", "Failed"), ("skipped", "Not imported")])
     message = fields.Char()
+
+    @api.depends("kind")
+    def _compute_kind_label(self):
+        labels = dict(KINDS)
+        for line in self:
+            line.kind_label = labels.get(line.kind) or line.kind
