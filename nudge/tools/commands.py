@@ -57,7 +57,8 @@ BY_WORD = {word: command for command in COMMANDS for word in command.words}
 # What a focused command may reach, and in which mode: reading only
 FOCUS = {
     "count": {
-        "mode": base.MODE_AGENT,
+        # NP-02: in Talk, with the reading tools of the Ask tier; a person without the Agent group counts too
+        "mode": base.MODE_TALK,
         "tools": ("aggregate_records", "search_records", "locate_data", "describe_model"),
     },
     "explain": {
@@ -190,7 +191,8 @@ def is_open(env, name):
         tool = base.TOOLS.get("run_sql")
         return bool(tool) and tool.is_available(env, base.MODE_AGENT)
     if name == "count":
-        return Conversation._can_use_agent()
+        # NP-02: counting is the Ask tier's: its switch closes the command
+        return base.ask_tier_applies(env)
     return name in BY_NAME
 
 

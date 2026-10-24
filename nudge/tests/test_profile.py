@@ -396,13 +396,14 @@ class TestProfileTools(NudgeCase, TransactionCase):
         self.assertEqual(events[-1]["state"], "complete")
         result = adapter.calls[1]["turns"][-1]["results"][0]
         self.assertIn("custom module by Odoo S.A.", result["content"])
+        # NP-02: with the reading tools of the Ask tier
         self.assertEqual(
             [tool["name"] for tool in adapter.calls[0]["tools"]],
-            ["assess_database", "describe_model", "describe_module", "find_screen", "locate_data",
-             "match_import_columns",
-             "open_screen", "read_configuration", "read_settings",
-             "record_changes", "remember_lesson", "search_company_files", "search_database_profile",
-             "search_odoo_documentation", "search_products",
+            ["aggregate_records", "assess_database", "describe_model", "describe_module", "filter_screen",
+             "find_record", "find_screen", "locate_data", "match_import_columns", "open_record",
+             "open_screen", "read_configuration", "read_record", "read_settings", "record_changes",
+             "remember_lesson", "search_company_files", "search_database_profile",
+             "search_odoo_documentation", "search_products", "search_records", "show_chart",
              "show_menu_path", "show_on_screen", "show_tour", "summarize_record_history", "test_import",
              "write_in_field"],
         )

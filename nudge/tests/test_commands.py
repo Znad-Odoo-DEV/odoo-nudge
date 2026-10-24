@@ -82,11 +82,12 @@ class TestDirectCommands(NudgeCase, TransactionCase):
         self.assertEqual(listed, self.names(self.user_a))
         for name in ("help", "screen", "doc", "find", "explain"):
             self.assertIn(name, listed)
-        for name in ("setting", "rules", "sql", "count"):
+        for name in ("setting", "rules", "sql"):
             self.assertNotIn(name, listed, "Not for a person without the rights")
         self.assertTrue(all(command["hint"] and command["example"] for command in answer["commands"]))
         self.assertIn("setting", self.names(self.admin))
         self.assertIn("count", self.names(self.agent))
+        self.assertIn("count", listed, "NP-02: the Ask tier counts")
 
     def test_the_session_carries_the_commands(self):
         info = self.env["ir.http"].with_user(self.user_a)._get_nudge_session_info()
@@ -176,6 +177,9 @@ class TestDirectCommands(NudgeCase, TransactionCase):
         answer = self.run_command(self.user_a, "/explain analytic account")
         self.assertTrue(answer["focused"])
         self.assertEqual(answer["content"], "")
+        self.assertEqual(self.run_command(self.user_a, "/count partners")["content"], "")
+        # Switched off, the command is not open: the direct answer says how to write it
+        self.env["ir.config_parameter"].sudo().set_param("nudge.ask_data", "no")
         self.assertIn("/count", self.run_command(self.user_a, "/count partners")["content"])
 
 
@@ -245,10 +249,19 @@ class TestFocusedCommands(NudgeCase, TransactionCase):
         self.assertEqual(len(adapter.calls), 2)
         self.assertEqual(event["state"], "error")
 
-    def test_count_is_not_for_everyone(self):
+    def test_count_is_for_those_who_may_ask_the_data(self):
+        # NP-02: a Nudge User counts with the reading tools, unless the administrator switched the tier off;
+        # a person outside Nudge never does
         self.use_adapter()
+        self.ask(self.user_a, "/count contacts")
+        self.env["ir.config_parameter"].sudo().set_param("nudge.ask_data", "no")
         with self.assertRaises(UserError):
             self.ask(self.user_a, "/count contacts")
+        with self.assertRaises(UserError):
+            self.ask(self.agent, "/count contacts")
+        self.env["ir.config_parameter"].sudo().set_param("nudge.ask_data", "yes")
+        with self.assertRaises(UserError):
+            self.ask(self.outsider, "/count contacts")
 
     def test_words_are_asked_for(self):
         self.use_adapter()

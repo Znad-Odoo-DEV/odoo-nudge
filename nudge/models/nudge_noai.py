@@ -18,7 +18,7 @@ from odoo.exceptions import UserError
 
 from ..llm import base as llm
 from ..llm import snapshot as screen_snapshot
-from ..tools import approval_sentence, base, noai_commands, revert, setup, setup_sentence
+from ..tools import approval_sentence, base, commands, noai_commands, revert, setup, setup_sentence
 from ..tools.base import MODE_AGENT, MODE_DEV, MODE_TALK
 from ..tools.noai_commands import grammar
 from ..tools.records import Refused
@@ -28,6 +28,9 @@ _logger = logging.getLogger(__name__)
 PARAM = "nudge.noai_first"
 NO_TOKENS = {"input_tokens": 0, "output_tokens": 0, "cache_read_tokens": 0, "cache_write_tokens": 0}
 MAX_CHOICES = 5
+# NP-02: what the rules answer in Talk, for a person who may ask the data but not act: reading, counting and
+# taking them to a screen. Anything that writes is left to the Agent
+READ_INTENTS = frozenset({"open", "find", "filter", "aggregate", "chart"})
 
 # What each kind of record is: its model, the date it is counted by, the
 # amount it is summed by, the field that holds who it is for
@@ -97,6 +100,11 @@ class NudgeNoai(models.AbstractModel):
         return str(value or "").lower() in ("1", "true")
 
     @api.model
+    def _may_ask(self):
+        """:return: whether the rules answer this person: the Agent, or the Ask tier of a Nudge User (NP-02)"""
+        return self.env.user.has_group("nudge.group_nudge_agent") or base.ask_tier_applies(self.env)
+
+    @api.model
     def _screen_of(self, snapshot):
         """:return: ``{"model", "record_id", "buttons"}`` of a snapshot of the screen"""
         snapshot = snapshot if isinstance(snapshot, dict) else screen_snapshot.sanitize(snapshot) or {}
@@ -130,11 +138,13 @@ class NudgeNoai(models.AbstractModel):
         """For the quick search box: what the words ask, understood without any AI.
         :return: ``{"intent", "label"}`` or False"""
         self.env["nudge.quick"]._check_user()
-        if not self._is_enabled() or not self.env.user.has_group("nudge.group_nudge_agent"):
+        if not self._is_enabled() or not self._may_ask():
             return False
         with self._company_words():
             parsed = noai_commands.parse(str(words or "")[:400], self._screen_of(snapshot))
         if not parsed.intent or parsed.confidence < noai_commands.THRESHOLD:
+            return False
+        if parsed.intent not in READ_INTENTS and not self.env.user.has_group("nudge.group_nudge_agent"):
             return False
         return {"intent": parsed.intent, "label": self._describe(parsed), "text": parsed.text}
 
@@ -143,6 +153,8 @@ class NudgeNoai(models.AbstractModel):
         """Answer ``text`` when it is a common request, before any provider is called.
 
         :return: the job of the stream (the answer is already written), or None to go on"""
+        if focus == "count" and not (fresh or found or background or explain == "screen"):
+            return self._serve_count(conversation, text, mode, snapshot)
         if mode == MODE_AGENT:
             served = self._serve_setup(conversation, text, mode, (fresh, focus, found, background, explain), snapshot)
             if served:
@@ -150,7 +162,7 @@ class NudgeNoai(models.AbstractModel):
         if mode == MODE_DEV:
             return self._serve_approval(conversation, text, mode, (fresh, focus, found, background, explain), snapshot)
         if (fresh or focus or found or background or explain == "screen" or mode not in (MODE_TALK, MODE_AGENT)
-                or not self.env.user.has_group("nudge.group_nudge_agent")):
+                or not self._may_ask()):
             return None
         direct = self._serve_changes(conversation, text, mode, snapshot)
         if direct is not None:
@@ -163,8 +175,13 @@ class NudgeNoai(models.AbstractModel):
         with self._company_words():
             parsed = noai_commands.parse(text, screen)
         plan = None
-        # Talk does not read the data: only taking the person to a screen is done there
-        talking = mode == MODE_TALK and parsed.intent != "open"
+        # A person who cannot act is not told what was not understood: the provider, or its absence, answers
+        if (not self.env.user.has_group("nudge.group_nudge_agent")
+                and not (parsed.intent and parsed.confidence >= noai_commands.THRESHOLD)):
+            return None
+        # Talk does not act: reading, counting and taking the person to a screen are done there (what the tools
+        # of the person allow: the Ask tier has the reading ones only), writing is left to the Agent
+        talking = mode == MODE_TALK and parsed.intent not in READ_INTENTS
         if parsed.intent and parsed.confidence >= noai_commands.THRESHOLD and not talking:
             try:
                 plan = self._plan(parsed, screen, mode)
@@ -174,6 +191,37 @@ class NudgeNoai(models.AbstractModel):
             if has_ai:
                 return None
             plan = Plan(self._what_i_understood(parsed), parsed=parsed)
+        return self._deliver(conversation, text, mode, plan, parsed, values)
+
+    @api.model
+    def _serve_count(self, conversation, text, mode, snapshot):
+        """``/count invoices unpaid this month``: a figure is worked out by rules and shown with the filter it
+        was counted on, with no provider and no token. Only what the rules do not understand goes to the model
+        (with the reading tools of the command); with none, the person is told what to write.
+
+        :return: the job of the stream, or None to go on with the provider"""
+        _command, rest = commands.parse(text)
+        if not self._is_enabled() or not rest:
+            return None
+        values, _text = conversation._chat_screen(snapshot)
+        screen = self._screen_of(values.get("snapshot") or {})
+        plan = parsed = None
+        with self._company_words():
+            for sentence in (rest, "count " + rest):
+                parsed = noai_commands.parse(sentence, screen)
+                if parsed.intent == "aggregate" and parsed.confidence >= noai_commands.THRESHOLD:
+                    break
+        if parsed.intent == "aggregate" and parsed.confidence >= noai_commands.THRESHOLD:
+            try:
+                plan = self._plan(parsed, screen, mode)
+            except (UserError, Refused) as error:
+                _logger.info("Nudge: a count understood without AI could not be planned: %s", error)
+        if plan is None:
+            if self._has_ai(conversation, mode):
+                return None
+            plan = Plan(self.env._(
+                "I could not work this out without an AI provider. Say what to count and how, for example: "
+                "/count unpaid invoices this month."), parsed=parsed)
         return self._deliver(conversation, text, mode, plan, parsed, values)
 
     @api.model
@@ -238,6 +286,9 @@ class NudgeNoai(models.AbstractModel):
 
     def _call(self, name, arguments, screen=None, mode=MODE_AGENT):
         """Run a tool as the person: what it reads comes back as data"""
+        if mode == MODE_AGENT and name in base.ASK_TOOLS and not self.env.user.has_group("nudge.group_nudge_agent"):
+            # NP-02: what a person without the Agent group reads runs as Talk: the Ask tier is offered there only
+            mode = MODE_TALK
         result = base.call(self.env, name, arguments, screen, mode)
         return result
 
@@ -373,6 +424,12 @@ class NudgeNoai(models.AbstractModel):
         conditions.extend(self._period_conditions(parsed, date_field))
         return conditions
 
+    def _left_name(self, parsed):
+        """:return: the words of the sentence that name someone or something, once the kind, the states, the
+        period and the verbs are taken out: "Raghad" in “how many invoices for Raghad”"""
+        spans = grammar.scan(grammar.normalise.tokenize(parsed.text))
+        return grammar._name_of(spans).strip()
+
     def _what_is_said(self, parsed):
         """:return: the states and the period said, in words"""
         words = {
@@ -502,6 +559,17 @@ class NudgeNoai(models.AbstractModel):
         conditions = self._conditions(parsed, kind if self._model_of(kind) else None, model_name)
         if conditions is None:
             return None
+        # NP-02: "invoices of Raghad": the person named narrows the figure, else it would be the total of all
+        name = self._left_name(parsed)
+        if name:
+            if not spec.get("party"):
+                return None
+            status, candidates = self._pick(name, "res.partner", None, screen)
+            if status == "many":
+                return self._choice(candidates, self.env._("Which one is “%s”?", name))
+            if status == "none":
+                return None
+            conditions.append({"field": spec["party"], "operator": "=", "value": str(candidates[0]["id"])})
         measure = parsed.slots["measure"]
         field = spec.get("amount")
         if measure != "count" and (not field or field not in self.env[model_name]._fields):
@@ -514,6 +582,9 @@ class NudgeNoai(models.AbstractModel):
         rows = (data or {}).get("rows") or []
         if not rows:
             return Plan(result.content if result.is_error else self.env._("I found nothing to count."))
+        # NP-02: the filter the figure was counted on, and the list behind it
+        showing = (data or {}).get("showing")
+        events = [result.event] if result.event else []
         value = self._measure_value(rows[0], measures[0])
         label = self._plural_of(kind, model_name)
         said = self._what_is_said(parsed)
@@ -526,7 +597,9 @@ class NudgeNoai(models.AbstractModel):
         else:
             text = self.env._("The average of %(what)s%(said)s: %(value)s.", what=label, said=suffix,
                               value=self._number(value))
-        return Plan(text)
+        if showing:
+            text = "%s %s" % (text, self.env._("Showing: %s.", showing))
+        return Plan(text, events=events)
 
     # What a chart is split by: the fields of a model that can say it, the first one it has
     CHART_FIELDS = {
@@ -904,6 +977,10 @@ class NudgeNoai(models.AbstractModel):
             understood = self.env._("I understood: %s.", self._describe(parsed))
         else:
             understood = self.env._("I did not understand this request.")
+        if not self.env.user.has_group("nudge.group_nudge_agent"):
+            return "%s %s" % (understood, self.env._(
+                "Without an AI provider I can open screens, find a record, filter a list, and count and sum. "
+                "For example: “open invoices”, “how many overdue invoices”."))
         return "%s %s" % (understood, self.env._(
             "Without an AI provider I can open screens, find a record, filter a list, count and sum, "
             "create a contact, a product, a quotation, a task or a time off, change one field and press "

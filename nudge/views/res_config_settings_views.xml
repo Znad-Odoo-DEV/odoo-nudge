@@ -132,6 +132,11 @@
                             </div>
                         </setting>
                     </block>
+                    <block title="Ask the Data" name="nudge_ask_data_container">
+                        <setting help="Every Nudge User can ask Nudge about the data in Talk: how many, how much, which most, a chart. Nudge reads with the rights and the record rules of the person, in their companies, and never creates or changes anything: the tools that do are not offered to it. Every answer says the filter it was worked out on, with a link to the list.">
+                            <field name="nudge_ask_data"/>
+                        </setting>
+                    </block>
                     <block title="Agent" name="nudge_agent_container">
                         <setting help="People of the group Agent User can ask Nudge to do the work: look up records, create and change them, press buttons. Nudge acts with the rights of the person, shows what it is about to do, and waits for their yes before each change. It never deletes.">
                             <field name="nudge_agent"/>

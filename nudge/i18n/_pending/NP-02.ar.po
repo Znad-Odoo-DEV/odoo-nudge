@@ -1,0 +1,35 @@
+# Arabic translations pending merge, NP-02 (Ask the data)
+
+msgid "Showing: %s."
+msgstr "المعروض: %s."
+
+msgid "Showing: %s"
+msgstr "المعروض: %s"
+
+msgid "Show list"
+msgstr "عرض القائمة"
+
+msgid "%s rows"
+msgstr "%s سجل"
+
+msgid "%s groups"
+msgstr "%s مجموعة"
+
+msgid "all records"
+msgstr "كل السجلات"
+
+msgid " or "
+msgstr " أو "
+
+msgid "I could not work this out without an AI provider. Say what to count and how, for example: /count unpaid invoices this month."
+msgstr "لم أستطع حساب هذا دون مزوّد ذكاء اصطناعي. اكتب ما يُعدّ وكيف، مثلًا: /count unpaid invoices this month."
+
+msgid "Without an AI provider I can open screens, find a record, filter a list, and count and sum. For example: “open invoices”, “how many overdue invoices”."
+msgstr "دون مزوّد ذكاء اصطناعي أستطيع فتح الشاشات والبحث عن سجل وتصفية قائمة والعدّ والجمع. مثلًا: «open invoices» و«how many overdue invoices»."
+
+msgid "Ask the Data"
+msgstr "اسأل البيانات"
+
+msgid "Let every Nudge User ask questions of the data in Talk: count, sum, group, look up and chart what their own access rights allow. Nudge gets the reading tools only; nothing is created, changed or deleted. Off: the data stays closed to those without the Agent User group."
+msgstr "اسمح لكل مستخدم نادج بطرح أسئلة عن البيانات في وضع الحديث: العدّ والجمع والتجميع والبحث والرسم ضمن ما تسمح به صلاحياته. يحصل نادج على أدوات القراءة فقط؛ لا يُنشأ شيء ولا يُغيَّر ولا يُحذف. عند الإيقاف تبقى البيانات مغلقة أمام من ليسوا في مجموعة مستخدم الوكيل."
+
