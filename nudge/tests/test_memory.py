@@ -7,6 +7,7 @@ from odoo.tests import TransactionCase, new_test_user, tagged
 
 from odoo.addons.nudge.llm import base as llm
 from odoo.addons.nudge.llm import loop, memory_match
+from odoo.addons.nudge.models.nudge_memory import HOW_TO
 
 from .common import NudgeCase
 
@@ -36,6 +37,13 @@ class TestMatching(TransactionCase):
         self.assertIsNone(memory_match.best("weather in Paris", candidates, 0.75)[0])
         twins = [(1, HOW), (2, HOW)]
         self.assertIsNone(memory_match.best(HOW, twins, 0.75)[0], "Two equal answers to choose from: ask the AI")
+
+    def test_an_arabic_word_of_how_stands_alone(self):
+        """Review (frontend #5): "اين" began "ايناس", "ليه" began "ليهم"."""
+        for text in ("أين الفواتير", "ليه كده", "كيفاش نعمل", "كيف أعمل فاتورة", "وين"):
+            self.assertTrue(HOW_TO.match(memory_match.fold(text)), text)
+        for text in ("ايناس كم فاتورة عندها", "ليهم فواتير متأخرة", "فينك"):
+            self.assertFalse(HOW_TO.match(memory_match.fold(text)), text)
 
 
 @tagged("post_install", "-at_install")
