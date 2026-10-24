@@ -768,6 +768,16 @@ class NudgeConnectorTool(models.Model):
             ("connector_id", "!=", self.connector_id.id)])
         return sorted(set(calls.mapped("connector_id.name")))
 
+    def _connect_read_sent(self):
+        """:return: how many characters the reads of this conversation sent to outside systems in their
+        arguments, without a card (answers kept and refusals sent nothing)"""
+        conversation_id = self.env.context.get("nudge_conversation_id")
+        if not conversation_id:
+            return 0
+        calls = self.env["nudge.connector.call"].sudo().search([
+            ("conversation_id", "=", conversation_id), ("access", "=", "read"), ("state", "in", ("done", "failed"))])
+        return sum(len(json.dumps(call.arguments or {}, ensure_ascii=False)) for call in calls)
+
     def _register_hook(self):
         """A worker that loads this database gives its allowed tools a place in its list"""
         result = super()._register_hook()
