@@ -1,0 +1,17 @@
+{
+  "date": "2026-10-22",
+  "currency": "USD",
+  "unit": "per million tokens",
+  "note": "Estimate. Prices change often: confirm them on the page of the provider before you rely on them. Edit this file, or the two prices in the wizard.",
+  "working_days": 22,
+  "output_tokens_per_call": 400,
+  "prompt_tokens": {"talk": 10600, "agent": 22900, "developer": 36000},
+  "calls_per_message": {"talk": 1, "agent": 3, "developer": 5},
+  "providers": {
+    "rules": {"input": 0.0, "output": 0.0},
+    "ollama": {"input": 0.0, "output": 0.0},
+    "claude": {"input": 4.0, "output": 20.0},
+    "gemini": {"input": 0.1, "output": 0.4},
+    "other": {"input": 0.5, "output": 1.5}
+  }
+}
