@@ -172,12 +172,16 @@ class TestDoors(MessagingCase, HttpCase):
         self.assertFalse(self.env["nudge.messaging.link"].sudo().search([("sender_id", "=", OTHER_PHONE)]))
 
     def test_a_linked_user_asking_for_overdue_invoices_gets_a_count(self):
+        # Demo data may bring overdue invoices of its own: the count is theirs and these three
+        before = self.env["account.move"].with_user(self.raghad).search_count([
+            ("move_type", "=", "out_invoice"), ("state", "=", "posted"),
+            ("payment_state", "in", ("not_paid", "partial")), ("invoice_date_due", "<", fields.Date.today())])
         self.overdue_invoices(3)
         self.link(self.raghad)
         self.assertEqual(self.say_whatsapp("كم فاتورة متأخرة").status_code, 200)
         channel, to, text = self.sent[-1]
         self.assertEqual((channel, to), ("whatsapp", RAGHAD_PHONE))
-        self.assertIn("3", text)
+        self.assertIn(str(before + 3), text)
         self.assertLessEqual(len(text), 1500)
         run = self.env["nudge.run"].sudo().search([("origin", "=", "WhatsApp")])
         self.assertEqual(run.user_id, self.raghad)
