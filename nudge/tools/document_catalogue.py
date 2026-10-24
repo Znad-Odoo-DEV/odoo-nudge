@@ -23,7 +23,7 @@ import hashlib
 import io
 import re
 
-from odoo import Command
+from odoo import Command, fields
 
 from ..llm import attachments
 from . import base
@@ -39,6 +39,8 @@ Write only what the document says. Leave out what it does not say (null, or an e
 Numbers as plain numbers with a dot for decimals, without currency signs or thousands separators.
 The shape:
 {
+  "document": "customer_price_list" | "vendor_price_list" | "material_list" | "bom" | "catalogue",
+  "currency": "ISO code such as AED or USD, when the document says one",
   "supplier": {"name": str, "vat": str, "email": str},
   "product": {"name": str, "code": str, "quantity": number, "uom": str},
   "rows": [{"name": str, "code": str, "uom": str, "quantity": number, "price": number, "cost": number}]
@@ -46,7 +48,8 @@ The shape:
 "supplier" is the vendor whose price list it is; leave it empty for a catalogue or a bill of materials.
 "product" is the finished product a bill of materials makes (its name or code, how many it makes); leave it empty otherwise.
 "rows" are the products of the list, or the components of the bill of materials, one per line of the table.
-"price" is the selling price, "cost" the buying or cost price; when a vendor's list gives one unit price, put it in "price"; in a bill of materials the unit price of a component is its "cost"."""
+"document" is customer_price_list only for the selling prices the company gives its customers; a vendor's list, a list of materials, a bill of materials or a catalogue of things to buy are the other values.
+"price" is the selling price, "cost" the buying or cost price. A unit price in anything but a customer_price_list is what the thing costs: put it in "cost", never in "price"."""
 
 PICTURE_PROMPT = (
     "Copy every word and number of this document as plain text, line by line, in reading order. "
@@ -59,7 +62,7 @@ HEADERS = {
     "code": ("code", "ref", "reference", "internalreference", "sku", "itemcode", "partnumber", "partno",
              "defaultcode", "productcode", "رقمالصنف", "الرمز", "الكود", "المرجع", "كودالصنف"),
     "uom": ("uom", "unit", "unitofmeasure", "measure", "الوحدة"),
-    "quantity": ("qty", "quantity", "qtyper", "quantityper", "amount", "الكمية", "كمية"),
+    "quantity": ("qty", "quantity", "qtyper", "quantityper", "الكمية", "كمية"),
     "price": ("price", "listprice", "salesprice", "saleprice", "unitprice", "rate", "السعر", "سعرالبيع", "سعرالوحدة"),
     "cost": ("cost", "unitcost", "costprice", "purchaseprice", "standardcost", "buyprice", "التكلفة", "سعرالشراء",
              "التكلفه"),
@@ -163,6 +166,8 @@ def read_table(rows, target):
         columns = {}
         for index, cell in enumerate(row):
             for field, spellings in HEADERS.items():
+                if field == "quantity" and target == "bom":
+                    spellings = spellings + ("amount",)
                 if _key(cell) in spellings and field not in columns:
                     columns[field] = index
                     break
@@ -220,6 +225,9 @@ def normalise(data):
             "quantity": _number(entry.get("quantity")), "price": _number(entry.get("price")),
             "cost": _number(entry.get("cost"))})
     return {
+        # only a price list the company gives its customers holds selling prices; any other unit price is a cost
+        "currency": _text(data.get("currency"), 10).upper(),
+        "selling": str(data.get("document") or "").strip().lower() == "customer_price_list",
         "supplier": {key: _text(supplier.get(key)) for key in ("name", "vat", "email")},
         "product": {"name": _text(product.get("name")), "code": _text(product.get("code"), 64),
                     "quantity": _number(product.get("quantity")), "uom": _text(product.get("uom"), 40)},
@@ -235,7 +243,8 @@ def read_for(env, arguments, screen, target):
     source = record.find_source(env, arguments, screen)
     table = table_of(source)
     if table is not None:
-        return source, normalise(read_table(table, target))
+        # the columns say which is the price and which the cost
+        return source, dict(normalise(read_table(table, target)), selling=True)
     digest = hashlib.sha1((source["text"] or "").encode() + (source["data"] or b"")[:200_000]).hexdigest()
     key = (env.uid, env.context.get("nudge_conversation_id"), digest, target)
     data = record._kept(env, key)
@@ -450,6 +459,10 @@ def run(action, env, arguments, screen, target):
         # The one number beside a component of a bill of materials is what it costs, never its selling price
         data = dict(data, rows=[
             dict(row, cost=row["price"] if row["cost"] is None else row["cost"], price=None) for row in data["rows"]])
+    elif not data.get("selling"):
+        # a material list or a vendor's document, whatever the model made of it: its one unit price is a cost
+        data = dict(data, rows=[
+            dict(row, cost=row["price"], price=None) if row["cost"] is None else row for row in data["rows"]])
     skip = set(arguments.get("skip_rows") or [])
     include = set(arguments.get("include_rows") or [])
     chosen = {item["line"]: item["product_id"] for item in arguments.get("product_choices") or []}
@@ -460,7 +473,7 @@ def run(action, env, arguments, screen, target):
         return base.ToolResult(ask_text(state["asking"]))
     if target == "bom":
         return bom_result(action, env, arguments, data, source, state, chosen)
-    return products_result(env, source, state, vendor, vendor_note)
+    return products_result(env, source, state, vendor, vendor_note, data.get("currency"))
 
 
 def analyse(env, data, target, chosen, skip, include, vendor):
@@ -487,8 +500,16 @@ def analyse(env, data, target, chosen, skip, include, vendor):
     return {"rows": rows, "asking": asking}
 
 
-def products_result(env, source, state, vendor, vendor_note):
+def products_result(env, source, state, vendor, vendor_note, currency_code=""):
     shown, made, exists = [], [], 0
+    from .document_record import resolve_currency  # noqa: PLC0415
+
+    currency, currency_note = resolve_currency(env, currency_code)
+    company = env.company
+    foreign = bool(currency and currency != company.currency_id)
+    factor = currency._convert(1.0, company.currency_id, company, fields.Date.context_today(env["res.users"]),
+                               round=False) if foreign else 1.0
+    default_price = env["product.template"].default_get(["list_price"]).get("list_price")
     for row in state["rows"]:
         label = f"{row['number']}. {cut(row['name'] or row['code'], 80)}"
         product = row["found"]["product"]
@@ -510,12 +531,21 @@ def products_result(env, source, state, vendor, vendor_note):
             uom = find_uom(env, row["uom"])
             values = new_values(env, row, uom, vendor)
             seller = seller_values(env, row, vendor)
+            if foreign:
+                # the product keeps the money of the company; the vendor line keeps the currency of the file
+                for name in ("standard_price", "list_price"):
+                    if name in values:
+                        values[name] = round(values[name] * factor, 2)
+                if seller and "currency_id" in env["product.supplierinfo"]._fields:
+                    seller["currency_id"] = currency.id
             made.append({"values": values, "seller": seller})
             parts = [env._("New")]
             if row["code"]:
                 parts.append(env._("reference %s", row["code"]))
             if "list_price" in values:
                 parts.append(env._("sales price %s", money(values["list_price"])))
+            elif default_price:
+                parts.append(env._("sales price %s (Odoo's default, the file gives none)", money(default_price)))
             if "standard_price" in values:
                 parts.append(env._("cost %s", money(values["standard_price"])))
             if uom:
@@ -523,7 +553,8 @@ def products_result(env, source, state, vendor, vendor_note):
             elif row["uom"]:
                 parts.append(env._("unit %s not found: Odoo's default", row["uom"]))
             if seller:
-                parts.append(env._("vendor line: %(vendor)s at %(price)s", vendor=vendor.name, price=money(seller["price"])))
+                parts.append(env._("vendor line: %(vendor)s at %(price)s", vendor=vendor.name,
+                                   price=money(seller["price"]) + (f" {currency.name}" if foreign else "")))
             shown.append({"field": f"row_{row['number']}", "label": label, "value": " · ".join(parts)})
     if not made:
         return base.ToolResult(
@@ -536,6 +567,14 @@ def products_result(env, source, state, vendor, vendor_note):
     if vendor:
         head.append({"field": "vendor", "label": env._("Vendor"), "value": vendor.display_name})
     notes = [{"field": "note", "label": env._("Note"), "value": vendor_note}] if vendor_note else []
+    if currency_note:
+        notes.append({"field": "note", "label": env._("Note"), "value": currency_note})
+    if foreign:
+        head.append({"field": "currency_id", "label": env._("Currency"), "value": currency.name})
+        notes.append({"field": "note", "label": env._("Note"), "value": env._(
+            "The file is in %(currency)s: costs and prices of the products are converted to %(company)s at today's "
+            "rate (1 %(currency)s = %(rate)s %(company)s); the vendor line keeps %(currency)s.",
+            currency=currency.name, company=company.currency_id.name, rate=f"{factor:.4f}")})
     foot = [{"field": "file", "label": env._("File kept on the record"), "value": source["name"]}]
     return pending_result(env, "products", "product.template", source, {"products": made},
                           env._("Create %(count)s products from %(file)s", count=len(made), file=cut(source["name"], 60)),

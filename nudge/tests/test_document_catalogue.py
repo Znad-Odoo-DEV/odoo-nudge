@@ -105,6 +105,33 @@ class TestDocumentCatalogue(NudgeCase, TransactionCase):
         self.assertTrue(self.env["ir.attachment"].search([
             ("res_model", "=", "product.template"), ("res_id", "=", lamp.id)]))
 
+    def test_a_unit_price_of_a_material_list_read_by_the_model_is_a_cost(self):
+        """Live re-trial S13: the model put the unit cost in price and the product got it as its sales price"""
+        material = {"rows": [{"name": "Nudge Varnish 5L", "code": "NV5", "price": 42.0}]}
+        for document in ("material_list", None):
+            self.patch(type(self.env["nudge.provider"]), "_complete_once", reading(
+                {"Material list": dict(material, document=document) if document else material}))
+            env = self.attached("bom2.pdf", pdf_with("Material list for the villa, Nudge Varnish 5L 42.00"),
+                                "application/pdf")
+            result = self.run_tool(env, target="products")
+            self.assertFalse(result.is_error, result.content)
+            step, done = self.say_yes(env, result)
+            product = self.env["product.template"].search([("default_code", "=", "NV5")])
+            self.assertEqual((product.standard_price, product.create_uid), (42.0, self.maker), document)
+            self.assertNotEqual(product.list_price, 42.0, document)
+            product.unlink()
+
+    def test_the_selling_prices_of_a_customer_price_list_stay_the_sales_price(self):
+        self.patch(type(self.env["nudge.provider"]), "_complete_once", reading(
+            {"Price list": {"document": "customer_price_list",
+                            "rows": [{"name": "Nudge Lamp", "code": "NL9", "price": 19.5}]}}))
+        env = self.attached("prices.pdf", pdf_with("Price list 2026 Nudge Lamp 19.50"), "application/pdf")
+        result = self.run_tool(env, target="products")
+        self.assertFalse(result.is_error, result.content)
+        self.say_yes(env, result)
+        product = self.env["product.template"].search([("default_code", "=", "NL9")])
+        self.assertEqual(product.list_price, 19.5)
+
     def test_an_excel_price_list_of_a_vendor_adds_the_vendor_line(self):
         self.no_provider()
         data = xlsx([["Item", "SKU", "Unit price"], ["Raghad Cable", "RCB1", 12.0]])
@@ -209,6 +236,39 @@ class TestDocumentCatalogue(NudgeCase, TransactionCase):
         mine = self.env["product.template"].search([
             ("default_code", "=", "OTH1"), ("company_id", "=", self.env.company.id)])
         self.assertEqual(len(mine), 1)
+
+    def test_a_price_list_in_a_foreign_currency_keeps_it_on_the_vendor_line_and_converts_the_cost(self):
+        """Review (functional 11): a USD list was written as AED without a word"""
+        company = self.env.company
+        foreign = self.env["res.currency"].with_context(active_test=False).search(
+            [("id", "!=", company.currency_id.id)], limit=1)
+        foreign.active = True
+        self.env["res.currency.rate"].create({
+            "currency_id": foreign.id, "company_id": company.id, "rate": 0.5, "name": "2000-01-01"})
+        factor = foreign._convert(1.0, company.currency_id, company, self.env.cr.now().date(), round=False)
+        self.patch(type(self.env["nudge.provider"]), "_complete_once", reading({"Vendor prices": {
+            "document": "vendor_price_list", "currency": foreign.name, "supplier": {"name": "Raghad Trading"},
+            "rows": [{"name": "Nudge Cable 3m", "code": "NC3", "price": 10.0}]}}))
+        env = self.attached("vendor.pdf", pdf_with("Vendor prices Nudge Cable 3m 10.00"), "application/pdf")
+        result = self.run_tool(env, target="products")
+        self.assertFalse(result.is_error, result.content)
+        lines = result.pending["preview"]["lines"]
+        self.assertEqual(next(line for line in lines if line["field"] == "currency_id")["value"], foreign.name)
+        self.assertIn("Odoo's default", self.rows_of(result)["row_1"])
+        self.say_yes(env, result)
+        product = self.env["product.template"].search([("default_code", "=", "NC3")])
+        self.assertAlmostEqual(product.standard_price, round(10.0 * factor, 2), places=2)
+        self.assertEqual(product.seller_ids.price, 10.0)
+        self.assertEqual(product.seller_ids.currency_id, foreign)
+
+    def test_an_amount_column_is_a_quantity_only_in_a_bill_of_materials(self):
+        self.no_provider()
+        env = self.csv_env("Component,Code,Amount,Price\nRaghad Panel,RP1,4,10\n")
+        result = self.run_tool(env, target="products")
+        self.assertFalse(result.is_error, result.content)
+        env = self.csv_env("Component,Code,Amount\nRaghad Panel,RP1,4\n")
+        result = self.run_tool(env, target="bom", finished_product="Raghad Cabinet")
+        self.assertIn("4 × ", self.rows_of(result)["row_1"])
 
     # -- bill of materials ---------------------------------------------
     def test_a_csv_makes_a_bom_with_existing_and_new_components(self):

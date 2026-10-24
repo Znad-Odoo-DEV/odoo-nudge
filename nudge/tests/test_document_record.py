@@ -252,6 +252,101 @@ class TestDocumentToRecord(NudgeCase, TransactionCase):
         attachment = self.env["ir.attachment"].search([("res_model", "=", "sale.order"), ("res_id", "=", order.id)])
         self.assertIn(b"quote for wire", attachment.raw)
 
+    def foreign_currency(self):
+        foreign = self.env["res.currency"].with_context(active_test=False).search(
+            [("id", "!=", self.env.company.currency_id.id)], limit=1)
+        foreign.active = True
+        return foreign
+
+    def test_a_quotation_in_a_currency_with_no_pricelist_does_not_claim_it(self):
+        """Review (functional 8): the card said Currency USD while the order was made in the pricelist's currency"""
+        self.needs("sale.order")
+        foreign = self.foreign_currency()
+        self.env["product.pricelist"].with_context(active_test=False).search([("currency_id", "=", foreign.id)]).unlink()
+        data = {"document_type": "sales_order", "partner": {"name": "Raghad Trading"}, "reference": "PO-CUR",
+                "currency": foreign.name,
+                "lines": [{"description": "Copper wire 2.5 mm", "quantity": 4, "unit_price": 25.0}]}
+        self.use_reading({"quote for wire": data})
+        env, _conversation = self.attached()
+        result = self.run_tool(env, target="sales_order", text="Please quote for wire, 4 rolls")
+        self.assertFalse(result.is_error, result.content)
+        shown = self.lines_of(result)
+        self.assertNotIn("currency_id", shown)
+        self.assertIn("No pricelist is in", " ".join(line["value"] for line in result.pending["preview"]["lines"]
+                                                       if line["field"] == "note" and line["value"]))
+
+    def test_a_quotation_in_a_currency_takes_a_pricelist_of_that_currency(self):
+        self.needs("sale.order")
+        foreign = self.foreign_currency()
+        pricelist = self.env["product.pricelist"].create({"name": "Nudge doc pricelist", "currency_id": foreign.id})
+        data = {"document_type": "sales_order", "partner": {"name": "Raghad Trading"}, "reference": "PO-CUR2",
+                "currency": foreign.name,
+                "lines": [{"description": "Copper wire 2.5 mm", "quantity": 4, "unit_price": 25.0}]}
+        self.use_reading({"quote for wire": data})
+        env, _conversation = self.attached()
+        result = self.run_tool(env, target="sales_order", text="Please quote for wire, 4 rolls")
+        self.assertFalse(result.is_error, result.content)
+        self.assertEqual(self.lines_of(result)["currency_id"]["value"], foreign.name)
+        step, done = self.say_yes(env, result)
+        order = self.env["sale.order"].browse(done.records[1])
+        self.assertEqual((order.pricelist_id, order.currency_id), (pricelist, foreign))
+        self.assertEqual(order.order_line.price_unit, 25.0)
+
+    def test_letters_a_pdf_spread_apart_come_back_together_on_a_bill(self):
+        """Live re-trial: Reference "INV -TRIAL-0042" and a line "Trial W ood V arnish 5L" reached the bill"""
+        self.needs("account.move")
+        spread = json.loads(json.dumps(BILL))
+        spread["reference"] = "INV -TRIAL-0042"
+        spread["lines"] = [{"description": "Trial W ood V arnish 5L", "quantity": 1, "unit_price": 40.0, "tax": "VAT 5%"}]
+        spread["totals"] = {}
+        self.use_reading({"INV-77": spread})
+        env, _conversation = self.attached()
+        result = self.run_tool(env, target="vendor_bill")
+        self.assertFalse(result.is_error, result.content)
+        step, done = self.say_yes(env, result)
+        bill = self.env["account.move"].browse(done.records[1])
+        self.assertEqual(bill.ref, "INV-TRIAL-0042")
+        self.assertEqual(bill.invoice_line_ids[0].name, "Trial Wood Varnish 5L")
+
+    def test_the_same_vendor_bill_is_not_made_twice_unless_insisted(self):
+        """Review (functional 9): the same PDF sent twice made two bills"""
+        self.needs("account.move")
+        self.use_reading({"INV-77": BILL})
+        env, _conversation = self.attached()
+        first = self.run_tool(env, target="vendor_bill")
+        self.say_yes(env, first)
+        again = self.run_tool(env, target="vendor_bill")
+        self.assertFalse(again.pending)
+        self.assertIn("exists already", again.content)
+        self.assertIn("INV-77", again.content)
+        insisted = self.run_tool(env, target="vendor_bill", insist=True)
+        self.assertTrue(insisted.pending, insisted.content)
+
+    def test_zero_rated_and_exempt_are_not_the_same_tax_and_a_five_percent_prefers_the_plain_one(self):
+        """Review (functional 10): every 0% wording took the first zero tax of the company"""
+        Tax = self.env["account.tax"]
+        common = {"amount_type": "percent", "type_tax_use": "purchase"}
+        zero = Tax.create(dict(common, name="Nudge doc Zero rated", amount=0, sequence=1))
+        exempt = Tax.create(dict(common, name="Nudge doc Exempt supplies", amount=0, sequence=2))
+        flag = {"price_include_override": "tax_included"} if "price_include_override" in Tax._fields else {"price_include": True}
+        included = Tax.create(dict(common, name="Nudge doc VAT 5% included", amount=5, sequence=0, **flag))
+        reverse = Tax.create(dict(common, name="Nudge doc VAT 5% reverse charge", amount=5, sequence=0))
+        self.assertEqual(document_record.resolve_taxes(self.env, "exempt", "vendor_bill"), exempt)
+        self.assertEqual(document_record.resolve_taxes(self.env, "zero rated", "vendor_bill"), zero)
+        alternatives = []
+        chosen = document_record.resolve_taxes(self.env, "5%", "vendor_bill", None, alternatives)
+        self.assertNotIn(chosen, included | reverse)
+        self.assertFalse(chosen.price_include)
+        self.assertTrue(alternatives)
+        self.assertEqual(alternatives[0][1], chosen)
+
+    def test_a_partner_vat_stored_with_separators_is_found(self):
+        """Review (functional 22): "BE 0123.456.789" never matched BE0123456789"""
+        partner = self.env["res.partner"].with_context(no_vat_validation=True).create({
+            "name": "Nudge Separated VAT", "is_company": True, "vat": "BE 0123.456.789"})
+        found = document_record.resolve_partner(self.env, {"partner": {"vat": "BE0123456789"}})
+        self.assertEqual((found["state"], found["partner"]), ("found", partner))
+
     def test_a_purchase_order_from_a_csv(self):
         self.needs("purchase.order")
         data = {"document_type": "purchase_order", "partner": {"name": "Raghad Trading"},
