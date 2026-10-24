@@ -96,6 +96,10 @@ test("a tile is moved and hidden, and the layout is saved for the person", async
     const saved = start();
     await mountHome();
     expect.verifySteps(["get_home cached"]);
+    // The controls of the tiles show only in the customise mode
+    expect(".o_nudge_home_later").toHaveCount(0);
+    await click(".o_nudge_home_customise");
+    await animationFrame();
     await click(".o_nudge_home_section[data-section=sales] .o_nudge_home_later");
     await animationFrame();
     expect(saved.at(-1).order.slice(-2)).toEqual(["sales.new_leads", "sales.quotations"]);
@@ -124,4 +128,38 @@ test("what Nudge says comes first, and every five minutes the numbers are counte
     await advanceTime(REFRESH_MS);
     await animationFrame();
     expect.verifySteps(["get_home forced"]);
+});
+
+test("the controls of the tiles show only in the customise mode, with labels and mirrored chevrons (UI-07)", async () => {
+    start();
+    await mountHome();
+    expect.verifySteps(["get_home cached"]);
+    expect(".o_nudge_home_tile").toHaveAttribute("draggable", "false");
+    expect(".o_nudge_home_earlier").toHaveCount(0);
+    expect(".o_nudge_home_customise").toHaveAttribute("aria-pressed", "false");
+    await click(".o_nudge_home_customise");
+    await animationFrame();
+    expect(".o_nudge_home").toHaveClass("o_nudge_home_customising");
+    expect(".o_nudge_home_customise").toHaveAttribute("aria-pressed", "true");
+    expect(".o_nudge_home_tile").toHaveAttribute("draggable", "true");
+    expect(".o_nudge_home_earlier").toHaveCount(3);
+    expect(".o_nudge_home_earlier").toHaveAttribute("aria-label", "Move this tile earlier");
+    expect(".o_nudge_home_hide").toHaveAttribute("aria-label", "Hide this tile");
+    expect(".o_nudge_home_earlier .o_nudge_home_flip").toHaveCount(3);
+    await click(".o_nudge_home_customise");
+    await animationFrame();
+    expect(".o_nudge_home_earlier").toHaveCount(0);
+});
+
+test("the sections sit in one flowing container and the preferences reach the page (UI-04, NP-23)", async () => {
+    start();
+    await mountHome();
+    expect.verifySteps(["get_home cached"]);
+    expect(".o_nudge_home_sections .o_nudge_home_section").toHaveCount(2);
+    expect(".o_nudge_home").not.toHaveClass("o_nudge_home_compact");
+    getService("nudge").state.compact = true;
+    getService("nudge").state.highContrast = true;
+    await animationFrame();
+    expect(".o_nudge_home").toHaveClass("o_nudge_home_compact");
+    expect(".o_nudge_home").toHaveClass("o_nudge_home_hc");
 });
