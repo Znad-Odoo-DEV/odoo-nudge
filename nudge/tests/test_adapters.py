@@ -112,6 +112,25 @@ class TestOpenAICompatAdapter(BaseCase):
         })
         self.assertTrue(response.closed)
 
+    def test_a_refusal_in_the_stream_is_a_refusal(self):
+        chunk = {"model": "served-model", "choices": [{"index": 0, "delta": {"refusal": "I cannot help with that."}}]}
+        self.respond(FakeResponse(lines=sse(chunk, delta(finish="stop"))))
+        self.assertEqual(self.run_stream()[-1]["reason"], base.STOP_REFUSAL)
+
+    def test_an_error_inside_the_stream_keeps_its_kind(self):
+        self.respond(FakeResponse(lines=sse({"error": {"message": "slow down", "code": 429}})))
+        events = self.run_stream()
+        self.assertEqual([event["type"] for event in events], ["error"])
+        self.assertEqual(events[0]["code"], base.ERROR_RATE_LIMIT)
+        self.respond(FakeResponse(lines=sse({"error": {"message": "overloaded"}})))
+        self.assertEqual(self.run_stream()[0]["code"], base.ERROR_UNAVAILABLE)
+
+    def test_a_stream_cut_before_its_end_is_not_a_complete_answer(self):
+        self.respond(FakeResponse(lines=sse(delta("Hel"), done=False)))
+        events = self.run_stream()
+        self.assertEqual(events[-1]["type"], "error")
+        self.assertEqual(events[-1]["code"], base.ERROR_NETWORK)
+
     def test_request(self):
         self.respond(FakeResponse(lines=sse(delta("ok", finish="stop"))))
         self.run_stream()
@@ -501,6 +520,12 @@ class TestAnthropicAdapter(BaseCase):
     def adapter(self, **kwargs):
         values = {"kind": "anthropic", "model": "claude-opus-5-5", "api_key": "sk-ant-test", **kwargs}
         return AnthropicAdapter(base.ProviderConfig(**values))
+
+    def test_a_window_that_was_too_small_is_a_cut_answer_and_unknown_reasons_end_it(self):
+        for reason, expected in (("model_context_window_exceeded", base.STOP_MAX_TOKENS), ("new_reason", base.STOP_END)):
+            self.stream = FakeStream(["Hello"], dict(FINAL, stop_reason=reason))
+            events = list(self.adapter().stream_chat(SYSTEM, TURNS))
+            self.assertEqual(events[-1]["reason"], expected)
 
     def test_stream(self):
         events = list(self.adapter().stream_chat(SYSTEM, TURNS))
