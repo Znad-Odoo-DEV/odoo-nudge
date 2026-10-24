@@ -114,9 +114,10 @@ class TestSkillRouter(NudgeCase, TransactionCase):
         for language in ("en", "ar", "az"):
             subset = [case for case in CASES + FRESH if case[2] == language]
             measured, hits, _brought, _right = self.measure(subset)
-            # Arabizi is the weak one: 0.63 on Odoo 17, where fewer skills change the weights; to be raised
-            # with the Arabizi and typo rules of the no-AI router
-            self.assertGreaterEqual(hits / measured, 0.6 if language == "az" else 0.9, language)
+            # Arabizi is the weak one: 0.80 (20 of 25) with the particles, endings and "2" read as the Arabic
+            # stems are, with or without the spreadsheet skill; the floor leaves 0.05 for the weights that
+            # fewer skills change
+            self.assertGreaterEqual(hits / measured, 0.75 if language == "az" else 0.9, language)
 
     def test_a_sentence_with_no_work_in_it_brings_no_skill(self):
         index = skill_router.index_of(self.env, self.visible())
