@@ -71,6 +71,7 @@ class FakeMcpServer:
         self.tools = json.loads(json.dumps(TOOLS))
         self.answers = {}
         self.legacy = False
+        self.discover_not_found = False
         self.sse = False
         self.token = None
         self.tokens = set()
@@ -227,6 +228,10 @@ class FakeMcpServer:
     def handle(self, handler, body, headers):
         method, message_id = body.get("method"), body.get("id")
         params = body.get("params") or {}
+        if self.discover_not_found and method == "server/discover":
+            # Nudge's own server: the answer is HTTP 200 with a JSON-RPC error, not a status
+            return handler.reply(200, {"jsonrpc": "2.0", "id": message_id, "error": {
+                "code": -32601, "message": "Method not found"}})
         if self.legacy:
             if method == "initialize":
                 return handler.reply(200, {"jsonrpc": "2.0", "id": message_id, "result": {

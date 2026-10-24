@@ -29,6 +29,7 @@ CLIENT_INFO = {"name": "Nudge", "version": "1.0"}
 ACCEPT = "application/json, text/event-stream"
 # The errors only a modern server answers with: the request was read as a modern one
 HEADER_MISMATCH, MISSING_CAPABILITY, UNSUPPORTED_VERSION, METHOD_NOT_FOUND = -32020, -32021, -32022, -32601
+INVALID_REQUEST = -32600
 MODERN_ERRORS = frozenset({HEADER_MISMATCH, MISSING_CAPABILITY, UNSUPPORTED_VERSION})
 MAX_BYTES = 2 * 1024 * 1024
 MAX_TOOLS = 200
@@ -253,7 +254,9 @@ class Client:
         modern_error = code in MODERN_ERRORS or (status == 404 and code == METHOD_NOT_FOUND)
         # A server already known as modern that refuses with an error of its own is not taken for an old one
         known = self.era == MODERN and isinstance(error, dict)
-        if status in (400, 404, 405) and not modern_error and not known:
+        # An old server may say "no such method" in a 200 answer with a JSON-RPC error, not in the status
+        unknown_method = code in (METHOD_NOT_FOUND, INVALID_REQUEST)
+        if (status in (400, 404, 405) or unknown_method) and not modern_error and not known:
             self.era = None
             return None
         self.era = MODERN
