@@ -5,6 +5,8 @@ Current version: nudge 19.0.1.57.31, nudge_builder 19.0.1.0.4, nudge_messaging 1
 ## 19.0.1.58.0 (unreleased)
 
 - NP-06 Setup wizard: Settings > Nudge > First Setup (always shown, also Nudge > Configuration > Setup Wizard) walks a system administrator through users and mode, the provider (rules only, local Ollama, Claude, Gemini, other OpenAI-compatible, each with pros, cons and a privacy note), the key and a test, a monthly cost estimate from a dated price table (data/nudge_price_table.json, editable in the wizard), the budgets and the switch-on; it works before any provider exists and ends with rules only
+- NP-01 The compliance checklists carry the e-invoicing dates: UAE (accredited provider by 30 October 2026, mandatory from 1 January 2027 and 1 July 2027), Saudi Arabia (phase 2 waves, onboarding), Egypt (e-receipt for sales to consumers) and Oman (Fawtara, provisional), each with its official source, a review date and "confirm with the authority"; the Saudi QR check looks for the right module; every pack shows when it was last reviewed. A daily job tells the accounting managers of each company 90, 30 and 7 days before a dated check, once for each threshold (Nudge, Health Check, Compliance Deadlines).
+- NP-08 Country packs can be updated from a signed feed: off until an administrator sets an address and the Ed25519 public key (Settings, Nudge, Compliance Packs). Each update shows what changes per country and takes effect only when a system administrator approves it; it can be rolled back, and the pack that comes with Nudge stays the fallback. `scripts/sign_pack_feed.py` signs a feed with a private key kept off the server.
 
 ## Release 2 (19.0.1.57.x)
 

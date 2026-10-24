@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- NP-01: the deadlines of the packs of each company, told once at 90, 30 and 7 days -->
+    <record id="cron_compliance_deadlines" model="ir.cron">
+        <field name="name">Nudge: compliance deadlines</field>
+        <field name="model_id" ref="model_nudge_compliance_notice"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_deadlines()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+    </record>
+
+    <!-- NP-08: reads the signed feed of the packs. It does nothing until an address and a public key are
+         set in the settings (both empty on a new database). -->
+    <record id="cron_compliance_feed" model="ir.cron">
+        <field name="name">Nudge: signed feed of the compliance packs</field>
+        <field name="model_id" ref="model_nudge_compliance_update"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_fetch()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+    </record>
+</odoo>
