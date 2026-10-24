@@ -52,3 +52,4 @@ access_nudge_recipe_source_manager,nudge.recipe.source manager,model_nudge_recip
 access_nudge_recipe_entry_manager,nudge.recipe.entry manager,model_nudge_recipe_entry,group_nudge_manager,1,1,1,0
 access_nudge_recipe_installed_manager,nudge.recipe.installed manager,model_nudge_recipe_installed,group_nudge_manager,1,1,1,0
 access_nudge_recipe_publish_manager,nudge.recipe.publish manager,model_nudge_recipe_publish,group_nudge_manager,1,1,1,1
+access_nudge_setup_wizard_system,nudge.setup.wizard system,model_nudge_setup_wizard,base.group_system,1,1,1,1

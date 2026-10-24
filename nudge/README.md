@@ -95,6 +95,10 @@ and in private mode. Nothing is spent, and every change still waits for a yes on
 | **Why did it fail?** | In Developer mode, `/debug` reads an automation, a server action or a scheduled action: its definition, its logged errors, the missing fields and models and the rights. With a provider Nudge proposes the fix as a card showing the difference on the code; the original is kept and put back on request. |
 | **Charts without AI** | A chart asked for in words of any dialect ("sales by month as a chart") is understood by rules, drawn from the figures the person may read and opened as a report, with no provider. |
 
+## Setup wizard
+
+Settings > Nudge > First Setup > *Choose a provider and see the cost* (or Nudge > Configuration > Setup Wizard; system administrators only) opens a six-step wizard: users and mode, provider, key and test, monthly estimate, budgets, enable. It is reachable before any provider exists, and "Rules only" goes through to the end with no provider. The key typed there is saved on the provider record (readable by system administrators only), is not stored in the wizard's table, and is never logged. The estimate is people x messages per day x working days x model calls per message x the measured prompt of the mode (Talk 10.6k, Agent 22.9k, Developer 36.0k tokens) at the prices of `data/nudge_price_table.json`, whose date is shown; the prices are an estimate and can be edited in the wizard or in that file. Budgets are written to the same settings as Settings > Nudge > Budgets.
+
 ## Install
 
 Requirements: Odoo 17 (Community or Enterprise); Nudge exists for Odoo 17 and 18 too, each on its

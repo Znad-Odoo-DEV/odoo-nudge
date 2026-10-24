@@ -72,8 +72,14 @@
                             </div>
                         </setting>
                     </block>
-                    <block title="First Setup" name="nudge_setup_container" invisible="not nudge_agent">
-                        <setting help="Nudge asks for the company, its country, currency, languages, apps, warehouses and users, one step at a time, and shows a card with the exact changes before each one. Nothing is done before your yes; most steps can be undone. The fiscal localisation module is named on its card. The outgoing mail server is never configured by Nudge.">
+                    <block title="First Setup" name="nudge_setup_container">
+                        <setting help="Choose how Nudge answers (rules only, a local model or a cloud provider), see what it would cost each month, set the budgets and switch it on. It works before any provider exists, and ends with rules only if you want no AI. A key typed there is kept on the provider, where only system administrators read it.">
+                            <div class="content-group">
+                                <button name="%(nudge.nudge_setup_wizard_action)d" type="action"
+                                        string="Choose a provider and see the cost" icon="oi-arrow-right" class="btn-link"/>
+                            </div>
+                        </setting>
+                        <setting invisible="not nudge_agent" help="Nudge asks for the company, its country, currency, languages, apps, warehouses and users, one step at a time, and shows a card with the exact changes before each one. Nothing is done before your yes; most steps can be undone. The fiscal localisation module is named on its card. The outgoing mail server is never configured by Nudge.">
                             <div class="content-group">
                                 <button name="action_nudge_setup" type="object"
                                         string="Set up this database with me" icon="oi-arrow-right" class="btn-link"/>

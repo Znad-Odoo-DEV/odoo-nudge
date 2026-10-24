@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_setup_wizard_view_form" model="ir.ui.view">
+        <field name="name">nudge.setup.wizard.view.form</field>
+        <field name="model">nudge.setup.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Nudge Setup">
+                <field name="tested" invisible="1"/>
+                <field name="provider_id" invisible="1"/>
+                <header>
+                    <field name="step" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group name="users" invisible="step != 'users'">
+                        <div class="text-muted" colspan="2">
+                            Say who will use Nudge and how much. The next steps turn this into a monthly estimate.
+                        </div>
+                        <field name="user_count"/>
+                        <field name="messages_per_day"/>
+                        <field name="mode" widget="radio"/>
+                        <field name="all_users"/>
+                    </group>
+                    <group name="provider" invisible="step != 'provider'">
+                        <field name="choice" widget="radio"/>
+                        <field name="pros"/>
+                        <field name="cons"/>
+                        <field name="privacy"/>
+                    </group>
+                    <group name="key" invisible="step != 'key'">
+                        <field name="base_url" invisible="choice in ('rules', 'claude', 'gemini')"/>
+                        <field name="model_name" placeholder="Leave empty to use the first model found"/>
+                        <field name="api_key" password="True" invisible="choice in ('rules', 'ollama')"
+                               autocomplete="off"/>
+                        <field name="test_result" nolabel="1" colspan="2" invisible="not test_result"/>
+                    </group>
+                    <group name="estimate" invisible="step != 'estimate'">
+                        <div class="text-muted" colspan="2">
+                            An estimate, not a quote. Prices dated <field name="price_date" class="oe_inline"/>.
+                            <field name="price_note" class="oe_inline"/>
+                        </div>
+                        <group string="Assumptions">
+                            <field name="working_days"/>
+                            <field name="calls_per_message"/>
+                            <field name="prompt_tokens"/>
+                            <field name="output_tokens"/>
+                            <field name="price_input"/>
+                            <field name="price_output"/>
+                        </group>
+                        <group string="Each Month">
+                            <field name="monthly_calls"/>
+                            <field name="monthly_tokens"/>
+                            <field name="monthly_cost"/>
+                            <field name="cost_person"/>
+                            <field name="cost_message"/>
+                        </group>
+                    </group>
+                    <group name="budgets" invisible="step != 'budgets'">
+                        <div class="text-muted" colspan="2">
+                            Nudge refuses a call past a limit. 0 is no limit. The figures suggested are a margin over the estimate.
+                        </div>
+                        <field name="budget_user_tokens"/>
+                        <field name="budget_user_cost"/>
+                        <field name="budget_company_tokens"/>
+                        <field name="budget_company_cost"/>
+                    </group>
+                    <group name="enable" invisible="step != 'enable'">
+                        <div class="text-muted" colspan="2">
+                            Enable writes the default provider, the mode, the budgets and, if you chose it, the access of all internal users. With rules only, no provider is needed.
+                        </div>
+                        <field name="choice" readonly="1"/>
+                        <field name="all_users"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_back" type="object" string="Back" invisible="step == 'users'"/>
+                    <button name="action_test" type="object" string="Save and Test" class="btn-secondary"
+                            invisible="step != 'key'"/>
+                    <button name="action_suggest_budgets" type="object" string="Suggest Budgets"
+                            class="btn-secondary" invisible="step != 'budgets'"/>
+                    <button name="action_next" type="object" string="Next" class="btn-primary"
+                            invisible="step == 'enable'"/>
+                    <button name="action_enable" type="object" string="Enable Nudge" class="btn-primary"
+                            invisible="step != 'enable'"/>
+                    <button special="cancel" string="Cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_setup_wizard_action" model="ir.actions.act_window">
+        <field name="name">Nudge Setup</field>
+        <field name="res_model">nudge.setup.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>
