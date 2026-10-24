@@ -75,6 +75,7 @@ Without them the rest works and the feature says what is missing.
         "views/nudge_compliance_feed_views.xml",
         "views/nudge_prompt_views.xml",
         "data/nudge_prompt_data.xml",
+        "views/nudge_built_views.xml",
     ],
     "assets": {
         "web.assets_backend": [
@@ -90,6 +91,7 @@ Without them the rest works and the feature says what is missing.
         ],
     },
     "post_init_hook": "post_init_hook",
+    "uninstall_hook": "uninstall_hook",
     "application": True,
     "installable": True,
 }
