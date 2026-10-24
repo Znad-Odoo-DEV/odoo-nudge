@@ -1,3 +1,5 @@
+import pytz
+
 import odoo
 from odoo import _, api, fields, models
 from odoo.exceptions import AccessError
@@ -148,6 +150,12 @@ class NudgeLatencyReport(models.Model):
         companies = self.env.companies.ids
         # A translated name is stored as json, one entry per language
         provider_name = "p.name->>'en_US'" if self.env["nudge.provider"]._fields["name"].translate else "p.name"
+        # The days of the period are the manager's days, as the dates they chose: in Dubai the evening
+        # of the 24th is already the 25th. The zone is one of pytz's names, never free text
+        tz = self.env.context.get("tz") or self.env.user.tz or "UTC"
+        if tz not in pytz.all_timezones_set:
+            tz = "UTC"
+        local_day = f"((m.create_date AT TIME ZONE 'UTC') AT TIME ZONE '{tz}')::date"
 
         def group(label_sql, join=""):
             self.env.cr.execute(f"""
@@ -167,7 +175,7 @@ class NudgeLatencyReport(models.Model):
                 LEFT JOIN ({USAGE_BY_MESSAGE}) u ON u.message_id = m.id
                 {join}
                 WHERE m.role = 'assistant'
-                  AND (m.create_date AT TIME ZONE 'UTC')::date BETWEEN %s AND %s
+                  AND {local_day} BETWEEN %s AND %s
                   AND (c.company_id IS NULL OR c.company_id = ANY(%s))
                 GROUP BY 1 ORDER BY 1""", (str(date_from), str(date_to), companies))
             keys = ("name", "answers", "errors", "refusals", "tokens", "cost", "cost_saved",
@@ -182,7 +190,7 @@ class NudgeLatencyReport(models.Model):
                 "COALESCE(pa.name, '')",
                 "LEFT JOIN res_users ru ON ru.id = c.user_id LEFT JOIN res_partner pa ON pa.id = ru.partner_id"),
             "by_company": group("COALESCE(co.name, '')", "LEFT JOIN res_company co ON co.id = c.company_id"),
-            "by_day": group("(m.create_date AT TIME ZONE 'UTC')::date::text"),
+            "by_day": group(f"{local_day}::text"),
             # S6: the model of the provider and its economy tier, side by side
             "by_tier": group("COALESCE(u.tier, '')"),
         }
