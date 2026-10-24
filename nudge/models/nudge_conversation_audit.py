@@ -24,6 +24,12 @@ class NudgeConversation(models.Model):
     def write(self, vals):
         if "kept_for_audit" in vals and not self.env.su:
             raise AccessError(_("What an auditor asked is kept: this cannot be changed."))
+        if not self.env.su and ("active" in vals or "name" in vals):
+            for conversation in self.filtered("kept_for_audit"):
+                # the title is made once, from the first question: after that it is part of what is kept
+                if ("active" in vals and not vals["active"]) or ("name" in vals and conversation.name and
+                                                                  vals["name"] != conversation.name):
+                    raise AccessError(_("What an auditor asked is kept: it cannot be archived or renamed."))
         return super().write(vals)
 
     def unlink(self):

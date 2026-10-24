@@ -312,6 +312,63 @@ class TestAuditor(NudgeCase, HttpCase):
             with self.assertRaises(AccessError, msg=user.login), self.cr.savepoint():
                 self.env["nudge.auditor.wizard"].with_user(user).create(values)
 
+    # -- the review fixes -----------------------------------------------------
+    def test_the_wizard_refuses_a_group_that_writes_and_names_it(self):
+        admin = new_test_user(self.env, login="nudge_adm_wi3", groups="base.group_system")
+        group = next((self.env.ref(xml_id) for xml_id in (
+            "account.group_account_manager", "sales_team.group_sale_manager", "base.group_partner_manager")
+            if self.env.ref(xml_id, raise_if_not_found=False)), None)
+        self.assertTrue(group)
+        values = {"name": "Ebrahim Auditor", "login": "ebrahim.auditor3@example.com",
+                  "company_ids": [Command.set(self.company_one.ids)], "send_invitation": False,
+                  "until": self.today + timedelta(days=5), "read_group_ids": [Command.set(group.ids)]}
+        with self.assertRaises(UserError) as caught, self.cr.savepoint():
+            self.env["nudge.auditor.wizard"].with_user(admin).create(values).action_create()
+        self.assertIn(group.display_name, str(caught.exception))
+        self.assertFalse(self.env["res.users"].search([("login", "=", values["login"])]))
+
+    def test_a_forbidden_right_given_through_the_groups_is_refused(self):
+        auditor_group = self.env.ref("nudge.group_nudge_auditor")
+        agent_group = self.env.ref("nudge.group_nudge_agent")
+        with self.assertRaises(ValidationError), self.cr.savepoint():
+            auditor_group.write({"implied_ids": [Command.link(agent_group.id)]})
+        users_field = self.env["res.groups"]._nudge_users_field()
+        with self.assertRaises(ValidationError), self.cr.savepoint():
+            auditor_group.write({users_field: [Command.link(self.manager.id)]})
+
+    def test_an_expired_auditor_cannot_sign_in_over_rpc(self):
+        def authenticate():
+            reply = self.url_open("/jsonrpc", data=json.dumps({"jsonrpc": "2.0", "method": "call", "id": 1, "params": {
+                "service": "common", "method": "authenticate",
+                "args": [self.env.cr.dbname, AUDITOR_LOGIN, AUDITOR_LOGIN, {}]}}),
+                headers={"Content-Type": "application/json"})
+            return reply.json().get("result")
+
+        self.assertTrue(authenticate())
+        self.auditor.sudo().nudge_auditor_until = self.today - timedelta(days=1)
+        self.env.flush_all()
+        self.assertFalse(authenticate())
+
+    def test_only_an_auditor_can_be_expired_and_the_cron_runs_every_hour(self):
+        self.user_a.sudo().nudge_auditor_until = self.today - timedelta(days=1)
+        self.assertFalse(self.env["res.users"]._nudge_auditor_expired(self.user_a.id))
+        cron = self.env.ref("nudge.cron_end_auditors")
+        self.assertEqual((cron.interval_number, cron.interval_type), (1, "hours"))
+
+    def test_an_auditor_cannot_archive_or_rename_what_was_kept(self):
+        self.use_adapter(reply="Some.")
+        audited, _events = self.ask_as_auditor()
+        audited.sudo().name = "How many contacts"
+        mine = audited.with_user(self.auditor)
+        with self.assertRaises(AccessError), self.cr.savepoint():
+            mine.write({"active": False})
+        with self.assertRaises(AccessError), self.cr.savepoint():
+            mine.write({"name": "Nothing to see"})
+        with self.assertRaises(AccessError), self.cr.savepoint():
+            mine.unlink()
+        self.assertTrue(audited.sudo().active)
+        self.assertEqual(audited.sudo().name, "How many contacts")
+
 
 def json_domain(text):
     """:return: the domain an action holds as text"""
