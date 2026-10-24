@@ -638,7 +638,8 @@ class NudgeMcp(models.AbstractModel):
                 "The person has not approved this yet. They are asked in Odoo (Nudge, Assistant "
                 "Approvals). Nothing was changed. Wait for their yes, then confirm again."))
         try:
-            self.env.cr.execute("SELECT id FROM nudge_step WHERE id = %s FOR UPDATE NOWAIT", (step.id,))
+            with self.env.cr.savepoint(flush=False):  # a refused lock must not abort the transaction
+                self.env.cr.execute("SELECT id FROM nudge_step WHERE id = %s FOR UPDATE NOWAIT", (step.id,))
         except pg_errors.LockNotAvailable:
             return finish("failed", _("This is being done already."))
         step.invalidate_recordset(["state"])
