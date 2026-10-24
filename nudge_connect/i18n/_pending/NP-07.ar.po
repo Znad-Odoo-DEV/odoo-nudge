@@ -1,0 +1,533 @@
+# Arabic of nudge_connect (NP-07), to merge into nudge_connect/i18n/ar.po
+msgid ""
+msgstr ""
+"Language: ar\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+#. module: nudge_connect
+msgid "Draft"
+msgstr "مسودة"
+
+#. module: nudge_connect
+msgid "Active"
+msgstr "نشط"
+
+#. module: nudge_connect
+msgid "Stopped"
+msgstr "متوقف"
+
+#. module: nudge_connect
+msgid "None"
+msgstr "بلا"
+
+#. module: nudge_connect
+msgid "Bearer Token"
+msgstr "رمز Bearer"
+
+#. module: nudge_connect
+msgid "OAuth Client Credentials"
+msgstr "بيانات اعتماد عميل OAuth"
+
+#. module: nudge_connect
+msgid "Not Allowed"
+msgstr "غير مسموح"
+
+#. module: nudge_connect
+msgid "Read"
+msgstr "قراءة"
+
+#. module: nudge_connect
+msgid "Write (Asks First)"
+msgstr "كتابة (يسأل أولاً)"
+
+#. module: nudge_connect
+msgid "Write"
+msgstr "كتابة"
+
+#. module: nudge_connect
+msgid "Done"
+msgstr "تم"
+
+#. module: nudge_connect
+msgid "Failed"
+msgstr "فشل"
+
+#. module: nudge_connect
+msgid "Refused"
+msgstr "مرفوض"
+
+#. module: nudge_connect
+msgid "Nudge Connector"
+msgstr "موصل نودج"
+
+#. module: nudge_connect
+msgid "Nudge Connector Tool"
+msgstr "أداة موصل نودج"
+
+#. module: nudge_connect
+msgid "Nudge Connector Call"
+msgstr "استدعاء موصل نودج"
+
+#. module: nudge_connect
+msgid "Name"
+msgstr "الاسم"
+
+#. module: nudge_connect
+msgid "Key"
+msgstr "المفتاح"
+
+#. module: nudge_connect
+msgid "Title"
+msgstr "العنوان"
+
+#. module: nudge_connect
+msgid "Description"
+msgstr "الوصف"
+
+#. module: nudge_connect
+msgid "Access"
+msgstr "الصلاحية"
+
+#. module: nudge_connect
+msgid "Error"
+msgstr "الخطأ"
+
+#. module: nudge_connect
+msgid "Last Error"
+msgstr "آخر خطأ"
+
+#. module: nudge_connect
+msgid "Activated On"
+msgstr "تاريخ التفعيل"
+
+#. module: nudge_connect
+msgid "Needs Review"
+msgstr "يحتاج مراجعة"
+
+#. module: nudge_connect
+msgid "What the person and the answers call it, e.g. Sister company Odoo."
+msgstr "الاسم الذي يستخدمه الشخص وتذكره الإجابات، مثل: أودو الشركة الشقيقة."
+
+#. module: nudge_connect
+msgid "A short name of small letters, digits and _: the tools are called cx_<key>__<tool>."
+msgstr "اسم قصير من أحرف إنجليزية صغيرة وأرقام و _: تُسمّى الأدوات cx_<key>__<tool>."
+
+#. module: nudge_connect
+msgid "Only an active connector is offered. Stop it to cut it off at once."
+msgstr "لا يُعرض إلا الموصل النشط. أوقفه لقطعه فوراً."
+
+#. module: nudge_connect
+msgid "Server Address"
+msgstr "عنوان الخادم"
+
+#. module: nudge_connect
+msgid "The MCP endpoint of the server (Streamable HTTP), e.g. https://mcp.example.com/mcp. HTTPS, or HTTP to this machine only."
+msgstr "نقطة MCP في الخادم (Streamable HTTP)، مثل https://mcp.example.com/mcp. يجب أن يكون HTTPS، أو HTTP لهذا الجهاز فقط."
+
+#. module: nudge_connect
+msgid "Runs on Your Own Network"
+msgstr "يعمل على شبكتك الخاصة"
+
+#. module: nudge_connect
+msgid "The server runs on this machine or on your company's own network: its address may be private, and it may be used with Private Mode on. Leave it off for a server on the internet."
+msgstr "الخادم يعمل على هذا الجهاز أو على شبكة شركتك: يجوز أن يكون عنوانه خاصاً، ويمكن استخدامه والوضع الخاص مفعّل. اتركه غير مفعّل لخادم على الإنترنت."
+
+#. module: nudge_connect
+msgid "Authentication"
+msgstr "المصادقة"
+
+#. module: nudge_connect
+msgid "Token Address"
+msgstr "عنوان الرمز"
+
+#. module: nudge_connect
+msgid "Where the access token is asked for (HTTPS)."
+msgstr "العنوان الذي يُطلب منه رمز الوصول (HTTPS)."
+
+#. module: nudge_connect
+msgid "Client ID"
+msgstr "معرّف العميل"
+
+#. module: nudge_connect
+msgid "Client Secret"
+msgstr "سر العميل"
+
+#. module: nudge_connect
+msgid "Scope"
+msgstr "النطاق"
+
+#. module: nudge_connect
+msgid "Credential Set"
+msgstr "بيانات الاعتماد مُدخلة"
+
+#. module: nudge_connect
+msgid "Groups"
+msgstr "المجموعات"
+
+#. module: nudge_connect
+msgid "Who may use it: a person of one of these groups, who is also an Agent User. Empty: nobody."
+msgstr "من يمكنه استخدامه: شخص من إحدى هذه المجموعات ويكون أيضاً مستخدم وكيل. فارغ: لا أحد."
+
+#. module: nudge_connect
+msgid "Companies"
+msgstr "الشركات"
+
+#. module: nudge_connect
+msgid "Where it may be used: in one of these companies. Empty: nowhere."
+msgstr "أين يمكن استخدامه: في إحدى هذه الشركات. فارغ: لا يُستخدم في أي شركة."
+
+#. module: nudge_connect
+msgid "Time Allowed (Seconds)"
+msgstr "الوقت المسموح (بالثواني)"
+
+#. module: nudge_connect
+msgid "Longest Answer (Characters)"
+msgstr "أطول إجابة (بالأحرف)"
+
+#. module: nudge_connect
+msgid "Protocol"
+msgstr "البروتوكول"
+
+#. module: nudge_connect
+msgid "What the server was found to speak."
+msgstr "البروتوكول الذي تبيّن أن الخادم يتحدث به."
+
+#. module: nudge_connect
+msgid "Server"
+msgstr "الخادم"
+
+#. module: nudge_connect
+msgid "Tools Read On"
+msgstr "تاريخ قراءة الأدوات"
+
+#. module: nudge_connect
+msgid "The day it was first made active: the first month of a company that asks for it counts from there."
+msgstr "اليوم الذي فُعّل فيه أول مرة: يُحسب منه الشهر الأول للشركة التي تطلب ذلك."
+
+#. module: nudge_connect
+msgid "Tools"
+msgstr "الأدوات"
+
+#. module: nudge_connect
+msgid "Calls"
+msgstr "الاستدعاءات"
+
+#. module: nudge_connect
+msgid "Allowed Tools"
+msgstr "الأدوات المسموحة"
+
+#. module: nudge_connect
+msgid "Tool"
+msgstr "الأداة"
+
+#. module: nudge_connect
+msgid "Name for the AI"
+msgstr "الاسم لدى الذكاء الاصطناعي"
+
+#. module: nudge_connect
+msgid "What the AI calls it: cx_<connector key>__<tool>."
+msgstr "الاسم الذي يستدعيها به الذكاء الاصطناعي: cx_<مفتاح الموصل>__<الأداة>."
+
+#. module: nudge_connect
+msgid "As the server wrote it. Read it before allowing the tool: it is what the AI reads of the tool."
+msgstr "كما كتبه الخادم. اقرأه قبل السماح بالأداة: هذا ما يقرؤه الذكاء الاصطناعي عنها."
+
+#. module: nudge_connect
+msgid "Arguments"
+msgstr "المدخلات"
+
+#. module: nudge_connect
+msgid "Arguments Taken"
+msgstr "المدخلات التي تأخذها"
+
+#. module: nudge_connect
+msgid "Read: run for the person at once, the answer names the connector. Write: the person sees exactly what is sent on a card, and nothing is sent before their yes."
+msgstr "قراءة: تعمل للشخص فوراً، وتذكر الإجابة اسم الموصل. كتابة: يرى الشخص ما سيُرسل بالضبط في بطاقة، ولا يُرسل شيء قبل موافقته."
+
+#. module: nudge_connect
+msgid "Says It Only Reads"
+msgstr "يقول إنها للقراءة فقط"
+
+#. module: nudge_connect
+msgid "What the server says of the tool: a hint, not a promise."
+msgstr "ما يقوله الخادم عن الأداة: تلميح وليس التزاماً."
+
+#. module: nudge_connect
+msgid "Says It May Delete"
+msgstr "يقول إنها قد تحذف"
+
+#. module: nudge_connect
+msgid "What the server says of the tool. Its cards are marked sensitive."
+msgstr "ما يقوله الخادم عن الأداة. تُعلَّم بطاقاتها بأنها حساسة."
+
+#. module: nudge_connect
+msgid "Its description or arguments changed on the server since it was allowed: it is not allowed any more until it is read and allowed again."
+msgstr "تغيّر وصفها أو مدخلاتها على الخادم منذ السماح بها: لم تعد مسموحة حتى تُقرأ ويُسمح بها من جديد."
+
+#. module: nudge_connect
+msgid "No Longer Offered"
+msgstr "لم تعد معروضة"
+
+#. module: nudge_connect
+msgid "Asked By"
+msgstr "طلبها"
+
+#. module: nudge_connect
+msgid "What was sent, with the values named like a secret masked."
+msgstr "ما أُرسل، مع إخفاء القيم التي تحمل أسماء تشبه الأسرار."
+
+#. module: nudge_connect
+msgid "Sent"
+msgstr "المُرسل"
+
+#. module: nudge_connect
+msgid "Answer Size (Characters)"
+msgstr "حجم الإجابة (بالأحرف)"
+
+#. module: nudge_connect
+msgid "Duration (ms)"
+msgstr "المدة (مللي ثانية)"
+
+#. module: nudge_connect
+msgid "%(count)s tools read: %(new)s new, %(changed)s changed and no longer allowed, %(gone)s gone."
+msgstr "قُرئت %(count)s أداة: %(new)s جديدة، و%(changed)s تغيّرت ولم تعد مسموحة، و%(gone)s اختفت."
+
+#. module: nudge_connect
+msgid "The server answers (%(server)s, protocol %(protocol)s)."
+msgstr "الخادم يستجيب (%(server)s، البروتوكول %(protocol)s)."
+
+#. module: nudge_connect
+msgid "The address must start with https:// (http:// only for this machine)."
+msgstr "يجب أن يبدأ العنوان بـ https:// (و http:// لهذا الجهاز فقط)."
+
+#. module: nudge_connect
+msgid "The address is on a private network or this machine, and the connector is not marked as running on your own network."
+msgstr "العنوان على شبكة خاصة أو على هذا الجهاز، والموصل غير معلَّم بأنه يعمل على شبكتك الخاصة."
+
+#. module: nudge_connect
+msgid "The server cannot be reached."
+msgstr "لا يمكن الوصول إلى الخادم."
+
+#. module: nudge_connect
+msgid "The server did not answer in time."
+msgstr "لم يستجب الخادم في الوقت المحدد."
+
+#. module: nudge_connect
+msgid "The server sends elsewhere: enter the final address."
+msgstr "الخادم يحيل إلى عنوان آخر: أدخل العنوان النهائي."
+
+#. module: nudge_connect
+msgid "The server refused the credential."
+msgstr "رفض الخادم بيانات الاعتماد."
+
+#. module: nudge_connect
+msgid "The server answered with an error."
+msgstr "أجاب الخادم بخطأ."
+
+#. module: nudge_connect
+msgid "The answer is too big."
+msgstr "الإجابة كبيرة جداً."
+
+#. module: nudge_connect
+msgid "The server did not answer as an MCP server does."
+msgstr "لم يُجب الخادم كما يُجيب خادم MCP."
+
+#. module: nudge_connect
+msgid "The server speaks another version of MCP."
+msgstr "الخادم يتحدث بإصدار آخر من MCP."
+
+#. module: nudge_connect
+msgid "The outside tool asks for more input, which Nudge cannot give it."
+msgstr "تطلب الأداة الخارجية مدخلات إضافية لا يستطيع نودج تقديمها."
+
+#. module: nudge_connect
+msgid "The call failed."
+msgstr "فشل الاستدعاء."
+
+#. module: nudge_connect
+msgid "The server does not say this tool only reads: a read runs without asking the person."
+msgstr "لا يقول الخادم إن هذه الأداة للقراءة فقط: والقراءة تعمل دون سؤال الشخص."
+
+#. module: nudge_connect
+msgid "The server says this tool may delete."
+msgstr "يقول الخادم إن هذه الأداة قد تحذف."
+
+#. module: nudge_connect
+msgid "The key starts with a small letter and holds small letters, digits and _ only, 20 at most: %s"
+msgstr "يبدأ المفتاح بحرف إنجليزي صغير ولا يحوي إلا أحرفاً صغيرة وأرقاماً و _، وبحد أقصى 20: %s"
+
+#. module: nudge_connect
+msgid "Another connector has the key %s."
+msgstr "يوجد موصل آخر بالمفتاح %s."
+
+#. module: nudge_connect
+msgid "The time allowed is between 1 and %s seconds."
+msgstr "الوقت المسموح بين 1 و %s ثانية."
+
+#. module: nudge_connect
+msgid "The longest answer is between 200 and %s characters."
+msgstr "أطول إجابة بين 200 و %s حرفاً."
+
+#. module: nudge_connect
+msgid "%s: the address must start with https:// (http:// only for this machine, localhost)."
+msgstr "%s: يجب أن يبدأ العنوان بـ https:// (و http:// لهذا الجهاز فقط، localhost)."
+
+#. module: nudge_connect
+msgid "Connectors Off"
+msgstr "إيقاف الموصلات"
+
+#. module: nudge_connect
+msgid "No connector is used in this company, whatever each connector says."
+msgstr "لا يُستخدم أي موصل في هذه الشركة، مهما كانت إعدادات كل موصل."
+
+#. module: nudge_connect
+msgid "Connectors Read-Only in Their First Month"
+msgstr "الموصلات للقراءة فقط في شهرها الأول"
+
+#. module: nudge_connect
+msgid "In this company a connector only reads during the month after it was first made active: its write tools are not offered before then."
+msgstr "في هذه الشركة يقرأ الموصل فقط خلال الشهر الذي يلي تفعيله أول مرة: لا تُعرض أدوات الكتابة قبل ذلك."
+
+#. module: nudge_connect
+msgid "Stop Every Connector"
+msgstr "إيقاف كل الموصلات"
+
+#. module: nudge_connect
+msgid "The kill switch: nothing is sent to any connector, in any company, until it is switched back."
+msgstr "مفتاح الإيقاف الطارئ: لا يُرسل شيء إلى أي موصل، في أي شركة، حتى يُعاد تشغيله."
+
+#. module: nudge_connect
+msgid "Connector"
+msgstr "الموصل"
+
+#. module: nudge_connect
+msgid "Address"
+msgstr "العنوان"
+
+#. module: nudge_connect
+msgid "Sends"
+msgstr "يُرسل"
+
+#. module: nudge_connect
+msgid "Read before in this conversation"
+msgstr "قُرئ سابقاً في هذه المحادثة"
+
+#. module: nudge_connect
+msgid "Send to %(connector)s: %(tool)s"
+msgstr "إرسال إلى %(connector)s: %(tool)s"
+
+#. module: nudge_connect
+msgid "Connectors"
+msgstr "الموصلات"
+
+#. module: nudge_connect
+msgid "Read the Tools"
+msgstr "قراءة الأدوات"
+
+#. module: nudge_connect
+msgid "Test the Connection"
+msgstr "اختبار الاتصال"
+
+#. module: nudge_connect
+msgid "Activate"
+msgstr "تفعيل"
+
+#. module: nudge_connect
+msgid "Stop Now"
+msgstr "إيقاف الآن"
+
+#. module: nudge_connect
+msgid "Nothing more is sent to this connector, from now on. Stop it?"
+msgstr "لن يُرسل شيء آخر إلى هذا الموصل من الآن. هل تريد إيقافه؟"
+
+#. module: nudge_connect
+msgid "Back to Draft"
+msgstr "إعادة إلى مسودة"
+
+#. module: nudge_connect
+msgid "Archived"
+msgstr "مؤرشف"
+
+#. module: nudge_connect
+msgid "e.g. Sister company Odoo"
+msgstr "مثال: أودو الشركة الشقيقة"
+
+#. module: nudge_connect
+msgid "Credential"
+msgstr "بيانات الاعتماد"
+
+#. module: nudge_connect
+msgid "Who May Use It"
+msgstr "من يمكنه استخدامه"
+
+#. module: nudge_connect
+msgid "Limits"
+msgstr "الحدود"
+
+#. module: nudge_connect
+msgid "On"
+msgstr "في"
+
+#. module: nudge_connect
+msgid "Connector Tool"
+msgstr "أداة الموصل"
+
+#. module: nudge_connect
+msgid "What the Server Says It Does"
+msgstr "ما يقول الخادم إنها تفعله"
+
+#. module: nudge_connect
+msgid "What It Takes"
+msgstr "ما تأخذه من مدخلات"
+
+#. module: nudge_connect
+msgid "Connector Calls"
+msgstr "استدعاءات الموصلات"
+
+#. module: nudge_connect
+msgid "Connector Call"
+msgstr "استدعاء موصل"
+
+#. module: nudge_connect
+msgid "Writes"
+msgstr "الكتابات"
+
+#. module: nudge_connect
+msgid "Failed or Refused"
+msgstr "فاشلة أو مرفوضة"
+
+#. module: nudge_connect
+msgid "The credential is sent to this server only. It never reaches the AI, and it is taken out of the log, the errors and the answers."
+msgstr "تُرسل بيانات الاعتماد إلى هذا الخادم فقط. لا تصل أبداً إلى الذكاء الاصطناعي، وتُحذف من السجل والأخطاء والإجابات."
+
+#. module: nudge_connect
+msgid "A tool comes in Not Allowed. Open it, read what it says and what it takes, and allow it as Read (runs at once for the person) or Write (the person sees exactly what is sent and says yes first). A tool whose description changes on the server is not allowed any more until it is allowed again."
+msgstr "تصل كل أداة بحالة غير مسموح. افتحها واقرأ ما تقوله وما تأخذه، ثم اسمح بها قراءةً (تعمل للشخص فوراً) أو كتابةً (يرى الشخص ما سيُرسل بالضبط ويوافق أولاً). والأداة التي يتغيّر وصفها على الخادم لا تعود مسموحة حتى يُسمح بها من جديد."
+
+#. module: nudge_connect
+msgid "Connect Nudge to an outside system"
+msgstr "اربط نودج بنظام خارجي"
+
+#. module: nudge_connect
+msgid "A connector is an outside system that speaks MCP: a sister company's Odoo, a calendar, a chat, a document store. Add its address, read its tools, and allow the ones Nudge may use: reads run for the person, writes wait for their yes."
+msgstr "الموصل نظام خارجي يتحدث MCP: أودو شركة شقيقة، أو تقويم، أو محادثة، أو مخزن مستندات. أضف عنوانه، واقرأ أدواته، واسمح بما يمكن لنودج استخدامه: القراءة تعمل للشخص، والكتابة تنتظر موافقته."
+
+#. module: nudge_connect
+msgid "Its description or arguments changed on the server since it was allowed. Read them again, then allow it again."
+msgstr "تغيّر وصفها أو مدخلاتها على الخادم منذ السماح بها. اقرأها مجدداً ثم اسمح بها من جديد."
+
+#. module: nudge_connect
+msgid "No call to a connector yet"
+msgstr "لا استدعاءات لأي موصل بعد"
+
+#. module: nudge_connect
+msgid "Every call Nudge makes to a connector is kept here: who asked, what was sent (secrets masked), the size of the answer and the time it took."
+msgstr "يُحفظ هنا كل استدعاء يجريه نودج لموصل: من طلبه، وما أُرسل (مع إخفاء الأسرار)، وحجم الإجابة والوقت الذي استغرقه."
+
+#. module: nudge_connect
+msgid "Connectors (MCP)"
+msgstr "الموصلات (MCP)"
+
+#. module: nudge_connect
+msgid "Outside systems that speak MCP, whose tools Nudge may use for a person: reads at once, writes after the person's yes. Each tool is allowed one by one."
+msgstr "أنظمة خارجية تتحدث MCP، يمكن لنودج استخدام أدواتها لشخص: القراءة فوراً، والكتابة بعد موافقة الشخص. يُسمح بكل أداة على حدة."
