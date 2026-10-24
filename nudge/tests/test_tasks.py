@@ -27,6 +27,41 @@ class TestTasks(BackgroundCase, TransactionCase):
     def cron(self):
         self.env["nudge.task"]._cron_run()
 
+    def test_a_long_list_is_read_by_pages_and_the_note_does_not_stop_the_work(self):
+        # Found in the live trial: "the 25 most recent" ended with "searches are limited to 20", 0 changes
+        self.env["res.partner"].create([{"name": "Nudge Pager %02d" % n} for n in range(25)])
+        search = tools.base.TOOLS["search_records"]
+        env = self.env(user=self.agent)
+        args = {"model": "res.partner", "fields": ["name"], "limit": 20, "order": "id desc",
+                "conditions": [{"field": "name", "operator": "contains", "value": "Nudge Pager"}]}
+        first = search.run(env, args, {})
+        second = search.run(env, dict(args, offset=20), {})
+        import json
+        one, two = json.loads(first.content), json.loads(second.content)
+        self.assertEqual((len(one["records"]), len(two["records"]), two["total"]), (20, 5, 25))
+        self.assertIn("offset", one["note"])
+        self.assertNotIn("note", two)
+
+    def test_a_table_in_the_result_is_shown_as_a_table(self):
+        task = self.make()
+        task.sudo().last_result = "Here are the RFQs:%s%s| Number | Total |%s|---|---|%s| P00001 | 5 <b> |" % ((chr(10),) * 4)
+        html = str(task.last_result_html)
+        self.assertIn("<table", html)
+        self.assertIn("<th>Number</th>", html)
+        self.assertIn("<td>P00001</td>", html)
+        self.assertIn("5 &lt;b&gt;", html)
+        self.assertNotIn("|", html)
+
+    def test_every_tool_has_a_label_for_the_person_never_its_name(self):
+        conversation = self.env["nudge.conversation"].with_user(self.agent)._chat_open(None)
+        for name, tool in tools.base.TOOLS.items():
+            if not name.isidentifier():
+                continue
+            with self.subTest(tool=name):
+                label = conversation._step_summary({"name": name, "input": {}}, tool, tools.base.ToolResult(""))
+                self.assertNotEqual(label, name)
+                self.assertNotIn("_", label)
+
     def test_asked_on_a_card_first(self):
         result = self.run_tool("prepare_task", {
             "name": "Overdue every morning", "kind": "schedule",
