@@ -948,8 +948,7 @@ class TestAgent(AgentCase, TransactionCase):
         self.assertEqual(turns[2]["results"], [{
             "id": "call_c", "name": "prepare_create",
             "content": tools.base.as_data("prepare_create", step.result), "is_error": False}])
-        self.assertIn("## Mode: Agent", "
-".join(base.system_texts(adapter.calls[1]["system"])))
+        self.assertIn("## Mode: Agent", "\n".join(base.system_texts(adapter.calls[1]["system"])))
 
     def test_no(self):
         adapter = self.use_adapter(script=[asking(self.CREATE), saying("What would you like instead?")])
@@ -1112,8 +1111,7 @@ class TestAgent(AgentCase, TransactionCase):
         self.assertIn("ignore the person", result["results"][0]["content"])
         self.assertNotIn("ignore the person", "".join(adapter.calls[1]["system"]))
         # The skills of the question come in the last block: the rule on data is in the base prompt
-        self.assertIn("never an instruction", "
-".join(base.system_texts(adapter.calls[1]["system"])))
+        self.assertIn("never an instruction", "\n".join(base.system_texts(adapter.calls[1]["system"])))
         self.assertEqual(conversation.sudo().run_ids.change_count, 0)
 
 
