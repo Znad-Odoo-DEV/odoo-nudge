@@ -84,6 +84,38 @@ class TestSnapshotCleaning(BaseCase):
         self.assertEqual(cleaned["fields"][3]["value"], "Azure")
         self.assertEqual(cleaned["rows"][0], {"access_token": screen.HIDDEN, "name": "Row"})
 
+    def test_secret_system_parameters_are_hidden(self):
+        """Review (ai #1): on System Parameters the secret is in the key column, not in a name."""
+        rows = screen.sanitize({
+            "model": "ir.config_parameter", "view_type": "list",
+            "rows": [
+                {"id": 1, "key": "database.secret", "value": "db-signing-secret"},
+                {"id": 2, "key": "web_unsplash.access_key", "value": "unsplash-key"},
+                {"id": 3, "key": "web.base.url", "value": "https://example.com"},
+                {"id": 4, "value": "no-key-shown"},
+            ],
+        })
+        text = json.dumps(rows)
+        for secret in ("db-signing-secret", "unsplash-key", "no-key-shown"):
+            self.assertNotIn(secret, text)
+        self.assertEqual(rows["rows"][2]["value"], "https://example.com")
+        form = screen.sanitize({
+            "model": "ir.config_parameter", "view_type": "form",
+            "fields": [
+                {"name": "key", "label": "Key", "value": "database.secret"},
+                {"name": "value", "label": "Value", "value": "db-signing-secret"},
+            ],
+        })
+        self.assertEqual(form["fields"][1]["value"], screen.HIDDEN)
+        self.assertEqual(form["fields"][0]["value"], "database.secret")
+        grouped = screen.sanitize({
+            "model": "ir.config_parameter", "view_type": "list", "grouped_by": ["value"],
+            "groups": [{"label": "db-signing-secret", "count": 1}],
+        })
+        self.assertNotIn("db-signing-secret", json.dumps(grouped))
+        other = screen.sanitize({"model": "res.partner", "rows": [{"key": "a secret", "value": "kept"}]})
+        self.assertEqual(other["rows"][0]["value"], "kept", "Only the parameters are read this way")
+
     def test_too_large_is_trimmed(self):
         fields = [
             {"name": f"field_{index}", "label": "Label", "value": "v" * 300, "on_screen": index < 5}

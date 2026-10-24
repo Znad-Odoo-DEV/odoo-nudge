@@ -68,6 +68,41 @@ class TestAdmin(NudgeCase, TransactionCase):
             "model": "res.users", "conditions": [{"field": "password", "operator": "=", "value": "x"}]})
         self.assertTrue(refused.is_error, "Nothing is looked for in a password")
 
+    def test_a_secret_parameter_leaves_by_no_other_way(self):
+        """Review (ai #1, S2): the value of a parameter whose key names a secret stays hidden however it is asked."""
+        self.switch(True)
+        only_value = json.loads(self.run_tool("search_records", {
+            "model": "ir.config_parameter", "fields": ["value"],
+            "conditions": [{"field": "key", "operator": "=", "value": "nudge_test.secret_key"}]}).content)
+        self.assertEqual(only_value["records"][0]["value"], HIDDEN, "The key is read even when not asked for")
+        plain = json.loads(self.run_tool("search_records", {
+            "model": "ir.config_parameter", "fields": ["value"],
+            "conditions": [{"field": "key", "operator": "=", "value": "nudge_test.plain"}]}).content)
+        self.assertEqual(plain["records"][0]["value"], "plain-value")
+        for name, arguments in [
+            ("aggregate_records", {"model": "ir.config_parameter", "group_by": ["value"]}),
+            ("aggregate_records", {"model": "ir.config_parameter", "conditions": [
+                {"field": "value", "operator": "contains", "value": "sk-"}]}),
+            ("search_records", {"model": "ir.config_parameter", "conditions": [
+                {"field": "value", "operator": "contains", "value": "sk-"}]}),
+            ("search_records", {"model": "ir.config_parameter", "order": "value desc"}),
+        ]:
+            result = self.run_tool(name, arguments)
+            self.assertTrue(result.is_error, (name, arguments, result.content))
+            self.assertNotIn("sk-very-secret", result.content)
+        self.Parameter.set_param("nudge.python", "yes")
+        for code in (
+            "result = env['ir.config_parameter'].search([('key', '=', 'nudge_test.secret_key')]).value",
+            "result = env['ir.config_parameter'].search([('key', '=', 'nudge_test.secret_key')]).read()",
+            "result = env['ir.config_parameter'].search_read([('key', '=', 'nudge_test.secret_key')], ['value'])",
+            "result = env['ir.config_parameter'].search([('key', '=', 'nudge_test.secret_key')]).mapped('value')",
+            "result = env['ir.config_parameter'].search_count([('value', 'like', 'sk-')])",
+        ):
+            result = self.run_tool("run_python", {"code": code, "purpose": "A test"})
+            self.assertNotIn("sk-very-secret", result.content, code)
+            if code.startswith("result = env['ir.config_parameter'].search_count"):
+                self.assertTrue(result.is_error, "No condition on the value: it would tell it letter by letter")
+
     def test_a_change_goes_through_a_card_marked_sensitive(self):
         self.switch(True)
         pending = self.run_tool("prepare_write", {
