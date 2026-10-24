@@ -1123,3 +1123,179 @@ msgstr "Notion"
 #: code:addons/nudge_connect/presets.py:0
 msgid "Another MCP server"
 msgstr "خادم MCP آخر"
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector_oauth.py:0
+msgid "Sign in to %(name)s first, then ask again: open %(link)s"
+msgstr "سجّل الدخول إلى %(name)s أولًا ثم اسأل مجددًا: افتح %(link)s"
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector_oauth.py:0
+msgid "You are signed out of %s."
+msgstr "تم تسجيل خروجك من %s."
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector_oauth.py:0
+msgid "Everybody is signed out of %s."
+msgstr "تم تسجيل خروج الجميع من %s."
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector_oauth.py:0
+msgid "Only an administrator may sign everybody out."
+msgstr "يستطيع مسؤول النظام فقط تسجيل خروج الجميع."
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector_oauth.py:0
+msgid "Only an administrator may set up the sign-in."
+msgstr "يستطيع مسؤول النظام فقط إعداد تسجيل الدخول."
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector_oauth.py:0
+msgid "The server does not say how to sign in: enter the sign-in and token addresses."
+msgstr "لا يذكر الخادم طريقة تسجيل الدخول: أدخل عنواني تسجيل الدخول والرمز."
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector_oauth.py:0
+msgid "Found how to sign in%s."
+msgstr "تم العثور على طريقة تسجيل الدخول%s."
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector_oauth.py:0
+msgid " and registered a client"
+msgstr " وتسجيل عميل"
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector_oauth.py:0
+msgid "This connector does not use a sign-in."
+msgstr "هذا الموصل لا يستخدم تسجيل دخول."
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector_oauth.py:0
+msgid "The administrator has not finished setting up the sign-in of %s."
+msgstr "لم يُكمل مسؤول النظام إعداد تسجيل الدخول إلى %s."
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector_oauth.py:0
+msgid "This sign-in link is not valid or ran out. Start again from Nudge."
+msgstr "رابط تسجيل الدخول هذا غير صالح أو انتهت مدته. ابدأ من جديد من Nudge."
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector_oauth.py:0
+msgid "This sign-in was begun by someone else."
+msgstr "بدأ شخص آخر عملية تسجيل الدخول هذه."
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector_oauth.py:0
+msgid "This connector no longer uses a sign-in."
+msgstr "لم يعد هذا الموصل يستخدم تسجيل دخول."
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector_oauth.py:0
+msgid "The provider did not send a code."
+msgstr "لم يرسل المزوّد رمزًا."
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector_oauth.py:0
+msgid "The provider refused the sign-in."
+msgstr "رفض المزوّد تسجيل الدخول."
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__oauth_authorize_url
+msgid "Sign-In Address"
+msgstr "عنوان تسجيل الدخول"
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_nudge_connector__oauth_authorize_url
+msgid "The page of the provider where a person signs in and agrees (HTTPS)."
+msgstr "صفحة المزوّد التي يسجّل فيها الشخص الدخول ويوافق (HTTPS)."
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__oauth_registration_url
+msgid "Registration Address"
+msgstr "عنوان التسجيل"
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_nudge_connector__oauth_registration_url
+msgid "Where Nudge may register itself as a client (RFC 7591), when the server offers it."
+msgstr "حيث يستطيع Nudge تسجيل نفسه كعميل (RFC 7591) إذا قدّم الخادم ذلك."
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__oauth_redirect_uri
+msgid "Redirect Address"
+msgstr "عنوان العودة"
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_nudge_connector__oauth_redirect_uri
+msgid "Give this address to the provider when you create the client: it is where the person comes back to."
+msgstr "أعطِ هذا العنوان للمزوّد عند إنشاء العميل: إليه يعود الشخص."
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__token_ids
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "Signed-In People"
+msgstr "الأشخاص المسجّلون"
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__signed_in
+msgid "You Are Signed In"
+msgstr "أنت مسجّل الدخول"
+
+#. module: nudge_connect
+#: model:ir.model.fields.selection,name:nudge_connect.selection__nudge_connector__auth_type__oauth_user
+msgid "OAuth Sign-In (Each Person Signs In)"
+msgstr "تسجيل دخول OAuth (كل شخص يسجّل دخوله)"
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "Find How to Sign In"
+msgstr "اعثر على طريقة تسجيل الدخول"
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "Sign In"
+msgstr "تسجيل الدخول"
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "Sign Out"
+msgstr "تسجيل الخروج"
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "Sign Everybody Out"
+msgstr "تسجيل خروج الجميع"
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "Everybody who signed in to this connector will have to sign in again. Go on?"
+msgstr "سيتعيّن على كل من سجّل الدخول إلى هذا الموصل أن يسجّل الدخول من جديد. هل تتابع؟"
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "Each person signs in once, with their own account at the provider: Nudge keeps their tokens for them alone and never uses another person's. Create the client at the provider with the redirect address above, or read how the server wants it (Find How to Sign In), which also registers a client when the server allows."
+msgstr "يسجّل كل شخص دخوله مرة واحدة بحسابه الخاص عند المزوّد: يحتفظ Nudge برموزه له وحده ولا يستخدم رموز غيره أبدًا. أنشئ العميل عند المزوّد بعنوان العودة أعلاه، أو اقرأ ما يريده الخادم (اعثر على طريقة تسجيل الدخول) وهذا يسجّل عميلًا أيضًا إذا سمح الخادم."
+
+#. module: nudge_connect
+#: code:addons/nudge_connect/presets.py:0
+msgid "Google Calendar (Developer Preview)"
+msgstr "تقويم Google (معاينة للمطورين)"
+
+#. module: nudge_connect
+#: code:addons/nudge_connect/presets.py:0
+msgid "Gmail (Developer Preview)"
+msgstr "Gmail (معاينة للمطورين)"

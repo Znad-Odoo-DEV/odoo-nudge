@@ -150,6 +150,11 @@ class NudgeConnector(models.Model):
         if not row:
             return {}
         values = {"url": row["url"], "auth_type": row["auth"], "runs_locally": False}
+        if row["auth"] == "oauth_user":
+            for name, key in (("oauth_scope", "scope"), ("oauth_authorize_url", "authorize"),
+                              ("oauth_token_url", "token")):
+                if row.get(key):
+                    values[name] = row[key]
         if not self.name:
             values["name"] = row["label"]
         if not self.key and row["key"]:

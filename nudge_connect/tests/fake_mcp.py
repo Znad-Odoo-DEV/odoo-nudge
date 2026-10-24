@@ -73,6 +73,14 @@ class FakeMcpServer:
         self.legacy = False
         self.sse = False
         self.token = None
+        self.tokens = set()
+        self.codes = {}
+        self.refreshes = {}
+        self.issued = 0
+        self.registered = []
+        self.no_discovery = False
+        self.bad_endpoint = None
+        self.expires_in = 3600
         self.requests = []
 
     @property
@@ -92,11 +100,25 @@ class FakeMcpServer:
                 headers = {key.lower(): value for key, value in self.headers.items()}
                 if self.path == "/token":
                     return fake.grant(self, raw.decode(), headers)
+                if self.path == "/register":
+                    return fake.register(self, json.loads(raw or b"{}"))
                 body = json.loads(raw or b"{}")
                 fake.requests.append({"method": body.get("method"), "headers": headers, "body": body})
-                if fake.token and headers.get("authorization") != f"Bearer {fake.token}":
+                allowed = set(fake.tokens) | ({fake.token} if fake.token else set())
+                if allowed and headers.get("authorization", "")[7:] not in allowed:
                     return self.reply(401, None)
                 fake.handle(self, body, headers)
+
+            def do_GET(self):
+                fake.requests.append({"method": "GET " + self.path, "headers": {}, "body": {}})
+                origin = fake.url[:-len("/mcp")]
+                documents = {
+                    "/.well-known/oauth-protected-resource/mcp": {"resource": fake.url, "authorization_servers": [origin]},
+                    "/.well-known/oauth-authorization-server": fake.metadata(origin),
+                }
+                if fake.no_discovery or self.path not in documents:
+                    return self.reply(404, None)
+                return self.reply(200, documents[self.path])
 
             def reply(self, status, message, extra=None):
                 self.send_response(status)
@@ -134,10 +156,59 @@ class FakeMcpServer:
         values = dict(parse_qsl(form))
         expected = "Basic " + base64.b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode()
         self.requests.append({"method": "token", "headers": headers, "body": values})
+        if values.get("grant_type") in ("authorization_code", "refresh_token"):
+            return self.grant_user(handler, values, headers)
         if headers.get("authorization") != expected or values.get("grant_type") != "client_credentials":
             return handler.reply(401, None)
         self.token = ACCESS_TOKEN
         return handler.reply(200, {"access_token": ACCESS_TOKEN, "token_type": "Bearer", "expires_in": 3600})
+
+    no_discovery = False
+    bad_endpoint = None
+
+    def metadata(self, origin):
+        return {"issuer": origin, "authorization_endpoint": self.bad_endpoint or origin + "/authorize",
+                "token_endpoint": origin + "/token", "registration_endpoint": origin + "/register"}
+
+    def register(self, handler, body):
+        self.registered.append(body)
+        return handler.reply(201, {"client_id": "registered-client-raghad", "redirect_uris": body.get("redirect_uris")})
+
+    def code_for(self, challenge, redirect_uri, client_id=CLIENT_ID):
+        """What the provider's page would hand back after the person agreed: a code tied to the sign-in"""
+        code = f"code-{len(self.codes) + 1}"
+        self.codes[code] = {"challenge": challenge, "redirect_uri": redirect_uri, "client_id": client_id}
+        return code
+
+    def _issue(self):
+        self.issued += 1
+        access, refresh = f"access-user-{self.issued}-secret", f"refresh-user-{self.issued}-secret"
+        self.tokens.add(access)
+        self.refreshes[refresh] = access
+        return {"access_token": access, "refresh_token": refresh, "token_type": "Bearer",
+                "expires_in": self.expires_in, "scope": "contacts.read"}
+
+    expires_in = 3600
+
+    def grant_user(self, handler, values, headers):
+        """The token address of the authorization code with PKCE, and of the refresh"""
+        grant = values.get("grant_type")
+        if grant == "authorization_code":
+            known = self.codes.pop(values.get("code"), None)
+            import hashlib
+            verifier = values.get("code_verifier", "")
+            challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b"=").decode()
+            if (not known or known["challenge"] != challenge or known["redirect_uri"] != values.get("redirect_uri")
+                    or known["client_id"] != values.get("client_id")):
+                return handler.reply(400, {"error": "invalid_grant"})
+            return handler.reply(200, self._issue())
+        if grant == "refresh_token":
+            old = self.refreshes.pop(values.get("refresh_token"), None)
+            if not old or values.get("client_id") != CLIENT_ID:
+                return handler.reply(400, {"error": "invalid_grant"})
+            self.tokens.discard(old)
+            return handler.reply(200, self._issue())
+        return handler.reply(400, {"error": "unsupported_grant_type"})
 
     def calls(self, method="tools/call"):
         return [request for request in self.requests if request["method"] == method]
