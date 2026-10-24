@@ -154,6 +154,25 @@ class AnthropicAdapter(base.BaseAdapter):
             stable[-1]["cache_control"] = {"type": "ephemeral"}
         return blocks
 
+    @staticmethod
+    def _build_tools(tools):
+        """Inputs are streamed as they are written, and checked by Nudge before anything runs.
+
+        S8: the tools render first, before the system prompt. Those every question of the mode is
+        offered come first, and a read point after the last of them (``base.CACHE_POINT``) keeps
+        them in the cache when a question brings tools of its own after them. With the one of the
+        system prompt and the one on the conversation, three of the four the API allows."""
+        built, marked = [], False
+        for tool in tools:
+            definition = {key: value for key, value in tool.items() if key != base.CACHE_POINT}
+            definition["eager_input_streaming"] = True
+            if tool.get(base.CACHE_POINT) and not marked:
+                # One read point among the tools, whatever the list says: the API counts them
+                definition["cache_control"] = {"type": "ephemeral"}
+                marked = True
+            built.append(definition)
+        return built
+
     def _build_messages(self, turns):
         messages = []
         for turn in turns:
@@ -207,11 +226,7 @@ class AnthropicAdapter(base.BaseAdapter):
             "cache_control": {"type": "ephemeral"},
         }
         if tools:
-            params["tools"] = [
-                # Inputs are streamed as they are written, and checked by
-                # Nudge before anything runs
-                dict(tool, eager_input_streaming=True) for tool in tools
-            ]
+            params["tools"] = self._build_tools(tools)
         if tools and tool_choice == "none":
             # The answer now: the tools stay known, none is called
             params["tool_choice"] = {"type": "none"}
