@@ -1,9 +1,10 @@
-"""NP-16: the outside auditor. The group is given on the user, the date it ends is kept here, a daily cron ends
-the access and the web request itself refuses a session past the date (``ir_http``)."""
+"""NP-16: the outside auditor. The group is given on the user, the date it ends is kept here, an hourly cron ends
+the access, the web request and the credential check (password or API key, over RPC too) refuse the user past
+the date."""
 import logging
 
 from odoo import api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import AccessDenied, ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -62,8 +63,21 @@ class ResUsers(models.Model):
     @api.model
     def _nudge_auditor_expired(self, user_id):
         """:return: whether the user is an auditor whose last day has passed (checked on each request)"""
-        until = self.sudo().browse(user_id).nudge_auditor_until
+        user = self.sudo().browse(user_id)
+        # the group first (cached): the date is read only for the few who are auditors
+        if not user.has_group(AUDITOR_GROUP):
+            return False
+        until = user.nudge_auditor_until
         return bool(until) and until < fields.Date.today()
+
+    def _check_credentials(self, credential, env):
+        """An auditor past the last day cannot sign in with a password or an API key either, over the web or
+        RPC: this is the check all of them go through (the argument is a dict on 18 and 19, the password on 17)."""
+        for user in self:
+            if self._nudge_auditor_expired(user.id):
+                _logger.info("Nudge: the expired auditor %s tried to sign in", user.login)
+                raise AccessDenied()
+        return super()._check_credentials(credential, env)
 
     def _nudge_end_auditor(self, reason):
         """Archive the auditors of ``self`` and write why in the log of the server."""
@@ -81,10 +95,54 @@ class ResUsers(models.Model):
 
     @api.model
     def _cron_nudge_end_auditors(self):
-        """Daily: archive the auditors whose last day has passed.
+        """Hourly: archive the auditors whose last day has passed.
 
         :return: how many were ended"""
         # Nudge's own infrastructure: the cron ends the access of people, whoever they are
         expired = self.sudo().search([("nudge_auditor_until", "<", fields.Date.today())])
         expired._nudge_end_auditor("the date was reached")
         return len(expired)
+
+
+class ResGroups(models.Model):
+    _inherit = "res.groups"
+
+    @api.model
+    def _nudge_users_field(self):
+        """:return: the name of the field of the users of a group (it changed in Odoo 19)"""
+        return "user_ids" if "user_ids" in self._fields else "users"
+
+    def write(self, vals):
+        result = super().write(vals)
+        # Giving the auditor group a forbidden right (implied_ids) or the group to users goes through here,
+        # not through res.users
+        if "implied_ids" in vals or self._nudge_users_field() in vals:
+            group = self.env.ref(AUDITOR_GROUP, raise_if_not_found=False)
+            if group:
+                group.sudo()[self._nudge_users_field()]._nudge_check_auditor()
+        return result
+
+    def _nudge_implied(self):
+        """:return: these groups and everything they imply, one level after the other"""
+        found = self
+        todo = self
+        while todo:
+            todo = todo.mapped("implied_ids") - found
+            found |= todo
+        return found
+
+    def _nudge_write_rights_beyond(self, baseline):
+        """:return: ``{group: [model names]}``: the models these groups (with what they imply) can create, write
+        or delete, that the groups of ``baseline`` (with what they imply) cannot"""
+        # sudo: reads the access rights of the groups to judge them, as the administrator who asks would
+        Access = self.env["ir.model.access"].sudo()
+        domain = ["|", "|", ("perm_create", "=", True), ("perm_write", "=", True), ("perm_unlink", "=", True)]
+        allowed = {access.model_id.id for access in Access.search(
+            domain + [("group_id", "in", baseline._nudge_implied().ids), ("active", "=", True)])}
+        result = {}
+        for group in self:
+            accesses = Access.search(domain + [("group_id", "in", group._nudge_implied().ids), ("active", "=", True)])
+            models_ = accesses.model_id.filtered(lambda model: model.id not in allowed)
+            if models_:
+                result[group] = sorted(models_.mapped("model"))
+        return result
