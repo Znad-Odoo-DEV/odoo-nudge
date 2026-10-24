@@ -6,10 +6,18 @@ from odoo.exceptions import AccessError
 from odoo.tests import TransactionCase, tagged
 
 from odoo.addons.nudge import tools
-from odoo.addons.nudge.llm import base, loop
+from odoo.addons.nudge.llm import base, loop, prompt
+from odoo.addons.nudge.models.nudge_provider_cache import stable_first
 from odoo.addons.nudge.profile import builder, collectors, retrieval
 
 from .common import NudgeCase
+
+
+def heard(call):
+    """S8: what a call was told of the overview: its system prompt and, with the first question of a
+    conversation, the rest of the overview in the context of that question"""
+    question = next(turn for turn in reversed(call["turns"]) if turn["role"] == "user")
+    return call["system"][1] + "\n" + (question.get("context") or "")
 
 # Standard modules taken as if they were custom ones, to have something to
 # find in a database that has none
@@ -246,14 +254,18 @@ class TestProfile(NudgeCase, TransactionCase):
         system = adapter.calls[0]["system"]
         self.assertEqual(len(system), 4)
         self.assertIn("## Where the work is", system[2])
-        self.assertEqual(system[1], overview)
+        kept, rest = prompt.split_overview(overview)
+        self.assertEqual(system[1], kept)
+        if rest:
+            # S8: the rest of the overview goes with the first question of the conversation
+            self.assertIn(prompt.render_overview_rest(rest), heard(adapter.calls[0]))
         self.ask(self.user_b, "Hello")
         self.assertEqual(adapter.calls[1]["system"], system, "The same for everybody who may know the same: read once")
         # What depends on the person comes after what is shared: a manager
         # reads more of the database, and their own rules
         self.ask(self.manager, "Hello")
         self.assertEqual(adapter.calls[2]["system"][:1], system[:1])
-        self.assertIn("## Automation", adapter.calls[2]["system"][1])
+        self.assertIn("## Automation", heard(adapter.calls[2]))
         self.assertNotEqual(adapter.calls[2]["system"][-1], system[-1])
 
     def test_what_the_overview_tells_whom(self):
@@ -281,10 +293,10 @@ class TestProfile(NudgeCase, TransactionCase):
         # In the conversation too
         adapter = self.use_adapter()
         self.ask(self.user_a, "Hello")
-        self.assertNotIn("Nudge Tour Keepers", "".join(adapter.calls[0]["system"]))
-        self.assertIn("scheduled actions are active", adapter.calls[0]["system"][1])
+        self.assertNotIn("Nudge Tour Keepers", "".join(adapter.calls[0]["system"]) + heard(adapter.calls[0]))
+        self.assertIn("scheduled actions are active", heard(adapter.calls[0]))
         self.ask(self.manager, "Hello")
-        self.assertIn("Nudge Tour Keepers", adapter.calls[1]["system"][1])
+        self.assertIn("Nudge Tour Keepers", heard(adapter.calls[1]))
 
     def test_first_question_reads_the_database(self):
         self.assertFalse(self.Profile._get_current())
@@ -406,4 +418,5 @@ class TestProfileTools(NudgeCase, TransactionCase):
              "search_records", "show_menu_path", "show_on_screen", "show_tour", "write_in_field"}, set(offered))
         self.assertFalse({"test_import", "summarize_record_history", "search_products", "assess_database",
                           "prepare_write", "prepare_create"} & set(offered), offered)
-        self.assertEqual(offered, sorted(offered), "In one order: the list is part of the cached prompt")
+        # In one order, the list is part of the cached prompt: S8, those of every question first
+        self.assertEqual(offered, [tool["name"] for tool in stable_first([{"name": name} for name in sorted(offered)], "talk")])

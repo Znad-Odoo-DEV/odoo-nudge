@@ -435,14 +435,32 @@ class OpenAICompatAdapter(base.BaseAdapter):
 
     @staticmethod
     def _normalize_usage(usage):
+        """S8: the prompt of these servers is cached by its prefix, with nothing to ask (OpenAI,
+        Gemini, Groq, DeepSeek, OpenRouter): the stable part of a request comes first (the system
+        prompt, then the tools every question of the mode is offered) and what was read from the
+        cache is told here, in the words each server uses. All of them count it in prompt_tokens."""
         details = usage.get("prompt_tokens_details") or {}
-        cached = int(details.get("cached_tokens") or 0)
+        if not isinstance(details, dict):
+            details = {}
+
+        def first(*values):
+            return next((int(value) for value in values if isinstance(value, (int, float)) and value > 0), 0)
+
+        cached = first(
+            details.get("cached_tokens"),
+            # DeepSeek
+            usage.get("prompt_cache_hit_tokens"),
+            # A proxy in front of Claude (LiteLLM), and the context cache of Gemini
+            usage.get("cache_read_input_tokens"), usage.get("cached_content_token_count"))
+        # OpenRouter in front of a model that charges the writing (Claude); OpenAI does not
+        written = first(details.get("cache_write_tokens"), usage.get("cache_creation_input_tokens"))
         prompt = int(usage.get("prompt_tokens") or 0)
         return {
-            # Same convention as Anthropic: input_tokens is the uncached part
-            "input_tokens": max(prompt - cached, 0),
+            # Same convention as Anthropic: input_tokens is the part neither read from nor written to the cache
+            "input_tokens": max(prompt - cached - written, 0),
             "output_tokens": int(usage.get("completion_tokens") or 0),
             "cache_read_tokens": cached,
+            "cache_write_tokens": written,
         }
 
     def list_models(self):

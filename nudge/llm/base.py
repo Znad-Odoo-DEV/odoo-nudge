@@ -30,6 +30,10 @@ ERROR_MISSING_LIBRARY = "missing_library"
 ERROR_UNSUPPORTED = "unsupported"
 ERROR_UNKNOWN = "unknown"
 
+# S8: the key of the last tool of a request that every question of the mode is offered: what comes
+# before it is a prefix a provider can keep in its cache, whatever the question adds after it
+CACHE_POINT = "cache_point"
+
 # How a provider turns speech into text
 STT_NONE = "none"
 # The recording is given to a chat model that can listen
@@ -127,7 +131,9 @@ class BaseAdapter:
     ``blocks`` holds the provider-native content of an assistant turn. An
     adapter replays them only when they were produced by its own kind.
 
-    ``tools`` is a list of ``{"name", "description", "input_schema"}``.
+    ``tools`` is a list of ``{"name", "description", "input_schema"}``. The tools that are the
+    same from one question to the next come first; the last of them may carry ``CACHE_POINT``
+    (S8), where an adapter that caches by breakpoints puts one, and that the others leave out.
     """
     kind = None
 

@@ -64,3 +64,4 @@ from . import nudge_skill_learning
 from . import nudge_answer_cache
 from . import nudge_agent_plan  # S10, S11
 from . import nudge_plugin  # L3: plugins, after the skills, prompts and quick search it extends
+from . import nudge_provider_cache  # S8
