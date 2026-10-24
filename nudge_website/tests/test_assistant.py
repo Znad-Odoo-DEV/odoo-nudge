@@ -262,6 +262,21 @@ class TestAssistant(WebsiteCase, TransactionCase):
         Message._cron_archive_old()
         self.assertTrue(new.active, "0 keeps them")
 
+    def test_a_backlog_of_visitor_lines_is_archived_in_one_pass(self):
+        # Review odoo-tech #4: one batch a day never caught up with a busy website
+        Message = self.env["nudge.web.message"]
+        lines = Message.browse([
+            Message._log(self.website, self.public_user, "h%s" % n, "an old question", False).id for n in range(3)])
+        self.env.cr.execute(
+            "UPDATE nudge_web_message SET create_date = now() - interval '31 days' WHERE id IN %s", (tuple(lines.ids),))
+        lines.invalidate_recordset()
+        committed = []
+        self.patch(type(self.env["ir.cron"]), "_commit_progress",
+                   lambda cron, done=0, **kwargs: committed.append(done) or 10 ** 6)
+        self.assertGreaterEqual(Message._cron_archive_old(batch=1), 3)
+        self.assertFalse(any(lines.mapped("active")))
+        self.assertGreaterEqual(len(committed), 3, "Each batch is committed")
+
     def test_without_a_provider_the_files_still_answer(self):
         result = self.ask("returns policy thirty days")
         self.assertFalse(result["used_ai"])

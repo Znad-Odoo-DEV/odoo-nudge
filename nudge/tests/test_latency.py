@@ -159,15 +159,30 @@ class TestUsageRetention(NudgeCase, TransactionCase):
             ("company_id", "=", self.company.id), ("date", ">=", self.first),
             ("id", "not in", self.before.ids)])
         self.set_months(1)
-        self.assertEqual(self.Usage._cron_apply_retention(batch=2), 2)
-        self.assertEqual(self.Usage._cron_apply_retention(batch=2), 2)
-        self.assertEqual(self.Usage._cron_apply_retention(batch=2), 1)
+        committed = []
+        self.patch(type(self.env["ir.cron"]), "_commit_progress",
+                   lambda cron, done=0, **kwargs: committed.append(done) or 10 ** 6)
+        # Review odoo-tech #4: a pass goes on until nothing is left, each full batch committed
+        self.assertEqual(self.Usage._cron_apply_retention(batch=2), 5)
+        self.assertEqual(committed, [2, 2])
         self.assertEqual(self.Usage._cron_apply_retention(batch=2), 0)
         self.assertEqual(self.mine(), kept)
         self.assertFalse(self.Usage.sudo().browse(o.id for o in old).exists())
         self.assertEqual(spent_before, self.Usage._spent([
             ("company_id", "=", self.company.id), ("date", ">=", self.first),
             ("id", "not in", self.before.ids)]))
+
+    def test_a_purge_out_of_time_is_taken_up_by_the_next_pass_at_once(self):
+        for n in range(5):
+            self.add(self.first - relativedelta(months=3, days=n))
+        self.set_months(1)
+        self.patch(type(self.env["ir.cron"]), "_commit_progress", lambda cron, *args, **kwargs: 0)
+        cron = self.env.ref("nudge.cron_usage_retention")
+        Trigger = self.env["ir.cron.trigger"].sudo()
+        triggers = Trigger.search_count([("cron_id", "=", cron.id)])
+        self.assertEqual(self.Usage._cron_apply_retention(batch=2), 2)
+        self.assertEqual(Trigger.search_count([("cron_id", "=", cron.id)]), triggers + 1)
+        self.assertEqual(len(self.mine()), 3)
 
     def test_current_month_is_never_purged(self):
         this_month = self.add(self.first)
