@@ -64,3 +64,8 @@ msgstr "قرأ قواعد الاعتماد"
 #: code:addons/nudge_studio/tools/approvals.py:0
 msgid "Pointed inside Studio"
 msgstr "أشّر داخل Studio"
+
+#. module: nudge_studio
+#: model:nudge.skill,name:nudge_studio.skill_studio_approvals
+msgid "Studio approval rules"
+msgstr "قواعد الموافقة في ستوديو"
