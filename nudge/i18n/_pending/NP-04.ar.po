@@ -1,0 +1,178 @@
+# NP-04 Waiting room instead of refusal, PERF-02 Stop, PERF-04: Arabic, to merge into ar.po
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: ar\n"
+
+#. module: nudge
+#. odoo-python
+msgid "Nudge is answering other people right now. Your question waits for its turn."
+msgstr "Nudge يجيب أشخاصًا آخرين الآن. سؤالك ينتظر دوره."
+
+#. module: nudge
+#. odoo-javascript
+msgid "You are next in line (about %s s)."
+msgstr "أنت التالي في الدور (حوالي %s ثانية)."
+
+#. module: nudge
+#. odoo-javascript
+msgid "You are number %(position)s in line (about %(seconds)s s)."
+msgstr "ترتيبك %(position)s في الدور (حوالي %(seconds)s ثانية)."
+
+#. module: nudge
+#. odoo-javascript
+msgid "Nudge is still busy. Your question is kept: try it again in a moment."
+msgstr "ما زال Nudge مشغولًا. سؤالك محفوظ: أعد إرساله بعد قليل."
+
+#. module: nudge
+#. odoo-javascript
+msgid "Nudge is answering other people. Your question waits for its turn."
+msgstr "Nudge يجيب أشخاصًا آخرين. سؤالك ينتظر دوره."
+
+#. module: nudge
+#. odoo-javascript
+msgid "Try again"
+msgstr "أعد المحاولة"
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_slot
+msgid "Nudge Answer Slot"
+msgstr "مكان إجابة في Nudge"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_slot__state__ready
+msgid "Its Turn"
+msgstr "جاء دوره"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_slot__state__claimed
+msgid "Starting"
+msgstr "يبدأ"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_slot__state__streaming
+msgid "Answering"
+msgstr "يجيب"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_slot__state__cancelled
+msgid "Cancelled"
+msgstr "أُلغي"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_slot__state__expired
+msgid "Expired"
+msgstr "انتهت مهلته"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_slot__seen_at
+msgid "Last Asked"
+msgstr "آخر سؤال عن الدور"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_slot__seen_at
+msgid "When the browser last asked where the question stands."
+msgstr "متى سأل المتصفح آخر مرة عن موقع السؤال في الدور."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_slot__ready_at
+msgid "Turn Given"
+msgstr "وقت إعطاء الدور"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_slot__started_at
+msgid "Answer Started"
+msgstr "بدء الإجابة"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_slot__waiting_since
+msgid "Waiting Since"
+msgstr "ينتظر منذ"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_slot__ended_at
+msgid "Ended At"
+msgstr "انتهى في"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__stream_serial
+msgid "Stream Serial"
+msgstr "رقم الإجابة"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__stream_stopped
+msgid "Stream Stopped"
+msgstr "الإجابة الموقوفة"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_provider__max_parallel
+msgid "Answers at Once"
+msgstr "الإجابات في وقت واحد"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_provider__max_parallel
+msgid ""
+"How many answers this provider gives at the same time; the others wait in "
+"line, and start as soon as one ends. 0 is automatic: one for Ollama (a model "
+"on one machine answers one question at a time), otherwise only the limit of "
+"Nudge."
+msgstr ""
+"كم إجابة يعطي هذا المزوّد في الوقت نفسه؛ والبقية تنتظر دورها وتبدأ حالما تنتهي "
+"إحداها. 0 تلقائي: واحدة لـ Ollama (النموذج على جهاز واحد يجيب سؤالًا واحدًا في "
+"كل مرة)، وإلا فحدّ Nudge وحده."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_max_line
+msgid "Questions Waiting at Most"
+msgstr "أقصى عدد للأسئلة المنتظرة"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_max_line
+msgid ""
+"When Nudge answers as many people as it may at once, the next questions wait "
+"in line and start as soon as an answer ends; the person sees their place and "
+"can cancel. Past this many waiting, a question is refused."
+msgstr ""
+"حين يجيب Nudge أكبر عدد مسموح من الأشخاص في وقت واحد، تنتظر الأسئلة التالية "
+"دورها وتبدأ حالما تنتهي إجابة؛ ويرى الشخص موقعه في الدور ويستطيع الإلغاء. وإذا "
+"تجاوز عدد المنتظرين هذا الحد يُرفض السؤال."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid "Busy Times and Fallback"
+msgstr "أوقات الازدحام والنموذج الاحتياطي"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid ""
+"When Nudge answers as many people as it may at once, the next questions wait "
+"in line instead of being refused: the person sees their place and about how "
+"long, and can cancel. Their answer starts as soon as one ends. A provider may "
+"also take fewer at once (Answers at Once, on the provider; one for Ollama)."
+msgstr ""
+"حين يجيب Nudge أكبر عدد مسموح من الأشخاص في وقت واحد، تنتظر الأسئلة التالية "
+"دورها بدل أن تُرفض: يرى الشخص موقعه والمدة التقريبية ويستطيع الإلغاء، وتبدأ "
+"إجابته حالما تنتهي إحدى الإجابات. ويمكن أن يأخذ المزوّد عددًا أقل في وقت واحد "
+"(الإجابات في وقت واحد، في إعدادات المزوّد؛ واحدة لـ Ollama)."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__queue_wait_ms
+msgid "Wait in Line (ms)"
+msgstr "الانتظار في الدور (ميلي ثانية)"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_message__queue_wait_ms
+msgid ""
+"How long the question waited in line for a place before this answer started "
+"(NP-04)."
+msgstr "كم انتظر السؤال دوره قبل أن تبدأ هذه الإجابة (NP-04)."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_message__first_line_ms
+msgid "First Words (ms)"
+msgstr "أول الكلمات (ميلي ثانية)"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_message__first_line_ms
+msgid "From the question reaching the server to the first words of the answer."
+msgstr "من وصول السؤال إلى الخادم حتى أول كلمات الإجابة."
