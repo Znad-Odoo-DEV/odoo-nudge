@@ -7,6 +7,7 @@ import {
     fields,
     getService,
     models,
+    mockService,
     mountView,
     onRpc,
     webModels,
@@ -184,4 +185,38 @@ test("asked to be taken somewhere, the screens Nudge found are offered", async (
     expect(asked.messages).toHaveLength(1);
     expect(".o_nudge_found_menu").toHaveText("Invoicing/Vendors/Bills");
     expect(".o_nudge_found_open").toHaveCount(1);
+});
+
+test("a figure of the data comes with a Show list button that opens the list as the person", async () => {
+    const listing = {
+        type: "ir.actions.act_window",
+        name: "Showing: Contact, Name contains Raghad, 2 rows",
+        res_model: "partner",
+        views: [[false, "list"], [false, "form"]],
+        view_mode: "list,form",
+        target: "current",
+        domain: [["name", "ilike", "Raghad"]],
+    };
+    const asked = setupNudge({
+        config: { commands: COMMANDS },
+        answer: answered(
+            { type: "delta", text: "2 contacts. Showing: Contact, Name contains Raghad, 2 rows" },
+            { type: "found", menus: [], records: [], lists: [{ label: "Show list", action: listing }] }
+        ),
+    });
+    mockService("action", {
+        doAction(action) {
+            expect.step(`open ${action.res_model} ${JSON.stringify(action.domain)}`);
+        },
+    });
+    await mountView({ resModel: "partner", type: "form", arch: "<form><field name='name'/></form>", resId: 1 });
+    const nudge = getService("nudge");
+    nudge.open();
+    await nudge.send("how many contacts are named Raghad");
+    await animationFrame();
+    expect(asked.messages).toHaveLength(1);
+    expect(".o_nudge_found_showlist").toHaveCount(1);
+    expect(".o_nudge_found_showlist").toHaveText("Show list");
+    await click(".o_nudge_found_showlist");
+    expect.verifySteps(['open partner [["name","ilike","Raghad"]]']);
 });

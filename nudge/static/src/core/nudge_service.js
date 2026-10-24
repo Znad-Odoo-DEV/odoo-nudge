@@ -951,7 +951,9 @@ function isReadable(file) {
                 guidance: shown?.steps || [],
                 products: products?.items || null,
                 productQuery: products?.query || "",
-                found: screens ? { menus: screens.menus || [], records: screens.records || [] } : null,
+                found: screens
+                    ? { menus: screens.menus || [], records: screens.records || [], lists: screens.lists || [] }
+                    : null,
                 chart: chart ? (({ type, ...drawn }) => drawn)(chart) : null,
                 changes: changes ? (({ type, ...listed }) => listed)(changes) : null,
                 choice: "",
@@ -1136,6 +1138,11 @@ function isReadable(file) {
             if (kind === "record") {
                 return openRecord({ model: item.model, id: item.id });
             }
+            if (kind === "list") {
+                // The list behind a figure (Ask the data): the action the server wrote for the
+                // person, opened as them; the server shows what their rights allow
+                return openList(item.action);
+            }
             if (kind === "show") {
                 // A field of an explanation, shown with the pointer
                 return showGuidance([
@@ -1222,6 +1229,16 @@ function isReadable(file) {
             try {
                 close();
                 await action.doAction(await orm.call(model, method, [[id]]));
+            } catch {
+                // Told in the answer all the same
+            }
+        }
+
+        /** The list behind a figure, as the server wrote it for the person */
+        async function openList(listing) {
+            try {
+                close();
+                await action.doAction(listing);
             } catch {
                 // Told in the answer all the same
             }
@@ -1585,7 +1602,7 @@ function isReadable(file) {
                 }
                 case "found":
                     // Screens Nudge found itself: the pointer to each, or Open
-                    answer.found = { menus: event.menus || [], records: event.records || [] };
+                    answer.found = { menus: event.menus || [], records: event.records || [], lists: event.lists || [] };
                     break;
                 case "filter":
                     answer.content = join(answer.content, event.text);
