@@ -112,7 +112,8 @@ class TestConnectorBudget(ConnectCase, TransactionCase):
         self.assertEqual(len(lines) - before, 1)
         line = lines.sorted("id")[-1]
         self.assertEqual((line.tokens, line.cost, line.company_id), (0, 0.0, self.env.company))
-        self.assertEqual(line.date, fields.Date.context_today(self.env["res.users"]))
+        # Today in the zone of the person who called: near midnight it is not the test's own day
+        self.assertEqual(line.date, fields.Date.context_today(line.with_user(line.user_id)))
 
     def test_a_person_is_refused_at_the_limit_of_calls(self):
         before = len(self.lines())
