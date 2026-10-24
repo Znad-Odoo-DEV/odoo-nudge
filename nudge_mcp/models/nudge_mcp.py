@@ -455,7 +455,7 @@ class NudgeMcp(models.AbstractModel):
         slot = self.env["nudge.slot"]._claim_channel(conversation, provider)
         try:
             self._mark_call(True, provider)
-            slot._handover()
+            slot._handover(mark_committed=True)
             yield slot
         finally:
             try:
