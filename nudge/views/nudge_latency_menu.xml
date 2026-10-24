@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="nudge_menu_latency" name="Latency and Cost" sequence="35"
+              parent="nudge_menu_root" action="nudge_latency_action"
+              groups="nudge.group_nudge_manager"/>
+</odoo>
