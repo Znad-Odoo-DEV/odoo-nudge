@@ -14,7 +14,8 @@ from odoo.addons.nudge.tools import translation as helper
 from .common import NudgeCase
 
 SOURCE = "Nudge Memory"
-TRANSLATED = "Gespeicherte Antworten"
+# Keeps the name of the module, a term of the glossary
+TRANSLATED = "Nudge-Gedächtnis"
 
 
 class TranslatingAdapter(FakeAdapter):

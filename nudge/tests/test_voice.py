@@ -156,7 +156,7 @@ class TestSpeechAdapter(BaseCase):
         self.assertEqual(result, {
             "text": "كيف أؤكد عرض السعر؟",
             "model": "served-model",
-            "usage": {"input_tokens": 130, "output_tokens": 9, "cache_read_tokens": 0},
+            "usage": {"input_tokens": 130, "output_tokens": 9, "cache_read_tokens": 0, "cache_write_tokens": 0},
         })
         request = posted[0]
         self.assertFalse(request["stream"])
