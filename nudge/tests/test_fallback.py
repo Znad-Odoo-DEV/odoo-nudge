@@ -131,6 +131,26 @@ class TestFallback(NudgeCase, TransactionCase):
         self.assertEqual(events[1]["reason"], "private")
         self.assertEqual(set(asked), {self.local.id}, "Nothing went to a provider outside")
 
+    def test_a_destination_the_company_refuses_is_stood_in_for_by_the_allowed_fallback(self):
+        # NP-15 + NP-10: the list allows the local server only; the main provider is refused
+        self.env.company.nudge_egress_hosts = "localhost:11434"
+        adapters, asked = self.answer_with(local={"reply": "From the local model."})
+        _conversation, events = self.question(self.user_a, "Where are quotations?")
+        self.assertEqual(asked, [self.local.id], "The refused provider is never asked")
+        notice = [event for event in events if event["type"] == "fallback"]
+        self.assertEqual(len(notice), 1)
+        self.assertEqual((notice[0]["model"], notice[0]["local"], notice[0]["reason"]),
+                         ("qwen-local", True, "destination"))
+        self.assertEqual(events[-1]["state"], "complete")
+        answer = self.env["nudge.message"].sudo().browse(events[-1]["message_id"])
+        self.assertEqual(answer.content, "From the local model.")
+        # A fallback the list refuses too leaves the plain refusal
+        self.env.company.nudge_egress_hosts = "other.invalid"
+        _adapters, asked = self.answer_with()
+        with self.assertRaisesRegex(UserError, "not on the list of allowed destinations"):
+            self.question(self.user_a, "And invoices?")
+        self.assertEqual(asked, [])
+
     def test_in_private_mode_a_fallback_outside_is_never_used(self):
         self.env.company.nudge_private_mode = True
         self.Parameter.set_param(FALLBACK_PROVIDER_PARAM, str(self.other.id))

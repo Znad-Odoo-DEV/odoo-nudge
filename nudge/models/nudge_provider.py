@@ -582,6 +582,14 @@ class NudgeProvider(models.Model):
             if provider.stt_url:
                 egress.check(provider.stt_url, "voice")
 
+    def _egress_allowed(self):
+        """:return: whether the allowed destinations of the company let a request go to this provider"""
+        try:
+            self._check_egress()
+        except UserError:
+            return False
+        return True
+
     def _egress_url(self):
         """:return: where the requests of this provider go: its address, or the public one of its maker"""
         self.ensure_one()
