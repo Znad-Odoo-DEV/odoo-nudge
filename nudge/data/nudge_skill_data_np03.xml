@@ -209,7 +209,7 @@ kind of business it does not know, say you have no reference and ask what the bu
         <field name="recipe_key">nudge-skill-guided-tours</field>
         <field name="name">Showing the way on screen</field>
         <field name="summary">Show on the person's screen where something is and how to do it: pointer, menu path, guided tour, writing in a field.</field>
-        <field name="trigger_words">where is, where do i, how do i, show me where, show me how, walk me through, guide me, point to, tour, take me to, اين, وين, كيف اعمل, دلني, ورجيني, جولة, خذني الى, وجهني</field>
+        <field name="trigger_words">walk me through, walkthrough, guide me, guided tour, tour, show me around, take me to, write it in the field, جولة, جوله, دلني, وجهني, خذني الى, علمني خطوة خطوة, اكتبها بالحقل</field>
         <field name="tool_names">show_tour,show_on_screen,show_menu_path,find_screen,open_screen,write_in_field</field>
         <field name="modes">talk,agent,dev</field>
         <field name="version">1.0.0</field>

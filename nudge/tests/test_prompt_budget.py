@@ -18,8 +18,9 @@ from .common import NudgeCase
 _logger = logging.getLogger(__name__)
 
 # What a call may weigh, in tokens: the card asks under 12k for Agent; the base prompt, the overview of
-# the database and the index of the skills leave about 14k for a typical question of that mode
-BUDGET = {"talk": 11000, "agent": 15000, "agent_heaviest": 16500, "dev": 20000}
+# the database and the index of the skills leave about 14k for a typical question of that mode. Talk measured
+# 11.1k for an import question once 24 skills were in the index (about 35 tokens each)
+BUDGET = {"talk": 11500, "agent": 15000, "agent_heaviest": 16500, "dev": 20000}
 
 PLAIN = "How do I record a payment from a customer?"
 INVOICE = "Which invoices of Raghad are still unpaid?"
