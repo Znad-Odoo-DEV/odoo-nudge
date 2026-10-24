@@ -230,6 +230,28 @@ class TestDocumentCatalogue(NudgeCase, TransactionCase):
         self.env["nudge.step"].with_user(self.maker).undo_changes(step.id)
         self.assertFalse(bom.active)
 
+    def test_the_price_beside_a_component_is_its_cost_and_units_are_found(self):
+        # Found in the live trial: the cost of a component was written as its sales price, "set" and "m2" fell
+        # back to the default unit, and the PDF's spread letters ("W ood V arnish") reached the name
+        from odoo.addons.nudge.tools import document_catalogue as catalogue
+
+        self.no_provider()
+        env = self.csv_env("Component,Code,Qty,UoM,Price\nRaghad Gasket,GK1,2,m2,3.5\nRaghad Kit,KT1,1,set,9\n")
+        result = self.run_tool(env, target="bom", finished_product="Raghad Cabinet Two")
+        step, done = self.say_yes(env, result)
+        bom = self.env["mrp.bom"].browse(done.records[1])
+        gasket = bom.bom_line_ids.product_id.filtered(lambda p: p.default_code == "GK1")
+        self.assertEqual(gasket.standard_price, 3.5)
+        self.assertNotEqual(gasket.list_price, 3.5)
+        kit = bom.bom_line_ids.product_id.filtered(lambda p: p.default_code == "KT1")
+        self.assertEqual(kit.uom_id, catalogue.find_uom(self.env, "units"))
+        square = self.env["uom.uom"].search([("name", "=", "m²")], limit=1)
+        if square:
+            self.assertEqual(gasket.uom_id, square)
+        self.assertEqual(catalogue._text("W ood V arnish"), "Wood Varnish")
+        self.assertEqual(catalogue._text("INV -TRIAL"), "INV-TRIAL")
+        self.assertEqual(catalogue._text("Grade B steel"), "Grade B steel")
+
     def test_a_pdf_bom_names_its_product_and_a_second_bom_is_not_made_by_chance(self):
         function = reading({"Bill of materials": BOM_PDF})
         self.patch(type(self.env["nudge.provider"]), "_complete_once", function)
