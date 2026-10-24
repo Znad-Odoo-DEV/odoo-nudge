@@ -13,6 +13,7 @@ from ..llm import attachments, ollama
 from ..llm import snapshot as screen
 from ..profile import retrieval
 from .ir_http import nudge_version
+from ..tools.deadline import until
 from ..tools.base import MODE_AGENT, MODE_DEV, MODE_TALK
 
 _logger = logging.getLogger(__name__)
@@ -538,8 +539,8 @@ class NudgeConversation(models.Model):
                 is_administrator=self.env.user.has_group("base.group_system"),
                 # A small model reads the short instructions
                 compact=tool_set == "essential",
-                background=bool(conversation.run_id.is_background),
                 ask_data=tools.base.ask_tier_applies(self.env),
+                background=bool(conversation.run_id.is_background),
                 work="\n\n".join(block for block in (
                     self._chat_where_the_work_is(), self.env["nudge.source"]._get_text()) if block)),
             "tools": self._chat_tools(mode, tool_set),
@@ -665,7 +666,8 @@ class NudgeConversation(models.Model):
             # A model of the server that sees reads it; without one, said
             # before anything is sent: the model would refuse the picture
             media_type, data = found["image"]
-            seen = provider._read_picture(media_type, data, text)
+            seen = provider._read_picture(
+                media_type, data, text, deadline=until(self._get_stream_seconds(provider)))
             found = dict(found, image=None, text=self.env._(
                 "What the picture shows, as read by %(model)s:\n%(text)s",
                 model=provider.picture_model or "", text=seen), kept_image=found["image"], seen=seen)
@@ -677,7 +679,8 @@ class NudgeConversation(models.Model):
             media_type, data = found["image"]
             try:
                 found = dict(found, seen_by_kind=True, seen=provider._read_picture(
-                    media_type, data, text, model=provider.model_name, prompt=ollama.PRODUCT_PROMPT))
+                    media_type, data, text, model=provider.model_name, prompt=ollama.PRODUCT_PROMPT,
+                    deadline=until(self._get_stream_seconds(provider))))
             except UserError as error:
                 _logger.info("Nudge: the picture was not described for the products: %s", error)
 
