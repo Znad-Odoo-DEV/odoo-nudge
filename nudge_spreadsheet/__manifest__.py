@@ -19,6 +19,7 @@ Installed by itself when Nudge and the Spreadsheet module are both there.
         "security/nudge_spreadsheet_security.xml",
         "security/ir.model.access.csv",
         "views/nudge_spreadsheet_views.xml",
+        "data/nudge_skill_data.xml",
     ],
     "assets": {
         "web.assets_backend": [

@@ -98,3 +98,4 @@ from . import test_ui_preferences  # NP-23
 from . import test_skills
 from . import test_quality_gate
 from . import test_prompt_budget  # NP-03
+from . import test_skill_coverage

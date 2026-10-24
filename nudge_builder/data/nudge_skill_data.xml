@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- NP-03: skills of Nudge (nudge_builder): the instructions and tools of one kind of work, given only to the questions
+     that need them. noupdate: an update never rewrites one you changed; archive the ones you do not want. -->
+<odoo>
+    <data noupdate="1">
+    <record id="skill_website_builder" model="nudge.skill">
+        <field name="key">website-builder</field>
+        <field name="recipe_key">nudge-skill-website-builder</field>
+        <field name="name">Building a website or shop</field>
+        <field name="summary">Build a website or an online shop from a description, check it and fix what the check found (Agent).</field>
+        <field name="trigger_words">website, web site, online shop, webshop, e-commerce, landing page, build a site, check the site, fix the site, موقع, موقع الكتروني, متجر الكتروني, متجر, صفحة هبوط, ابني موقع</field>
+        <field name="tool_names">start_website_builder,build_shop,check_site,fix_site</field>
+        <field name="modes">talk,agent,dev</field>
+        <field name="version">1.0.0</field>
+        <field name="sequence">70</field>
+        <field name="state">published</field>
+        <field name="origin">module</field>
+        <field name="test_sentence">Build an online shop website for my company</field>
+        <field name="test_expect">start_website_builder</field>
+        <field name="instructions">## Building a website or shop
+- start_website_builder opens the builder for a new site; build_shop makes the shop from the products; check_site audits the result and fix_site repairs what it found, each after the person's yes.
+</field>
+    </record>
+    </data>
+</odoo>

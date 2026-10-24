@@ -1937,3 +1937,8 @@ msgstr "لم يُبنَ أي موقع بعد"
 msgid "Ask Nudge in Developer mode to build a website: it appears here."
 msgstr "اطلب من Nudge في وضع المطوّر بناء موقع إلكتروني: سيظهر هنا."
 
+
+#. module: nudge_builder
+#: model:nudge.skill,name:nudge_builder.skill_website_builder
+msgid "Building a website or shop"
+msgstr "بناء موقع أو متجر"

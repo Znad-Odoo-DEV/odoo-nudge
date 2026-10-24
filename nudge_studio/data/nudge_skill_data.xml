@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- NP-03: skills of Nudge (nudge_studio): the instructions and tools of one kind of work, given only to the questions
+     that need them. noupdate: an update never rewrites one you changed; archive the ones you do not want. -->
+<odoo>
+    <data noupdate="1">
+    <record id="skill_studio_approvals" model="nudge.skill">
+        <field name="key">studio-approvals</field>
+        <field name="recipe_key">nudge-skill-studio-approvals</field>
+        <field name="name">Studio approval rules</field>
+        <field name="summary">Read and make Studio approval rules on a button: one rule per button and approver, steps in order (Developer).</field>
+        <field name="trigger_words">approval rule, approval rules, studio, studio approval, who may press, who can validate, قاعدة موافقة, قواعد الموافقة, ستوديو, من يضغط الزر</field>
+        <field name="tool_names">prepare_approval_rule,read_approval_rules,show_in_studio</field>
+        <field name="modes">dev</field>
+        <field name="group_ids" eval="[Command.link(ref('base.group_system'))]"/>
+        <field name="version">1.0.0</field>
+        <field name="sequence">70</field>
+        <field name="state">published</field>
+        <field name="origin">module</field>
+        <field name="test_sentence">Who may press the Confirm button? Add a Studio approval rule</field>
+        <field name="test_expect">read_approval_rules</field>
+        <field name="instructions">## Studio approval rules
+- Who may press a button is an approval rule on that button: read_approval_rules for what exists, then prepare_approval_rule (one rule per button and per approver, steps in order); show_in_studio shows them in Studio.
+</field>
+    </record>
+    </data>
+</odoo>

@@ -19,6 +19,9 @@ Studio are both there.
     "images": ["static/description/banner.png"],
     "depends": ["nudge", "web_studio"],
     "auto_install": True,
+    "data": [
+        "data/nudge_skill_data.xml",
+    ],
     "assets": {
         "web.assets_backend": [
             "nudge_studio/static/src/**/*",

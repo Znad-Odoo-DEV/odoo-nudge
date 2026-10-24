@@ -134,3 +134,8 @@ msgstr "ملف جدول البيانات"
 #: model:ir.model.fields,field_description:nudge_spreadsheet.field_nudge_spreadsheet__thumbnail
 msgid "Thumbnail"
 msgstr "صورة مصغرة"
+
+#. module: nudge_spreadsheet
+#: model:nudge.skill,name:nudge_spreadsheet.skill_spreadsheets
+msgid "Spreadsheets of figures"
+msgstr "جداول البيانات"

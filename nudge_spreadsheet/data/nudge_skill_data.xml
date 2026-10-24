@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- NP-03: skills of Nudge (nudge_spreadsheet): the instructions and tools of one kind of work, given only to the questions
+     that need them. noupdate: an update never rewrites one you changed; archive the ones you do not want. -->
+<odoo>
+    <data noupdate="1">
+    <record id="skill_spreadsheets" model="nudge.skill">
+        <field name="key">spreadsheets</field>
+        <field name="recipe_key">nudge-skill-spreadsheets</field>
+        <field name="name">Spreadsheets of figures</field>
+        <field name="summary">Make a spreadsheet of figures from the database, with formulas and a chart, to open and keep (Agent).</field>
+        <field name="trigger_words">spreadsheet, make a spreadsheet, excel sheet, sheet of figures, workbook, جدول, جدول بيانات, اكسل, ورقة عمل, اعمل جدول</field>
+        <field name="tool_names">make_spreadsheet</field>
+        <field name="modes">agent,dev</field>
+        <field name="version">1.0.0</field>
+        <field name="sequence">70</field>
+        <field name="state">published</field>
+        <field name="origin">module</field>
+        <field name="test_sentence">Make a spreadsheet of the sales per customer</field>
+        <field name="test_expect">make_spreadsheet</field>
+        <field name="instructions">## Spreadsheets of figures
+- make_spreadsheet builds the sheet from what you read with aggregate_records or search_records: read first, then give the rows and the formulas; say where the person finds it.
+</field>
+    </record>
+    </data>
+</odoo>
