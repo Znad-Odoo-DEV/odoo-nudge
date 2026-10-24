@@ -138,6 +138,23 @@ export function asksHowTo(text) {
     return HOW_TO.test(String(text || ""));
 }
 
+// A question of figures: "how many contacts", "كم عدد الموظفين", "قديش", "kam". It asks for a number, not for
+// steps, so it is never offered the guided tour
+const FIGURES = new RegExp(
+    "(\\b(how (many|much)|number of|count of|total (of|number)|addesh|adesh|kam|kaam)\\b" +
+        "|(^|\\s)(كم|كام|قديش|قدّيش|قدايش|شكد|شقد|بكم)(?=$|[\\s؟?.,،]))",
+    "i"
+);
+
+/**
+ * @param {string} text
+ * @returns {boolean} whether the message asks for a figure (a count, an amount), not for steps
+ */
+export function asksForFigures(text) {
+    const said = String(text || "");
+    return FIGURES.test(said) && !asksHowTo(said);
+}
+
 // A comparison or a report: the person is asked whether they want it in the
 // chat or as a spreadsheet
 const REPORT = new RegExp(
@@ -2051,8 +2068,9 @@ function isReadable(file) {
                 attachment: attachment?.name || "",
             };
             state.messages.push(question);
-            if (report || productQuery !== null) {
-                // A report is not a how-to, nor a product search: nothing to show with the pointer
+            if (report || productQuery !== null || (asksForFigures(text) && explain !== EXPLAIN_DO)) {
+                // A report is not a how-to, nor a product search, nor a question of figures ("how many
+                // contacts"): nothing to show with the pointer, and the person is not asked how
                 explain = null;
             } else if (!isSharing()) {
                 // Nothing to point at without the screen: in writing, or the work
