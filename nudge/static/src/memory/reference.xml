@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!-- S15: what is said under an answer: who approved it, the choices, Save as reference -->
+    <t t-name="nudge.Reference">
+        <div t-if="info.label" class="o_nudge_reference_label" dir="auto">
+            <i class="fa fa-check-circle-o" aria-hidden="true"/>
+            <span t-esc="info.label"/>
+        </div>
+        <div t-if="info.choices.length" class="o_nudge_reference_choices" role="group"
+             aria-label="Approved answers to choose from">
+            <button t-foreach="info.choices" t-as="choice" t-key="choice.id" type="button"
+                    class="btn btn-sm btn-light o_nudge_reference_choice" dir="auto"
+                    t-att-disabled="info.busy" t-on-click="() => this.choose(choice.id)">
+                <i class="fa fa-bookmark-o" aria-hidden="true"/>
+                <span t-esc="choice.question"/>
+            </button>
+        </div>
+        <div t-if="canSave" class="o_nudge_reference_save_row">
+            <button type="button" class="btn btn-sm btn-link o_nudge_reference_save"
+                    title="Keep this answer: the same question is then answered without the AI"
+                    t-att-disabled="info.busy" t-on-click="save">
+                <i class="fa fa-bookmark" aria-hidden="true"/> Save as reference
+            </button>
+        </div>
+    </t>
+
+    <t t-inherit="nudge.Message" t-inherit-mode="extension">
+        <xpath expr="//div[@t-if='props.remembered']" position="after">
+            <NudgeReference t-if="isAssistant and props.messageId" messageId="props.messageId"
+                            remembered="!!props.remembered" state="props.state"/>
+        </xpath>
+    </t>
+
+    <t t-inherit="nudge.Panel" t-inherit-mode="extension">
+        <xpath expr="//NudgeMessage[@remembered='message.remembered']" position="attributes">
+            <attribute name="messageId">message.id</attribute>
+        </xpath>
+    </t>
+
+</templates>

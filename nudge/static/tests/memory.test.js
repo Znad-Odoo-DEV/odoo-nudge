@@ -29,6 +29,8 @@ defineModels([Partner, ResCompany, ResPartner, ResUsers]);
 const FORM = /* xml */ `<form><field name="name"/></form>`;
 
 async function start(params = {}) {
+    // What is said under an answer from memory (S15): nothing, in these tests
+    onRpc("nudge.memory", "reference_info", () => ({ label: "", choices: [] }));
     const asked = setupNudge({ ...params, config: { can_use_agent: true, ...params.config } });
     await mountView({ resModel: "partner", type: "form", arch: FORM, resId: 1 });
     const nudge = getService("nudge");
