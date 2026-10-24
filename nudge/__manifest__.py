@@ -84,6 +84,7 @@ Without them the rest works and the feature says what is missing.
         "views/nudge_built_views.xml",
         "views/nudge_slot_views.xml",
         "views/nudge_auditor_views.xml",
+        "views/nudge_coverage_views.xml",
     ],
     "assets": {
         "web.assets_backend": [

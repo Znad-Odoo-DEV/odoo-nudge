@@ -36,6 +36,7 @@ from . import nudge_recipe_wizard
 from . import nudge_translation
 from . import nudge_meeting
 from . import nudge_question
+from . import nudge_coverage
 from . import res_users
 from . import res_partner
 from . import nudge_coach

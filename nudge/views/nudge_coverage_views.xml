@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- NP-12: the sentences the rules could not answer, with one click to teach them -->
+    <record id="nudge_coverage_view_list" model="ir.ui.view">
+        <field name="name">nudge.coverage.view.list</field>
+        <field name="model">nudge.coverage</field>
+        <field name="arch" type="xml">
+            <list string="Missed Sentences" editable="bottom" create="0" delete="0"
+                  decoration-muted="state == 'added'">
+                <field name="sample"/>
+                <field name="times"/>
+                <field name="phrase" readonly="state == 'added'"/>
+                <field name="intent" readonly="state == 'added'"/>
+                <field name="result" optional="show"/>
+                <field name="state" widget="badge" decoration-success="state == 'added'"/>
+                <field name="company_id" optional="show" groups="base.group_multi_company"/>
+                <button name="action_add_entry" type="object" string="Make entry" icon="fa-plus"
+                        class="btn-link" invisible="state == 'added'"/>
+                <button name="action_keep_answer" type="object" string="Save as an answer" icon="fa-comment"
+                        class="btn-link" invisible="state == 'added'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_coverage_action" model="ir.actions.act_window">
+        <field name="name">Missed Sentences</field>
+        <field name="res_model">nudge.coverage</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">The rules understood everything asked this week</p>
+            <p>
+                Here are the sentences asked in the last seven days that Nudge could not answer without an AI,
+                the most asked first. Write the word it did not know and what it means, then press Make entry:
+                the next time, Nudge understands it without any AI. Or save an answer for the sentence.
+            </p>
+        </field>
+    </record>
+
+    <record id="nudge_coverage_open_action" model="ir.actions.server">
+        <field name="name">Missed Sentences</field>
+        <field name="model_id" ref="model_nudge_coverage"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open()</field>
+    </record>
+
+    <menuitem id="nudge_menu_coverage" name="Missed Sentences" sequence="22"
+              parent="nudge_menu_knowledge" action="nudge_coverage_open_action"
+              groups="nudge.group_nudge_manager"/>
+</odoo>

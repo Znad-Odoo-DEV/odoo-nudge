@@ -8,6 +8,8 @@ Current version: nudge 19.0.1.58.0, nudge_mcp 19.0.1.1.0, nudge_connect 19.0.1.0
 - NP-04: the external assistants (MCP) and the messaging apps take their places in the same line as the panel (`nudge.slot._claim_channel`, `NudgeBusy`); Arabic in i18n/_pending/NP-04-channels.ar.po.
 - NP-16: Nudge Auditor, a time-boxed read-only persona: Ask the data plus the log of what Nudge did in their companies; access until a date (daily cron and a check on each request), their questions kept against retention and listed for managers, an admin wizard to add one; Arabic in i18n/_pending/NP-16.ar.po.
 - NP-17: certificate and credential expiry watch: managers are told 60, 30 and 7 days before and on the day, once each, for the ZATCA production certificate and the certificates of Odoo where they exist, and for credentials entered by hand in Health Check, Credential Expiry; only dates are read; Arabic in i18n/_pending/NP-17.ar.po.
+- NP-11: a sentence nearly understood is offered back as up to two "Did you mean" choices (the missing word asked for), and "what is waiting for me today" is answered by rules from the activities, approvals and digest lines; the panel needs the `commands` of a `found` event passed through; Arabic in i18n/_pending/NP-11.ar.po.
+- NP-12: Missed Sentences page for managers (Make entry as a command word, Save as an answer), and an Arabic question finds English documentation pages through the lexicon and a glossary.
 - Help of Answers at the Same Time describes the waiting line; Arabic in i18n/_pending/LEAD-finish.ar.po.
 - SEC-01: a field named signature is hidden unless it is written text (HTML or text); keys, hashes and hmac stay hidden.
 - The picture reading takes the deadline of the answer.
