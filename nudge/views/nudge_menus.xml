@@ -33,7 +33,7 @@
     <menuitem id="nudge_menu_notes" name="Business Notes" sequence="20"
               parent="nudge_menu_knowledge" action="nudge_note_action"/>
 
-    <menuitem id="nudge_menu_memory" name="Remembered Answers" sequence="22"
+    <menuitem id="nudge_menu_memory" name="Nudge Memory" sequence="22"
               parent="nudge_menu_knowledge" action="nudge_memory_action"/>
 
     <menuitem id="nudge_menu_sources" name="Company Files" sequence="25"
