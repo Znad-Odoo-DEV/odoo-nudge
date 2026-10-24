@@ -1,0 +1,922 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* nudge_connect
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-24 05:50+0000\n"
+"PO-Revision-Date: 2026-10-24 05:50+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid ""
+"%(count)s tools read: %(new)s new, %(changed)s changed and no longer "
+"allowed, %(gone)s gone."
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid ""
+"%s: the address must start with https:// (http:// only for this machine, "
+"localhost)."
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.actions.act_window,help:nudge_connect.nudge_connector_action
+msgid ""
+"A connector is an outside system that speaks MCP: a sister company's Odoo, a calendar, a chat,\n"
+"                a document store. Add its address, read its tools, and allow the ones Nudge may use: reads run\n"
+"                for the person, writes wait for their yes."
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_nudge_connector__key
+msgid ""
+"A short name of small letters, digits and _: the tools are called "
+"cx_<key>__<tool>."
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid ""
+"A tool comes in Not Allowed. Open it, read what it says and what it takes, and\n"
+"                                allow it as Read (runs at once for the person) or Write (the person sees exactly\n"
+"                                what is sent and says yes first). A tool whose description changes on the server\n"
+"                                is not allowed any more until it is allowed again."
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_call__access
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_tool__access
+msgid "Access"
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "Activate"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__activated_on
+msgid "Activated On"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__active
+#: model:ir.model.fields.selection,name:nudge_connect.selection__nudge_connector__state__active
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_search
+msgid "Active"
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/tools/connectors.py:0
+msgid "Address"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__allowed_count
+msgid "Allowed Tools"
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid "Another connector has the key %s."
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_call__result_chars
+msgid "Answer Size (Characters)"
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_search
+msgid "Archived"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_call__arguments
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_tool__input_schema
+msgid "Arguments"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_tool__input_schema_text
+msgid "Arguments Taken"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_nudge_connector_tool__description
+msgid ""
+"As the server wrote it. Read it before allowing the tool: it is what the AI "
+"reads of the tool."
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_call__user_id
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_call_view_search
+msgid "Asked By"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__auth_type
+msgid "Authentication"
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "Back to Draft"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__bearer_token
+#: model:ir.model.fields.selection,name:nudge_connect.selection__nudge_connector__auth_type__bearer
+msgid "Bearer Token"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__call_ids
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "Calls"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__oauth_client_id
+msgid "Client ID"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__oauth_client_secret
+msgid "Client Secret"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model,name:nudge_connect.model_res_company
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__company_ids
+msgid "Companies"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_call__company_id
+msgid "Company"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model,name:nudge_connect.model_res_config_settings
+msgid "Config Settings"
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.actions.act_window,help:nudge_connect.nudge_connector_action
+msgid "Connect Nudge to an outside system"
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/tools/connectors.py:0
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_call__connector_id
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_tool__connector_id
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_call_view_search
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "Connector"
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_call_view_form
+msgid "Connector Call"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.actions.act_window,name:nudge_connect.nudge_connector_call_action
+#: model:ir.ui.menu,name:nudge_connect.nudge_connect_menu_calls
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_call_view_list
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_call_view_search
+msgid "Connector Calls"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_call__tool_id
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_tool_view_form
+msgid "Connector Tool"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.actions.act_window,name:nudge_connect.nudge_connector_action
+#: model:ir.ui.menu,name:nudge_connect.nudge_connect_menu_connectors
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_list
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_search
+#: model_terms:ir.ui.view,arch_db:nudge_connect.res_config_settings_view_form_connect
+msgid "Connectors"
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.res_config_settings_view_form_connect
+msgid "Connectors (MCP)"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_res_company__nudge_connect_disabled
+#: model:ir.model.fields,field_description:nudge_connect.field_res_config_settings__nudge_connect_disabled
+msgid "Connectors Off"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_res_company__nudge_connect_read_only_first_month
+#: model:ir.model.fields,field_description:nudge_connect.field_res_config_settings__nudge_connect_read_only_first_month
+msgid "Connectors Read-Only in Their First Month"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_call__conversation_id
+msgid "Conversation"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__create_uid
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_call__create_uid
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_tool__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__create_date
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_call__create_date
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_tool__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "Credential"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__has_secret
+msgid "Credential Set"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_tool__definition_hash
+msgid "Definition Hash"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_tool__description
+msgid "Description"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__display_name
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_call__display_name
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_tool__display_name
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_conversation__display_name
+#: model:ir.model.fields,field_description:nudge_connect.field_res_company__display_name
+#: model:ir.model.fields,field_description:nudge_connect.field_res_config_settings__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields.selection,name:nudge_connect.selection__nudge_connector_call__state__done
+msgid "Done"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields.selection,name:nudge_connect.selection__nudge_connector__state__draft
+msgid "Draft"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_call__duration_ms
+msgid "Duration (ms)"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_call__error
+msgid "Error"
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.actions.act_window,help:nudge_connect.nudge_connector_call_action
+msgid ""
+"Every call Nudge makes to a connector is kept here: who asked, what was sent (secrets masked),\n"
+"                the size of the answer and the time it took."
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields.selection,name:nudge_connect.selection__nudge_connector_call__state__failed
+msgid "Failed"
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_call_view_search
+msgid "Failed or Refused"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__group_ids
+msgid "Groups"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_tool__header_params
+msgid "Header Params"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_tool__hint_warning
+msgid "Hint Warning"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__id
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_call__id
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_tool__id
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_conversation__id
+#: model:ir.model.fields,field_description:nudge_connect.field_res_company__id
+#: model:ir.model.fields,field_description:nudge_connect.field_res_config_settings__id
+msgid "ID"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_res_company__nudge_connect_read_only_first_month
+#: model:ir.model.fields,help:nudge_connect.field_res_config_settings__nudge_connect_read_only_first_month
+#: model_terms:ir.ui.view,arch_db:nudge_connect.res_config_settings_view_form_connect
+msgid ""
+"In this company a connector only reads during the month after it was first "
+"made active: its write tools are not offered before then."
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_tool_view_form
+msgid ""
+"Its description or arguments changed on the server since it was allowed. Read them\n"
+"                        again, then allow it again."
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_nudge_connector_tool__needs_review
+msgid ""
+"Its description or arguments changed on the server since it was allowed: it "
+"is not allowed any more until it is read and allowed again."
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__key
+msgid "Key"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__last_error
+msgid "Last Error"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__write_uid
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_call__write_uid
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_tool__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__write_date
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_call__write_date
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_tool__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "Limits"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__max_result_chars
+msgid "Longest Answer (Characters)"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__name
+msgid "Name"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_tool__local_name
+msgid "Name for the AI"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_tool__needs_review
+msgid "Needs Review"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_tool__missing
+msgid "No Longer Offered"
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.actions.act_window,help:nudge_connect.nudge_connector_call_action
+msgid "No call to a connector yet"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_res_company__nudge_connect_disabled
+#: model:ir.model.fields,help:nudge_connect.field_res_config_settings__nudge_connect_disabled
+#: model_terms:ir.ui.view,arch_db:nudge_connect.res_config_settings_view_form_connect
+msgid "No connector is used in this company, whatever each connector says."
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields.selection,name:nudge_connect.selection__nudge_connector__auth_type__none
+msgid "None"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields.selection,name:nudge_connect.selection__nudge_connector_tool__access__off
+msgid "Not Allowed"
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "Nothing more is sent to this connector, from now on. Stop it?"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model,name:nudge_connect.model_nudge_connector
+msgid "Nudge Connector"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model,name:nudge_connect.model_nudge_connector_call
+msgid "Nudge Connector Call"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model,name:nudge_connect.model_nudge_connector_tool
+msgid "Nudge Connector Tool"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model,name:nudge_connect.model_nudge_conversation
+msgid "Nudge Conversation"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields.selection,name:nudge_connect.selection__nudge_connector__auth_type__oauth
+msgid "OAuth Client Credentials"
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_call_view_form
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_call_view_list
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "On"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_nudge_connector__state
+msgid "Only an active connector is offered. Stop it to cut it off at once."
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.res_config_settings_view_form_connect
+msgid ""
+"Outside systems that speak MCP, whose tools Nudge may use for a person: "
+"reads at once, writes after the person's yes. Each tool is allowed one by "
+"one."
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__protocol_version
+msgid "Protocol"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields.selection,name:nudge_connect.selection__nudge_connector_call__access__read
+#: model:ir.model.fields.selection,name:nudge_connect.selection__nudge_connector_tool__access__read
+msgid "Read"
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/tools/connectors.py:0
+msgid "Read before in this conversation"
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "Read the Tools"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_nudge_connector_tool__access
+msgid ""
+"Read: run for the person at once, the answer names the connector. Write: the"
+" person sees exactly what is sent on a card, and nothing is sent before "
+"their yes."
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields.selection,name:nudge_connect.selection__nudge_connector_call__state__refused
+msgid "Refused"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_tool__reviewed_hash
+msgid "Reviewed Hash"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__runs_locally
+msgid "Runs on Your Own Network"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_tool__destructive_hint
+msgid "Says It May Delete"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_tool__read_only_hint
+msgid "Says It Only Reads"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__oauth_scope
+msgid "Scope"
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/tools/connectors.py:0
+msgid "Send to %(connector)s: %(tool)s"
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/tools/connectors.py:0
+msgid "Sends"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_call__arguments_text
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_call_view_form
+msgid "Sent"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__server_name
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "Server"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__url
+msgid "Server Address"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__state
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_call__state
+msgid "State"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_res_config_settings__nudge_connect_stopped
+msgid "Stop Every Connector"
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "Stop Now"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields.selection,name:nudge_connect.selection__nudge_connector__state__stopped
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_search
+msgid "Stopped"
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "Test the Connection"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_nudge_connector__url
+msgid ""
+"The MCP endpoint of the server (Streamable HTTP), e.g. "
+"https://mcp.example.com/mcp. HTTPS, or HTTP to this machine only."
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid ""
+"The address is not on the list of allowed destinations of your company."
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid ""
+"The address is on a private network or this machine, and the connector is "
+"not marked as running on your own network."
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid "The address must start with https:// (http:// only for this machine)."
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid "The answer is too big."
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid "The call failed."
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid ""
+"The credential is sent to this server only. It never reaches the AI, and it is\n"
+"                                taken out of the log, the errors and the answers."
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_nudge_connector__activated_on
+msgid ""
+"The day it was first made active: the first month of a company that asks for"
+" it counts from there."
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid ""
+"The key starts with a small letter and holds small letters, digits and _ "
+"only, 20 at most: %s"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_res_config_settings__nudge_connect_stopped
+#: model_terms:ir.ui.view,arch_db:nudge_connect.res_config_settings_view_form_connect
+msgid ""
+"The kill switch: nothing is sent to any connector, in any company, until it "
+"is switched back."
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_nudge_connector__timeout
+msgid ""
+"The longest a call may take, at most 60; never longer than the request it is"
+" made in."
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid "The longest answer is between 200 and %s characters."
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid "The outside tool asks for more input, which Nudge cannot give it."
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid "The server answered with an error."
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid "The server answers (%(server)s, protocol %(protocol)s)."
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid "The server cannot be reached."
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid "The server did not answer as an MCP server does."
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid "The server did not answer in time."
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid ""
+"The server does not say this tool only reads: a read runs without asking the"
+" person."
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid "The server refused the credential."
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_nudge_connector__runs_locally
+msgid ""
+"The server runs on this machine or on your company's own network: its "
+"address may be private, and it may be used with Private Mode on. Leave it "
+"off for a server on the internet."
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid "The server says this tool may delete."
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid "The server sends elsewhere: enter the final address."
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid "The server speaks another version of MCP."
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/models/nudge_connector.py:0
+msgid "The time allowed is between 1 and %s seconds."
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__timeout
+msgid "Time Allowed (Seconds)"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_tool__title
+msgid "Title"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__oauth_token_url
+msgid "Token Address"
+msgstr ""
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/tools/connectors.py:0
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_call__tool_name
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_tool__remote_name
+msgid "Tool"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__tool_count
+msgid "Tool Count"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__tool_ids
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "Tools"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector__last_sync
+msgid "Tools Read On"
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_tool_view_form
+msgid "What It Takes"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_nudge_connector_tool__local_name
+msgid "What the AI calls it: cx_<connector key>__<tool>."
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_nudge_connector__max_result_chars
+msgid ""
+"What the AI reads of an answer, at most 5000 characters; the rest is cut."
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_tool_view_form
+msgid "What the Server Says It Does"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_nudge_connector__name
+msgid "What the person and the answers call it, e.g. Sister company Odoo."
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_nudge_connector_tool__destructive_hint
+msgid "What the server says of the tool. Its cards are marked sensitive."
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_nudge_connector_tool__read_only_hint
+msgid "What the server says of the tool: a hint, not a promise."
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_nudge_connector__protocol_version
+msgid "What the server was found to speak."
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_nudge_connector_call__arguments
+msgid "What was sent, with the values named like a secret masked."
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_nudge_connector__company_ids
+msgid "Where it may be used: in one of these companies. Empty: nowhere."
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_nudge_connector__oauth_token_url
+msgid "Where the access token is asked for (HTTPS)."
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "Who May Use It"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_nudge_connector__group_ids
+msgid ""
+"Who may use it: a person of one of these groups, who is also an Agent User. "
+"Empty: nobody."
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields.selection,name:nudge_connect.selection__nudge_connector_call__access__write
+msgid "Write"
+msgstr ""
+
+#. module: nudge_connect
+#: model:ir.model.fields.selection,name:nudge_connect.selection__nudge_connector_tool__access__write
+msgid "Write (Asks First)"
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_call_view_search
+msgid "Writes"
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "e.g. Sister company Odoo"
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "https://auth.example.com/token"
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "https://mcp.example.com/mcp"
+msgstr ""
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "sister"
+msgstr ""

@@ -1,13 +1,9 @@
 import datetime
-import os
-from unittest.mock import patch
 
 from dateutil.relativedelta import relativedelta
 
 from odoo.exceptions import UserError
-from odoo.modules.module import get_module_path
 from odoo.tests import TransactionCase, new_test_user, tagged
-from odoo.tools.translate import CodeTranslations, code_translations
 
 from odoo.addons.nudge.tools import report_explain
 
@@ -128,12 +124,6 @@ class TestExplainReport(NudgeCase, TransactionCase):
 
     def test_the_sentences_are_in_the_arabic_of_the_reader(self):
         self.env["res.lang"]._activate_lang("ar_001")
-        path = os.path.join(get_module_path("nudge"), "i18n", "_pending", "NP-21.ar.po")
-        with open(path, "rb") as pending:
-            added = CodeTranslations._read_code_translations_file(pending, lambda row: bool(row.get("value")))
-        known = dict(code_translations.get_python_translations("nudge", "ar_001"), **added)
-        # The pending terms are not in ar.po yet: they are put in the cache of the code terms for this test
-        self.startPatcher(patch.dict(code_translations.python_translations, {("nudge", "ar_001"): known}))
         report = self.keep(period="this_month", period_field="date_order")
         english = self.texts(self.explain(report))
         arabic = self.texts(self.explain(report, lang="ar_001"))
