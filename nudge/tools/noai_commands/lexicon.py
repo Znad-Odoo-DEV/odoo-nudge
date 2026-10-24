@@ -85,3 +85,8 @@ def extended(pairs):
         yield
     finally:
         _EXTRA.reset(token)
+
+
+def extra_words():
+    """:return: ``{key: categories}`` of the words a company added for the parse that is running"""
+    return _EXTRA.get() or {}
