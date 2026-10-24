@@ -42,6 +42,7 @@ STOP_REASONS = {
     "refusal": base.STOP_REFUSAL,
     "tool_use": base.STOP_TOOL_USE,
     "pause_turn": base.STOP_PAUSE,
+    "model_context_window_exceeded": base.STOP_MAX_TOKENS,
 }
 
 # Keys accepted when a content block is sent back in a later request
@@ -338,7 +339,10 @@ class AnthropicAdapter(base.BaseAdapter):
                         return
                     raise
             request_id = stream.request_id
-        reason = STOP_REASONS.get(final.get("stop_reason"), base.STOP_END)
+        reason = STOP_REASONS.get(final.get("stop_reason"))
+        if reason is None:
+            _logger.info("Nudge: Anthropic stop reason %r is not known, read as the end", final.get("stop_reason"))
+            reason = base.STOP_END
         if reason == base.STOP_TOOL_USE:
             # Not on max_tokens nor on a refusal: a call cut short reads
             # as a valid, shorter one
