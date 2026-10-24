@@ -80,10 +80,11 @@ TRANSLATE_LOCK = 0x4E4D
 NO_TOKENS = {"input_tokens": 0, "output_tokens": 0, "cache_read_tokens": 0, "cache_write_tokens": 0}
 # The tools whose results are the same for everybody: the documentation, the
 # way through the menus, the structure of the database. Any other tool read
-# or did something in this person's data
+# or did something in this person's data; locate_data counts the records as
+# the person sees them (record rules, companies), so it is not one of them
 SAFE_TOOLS = frozenset((
     "search_odoo_documentation", "find_screen", "show_menu_path", "open_screen", "show_on_screen",
-    "search_database_profile", "locate_data", "describe_model", "describe_module", "show_settings",
+    "search_database_profile", "describe_model", "describe_module", "show_settings",
     "more_tools"))
 # What the rules understand as asking for figures or records of the database: never from memory
 LIVE_INTENTS = frozenset(("find", "filter", "chart"))
