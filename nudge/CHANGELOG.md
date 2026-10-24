@@ -2,6 +2,10 @@
 
 Current version: nudge 19.0.1.57.31, nudge_builder 19.0.1.0.4, nudge_messaging 19.0.1.0.4, nudge_mcp 19.0.1.0.4, nudge_ai 19.0.1.0.9, nudge_studio 19.0.1.0.9, nudge_mail 19.0.1.0.13.
 
+## 19.0.1.58.0 (unreleased)
+
+- NP-06 Setup wizard: Settings > Nudge > First Setup (always shown, also Nudge > Configuration > Setup Wizard) walks a system administrator through users and mode, the provider (rules only, local Ollama, Claude, Gemini, other OpenAI-compatible, each with pros, cons and a privacy note), the key and a test, a monthly cost estimate from a dated price table (data/nudge_price_table.json, editable in the wizard), the budgets and the switch-on; it works before any provider exists and ends with rules only
+
 ## Release 2 (19.0.1.57.x)
 
 Odoo 19 only for now: the two new companions, nudge_builder and nudge_messaging, are not ported to Odoo 17 and 18 yet; the other modules follow in the next store update.

@@ -68,6 +68,7 @@ from . import test_recipe_market
 from . import test_translation
 from . import test_recurring
 from . import test_setup
+from . import test_setup_wizard
 from . import test_compliance
 from . import test_coach
 from . import test_revert
