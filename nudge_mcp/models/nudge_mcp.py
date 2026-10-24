@@ -457,8 +457,8 @@ class NudgeMcp(models.AbstractModel):
         provider = Provider._get_for_mode(self._mode_of(name)) or Provider._get_default()
         slot = self.env["nudge.slot"]._claim_channel(conversation, provider)
         try:
-            self._mark_call(True, provider)
-            slot._handover(mark_committed=True)
+            if self._mark_call(True, provider):
+                slot._handover(mark_committed=True)
             yield slot
         finally:
             try:
@@ -468,14 +468,20 @@ class NudgeMcp(models.AbstractModel):
 
     def _mark_call(self, active, provider=None):
         """Mark (or clear) the call in the table, committed at once on a cursor of its own
-        so that the other workers see it before this one has finished"""
+        so that the other workers see it before this one has finished. The call must not write
+        the log's conversation after this: repeatable read refuses a row changed meanwhile.
+
+        :return: whether the mark was written: a conversation this request created is not
+            committed yet, and its call counts through its place, kept claimed, instead"""
         conversation = self._conversation()
         with self.env.registry.cursor() as cr:
             cr.execute(
                 "UPDATE nudge_conversation SET stream_started_at = %s, provider_id = COALESCE(%s, provider_id) "
                 "WHERE id = %s",
                 [fields.Datetime.now() if active else None, provider.id if provider else None, conversation.id])
+            marked = bool(cr.rowcount)
         conversation.invalidate_recordset(["stream_started_at", "provider_id"])
+        return marked
 
     def _run_tool(self, run, tool, arguments, started):
         env = self.env
