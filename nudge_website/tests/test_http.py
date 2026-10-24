@@ -110,6 +110,7 @@ class TestDoors(WebsiteCase, HttpCase):
         self.assertIn("Nablus", lead_yes.description)
         self.assertNotIn("90%", lead_yes.description, "A transcript sent by the browser is never read")
         self.assertFalse(lead_yes.user_id, "Assigned to nobody until someone takes it")
+        self.assertEqual(lead_yes.company_id, self.website.company_id)
         # A request with a bad address is not made
         bad = self.post("/nudge_website/handover", name="Ebrahim", email="not-an-address", consent=True)
         self.assertNotEqual(bad["type"], "lead")
