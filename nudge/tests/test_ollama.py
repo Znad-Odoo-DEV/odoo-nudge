@@ -1,4 +1,5 @@
 import json
+import time
 
 from odoo.exceptions import UserError
 from odoo.tests import BaseCase, TransactionCase, tagged
@@ -212,7 +213,7 @@ class TestOllamaProvider(NudgeCase, TransactionCase):
             "provider_id": self.provider.id, "name": "qwen3:8b", "sees_pictures": False})
         read = []
 
-        def read_picture(base_url, model, data, question="", api_key="", prompt=""):
+        def read_picture(base_url, model, data, question="", api_key="", prompt="", deadline=None):
             read.append((model, question))
             return "A red office chair, label FURN_7777", {"input_tokens": 300, "output_tokens": 12}
 
@@ -225,6 +226,27 @@ class TestOllamaProvider(NudgeCase, TransactionCase):
         self.assertFalse(question.get("images"), "The picture itself is not sent to a model without eyes")
         message = conversation.sudo().message_ids.filtered(lambda message: message.role == "user")
         self.assertTrue(message.attachment_id, "Kept for the person to see")
+
+    def test_the_job_deadline_goes_to_the_picture_reading(self):
+        from .test_attachments import PNG  # noqa: PLC0415
+
+        self.use_adapter()
+        self.server()
+        self.provider.write({"is_ollama": True, "picture_model": "qwen2.5vl:3b"})
+        self.env["nudge.provider.model"].create({
+            "provider_id": self.provider.id, "name": "qwen3:8b", "sees_pictures": False})
+        seen = []
+
+        def read_picture(base_url, model, data, question="", api_key="", prompt="", deadline=None):
+            seen.append(deadline)
+            return "A red office chair", {"input_tokens": 1, "output_tokens": 1}
+
+        self.patch(ollama, "read_picture", read_picture)
+        conversation = self.env["nudge.conversation"].with_user(self.user_a)._chat_open(None)
+        conversation._chat_prepare("Do we sell this?", attachment=("photo.png", PNG, "image/png"))
+        self.assertEqual(len(seen), 1)
+        self.assertIsNotNone(seen[0], "The reading ends by the deadline of the answer")
+        self.assertGreater(seen[0], time.monotonic())
 
     def test_what_a_picture_shows_is_looked_for_among_the_products(self):
         from .test_attachments import PNG  # noqa: PLC0415
@@ -259,7 +281,7 @@ class TestOllamaProvider(NudgeCase, TransactionCase):
             "provider_id": self.provider.id, "name": "qwen3:8b", "sees_pictures": True})
         read = []
 
-        def read_picture(base_url, model, data, question="", api_key="", prompt=""):
+        def read_picture(base_url, model, data, question="", api_key="", prompt="", deadline=None):
             read.append(model)
             asked.append(prompt)
             return "A large oak cabinet with two doors", {"input_tokens": 1, "output_tokens": 1}
