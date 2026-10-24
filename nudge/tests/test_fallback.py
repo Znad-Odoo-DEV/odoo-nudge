@@ -159,7 +159,8 @@ class TestFallback(NudgeCase, TransactionCase):
     def test_lead_03_first_install_uses_the_only_provider_and_private_mode_the_local_one(self):
         Provider = self.env["nudge.provider"].sudo()
         self.Parameter.set_param(DEFAULT_PROVIDER_PARAM, "")
-        self.assertFalse(Provider._get_default(), "Several configured and none named: none chosen for them")
+        ready = Provider.search([]).filtered("is_configured").sorted("sequence")
+        self.assertEqual(Provider._get_default(), ready[:1], "None named: the first in the administrator's order")
         (Provider.search([]) - self.other).write({"active": False})
         self.assertEqual(Provider._get_default(), self.other, "Exactly one configured: first install")
         self.other.active = True
