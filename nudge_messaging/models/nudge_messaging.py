@@ -241,11 +241,14 @@ class NudgeMessaging(models.AbstractModel):
         """A phone nobody linked: a code links it, anything else gets one polite line and nothing more"""
         Api = self.env["nudge.messaging.api"]
         code = CODE.match(text)
+        tried = False
         if code:
             Code = self.env["nudge.messaging.code"]
             # Three wrong tries per phone and thirty a minute lock the codes (_guard); sixty an hour from
-            # all the phones together close the door (_too_many_wrong)
+            # all the phones together close the door (_too_many_wrong). Only a code tried can be wrong: a
+            # try refused is kept as too many, so a phone refused cannot keep the door shut for the others
             if Code._guard(channel, sender) and not Code._too_many_wrong():
+                tried = True
                 user = Code._redeem(code.group(1), channel, sender)
                 if user:
                     line.write({"user_id": user.id, "state": "linked"})
@@ -255,13 +258,15 @@ class NudgeMessaging(models.AbstractModel):
                     return "linked"
         # One polite line per hour to a phone nobody linked: a flood of messages earns no flood of replies
         told = self.env["nudge.messaging.message"].search_count([
-            ("sender_hash", "=", line.sender_hash), ("state", "in", ("unknown", "wrong_code")), ("id", "!=", line.id),
-            ("create_date", ">=", fields.Datetime.now() - timedelta(hours=1))])
+            ("sender_hash", "=", line.sender_hash), ("state", "in", ("unknown", "wrong_code", "limited")),
+            ("id", "!=", line.id), ("create_date", ">=", fields.Datetime.now() - timedelta(hours=1))])
         if not told:
             Api._send_text(channel, sender, self._in(lang)._(
                 "Hello. I do not know this phone yet. In Odoo, open your Preferences, Nudge Messaging, "
                 "get a code and send it here."))
-        return "wrong_code" if code else "unknown"
+        if tried:
+            return "wrong_code"
+        return "limited" if code else "unknown"
 
     @api.model
     def _is_stale(self, timestamp):

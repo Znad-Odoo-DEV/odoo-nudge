@@ -35,7 +35,7 @@ class TestRelease2Security(MessagingCase, TransactionCase):
         code = self.env["nudge.messaging.code"]._make(user)
         for index in range(3):
             self.assertEqual(self.receive("123456" if code != "123456" else "654321", "971555", f"m{index}"), "wrong_code")
-        self.assertEqual(self.receive(code, "971555", "m-right"), "wrong_code")
+        self.assertEqual(self.receive(code, "971555", "m-right"), "limited", "Refused, not tried")
         self.assertFalse(self.env["nudge.messaging.link"]._link_for("whatsapp", "971555"))
         # another phone with the right code still links: the code was not burnt by the guesser
         self.assertEqual(self.receive(code, "971556", "m-other"), "linked")
@@ -57,9 +57,29 @@ class TestRelease2Security(MessagingCase, TransactionCase):
         Message = self.env["nudge.messaging.message"]
         for index in range(30):
             Message._reserve("whatsapp", f"bad{index}", f"9715{index:04d}").state = "wrong_code"
-        self.assertEqual(self.receive(code, "971599", "m-late"), "wrong_code")
+        self.assertEqual(self.receive(code, "971599", "m-late"), "limited")
         self.assertTrue(all(Code.sudo().search([("user_id", "=", self.ebrahim.id)]).mapped("used")))
-        self.assertEqual(self.receive(code, "971598", "m-later"), "wrong_code")
+        self.assertEqual(self.receive(code, "971598", "m-later"), "limited")
+
+    def test_one_phone_or_two_cannot_close_linking_for_everybody(self):
+        """Review S5: a try the guard refused is not a wrong code, and each phone weighs three wrong codes
+        at most in the caps of all the phones together"""
+        Code = self.env["nudge.messaging.code"]
+        code = Code._make(self.ebrahim)
+        wrong = "123456" if code != "123456" else "654321"
+        states = [self.receive(wrong, "971577", f"flood{index}") for index in range(10)]
+        self.assertEqual(states, ["wrong_code"] * 3 + ["limited"] * 7, "Three tries, then refused and not counted")
+        # Wrong codes of one phone and of another (a race, a log of before) weigh three each
+        Message = self.env["nudge.messaging.message"]
+        for index in range(60):
+            Message._reserve("whatsapp", f"one{index}", "971578").state = "wrong_code"
+        for index in range(15):
+            Message._reserve("whatsapp", f"two{index}", "971579").state = "wrong_code"
+        self.assertEqual(Code._wrong_codes(fields.Datetime.now() - timedelta(hours=1)), 9)
+        self.assertFalse(Code._too_many_wrong())
+        self.assertTrue(Code._guard("whatsapp", "971580"))
+        self.assertFalse(Code.sudo().search([("user_id", "=", self.ebrahim.id)]).used, "The live code is not voided")
+        self.assertEqual(self.receive(code, "971580", "m-right"), "linked")
 
     def test_private_mode_closes_the_channel_unless_the_administrator_allows_it(self):
         self.overdue_invoices(2)
