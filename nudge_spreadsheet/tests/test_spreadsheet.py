@@ -129,6 +129,8 @@ class TestTool(NudgeCase, TransactionCase):
         # Theirs: another person does not see it
         with self.assertRaises(AccessError):
             spreadsheet.with_user(self.user_a).read(["name"])
+        with self.assertRaises(AccessError):
+            spreadsheet.with_user(self.agent).write({"user_id": self.user_a.id})
         served = spreadsheet.with_user(self.agent).get_spreadsheet(spreadsheet.id)
         self.assertEqual(served["name"], spreadsheet.name)
         self.assertTrue(served["can_write"])

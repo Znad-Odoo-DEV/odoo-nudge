@@ -1,6 +1,7 @@
 import json
 
 from odoo import api, fields, models
+from odoo.exceptions import AccessError
 
 
 class NudgeSpreadsheet(models.Model):
@@ -20,6 +21,12 @@ class NudgeSpreadsheet(models.Model):
     company_id = fields.Many2one(
         "res.company", required=True, default=lambda self: self.env.company, readonly=True)
     conversation_id = fields.Many2one("nudge.conversation", ondelete="set null", readonly=True)
+
+    def write(self, vals):
+        # The rule is checked before the write: given to someone else, it would be theirs, made by another
+        if not self.env.su and "user_id" in vals and any(sheet.user_id.id != vals["user_id"] for sheet in self):
+            raise AccessError(self.env._("A spreadsheet stays with the person it was made for."))
+        return super().write(vals)
 
     def action_open(self):
         """:return: the client action showing this spreadsheet"""
