@@ -6,6 +6,7 @@ import { _t } from "@web/core/l10n/translation";
 
 import { renderMarkdown } from "../core/markdown";
 import { NudgeChart } from "./nudge_chart";
+import { NudgePlanCard, draftFix } from "./nudge_plan_card";
 
 /**
  * Receives plain values rather than the message object: the answer grows
@@ -13,7 +14,7 @@ import { NudgeChart } from "./nudge_chart";
  */
 export class NudgeMessage extends Component {
     static template = "nudge.Message";
-    static components = { NudgeChart };
+    static components = { NudgeChart, NudgePlanCard };
     static props = {
         role: String,
         content: String,
@@ -143,6 +144,10 @@ export class NudgeMessage extends Component {
             // Before the count of a plan: "5 done" stayed on a card that was undone
             return _t("Undone");
         }
+        if (card?.verify?.fields?.length && this.props.cardState === "done") {
+            // S11: read again after writing, a field is not what the card said: never "Done"
+            return _t("Written, but not everything is as asked");
+        }
         if (card?.plan && this.props.cardState === "done") {
             if (!card.failed_count) {
                 return _t("%s done", card.done_count || 0);
@@ -194,5 +199,10 @@ export class NudgeMessage extends Component {
 
     decide(decision) {
         this.props.onDecide?.(this.props.card.step_id, decision);
+    }
+
+    /** S11: what did not end as asked is asked again, in the message box, for the person to send */
+    fix(verify) {
+        draftFix(this.env, verify);
     }
 }

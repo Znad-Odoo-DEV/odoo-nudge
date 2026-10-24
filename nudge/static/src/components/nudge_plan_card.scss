@@ -1,0 +1,146 @@
+// S10: a plan of several changes, numbered; S11: what was read again after a change.
+// Custom properties only: the colours follow the theme, dark mode included.
+
+.o_nudge_plan_intro {
+    margin: 4px 0 0;
+    color: var(--nudge-text-muted, var(--bs-secondary-color));
+    font-size: 0.85em;
+}
+
+.o_nudge_plan_steps {
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.o_nudge_plan_step {
+    padding: 6px 0;
+    border-top: 1px solid var(--nudge-border, var(--bs-border-color));
+
+    &:first-child {
+        border-top: 0;
+    }
+
+    &[data-state="removed"] {
+        opacity: 0.6;
+
+        .o_nudge_plan_step_title {
+            text-decoration: line-through;
+        }
+    }
+
+    &[aria-current="step"] {
+        padding-inline-start: 8px;
+        border-inline-start: 3px solid var(--nudge-accent, var(--bs-primary));
+    }
+}
+
+.o_nudge_plan_step_head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+}
+
+.o_nudge_plan_step_number {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5em;
+    height: 1.5em;
+    border-radius: 50%;
+    background: var(--nudge-surface-muted, var(--bs-tertiary-bg));
+    font-size: 0.8em;
+}
+
+.o_nudge_plan_step_title {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.o_nudge_plan_step[data-state="done"] .o_nudge_plan_step_icon {
+    color: var(--bs-success);
+}
+
+.o_nudge_plan_step[data-state="failed"] .o_nudge_plan_step_icon {
+    color: var(--bs-danger);
+}
+
+.o_nudge_plan_step_icon.fa-exclamation-circle {
+    color: var(--bs-warning);
+}
+
+.o_nudge_plan_remove,
+.o_nudge_plan_edit {
+    padding: 0 4px;
+    line-height: 1;
+}
+
+.o_nudge_plan_uses {
+    margin: 2px 0 0;
+}
+
+.o_nudge_plan_ref {
+    font-style: italic;
+    color: var(--nudge-text-muted, var(--bs-secondary-color));
+}
+
+.o_nudge_plan_editing {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+
+    .o_nudge_plan_input {
+        flex: 1 1 8em;
+        min-width: 0;
+    }
+}
+
+.o_nudge_plan_actions {
+    align-items: center;
+}
+
+.o_nudge_verify {
+    margin-top: 6px;
+    padding: 6px 8px;
+    border-inline-start: 3px solid var(--bs-warning);
+    border-radius: 6px;
+    background: var(--nudge-surface-muted, var(--bs-tertiary-bg));
+    font-size: 0.85em;
+}
+
+.o_nudge_verify_head {
+    font-weight: 600;
+
+    .fa {
+        margin-inline-end: 4px;
+        color: var(--bs-warning);
+    }
+}
+
+.o_nudge_verify_fields {
+    margin: 4px 0 0;
+    padding-inline-start: 18px;
+}
+
+.o_nudge_verify_actual {
+    font-weight: 600;
+}
+
+.o_nudge_verify_fix {
+    padding-inline: 0;
+}
+
+.o_nudge_verified {
+    margin-top: 4px;
+    color: var(--nudge-text-muted, var(--bs-secondary-color));
+    font-size: 0.8em;
+
+    .fa {
+        margin-inline-end: 4px;
+        color: var(--bs-success);
+    }
+}
