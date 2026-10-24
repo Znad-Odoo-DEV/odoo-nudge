@@ -2491,6 +2491,8 @@ msgstr "مقارنة بالفترة السابقة (%(was)s) ارتفع الإج
 #: model:ir.model.fields.selection,name:nudge.selection__res_users_settings__nudge_mode__agent
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_prompt_view_search
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_memory__mode__agent
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_memory_save__mode__agent
 msgid "Agent"
 msgstr "الوكيل"
 
@@ -2718,6 +2720,8 @@ msgstr "توجد هنا مهارة أخرى بالمفتاح %s."
 #: model:ir.model.fields,field_description:nudge.field_nudge_step__message_id
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_message_view_feedback
 #: model:nudge.answer.cache,field_description:nudge.field_nudge_answer_cache__answer
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_save__answer
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_translation__answer
 msgid "Answer"
 msgstr "الإجابة"
 
@@ -2954,6 +2958,7 @@ msgstr "اعتمده"
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_compliance_update__approved_on
 #: model:ir.model.fields,field_description:nudge.field_nudge_skill__approved_on
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory__approved_date
 msgid "Approved On"
 msgstr "تاريخ الاعتماد"
 
@@ -3137,6 +3142,8 @@ msgstr "أرشفة العملاء المحتملين الخاسرين شهريا
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_search
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_source_view_search
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_tour_view_search
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_view_search
 msgid "Archived"
 msgstr "مؤرشف"
 
@@ -3931,6 +3938,7 @@ msgstr "يمكنه التحدث مع Nudge واتباع إرشاداته."
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_coach_assign_view_form
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_setup_wizard_view_form
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_upgrade_wizard_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_save_view_form
 msgid "Cancel"
 msgstr "إلغاء"
 
@@ -4560,6 +4568,8 @@ msgstr "اتفاق الشركات"
 #: model:ir.model.fields,field_description:nudge.field_nudge_validator_policy__company_id
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_latency_view_search
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_search
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_save__company_id
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_translation__company_id
 msgid "Company"
 msgstr "الشركة"
 
@@ -5199,6 +5209,8 @@ msgstr "JSON المنشأ"
 #: model:ir.model.fields,field_description:nudge.field_nudge_validator_policy__create_uid
 #: model:ir.model.fields,field_description:nudge.field_nudge_plugin__create_uid
 #: model:ir.model.fields,field_description:nudge.field_nudge_plugin_item__create_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_save__create_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_translation__create_uid
 msgid "Created by"
 msgstr "أنشئ بواسطة"
 
@@ -5260,6 +5272,8 @@ msgstr "أنشئ بواسطة"
 #: model:ir.model.fields,field_description:nudge.field_nudge_validator_policy__create_date
 #: model:ir.model.fields,field_description:nudge.field_nudge_plugin__create_date
 #: model:ir.model.fields,field_description:nudge.field_nudge_plugin_item__create_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_save__create_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_translation__create_date
 msgid "Created on"
 msgstr "أنشئ في"
 
@@ -5858,6 +5872,8 @@ msgstr "تجاهل"
 #: model:ir.model.fields,field_description:nudge.field_res_users_settings__display_name
 #: model:ir.model.fields,field_description:nudge.field_nudge_plugin__display_name
 #: model:ir.model.fields,field_description:nudge.field_nudge_plugin_item__display_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_save__display_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_translation__display_name
 msgid "Display Name"
 msgstr "اسم العرض"
 
@@ -5927,6 +5943,8 @@ msgstr "الملف المحفوظ"
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_digest_link__domain
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_market_view_search
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory__domain_key
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_view_search
 msgid "Domain"
 msgstr "المجال"
 
@@ -7182,6 +7200,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:nudge.field_nudge_skill__group_ids
 #: model:ir.model.fields,field_description:nudge.field_nudge_source__group_ids
 #: model:ir.model.fields,field_description:nudge.field_nudge_tour__group_ids
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_save__group_ids
 msgid "For the Groups"
 msgstr "للمجموعات"
 
@@ -8125,6 +8144,8 @@ msgstr "أعمل عليه في الخلفية. سأخبرك عندما ينته�
 #: model:ir.model.fields,field_description:nudge.field_res_users_settings__id
 #: model:ir.model.fields,field_description:nudge.field_nudge_plugin__id
 #: model:ir.model.fields,field_description:nudge.field_nudge_plugin_item__id
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_save__id
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_translation__id
 msgid "ID"
 msgstr "المعرف"
 
@@ -8824,6 +8845,9 @@ msgstr "التسمية"
 #: model:ir.model.fields,field_description:nudge.field_nudge_memory__language
 #: model:ir.model.fields,field_description:nudge.field_nudge_translation__lang_id
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_answer_cache_view_search
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_save__language
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_translation__language
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_view_search
 msgid "Language"
 msgstr "اللغة"
 
@@ -8849,6 +8873,7 @@ msgstr "لغة الواجهة"
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/setup.py:0
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory__languages
 msgid "Languages"
 msgstr "اللغات"
 
@@ -8977,6 +9002,8 @@ msgstr "آخر تشغيل"
 #: model:ir.model.fields,field_description:nudge.field_nudge_validator_policy__write_uid
 #: model:ir.model.fields,field_description:nudge.field_nudge_plugin__write_uid
 #: model:ir.model.fields,field_description:nudge.field_nudge_plugin_item__write_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_save__write_uid
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_translation__write_uid
 msgid "Last Updated by"
 msgstr "آخر تحديث بواسطة"
 
@@ -9038,6 +9065,8 @@ msgstr "آخر تحديث بواسطة"
 #: model:ir.model.fields,field_description:nudge.field_nudge_validator_policy__write_date
 #: model:ir.model.fields,field_description:nudge.field_nudge_plugin__write_date
 #: model:ir.model.fields,field_description:nudge.field_nudge_plugin_item__write_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_save__write_date
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_translation__write_date
 msgid "Last Updated on"
 msgstr "آخر تحديث في"
 
@@ -9896,6 +9925,7 @@ msgstr "نص الاجتماع %s"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__memory_id
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_translation__memory_id
 msgid "Memory"
 msgstr "الذاكرة"
 
@@ -9907,6 +9937,8 @@ msgstr "مذكور في الوصف: %s"
 
 #. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_tour_step__kind__menu
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory__menu_id
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_save__menu_id
 msgid "Menu"
 msgstr "قائمة"
 
@@ -10005,6 +10037,8 @@ msgstr "إجراءات سريعة للجوال"
 #: model:ir.model.fields,field_description:nudge.field_nudge_prompt__mode
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_latency_view_search
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_prompt_view_search
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory__mode
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_save__mode
 msgid "Mode"
 msgstr "الوضع"
 
@@ -12931,6 +12965,7 @@ msgstr "طلبات للتسليم"
 #: model:ir.model.fields,field_description:nudge.field_nudge_prompt__origin
 #: model:ir.model.fields,field_description:nudge.field_nudge_skill__origin
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_search
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_translation__origin
 msgid "Origin"
 msgstr "المصدر"
 
@@ -14000,6 +14035,8 @@ msgstr "كمية أعلى بكثير من المعتاد"
 #: model:ir.model.fields,field_description:nudge.field_nudge_run__question_id
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_auditor_question_view_list
 #: model:nudge.answer.cache,field_description:nudge.field_nudge_answer_cache__question
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_save__question
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_translation__question
 msgid "Question"
 msgstr "السؤال"
 
@@ -15320,6 +15357,7 @@ msgstr "النوع"
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__snapshot
 #: model:ir.model.fields,field_description:nudge.field_nudge_tour_step__action_xmlid
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_view_form
 msgid "Screen"
 msgstr "الشاشة"
 
@@ -16121,6 +16159,7 @@ msgstr "الحالة"
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_search
 #: model:ir.model.fields,field_description:nudge.field_nudge_plugin__state
 #: model:ir.model.fields,field_description:nudge.field_nudge_plugin_item__status
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_view_search
 msgid "Status"
 msgstr "الحالة"
 
@@ -16176,6 +16215,8 @@ msgstr "رقم الخطوة في الخطة"
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_step_view_search
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_tour_view_form
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_tour_view_list
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory__step_count
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_save__steps
 msgid "Steps"
 msgstr "الخطوات"
 
@@ -16566,6 +16607,8 @@ msgstr "يلتقط صورة وينشئ منها مسودة فاتورة مورد
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_setup_wizard__mode__talk
 #: model:ir.model.fields.selection,name:nudge.selection__res_users_settings__nudge_mode__talk
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_prompt_view_search
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_memory__mode__talk
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_memory_save__mode__talk
 msgid "Talk"
 msgstr "حوار"
 
@@ -17345,6 +17388,7 @@ msgstr "الشركة التي تُخبَر محادثاتها بها. فارغ: 
 
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_memory__company_id
+#: model:ir.model.fields,help:nudge.field_nudge_memory_translation__company_id
 msgid "The company whose people are answered with it. Empty: all of them."
 msgstr "الشركة التي يُجاب موظفوها بها. فارغ: كل الشركات."
 
@@ -19450,6 +19494,8 @@ msgstr "قاموس الترجمة"
 #: model:ir.actions.act_window,name:nudge.nudge_translation_action
 #: model:ir.ui.menu,name:nudge.nudge_menu_translation
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory__translation_ids
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_view_form
 msgid "Translations"
 msgstr "الترجمات"
 
@@ -19850,6 +19896,7 @@ msgstr "قائمة الاستخدام"
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_view_form
 msgid "Use"
 msgstr "استخدام"
 
@@ -20018,6 +20065,7 @@ msgstr "الإصدار (تاريخ الفهرس)"
 #: code:addons/nudge/tools/building.py:0
 #: model:ir.model.fields,field_description:nudge.field_nudge_tour_step__view_type
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_built__kind__view
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory__view_type
 msgid "View"
 msgstr "العرض"
 
@@ -23776,6 +23824,7 @@ msgstr "نموذج الشاشة"
 
 #. module: nudge
 #: model:nudge.answer.cache,field_description:nudge.field_nudge_answer_cache__view_type
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_save__view_type
 msgid "View Type"
 msgstr "نوع العرض"
 
@@ -24639,3 +24688,576 @@ msgstr "تغيّرت منذ السماح بها: بانتظار مراجعة ج�
 #: code:addons/nudge/models/nudge_plugin.py:0
 msgid "%s: send it to Nudge from here."
 msgstr "%s: أرسله إلى نادج من هنا."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_memory_translation__reviewed
+msgid ""
+"A manager read it. A translation by the AI is served before it is reviewed."
+msgstr ""
+"قرأها مدير. الترجمة التي يكتبها الذكاء الاصطناعي تُقدَّم قبل مراجعتها."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_view_form
+msgid ""
+"A person asking in another language gets the translation of that language. A\n"
+"                                missing one is translated once by the AI provider (never in private mode), kept\n"
+"                                here for you to review, and costs nothing after that."
+msgstr ""
+"من يسأل بلغة أخرى يتلقى الترجمة إلى تلك اللغة. الترجمة الناقصة يكتبها مزوّد "
+"الذكاء الاصطناعي مرة واحدة (ولا يحدث ذلك أبدًا في الوضع الخاص)، وتُحفظ هنا "
+"لتراجعها، ولا تكلّف شيئًا بعد ذلك."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_memory.py:0
+msgid "A reference needs a question and an answer."
+msgstr "يحتاج المرجع إلى سؤال وإجابة."
+
+#. module: nudge
+#: model:ir.model.constraint,message:nudge.constraint_nudge_memory_translation_unique_language
+msgid "A remembered answer has one translation per language."
+msgstr "لكل إجابة محفوظة ترجمة واحدة لكل لغة."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory__model_name
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_save__model_name
+msgid "About the Screen"
+msgstr "عن الشاشة"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_memory_like_suggest
+msgid ""
+"An answer liked by enough different people becomes a Suggested reference, "
+"for a manager to approve with one click. Never served before that yes."
+msgstr ""
+"الإجابة التي يعجب بها عدد كافٍ من الأشخاص المختلفين تصبح مرجعًا مقترحًا "
+"يعتمده مدير بنقرة واحدة. لا تُقدَّم أبدًا قبل هذه الموافقة."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form_memory
+msgid ""
+"An answer liked by enough different people becomes a Suggested reference, "
+"for a manager to approve with one click. Nothing is served before that yes. "
+"Off: only a manager's thumbs-up and Save as reference keep answers."
+msgstr ""
+"الإجابة التي يعجب بها عدد كافٍ من الأشخاص المختلفين تصبح مرجعًا مقترحًا "
+"يعتمده مدير بنقرة واحدة. لا يُقدَّم شيء قبل هذه الموافقة. عند الإيقاف: لا "
+"يحفظ الإجابات إلا إبهام المدير المرفوع و«حفظ كمرجع»."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_memory_skill_count
+msgid "Answers per Draft Skill"
+msgstr "عدد الإجابات لكل مسودة مهارة"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_skill__reference_ids
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_form_references
+msgid "Approved Answers"
+msgstr "الإجابات المعتمدة"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form_memory
+msgid ""
+"Approved answers (a manager's Save as reference or thumbs-up) answer the "
+"same question of the others at once, in any language or dialect, without the"
+" AI provider and without cost. Nothing that changed data is kept, and a "
+"question asking for live figures is never answered from memory."
+msgstr ""
+"الإجابات المعتمدة (عبر «حفظ كمرجع» أو إبهام المدير المرفوع) تجيب السؤال نفسه"
+" للآخرين فورًا، بأي لغة أو لهجة، دون مزوّد الذكاء الاصطناعي ودون تكلفة. لا "
+"يُحفظ ما غيّر بيانات، والسؤال الذي يطلب أرقامًا حيّة لا يُجاب من الذاكرة "
+"أبدًا."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill_learning.py:0
+msgid ""
+"Approved answers about %(app)s were put together as a draft skill. Review "
+"it, publish it or reject it: until it is published, no model reads it. The "
+"answers keep answering their questions first, with no AI."
+msgstr ""
+"جُمعت الإجابات المعتمدة عن %(app)s في مسودة مهارة. راجعها أو انشرها أو "
+"ارفضها: لا يقرؤها أي نموذج حتى تُنشر. وتبقى الإجابات تجيب أسئلتها أولًا، دون"
+" ذكاء اصطناعي."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/memory/reference.xml:0
+msgid "Approved answers to choose from"
+msgstr "إجابات معتمدة للاختيار منها"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_memory__state__liked
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_view_search
+msgid "Collecting Likes"
+msgstr "تجمع الإعجابات"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill_learning.py:0
+msgid "Draft skill from %(count)s approved answers: %(app)s"
+msgstr "مسودة مهارة من %(count)s إجابة معتمدة: %(app)s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_memory.py:0
+msgid "From Nudge's memory, approved by %(manager)s on %(date)s"
+msgstr "من ذاكرة Nudge، اعتمدها %(manager)s في %(date)s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill_learning.py:0
+msgid "From approved answers of Nudge's memory."
+msgstr "من الإجابات المعتمدة في ذاكرة Nudge."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_view_list
+msgid "Hits"
+msgstr "مرات الإجابة"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_memory_like_count
+msgid "How many different people must like an answer before it is suggested."
+msgstr "عدد الأشخاص المختلفين الذين يجب أن يعجبوا بإجابة قبل اقتراحها."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill_learning.py:0
+msgid "How we answer: %(app)s, for %(groups)s"
+msgstr "كيف نجيب: %(app)s، لـ %(groups)s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_skill_learning.py:0
+msgid "How we answer: %s"
+msgstr "كيف نجيب: %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_memory.py:0
+msgid ""
+"I have approved answers to questions close to yours. Pick one, or ask the AI"
+" instead."
+msgstr ""
+"لدي إجابات معتمدة عن أسئلة قريبة من سؤالك. اختر واحدة، أو اسأل الذكاء "
+"الاصطناعي بدلًا منها."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory__skill_id
+msgid "In the Skill"
+msgstr "ضمن المهارة"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/memory/reference.xml:0
+msgid "Keep this answer: the same question is then answered without the AI"
+msgstr "احفظ هذه الإجابة: يُجاب السؤال نفسه بعدها دون ذكاء اصطناعي"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_memory.py:0
+msgid "Kept in %s."
+msgstr "محفوظة باللغة %s."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_memory.py:0
+msgid "Kept in %s: private mode sends nothing to translate it."
+msgstr "محفوظة باللغة %s: الوضع الخاص لا يرسل شيئًا لترجمتها."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory__like_user_ids
+msgid "Liked By"
+msgstr "أعجب بها"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory__like_count
+msgid "Likes"
+msgstr "الإعجابات"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_memory_like_count
+msgid "Likes Needed"
+msgstr "الإعجابات المطلوبة"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_save__message_ref
+msgid "Message Ref"
+msgstr "مرجع الرسالة"
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_memory_suggested_action
+msgid "Nothing is suggested"
+msgstr "لا توجد اقتراحات"
+
+#. module: nudge
+#: model:ir.actions.act_window,name:nudge.nudge_memory_action
+#: model:ir.ui.menu,name:nudge.nudge_menu_memory
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_view_list
+msgid "Nudge Memory"
+msgstr "ذاكرة Nudge"
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_memory_translation
+msgid "Nudge Remembered Answer Translation"
+msgstr "ترجمة إجابة محفوظة في Nudge"
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_memory_save
+msgid "Nudge Save as Reference"
+msgstr "حفظ كمرجع في Nudge"
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_memory_action
+msgid "Nudge remembers no answer yet"
+msgstr "لا يتذكر Nudge أي إجابة بعد"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_memory.py:0
+msgid "Only Nudge managers save references."
+msgstr "مديرو Nudge فقط يحفظون المراجع."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_memory.py:0
+msgid "Only a finished answer can be saved as a reference."
+msgstr "لا تُحفظ كمرجع إلا إجابة مكتملة."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory__screen_bound
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_save__screen_bound
+msgid "Only on Its Screen"
+msgstr "على شاشتها فقط"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory__variants
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_save__variants
+msgid "Other Wordings"
+msgstr "صيغ أخرى"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_save_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_view_form
+msgid "Other ways people ask it, one per line"
+msgstr "صيغ أخرى يسأل بها الناس، صيغة في كل سطر"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_memory__variants
+msgid ""
+"Other ways people ask it, one per line: each finds this answer as the "
+"question does."
+msgstr ""
+"صيغ أخرى يسأل بها الناس، صيغة في كل سطر: كل صيغة تجد هذه الإجابة كما يجدها "
+"السؤال."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_memory_save__variants
+msgid "Other ways people ask it, one per line: each finds this answer too."
+msgstr ""
+"صيغ أخرى يسأل بها الناس، صيغة في كل سطر: كل صيغة تجد هذه الإجابة أيضًا."
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_memory_action
+msgid ""
+"Press Save as reference under an answer of Nudge, or the thumbs-up as a manager. Once\n"
+"                approved, the same question, in any language or dialect, is answered from here at once,\n"
+"                without the AI provider and at no cost. You can also write one yourself."
+msgstr ""
+"اضغط «حفظ كمرجع» تحت إجابة من Nudge، أو الإبهام المرفوع بصفتك مديرًا. بعد "
+"الاعتماد يُجاب السؤال نفسه، بأي لغة أو لهجة، من هنا فورًا، دون مزوّد الذكاء "
+"الاصطناعي وبلا تكلفة. ويمكنك أيضًا كتابة إجابة بنفسك."
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_skill__origin__references
+msgid "Proposed from approved answers"
+msgstr "مقترحة من الإجابات المعتمدة"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_translation__reviewed
+msgid "Reviewed"
+msgstr "تمت مراجعتها"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_memory.py:0
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_save_view_form
+msgid "Save as Reference"
+msgstr "حفظ كمرجع"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/memory/reference.xml:0
+msgid "Save as reference"
+msgstr "حفظ كمرجع"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_memory.py:0
+msgid ""
+"Saved: the same question is answered from Nudge's memory from now on, with "
+"no AI."
+msgstr "تم الحفظ: يُجاب السؤال نفسه من ذاكرة Nudge من الآن، دون ذكاء اصطناعي."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_memory__screen_bound
+msgid ""
+"Served only to someone asking from that screen: for an answer that says "
+"“this button”."
+msgstr "تُقدَّم فقط لمن يسأل من تلك الشاشة: لإجابة تقول «هذا الزر»."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_tour.py:0
+msgid "Steps of a remembered answer"
+msgstr "خطوات إجابة محفوظة"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory__tour_id
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_save__step_lines
+msgid "Steps on the Screen"
+msgstr "الخطوات على الشاشة"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_memory_like_suggest
+msgid "Suggest From Likes"
+msgstr "الاقتراح من الإعجابات"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_memory__state__proposed
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_view_search
+msgid "Suggested"
+msgstr "مقترحة"
+
+#. module: nudge
+#: model:ir.actions.act_window,name:nudge.nudge_memory_suggested_action
+#: model:ir.ui.menu,name:nudge.nudge_menu_memory_suggested
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form_memory
+msgid "Suggested References"
+msgstr "المراجع المقترحة"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_memory__mode
+msgid ""
+"Talk: served to every question that matches. Agent: an answer of Agent mode,"
+" served in Agent mode too."
+msgstr ""
+"المحادثة: تُقدَّم لكل سؤال يطابقها. الوكيل: إجابة من وضع الوكيل، تُقدَّم في "
+"وضع الوكيل أيضًا."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_memory__model_name
+msgid ""
+"Technical name of the model the answer is about. Only people who may open it"
+" are answered with it."
+msgstr ""
+"الاسم التقني للموديل الذي تخصه الإجابة. لا يُجاب بها إلا من يحق له فتحه."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_memory.py:0
+msgid "The answer is too long. The limit is %s characters."
+msgstr "الإجابة طويلة جدًا. الحد %s حرف."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_memory__domain_key
+msgid ""
+"The app or the skill it is about: approved answers of one domain propose a "
+"draft skill."
+msgstr ""
+"التطبيق أو المهارة التي تخصها: الإجابات المعتمدة في مجال واحد تقترح مسودة "
+"مهارة."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_skill__reference_ids
+msgid ""
+"The approved answers of Nudge's memory this draft was made from. They still "
+"answer their questions first, with no AI; the skill helps when the AI is "
+"asked."
+msgstr ""
+"الإجابات المعتمدة في ذاكرة Nudge التي صُنعت منها هذه المسودة. ما زالت تجيب "
+"أسئلتها أولًا، دون ذكاء اصطناعي؛ والمهارة تساعد حين يُسأل الذكاء الاصطناعي."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_memory__skill_id
+msgid "The draft skill this answer was put into."
+msgstr "مسودة المهارة التي وُضعت فيها هذه الإجابة."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_memory__language
+msgid ""
+"The language of the question and the answer: en, ar, fr... A person asking "
+"in another language gets its translation."
+msgstr "لغة السؤال والإجابة: en وar وfr... من يسأل بلغة أخرى يتلقى ترجمتها."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_memory_translation__question
+msgid ""
+"The question in this language: it finds the answer as the question does."
+msgstr "السؤال بهذه اللغة: يجد الإجابة كما يجدها السؤال."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_save_view_form
+msgid ""
+"The same question, in any language or dialect, will be answered with this text at once,\n"
+"                    without the AI provider. Keep explanations, policies and how-tos: never a figure that\n"
+"                    changes."
+msgstr ""
+"سيُجاب السؤال نفسه، بأي لغة أو لهجة، بهذا النص فورًا، دون مزوّد الذكاء "
+"الاصطناعي. احفظ الشروح والسياسات وطرق العمل: لا رقمًا يتغيّر أبدًا."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_memory__tour_id
+msgid "The steps of the explanation, shown again on the screen with no AI."
+msgstr "خطوات الشرح، تُعرض مجددًا على الشاشة دون ذكاء اصطناعي."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_memory.py:0
+msgid "This answer already comes from Nudge's memory."
+msgstr "هذه الإجابة من ذاكرة Nudge أصلًا."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/memory/reference.js:0
+msgid "This answer cannot be given here any more. Ask the AI instead."
+msgstr ""
+"لم يعد ممكنًا تقديم هذه الإجابة هنا. اسأل الذكاء الاصطناعي بدلًا منها."
+
+#. module: nudge
+#. odoo-javascript
+#. odoo-python
+#: code:addons/nudge/models/nudge_memory.py:0
+#: code:addons/nudge/static/src/memory/reference.js:0
+msgid "This answer cannot be saved as a reference."
+msgstr "لا يمكن حفظ هذه الإجابة كمرجع."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_memory.py:0
+msgid ""
+"This answer changed data or did work: only explanations, policies and how-"
+"tos are kept as references."
+msgstr ""
+"هذه الإجابة غيّرت بيانات أو أنجزت عملًا: لا تُحفظ كمراجع إلا الشروح "
+"والسياسات وطرق العمل."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_memory.py:0
+msgid "This answer is not open to you any more."
+msgstr "لم تعد هذه الإجابة متاحة لك."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_memory.py:0
+msgid ""
+"This answer was made from records of the database: keep only what stays true"
+" for everybody, never a figure or a record that changes."
+msgstr ""
+"صُنعت هذه الإجابة من سجلات قاعدة البيانات: احتفظ فقط بما يبقى صحيحًا للجميع،"
+" لا برقم أو سجل يتغيّر أبدًا."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_memory.py:0
+msgid "This answer was not offered here."
+msgstr "لم تُعرض هذه الإجابة هنا."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_memory.py:0
+msgid "This message is not yours."
+msgstr "هذه الرسالة ليست لك."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_memory.py:0
+msgid ""
+"This question asks for live figures of the database: Nudge works them out "
+"each time, from the data, and never answers them from memory."
+msgstr ""
+"هذا السؤال يطلب أرقامًا حيّة من قاعدة البيانات: يحسبها Nudge كل مرة من "
+"البيانات، ولا يجيبها من الذاكرة أبدًا."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_translation__model_name
+msgid "Translated By"
+msgstr "ترجمها"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_memory_translation__origin__ai
+msgid "Translated by the AI"
+msgstr "ترجمها الذكاء الاصطناعي"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_save__warning
+msgid "Warning"
+msgstr "تنبيه"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_memory_save__answer
+msgid "What people are answered. Change it as you like before saving."
+msgstr "ما يُجاب به الناس. غيّره كما تشاء قبل الحفظ."
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_memory_suggested_action
+msgid ""
+"When Suggest From Likes is on (Settings, Nudge, Answer Memory), an answer liked by enough\n"
+"                different people waits here. Approve it with one click: nothing is served before your yes."
+msgstr ""
+"حين يكون «الاقتراح من الإعجابات» مفعّلًا (الإعدادات، Nudge، ذاكرة الإجابات) "
+"تنتظر هنا الإجابة التي أعجب بها عدد كافٍ من الأشخاص المختلفين. اعتمدها بنقرة"
+" واحدة: لا يُقدَّم شيء قبل موافقتك."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_memory_skill_count
+msgid ""
+"When this many approved answers are about one app or skill, they are put "
+"together as a draft skill for a manager to publish."
+msgstr ""
+"حين يبلغ عدد الإجابات المعتمدة عن تطبيق أو مهارة واحدة هذا الحد، تُجمع في "
+"مسودة مهارة ينشرها مدير."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form_memory
+msgid ""
+"When this many approved answers are about one app or skill, they are put "
+"together as a draft skill for a manager to publish. The answers keep "
+"answering their questions first, with no AI."
+msgstr ""
+"حين يبلغ عدد الإجابات المعتمدة عن تطبيق أو مهارة واحدة هذا الحد، تُجمع في "
+"مسودة مهارة ينشرها مدير. وتبقى الإجابات تجيب أسئلتها أولًا، دون ذكاء "
+"اصطناعي."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_memory__menu_id
+msgid ""
+"Where its screen is found. About a menu and no model: only people who see "
+"this menu are answered with it."
+msgstr ""
+"حيث توجد شاشتها. إذا كانت عن قائمة بلا موديل: لا يُجاب بها إلا من يرى هذه "
+"القائمة."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_memory_save__group_ids
+msgid ""
+"Who may be answered with it. Empty: everybody who uses Nudge and may open "
+"its screen."
+msgstr "من يُجاب بها. فارغ: كل من يستخدم Nudge ويحق له فتح شاشتها."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_view_search
+msgid "With Steps on the Screen"
+msgstr "مع خطوات على الشاشة"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_memory_translation__origin__manager
+msgid "Written by a manager"
+msgstr "كتبها مدير"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_memory_translation__language
+msgid "en, ar, fr..."
+msgstr "en وar وfr..."
