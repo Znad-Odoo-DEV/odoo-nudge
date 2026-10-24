@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- NP-03: skills of Nudge (nudge_mail): the instructions and tools of one kind of work, given only to the questions
+     that need them. noupdate: an update never rewrites one you changed; archive the ones you do not want. -->
+<odoo>
+    <data noupdate="1">
+    <record id="skill_designed_emails" model="nudge.skill">
+        <field name="key">designed-emails</field>
+        <field name="recipe_key">nudge-skill-designed-emails</field>
+        <field name="name">Designed emails</field>
+        <field name="summary">Design an email template in a chosen style, send a test to yourself, or add a button that sends an email after reading it (Developer).</field>
+        <field name="trigger_words">designed email, email design, email template, newsletter, test email, send me a test, email button, review the email, ايميل, بريد, قالب ايميل, قالب بريد, تصميم ايميل, ايميل تجريبي, زر ايميل, رسالة بريد</field>
+        <field name="model_names">mail.template</field>
+        <field name="tool_names">prepare_email_design,send_test_email,prepare_email_review</field>
+        <field name="modes">dev</field>
+        <field name="version">1.0.0</field>
+        <field name="sequence">75</field>
+        <field name="state">published</field>
+        <field name="origin">module</field>
+        <field name="test_sentence">Design an email template for the quotation in a modern style</field>
+        <field name="test_expect">prepare_email_design</field>
+        <field name="instructions">## Designed emails
+- prepare_email_design makes a mail template laid out for mail clients: ask the style, who receives it and who signs it, then show the card; the company footer is on unless the person says otherwise.
+- send_test_email renders a template for one record and sends it to the person's own address only, marked [Test]; the real recipients are only named on the card.
+- prepare_email_review puts a button on the form that opens the email ready for the record, editable, and Send does what the button does and sends the email.
+- Every one of them waits for the person's yes on its card.
+</field>
+    </record>
+    </data>
+</odoo>

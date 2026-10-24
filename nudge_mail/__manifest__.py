@@ -30,6 +30,7 @@ never by itself.
         "security/ir.model.access.csv",
         "security/nudge_mail_security.xml",
         "data/nudge_mail_data.xml",
+        "data/nudge_skill_data.xml",
         "views/nudge_email_views.xml",
         "views/nudge_mail_agent_views.xml",
     ],
