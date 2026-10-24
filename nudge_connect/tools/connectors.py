@@ -29,6 +29,9 @@ TOOL_MODEL = "nudge.connector.tool"
 MAX_NAME = 64
 # What the person sees on a card is all that is sent: a payload too long to show is not sent
 MAX_PAYLOAD_SHOWN = 4000
+# A read asks, it does not carry: what it sends out without a card stays short, so that the records of
+# Odoo cannot leave through the arguments of a read
+MAX_READ_ARGUMENTS = 1000
 MASK = "***"
 # Names of arguments whose values are kept out of the log
 SECRET_WORDS = ("password", "passwd", "secret", "token", "apikey", "api_key", "authorization", "credential",
@@ -201,6 +204,11 @@ class ConnectorRead(ConnectorTool, base.Tool):
     kind = "read"
 
     def run(self, env, arguments, screen):
+        asked = len(json.dumps(arguments, ensure_ascii=False))
+        if asked > MAX_READ_ARGUMENTS:
+            return base.ToolResult(
+                f"A read sends at most {MAX_READ_ARGUMENTS} characters to an outside system, without asking the "
+                f"person; these arguments are {asked}. Nothing was sent. Ask with fewer words.", is_error=True)
         try:
             tool = self._tool(env)
         except Refused as refusal:
