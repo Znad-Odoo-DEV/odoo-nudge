@@ -6804,8 +6804,8 @@ msgstr "تعبئة حقل من الحقول الأخرى"
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/explainer.py:0
-msgid "Fill in"
-msgstr "عبّئ"
+msgid "Fields still to fill in"
+msgstr "حقول ما زالت فارغة"
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_validator_policy_list

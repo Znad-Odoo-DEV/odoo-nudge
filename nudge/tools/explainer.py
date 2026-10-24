@@ -287,7 +287,7 @@ def why_cannot_save(env, snapshot):
                 "%s has a value Odoo does not accept: check its format, its range or what it must match.",
                 _field_text(env, entry)), name, KIND_INVALID))
     if missing:
-        sections.append(_section(_("Fill in"), missing))
+        sections.append(_section(_("Fields still to fill in"), missing))
     if invalid:
         sections.append(_section(_("Check the value"), invalid))
     if locked:
