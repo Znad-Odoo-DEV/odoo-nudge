@@ -62,6 +62,14 @@ class TestExplainer(NudgeCase, TransactionCase):
         # Technical names are for administrators and developers
         self.assertNotIn("(name)", self.items(answer, "missing")[0]["text"])
 
+    def test_a_normal_user_is_told_the_label_and_never_the_technical_name(self):
+        snapshot = form([field("partner_id", "Customer", "many2one", None, required=True)])
+        answer = self.run_command(self.user_contacts, "/why", snapshot)
+        self.assertEqual(self.items(answer, "missing")[0]["text"], "Customer must be filled in.")
+        self.assertEqual(answer["explain"]["sections"][0]["head"], "Fields still to fill in")
+        text = self.items(self.run_command(self.administrator(), "/why", snapshot), "missing")[0]["text"]
+        self.assertIn("Customer (partner_id)", text)
+
     def test_a_required_one2many_with_no_line_is_empty(self):
         snapshot = form([field("child_ids", "Contacts", "one2many", {"count": 0}, required=True)])
         answer = self.run_command(self.user_contacts, "/why", snapshot)
