@@ -42,21 +42,30 @@ ORIGIN = "Mail agent"
 DOCUMENT_MIMES = ("application/pdf", "image/png", "image/jpeg", "image/webp")
 DOCUMENT_EXTENSIONS = (".pdf", ".png", ".jpg", ".jpeg", ".webp")
 
+def arabic(*words):
+    """An Arabic word is a whole word (with the one-letter and the article prefixes): "عطل" is not in "عطلة" """
+    return r"(?<!\w)(?:و|ب|ل|ال|وال|بال|لل)?(?:" + "|".join(words) + r")(?!\w)"
+
+
 NO_REPLY = re.compile(
     r"^(no-?reply|do-?not-?reply|donotreply|mailer-daemon|postmaster|bounce|notifications?|newsletter|news|"
     r"marketing|promo(tions)?)\b", re.I)
 AUTOMATIC = re.compile(
     r"unsubscribe|newsletter|out of office|auto-?reply|automatic reply|delivery status|undeliverable|"
-    r"إلغاء الاشتراك|نشرة|رد تلقائي|خارج المكتب", re.I)
+    + arabic("إلغاء الاشتراك", "نشرة", "رد تلقائي", "خارج المكتب"), re.I)
 BILL_WORDS = re.compile(
-    r"\b(invoice|bill|statement|payment due|credit note|tax invoice)\b|فاتورة|فواتير|مطالبة|كشف حساب", re.I)
+    r"\b(invoice|bill|statement|payment due|credit note|tax invoice)\b|"
+    + arabic("فاتورة", "فواتير", "مطالبة", "كشف حساب"), re.I)
 SUPPORT_WORDS = re.compile(
     r"\b(support|issue|problem|bug|error|not working|broken|complaint|ticket|failure|defect|damaged)\b|"
-    r"مشكلة|عطل|خلل|شكوى|لا يعمل|ما يشتغل|مو شغال|خربان|تالف", re.I)
+    + arabic("مشكلة", "عطل", "خلل", "شكوى", "لا يعمل", "ما يشتغل", "مو شغال", "خربان", "تالف"), re.I)
 LEAD_WORDS = re.compile(
     r"\b(quote|quotation|rfq|request for (a )?quotation|price list|pricing|prices?|interested|inquiry|enquiry|"
-    r"proposal|demo|catalogue|catalog|tender)\b|عرض سعر|عروض أسعار|استفسار|مهتم|أسعار|سعر|مناقصة", re.I)
-QUESTION_MARK = re.compile(r"[?؟]|\b(when|where|how|what|why|can you|could you|status of)\b|متى|وين|فين|كيف|شو|ليش|هل", re.I)
+    r"proposal|demo|catalogue|catalog|tender)\b|"
+    + arabic("عرض سعر", "عروض أسعار", "استفسار", "مهتم", "أسعار", "سعر", "مناقصة"), re.I)
+QUESTION_MARK = re.compile(
+    r"[?؟]|\b(when|where|how|what|why|can you|could you|status of)\b|" + arabic("متى", "وين", "فين", "كيف", "شو", "ليش", "هل"),
+    re.I)
 
 
 class NudgeMailProposal(models.Model):

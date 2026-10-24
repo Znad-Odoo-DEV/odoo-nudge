@@ -351,3 +351,23 @@ class TestMailAgent(NudgeCase, TransactionCase):
         proposal = self.env["nudge.mail.proposal"].search([("name", "=", "Quotation for 12 desks")])
         self.assertEqual((proposal.kind, proposal.state), ("lead", "pending"))
         self.assertEqual(proposal.company_id, self.company)
+
+
+@tagged("post_install", "-at_install", "nudge_mail")
+class TestMailWords(TransactionCase):
+    """An Arabic word of the rules counts only as a whole word"""
+
+    def test_a_word_inside_another_is_not_the_word(self):
+        from odoo.addons.nudge_mail.models import nudge_mail_proposal as rules
+        for text in ("عطلة سعيدة", "أهلاً بكم", "مشوار الصباح", "عناوين الفروع", "الموظفين الجدد", "مسعر"):
+            for name in ("SUPPORT_WORDS", "QUESTION_MARK", "LEAD_WORDS", "BILL_WORDS", "AUTOMATIC"):
+                self.assertFalse(getattr(rules, name).search(text), (name, text))
+
+    def test_the_word_alone_or_with_its_prefix_counts(self):
+        from odoo.addons.nudge_mail.models import nudge_mail_proposal as rules
+        self.assertTrue(rules.SUPPORT_WORDS.search("يوجد عطل في الجهاز"))
+        self.assertTrue(rules.SUPPORT_WORDS.search("والعطل مستمر"))
+        self.assertTrue(rules.LEAD_WORDS.search("نريد عرض سعر"))
+        self.assertTrue(rules.LEAD_WORDS.search("الأسعار"))
+        self.assertTrue(rules.QUESTION_MARK.search("هل يمكن الحضور"))
+        self.assertTrue(rules.BILL_WORDS.search("فاتورة الشهر"))
