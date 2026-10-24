@@ -4,7 +4,7 @@ Ask [Nudge](../nudge/README.md) from your phone, on WhatsApp (Business Cloud API
 answered in the chat; a change is never made there: Nudge prepares it and answers with a link, and the person
 says yes inside Odoo.
 
-Community and Enterprise. Odoo 19 for now (17 and 18 are not ported yet). No new Python package: plain
+Community and Enterprise. For Odoo 17, 18 and 19. No new Python package: plain
 `requests` for the two APIs. Needs Nudge and Nudge: MCP Server, which is installed with it and stays switched off (it reuses its log of requests, its origin and
 its pending step).
 

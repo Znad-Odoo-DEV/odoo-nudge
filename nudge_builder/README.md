@@ -2,7 +2,7 @@
 
 Six questions about the business, three directions of the home page to look at side by side, then a website of
 unpublished pages made only of Odoo's own snippets. Needs [Nudge](../nudge/README.md) and Website
-(Website Sale is optional). Odoo 19 for now; 17 and 18 follow in a later store update.
+(Website Sale is optional). For Odoo 17, 18 and 19.
 
 It is for a Nudge manager who is also a website designer: it runs with that person's own rights and companies.
 Nothing is published until the person says so, no existing page is edited and nothing is deleted.
