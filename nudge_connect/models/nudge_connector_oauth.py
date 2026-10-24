@@ -216,14 +216,11 @@ class NudgeConnector(models.Model):
         except UserError as refused:
             raise mcp_client.McpError("egress", refused.args[0]) from None
         try:
-            response = requests.request(
-                method, url, data=data, json=body, headers={"Accept": "application/json"},
-                timeout=self._seconds(), allow_redirects=False, stream=True)
-            raw = b""
-            for chunk in response.iter_content(8192):
-                raw += chunk
-                if len(raw) > MAX_DOCUMENT:
-                    raise mcp_client.McpError("toobig")
+            seconds = self._seconds()
+            with requests.request(
+                    method, url, data=data, json=body, headers={"Accept": "application/json"},
+                    timeout=seconds, allow_redirects=False, stream=True) as response:
+                raw = mcp_client.read_capped(response, MAX_DOCUMENT, seconds)
         except requests.Timeout:
             raise mcp_client.McpError("timeout") from None
         except requests.RequestException:

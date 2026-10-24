@@ -8,6 +8,7 @@ import json
 import logging
 import time
 from datetime import timedelta
+from unittest.mock import patch
 
 from odoo import fields
 from odoo.exceptions import AccessError, UserError
@@ -422,6 +423,45 @@ class TestConnectorUse(ConnectCase, TransactionCase):
 
 @tagged("post_install", "-at_install", "nudge_connect")
 class TestConnectorSafety(ConnectCase, TransactionCase):
+
+    def test_a_token_answer_is_cut_to_size_and_to_time(self):
+        self.connector.write({
+            "auth_type": "oauth", "oauth_token_url": self.server.url.replace("/mcp", "/token"),
+            "oauth_client_id": "a", "oauth_client_secret": "b"})
+        self.addCleanup(self.connector._forget_token)
+
+        class Endless:
+            status_code = 200
+            closed = False
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                self.closed = True
+
+            def iter_content(self, size):
+                while True:
+                    yield b" " * size
+
+        response = Endless()
+        with patch.object(mcp_client.requests, "post", return_value=response):
+            with self.assertRaises(mcp_client.McpError) as error:
+                self.connector._oauth_token()
+        self.assertEqual(error.exception.code, "toobig")
+        self.assertTrue(response.closed, "The connection is closed")
+
+        class Slow(Endless):
+            def iter_content(self, size):
+                while True:
+                    time.sleep(0.05)
+                    yield b" "
+
+        self.patch(nudge_connector, "worker_cap", lambda seconds: 0.2)
+        with patch.object(mcp_client.requests, "post", return_value=Slow()):
+            with self.assertRaises(mcp_client.McpError) as error:
+                self.connector._oauth_token()
+        self.assertEqual(error.exception.code, "timeout", "One deadline for the whole answer, not per read")
 
     def test_secrets_reach_neither_the_model_nor_the_log(self):
         self.connector.write({"auth_type": "bearer", "bearer_token": SECRET})

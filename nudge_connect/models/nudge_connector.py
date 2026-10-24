@@ -399,9 +399,12 @@ class NudgeConnector(models.Model):
         if self.oauth_scope:
             data["scope"] = self.oauth_scope
         try:
-            response = requests.post(self.oauth_token_url, data=data, timeout=self._seconds(),
-                                     auth=(self.oauth_client_id, self.oauth_client_secret), allow_redirects=False)
-            answer = response.json() if response.status_code == 200 else {}
+            seconds = self._seconds()
+            with requests.post(self.oauth_token_url, data=data, timeout=seconds, stream=True,
+                               auth=(self.oauth_client_id, self.oauth_client_secret),
+                               allow_redirects=False) as response:
+                answer = (json.loads(mcp_client.read_capped(response, 256 * 1024, seconds))
+                          if response.status_code == 200 else {})
         except requests.Timeout:
             raise mcp_client.McpError("timeout") from None
         except (requests.RequestException, ValueError):
