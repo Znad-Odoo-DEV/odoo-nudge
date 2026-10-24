@@ -27,6 +27,7 @@ Current version: nudge 18.0.1.59.1, nudge_mcp 18.0.1.1.0, nudge_connect 18.0.1.0
 - Review: a spreadsheet is saved five seconds after the last change, not only on leaving, and the website build bar retries a failed status poll before giving up.
 - Review: the website handover form refuses a second submit while one is sent, its log lines align by their own language, and a second start of the meeting recorder opens no second microphone.
 - Review: the changelog line of current versions lists the real versions of the twelve modules (the ports give it their series), and the certificate model is named without a list of versions in the README.
+- Review: nudge_studio ships its .pot.
 ## 19.0.1.59.0
 
 - Fix, found in the live trial: on a real server every question failed with "Record does not exist or has been deleted (nudge.slot)". The place a question claims (NP-04) is committed on a cursor of its own, and the request, whose snapshot is older (repeatable read), read it back. `_handover` and `_waited_ms` now work on a cursor of their own; the place stops counting once the request commits (both count for that instant, never one place too many), at once for the external assistants and the messaging apps whose mark is committed already. The tests share one transaction, which is why they never saw it.
