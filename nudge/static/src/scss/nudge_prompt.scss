@@ -1,0 +1,75 @@
+// Chips of the prompt library and their small forms. Logical properties only: it mirrors in Arabic.
+.o_nudge_prompt_chip {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+
+    .o_nudge_prompt_chip_hint {
+        font-size: 0.8em;
+        color: var(--bs-secondary-color);
+    }
+}
+
+.o_nudge_prompt_form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-block: 8px;
+    margin-inline: 12px;
+    padding: 12px;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 12px;
+    background: var(--bs-body-bg);
+    color: var(--bs-body-color);
+
+    .o_nudge_prompt_title {
+        margin: 0;
+        font-weight: 600;
+    }
+
+    .o_nudge_prompt_text {
+        margin: 0;
+        padding: 8px;
+        border-radius: 8px;
+        background: var(--bs-secondary-bg);
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+    }
+
+    .o_nudge_prompt_field {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .o_nudge_prompt_label, .o_nudge_prompt_note {
+        font-size: 0.85em;
+        color: var(--bs-secondary-color);
+    }
+
+    .o_nudge_prompt_note {
+        margin: 0;
+    }
+
+    .o_nudge_prompt_found {
+        margin: 0;
+        padding-inline-start: 0;
+        list-style: none;
+    }
+
+    .o_nudge_prompt_error {
+        margin: 0;
+        color: var(--bs-danger);
+    }
+
+    .o_nudge_prompt_buttons {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+}
+
+.o_nudge_save_prompt {
+    padding-inline: 6px;
+}

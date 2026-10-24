@@ -1,12 +1,12 @@
 /** @odoo-module **/
 
-import { Component, onWillUnmount, useEffect, useRef, useState } from "@odoo/owl";
+import { Component, onMounted, onWillUnmount, useEffect, useRef, useState } from "@odoo/owl";
 
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { session } from "@web/session";
-import { useService } from "@web/core/utils/hooks";
+import { useBus, useService } from "@web/core/utils/hooks";
 
 import { DICTATION_HOTKEYS, hotkeyLabel, HOTKEYS, NO_HOTKEY } from "../core/hotkeys";
 import { THEMES } from "../core/looks";
@@ -17,13 +17,21 @@ import { NudgeCoachCard } from "../coach/coach_card";
 import { NudgeFace } from "./nudge_face";
 import { NudgeImportCard } from "../import/import_card";
 import { NudgeMessage } from "./nudge_message";
+import { NudgePromptFill, NudgePromptSave } from "../prompts/prompt_forms";
 
 // A finger drawn down this far closes the sheet on a phone
 const SWIPE_CLOSE_PX = 80;
 
 export class NudgePanel extends Component {
     static template = "nudge.Panel";
-    static components = { NudgeCoachCard, NudgeFace, NudgeImportCard, NudgeMessage };
+    static components = {
+        NudgeCoachCard,
+        NudgeFace,
+        NudgeImportCard,
+        NudgeMessage,
+        NudgePromptFill,
+        NudgePromptSave,
+    };
     static props = {};
 
     setup() {
@@ -48,6 +56,11 @@ export class NudgePanel extends Component {
         this.recorder = null;
         onWillUnmount(() => this.recorder?.abort());
         this.importer = useService("nudge_import");
+        // The prompt library: the chips of the screen, the form of the one chosen, "keep as a prompt"
+        this.prompts = useState({ chips: [], fill: null, save: null });
+        this.chipsKey = null;
+        onMounted(() => this.loadChips());
+        useBus(this.env.bus, "ACTION_MANAGER:UI-UPDATED", () => this.loadChips());
         // The search without AI, before a provider is set up
         this.quick = useState({
             words: "", results: null, answer: null, memory: null, action: null, isSearching: false,
@@ -177,6 +190,92 @@ export class NudgePanel extends Component {
             return _t("Tell Nudge what to build…");
         }
         return this.isAgent ? _t("Tell Nudge what to do…") : _t("Ask Nudge…");
+    }
+
+    // ------------------------------------------------------------------
+    // Prompt library
+    // ------------------------------------------------------------------
+
+    /** The model of the view in front: the chips follow it */
+    get screenModel() {
+        const current = this.action.currentController;
+        return current?.props?.resModel || current?.action?.res_model || null;
+    }
+
+    async loadChips() {
+        // Without a provider only the prompts the rules of Nudge understand are offered
+        const withoutAi = !this.state.isConfigured;
+        const key = `${this.screenModel}|${withoutAi}`;
+        if (key === this.chipsKey) {
+            return;
+        }
+        this.chipsKey = key;
+        try {
+            this.prompts.chips = await this.orm.call("nudge.prompt", "chips", [this.screenModel, withoutAi]);
+        } catch {
+            // The built-in suggestions stay
+            this.prompts.chips = [];
+            this.chipsKey = null;
+        }
+    }
+
+    get promptChips() {
+        return this.prompts.chips;
+    }
+
+    async onChip(chip) {
+        if (this.state.isStreaming) {
+            return;
+        }
+        // Words to fill in, or the text of a colleague: read first, sent when the person says so
+        if (chip.variables.length || chip.preview) {
+            this.prompts.fill = chip;
+            return;
+        }
+        try {
+            this.sendFilled(await this.orm.call("nudge.prompt", "render", [[chip.id], {}]));
+        } catch (error) {
+            this.notification.add(error?.data?.message || _t("This prompt could not be used."), { type: "danger" });
+        }
+    }
+
+    sendFilled({ text, mode }) {
+        this.prompts.fill = null;
+        if (!this.state.isConfigured) {
+            return this.nudge.sendWithoutAi(text);
+        }
+        // A prompt for Agent or Developer work puts the panel in that mode; one for Talk keeps the mode
+        if (mode === "agent" && this.state.canUseAgent && this.state.mode === "talk") {
+            this.nudge.setMode("agent");
+        } else if (mode === "dev" && this.state.canDevelop && this.state.mode !== "dev") {
+            this.nudge.setMode("dev");
+        }
+        this.send(text);
+    }
+
+    /** The words to keep: what is typed, else the last message that was sent */
+    get promptSource() {
+        const typed = this.state.draft.trim();
+        if (typed) {
+            return typed;
+        }
+        const last = [...this.state.messages].reverse().find((message) => message.role === "user");
+        return (last?.content || "").trim();
+    }
+
+    get canSavePrompt() {
+        return Boolean(this.promptSource) && !this.state.isStreaming;
+    }
+
+    openSave() {
+        this.prompts.save = this.promptSource ? { text: this.promptSource, mode: this.state.mode } : null;
+    }
+
+    savedPrompt() {
+        this.prompts.save = null;
+        this.chipsKey = null;
+        this.notification.add(_t("Kept as a prompt. It is in the Prompts menu."), { type: "success" });
+        return this.loadChips();
     }
 
     get suggestions() {
