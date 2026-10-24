@@ -986,18 +986,19 @@ class TestAgent(AgentCase, TransactionCase):
         self.assertFalse(self.made())
 
     def test_one_action_at_a_time(self):
-        second = call("prepare_write", {
-            "model": "res.partner", "ids": [self.bob.id], "values": values(function="Director")}, "call_w")
+        # Two changes of the same kind: one card after the other (two kinds, or more, make a plan: S10)
+        second = call("prepare_create", {
+            "model": "res.partner", "values": values(name="Nudge Second")}, "call_w")
         adapter = self.use_adapter(script=[
             asking(self.SEARCH, self.CREATE, second),
             saying("Created. Shall I go on?"),
         ])
-        conversation, events = self.order(self.agent, "Create it and move Bob")
+        conversation, events = self.order(self.agent, "Create it and another one")
         self.assertEqual([event["type"] for event in events], ["start", "confirm", "waiting"])
         self.decide(conversation)
 
         self.assertTrue(self.made())
-        self.assertEqual(self.bob.function, "Buyer")
+        self.assertFalse(self.env["res.partner"].search([("name", "=", "Nudge Second")]))
         results = adapter.calls[1]["turns"][-1]["results"]
         self.assertEqual([result["id"] for result in results], ["call_s", "call_c", "call_w"])
         self.assertEqual([result["is_error"] for result in results], [False, False, True])
