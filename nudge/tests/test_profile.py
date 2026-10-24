@@ -405,5 +405,5 @@ class TestProfileTools(NudgeCase, TransactionCase):
              "remember_lesson", "search_company_files", "search_database_profile",
              "search_odoo_documentation", "search_products", "search_records", "show_chart",
              "show_menu_path", "show_on_screen", "show_tour", "summarize_record_history", "test_import",
-             "write_in_field"],
+             "use_skill", "write_in_field"],
         )

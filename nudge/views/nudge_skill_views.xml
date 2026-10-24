@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_skill_view_list" model="ir.ui.view">
+        <field name="name">nudge.skill.view.list</field>
+        <field name="model">nudge.skill</field>
+        <field name="arch" type="xml">
+            <list string="Skills" decoration-muted="state == 'draft'" decoration-danger="test_state == 'failed'">
+                <header>
+                    <button name="action_run_test" type="object" string="Run Tests"/>
+                    <button name="action_export_recipe" type="object" string="Export as a recipe" display="always"/>
+                </header>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="key" optional="show"/>
+                <field name="summary" optional="hide"/>
+                <field name="modes" optional="show"/>
+                <field name="origin" optional="show"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'published'" decoration-info="state == 'draft'"/>
+                <field name="load_count" optional="show"/>
+                <field name="token_estimate" optional="show"/>
+                <field name="test_state" widget="badge" optional="show"
+                       decoration-success="test_state == 'ok'" decoration-danger="test_state == 'failed'"/>
+                <field name="company_id" optional="hide" groups="base.group_multi_company"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_skill_view_form" model="ir.ui.view">
+        <field name="name">nudge.skill.view.form</field>
+        <field name="model">nudge.skill</field>
+        <field name="arch" type="xml">
+            <form string="Skill">
+                <header>
+                    <button name="action_publish" type="object" string="Publish" class="btn-primary"
+                            invisible="state == 'published' or not active"/>
+                    <button name="action_reject" type="object" string="Reject"
+                            invisible="state == 'published' or not active"/>
+                    <button name="action_unpublish" type="object" string="Back to Draft"
+                            invisible="state != 'published'"/>
+                    <button name="action_run_test" type="object" string="Run Test"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="Invoice follow-up"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="key" placeholder="invoice-follow-up"/>
+                            <field name="summary"/>
+                            <field name="modes" placeholder="talk,agent,dev"/>
+                            <field name="group_ids" widget="many2many_tags"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="origin"/>
+                            <field name="version"/>
+                            <field name="load_count"/>
+                            <field name="token_estimate"/>
+                            <field name="approved_by"/>
+                            <field name="approved_on"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Instructions" name="instructions">
+                            <field name="instructions" nolabel="1"
+                                   placeholder="## Invoice follow-up&#10;- Read the overdue invoices of the customer first..."/>
+                            <div class="text-muted">
+                                Written in English, for the model. Given with a question only when it holds one of
+                                the words below, names one of the screens below, or when the model asks for it.
+                                A draft is never given to a model: publish it once you have read it.
+                            </div>
+                        </page>
+                        <page string="When It Is Given" name="triggers">
+                            <group>
+                                <field name="trigger_words" placeholder="overdue, follow up, متأخرة, تذكير بالدفع"/>
+                                <field name="model_names" placeholder="account.move"/>
+                                <field name="tool_names" placeholder="search_records, aggregate_records"/>
+                            </group>
+                            <div class="text-muted">
+                                The tools are offered only to the people who may already use them in that mode:
+                                a skill never gives a tool.
+                            </div>
+                        </page>
+                        <page string="Test" name="test">
+                            <group>
+                                <field name="test_sentence" placeholder="Which invoices of this customer are overdue?"/>
+                                <field name="test_expect" placeholder="search_records"/>
+                                <field name="test_state" widget="badge"
+                                       decoration-success="test_state == 'ok'" decoration-danger="test_state == 'failed'"/>
+                                <field name="test_detail"/>
+                                <field name="test_date"/>
+                            </group>
+                            <div class="text-muted">
+                                Checked every week with the health check, without any AI: the sentence must still
+                                bring this skill, and the tool must still be here. A failure is written in the
+                                business notes.
+                            </div>
+                        </page>
+                        <page string="Lessons" name="lessons" invisible="not lesson_ids">
+                            <field name="lesson_ids">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="body"/>
+                                    <field name="approved_by"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Changes" name="changes">
+                            <field name="revision_ids">
+                                <list>
+                                    <field name="date"/>
+                                    <field name="user_id"/>
+                                    <field name="what"/>
+                                </list>
+                                <form string="Change">
+                                    <group>
+                                        <field name="date"/>
+                                        <field name="user_id"/>
+                                        <field name="what"/>
+                                    </group>
+                                    <field name="diff" class="font-monospace"/>
+                                </form>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_skill_view_search" model="ir.ui.view">
+        <field name="name">nudge.skill.view.search</field>
+        <field name="model">nudge.skill</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="key"/>
+                <field name="instructions"/>
+                <field name="trigger_words"/>
+                <filter name="draft" string="To Review" domain="[('state', '=', 'draft')]"/>
+                <filter name="published" string="Published" domain="[('state', '=', 'published')]"/>
+                <filter name="failed" string="Test Failed" domain="[('test_state', '=', 'failed')]"/>
+                <separator/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_origin" string="Origin" context="{'group_by': 'origin'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_skill_action" model="ir.actions.act_window">
+        <field name="name">Skills</field>
+        <field name="res_model">nudge.skill</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No skill yet</p>
+            <p>
+                A skill holds the instructions of one kind of work. Every question carries a one-line list of
+                the skills; the full text of one is given only when the question needs it, so each call is
+                shorter, cheaper and faster. Three approved lessons about one app propose a draft skill here.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="nudge_menu_skills" name="Skills" sequence="24"
+              parent="nudge_menu_knowledge" action="nudge_skill_action"
+              groups="nudge.group_nudge_manager"/>
+
+    <!-- Business notes: a skill proposed from lessons, and a red line when the test of a skill fails -->
+    <record id="nudge_note_view_list_skills" model="ir.ui.view">
+        <field name="name">nudge.note.view.list.skills</field>
+        <field name="model">nudge.note</field>
+        <field name="inherit_id" ref="nudge_note_view_list"/>
+        <field name="arch" type="xml">
+            <list position="attributes">
+                <attribute name="decoration-danger">kind == 'alert'</attribute>
+            </list>
+            <xpath expr="//button[@name='action_approve']" position="attributes">
+                <attribute name="invisible">state == 'approved' or kind in ('skill', 'alert')</attribute>
+            </xpath>
+            <xpath expr="//button[@name='action_refuse']" position="after">
+                <field name="skill_id" column_invisible="True"/>
+                <button name="action_open_skill" type="object" string="Review" icon="fa-arrow-right"
+                        class="btn-link" invisible="not skill_id or kind == 'lesson'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="nudge_note_view_search_skills" model="ir.ui.view">
+        <field name="name">nudge.note.view.search.skills</field>
+        <field name="model">nudge.note</field>
+        <field name="inherit_id" ref="nudge_note_view_search"/>
+        <field name="arch" type="xml">
+            <filter name="notes" position="after">
+                <filter name="skills" string="About Skills" domain="[('kind', 'in', ('skill', 'alert'))]"/>
+            </filter>
+        </field>
+    </record>
+
+    <!-- Recipes: skills are shared as an item of their own kind -->
+    <record id="nudge_recipe_export_view_form_skills" model="ir.ui.view">
+        <field name="name">nudge.recipe.export.view.form.skills</field>
+        <field name="model">nudge.recipe.export</field>
+        <field name="inherit_id" ref="nudge_recipe_export_view_form"/>
+        <field name="arch" type="xml">
+            <field name="with_prompts" position="after">
+                <field name="with_skills"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="nudge_recipe_publish_view_form_skills" model="ir.ui.view">
+        <field name="name">nudge.recipe.publish.view.form.skills</field>
+        <field name="model">nudge.recipe.publish</field>
+        <field name="inherit_id" ref="nudge_recipe_publish_view_form"/>
+        <field name="arch" type="xml">
+            <field name="with_prompts" position="after">
+                <field name="with_skills"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="res_config_settings_view_form_skills" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.nudge.skills</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='nudge_ask_data_container']" position="after">
+                <block title="Skills" name="nudge_skills_container">
+                    <setting help="Each question carries a one-line list of the skills, and the full instructions of the one or two it needs: calls are shorter, cheaper and faster. Switch this on to send every skill in full with every question, as before.">
+                        <field name="nudge_skills_inline"/>
+                        <div class="content-group mt8">
+                            <button name="%(nudge_skill_action)d" type="action"
+                                    string="Skills" icon="oi-arrow-right" class="btn-link"/>
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

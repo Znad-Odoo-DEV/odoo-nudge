@@ -172,9 +172,12 @@ class TestConfiguration(NudgeCase, TransactionCase):
             "app": "nudge", "settings": [{"field": "nudge_voice", "text": "x"}]}, user=self.user_a, mode="talk").is_error)
 
     def test_the_advisor_is_in_the_instructions(self):
-        self.assertIn("## Setting Odoo up", prompt.SYSTEM_PERSONA)
-        self.assertIn("read_settings", prompt.SYSTEM_PERSONA)
-        self.assertIn("show_settings", prompt.SYSTEM_PERSONA)
+        # NP-03: a skill that comes with Nudge, given to the questions that need it
+        advisor = self.env.ref("nudge.skill_odoo_setup")
+        self.assertIn("## Setting Odoo up", advisor.instructions)
+        self.assertIn("read_settings", advisor.instructions)
+        self.assertIn("show_settings", advisor.instructions)
+        self.assertNotIn("## Setting Odoo up", prompt.SYSTEM_PERSONA)
 
     def test_a_setting_of_the_company_is_read(self):
         # The fiscal country, the default taxes, the currency read "not set": they are the company's

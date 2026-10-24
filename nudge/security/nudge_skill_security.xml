@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- NP-03: a Nudge user reads the published skills of their companies, which are given to the model for
+             them; the groups of a skill are checked by the router. Drafts are for the managers only. -->
+        <record id="nudge_skill_rule_user" model="ir.rule">
+            <field name="name">Nudge Skill: published, of my companies</field>
+            <field name="model_id" ref="model_nudge_skill"/>
+            <field name="domain_force">[('state', '=', 'published'),
+                '|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[Command.link(ref('group_nudge_user'))]"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="nudge_skill_rule_manager" model="ir.rule">
+            <field name="name">Nudge Skill: of my companies, for managers</field>
+            <field name="model_id" ref="model_nudge_skill"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[Command.link(ref('group_nudge_manager'))]"/>
+        </record>
+    </data>
+</odoo>
