@@ -2,6 +2,7 @@
   "id": "eg",
   "name": {"en": "Egypt", "ar": "مصر"},
   "countries": ["EG"],
+  "reviewed": "2026-10-22",
   "reference": {
     "en": "Value Added Tax Law No. (67) of 2016 and the e-invoicing system of the Egyptian Tax Authority (ETA). Check the current text with the ETA before you rely on it. This is a checklist, not legal advice; confirm with the authority.",
     "ar": "قانون الضريبة على القيمة المضافة رقم (67) لسنة 2016 ونظام الفاتورة الإلكترونية لمصلحة الضرائب المصرية. راجع النص الحالي لدى المصلحة قبل الاعتماد عليه. هذه قائمة فحص وليست استشارة قانونية؛ تأكد لدى الجهة المختصة."
@@ -61,6 +62,25 @@
         "en": "Documents addressed to authorities and to customers in Egypt are customarily issued in Arabic. Activate Arabic and set it on the customers who ask for it.",
         "ar": "تُصدر المستندات الموجهة إلى الجهات الرسمية والعملاء في مصر عادةً بالعربية. فعّل العربية واضبطها على العملاء الذين يطلبونها."
       }
+    },
+    {
+      "key": "e_receipt",
+      "check": "note",
+      "severity": "warning",
+      "title": {
+        "en": "Retail sales to consumers: the e-receipt obligation is checked",
+        "ar": "البيع للمستهلكين: التحقق من الالتزام بالإيصال الإلكتروني"
+      },
+      "explanation": {
+        "en": "The e-receipt is a separate duty from the e-invoice, for businesses that sell to consumers (B2C) and issue receipts from cash registers or point of sale. The Egyptian Tax Authority adds taxpayers in phases by decision (for example Decision No. 281 of 2025, eighth sub-phase). Look the company up in the Authority's list of obligated taxpayers; if it is listed, the point of sale must be registered with the Authority and issue e-receipts. Dates come from the authority and may change: confirm with the authority.",
+        "ar": "الإيصال الإلكتروني التزام مستقل عن الفاتورة الإلكترونية، للمنشآت التي تبيع للمستهلكين (B2C) وتصدر إيصالات من الصناديق أو نقاط البيع. تضيف مصلحة الضرائب المصرية الممولين على مراحل بقرارات (مثل القرار رقم 281 لسنة 2025، المرحلة الفرعية الثامنة). ابحث عن الشركة في قائمة الممولين الملزمين لدى المصلحة؛ فإن كانت مدرجة وجب تسجيل نقطة البيع لدى المصلحة وإصدار إيصالات إلكترونية. التواريخ مصدرها الجهة المختصة وقد تتغير: تأكد لدى الجهة المختصة."
+      },
+      "reference": {
+        "en": "Egyptian Tax Authority, e-receipt system (eReceipt API and obligated taxpayers by phase).",
+        "ar": "مصلحة الضرائب المصرية، منظومة الإيصال الإلكتروني (واجهة eReceipt API والممولون الملزمون بحسب المرحلة)."
+      },
+      "source": "https://sdk.invoicing.eta.gov.eg/receiptissuancefaq/",
+      "reviewed": "2026-10-22"
     }
   ]
 }

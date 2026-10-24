@@ -2,6 +2,7 @@
   "id": "om",
   "name": {"en": "Oman", "ar": "سلطنة عُمان"},
   "countries": ["OM"],
+  "reviewed": "2026-10-22",
   "reference": {
     "en": "Value Added Tax Law (Royal Decree No. 121/2020), Oman Tax Authority: standard rate of 5% since 16 April 2021. Check the current text with the Authority before you rely on it. This is a checklist, not legal advice; confirm with the authority.",
     "ar": "قانون ضريبة القيمة المضافة (المرسوم السلطاني رقم 121/2020)، جهاز الضرائب في سلطنة عُمان: السعر الأساسي 5% منذ 16 أبريل 2021. راجع النص الحالي لدى الجهاز قبل الاعتماد عليه. هذه قائمة فحص وليست استشارة قانونية؛ تأكد لدى الجهة المختصة."
@@ -61,6 +62,26 @@
         "en": "Documents addressed to authorities and to customers in Oman are customarily issued in Arabic or in both languages. Activate Arabic and set it on the customers who ask for it.",
         "ar": "تُصدر المستندات الموجهة إلى الجهات الرسمية والعملاء في عُمان عادةً بالعربية أو بلغتين. فعّل العربية واضبطها على العملاء الذين يطلبونها."
       }
+    },
+    {
+      "key": "fawtara",
+      "check": "note",
+      "severity": "warning",
+      "title": {
+        "en": "Fawtara e-invoicing: from 1 April 2027 (supplies over OMR 5 million) and 1 October 2027 (the rest)",
+        "ar": "الفوترة الإلكترونية «فاتورة»: من 1 أبريل 2027 (التوريدات فوق 5 ملايين ريال) و1 أكتوبر 2027 (الباقون)"
+      },
+      "explanation": {
+        "en": "The Oman Tax Authority runs the Fawtara e-invoicing project (invoices in XML through accredited service providers). Reports of Decision No. 189/2026 give 1 April 2027 for taxpayers whose annual supplies exceed OMR 5 million and 1 October 2027 for the others, replacing an earlier schedule; the Authority's own pages still say the dates will follow the legislation. Treat the dates as provisional. Dates come from the authority and may change: confirm with the authority.",
+        "ar": "يدير جهاز الضرائب في سلطنة عُمان مشروع «فاتورة» للفوترة الإلكترونية (فواتير بصيغة XML عبر مزوّدي خدمة معتمدين). تذكر التقارير القرار رقم 189/2026 الذي يحدد 1 أبريل 2027 للمكلفين الذين تتجاوز توريداتهم السنوية 5 ملايين ريال و1 أكتوبر 2027 للباقين بدلاً من جدول سابق؛ لكن صفحات الجهاز نفسه تقول إن المواعيد ستتبع التشريع. اعتبر التاريخين مبدئيين. التواريخ مصدرها الجهة المختصة وقد تتغير: تأكد لدى الجهة المختصة."
+      },
+      "reference": {
+        "en": "Oman Tax Authority, Fawtara (e-invoicing). Decision No. 189/2026 as reported by secondary sources, not yet confirmed on the Authority's pages.",
+        "ar": "جهاز الضرائب في سلطنة عُمان، «فاتورة» (الفوترة الإلكترونية). القرار رقم 189/2026 كما نقلته مصادر ثانوية ولم تؤكده بعد صفحات الجهاز."
+      },
+      "deadline": "2027-04-01",
+      "source": "https://tms.taxoman.gov.om/portal/e-invoicing",
+      "reviewed": "2026-10-22"
     }
   ]
 }
