@@ -18,7 +18,10 @@ from odoo.exceptions import AccessError
 from odoo.fields import Domain
 from odoo.tools import html2plaintext
 
-from ..llm.snapshot import HIDDEN, SECRET_FIELD_NAME, SENSITIVE_NAME, SIGNATURE_NAME, WRITTEN_TYPES
+from ..llm.snapshot import (
+    HIDDEN, PARAMETER_MODEL, SECRET_FIELD_NAME, SECRET_KEY, SENSITIVE_NAME, SIGNATURE_NAME, WRITTEN_TYPES,
+    is_secret_parameter,
+)
 from . import base
 
 MODEL_PATTERN = r"[a-z][a-z0-9_]*(\.[a-z0-9_]+)+"
@@ -57,8 +60,6 @@ DEVELOPER_MODELS = re.compile(
     r"|ir\.model\.fields|ir\.model\.fields\.selection|ir\.actions\.act_window|ir\.ui\.menu"
     r"|ir\.actions\.report|ir\.cron|nudge\.email\.flow)$"
 )
-# Parameters whose value is a secret, whatever the administrator may read
-SECRET_KEY = re.compile(r"secret|token|key|password|passwd|credential|oauth", re.IGNORECASE)
 # Read, never changed by Nudge: what a company is made of
 FIXED_MODELS = re.compile(r"^res\.(company|currency|lang|country|bank)(\.|$)")
 
@@ -191,13 +192,19 @@ def password_fields(model):
     return names
 
 
-def is_hidden_field(model, field):
-    """:return: whether the value of ``field`` must never leave: it is named like a secret, a view shows it as a
-    password, or this person may not read it (``groups``)"""
+def holds_secret(model, field):
+    """:return: whether ``field`` holds a secret: it is named like one, a view shows it as a password, or it is the
+    value of a system parameter (database.secret, API keys: the secret is in the key, not in the name)"""
     return bool(
         is_secret(field)
         or field.name in password_fields(model)
-        or not model._has_field_access(field, "read"))
+        or (field.model_name == PARAMETER_MODEL and field.name == "value"))
+
+
+def is_hidden_field(model, field):
+    """:return: whether the value of ``field`` must never leave: it holds a secret, or this person may not read it
+    (``groups``)"""
+    return holds_secret(model, field) or not model._has_field_access(field, "read")
 
 
 def get_records(model, ids, operation="read"):
@@ -284,14 +291,21 @@ def describe(env, records, names):
     rows = []
     # A field this person may not read is not even asked for
     blocked = {name for name in names if name != "id" and not records._has_field_access(fields[name], "read")}
-    for values in records.read([name for name in names if name not in blocked] or ["id"]):
+    read = [name for name in names if name not in blocked] or ["id"]
+    # A parameter shows its value only when its key, read even when not asked for, names no secret
+    parameter = records._name == PARAMETER_MODEL and "value" in read
+    if parameter and "key" not in read:
+        read.append("key")
+    for values in records.read(read):
         row = {"id": values["id"]}
-        # A parameter named like a secret keeps its value to itself
-        secret_row = records._name == "ir.config_parameter" and SECRET_KEY.search(values.get("key") or "")
         for name in names:
             if name == "id" or fields[name].type in SKIPPED_TYPES:
                 continue
-            if name in blocked or is_hidden_field(records, fields[name]) or (secret_row and name == "value"):
+            if parameter and name == "value":
+                hidden = is_secret_parameter(values.get("key"))
+            else:
+                hidden = name in blocked or is_hidden_field(records, fields[name])
+            if hidden:
                 row[name] = HIDDEN
             else:
                 row[name] = format_value(env, fields[name], values.get(name))
@@ -391,7 +405,7 @@ def build_domain(model, conditions, match="all"):
     for condition in conditions:
         path, operator = condition["field"], condition["operator"]
         field = target_field(model, path)
-        if is_secret(field) or field.name in password_fields(model.env[field.model_name]):
+        if holds_secret(model.env[field.model_name], field):
             raise Refused(f"Nothing can be looked for in {path}.")
         if operator in ("is set", "is not set"):
             value = False
@@ -523,7 +537,9 @@ class SearchRecords(base.Tool):
         domain = build_domain(model, arguments.get("conditions") or [], arguments.get("match"))
         order = arguments.get("order")
         if order:
-            get_fields(model, [part.split()[0] for part in order.split(",")])
+            ordered = get_fields(model, [part.split()[0] for part in order.split(",")])
+            if any(holds_secret(model, field) for field in ordered.values()):
+                raise Refused("Records cannot be put in the order of a field that holds a secret.")
         limit = arguments.get("limit") or DEFAULT_ROWS
         offset = arguments.get("offset") or 0
         records = model.search(domain, limit=limit, offset=offset, order=order)

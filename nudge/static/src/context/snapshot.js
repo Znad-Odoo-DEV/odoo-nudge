@@ -202,7 +202,7 @@ function describeRow(record, names) {
             continue;
         }
         const isRelation = field.type === "one2many" || field.type === "many2many";
-        const value = isPasswordField(info)
+        const value = isPasswordField(info) || isSecretParameter(record, name)
             ? (record.data[name] ? HIDDEN : null)
             : isRelation
             ? { count: record.data[name]?.count ?? 0 }
@@ -262,6 +262,16 @@ function isPasswordField(info, node) {
     return info?.widget === "password" || (attr !== undefined && attr !== null && !/^(false|0)?$/i.test(String(attr)));
 }
 
+// A system parameter keeps its value to itself unless its key is known and names no credential (database.secret)
+const SECRET_KEY = /secret|token|key|password|passwd|credential|oauth/i;
+function isSecretParameter(record, name) {
+    if (record.resModel !== "ir.config_parameter" || name !== "value") {
+        return false;
+    }
+    const key = record.data.key;
+    return !(typeof key === "string" && key && !SECRET_KEY.test(key));
+}
+
 function describeFormFields(controller, record, root) {
     const context = record.evalContextWithVirtualIds;
     const fields = [];
@@ -280,7 +290,7 @@ function describeFormFields(controller, record, root) {
             continue;
         }
         seen.add(info.name);
-        const secret = isPasswordField(info, node);
+        const secret = isPasswordField(info, node) || isSecretParameter(record, info.name);
         const value = secret
             ? (record.data[info.name] ? HIDDEN : null)
             : isTotals

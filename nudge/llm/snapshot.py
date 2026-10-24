@@ -35,6 +35,15 @@ SECRET_FIELD_NAME = re.compile(_SECRET_NAMES, re.IGNORECASE)
 SIGNATURE_NAME = re.compile(r"signature", re.IGNORECASE)
 WRITTEN_TYPES = ("html", "text")
 CONTROL_CHARS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
+# A system parameter whose key names a credential (database.secret, an API key) keeps its value to itself
+SECRET_KEY = re.compile(r"secret|token|key|password|passwd|credential|oauth", re.IGNORECASE)
+PARAMETER_MODEL = "ir.config_parameter"
+
+
+def is_secret_parameter(key):
+    """:return: whether the value of the system parameter ``key`` must stay hidden: unless its key is known and
+    names no credential"""
+    return not (isinstance(key, str) and key and not SECRET_KEY.search(key))
 
 # Dropped one after the other until the snapshot fits, least useful first
 KEPT_LINES = 5
@@ -80,6 +89,25 @@ def _hide_named_value(entry):
     if "value" in entry and (entry.get("masked") is True or (isinstance(name, str) and SENSITIVE_NAME.search(name))):
         # ``masked``: the screen said so (a password widget), whatever the field is called
         entry["value"] = HIDDEN
+
+
+def _hide_parameters(snapshot):
+    """System Parameters: the secret is in the value of the key column, not in a name."""
+    if snapshot.get("model") != PARAMETER_MODEL:
+        return
+    for row in snapshot.get("rows") or []:
+        if isinstance(row, dict) and row.get("value") not in (None, "") and is_secret_parameter(row.get("key")):
+            row["value"] = HIDDEN
+    fields = [field for field in snapshot.get("fields") or [] if isinstance(field, dict)]
+    key = next((field.get("value") for field in fields if field.get("name") == "key"), None)
+    for field in fields:
+        if field.get("name") == "value" and field.get("value") not in (None, "") and is_secret_parameter(key):
+            field["value"] = HIDDEN
+    grouped = snapshot.get("grouped_by")
+    if isinstance(grouped, list) and any(str(name).split(":")[0] == "value" for name in grouped):
+        for group in snapshot.get("groups") or []:
+            if isinstance(group, dict):
+                group["label"] = HIDDEN
 
 
 def _dump(snapshot):
@@ -134,7 +162,9 @@ def sanitize(raw):
             return None
     if not isinstance(raw, dict) or not raw:
         return None
-    snapshot = _trim(_clean(raw))
+    cleaned = _clean(raw)
+    _hide_parameters(cleaned)
+    snapshot = _trim(cleaned)
     return snapshot or None
 
 

@@ -72,9 +72,21 @@ class Partner extends models.Model {
     ];
 }
 
+class IrConfigParameter extends models.Model {
+    _name = "ir.config_parameter";
+
+    key = fields.Char({ string: "Key" });
+    value = fields.Text({ string: "Value" });
+
+    _records = [
+        { id: 1, key: "database.secret", value: "db-signing-secret" },
+        { id: 2, key: "web.base.url", value: "https://example.com" },
+    ];
+}
+
 const { ResCompany, ResPartner, ResUsers } = webModels;
 
-defineModels([Partner, ResCompany, ResPartner, ResUsers]);
+defineModels([Partner, IrConfigParameter, ResCompany, ResPartner, ResUsers]);
 
 const FORM = /* xml */ `
     <form>
@@ -284,6 +296,32 @@ test("a list is described with its columns and first rows", async () => {
     await click(".o_data_row:eq(1) .o_list_record_selector input");
     await animationFrame();
     expect(capture().snapshot.selected_ids).toEqual([2]);
+});
+
+test("a system parameter whose key names a secret keeps its value to itself", async () => {
+    await start();
+    await mountView({
+        resModel: "ir.config_parameter",
+        type: "list",
+        arch: /* xml */ `<list><field name="key"/><field name="value"/></list>`,
+    });
+    const { snapshot } = capture();
+    expect(JSON.stringify(snapshot)).not.toInclude("db-signing-secret");
+    expect(snapshot.rows[0].value).toBe("[hidden]");
+    expect(snapshot.rows[1].value).toBe("https://example.com");
+});
+
+test("the form of a secret system parameter hides its value", async () => {
+    await start();
+    await mountView({
+        resModel: "ir.config_parameter",
+        type: "form",
+        resId: 1,
+        arch: /* xml */ `<form><sheet><group><field name="key"/><field name="value"/></group></sheet></form>`,
+    });
+    const { snapshot } = capture();
+    expect(JSON.stringify(snapshot)).not.toInclude("db-signing-secret");
+    expect(byName(snapshot.fields).value.value).toBe("[hidden]");
 });
 
 test("a grouped list is described by its groups", async () => {

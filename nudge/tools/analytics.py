@@ -14,7 +14,7 @@ from odoo.exceptions import AccessError
 from . import base
 from .records import (
     FIELD_PATTERN, MAX_CONDITIONS, MODEL_PATTERN, OPERATORS, PATH_PATTERN, Refused,
-    build_domain, cut, get_fields, get_model, is_secret, refusing,
+    build_domain, cut, get_fields, get_model, holds_secret, refusing,
 )
 
 MAX_GROUPS = 3
@@ -191,7 +191,7 @@ class AggregateRecords(base.Tool):
         for spec in arguments.get("group_by") or []:
             name, _separator, interval = spec.partition(":")
             field = get_fields(model, [name])[name]
-            if is_secret(field):
+            if holds_secret(model, field):
                 raise Refused(f"Nothing can be grouped by {name}.")
             if interval and field.type not in ("date", "datetime"):
                 raise Refused(f"{name} is not a date: it cannot be grouped by {interval}.")
@@ -207,7 +207,7 @@ class AggregateRecords(base.Tool):
                 continue
             name, _separator, aggregate = spec.partition(":")
             field = get_fields(model, [name])[name]
-            if is_secret(field):
+            if holds_secret(model, field):
                 raise Refused(f"Nothing can be summed on {name}.")
             if field.type not in NUMERIC_TYPES:
                 raise Refused(f"{name} is not a number: it cannot be {aggregate}med. Use count.")
