@@ -274,21 +274,17 @@ def max_ai(env):
 @contextlib.contextmanager
 def ai_slot(env):
     """Hold one of the places for the AI of the website, or raise ``Busy``. A place is
-    a session lock of the database (no table written); it is let go at the end, and
-    by the database itself if the connection dies."""
+    a lock of the transaction (no table written): the database lets it go when the
+    request ends, committed or rolled back, or when the connection dies. A lock of the
+    session outlived a transaction that failed (nothing can be unlocked in it) and kept
+    its place for the life of the pooled connection."""
     cr = env.cr
-    taken = None
     for slot in range(max_ai(env)):
-        cr.execute("SELECT pg_try_advisory_lock(hashtext(%s), %s)", (LOCK_KEY, slot))
+        cr.execute("SELECT pg_try_advisory_xact_lock(hashtext(%s), %s)", (LOCK_KEY, slot))
         if cr.fetchone()[0]:
-            taken = slot
-            break
-    if taken is None:
-        raise Busy()
-    try:
-        yield taken
-    finally:
-        cr.execute("SELECT pg_advisory_unlock(hashtext(%s), %s)", (LOCK_KEY, taken))
+            yield slot
+            return
+    raise Busy()
 
 
 def narrate(env, website, user, text, facts):
