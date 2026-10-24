@@ -2,7 +2,7 @@ import base64
 
 from odoo.tests import BaseCase, TransactionCase, tagged
 
-from odoo.addons.nudge.llm import loop, ollama, prompt
+from odoo.addons.nudge.llm import base, loop, ollama, prompt
 from odoo.addons.nudge.models import nudge_conversation
 from odoo.addons.nudge.models.nudge_provider import AGENT_PROVIDER_PARAM, DEFAULT_PROVIDER_PARAM
 from odoo.addons.nudge.tools import commands
@@ -139,8 +139,9 @@ class TestSmallModels(NudgeCase, TransactionCase):
         call = adapter.calls[0]
         self.assertEqual(call["system"][0], prompt.SYSTEM_PERSONA_COMPACT)
         self.assertLess(len(prompt.SYSTEM_PERSONA_COMPACT), len(prompt.SYSTEM_PERSONA) / 3)
-        # Last before the question: which tool does what it is asked
-        self.assertTrue(call["system"][-1].endswith(prompt.TALK_MAP_COMPACT))
+        # Which tool does what it is asked (the skills of the question come after it)
+        self.assertIn(prompt.TALK_MAP_COMPACT, "
+".join(base.system_texts(call["system"])))
         self.assertIn("remember_lesson", prompt.TALK_MAP_COMPACT)
         context = call["turns"][-1]["context"]
         self.assertIn("<nudge_found>", context)

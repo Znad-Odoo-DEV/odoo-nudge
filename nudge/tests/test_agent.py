@@ -338,7 +338,8 @@ class TestReading(AgentCase, TransactionCase):
             "aggregate_records", "bulk_apply", "call_method", "document_to_record", "filter_screen", "find_products", "find_record",
             "open_record", "prepare_create", "prepare_plan", "prepare_revert", "prepare_task", "prepare_write", "read_record", "save_report", "search_records", "show_chart"]
         # Other modules add their own agent tools
-        expected += [name for name in ("make_spreadsheet", "build_shop", "check_site", "fix_site") if name in tools.base.TOOLS]
+        expected += [name for name in ("make_spreadsheet", "build_shop", "check_site", "fix_site",
+                                               "read_site_page", "edit_page_section", "change_page_seo", "undo_site_change") if name in tools.base.TOOLS]
         expected = [name for name in expected if name not in tools.base.ASK_TOOLS]
         self.assertEqual(sorted(set(agent) - set(talk)), sorted(expected))
         self.assertEqual(set(talk) - set(agent), set())

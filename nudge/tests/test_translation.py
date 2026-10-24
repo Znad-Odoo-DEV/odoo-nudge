@@ -13,7 +13,7 @@ from odoo.addons.nudge.tools import translation as helper
 
 from .common import NudgeCase
 
-SOURCE = "Remembered Answers"
+SOURCE = "Nudge Memory"
 TRANSLATED = "Gespeicherte Antworten"
 
 

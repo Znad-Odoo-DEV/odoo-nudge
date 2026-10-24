@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- S15: loaded after the menus, the settings and the skills it adds to -->
-    <menuitem id="nudge_menu_memory" name="Nudge Memory" sequence="22"
-              parent="nudge_menu_knowledge" action="nudge_memory_action"/>
-
+    <!-- S15: loaded after the menus, the settings and the skills it adds to; the menu is named in nudge_menus.xml -->
     <menuitem id="nudge_menu_memory_suggested" name="Suggested References" sequence="23"
               parent="nudge_menu_knowledge" action="nudge_memory_suggested_action"/>
 
