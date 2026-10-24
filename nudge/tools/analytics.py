@@ -108,12 +108,12 @@ def list_action(model, domain, title):
     """:return: the action that opens the list of what a figure counted, with its domain, or None when the
     person has no list view of the model"""
     try:
-        model.get_view(view_type="list")
+        model.get_view(view_type="tree")
     except Exception:  # noqa: BLE001 - no such view for this model, or none the person may open
         return None
     return {
         "type": "ir.actions.act_window", "name": title, "res_model": model._name,
-        "views": [[False, "list"], [False, "form"]], "view_mode": "list,form", "target": "current",
+        "views": [[False, "tree"], [False, "form"]], "view_mode": "tree,form", "target": "current",
         "domain": json.loads(json.dumps(domain.to_list() if hasattr(domain, "to_list") else list(domain),
                                         default=str)),
     }

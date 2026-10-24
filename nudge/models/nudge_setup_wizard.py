@@ -162,7 +162,7 @@ class NudgeSetupWizard(models.TransientModel):
             wizard.pros, wizard.cons, wizard.privacy = pros, cons, privacy
 
     def _choice_texts(self):
-        _ = self.env._
+        from odoo import _  # noqa: PLC0415
         return {
             "rules": (
                 _("Free. Nothing leaves your server. Open screens, find records, filter, count and "

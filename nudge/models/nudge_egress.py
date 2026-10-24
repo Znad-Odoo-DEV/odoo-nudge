@@ -19,7 +19,7 @@ class NudgeEgress(models.AbstractModel):
 
     @api.model
     def _purposes(self):
-        _ = self.env._
+        from odoo import _  # noqa: PLC0415
         return {
             "chat": _("an AI provider"),
             "voice": _("the voice transcription"),

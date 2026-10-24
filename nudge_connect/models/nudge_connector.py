@@ -346,7 +346,7 @@ class NudgeConnector(models.Model):
 
     def _failure(self, error):
         """:return: what the person and the model are told of ``error``, without any secret"""
-        _ = self.env._
+        from odoo import _  # noqa: PLC0415
         words = {
             "scheme": _("The address must start with https:// (http:// only for this machine)."),
             "egress": _("The address is not on the list of allowed destinations of your company."),

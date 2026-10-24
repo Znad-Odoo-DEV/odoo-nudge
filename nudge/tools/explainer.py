@@ -18,6 +18,8 @@ and developers only.
 from odoo import _
 import re
 
+import odoo.http
+
 from . import commands
 
 MAX_ITEMS = 12
@@ -40,7 +42,7 @@ def is_technical(env):
     """:return: whether the person may be told technical names: an
     administrator, or someone in Developer mode"""
     user = env.user
-    return user.has_group("base.group_system") or user.has_group("base.group_no_one")
+    return user.has_group("base.group_system") or bool(odoo.http.request and odoo.http.request.session.debug)
 
 
 def _item(text, field=None, kind=KIND_INFO):
