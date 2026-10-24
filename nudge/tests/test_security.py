@@ -35,6 +35,28 @@ class TestSecurity(NudgeCase, TransactionCase):
             conversation.message_ids,
         )
 
+    def test_a_manager_reads_the_conversations_of_their_companies_only(self):
+        self.use_adapter()
+        conversation, _result = self.ask(self.user_a, "Hello")
+        home = conversation.company_id
+        run = self.env["nudge.run"].create({
+            "name": "Hello", "conversation_id": conversation.id, "user_id": self.user_a.id, "company_id": home.id})
+        history = self.env["nudge.history"].create({"user_id": self.user_a.id, "model": "res.partner", "res_id": 1})
+        other = self.env["res.company"].create({"name": "Raghad Trading"})
+        manager = self.manager.sudo()
+        manager.write({"company_ids": [(4, other.id)], "company_id": other.id})
+        lists = (conversation, conversation.message_ids, run, history)
+        # Working in another company: nothing of the first one
+        for records in lists:
+            found = records.with_user(self.manager).with_context(allowed_company_ids=other.ids).search(
+                [("id", "in", records.ids)])
+            self.assertFalse(found, records._name)
+        # Working in both: everything
+        for records in lists:
+            found = records.with_user(self.manager).with_context(allowed_company_ids=(other | home).ids).search(
+                [("id", "in", records.ids)])
+            self.assertEqual(found, records, records._name)
+
     def test_outsider_has_no_access(self):
         with self.assertRaises(AccessError):
             self.env["nudge.conversation"].with_user(self.outsider).search([])
