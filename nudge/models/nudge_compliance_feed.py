@@ -136,9 +136,9 @@ class NudgeComplianceNotice(models.Model):
             notice = Notice.create({
                 "company_id": company.id, "pack": CREDENTIAL_PACK, "check_key": key, "threshold": threshold,
                 "deadline": record["date"], "title": record["name"]})
-            notice._tell_credential(company, record["name"], days)
+            notice._tell_credential(company, record["name"], days, source)
 
-    def _tell_credential(self, company, name, days):
+    def _tell_credential(self, company, name, days, source="manual"):
         self.ensure_one()
         for user in self._recipients(company):
             env = self.with_context(lang=user.lang or self.env.lang).env
@@ -148,8 +148,19 @@ class NudgeComplianceNotice(models.Model):
                 subject = _("%(name)s expires today", name=name)
             else:
                 subject = _("%(name)s has expired", name=name)
-            body = _("%(subject)s (%(date)s). Renew it before e-invoicing stops.",
-                         subject=subject, date=self.deadline)
+            # a certificate of the e-invoicing modules stops e-invoicing; what a person entered by hand is not
+            # known to: it only stops working
+            einvoicing = source != "manual"
+            if days > 0:
+                advice = (_("Renew it before e-invoicing stops.") if einvoicing
+                          else _("Renew it before it stops working."))
+            elif days == 0:
+                advice = (_("Renew it today: e-invoicing stops after today.") if einvoicing
+                          else _("Renew it today: it stops working after today."))
+            else:
+                advice = (_("Renew it now: e-invoicing is no longer possible with it.") if einvoicing
+                          else _("Renew it now: it no longer works."))
+            body = _("%(subject)s (%(date)s). %(advice)s", subject=subject, date=self.deadline, advice=advice)
             try:
                 notify_user(user, "simple_notification", {"title": subject, "message": body, "type": "warning"})
                 if "mail.thread" in self.env:
