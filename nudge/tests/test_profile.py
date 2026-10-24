@@ -36,10 +36,21 @@ class TestCollectors(NudgeCase, TransactionCase):
         for standard in ("base", "web", "web_tour", "bus"):
             self.assertNotIn(standard, custom)
 
+    def test_a_module_licensed_oeel_does_not_make_a_community_database_enterprise(self):
+        # project_hr_skills ships in the Community tree under OEEL-1
+        Module = self.env["ir.module.module"].sudo()
+        if Module.search_count([("name", "=", "web_enterprise"), ("state", "=", "installed")]):
+            self.skipTest("an Enterprise database")
+        Module.search([("name", "=", "web_tour")]).license = "OEEL-1"
+        self.assertFalse(collectors.is_enterprise(self.env))
+        overview = self.slices(collectors.collect_modules)["overview"]
+        self.assertEqual(overview["data"]["edition"], "Community")
+        self.assertIn("Odoo 17.0 Community", overview["summary"])
+
     def test_overview(self):
         overview = self.slices(collectors.collect_modules)["overview"]
         edition = "Enterprise" if self.env["ir.module.module"].sudo().search_count(
-            [("state", "=", "installed"), ("license", "=", "OEEL-1")]) else "Community"
+            [("name", "=", "web_enterprise"), ("state", "=", "installed")]) else "Community"
         self.assertIn(f"Odoo 17.0 {edition}", overview["summary"])
         self.assertIn("Tours (web_tour)", overview["summary"])
         self.assertFalse(overview["restricted"])
