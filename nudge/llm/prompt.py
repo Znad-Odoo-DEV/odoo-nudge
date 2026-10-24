@@ -586,6 +586,52 @@ def build_system_blocks(overview="", mode="talk", can_use_agent=False, work="", 
             if block]
 
 
+# S8: the overview of the database is sent once in a conversation. The system prompt of every call
+# keeps what every answer needs: the version and the edition, the apps, and the notes of the
+# administrators, which are rules to follow; it stays the same from one question to the next, and
+# from one conversation to the next, a prefix the providers keep in their cache. The rest (the custom
+# modules, the languages, the companies, the automation and the access) goes in the context of the
+# first question of the conversation, and of the question after which it changed
+# (nudge.conversation._chat_overview and _chat_build_turns): replayed with it for the rounds of that
+# question, and never again after it, as the screens of the old questions (PERF-08)
+OVERVIEW_HEADING = "## This database"
+NOTES_HEADING = "## Notes from the people who run this database"
+OVERVIEW_KEPT_LINES = 2
+OVERVIEW_GIVEN = (
+    "The rest of this overview (custom modules, languages, companies, automation, access) comes with the "
+    "first question of a conversation; later, look it up with search_database_profile.")
+# A rest shorter than this stays in the system prompt: sending it once would save less than the words above
+OVERVIEW_MIN_REST = 2 * len(OVERVIEW_GIVEN)
+
+
+def split_overview(overview):
+    """:param overview: what is known of the database, as nudge.profile._get_overview writes it
+    :return: ``(kept, rest)``: what every call is given in its system prompt, and what is given once,
+        with one question; ``(overview, "")`` when the rest would be too short to be worth it"""
+    overview = (overview or "").strip("\n")
+    body, notes = overview, ""
+    # The notes come last, whatever headings their text holds
+    at = overview.find(NOTES_HEADING)
+    if at == 0 or (at > 0 and overview[at - 2:at] == "\n\n"):
+        body, notes = overview[:at].rstrip("\n"), overview[at:]
+    lines = body.split("\n")
+    if lines[0] != OVERVIEW_HEADING:
+        return overview, ""
+    head = body.split("\n\n## ")[0].split("\n")[:1 + OVERVIEW_KEPT_LINES]
+    rest = "\n".join(lines[len(head):]).strip("\n")
+    if len(rest) < OVERVIEW_MIN_REST:
+        return overview, ""
+    kept = "\n".join([*head, OVERVIEW_GIVEN])
+    return "\n\n".join(part for part in (kept, notes) if part), rest
+
+
+def render_overview_rest(rest):
+    """:return: the rest of the overview, as a block of the context of the question it goes with; the
+    closing tag cannot appear inside"""
+    text = rest.replace("</nudge_overview", "<\\/nudge_overview")
+    return f"<nudge_overview>\n{OVERVIEW_HEADING}, continued\n{text}\n</nudge_overview>"
+
+
 # NP-03, skills: the instructions of one kind of work (setting Odoo up, importing files, designed
 # emails, a module scaffold...) are records of nudge.skill, no longer text of this file. A call carries
 # the index of the skills the person may use, one line each; the full text of a skill joins only when

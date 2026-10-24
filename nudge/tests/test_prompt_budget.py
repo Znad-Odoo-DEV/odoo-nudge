@@ -31,9 +31,11 @@ WEBSITE = "Build a website for my company with a contact page"
 
 
 def tokens(call):
-    """The system text and the tool schema as sent, at 4 characters a token"""
+    """The system text and the tool schema as sent, at 4 characters a token (S8: the mark of the tools
+    every question is offered is read by the adapters, never sent)"""
     text = "\n".join(llm.system_texts(call["system"]))
-    return (len(text) + len(base.dump(call["tools"] or []))) // 4
+    sent = [{key: value for key, value in tool.items() if key != llm.CACHE_POINT} for tool in call["tools"] or []]
+    return (len(text) + len(base.dump(sent))) // 4
 
 
 def names(call):
@@ -92,6 +94,41 @@ class TestPromptBudget(NudgeCase, TransactionCase):
         for mode in ("talk", "agent", "dev"):
             self.assertLess(measured[mode, PLAIN], before[mode], f"{mode}: shorter than every tool in full")
         self.assertLess(measured["agent", PLAIN], before["agent"] - 4000, "Agent: at least 4k tokens fewer")
+
+    def test_a_later_question_of_a_conversation_carries_the_overview_once(self):
+        """S8: the same question asked first and then again in the same conversation, measured as above
+        with the context of the question: the system prompt keeps what every answer needs of the overview
+        of the database and the notes, the same in both calls; the rest of the overview goes with the
+        first question only; the tools every question is offered come first, in the same order"""
+        self.env["nudge.note"].with_user(self.manager).create({"name": "Words", "body": "We call quotations offers."})
+        self.env["nudge.profile"].sudo()._ensure_current()
+        overview = self.env["nudge.profile"].with_user(self.admin).sudo()._get_overview()
+        kept, rest = prompt.split_overview(overview)
+        self.assertTrue(rest, "An administrator reads an overview with a rest")
+        sizes = {}
+        for mode in ("talk", "agent", "dev"):
+            conversation, first = self.first_call(self.admin, PLAIN, mode=mode)
+            _conversation, later = self.first_call(self.admin, PLAIN, mode=mode, conversation_id=conversation.id)
+            asked = [first[0], later[0]]
+            contexts = [next(turn for turn in reversed(call["turns"]) if turn["role"] == "user")["context"] for call in asked]
+            total = [tokens(call) + len(context) // 4 for call, context in zip(asked, contexts)]
+            # What every call weighed before S8: the whole overview in the system prompt, no rest in the context
+            before = total[1] + (len(overview) - len(kept)) // 4
+            sizes[mode] = {"before": before, "first": total[0], "later": total[1],
+                           "overview": len(overview) // 4, "kept": len(kept) // 4}
+            self.assertEqual(first[0]["system"], later[0]["system"], f"{mode}: one system prompt, read from the cache")
+            self.assertIn("We call quotations offers.", first[0]["system"][1], f"{mode}: the notes are rules, in every call")
+            self.assertIn(prompt.render_overview_rest(rest), contexts[0])
+            self.assertNotIn("<nudge_overview>", contexts[1])
+            self.assertLess(total[1], before, mode)
+            self.assertLessEqual(total[0], before + len(prompt.OVERVIEW_GIVEN) // 4 + 40, f"{mode}: the first call about as before")
+            self.assertEqual([tool["name"] for tool in later[0]["tools"]], [tool["name"] for tool in first[0]["tools"]])
+            stable = next((index for index, tool in enumerate(first[0]["tools"]) if tool.get(llm.CACHE_POINT)), None)
+            if stable is not None:
+                self.assertTrue(all(tool["name"] in base.CORE_BY_MODE[mode] or tool["name"] not in groups.routed_tools()
+                                    for tool in first[0]["tools"][:stable + 1]), f"{mode}: the core first")
+            self.assertLess(total[1], BUDGET[mode], mode)
+        _logger.info("S8 call sizes in tokens (system, tools and the context of the question): %s", sizes)
 
     # ------------------------------------------------------------- the right tools
     def test_each_question_gets_the_tools_and_instructions_of_its_work(self):

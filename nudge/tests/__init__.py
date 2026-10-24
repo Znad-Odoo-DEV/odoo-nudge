@@ -106,3 +106,4 @@ from . import test_skill_router
 from . import test_agent_plan
 from . import test_plugins  # EXT-01 / L3
 from . import test_references  # S15
+from . import test_prompt_cache  # S8
