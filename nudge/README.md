@@ -380,6 +380,38 @@ the previous section answer the usual counts first, with no AI, for these people
 `/count unpaid invoices this month` answers with no provider at all. The switch is **Settings ‣
 Nudge ‣ Ask the Data** (on by default); off, the data stays closed to those without the Agent group.
 
+### Skills
+
+The instructions of one kind of work are kept apart as **skills** (Nudge ‣ What Nudge Knows ‣ Skills):
+setting Odoo up, importing files, designed emails, why something built failed and a module for a
+developer come with Nudge; a manager writes the company's own. A skill has a key, a title, a one-line
+summary, the full instructions (English, for the model), the words in English and Arabic that bring
+it, the screens that bring it, the tools it needs, the modes, the groups and the company it is for, a
+version and a test sentence with the tool it expects.
+
+- **Progressive disclosure.** Every call carries only the one-line list of the skills the person may
+  use. The full text of one or two joins the call when the question holds one of their words or names
+  their screen (the rules router, no AI), or when the model asks for it with `use_skill` (from its next
+  step of the same answer, and for the next questions of the conversation; the text joins the
+  instructions, never a tool result). A small model gets the skills of its question without the list. Measured with the method of the load test (system text and tool schema at 4 bytes a token):
+  about 0.4k tokens less in each call of Talk and Agent, about 0.9k less in Developer.
+- **Never more rights.** The tools a skill names are offered only to the people who may already use
+  them in that mode (groups, the switches of the administrator): a skill naming `run_sql` gives nothing
+  to an Agent user without the SQL switch. A skill is an instruction of the company: only Nudge managers
+  write and publish skills, every change is kept with its difference (tab Changes), and a draft is never
+  sent to a model.
+- **Recipes.** Skills are an item kind (`skill`) of the recipes. An imported skill, new or updated, is
+  a draft until a manager reads it and publishes it; a tool this database does not have refuses the item.
+- **Proposals and tests (NP-19).** Three approved lessons about one app (the model they name, or the
+  screen they were learnt on) become a draft skill, with a line in Business Notes for the managers
+  (Review opens the draft; Refuse on the line archives it; publishing it approves the line). Once the
+  skill is published, its lessons come with it when a question needs it, no longer with every question. The
+  weekly health check runs the test sentence of every active skill without any AI (does it still bring
+  the skill, is its tool still here) and writes a red line in Business Notes for each that fails; red
+  lines and proposals are never sent to a model.
+- **Fallback.** Settings ‣ Nudge ‣ Skills ‣ Every Skill in Full sends every skill in full with every
+  question, as before skills.
+
 ### In the background
 
 In Agent mode, the clock next to Send leaves the request to the server. Close the panel, go to
