@@ -492,7 +492,7 @@ class TestEngine(MessagingCase, HttpCase):
         self.receive("tell me something about the weather in the database please")
         names = {tool["name"] for tool in adapter.calls[0]["tools"]}
         self.assertFalse(names & {"prepare_create", "prepare_write", "call_method", "document_to_record"})
-        self.assertFalse(names & {"find_products", "search_products"}, "No tool of Agent mode only")
+        self.assertNotIn("find_products", names, "No tool of Agent mode only (search_products is one of Talk)")
         self.assertIn("search_records", names, "The Ask tier is offered, as in Talk")
         downloads = []
         self.patch(type(self.env["nudge.messaging.api"]), "_download", lambda model, channel, media: (
