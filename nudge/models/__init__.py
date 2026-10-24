@@ -17,6 +17,7 @@ from . import ir_module_module
 from . import res_config_settings
 from . import res_users_settings
 from . import ir_http
+from . import ir_model
 from . import res_company
 from . import nudge_quick
 from . import nudge_memory

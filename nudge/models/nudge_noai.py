@@ -458,7 +458,7 @@ class NudgeNoai(models.AbstractModel):
         return names.get(kind) or self._label_of(model_name)
 
     def _label_of(self, model_name):
-        return self.env["ir.model"]._get(model_name).name or model_name
+        return self.env["ir.model"].sudo()._get(model_name).name or model_name
 
     def _today(self):
         return fields.Date.context_today(self)

@@ -144,7 +144,7 @@ class NudgeRecipe(models.AbstractModel):
         if task.engine == "rule":
             data["rule"] = {
                 "domain": task.rule_domain or "[]", "measure": task.rule_measure,
-                "field": task.rule_field_id.name or "", "groupby": task.rule_groupby_id.name or "",
+                "field": task.rule_field_id.sudo().name or "", "groupby": task.rule_groupby_id.sudo().name or "",
                 "condition": task.rule_condition, "threshold": task.rule_threshold,
             }
         return data
@@ -540,8 +540,9 @@ class NudgeRecipe(models.AbstractModel):
         vals["model_name"] = model if model and model in self.env else False
         if kind == "rule":
             rule = data.get("rule") or {}
-            Fields = self.env["ir.model.fields"]
-            record_model = self.env["ir.model"].search([("model", "=", model)], limit=1)
+            # sudo: names only; a manager has no right on ir.model, the task checks the model is theirs
+            Fields = self.env["ir.model.fields"].sudo()
+            record_model = self.env["ir.model"].sudo().search([("model", "=", model)], limit=1)
             field = Fields.search([("model_id", "=", record_model.id), ("name", "=", rule.get("field"))], limit=1)
             groupby = Fields.search([("model_id", "=", record_model.id), ("name", "=", rule.get("groupby"))], limit=1)
             vals.update(rule_model_id=record_model.id, rule_domain=rule.get("domain") or "[]",
