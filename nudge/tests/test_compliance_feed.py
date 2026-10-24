@@ -136,6 +136,22 @@ class TestDeadlineNotices(TransactionCase):
             self.assertEqual(self.env["nudge.compliance.notice"].search_count(
                 [("company_id", "=", self.uae.id), ("check_key", "=", "einvoicing_asp")]), 2)
 
+    def test_a_deadline_that_moved_is_told_again_for_its_new_date(self):
+        """Review (functional 15): a notice told for the old date silenced the new one"""
+        Notice = self.env["nudge.compliance.notice"]
+        domain = [("company_id", "=", self.uae.id), ("check_key", "=", "einvoicing_asp")]
+        with patch(NOTIFY) as notify:
+            self.Notice._cron_deadlines(today=date(2026, 10, 22))
+            old = Notice.search(domain)
+            self.assertEqual(len(old), 1)
+            # as if it had been told at 7 days for the date before the pack moved it
+            old.write({"deadline": date(2026, 7, 31), "threshold": 7})
+            count = notify.call_count
+            self.Notice._cron_deadlines(today=date(2026, 10, 22))
+            self.assertEqual(Notice.search_count(domain), 2)
+            self.assertEqual(sorted(Notice.search(domain).mapped("deadline")), [date(2026, 7, 31), date(2026, 10, 30)])
+            self.assertGreater(notify.call_count, count)
+
     def test_a_missed_cron_tells_only_the_tightest_threshold_and_a_past_date_nothing(self):
         with patch(NOTIFY):
             self.Notice._cron_deadlines(today=date(2026, 10, 26))  # 4 days left
