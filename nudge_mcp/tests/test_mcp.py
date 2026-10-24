@@ -107,6 +107,8 @@ class TestMcp(HttpCase):
         self.assertEqual(self.rpc("initialize", key=self.make_key(self.no_group)).status_code, 401)
 
     def test_expired_key(self):
+        if "expiration_date" not in self.env["res.users.apikeys"]._fields:
+            self.skipTest("Odoo 17 keys have no expiry")
         key = self.make_key(self.agent)
         self.env.cr.execute(
             "UPDATE res_users_apikeys SET expiration_date = now() at time zone 'utc' - interval '1 day' "
@@ -632,7 +634,8 @@ class TestMcp(HttpCase):
         self.assertEqual(self.rpc("initialize", key=wizard.key).status_code, 200)
         row = self.env["res.users.apikeys"].sudo().search([("user_id", "=", self.agent.id), ("name", "=", "Claude Desktop")])
         self.assertEqual(row.scope, nudge_mcp.SCOPE)
-        self.assertTrue(row.expiration_date)
+        if "expiration_date" in row._fields:  # Odoo 17 keys have no expiry
+            self.assertTrue(row.expiration_date)
         # Only the group makes keys; and only when Nudge is open
         with self.assertRaises(AccessError):
             Wizard.with_user(self.no_group).create({"name": "Nope"}).action_create()

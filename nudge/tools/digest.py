@@ -251,5 +251,6 @@ def sentence(env, line):
     if line["amount"]:
         text += f" ({line['amount']})"
     if line.get("change") is not None:
-        text += _(", %(change)s%% against the week before", change=f"{line['change']:+d}")
+        change = f"{line['change']:+d}"
+        text += _(", %(change)s%% against the week before", change=change)
     return text

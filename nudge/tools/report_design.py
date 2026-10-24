@@ -328,7 +328,8 @@ def pdf_state(env, report, sample):
     if state != "ok":
         return _("The PDF engine (wkhtmltopdf) is not available here: the page is shown as it prints, in HTML.")
     pdf, _kind = report._render_qweb_pdf(report, sample.ids)
-    return _("PDF made: %s KB.", f"{len(pdf) / 1024:.0f}")
+    size = f"{len(pdf) / 1024:.0f}"
+    return _("PDF made: %s KB.", size)
 
 
 def document_name(env, kind):
