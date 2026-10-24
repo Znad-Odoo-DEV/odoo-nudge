@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_connect" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.nudge.connect</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="92"/>
+        <field name="inherit_id" ref="nudge.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='nudge_access_container']" position="after">
+                <block title="Connectors (MCP)" name="nudge_connect_container">
+                    <setting string="Connectors" help="Outside systems that speak MCP, whose tools Nudge may use for a person: reads at once, writes after the person's yes. Each tool is allowed one by one.">
+                        <button name="action_nudge_connectors" type="object" icon="oi-arrow-right"
+                                string="Connectors" class="btn-link"/>
+                    </setting>
+                    <setting help="The kill switch: nothing is sent to any connector, in any company, until it is switched back.">
+                        <field name="nudge_connect_stopped"/>
+                    </setting>
+                    <setting help="No connector is used in this company, whatever each connector says.">
+                        <field name="nudge_connect_disabled"/>
+                    </setting>
+                    <setting help="In this company a connector only reads during the month after it was first made active: its write tools are not offered before then.">
+                        <field name="nudge_connect_read_only_first_month"/>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

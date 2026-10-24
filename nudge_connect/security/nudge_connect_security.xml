@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- The calls of the companies one works in -->
+    <record id="nudge_connector_call_company_rule" model="ir.rule">
+        <field name="name">Nudge connector calls: own companies</field>
+        <field name="model_id" ref="model_nudge_connector_call"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+</odoo>
