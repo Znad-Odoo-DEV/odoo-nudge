@@ -112,6 +112,7 @@ def draw_picture(provider, model, prompt, timeout=60):
         return None
     provider._check_private()
     try:
+        provider.env["nudge.egress"].check(provider.base_url, "picture")  # NP-15
         response = requests.post(
             provider.base_url.rstrip("/") + "/images/generations",
             json={"model": model, "prompt": prompt[:900], "n": 1, "size": "1536x1024", "response_format": "b64_json"},
@@ -122,7 +123,8 @@ def draw_picture(provider, model, prompt, timeout=60):
             return base64.b64decode(entry["b64_json"])
         if entry.get("url"):
             provider.env["nudge.egress"].check(entry["url"], "picture")  # NP-15: it lives on another host
-            fetched = requests.get(entry["url"], timeout=timeout)
+            # Not followed: a redirect would go to a host the list was not asked about
+            fetched = requests.get(entry["url"], timeout=timeout, allow_redirects=False)
             fetched.raise_for_status()
             return fetched.content
     except Exception:  # noqa: BLE001 - the placeholder takes over

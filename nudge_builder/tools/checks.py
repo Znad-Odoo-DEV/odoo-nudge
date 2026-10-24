@@ -23,6 +23,8 @@ from lxml import etree
 from odoo.exceptions import AccessError
 from odoo.tools import html_escape, is_html_empty
 
+from odoo.addons.nudge.tools import egress
+
 _logger = logging.getLogger(__name__)
 
 CRITICAL, WARNING, INFO = "critical", "warning", "info"
@@ -201,14 +203,14 @@ def _safe_target(url):
     return True
 
 
-def head_status(url):
+def head_status(url, allowed=None):
     """:return: the HTTP status of a HEAD request (5 seconds), or 0 when nothing answered or the
     address, or any address it redirects to, is not a public one. Redirects are followed here,
     three at most, each one checked like the first: a public page cannot send the server to its
-    own network."""
+    own network, nor to a host the company did not allow (``allowed``)."""
     import requests  # noqa: PLC0415
     for _hop in range(MAX_REDIRECTS + 1):
-        if not _safe_target(url):
+        if not _safe_target(url) or (allowed and not allowed(url)):
             return 0
         try:
             response = requests.head(url, timeout=EXTERNAL_TIMEOUT, allow_redirects=False,
@@ -292,15 +294,21 @@ def check_links(env, website, pages, external=False, fetch=None, **_options):
                            [p.url for p in pages_.values()], extra={"links": sorted(broken)[:MAX_IDS]}))
     if external and outside:
         fetch = fetch or head_status
+        # NP-15: an address the company did not allow is not visited
+        entries = env["nudge.egress"]._entries()
+
+        def allowed(url):
+            return not entries or egress.is_allowed(entries, url)
+
         bad, checked, started = {}, 0, time.monotonic()
         for href in sorted(outside):
             if checked >= MAX_EXTERNAL or time.monotonic() - started > EXTERNAL_BUDGET:
                 break
             checked += 1
             full = "https:" + href if href.startswith("//") else href
-            if fetch is head_status and not _safe_target(full):
+            if fetch is head_status and not (_safe_target(full) and allowed(full)):
                 continue
-            status = fetch(full)
+            status = head_status(full, allowed) if fetch is head_status else fetch(full)
             if status == 0 or status >= 400 and status not in (401, 403, 405, 429, 999):
                 bad[href] = status
         if bad:
