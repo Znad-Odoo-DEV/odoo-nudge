@@ -1,4 +1,5 @@
 import json
+import unittest
 
 from odoo.exceptions import AccessError, UserError
 from odoo.tests import TransactionCase, new_test_user, tagged
@@ -21,6 +22,8 @@ class TestMailAgent(NudgeCase, TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        if not all(model in cls.env for model in ("crm.lead", "project.project")):
+            raise unittest.SkipTest("These tests need CRM and Project installed")
         groups = ("nudge.group_nudge_manager,base.group_partner_manager,sales_team.group_sale_salesman,"
                   "account.group_account_invoice,project.group_project_user")
         cls.boss = new_test_user(cls.env, login="agent_boss", groups=groups, name="Raghad Manager")

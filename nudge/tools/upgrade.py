@@ -269,11 +269,10 @@ class RenamedReferences(UpgradeCheck):
         if rule:
             arabic = (env.lang or "").startswith("ar")
             note = (rule.get("note_ar") if arabic else None) or rule["note"]
+        what = ", ".join(f"{m}.{f}" if f != "*" else m for m in (rule or {}).get("models", [])[:2]
+                         for f in (rule or {}).get("fields", [])[:3]) or rule_id
         return env._("%(count)s %(where)s refer to %(what)s. Fix: %(note)s.",
-                     count=count, where=place_names(env).get(place, place),
-                     what=", ".join(f"{m}.{f}" if f != "*" else m for m in (rule or {}).get("models", [])[:2]
-                                    for f in (rule or {}).get("fields", [])[:3]) or rule_id,
-                     note=note)
+                     count=count, where=place_names(env).get(place, place), what=what, note=note)
 
 
 class MarkupAndApis(UpgradeCheck):

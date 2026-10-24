@@ -218,9 +218,9 @@ class PreparePlan(base.Action):
             values, shown = read_values(model, step.get("values") or [])
             if not values:
                 raise Refused(f"Step {index}: nothing to write. Give values.")
-            label = env._("Change %(fields)s on %(count)s × %(model)s", fields="; ".join(
-                f"{line['label']}: {line['value']}" for line in shown), count=len(records),
-                model=model._description)
+            changed = "; ".join(f"{line['label']}: {line['value']}" for line in shown)
+            label = env._("Change %(fields)s on %(count)s × %(model)s", fields=changed, count=len(records),
+                          model=model._description)
             return {"action": "write", "model": model._name, "ids": records.ids,
                     "values": values, "label": label}, records
         model = get_model(env, step["model"], "read", to_change=True)
