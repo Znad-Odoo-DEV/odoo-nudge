@@ -42,7 +42,9 @@ class TestReportDesign(NudgeCase, TransactionCase):
         })
         bank = cls.env["res.bank"].create({"name": "Nudge National Bank"})
         cls.env["res.partner.bank"].create({
-            "acc_number": "AE070331234567890123456", "partner_id": cls.company.partner_id.id, "bank_id": bank.id})
+            "acc_number": "AE070331234567890123456", "partner_id": cls.company.partner_id.id, "bank_id": bank.id,
+            # The footer prints the first account: before any the demo data gave the company
+            "sequence": -100})
         cls.raghad = cls.env["res.partner"].create({"name": "Raghad"})
         product = cls.env["product.product"].create({"name": "Nudge Design Item", "type": "service"})
         cls.quotation = cls.env["sale.order"].create({
