@@ -638,9 +638,9 @@ bulk and Agent paths answer 403 and the log has no write right.
 
 - **Add an Auditor** (Nudge, Configuration, administrators): name, login, companies and the last day. It makes the
   user with the auditor group and the internal user group and nothing else; read-only app rights (for example the
-  read-only accounting rights) can be chosen in the wizard or on the user.
-- **Access until**: on the user (page Nudge Auditor). The day after, a daily cron archives the user, and a session
-  is refused on its next request, whatever the cron has done yet. **Revoke the Access** ends it at once.
+  read-only accounting rights) can be chosen in the wizard: a group that can create, change or delete records is refused.
+- **Access until**: on the user (page Nudge Auditor). The day after, an hourly cron archives the user, and a session,
+  a password or an API key (RPC too) is refused at once, whatever the cron has done yet. **Revoke the Access** ends it at once.
 - **Questions of Auditors** (Nudge managers, What Nudge Did): every question an auditor asked, kept for the company.
   The retention of old conversations leaves them and nobody can delete them.
 

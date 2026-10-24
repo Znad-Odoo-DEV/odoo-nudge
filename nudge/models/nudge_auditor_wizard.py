@@ -50,6 +50,13 @@ class NudgeAuditorWizard(models.TransientModel):
             # A group that implies one of them is refused by the user itself (res.users)
             if group in forbidden:
                 raise UserError(self.env._("%s acts, builds or manages: it cannot be given to an auditor.", group.display_name))
+        # Any other group is judged by its access rights (and those of the groups it implies): an auditor reads,
+        # so nothing that creates, writes or deletes beyond the rights of an internal user and of the auditor
+        baseline = self.env.ref("base.group_user") | self.env.ref(AUDITOR_GROUP)
+        for group, models_ in self.read_group_ids._nudge_write_rights_beyond(baseline).items():
+            raise UserError(self.env._(
+                "%(group)s lets its users create, change or delete records (%(models)s): it cannot be given to "
+                "an auditor, who only reads.", group=group.display_name, models=", ".join(models_[:5])))
         groups = self.env.ref(AUDITOR_GROUP) | self.env.ref("base.group_user") | self.read_group_ids
         user = self.env["res.users"].with_context(no_reset_password=True).create({
             "name": self.name, "login": self.login.strip(), "email": self.login.strip(),

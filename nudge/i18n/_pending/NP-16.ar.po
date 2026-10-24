@@ -103,3 +103,9 @@ msgstr "ما سأله المدقق محفوظ للشركة ولا يمكن حذ�
 
 msgid "Nudge: end the access of auditors"
 msgstr "Nudge: إنهاء صلاحية المدققين"
+
+msgid "%(group)s lets its users create, change or delete records (%(models)s): it cannot be given to an auditor, who only reads."
+msgstr "تتيح المجموعة %(group)s لمستخدميها إنشاء السجلات أو تعديلها أو حذفها (%(models)s): لا يمكن منحها لمدقق يقرأ فقط."
+
+msgid "What an auditor asked is kept: it cannot be archived or renamed."
+msgstr "ما سأله المدقق محفوظ: لا يمكن أرشفته أو إعادة تسميته."
