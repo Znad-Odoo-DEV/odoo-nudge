@@ -11,7 +11,7 @@ import re
 
 from dateutil.relativedelta import relativedelta
 
-from odoo import _, fields
+from odoo import fields
 
 from . import saved_reports
 from .analytics import TooBig, grouped
@@ -22,7 +22,7 @@ from .records import Refused, build_domain, get_model
 def _tr(env, source, *args, **kwargs):
     """Translate in the language of ``env``: ``env._`` on 18 and 19; on 17 ``_()`` reads the
     ``context`` and ``cr`` of the frame that calls it, which a function of this module lacks.
-    The code calls ``_(`` so that its terms are extracted; scripts/port17.py turns those calls into this."""
+    The code calls ``_tr(env, `` so that its terms are extracted; scripts/port17.py turns those calls into this."""
     method = getattr(env, "_", None)
     if method:
         return method(source, *args, **kwargs)
@@ -174,9 +174,9 @@ def facts(env, definition, domain_source):
     except TooBig as error:
         raise Refused(str(error)) from error
     if not count:
-        return [{"key": "empty", "text": _("There is no data in this report: no record matches it.")}]
+        return [{"key": "empty", "text": _tr(env, "There is no data in this report: no record matches it.")}]
     records = f"{count:,}"
-    out = [{"key": "total", "text": _(
+    out = [{"key": "total", "text": _tr(env, 
         "Overall, %(measure)s is %(total)s over %(count)s records.",
         measure=measure, total=_money(env, model, spec, total), count=records)}]
     if definition["group_by"]:
@@ -205,7 +205,7 @@ def _group_facts(env, model, definition, domain, total, today):
     if not any(fact["key"] in ("signs", "movers", "steps") for fact in out):
         negatives = [label for label, value, _key in rows if value < 0]
         if negatives:
-            out.append({"key": "negative", "text": _(
+            out.append({"key": "negative", "text": _tr(env, 
                 "%(count)s rows are below zero, for instance %(names)s.",
                 count=len(negatives), names=", ".join(negatives[:MAX_NAMED]))})
     return out
@@ -228,14 +228,14 @@ def _contributor_facts(env, model, spec, rows, total):
     share = running / total
     if len(named) == 1:
         if share >= CONCENTRATION:
-            return [{"key": "contributors", "text": _(
+            return [{"key": "contributors", "text": _tr(env, 
                 "%(name)s alone is %(share)s of the total.", name=named[0], share=_percent(share))}]
     elif share >= CONCENTRATION and len(named) < len(ranked):
-        return [{"key": "contributors", "text": _(
+        return [{"key": "contributors", "text": _tr(env, 
             "%(count)s rows (%(names)s) make %(share)s of the total.",
             count=len(named), names=", ".join(named), share=_percent(share))}]
     label, value, _key = ranked[0]
-    return [{"key": "contributors", "text": _(
+    return [{"key": "contributors", "text": _tr(env, 
         "The biggest is %(name)s with %(value)s, %(share)s of the total.",
         name=label, value=_money(env, model, spec, value), share=_percent(value / total))}]
 
@@ -254,27 +254,27 @@ def _step_facts(env, model, spec, rows):
     out = []
     (last, now, _k1), (before_label, before, _k2) = rows[-1], rows[-2]
     if now != before:
-        sentence = _(
+        sentence = _tr(env, 
             "%(last)s is %(now)s, up %(change)s on %(before)s (%(was)s).", last=last,
             now=_money(env, model, spec, now), change=_change_words(env, model, spec, now, before),
-            before=before_label, was=_money(env, model, spec, before)) if now > before else _(
+            before=before_label, was=_money(env, model, spec, before)) if now > before else _tr(env, 
             "%(last)s is %(now)s, down %(change)s on %(before)s (%(was)s).", last=last,
             now=_money(env, model, spec, now), change=_change_words(env, model, spec, now, before),
             before=before_label, was=_money(env, model, spec, before))
     else:
-        sentence = _("%(last)s is %(now)s, the same as %(before)s.", last=last,
+        sentence = _tr(env, "%(last)s is %(now)s, the same as %(before)s.", last=last,
                          now=_money(env, model, spec, now), before=before_label)
     out.append({"key": "movers", "text": sentence})
     steps = [(abs(rows[index][1] - rows[index - 1][1]), index) for index in range(1, len(rows))]
     size, index = max(steps)
     if size and index != len(rows) - 1:
-        out.append({"key": "steps", "text": _(
+        out.append({"key": "steps", "text": _tr(env, 
             "The biggest step is from %(before)s to %(label)s: %(change)s.", before=rows[index - 1][0],
             label=rows[index][0], change=_money(env, model, spec, rows[index][1] - rows[index - 1][1]))})
     flips = [index for index in range(1, len(rows)) if rows[index][1] * rows[index - 1][1] < 0]
     if flips:
         names = ", ".join(rows[index][0] for index in flips[:MAX_NAMED])
-        out.append({"key": "signs", "text": _(
+        out.append({"key": "signs", "text": _tr(env, 
             "The sign changed at %(names)s.", names=names)})
     return out
 
@@ -290,9 +290,9 @@ def _mover_facts(env, model, definition, rows, previous_domain, total):
         return []
     before = {key if key is not None else False: (label, value) for label, value, key in before_rows}
     if not before_total and not before:
-        return [{"key": "movers", "text": _("There is nothing in the period before to compare with.")}]
+        return [{"key": "movers", "text": _tr(env, "There is nothing in the period before to compare with.")}]
     out = []
-    sentence = _("Against the period before (%(was)s) the total is up %(change)s.") if total >= before_total         else _("Against the period before (%(was)s) the total is down %(change)s.")
+    sentence = _tr(env, "Against the period before (%(was)s) the total is up %(change)s.") if total >= before_total         else _tr(env, "Against the period before (%(was)s) the total is down %(change)s.")
     out.append({"key": "movers", "text": sentence % {
         "was": _money(env, model, spec, before_total), "change": _change_words(env, model, spec, total, before_total)}})
     deltas = []
@@ -306,11 +306,11 @@ def _mover_facts(env, model, definition, rows, previous_domain, total):
         for size, label, value, was in movers:
             sign = "+" if value >= was else "-"
             parts.append(f"{label} {sign}{_money(env, model, spec, size)}")
-        out.append({"key": "movers", "text": _("Biggest movers: %(movers)s.", movers="; ".join(parts))})
+        out.append({"key": "movers", "text": _tr(env, "Biggest movers: %(movers)s.", movers="; ".join(parts))})
     flips = sorted(str(label) for key, (label, value) in now.items()
                    if key in before and value * before[key][1] < 0)
     if flips:
-        out.append({"key": "signs", "text": _(
+        out.append({"key": "signs", "text": _tr(env, 
             "These changed sign against the period before: %(names)s.", names=", ".join(flips[:MAX_NAMED]))})
     return out
 
@@ -320,7 +320,7 @@ def _undefined_facts(env, rows, total, field_label):
         return []
     undefined = sum(value for _label, value, key in rows if key in (None, False))
     if undefined / total >= UNDEFINED_SHARE:
-        return [{"key": "suspicious", "text": _(
+        return [{"key": "suspicious", "text": _tr(env, 
             "%(share)s of the total has no %(field)s set.", share=_percent(undefined / total), field=field_label)}]
     return []
 
@@ -334,6 +334,6 @@ def _column_facts(env, model, definition, domain):
         except TooBig:
             continue
         if not total:
-            out.append({"key": "suspicious", "text": _(
+            out.append({"key": "suspicious", "text": _tr(env, 
                 "%(measure)s is empty: zero in every row.", measure=_measure_name(env, model, spec))})
     return out
