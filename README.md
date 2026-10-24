@@ -512,6 +512,18 @@ version and a test sentence with the tool it expects.
   expects. `tests/test_skill_coverage.py` fails when a tool belongs to no skill, a skill names a tool that does
   not exist, a test sentence no longer brings its skill, or an instruction passes the 12,000 characters.
 
+### Plugins
+
+A **plugin** is an Odoo module named `nudge_plugin_<name>` that adds tools, skills, prompts and slash
+commands, described in its manifest under `nudge_plugin` (`doc/plugins.md`; `nudge_plugin_example` is one to
+copy). Installed, it waits in Nudge ‣ Configuration ‣ Plugins: nothing of it reaches anyone until a system
+administrator reads what it brings (each tool, whether it writes, the models it touches, the text of each skill
+and prompt) and allows it. A switch per plugin and Settings ‣ Nudge ‣ Plugins ‣ Every Plugin Off take it back at
+once; a plugin that changed since it was allowed waits again. Its tools run with the person's rights and its
+writes wait for a yes on a card; it never takes the name of a tool or a command that exists already. A manifest
+signed by a trusted key shows "Verified publisher". Each database offers only the tools of the modules it has
+(EXT-01): on a server with several databases, a companion or a plugin installed in one is not offered in another.
+
 ### In the background
 
 In Agent mode, the clock next to Send leaves the request to the server. Close the panel, go to
