@@ -60,6 +60,7 @@ from . import test_report_explain
 from . import test_saved_reports
 from . import test_home
 from . import test_approval_flow
+from . import test_document_catalogue
 from . import test_document_record
 from . import test_embedding
 from . import test_history

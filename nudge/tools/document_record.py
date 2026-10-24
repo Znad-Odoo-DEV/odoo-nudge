@@ -45,7 +45,11 @@ TARGETS = {
     "purchase_order": ("purchase.order", {}, "purchase order"),
     "lead": ("crm.lead", {}, "lead"),
     "contact": ("res.partner", {}, "contact"),
+    # A price list or a bill of materials (document_catalogue); the BOM only where mrp is installed
+    "products": ("product.template", {}, "products"),
+    "bom": ("mrp.bom", {}, "bill of materials"),
 }
+CATALOGUE = ("products", "bom")
 
 
 def kind_label(env, target):
@@ -54,6 +58,7 @@ def kind_label(env, target):
         "vendor_bill": env._("vendor bill"), "customer_invoice": env._("customer invoice"),
         "sales_order": env._("quotation"), "purchase_order": env._("purchase order"),
         "lead": env._("lead"), "contact": env._("contact"),
+        "products": env._("products"), "bom": env._("bill of materials"),
     }[target]
 
 
@@ -192,7 +197,8 @@ def normalise(data):
         })
     totals = data.get("totals") if isinstance(data.get("totals"), dict) else {}
     return {
-        "type": data.get("document_type") if data.get("document_type") in TARGETS else "unknown",
+        "type": data.get("document_type") if data.get("document_type") in TARGETS
+        and data.get("document_type") not in CATALOGUE else "unknown",
         "partner": {key: text_of(partner.get(key), 200) for key in (
             "name", "contact_name", "vat", "email", "phone", "street", "city", "country")},
         "is_company": bool(partner.get("is_company")),
@@ -711,7 +717,12 @@ class DocumentToRecord(base.Action):
         "never confirmed or posted. target \"guess\" lets the document say what it is. When the "
         "result says a contact or a product is ambiguous, or the contact is not in Odoo, ask the "
         "person and call again with partner_id, product_choices or create_partner. Use this, not "
-        "prepare_create, whenever the person gives a document to enter."
+        "prepare_create, whenever the person gives a document to enter. target \"products\" turns a "
+        "price list, catalogue or table of products (Excel/CSV need no model; PDF or picture are read) "
+        "into new products, showing first every row with the products that exist already (never "
+        "duplicated, never changed); target \"bom\" turns a table of components into a bill of materials "
+        "(only when Manufacturing is installed). Both show numbered rows: the person unticks rows by "
+        "number (skip_rows)."
     )
     input_schema = {
         "type": "object",
@@ -737,6 +748,18 @@ class DocumentToRecord(base.Action):
                                                         "description": "0 = no product, keep the description."}}},
                 "description": "The product the person chose for a line of the document.",
             },
+            "skip_rows": {"type": "array", "maxItems": 200, "items": {"type": "integer", "minimum": 1},
+                          "description": "products / bom: the numbers of the rows the person unticked."},
+            "include_rows": {"type": "array", "maxItems": 200, "items": {"type": "integer", "minimum": 1},
+                             "description": "products: rows like an existing product that the person wants made anyway."},
+            "vendor": {"type": "string", "maxLength": 200,
+                       "description": "products: the vendor whose price list the file is, to add the vendor line."},
+            "finished_product": {"type": "string", "maxLength": 200,
+                                 "description": "bom: the product the bill of materials makes, when the file does not say."},
+            "finished_product_id": {"type": "integer", "minimum": 0,
+                                    "description": "bom: the product the person chose for it (0 = a new product)."},
+            "add_another": {"type": "boolean",
+                            "description": "bom: the person wants one more bill of materials for a product that has one."},
             "insist": {"type": "boolean",
                        "description": "The person wants Nudge to read a vendor bill even though Odoo's own "
                                       "digitisation is installed."},
@@ -753,6 +776,10 @@ class DocumentToRecord(base.Action):
         target = arguments["target"]
         if target != "guess":
             self._check_target(env, target)
+        if target in CATALOGUE:
+            from . import document_catalogue  # noqa: PLC0415
+
+            return document_catalogue.run(self, env, arguments, screen, target)
         if target == "vendor_bill" and ocr_installed(env) and not arguments.get("insist"):
             return base.ToolResult(
                 "Odoo's own digitisation of vendor bills is installed: tell the person to use it, on the "
@@ -874,6 +901,9 @@ class DocumentToRecord(base.Action):
         )
 
     def _check_target(self, env, target):
+        if target in CATALOGUE:
+            # document_catalogue refuses by itself, naming the group
+            return
         model_name = TARGETS[target][0]
         if model_name not in env:
             app = {"account.move": "Invoicing", "sale.order": "Sales", "purchase.order": "Purchase",
@@ -887,6 +917,10 @@ class DocumentToRecord(base.Action):
         if model_name not in ALLOWED_MODELS or spec.get("target") not in TARGETS \
                 or TARGETS[spec["target"]][0] != model_name:
             raise Refused("This is not a record Nudge makes from a document.")
+        if spec["target"] in CATALOGUE:
+            from . import document_catalogue  # noqa: PLC0415
+
+            return document_catalogue.execute(self, env, step)
         model = get_model(env, model_name, "create", to_change=True)
         values = dict(spec["values"])
         created = []
