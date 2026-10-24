@@ -25899,3 +25899,51 @@ msgstr ""
 "مبالغ هذا التقرير بعدة عملات (%(names)s)، فأي إجمالي أو مقارنة ستجمع "
 "أموالاً مختلفة معاً. صفِّ حسب عملة واحدة أو جمّع التقرير حسب العملة."
 
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_setup_wizard__redact_pii
+msgid "Mask Personal Data Before It Is Sent"
+msgstr "إخفاء البيانات الشخصية قبل إرسالها"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_setup_wizard__redact_pii
+msgid ""
+"Emails, phone numbers, IBANs and ID numbers become tokens before a "
+"question goes to a provider that does not run on your server. It reduces "
+"what is sent; it cannot promise to catch every number."
+msgstr ""
+"تتحول البريد الإلكتروني وأرقام الهاتف وأرقام الآيبان وأرقام الهوية إلى "
+"رموز قبل أن يذهب السؤال إلى مزود لا يعمل على خادمك. هذا يقلل ما يُرسل، "
+"لكنه لا يضمن التقاط كل رقم."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_setup_wizard__data_ack
+msgid "I Understand What Is Sent to the Provider"
+msgstr "أفهم ما يُرسل إلى المزود"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_setup_wizard__data_ack
+msgid ""
+"Required for a provider outside your server: questions and the records "
+"they need leave it."
+msgstr "مطلوب لمزود خارج خادمك: الأسئلة والسجلات التي تحتاجها تغادر الخادم."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_setup_wizard_view_form
+msgid ""
+"Data sent to the provider: the question and the records it needs, from "
+"everyone who uses Nudge. Private Mode (Settings) stops anything leaving "
+"your server."
+msgstr ""
+"البيانات المرسلة إلى المزود: السؤال والسجلات التي يحتاجها، من كل من "
+"يستخدم Nudge. الوضع الخاص (في الإعدادات) يمنع خروج أي شيء من خادمك."
+
+#. module: nudge
+#: models/nudge_setup_wizard.py
+msgid ""
+"Tick that you understand what is sent to the provider: questions and the "
+"records they need leave your server. Private Mode in Settings stops "
+"anything leaving it."
+msgstr ""
+"علّم أنك تفهم ما يُرسل إلى المزود: الأسئلة والسجلات التي تحتاجها تغادر "
+"خادمك. الوضع الخاص في الإعدادات يمنع خروج أي شيء."
+

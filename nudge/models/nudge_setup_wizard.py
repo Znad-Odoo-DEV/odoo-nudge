@@ -30,6 +30,7 @@ CHOICES = [
     ("other", "Other OpenAI-compatible API"),
 ]
 # The provider records the module ships, by choice; "other" is created
+LOCAL_CHOICES = ("rules", "ollama")
 SEEDED = {"ollama": "nudge.provider_ollama", "claude": "nudge.provider_anthropic",
           "gemini": "nudge.provider_gemini"}
 
@@ -78,6 +79,13 @@ class NudgeSetupWizard(models.TransientModel):
     working_days = fields.Integer(string="Working Days per Month")
     mode = fields.Selection(MODES, string="Mode Used Most", default="talk", required=True)
     all_users = fields.Boolean(string="Nudge for All Internal Users", default=True)
+    redact_pii = fields.Boolean(
+        string="Mask Personal Data Before It Is Sent", default=True,
+        help="Emails, phone numbers, IBANs and ID numbers become tokens before a question goes to a provider that "
+             "does not run on your server. It reduces what is sent; it cannot promise to catch every number.")
+    data_ack = fields.Boolean(
+        string="I Understand What Is Sent to the Provider",
+        help="Required for a provider outside your server: questions and the records they need leave it.")
 
     choice = fields.Selection(CHOICES, string="Provider", default="rules", required=True)
     pros = fields.Text(compute="_compute_texts")
@@ -228,6 +236,8 @@ class NudgeSetupWizard(models.TransientModel):
         self.price_output = prices.get("output", 0.0)
         self.tested = False
         self.test_result = False
+        # a provider outside the server sends business data out: the whole company is not opened to it by default
+        self.all_users = self.choice in LOCAL_CHOICES
         if self.choice == "ollama" and not self.base_url:
             self.base_url = "http://localhost:11434/v1"
 
@@ -368,6 +378,13 @@ class NudgeSetupWizard(models.TransientModel):
         if self.choice != "rules":
             if not self.tested or not self.provider_id:
                 raise UserError(_("Test the connection of the provider first."))
+            outside = not self.provider_id.runs_locally and self.choice not in LOCAL_CHOICES
+            if outside and not self.data_ack:
+                raise UserError(_(
+                    "Tick that you understand what is sent to the provider: questions and the records they need "
+                    "leave your server. Private Mode in Settings stops anything leaving it."))
+            if outside:
+                self.env.company.sudo().nudge_redact_pii = self.redact_pii
             Parameter.set_param(DEFAULT_PROVIDER_PARAM, str(self.provider_id.id))
             if self.mode in ("agent", "developer"):
                 Parameter.set_param(AGENT_PARAM, "yes")
