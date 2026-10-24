@@ -86,6 +86,8 @@ export class NudgePanel extends Component {
         onWillUnmount(() => browser.clearInterval(watching));
         // The commands offered while one is typed: the one chosen with the arrows
         this.commandMenu = useState({ index: 0, closedFor: null });
+        // NP-23: the overlay that lists the commands
+        this.help = useState({ open: false });
 
         useEffect(
             () => this.inputRef.el?.focus(),
@@ -335,8 +337,24 @@ export class NudgePanel extends Component {
         ];
     }
 
+    /** NP-23: the toggles of the look, shown in the preferences */
+    get lookChoices() {
+        return [
+            { name: "highContrast", label: _t("High contrast") },
+            { name: "largeText", label: _t("Large text") },
+            { name: "compact", label: _t("Compact tiles on the home page") },
+            { name: "dock", label: _t("Dock the panel at the side of the screen") },
+            { name: "companyAccent", label: _t("Use the colour of my company") },
+        ];
+    }
+
+    toggleHelp() {
+        this.help.open = !this.help.open;
+    }
+
     get themes() {
         const names = {
+            odoo: _t("Odoo colour"),
             violet: _t("Violet"),
             teal: _t("Teal"),
             amber: _t("Amber"),
@@ -774,7 +792,9 @@ export class NudgePanel extends Component {
     onKeydown(ev) {
         if (ev.key === "Escape") {
             ev.stopPropagation();
-            if (this.isListening) {
+            if (this.help.open) {
+                this.help.open = false;
+            } else if (this.isListening) {
                 this.voice.cancel();
             } else {
                 this.nudge.close();

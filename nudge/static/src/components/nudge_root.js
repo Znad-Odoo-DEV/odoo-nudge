@@ -35,6 +35,17 @@ export class NudgeRoot extends Component {
         browser.addEventListener("resize", onResize);
         onWillUnmount(() => browser.removeEventListener("resize", onResize));
 
+        // The page makes room for the avatar (and for the drawer, docked); removed with the component
+        useEffect(
+            (enabled, docked) => {
+                const body = document.body;
+                body.classList.toggle("o_nudge_on", Boolean(enabled));
+                body.classList.toggle("o_nudge_dock_open", Boolean(docked));
+                return () => body.classList.remove("o_nudge_on", "o_nudge_dock_open");
+            },
+            () => [this.state.isEnabled, this.isDocked]
+        );
+
         useEffect(
             (avatar) => {
                 if (!avatar) {
@@ -69,6 +80,27 @@ export class NudgeRoot extends Component {
 
     get direction() {
         return localization.direction;
+    }
+
+    /** NP-23: the panel is a drawer at the side of a wide screen; on a phone it stays the sheet */
+    get isDocked() {
+        return Boolean(this.state.dock && this.state.isOpen && !this.state.isMobile);
+    }
+
+    /** The colour of the company as the accent, when the person asked for it and the company has one */
+    get companyStyle() {
+        const color = this.state.companyAccent ? this.state.companyColor : "";
+        if (!color) {
+            return "";
+        }
+        const [red, green, blue] = [1, 3, 5].map((index) => parseInt(color.slice(index, index + 2), 16));
+        return `--nudge-company: ${color}; --nudge-company-rgb: ${red}, ${green}, ${blue}`;
+    }
+
+    get rootStyle() {
+        // A docked drawer has its place; the avatar is not moved around then
+        const parts = [this.isDocked ? "" : this.placement?.style, this.companyStyle].filter(Boolean);
+        return parts.length ? parts.join("; ") : undefined;
     }
 
     get isListening() {
