@@ -567,3 +567,10 @@ Packs that carry a date (`deadline`, `source`, `reviewed` on a check; `reviewed`
 
 The feed of updates is off on a new database (no address, no key). In **Settings, Nudge, Compliance Packs** an administrator sets the HTTPS address and the Ed25519 public key of the publisher. Once a day Nudge fetches that one file (never in private mode), checks the signature, validates each pack like a bundled one and lists the changes per country in **Nudge, Health Check, Compliance Pack Updates**. Only a system administrator approves, declines or rolls back an update; a pack is data (no code, no HTML). The feed is `{"format": 1, "payload": "<json text>", "signature": "<base64>"}`; sign it with `python -I scripts/sign_pack_feed.py --key <private.pem> --payload feed.json --out signed.json`. The private key never belongs on the server or in the repository.
 
+## Busy times, Stop and the fallback model
+
+Past the answers at the same time a question waits in line, with its place, about how long and
+Cancel, and starts by itself when a place frees; Stop lets the server go at once, even while the
+provider says nothing; a fallback model chosen in Settings answers once when the provider fails,
+has no key, the budget is used up (only one on your own server) or private mode is on (only one on
+your own server). See doc/busy-times.md.
