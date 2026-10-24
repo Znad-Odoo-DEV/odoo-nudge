@@ -1,5 +1,8 @@
 import json
 from datetime import timedelta
+from unittest.mock import patch
+
+from psycopg2 import errors
 
 from odoo import fields
 from odoo.exceptions import AccessError
@@ -58,6 +61,23 @@ class TestAnswerCache(NudgeCase, TransactionCase):
         self.ask_as(self.user_b, "How do I confirm a purchase order?")
         self.assertEqual(len(adapter.calls), 2)
         self.assertEqual(self.Cache.search_count([]), 2)
+
+    def test_a_count_made_meanwhile_does_not_fail_the_answer(self):
+        """Review (odoo-tech #9): a serialization error on the counter leaves the hit uncounted, never the answer."""
+        adapter = self.use_adapter(reply=STEPS)
+        self.ask_as(self.user_a, HOW)
+        cursor = type(self.env.cr)
+        execute = cursor.execute
+
+        def busy(cr, query, params=None, log_exceptions=True):
+            if "SET hits" in str(query):
+                raise errors.SerializationFailure("could not serialize access due to concurrent update")
+            return execute(cr, query, params, log_exceptions)
+
+        with patch.object(cursor, "execute", busy):
+            _c, last, answer = self.ask_as(self.user_b, SAME)
+        self.assertEqual((len(adapter.calls), last["type"], answer.content), (1, "done", STEPS))
+        self.assertEqual(self.Cache.search([]).hits, 0)
 
     def test_a_hit_is_a_zero_token_row_of_the_ledger(self):
         self.use_adapter(reply=STEPS)

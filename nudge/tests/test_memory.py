@@ -1,3 +1,7 @@
+from unittest.mock import patch
+
+from psycopg2 import errors
+
 from odoo.exceptions import AccessError
 from odoo.tests import TransactionCase, new_test_user, tagged
 
@@ -109,6 +113,27 @@ class TestAnswerMemory(NudgeCase, TransactionCase):
         self.assertEqual((memory.uses, bool(memory.last_used)), (1, True))
         usage = self.env["nudge.usage"].search([("kind", "=", "memory"), ("message_id", "=", answer.id)])
         self.assertEqual((usage.tokens, usage.cost, usage.user_id), (0, 0.0, self.user_b))
+
+    def test_a_count_another_answer_made_meanwhile_does_not_fail_the_answer(self):
+        """Review (odoo-tech #9): under repeatable read a second answer counting the same memory got a
+        serialization error, which a phone's answer turned into "Something went wrong"."""
+        memory = self.remember()
+        cursor = type(self.env.cr)
+        execute = cursor.execute
+
+        def busy(cr, query, params=None, log_exceptions=True):
+            if "SET uses" in str(query) or "SET hits" in str(query):
+                raise errors.SerializationFailure("could not serialize access due to concurrent update")
+            return execute(cr, query, params, log_exceptions)
+
+        adapter = self.use_adapter(reply="From the AI")
+        with patch.object(cursor, "execute", busy):
+            conversation, last = self.ask(self.user_b, SAME)
+        self.assertEqual((adapter.calls, last["type"], last["memory"]["id"]), ([], "done", memory.id))
+        self.assertEqual(memory.uses, 0, "Not counted this time; the answer is given")
+        self.assertTrue(self.env["nudge.usage"].search([("kind", "=", "memory")]))
+        self.env["nudge.memory"]._count_use(memory)
+        self.assertEqual(memory.uses, 1)
 
     def test_ask_the_ai_instead(self):
         self.remember()
