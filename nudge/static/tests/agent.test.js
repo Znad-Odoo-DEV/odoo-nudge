@@ -13,7 +13,7 @@ import {
     webModels,
 } from "@web/../tests/web_test_helpers";
 
-import { asksForFigures, asksHowTo, asksToDoIt } from "@nudge/core/nudge_service";
+import { asksForFigures, asksForReport, asksHowTo, asksToDoIt } from "@nudge/core/nudge_service";
 
 import { answered, lines, setupNudge, streamed } from "./voice_helpers";
 
@@ -713,6 +713,12 @@ test("a question of how is told from an order", () => {
         "أكّدلي عرض السعر S00002", "غيّرلي مدينة Raghad لحلب", ""]) {
         expect(asksHowTo(text)).toBe(false, { message: text });
     }
+});
+
+test("an Arabic word of the report rule is a whole word", () => {
+    expect(asksForReport("قارن المبيعات مقابل المشتريات")).toBe(true);
+    expect(asksForReport("جدول مقابلة المرشحين")).toBe(false);
+    expect(asksForFigures("وكم عدد الموظفين")).toBe(true);
 });
 
 test("a question of figures is not asked how, a question of how still is", async () => {
