@@ -101,3 +101,4 @@ from . import test_skills
 from . import test_quality_gate
 from . import test_prompt_budget  # NP-03
 from . import test_skill_coverage
+from . import test_rules  # S9

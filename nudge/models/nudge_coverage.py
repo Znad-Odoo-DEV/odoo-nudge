@@ -82,6 +82,7 @@ class NudgeCoverage(models.TransientModel):
             ("last_asked", ">=", fields.Datetime.now() - timedelta(days=WINDOW_DAYS)),
         ], order="recent_count desc, id", limit=SCANNED)
         out = []
+        Rule = self.env["nudge.rule"]
         with self.env["nudge.noai"]._company_words():
             for row in rows:
                 try:
@@ -93,6 +94,9 @@ class NudgeCoverage(models.TransientModel):
                     continue
                 parsed = noai_commands.parse(row.sample, {})
                 if parsed.intent and parsed.confidence >= noai_commands.THRESHOLD:
+                    continue
+                # S9: a rule the managers accepted from the requests that came back answers it
+                if Rule.with_company(row.company_id)._matching(row.sample)[0]:
                     continue
                 out.append((row, times, parsed))
         out.sort(key=lambda item: (-item[1], item[0].id))
