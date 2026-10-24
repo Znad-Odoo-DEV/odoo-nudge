@@ -32,6 +32,9 @@ MAX_PAYLOAD_SHOWN = 4000
 # A read asks, it does not carry: what it sends out without a card stays short, so that the records of
 # Odoo cannot leave through the arguments of a read
 MAX_READ_ARGUMENTS = 1000
+# ... and in a whole conversation: text an outside answer smuggled in cannot make the model loop reads
+# and carry the records out a thousand characters at a time
+MAX_READ_ARGUMENTS_PER_CONVERSATION = 5000
 MASK = "***"
 # Names of arguments whose values are kept out of the log
 SECRET_WORDS = ("password", "passwd", "secret", "token", "apikey", "api_key", "authorization", "credential",
@@ -213,6 +216,12 @@ class ConnectorRead(ConnectorTool, base.Tool):
             tool = self._tool(env)
         except Refused as refusal:
             return base.ToolResult(str(refusal), is_error=True)
+        sent = tool._connect_read_sent()
+        if sent + asked > MAX_READ_ARGUMENTS_PER_CONVERSATION:
+            return base.ToolResult(
+                f"The reads of this conversation have sent {sent} characters to outside systems, without asking "
+                f"the person; at most {MAX_READ_ARGUMENTS_PER_CONVERSATION} go that way. Nothing was sent. Answer "
+                "with what was read, or ask the person to continue in a new conversation.", is_error=True)
         text, is_error = tool._connect_call(arguments)
         return base.ToolResult(self._told(tool, text), is_error=is_error)
 
