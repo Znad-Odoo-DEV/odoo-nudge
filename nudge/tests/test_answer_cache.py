@@ -1,3 +1,4 @@
+import json
 from datetime import timedelta
 
 from odoo import fields
@@ -159,6 +160,31 @@ class TestAnswerCache(NudgeCase, TransactionCase):
         self.ask_as(self.user_a, HOW)
         entry = self.Cache.search([])
         self.assertEqual(entry.answer, STEPS)
+
+    def keep_turn(self, earlier_events=None, last_events=None):
+        """Write a question and a two-round answer marked for the cache, then keep it as the chat does"""
+        conversation = self.env["nudge.conversation"].with_user(self.user_a)._chat_open()
+        key = self.Cache.with_user(self.user_a)._key(HOW, "talk", None)
+        conversation.sudo().cache_pending = json.dumps(key)
+        Message = self.env["nudge.message"].sudo()
+        values = {"conversation_id": conversation.id}
+        Message.create(dict(values, role="user", content=HOW, mode="talk"))
+        Message.create(dict(values, role="assistant", content="", state="complete", screen_events=earlier_events,
+                            tool_calls=[{"id": "call_1", "name": "open_screen", "arguments": {}}]))
+        Message.create(dict(values, role="tool", tool_results=[{"id": "call_1", "content": "Opened."}]))
+        last = Message.create(dict(values, role="assistant", content=STEPS, state="complete",
+                                   screen_events=last_events))
+        self.Cache.with_user(self.user_a)._keep_from(last)
+        return self.Cache.search([])
+
+    def test_a_screen_opened_or_a_stand_in_model_is_not_kept(self):
+        """Review (ai #10, #11): what an earlier round did on the screen, and the answer of the fallback."""
+        self.assertTrue(self.keep_turn(), "Two rounds of safe tools: kept")
+        self.Cache.search([]).unlink()
+        self.assertFalse(self.keep_turn(earlier_events=[{"type": "action", "action": {"res_model": "sale.order"}}]),
+                         "The screen opened in the first round would not be opened by the cached reply")
+        fallback = {"type": "fallback", "provider": "Local", "model": "small", "local": True, "reason": "error"}
+        self.assertFalse(self.keep_turn(last_events=[fallback]), "The stand-in model is not served for days")
 
     def test_live_counts_of_one_person_are_not_kept(self):
         """Review (ai #2): locate_data counts the records as the person sees them, under their rules."""
