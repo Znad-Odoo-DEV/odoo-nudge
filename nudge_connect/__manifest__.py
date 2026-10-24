@@ -43,4 +43,5 @@ Installed from Apps by an administrator who wants it, with Nudge.
     ],
     "auto_install": False,
     "installable": True,
+    "images": ["static/description/banner.png"],
 }

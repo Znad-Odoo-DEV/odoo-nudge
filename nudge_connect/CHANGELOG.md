@@ -4,6 +4,7 @@
 
 - Fix, found in the live trial: Test the Connection against a server that answers "method not found" to `server/discover` in an HTTP 200 JSON-RPC error (Nudge's own MCP server) now falls back to the standard `initialize` handshake, as it did for a 400, 404 or 405.
 - Fix, found in the live trial: Read the Tools failed for the administrator ("not allowed to create Nudge Connector Tool") and a connector could not be deleted; the tools are written by Nudge in the sync (after checking the person may write the connector), and the Settings group may delete a connector with its tools.
+- Review: the module has an icon, a banner and a store page (`static/description`) and the `images` key, as every other module.
 
 ## 19.0.1.59.0
 
