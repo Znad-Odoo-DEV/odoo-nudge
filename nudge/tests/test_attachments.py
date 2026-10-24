@@ -192,6 +192,16 @@ class TestProducts(NudgeCase, TransactionCase):
         self.assertNotIn(self.wire.id, [option["id"] for option in found["Nothing Like It"]["options"][:1]]
                          if found["Nothing Like It"]["options"] else [])
 
+    def test_a_product_that_is_not_stored_is_not_reported_out_of_stock(self):
+        """Review (functional 23): a service shows 0 on hand in Odoo 19"""
+        if "is_storable" not in self.env["product.product"]._fields:
+            self.skipTest("Inventory is not installed")
+        self.env["product.product"].create({"name": "Nudge Consulting Hour", "default_code": "NCH-1", "is_storable": False})
+        result = tools.base.call(self.env(user=self.agent), "find_products", {"names": ["NCH-1"]}, None, "agent")
+        option = json.loads(result.content)["products"][0]["options"][0]
+        self.assertNotIn("on_hand", option)
+        self.assertIn("not tracked", option["stock"])
+
     def test_agent_only(self):
         for mode, user in (("talk", self.agent), ("agent", self.user_a)):
             names = [tool.name for tool in tools.base.available(self.env(user=user), mode)]

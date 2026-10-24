@@ -951,7 +951,10 @@ class FormatsStep(Step):
         lines = [_line(_("Language"), lang.name),
                  _line(_("Date"), sample, datetime.date(2026, 12, 31).strftime(lang.date_format)),
                  _line(_("Number"), number),
-                 _line(_("To go back"), _("Settings > Translations > Languages"))]
+                 _line(_("Applies to"), _(
+                     "Everyone who uses %s, and printed documents: it is a setting of the language, not of one person.",
+                     lang.name)),
+                 _line(_("To go back"), _("Settings > Translations > Languages (there is no Undo for this)"))]
         return {"data": {"lang_id": lang.id, "values": values}, "lines": lines, "names": f"{sample} / {number}"}
 
     def apply(self, env, data):

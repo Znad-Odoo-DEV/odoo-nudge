@@ -398,7 +398,11 @@ class PriceBelowCost(Check):
 
     def spec(self, env, model):
         return {n for n in ("currency_id",) if n in env[model]._fields}, {
-            "order_line": ["product_id", "price_unit", "discount"]}
+            "order_line": ["product_id", "price_unit", "discount", self.uom_field(env)]}
+
+    @staticmethod
+    def uom_field(env):
+        return "product_uom_id" if "product_uom_id" in env["sale.order.line"]._fields else "product_uom"
 
     def run(self, env, payload):
         rows = [row for row in payload["lines"].get("order_line", [])
@@ -411,11 +415,17 @@ class PriceBelowCost(Check):
         products = env["product.product"].browse({row["product_id"]["id"] for row in rows}).exists()
         try:
             costs = {product.id: product.standard_price for product in products}
+            units = {product.id: product.uom_id for product in products}
         except AccessError:
             return []
         low = []
+        uom_field = self.uom_field(env)
         for row in rows:
             cost = costs.get(row["product_id"]["id"])
+            # the cost is per unit of the product, the price per unit of the line: a dozen is not one
+            line_uom = row.get(uom_field)
+            if cost and isinstance(line_uom, dict) and units.get(row["product_id"]["id"]):
+                cost = units[row["product_id"]["id"]]._compute_price(cost, env["uom.uom"].browse(line_uom["id"]))
             price = row["price_unit"] * (1 - (number(row.get("discount")) or 0) / 100)
             if cost and 0 <= price < cost:
                 low.append((row["product_id"]["id"], price, cost))
