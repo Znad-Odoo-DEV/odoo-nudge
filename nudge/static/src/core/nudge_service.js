@@ -143,7 +143,7 @@ export function asksHowTo(text) {
 // steps, so it is never offered the guided tour
 const FIGURES = new RegExp(
     "(\\b(how (many|much)|number of|count of|total (of|number)|addesh|adesh|kam|kaam)\\b" +
-        "|(^|\\s)(كم|كام|قديش|قدّيش|قدايش|شكد|شقد|بكم)(?=$|[\\s؟?.,،]))",
+        "|(^|\\s)و?(كم|كام|قديش|قدّيش|قدايش|شكد|شقد|بكم)(?=$|[\\s؟?.,،]))",
     "i"
 );
 
@@ -160,7 +160,7 @@ export function asksForFigures(text) {
 // chat or as a spreadsheet
 const REPORT = new RegExp(
     "(\\bcompar|\\breport\\b|\\bvs\\.?\\b|\\bversus\\b|\\bstatistic|\\bsummary\\b|\\bbreakdown\\b|\\bper (month|week|department|warehouse)\\b" +
-        "|مقارن|قارن|تقرير|مقابل|احصائ|إحصائ|ملخص|تلخيص|حسب (الشهر|القسم|المستودع|الاسبوع|الأسبوع))",
+        "|مقارن|قارن|تقرير|(^|[^\\u0600-\\u06FF])مقابل(?![\\u0600-\\u06FF])|احصائ|إحصائ|ملخص|تلخيص|حسب (الشهر|القسم|المستودع|الاسبوع|الأسبوع))",
     "i"
 );
 
