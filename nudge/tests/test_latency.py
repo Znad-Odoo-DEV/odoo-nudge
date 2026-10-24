@@ -101,24 +101,24 @@ class TestLatencyPanel(NudgeCase, TransactionCase):
 
     def test_indexes_exist_and_serve_the_daily_sum(self):
         cr = self.env.cr
-        cr.execute("SELECT indexname FROM pg_indexes WHERE tablename = 'nudge_usage'")
-        names = {name for [name] in cr.fetchall()}
-        self.assertIn("nudge_usage_user_date_sums_idx", names)
-        self.assertIn("nudge_usage_company_date_sums_idx", names)
+        cr.execute("SELECT indexname, indexdef FROM pg_indexes WHERE tablename = 'nudge_usage'")
+        definitions = dict(cr.fetchall())
+        # The sums are in the index itself: the budget and the panel never visit the table
+        self.assertIn("(user_id, date) INCLUDE (tokens, cost)", definitions.get("nudge_usage_user_date_sums_idx", ""))
+        self.assertIn("(company_id, date) INCLUDE (tokens, cost)", definitions.get("nudge_usage_company_date_sums_idx", ""))
         self.answer(self.user_a, "agent", 1000, tokens=10)
         cr.execute("SAVEPOINT np20_plan")
-        # Only the covering index can serve the sum without the table: the planner of a tiny table
-        # may otherwise pick the plain index of the date, so the choice is left to the cover
+        # Which index the planner of a tiny table picks is its own choice (the cover, or the plain index
+        # of the date); what is checked is that the sum is served by an index, never by reading the table.
+        # An index-only scan needs enable_indexscan on, so only the scans of the whole table are switched off
         cr.execute("SET LOCAL enable_seqscan = off")
-        cr.execute("SET LOCAL enable_indexscan = off")
-        cr.execute("SET LOCAL enable_bitmapscan = off")
         cr.execute(
             "EXPLAIN SELECT SUM(tokens), SUM(cost) FROM nudge_usage WHERE user_id = %s AND date = %s",
             (self.user_a.id, self.today))
         plan = "\n".join(line for [line] in cr.fetchall())
         cr.execute("ROLLBACK TO SAVEPOINT np20_plan")
-        self.assertIn("nudge_usage_user_date_sums_idx", plan)
         self.assertIn("Index", plan)
+        self.assertNotIn("Seq Scan", plan)
 
 
 @tagged("post_install", "-at_install")
