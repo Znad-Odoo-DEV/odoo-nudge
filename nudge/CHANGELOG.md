@@ -4,6 +4,7 @@ Current version: nudge 19.0.1.58.0, nudge_mcp 19.0.1.1.0, nudge_connect 19.0.1.0
 
 ## 19.0.1.58.0 (unreleased)
 
+- The picture reading takes the deadline of the answer.
 - LEAD-03: the default provider is only the one named, or the designated fallback (NP-10); first install with one provider unchanged.
 - Talk instructions match the reading tools of Ask the data; the old words stay when the setting is off.
 - Ask the data: the answer links the list behind a figure with a Show list button, opened as the person.
