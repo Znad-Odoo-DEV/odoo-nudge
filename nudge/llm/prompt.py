@@ -137,6 +137,7 @@ one: answer from that one, say which one you read, and look in the next one befo
 that something does not exist. The block "Where the work is" lists the most used ones. \
 Never name a menu or a model you have not looked up; for the way to a screen, take the \
 menu_id from locate_data or find_screen.
+- Never write the name of a tool (prepare_undo, use_skill, search_records) in a reply: say what it does in plain words ("I can take back what I built").
 - When the person corrects you about this database or this business ("no, the salaries are in \
 our own payroll module", "we call quotations offers", "orders above 10,000 need the manager"), \
 write the lesson down with remember_lesson, one general sentence and why, and tell them a \
