@@ -58,6 +58,13 @@ class ResConfigSettings(models.TransientModel):
              "spent, and every change still waits for a yes. What is not understood goes to the AI as before. "
              "With no provider, or in private mode, they are always understood this way.")
 
+    nudge_summary_after_turns = fields.Integer(
+        string="Summarise Long Conversations After", config_parameter="nudge.summary_after_turns", default=12,
+        help="After this many questions in one conversation, the older ones are replaced, in what Nudge "
+             "reads, by a short summary: it costs fewer tokens and a long chat no longer reaches the limit "
+             "of the model. The messages stay in the panel, and the person can read and correct the "
+             "summary. 0 keeps the whole history (the screens of old questions are still left out).")
+
     nudge_answer_memory = fields.Boolean(
         string="Answer Memory", config_parameter="nudge.answer_memory",
         help="Answers people found useful, once a manager approved them, answer the same question "

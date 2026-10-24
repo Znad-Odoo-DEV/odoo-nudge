@@ -81,4 +81,14 @@
         <field name="interval_number">1</field>
         <field name="interval_type">weeks</field>
     </record>
+
+    <!-- NP-22: the provider rewrites the summaries of long conversations, a few at a time, never in a request -->
+    <record id="cron_conversation_summaries" model="ir.cron">
+        <field name="name">Nudge: improve the summaries of long conversations</field>
+        <field name="model_id" ref="model_nudge_conversation"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_improve_summaries()</field>
+        <field name="interval_number">15</field>
+        <field name="interval_type">minutes</field>
+    </record>
 </odoo>

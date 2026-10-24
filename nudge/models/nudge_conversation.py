@@ -55,7 +55,10 @@ FALLBACK_ERRORS = frozenset({
     base.ERROR_UNKNOWN,
 })
 
-USER_WRITABLE_FIELDS = frozenset({"name", "active"})
+USER_WRITABLE_FIELDS = frozenset({"name", "active", "summary_text"})
+# NP-22: the bookkeeping of the summary is written by Nudge, nobody else, a manager included
+SUMMARY_BOOKKEEPING = frozenset({
+    "summary_extra", "summary_upto_id", "summary_count", "summary_edited", "summary_ai", "summary_dirty"})
 
 SCREEN_SHARING_PARAM = "nudge.screen_sharing"
 AGENT_PARAM = "nudge.agent"
@@ -202,6 +205,17 @@ class NudgeConversation(models.Model):
         if not self.env.su and not USER_WRITABLE_FIELDS.issuperset(vals):
             if not self._is_privileged() or {"run_id", "waiting_step_id"} & vals.keys():
                 raise AccessError(_("Only the title of a conversation can be changed."))
+        if not self.env.su and "summary_text" in vals:
+            # NP-22: the summary is the owner's to correct, and to nobody else's, a manager included
+            if any(conversation.user_id != self.env.user for conversation in self)                     or SUMMARY_BOOKKEEPING & vals.keys():
+                raise AccessError(_("Only the owner of a conversation can change its summary."))
+            # Kept as written; emptied, it is made again from the messages
+            vals = dict(vals, summary_edited=bool((vals["summary_text"] or "").strip()), summary_ai=False,
+                        summary_dirty=False)
+            if not vals["summary_edited"]:
+                vals.update(summary_text=False, summary_extra=False, summary_upto_id=0, summary_count=0)
+        elif not self.env.su and SUMMARY_BOOKKEEPING & vals.keys():
+            raise AccessError(_("Only Nudge writes the bookkeeping of a summary."))
         return super().write(vals)
 
     # ------------------------------------------------------------------
@@ -510,6 +524,8 @@ class NudgeConversation(models.Model):
         self.ensure_one()
         conversation = self.sudo()
         focus = self._chat_focus()
+        # NP-22: what the next replay leaves out is summarised now, with no provider call
+        conversation._summary_refresh()
         tool_set = provider.tool_set if provider else "full"
         if focus:
             # One precise thing, with a few tools: no overview, no history
@@ -928,13 +944,20 @@ class NudgeConversation(models.Model):
 
     def _chat_build_turns(self):
         """:return: the conversation as the adapters read it; a question
-        asked with a focused command is read without what came before"""
+        asked with a focused command is read without what came before.
+
+        PERF-08 and NP-22: only the latest question carries its screen, and past the turns set in
+        Settings (or the token budget of the history) the oldest ones are replaced by their
+        summary, which is data about the past and is put in front of the first question kept"""
         self.ensure_one()
         turns = []
         messages = self.message_ids.sorted("id")
         question = messages.filtered(lambda message: message.role == "user")[-1:]
+        summary_text = ""
         if question.command in tools.commands.FOCUS:
             messages = messages.filtered(lambda message: message.id >= question.id)
+        else:
+            messages, summary_text = self._summary_block(messages)
         for message, following in zip(messages, list(messages[1:]) + [messages.browse()]):
             if message.role == "tool":
                 if turns and turns[-1].get("tool_calls"):
@@ -945,10 +968,14 @@ class NudgeConversation(models.Model):
             calls = message.tool_calls if following.role == "tool" else None
             if not message.content and not calls:
                 continue
+            text = message.content or ""
+            if summary_text and message.role == "user":
+                text, summary_text = summary_text + text, ""
             turns.append({
                 "role": message.role,
-                "text": message.content or "",
-                "context": message.context_text or "",
+                "text": text,
+                # The screen of an old question is not sent again: the latest one is the screen now
+                "context": (message.context_text or "") if message == question else "",
                 "images": self._chat_images_of(message),
                 "blocks": (message.content_blocks or []) if calls or message.content else [],
                 "provider_kind": message.provider_kind or "",
