@@ -655,15 +655,17 @@ class ReadModuleCode(base.Tool):
                 folders.setdefault(folder, []).append(file_name)
             # Tests are many and rarely what is asked: a few names and a count, so
             # the folders that matter still fit in what a tool may return
-            lines, test_lines = [], []
+            lines, asset_lines, test_lines = [], [], []
             for folder, names in folders.items():
                 is_tests = folder.rpartition("/")[2] == "tests"
                 if is_tests and len(names) > MAX_LISTED_TESTS:
                     names = names[:MAX_LISTED_TESTS] + [f"... and {len(names) - MAX_LISTED_TESTS} more (use find)"]
-                (test_lines if is_tests else lines).append(
+                is_asset = folder.split("/")[0] in ("static", "migrations")
+                (test_lines if is_tests else asset_lines if is_asset else lines).append(
                     f"- {folder + '/' if folder else '(top)'}: {', '.join(names)}")
-            # The folders of tests last: what a tool may return cuts the end, not the code
-            lines += test_lines
+            # The web assets and migrations after the code, the folders of tests last: what a
+            # tool may return cuts the end, not the code
+            lines += asset_lines + test_lines
             listed = "\n".join(lines)
             # What it is for, as its own manifest says: told only the files, a
             # small model guessed the purpose of nudge_spreadsheet from their names
