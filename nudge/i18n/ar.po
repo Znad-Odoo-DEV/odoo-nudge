@@ -25506,3 +25506,15 @@ msgstr "بقية النظرة العامة"
 msgid ""
 "What that question was given of the overview beyond what every call is given"
 msgstr "ما أُعطيه ذلك السؤال من النظرة العامة زيادةً على ما يُعطاه كل استدعاء"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_memory_translation__step_notes
+msgid "Translated Step Notes"
+msgstr "ملاحظات الخطوات المترجمة"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_memory_translation__step_notes
+msgid ""
+"The notes of the steps of the explanation in this language, as JSON: the "
+"note, then its translation."
+msgstr "ملاحظات خطوات الشرح بهذه اللغة بصيغة JSON: الملاحظة ثم ترجمتها."
