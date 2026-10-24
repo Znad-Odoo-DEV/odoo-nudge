@@ -96,6 +96,12 @@ class NudgePrompt(models.Model):
         return super().create(vals_list)
 
     def write(self, vals):
+        # The rules are checked on the prompt before it is written: given to someone else, it would land in
+        # their list as their own
+        given = vals.get("user_id")
+        if not self.env.su and given not in (None, False, self.env.user.id) and any(
+                prompt.user_id.id != given for prompt in self):
+            raise AccessError(_("A private prompt stays with its owner."))
         if "scope" in vals:
             self._check_may_share(vals)
         if vals.get("body"):

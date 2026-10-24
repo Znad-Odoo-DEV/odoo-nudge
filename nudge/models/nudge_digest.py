@@ -186,6 +186,12 @@ class NudgeDigestLink(models.Model):
     res_model = fields.Char(required=True)
     domain = fields.Char(default="[]")
 
+    def write(self, vals):
+        # The rule is checked before the write: a link stays with the person it was made for
+        if not self.env.su and "user_id" in vals and any(link.user_id.id != vals["user_id"] for link in self):
+            raise AccessError(_("This list stays with the person it was made for."))
+        return super().write(vals)
+
     def action_open(self):
         """:return: the list of the records counted, as the one who opens it"""
         self.ensure_one()
