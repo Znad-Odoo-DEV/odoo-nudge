@@ -51,8 +51,8 @@ export function isSafeUrl(url) {
     if (/^https?:\/\//i.test(url) || /^mailto:/i.test(url)) {
         return true;
     }
-    // Address inside Odoo. "//host" would leave the site
-    return url.startsWith("/") && !url.startsWith("//");
+    // Address inside Odoo. "//host" and "/\host" (a browser reads the backslash as a slash) would leave the site
+    return url.startsWith("/") && !url.startsWith("//") && !url.startsWith("/\\");
 }
 
 function renderLink(url, label) {

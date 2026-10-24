@@ -32,7 +32,7 @@
     }
 
     function isLocal(url) {
-        return typeof url === "string" && url.startsWith("/") && !url.startsWith("//");
+        return typeof url === "string" && url.startsWith("/") && !url.startsWith("//") && !url.startsWith("/\\");
     }
 
     function line(log, className, text) {
