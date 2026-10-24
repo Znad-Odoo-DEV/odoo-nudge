@@ -2092,6 +2092,7 @@ class PrepareScheduledAction(Building):
             "state": "code",
             "code": code,
             "usage": "ir_cron",
+            "numbercall": -1,
             "interval_number": every["number"],
             "interval_type": every["unit"],
             "nextcall": odoo_fields.Datetime.to_string(when),

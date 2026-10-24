@@ -7,6 +7,7 @@
         <field name="code">model._cron_refresh()</field>
         <field name="interval_number">1</field>
         <field name="interval_type">hours</field>
+        <field name="numbercall">-1</field>
     </record>
 
     <!-- Started on demand, when someone asks for something in the background.
@@ -20,6 +21,7 @@
         <field name="code">model._cron_run()</field>
         <field name="interval_number">10</field>
         <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
     </record>
 
     <!-- The recording of a meeting is never kept: what a summary left behind goes within the hour -->
@@ -30,6 +32,7 @@
         <field name="code">model._cron_forget_meeting_audio()</field>
         <field name="interval_number">1</field>
         <field name="interval_type">hours</field>
+        <field name="numbercall">-1</field>
     </record>
 
     <!-- Optional (Settings, Nudge): forget the conversations older than the days set; 0 is never -->
@@ -40,6 +43,7 @@
         <field name="code">model._cron_apply_retention()</field>
         <field name="interval_number">1</field>
         <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
     </record>
 
     <record id="cron_agent_runs" model="ir.cron">
@@ -49,6 +53,7 @@
         <field name="code">model._cron_work()</field>
         <field name="interval_number">10</field>
         <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
     </record>
 
     <!-- The local search model: the download asked for in the Settings, then the
@@ -60,6 +65,7 @@
         <field name="code">model._cron_work()</field>
         <field name="interval_number">30</field>
         <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
     </record>
 
     <!-- The weekly health check of the companies that asked for it, each as the manager who asked -->
@@ -70,6 +76,7 @@
         <field name="code">model._cron_run()</field>
         <field name="interval_number">1</field>
         <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
     </record>
 
     <!-- The questions asked often that nothing answers yet: counted without any AI, proposed to the managers -->
@@ -80,6 +87,7 @@
         <field name="code">model._cron_find()</field>
         <field name="interval_number">1</field>
         <field name="interval_type">weeks</field>
+        <field name="numbercall">-1</field>
     </record>
 
     <!-- NP-22: the provider rewrites the summaries of long conversations, a few at a time, never in a request -->
@@ -90,5 +98,6 @@
         <field name="code">model._cron_improve_summaries()</field>
         <field name="interval_number">15</field>
         <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
     </record>
 </odoo>

@@ -9,5 +9,6 @@
         <field name="interval_type">minutes</field>
         <!-- Off until a company turns the Mail Agent on: the company switch starts it -->
         <field name="active" eval="False"/>
+        <field name="numbercall">-1</field>
     </record>
 </odoo>

@@ -8,6 +8,7 @@
         <field name="code">model._cron_deadlines()</field>
         <field name="interval_number">1</field>
         <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
     </record>
 
     <!-- NP-08: reads the signed feed of the packs. It does nothing until an address and a public key are
@@ -19,5 +20,6 @@
         <field name="code">model._cron_fetch()</field>
         <field name="interval_number">1</field>
         <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
     </record>
 </odoo>

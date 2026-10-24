@@ -7,6 +7,7 @@
         <field name="code">model._cron_sync_website_pages()</field>
         <field name="interval_number">6</field>
         <field name="interval_type">hours</field>
+        <field name="numbercall">-1</field>
     </record>
     <record id="cron_archive_visitor_lines" model="ir.cron">
         <field name="name">Nudge: archive old visitor messages of the website assistant</field>
@@ -15,5 +16,6 @@
         <field name="code">model._cron_archive_old()</field>
         <field name="interval_number">1</field>
         <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
     </record>
 </odoo>

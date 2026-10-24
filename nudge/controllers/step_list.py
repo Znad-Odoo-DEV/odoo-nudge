@@ -17,7 +17,7 @@ class StepListController(http.Controller):
         window action, so what they see is what their own rights allow."""
         step = request.env["nudge.step"].browse(step_id)
         try:
-            step._nudge_check_access("read") if hasattr(step, "check_access") else step.check_access_rights("read")
+            step._nudge_check_access("read")
             step.exists().ensure_one()
             values = step.action_open_list()
         except (AccessError, UserError):
@@ -45,7 +45,7 @@ class ModuleScaffoldController(http.Controller):
             raise Forbidden()
         step = env["nudge.step"].browse(step_id)
         try:
-            step._nudge_check_access("read") if hasattr(step, "check_access") else step.check_access_rights("read")
+            step._nudge_check_access("read")
             step.exists().ensure_one()
         except (AccessError, UserError):
             raise Forbidden() from None
