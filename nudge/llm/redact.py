@@ -147,7 +147,8 @@ class RedactingAdapter:
     def stream_chat(self, system, turns, deadline=None, tools=None, tool_choice=None):
         redactor = Redactor()
         mask = redactor.redact
-        system = mask(system)
+        # Every caller gives the system prompt as a list of blocks (build_system_blocks, oneshot): each one is masked
+        system = [redactor.walk(block, mask) for block in base.system_texts(system)]
         turns = [redactor.walk(turn, mask) for turn in (turns or [])]
         pending = ""
         for event in self._adapter.stream_chat(
