@@ -189,7 +189,7 @@ class TestOpenAIToolCalls(BaseCase):
         self.posted = []
 
     def respond(self, *chunks):
-        def post(payload, stream, read_timeout):
+        def post(payload, stream, read_timeout, **kwargs):
             self.posted.append(json.loads(json.dumps(payload)))
             return FakeResponse(lines=sse(*chunks))
 

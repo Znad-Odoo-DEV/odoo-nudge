@@ -1,6 +1,8 @@
 import json
 import logging
+import socket
 import sys
+import threading
 import time
 import types
 from unittest.mock import patch
@@ -9,7 +11,7 @@ import requests
 
 from odoo.tests import BaseCase, tagged
 
-from odoo.addons.nudge.llm import base, openai_compat_adapter
+from odoo.addons.nudge.llm import base, openai_compat_adapter, resilience
 from odoo.addons.nudge.llm.anthropic_adapter import TOOL_NOTE, AnthropicAdapter, sanitize_blocks
 from odoo.addons.nudge.llm.openai_compat_adapter import OpenAICompatAdapter
 
@@ -38,8 +40,9 @@ def delta(text=None, finish=None, **extra):
 
 
 class FakeResponse:
-    def __init__(self, status_code=200, lines=(), body=None):
+    def __init__(self, status_code=200, lines=(), body=None, headers=None):
         self.status_code = status_code
+        self.headers = headers or {}
         self.lines = lines
         self.body = body
         self.text = json.dumps(body) if body is not None else ""
@@ -69,11 +72,14 @@ class TestOpenAICompatAdapter(BaseCase):
         self.posted = []
         self.slept = []
         self.patch(openai_compat_adapter.time, "sleep", self.slept.append)
+        # A cool-down is remembered by the process: each test starts without one
+        resilience.reset()
+        self.addCleanup(resilience.reset)
 
     def respond(self, *responses):
         responses = list(responses)
 
-        def post(payload, stream, read_timeout):
+        def post(payload, stream, read_timeout, **kwargs):
             self.posted.append(json.loads(json.dumps(payload)))
             return responses.pop(0)
 
@@ -159,6 +165,7 @@ class TestOpenAICompatAdapter(BaseCase):
             (422, base.ERROR_BAD_REQUEST),
         ]
         for status, code in cases:
+            resilience.reset()
             self.posted.clear()
             self.respond(FakeResponse(status, body={"error": {"message": f"failed {status}"}}))
             events = self.run_stream()
@@ -170,7 +177,7 @@ class TestOpenAICompatAdapter(BaseCase):
             kind="openai_compatible", model="qwen3:4b", base_url="http://localhost:11434/v1", effort="none"))
         posted = []
 
-        def post(payload, stream, read_timeout):
+        def post(payload, stream, read_timeout, **kwargs):
             posted.append(dict(payload))
             return FakeResponse(body={"choices": [{"message": {"content": "OK"}}]})
 
@@ -178,7 +185,7 @@ class TestOpenAICompatAdapter(BaseCase):
         self.adapter.check()
         self.assertEqual(posted[0]["reasoning_effort"], "none")
 
-        def silent(payload, stream, read_timeout):
+        def silent(payload, stream, read_timeout, **kwargs):
             raise requests.exceptions.ReadTimeout("Read timed out.")
 
         self.patch(self.adapter, "_post", silent)
@@ -229,11 +236,13 @@ class TestOpenAICompatAdapter(BaseCase):
         self.slept.clear()
         self.respond(FakeResponse(429, body={"error": {"message": "Please retry in 52s."}}))
         self.assertEqual(self.run_stream()[0]["code"], base.ERROR_RATE_LIMIT)
+        resilience.reset()
         self.respond(FakeResponse(429, body={"error": {"message": "Please retry in 5s."}}))
         self.assertEqual(self.run_stream(deadline=time.monotonic() + 8)[0]["code"], base.ERROR_RATE_LIMIT)
         self.assertEqual(self.slept, [])
 
         # Waited for once, not twice; and RetryInfo is read as well
+        resilience.reset()
         details = {"error": {"message": "quota", "details": [{"retryDelay": "2s"}]}}
         self.respond(FakeResponse(429, body=details), FakeResponse(429, body=details))
         self.assertEqual(self.run_stream()[0]["code"], base.ERROR_RATE_LIMIT)
@@ -250,7 +259,7 @@ class TestOpenAICompatAdapter(BaseCase):
         self.assertEqual(events[1], base.error_event(base.ERROR_UNAVAILABLE, "overloaded"))
 
     def test_network_failure(self):
-        def post(payload, stream, read_timeout):
+        def post(payload, stream, read_timeout, **kwargs):
             raise requests.exceptions.ConnectTimeout("refused for key sk-test")
 
         self.patch(self.adapter, "_post", post)
@@ -261,7 +270,7 @@ class TestOpenAICompatAdapter(BaseCase):
         self.assertNotIn("sk-test", logs.output[0])
 
     def test_a_silent_provider_is_told_as_such(self):
-        def post(payload, stream, read_timeout):
+        def post(payload, stream, read_timeout, **kwargs):
             raise requests.exceptions.ReadTimeout("Read timed out. (read timeout=30)")
 
         self.patch(self.adapter, "_post", post)
@@ -332,9 +341,11 @@ class FakeAPIError(Exception):
 
 
 class FakeAPIStatusError(FakeAPIError):
-    def __init__(self, status_code=400):
+    def __init__(self, status_code=400, retry_after=None):
         super().__init__("failed")
         self.status_code = status_code
+        if retry_after is not None:
+            self.response = types.SimpleNamespace(headers={"retry-after": str(retry_after)})
 
 
 class FakeAuthenticationError(FakeAPIStatusError):
@@ -457,6 +468,10 @@ class TestAnthropicAdapter(BaseCase):
                 return self.stream
             return call
 
+        resilience.reset()
+        self.addCleanup(resilience.reset)
+        self.slept = []
+        self.patch(time, "sleep", self.slept.append)
         self.client_arguments = {}
         self.checked = []
         self.check_error = None
@@ -500,7 +515,7 @@ class TestAnthropicAdapter(BaseCase):
             "input_tokens": 10, "output_tokens": 20, "cache_read_tokens": 300, "cache_write_tokens": 40,
         })
         self.assertEqual(self.client_arguments, {
-            "api_key": "sk-ant-test", "timeout": 60.0, "max_retries": 2,
+            "api_key": "sk-ant-test", "timeout": 60.0, "max_retries": 0,
             "default_headers": {"Accept-Encoding": "gzip, deflate"}})
 
     def test_request(self):
@@ -629,6 +644,7 @@ class TestAnthropicAdapter(BaseCase):
             (FakeAPITimeoutError(), base.ERROR_TIMEOUT),
         ]
         for error, code in cases:
+            resilience.reset()
             self.stream = FakeStream(["Hel"], FINAL, error=error)
             events = list(self.adapter().stream_chat(SYSTEM, TURNS))
             self.assertEqual([event["type"] for event in events], ["text", "error"])
@@ -747,7 +763,7 @@ class TestToolChoice(BaseCase):
             FakeResponse(lines=sse(delta("Here."), delta(finish="stop"))),
         ]
 
-        def post(payload, stream, read_timeout):
+        def post(payload, stream, read_timeout, **kwargs):
             posted.append(json.loads(json.dumps(payload)))
             return responses.pop(0)
 
@@ -811,3 +827,256 @@ class TestOneShot(BaseCase):
         adapter = OpenAICompatAdapter.__new__(OpenAICompatAdapter)
         messages = adapter._build_messages(base.system_texts("Read Ebrahim's bill."), [])
         self.assertEqual(messages[0], {"role": "system", "content": "Read Ebrahim's bill."})
+
+
+# ----------------------------------------------------------------------
+# Deadlines and cool-down: no provider is called, a local socket stands in
+# ----------------------------------------------------------------------
+
+class SilentServer:
+    """A local server that takes a request, then answers late or never.
+
+    :param first: the bytes sent once the request is read (None: nothing)
+    :param pause: seconds to wait before sending ``rest``
+    :param rest: the bytes sent after the pause (None: nothing, the
+        connection is held until the server is closed)"""
+
+    HEAD = b"HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nConnection: close\r\n\r\n"
+
+    def __init__(self, first=None, pause=0.0, rest=None):
+        self.first, self.pause, self.rest = first, pause, rest
+        self.stop = threading.Event()
+        self.listener = socket.socket()
+        self.listener.bind(("127.0.0.1", 0))
+        self.listener.listen(1)
+        self.url = f"http://127.0.0.1:{self.listener.getsockname()[1]}/v1"
+        threading.Thread(target=self.serve, daemon=True).start()
+
+    def serve(self):
+        try:
+            conn, _address = self.listener.accept()
+        except OSError:
+            return
+        with conn:
+            conn.settimeout(5)
+            try:
+                conn.recv(65536)
+                if self.first:
+                    conn.sendall(self.first)
+                if self.rest:
+                    self.stop.wait(self.pause)
+                    conn.sendall(self.rest)
+                self.stop.wait(8)
+            except OSError:
+                pass
+
+    def close(self):
+        self.stop.set()
+        self.listener.close()
+
+
+@tagged("post_install", "-at_install")
+class TestProviderDeadlines(BaseCase):
+
+    def setUp(self):
+        super().setUp()
+        resilience.reset()
+        self.addCleanup(resilience.reset)
+        self.slept = []
+        self.patch(time, "sleep", self.slept.append)
+
+    def openai(self, url="https://llm.invalid/v1", key="sk-test", **kwargs):
+        return OpenAICompatAdapter(base.ProviderConfig(
+            kind="openai_compatible", model="m", api_key=key, base_url=url, timeout=30, **kwargs))
+
+    def serve(self, **kwargs):
+        server = SilentServer(**kwargs)
+        self.addCleanup(server.close)
+
+        # The test framework forbids requests to the network and does not know
+        # a (connect, read) timeout: the local socket is reached through the
+        # transport adapter itself
+        def post(url, json=None, headers=None, stream=False, timeout=None, **_kwargs):
+            prepared = requests.Request("POST", url, json=json, headers=headers).prepare()
+            return requests.adapters.HTTPAdapter().send(prepared, stream=stream, timeout=timeout)
+
+        self.patch(openai_compat_adapter.requests, "post", post)
+        return server
+
+    # -- OpenAI-compatible --------------------------------------------
+    def test_the_connection_is_cut_to_the_deadline(self):
+        seen = []
+
+        def post(url, **kwargs):
+            seen.append(kwargs["timeout"])
+            return FakeResponse(lines=sse(delta("ok", finish="stop")))
+
+        self.patch(openai_compat_adapter.requests, "post", post)
+        list(self.openai().stream_chat(SYSTEM, TURNS))
+        list(self.openai().stream_chat(SYSTEM, TURNS, deadline=time.monotonic() + 3))
+        self.assertEqual(seen[0][0], openai_compat_adapter.CONNECT_TIMEOUT)
+        self.assertLessEqual(seen[1][0], 3.0, "Connecting may not take longer than the job has")
+        self.assertLessEqual(seen[1][1], 3.0)
+
+    def test_a_provider_silent_after_connecting_ends_at_the_deadline(self):
+        server = self.serve()
+        started = time.monotonic()
+        events = list(self.openai(server.url).stream_chat(SYSTEM, TURNS, deadline=started + 1.5))
+        self.assertLess(time.monotonic() - started, 4)
+        self.assertEqual([event["type"] for event in events], ["error"])
+        self.assertEqual(events[0]["code"], base.ERROR_TIMEOUT)
+
+    def test_a_stream_gone_silent_between_two_chunks_ends_at_the_deadline(self):
+        chunk = b"\n".join(sse(delta("Hel"), done=False)) + b"\n"
+        # The transport reads 64 bytes at a time: a chunk of a whole number of them is seen at once
+        chunk = chunk[:-2] + b" " * (-len(chunk) % 64) + chunk[-2:]
+        # The first chunk comes at once, the next one after the deadline
+        server = self.serve(first=SilentServer.HEAD + chunk, pause=4.0, rest=chunk)
+        started = time.monotonic()
+        events = list(self.openai(server.url).stream_chat(SYSTEM, TURNS, deadline=started + 1.5))
+        self.assertLess(time.monotonic() - started, 3.5, "The wait for the next chunk is cut with the deadline")
+        self.assertEqual(events[0], base.text_event("Hel"))
+        self.assertEqual(events[-1]["type"], "stop")
+        self.assertEqual(events[-1]["reason"], base.STOP_DEADLINE)
+
+    def test_a_wait_that_does_not_fit_the_deadline_fails_fast_as_busy(self):
+        limited = FakeResponse(429, body={"error": {"message": "slow down"}}, headers={"Retry-After": "120"})
+        adapter = self.openai()
+        self.patch(adapter, "_post", lambda *args, **kwargs: limited)
+        for deadline in (None, time.monotonic() + 40):
+            resilience.reset()
+            events = list(adapter.stream_chat(SYSTEM, TURNS, deadline=deadline))
+            self.assertEqual([event["code"] for event in events], [base.ERROR_RATE_LIMIT])
+            self.assertEqual(events[0]["detail"], "The provider is busy, try again in 120 s.")
+        self.assertEqual(self.slept, [])
+        self.assertTrue(limited.closed)
+
+    def test_a_cool_down_is_shared_by_the_next_requests(self):
+        limited = FakeResponse(429, body={"error": {"message": "slow down"}}, headers={"Retry-After": "45"})
+        posted = []
+
+        def post(payload, stream, read_timeout, **kwargs):
+            posted.append(payload)
+            return limited
+
+        first, second = self.openai(), self.openai()
+        self.patch(first, "_post", post)
+        self.patch(second, "_post", post)
+        self.assertEqual(list(first.stream_chat(SYSTEM, TURNS))[0]["code"], base.ERROR_RATE_LIMIT)
+        self.assertEqual(len(posted), 1)
+        # Another adapter, another request: the provider is not asked at all
+        events = list(second.stream_chat(SYSTEM, TURNS))
+        self.assertEqual(len(posted), 1, "A provider that asked for peace is left alone")
+        self.assertEqual(events[0]["code"], base.ERROR_RATE_LIMIT)
+        self.assertRegex(events[0]["detail"], r"^The provider is busy, try again in \d+ s\.$")
+        # Another account is not held
+        other = self.openai(key="sk-other")
+        self.patch(other, "_post", lambda *a, **k: FakeResponse(lines=sse(delta("ok", finish="stop"))))
+        self.assertEqual(list(other.stream_chat(SYSTEM, TURNS))[-1]["type"], "stop")
+        # And the cool-down ends
+        resilience.reset()
+        self.patch(first, "_post", lambda *a, **k: FakeResponse(lines=sse(delta("ok", finish="stop"))))
+        self.assertEqual(list(first.stream_chat(SYSTEM, TURNS))[-1]["type"], "stop")
+
+    def test_a_voice_request_is_held_by_the_cool_down_and_bounded(self):
+        adapter = self.openai(stt_mode=base.STT_ENDPOINT, stt_model="listen")
+        seen = []
+
+        def post(url, **kwargs):
+            seen.append(kwargs["timeout"])
+            return FakeResponse(429, body={"error": {"message": "slow"}}, headers={"Retry-After": "90"})
+
+        self.patch(openai_compat_adapter.requests, "post", post)
+        with self.assertRaises(base.AdapterError) as capture:
+            adapter.transcribe(b"RIFF", deadline=time.monotonic() + 5)
+        self.assertEqual(capture.exception.code, base.ERROR_RATE_LIMIT)
+        self.assertLessEqual(seen[0][0], 5.0)
+        with self.assertRaises(base.AdapterError):
+            adapter.transcribe(b"RIFF")
+        self.assertEqual(len(seen), 1, "The second request did not reach the provider")
+        self.assertEqual(self.slept, [])
+
+    def test_a_server_error_is_retried_only_while_the_deadline_allows(self):
+        responses = [FakeResponse(503, body={"error": {"message": "high demand"}}) for _i in range(3)]
+        adapter = self.openai()
+        self.patch(adapter, "_post", lambda *a, **k: responses.pop(0))
+        events = list(adapter.stream_chat(SYSTEM, TURNS, deadline=time.monotonic() + 9))
+        self.assertEqual(events[0]["code"], base.ERROR_UNAVAILABLE)
+        self.assertEqual(self.slept, [], "No sleep that leaves less than the answer needs")
+        self.assertGreater(resilience.cooldown_left(resilience.cooldown_key(adapter.config)), 0)
+
+    # -- Ollama ------------------------------------------------------------
+    def test_ollama_calls_are_cut_to_the_deadline(self):
+        from odoo.addons.nudge.llm import ollama  # noqa: PLC0415
+        seen = []
+
+        def request(method, url, **kwargs):
+            seen.append(kwargs["timeout"])
+            return FakeResponse(body={"message": {"content": "A red chair"}})
+
+        self.patch(ollama.requests, "request", request)
+        ollama.read_picture("http://localhost:11434/v1", "vision", "AAAA")
+        ollama.read_picture("http://localhost:11434/v1", "vision", "AAAA", deadline=time.monotonic() + 4)
+        self.assertEqual(seen[0], (ollama.CONNECT_TIMEOUT, ollama.PICTURE_TIMEOUT))
+        self.assertLessEqual(seen[1][0], 4.0)
+        self.assertLessEqual(seen[1][1], 4.0)
+
+    # -- Anthropic -----------------------------------------------------------
+    def anthropic(self, **kwargs):
+        calls = {"clients": 0, "arguments": {}}
+        self.stream = FakeStream(["Hel"], FINAL)
+
+        def make_client(**arguments):
+            calls["clients"] += 1
+            calls["arguments"].update(arguments)
+            return types.SimpleNamespace(beta=types.SimpleNamespace(
+                messages=types.SimpleNamespace(stream=lambda **params: self.stream)))
+
+        patcher = patch.dict(sys.modules, {"anthropic": fake_sdk(make_client)})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        self.sdk_calls = calls
+        return AnthropicAdapter(base.ProviderConfig(
+            kind="anthropic", model="claude-opus-5-5", api_key="sk-ant-test", **kwargs))
+
+    def test_claude_connects_and_waits_inside_the_deadline_without_sdk_retries(self):
+        adapter = self.anthropic(timeout=60)
+        list(adapter.stream_chat(SYSTEM, TURNS, deadline=time.monotonic() + 6))
+        arguments = self.sdk_calls["arguments"]
+        self.assertEqual(arguments["max_retries"], 0, "Retries are Nudge's, inside the time left")
+        timeout = arguments["timeout"]
+        self.assertLessEqual(getattr(timeout, "connect", timeout), 6.0)
+        self.assertLessEqual(getattr(timeout, "read", timeout), 6.0)
+
+    def test_claude_busy_beyond_the_deadline_fails_fast_and_is_remembered(self):
+        adapter = self.anthropic()
+        self.stream = FakeStream([], FINAL, error=FakeRateLimitError(429, retry_after=120))
+        events = list(adapter.stream_chat(SYSTEM, TURNS, deadline=time.monotonic() + 40))
+        self.assertEqual([event["code"] for event in events], [base.ERROR_RATE_LIMIT])
+        self.assertRegex(events[0]["detail"], r"^The provider is busy, try again in \d+ s\.$")
+        self.assertEqual(self.slept, [])
+        clients = self.sdk_calls["clients"]
+        events = list(AnthropicAdapter(adapter.config).stream_chat(SYSTEM, TURNS))
+        self.assertEqual(events[0]["code"], base.ERROR_RATE_LIMIT)
+        self.assertEqual(self.sdk_calls["clients"], clients, "The provider is not asked during the cool-down")
+
+    def test_claude_overloaded_is_asked_again_inside_the_deadline(self):
+        adapter = self.anthropic()
+        self.stream = FakeStream([], FINAL, error=FakeAPIStatusError(529))
+
+        def sleep(seconds):
+            self.slept.append(seconds)
+            self.stream = FakeStream(["Hel"], FINAL)
+
+        self.patch(time, "sleep", sleep)
+        events = list(adapter.stream_chat(SYSTEM, TURNS, deadline=time.monotonic() + 120))
+        self.assertEqual([event["type"] for event in events], ["text", "stop"])
+        self.assertEqual(self.slept, [1.0])
+
+        # Not when it would leave no time for the answer
+        resilience.reset()
+        self.slept.clear()
+        self.stream = FakeStream([], FINAL, error=FakeAPIStatusError(529))
+        events = list(adapter.stream_chat(SYSTEM, TURNS, deadline=time.monotonic() + 5))
+        self.assertEqual(events[0]["code"], base.ERROR_UNAVAILABLE)
+        self.assertEqual(self.slept, [])
