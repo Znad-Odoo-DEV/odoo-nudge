@@ -510,7 +510,7 @@ class TestEngine(MessagingCase, HttpCase):
         marks = []
         messaging = type(self.env["nudge.messaging"])
         original = messaging._mark
-        self.patch(messaging, "_mark", lambda model, channel, active: (marks.append(active), original(model, channel, active))[1])
+        self.patch(messaging, "_mark", lambda model, channel, active, provider=None: (marks.append(active), original(model, channel, active, provider))[1])
         self.patch(type(self.env["nudge.messaging.api"]), "_download",
                    lambda model, channel, media: (b"RIFFxxxxWAVE", "audio/ogg"))
         self.patch(type(self.env["nudge.voice"]), "_transcribe", lambda model, audio, language="", hints=None: "hello")
