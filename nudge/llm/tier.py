@@ -61,9 +61,9 @@ def escalation(outcome, same_provider):
         handed over; an error of the account, which the model above would meet too)"""
     if outcome.get("aborted") or outcome.get("fell_back"):
         return ""
-    # A refusal stands whatever was written before it
-    refused = (outcome.get("stop") or {}).get("reason") == base.STOP_REFUSAL
-    if (outcome.get("text") or outcome.get("tool_calls")) and not (refused and not outcome.get("tool_calls")):
+    # Once something was shown, nothing takes over (as NP-10): a refusal after some text is recorded
+    # as refused, its text dropped, and the person asks again
+    if outcome.get("text") or outcome.get("tool_calls"):
         return ""
     error = outcome.get("error")
     if error:
