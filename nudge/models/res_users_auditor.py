@@ -38,13 +38,22 @@ class ResUsers(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         users = super().create(vals_list)
+        users._nudge_clear_auditor_until()
         users._nudge_check_auditor()
         return users
 
     def write(self, vals):
         result = super().write(vals)
+        self._nudge_clear_auditor_until()
         self._nudge_check_auditor()
         return result
+
+    def _nudge_clear_auditor_until(self):
+        """The last day goes with the group: a user who is not (or no longer) an auditor keeps no date the hourly
+        cron would archive them on"""
+        dated = self.sudo().filtered(lambda user: user.nudge_auditor_until and not user.has_group(AUDITOR_GROUP))
+        if dated:
+            dated.write({"nudge_auditor_until": False})
 
     def _nudge_check_auditor(self):
         for user in self:
@@ -98,8 +107,10 @@ class ResUsers(models.Model):
         """Hourly: archive the auditors whose last day has passed.
 
         :return: how many were ended"""
-        # Nudge's own infrastructure: the cron ends the access of people, whoever they are
+        # Nudge's own infrastructure: the cron ends the access of people, whoever they are, and only of auditors:
+        # a date left on someone else never archives them
         expired = self.sudo().search([("nudge_auditor_until", "<", fields.Date.today())])
+        expired = expired.filtered(lambda user: user.has_group(AUDITOR_GROUP))
         expired._nudge_end_auditor("the date was reached")
         return len(expired)
 
@@ -113,13 +124,18 @@ class ResGroups(models.Model):
         return "user_ids" if "user_ids" in self._fields else "users"
 
     def write(self, vals):
+        users_field = self._nudge_users_field()
+        group = self.env.ref(AUDITOR_GROUP, raise_if_not_found=False)
+        before = group.sudo()[users_field] if group and group in self and users_field in vals else None
         result = super().write(vals)
+        if before is not None:
+            # Taken out of the group: their last day goes with it
+            (before - group.sudo()[users_field])._nudge_clear_auditor_until()
         # Giving the auditor group a forbidden right (implied_ids) or the group to users goes through here,
         # not through res.users
-        if "implied_ids" in vals or self._nudge_users_field() in vals:
-            group = self.env.ref(AUDITOR_GROUP, raise_if_not_found=False)
+        if "implied_ids" in vals or users_field in vals:
             if group:
-                group.sudo()[self._nudge_users_field()]._nudge_check_auditor()
+                group.sudo()[users_field]._nudge_check_auditor()
         return result
 
     def _nudge_implied(self):

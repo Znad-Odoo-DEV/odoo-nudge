@@ -368,6 +368,23 @@ class TestAuditor(NudgeCase, HttpCase):
         cron = self.env.ref("nudge.cron_end_auditors")
         self.assertEqual((cron.interval_number, cron.interval_type), (1, "hours"))
 
+    def test_a_date_left_on_someone_who_is_not_an_auditor_never_archives_them(self):
+        # An auditor kept on as an employee: the group goes, the last day with it
+        kept = new_test_user(self.env, login="nudge_aud_kept", groups="base.group_user,nudge.group_nudge_auditor",
+                             nudge_auditor_until=self.today + timedelta(days=1))
+        group = self.env.ref("nudge.group_nudge_auditor")
+        group.write({group._nudge_users_field(): [Command.unlink(kept.id)]})
+        self.assertFalse(kept.sudo().nudge_auditor_until)
+        # A date typed on the wrong user is not kept either
+        self.user_a.sudo().nudge_auditor_until = self.today - timedelta(days=1)
+        self.assertFalse(self.user_a.sudo().nudge_auditor_until)
+        # And one left from before is never acted on by the cron
+        self.env.cr.execute("UPDATE res_users SET nudge_auditor_until = %s WHERE id = %s",
+                            (self.today - timedelta(days=1), self.user_b.id))
+        self.env["res.users"].invalidate_model(["nudge_auditor_until"])
+        self.assertEqual(self.env["res.users"]._cron_nudge_end_auditors(), 0)
+        self.assertTrue(self.user_b.active)
+
     def test_an_auditor_cannot_archive_or_rename_what_was_kept(self):
         self.use_adapter(reply="Some.")
         audited, _events = self.ask_as_auditor()
