@@ -140,6 +140,8 @@ class NudgeWebsite(http.Controller):
         }
         if "website_id" in env["crm.lead"]._fields:
             values["website_id"] = website.id
+        # The company of the website, not the one of the public user
+        values["company_id"] = website.company_id.id
         lead = env["crm.lead"].sudo().create(values)
         return {"type": "lead", "text": env._("Thank you. Someone will write to you soon."), "id": lead.id}
 
