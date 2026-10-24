@@ -184,19 +184,13 @@ class NudgePlugin(models.Model):
     # ------------------------------------------------------------------ reading a module
     @api.model
     def _trusted_keys(self):
-        """:return: the public keys of the publishers this database trusts.
-
-        TODO(L3/EXT-08): read the trust list of the recipe sources once it is merged (``nudge.signing.key``
-        is read here if it exists); until then the keys are one per line in the system parameter
-        ``nudge.plugin_trusted_keys``."""
+        """:return: the public keys of the publishers this database trusts: the same Trusted Publishers as the
+        signed recipes (an archived publisher is not trusted), plus any key given one per line in the system
+        parameter ``nudge.plugin_trusted_keys``."""
         keys = [line.strip() for line in (self.env["ir.config_parameter"].sudo().get_param(
             registry.TRUSTED_KEYS_PARAM) or "").splitlines() if line.strip()]
-        if "nudge.signing.key" in self.env:
-            Key = self.env["nudge.signing.key"].sudo()
-            field = next((name for name in ("public_key", "key") if name in Key._fields), None)
-            if field:
-                domain = [("trusted", "=", True)] if "trusted" in Key._fields else []
-                keys += [value for value in Key.search(domain).mapped(field) if value]
+        # sudo: the trust list is Nudge's own configuration, read to check a signature, never shown
+        keys += [key for key in self.env["nudge.recipe.publisher"].sudo().search([]).mapped("public_key") if key]
         return keys
 
     @api.model
