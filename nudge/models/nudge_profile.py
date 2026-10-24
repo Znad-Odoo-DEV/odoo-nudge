@@ -127,6 +127,7 @@ class NudgeProfile(models.Model):
             text = piece._get_summary() if knows_names else (piece.data or {}).get("public") or ""
             if text:
                 parts.append(f"## {piece.title}\n{text}")
+        # sudo: people have no access to the table; _get_text keeps to this person's company and groups
         notes = self.env["nudge.note"].sudo()._get_text()
         if notes:
             parts.append(
@@ -200,6 +201,16 @@ class NudgeNote(models.Model):
     proposed_by = fields.Many2one("res.users", readonly=True)
     approved_by = fields.Many2one("res.users", readonly=True)
     conversation_id = fields.Many2one("nudge.conversation", readonly=True, ondelete="set null")
+    company_id = fields.Many2one(
+        "res.company", default=lambda self: self.env.company, index=True,
+        help="The company whose conversations are told it. Empty: all of them.")
+    group_ids = fields.Many2many(
+        "res.groups", "nudge_note_res_groups_rel", "note_id", "group_id", string="For the Groups",
+        help="Who is told it. Empty: everybody who uses Nudge.")
+    not_sent = fields.Boolean(
+        string="Not Sent", compute="_compute_not_sent",
+        help="The notes sent to Nudge hold at most %s characters: this one is left out for a person of the "
+             "current company who reads every note of it. Shorten or archive notes to make room." % MAX_NOTES_CHARS)
 
     def action_approve(self):
         self.check_access("write")
@@ -210,12 +221,49 @@ class NudgeNote(models.Model):
         self.write({"state": "refused"})
 
     @api.model
-    def _get_text(self):
-        lines, size = [], 0
-        for note in self.search([("state", "=", "approved")]):
+    def _user_groups(self, user):
+        # v19 names it all_group_ids; 17 and 18 groups_id (implied groups included)
+        user = user.sudo()
+        return user.all_group_ids if "all_group_ids" in user._fields else user.groups_id
+
+    @api.model
+    def _scope_domain(self):
+        """:return: the approved notes of the current company (or of all of them)"""
+        return [("state", "=", "approved"), ("company_id", "in", [self.env.company.id, False])]
+
+    @api.model
+    def _select(self, notes):
+        """:return: ``(lines, left out)``: the notes that fit in the limit, in their order (the order
+        of the list, then the newest first), and the ones that do not"""
+        lines, left, size = [], self.browse(), 0
+        for note in notes:
             line = f"- {note.name}: {' '.join((note.body or '').split())}"
             if size + len(line) > MAX_NOTES_CHARS:
-                break
+                left |= note
+                continue
             lines.append(line)
             size += len(line)
+        return lines, left
+
+    @api.model
+    def _get_text(self):
+        """:return: the notes this person's conversation is told: approved, of the current company or of
+        all of them, for the groups of this person or for everybody"""
+        groups = self._user_groups(self.env.user)
+        notes = self.search(self._scope_domain(), order="sequence, write_date desc, id desc").filtered(
+            lambda note: not note.group_ids or note.group_ids & groups)
+        lines, left = self._select(notes)
+        if left:
+            _logger.warning(
+                "Nudge business notes: %s of %s left out of the prompt of company %s (limit of %s characters)",
+                len(left), len(notes), self.env.company.id, MAX_NOTES_CHARS)
         return "\n".join(lines)
+
+    @api.depends("state", "company_id", "sequence", "body", "name", "active")
+    def _compute_not_sent(self):
+        # Seen from the current company, for a person who reads every note of it: the groups of a
+        # note only make the real text shorter
+        notes = self.sudo().search(self._scope_domain(), order="sequence, write_date desc, id desc")
+        left = self._select(notes)[1]
+        for note in self:
+            note.not_sent = note._origin.id in left.ids if note.state == "approved" else False

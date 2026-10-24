@@ -368,7 +368,7 @@ The administrator is a Manager after installation. Give access to others from
 
 - **Nudge ‣ What Nudge Knows ‣ Database Profile**: what was read from the database, version by
   version, and what changed. Any piece can be corrected; corrections survive a refresh.
-- **Nudge ‣ What Nudge Knows ‣ Business Notes**: how your business names things and works.
+- **Nudge ‣ What Nudge Knows ‣ Business Notes**: how your business names things and works. A note (or an approved lesson) belongs to a company, or to all of them when the company is empty, and may be limited to some groups: a conversation is told only the notes of its current company and of the groups of its person. The notes sent hold at most 3,000 characters; a note left out by the limit is marked in the list (column Not Sent) and the log says so, so that nothing is dropped unseen.
 - **Nudge ‣ Conversations**: who asked what, tokens and cost.
 - **Nudge ‣ Usage**: every call to an AI provider, conversation or speech, by person and by
   day, with tokens and cost. **Settings ‣ Nudge ‣ Budgets** sets what may be spent: tokens or
