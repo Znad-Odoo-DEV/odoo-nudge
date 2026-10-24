@@ -36,9 +36,9 @@ class TestConnectorCatalogue(ConnectCase, TransactionCase):
 
     def test_every_preset_is_well_formed_and_never_pre_allows_a_write(self):
         self.assertEqual({row["id"] for row in presets.PRESETS},
-                         {"odoo", "gcalendar", "gmail", "slack", "teams", "github", "notion", "generic"})
+                         {"odoo", "gcalendar", "gmail", "slack", "github", "notion", "generic"})
         for row in presets.PRESETS:
-            self.assertIn(row["auth"], {"none", "bearer", "oauth"}, row["id"])
+            self.assertIn(row["auth"], {"none", "bearer", "oauth", "oauth_user"}, row["id"])
             self.assertFalse(set(row["read"]) & set(row["write"]), f"{row['id']}: a tool is Read and Write")
             if row["key"]:
                 self.assertTrue(nudge_connector.KEY.match(row["key"]), row["id"])
@@ -48,13 +48,13 @@ class TestConnectorCatalogue(ConnectCase, TransactionCase):
         form = Form(self.env["nudge.connector"])
         form.preset = "slack"
         self.assertEqual(form.url, "https://mcp.slack.com/mcp")
-        self.assertEqual((form.name, form.key, form.auth_type), ("Slack", "slack", "bearer"))
+        self.assertEqual((form.name, form.key, form.auth_type), ("Slack", "slack", "oauth_user"))
         self.assertIn("Recommended scopes", form.preset_note)
         self.assertIn("never allowed by the preset", form.preset_note)
         form.key = "chat"
         form.name = "Chat of Raghad"
-        form.preset = "teams"
-        self.assertEqual((form.name, form.key, form.auth_type), ("Chat of Raghad", "chat", "oauth"),
+        form.preset = "github"
+        self.assertEqual((form.name, form.key, form.auth_type), ("Chat of Raghad", "chat", "bearer"),
                          "A name and key already chosen are kept")
 
     def test_the_fill_button_on_a_saved_connector(self):

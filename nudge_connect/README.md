@@ -36,7 +36,7 @@ server no longer lists is kept, marked No Longer Offered, and is not offered.
 ## From the catalogue
 
 On a new connector, pick **From Catalogue**: another Odoo database (through its own Nudge MCP server),
-Google Calendar, Gmail, Slack, Microsoft Teams, GitHub, Notion or a generic MCP server. The address, the
+Google Calendar and Gmail (Google's Developer Preview endpoints), Slack, GitHub, Notion or a generic MCP server (Microsoft Teams has no official remote MCP endpoint, so there is no preset for it). The address, the
 kind of credential and a note with the recommended scopes are filled in (names and keys you already typed are
 kept); on a saved connector the **Fill From Catalogue** button does the same. The table is `presets.py`.
 
@@ -59,6 +59,30 @@ Read tool for the same connector, tool, arguments, person and company, so that a
 does not reach the server. A kept answer is logged as a hit, is not a call for the budget, and is framed as data
 exactly like a fresh one. Writes and failures are never kept; changing the connector or one of its tools forgets
 what was kept; an hourly action forgets what ran out. Private Mode changes nothing here.
+
+## Signing in (OAuth, one token per person)
+
+Authentication **OAuth Sign-In** is for servers that serve a person's own data (a calendar, a mailbox, a workspace).
+It is the authorization code flow with PKCE (S256). The administrator enters the client ID and secret created at
+the provider with the **Redirect Address** shown on the connector (`<web.base.url>/nudge_connect/oauth/callback`),
+or presses **Find How to Sign In**: Nudge reads `/.well-known/oauth-protected-resource` (RFC 9728) and the
+authorization server's metadata (RFC 8414) and, when there is no client yet and the server publishes a registration
+endpoint (RFC 7591, as Notion does), registers one. Every address a server names must pass the same checks as the
+connector's own address.
+
+Each person signs in once from the link Nudge gives them when they first use the connector
+(`/nudge_connect/oauth/start/<connector>`; administrators also have the **Sign In** button). Tokens are kept per
+connector and person, readable by the Settings group only, sent only to the server they belong to, taken out of the
+log, the answers and every prompt, and renewed with the refresh token when they end. A person without a token is told
+to sign in; another person's token is never used. The state is random, single use, bound to the person and the
+connector, and valid for 10 minutes; the return address comes from `web.base.url`, never from a request. **Sign Out**
+forgets one person's tokens, **Sign Everybody Out** all of them; changing the client or addresses of a connector signs
+everybody out. The connector's companies and groups apply as to every connector.
+
+Presets: Google Calendar and Gmail (Developer Preview: enable the API in your Google Cloud project and create an OAuth
+web client), Notion (discovers and registers by itself), Slack (create a Slack app, enter its client ID and secret),
+GitHub (a personal access token as Bearer, or OAuth sign-in with the client of a GitHub OAuth app), the sister Odoo
+(bearer), generic.
 
 ## Settings
 
