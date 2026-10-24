@@ -250,3 +250,22 @@ class TestSiteChecks(TransactionCase):
         with patch("requests.head", head), patch.object(checks, "_safe_target", lambda url: "127.0.0.1" not in url):
             self.assertEqual(checks.head_status("https://public.example/r"), 0)
         self.assertEqual(asked, ["https://public.example/r"])
+
+    def test_a_host_the_company_did_not_allow_is_not_visited(self):
+        class Reply:
+            def __init__(self, status, location=None):
+                self.status_code, self.headers = status, ({"Location": location} if location else {})
+
+        asked = []
+
+        def head(url, **kwargs):
+            asked.append(url)
+            return Reply(302, "https://elsewhere.example/") if "example.org" in url else Reply(200)
+
+        self.env.company.sudo().nudge_egress_hosts = "example.org"
+        checks.new_page(self.env, self.website, "Outside", "/t-outside", '<a href="https://unlisted.example/">x</a>')
+        with patch("requests.head", head), patch.object(checks, "_safe_target", lambda url: True):
+            found, _skipped = self.run_check(groups=["links"], external=True)
+        self.assertNotIn("https://unlisted.example/", asked, "Not on the list: not visited")
+        self.assertNotIn("https://elsewhere.example/", asked, "Nor followed to when a listed page redirects there")
+        self.assertIn("https://example.org/a", self.keys(found, "links_external_broken")[0]["extra"]["links"])
