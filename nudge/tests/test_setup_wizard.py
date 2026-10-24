@@ -148,7 +148,7 @@ class TestSetupWizard(NudgeCase, TransactionCase):
         self.assertGreater(wizard.budget_user_cost, 0)
         wizard.write({"budget_user_tokens": 50000, "budget_user_cost": 1.5,
                       "budget_company_tokens": 9000000, "budget_company_cost": 80.0})
-        wizard.write({"step": "enable"})
+        wizard.write({"step": "enable", "data_ack": True})
         wizard.action_enable()
         budgets = self.env["nudge.usage"]._get_budgets()
         self.assertEqual(budgets["user_tokens"], 50000)
@@ -157,6 +157,25 @@ class TestSetupWizard(NudgeCase, TransactionCase):
         self.assertEqual(budgets["company_cost"], 80.0)
         param = self.env["ir.config_parameter"].sudo().get_param
         self.assertEqual(param("nudge.default_provider_id"), str(wizard.provider_id.id))
+
+    def test_a_provider_outside_the_server_needs_the_acknowledgement_and_closes_the_door_by_default(self):
+        """Review (functional 16): the wizard opened Nudge to every employee and sent data out without a word"""
+        self.use_adapter()
+        wizard = self.other_wizard()
+        wizard._onchange_choice()
+        self.assertFalse(wizard.all_users, "a cloud provider is not opened to every employee by default")
+        wizard.action_test()
+        wizard.write({"step": "enable"})
+        with self.assertRaises(UserError) as stopped:
+            wizard.action_enable()
+        self.assertIn("what is sent", str(stopped.exception))
+        wizard.write({"data_ack": True, "redact_pii": True})
+        wizard.action_enable()
+        self.assertTrue(self.env.company.nudge_redact_pii)
+        self.assertFalse(self.outsider.has_group("nudge.group_nudge_user"))
+        local = self.Wizard.create({"choice": "ollama"})
+        local._onchange_choice()
+        self.assertTrue(local.all_users)
 
     def test_enabling_a_provider_needs_a_passed_test(self):
         wizard = self.other_wizard()

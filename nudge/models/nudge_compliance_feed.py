@@ -103,7 +103,8 @@ class NudgeComplianceNotice(models.Model):
                 # sudo: Nudge's own record of what was told; the managers only read it
                 Notice = self.sudo()
                 if Notice.search_count([("company_id", "=", company.id), ("pack", "=", pack.id),
-                                        ("check_key", "=", entry.key), ("threshold", "<=", threshold)]):
+                                        ("check_key", "=", entry.key), ("deadline", "=", entry.deadline),
+                                        ("threshold", "<=", threshold)]):
                     continue
                 notice = Notice.create({
                     "company_id": company.id, "pack": pack.id, "check_key": entry.key, "threshold": threshold,

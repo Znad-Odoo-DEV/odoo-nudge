@@ -68,6 +68,12 @@
                             Enable writes the default provider, the mode, the budgets and, if you chose it, the access of all internal users. With rules only, no provider is needed.
                         </div>
                         <field name="choice" readonly="1"/>
+                        <field name="privacy" invisible="choice == 'rules'"/>
+                        <div class="text-muted" colspan="2" invisible="choice in ('rules', 'ollama')">
+                            Data sent to the provider: the question and the records it needs, from everyone who uses Nudge. Private Mode (Settings) stops anything leaving your server.
+                        </div>
+                        <field name="redact_pii" invisible="choice in ('rules', 'ollama')"/>
+                        <field name="data_ack" invisible="choice in ('rules', 'ollama')"/>
                         <field name="all_users"/>
                     </group>
                 </sheet>
