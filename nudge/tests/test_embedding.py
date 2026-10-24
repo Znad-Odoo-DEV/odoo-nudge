@@ -94,8 +94,13 @@ class TestWithoutTheModel(NudgeCase, TransactionCase):
             self.assertIn("Off", Embedding._status())
         found = self.env["nudge.doc.passage"]._search_text("reordering rules")
         self.assertEqual(found[0].page_id.category, "inventory_and_mrp")
-        self.assertFalse(self.env["nudge.doc.passage"]._search_text("قواعد إعادة الطلب"),
-                         "No keyword in common: nothing is found without the model")
+        # The Arabic words are carried to English keywords (NP-12), so the reordering pages are found by them
+        arabic = self.env["nudge.doc.passage"]._search_text("قواعد إعادة الطلب")
+        self.assertTrue(arabic, "The Arabic question is mapped to English keywords")
+        self.assertTrue(all("reorder" in passage.body.lower() or "replenish" in passage.body.lower()
+                            for passage in arabic))
+        self.assertFalse(self.env["nudge.doc.passage"]._search_text("زنجبيل بنفسجي"),
+                         "No known word, no keyword in common: nothing is found without the model")
 
     def test_the_settings_say_what_to_install(self):
         Embedding = self.env["nudge.embedding"]
@@ -173,7 +178,10 @@ class TestSearchByMeaning(NudgeCase, TransactionCase):
             self.assertTrue(all("reordering" in passage.body.lower() or "replenish" in passage.body.lower()
                                 for passage in found))
             # The app limits the pages found by meaning too
-            self.assertFalse(self.Passage._search_text("قواعد إعادة الطلب", app="sales"))
+            # (the sales folder has a few pages that do say replenishment: those may come, none of inventory)
+            in_sales = self.Passage._search_text("قواعد إعادة الطلب", app="sales")
+            self.assertTrue(all(passage.page_id.category == "sales" for passage in in_sales))
+            self.assertFalse(in_sales & found.filtered(lambda p: p.page_id.category == "inventory_and_mrp"))
             result = tools.base.call(
                 self.env(user=self.user_a), "search_odoo_documentation", {"query": "replenishment"})
             self.assertFalse(result.is_error, result.content)

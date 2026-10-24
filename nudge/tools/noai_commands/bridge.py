@@ -61,6 +61,9 @@ GLOSSARY = {
     "فواتير": "invoice", "تذكير": "reminder follow-up", "متابعة": "follow-up", "كيف": "", "كيفية": "",
     "رصيد": "balance credit", "اشعار دائن": "credit note", "اشعار مدين": "debit note", "استرداد": "refund",
     "ارجاع": "return refund", "مرتجع": "return", "مرتجعات": "return",
+    # Said as a whole they name one topic: "the order" alone would bring every sales page
+    "اعادة الطلب": "reordering replenishment", "قواعد اعادة الطلب": "reordering replenishment",
+    "قاعدة اعادة الطلب": "reordering replenishment", "اعادة التموين": "replenishment",
 }
 
 _glossary_cache = {}
