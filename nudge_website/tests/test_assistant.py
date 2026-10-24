@@ -146,6 +146,22 @@ class TestAssistant(WebsiteCase, TransactionCase):
         self.assertFalse(Source.with_context(active_test=False).search(
             [("website_page_id", "=", page.id)]).passage_ids)
 
+    def test_a_page_is_read_in_every_language_of_its_website(self):
+        # Review odoo-tech #12: a page was read in the language of the scheduled action only, so a
+        # visitor in another language was answered from the English text
+        french = self.env["res.lang"]._activate_lang("fr_FR")
+        self.website.language_ids |= french
+        english = "Every table of Raghad carries a warranty of five years."
+        page = self._page("/nudge-raghad-garantie", english)
+        page.view_id.update_field_translations("arch_db", {
+            "fr_FR": {english: "Chaque table de Raghad porte une garantie de cinq ans."}})
+        Source = self.env["nudge.source"]
+        Source._sync_website_pages()
+        bodies = " ".join(Source.with_context(active_test=False).search(
+            [("website_page_id", "=", page.id)]).passage_ids.mapped("body"))
+        self.assertIn("warranty of five years", bodies)
+        self.assertIn("garantie de cinq ans", bodies)
+
     # ------------------------------------------------------------------
     # Load: a place for the AI, not a worker for every visitor
     # ------------------------------------------------------------------
