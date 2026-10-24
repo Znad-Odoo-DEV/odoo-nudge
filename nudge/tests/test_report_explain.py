@@ -62,12 +62,14 @@ class TestExplainReport(NudgeCase, TransactionCase):
 
     @classmethod
     def order(cls, user, shift, amount, ref, company=None):
+        line = cls.env["sale.order.line"]
+        tax_field = "tax_ids" if "tax_ids" in line._fields else "tax_id"  # renamed in 19
         return cls.env["sale.order"].sudo().create({
             "partner_id": cls.customer.id, "user_id": user.id, "client_order_ref": ref,
             "date_order": first_of_month(shift) + datetime.timedelta(days=2),
             "company_id": (company or user.company_id).id,
             "order_line": [(0, 0, {"product_id": cls.product.id, "product_uom_qty": 1, "price_unit": amount,
-                                   "tax_ids": [(5, 0, 0)]})],
+                                   tax_field: [(5, 0, 0)]})],
         })
 
     def setUp(self):
@@ -124,6 +126,8 @@ class TestExplainReport(NudgeCase, TransactionCase):
 
     def test_the_sentences_are_in_the_arabic_of_the_reader(self):
         self.env["res.lang"]._activate_lang("ar_001")
+        # a database made from scratch has the language but not yet the terms of the module
+        self.env["ir.module.module"]._load_module_terms(["nudge"], ["ar_001"])
         report = self.keep(period="this_month", period_field="date_order")
         english = self.texts(self.explain(report))
         arabic = self.texts(self.explain(report, lang="ar_001"))

@@ -17,6 +17,21 @@ from . import saved_reports
 from .analytics import TooBig, grouped
 from .records import Refused, build_domain, get_model
 
+
+
+def _tr(env, source, *args, **kwargs):
+    """Translate in the language of ``env``: ``env._`` on 18 and 19; on 17 ``_()`` reads the
+    ``context`` and ``cr`` of the frame that calls it, which a function of this module lacks.
+    The code calls ``_(`` so that its terms are extracted; scripts/port17.py turns those calls into this."""
+    method = getattr(env, "_", None)
+    if method:
+        return method(source, *args, **kwargs)
+    from odoo import _
+    context = env.context  # noqa: F841
+    cr = env.cr  # noqa: F841
+    return _(source, *args, **kwargs)
+
+
 MAX_ROWS = 60
 # A few rows that carry most of the total are worth a sentence
 CONCENTRATION = 0.6
