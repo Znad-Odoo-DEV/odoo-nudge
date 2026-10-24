@@ -75,7 +75,6 @@ class TestAnswerMemory(NudgeCase, TransactionCase):
 
     def test_what_changed_or_showed_data_is_not_kept(self):
         for label, question_values, call in (
-                ("a screen was shared", {"snapshot": {"model": "res.partner"}}, None),
                 ("a record was read", {}, "read_record"),
                 ("something was written", {}, "prepare_write"),
                 ("agent mode", {"mode": "agent"}, None),
@@ -89,6 +88,29 @@ class TestAnswerMemory(NudgeCase, TransactionCase):
                 "tool_calls": [{"id": "1", "name": call, "input": {}}] if call else False})
             answer.with_user(self.user_a).rate("up")
             self.assertFalse(self.Memory.search([("conversation_id", "=", conversation.id)]), label)
+
+    def test_a_like_given_with_the_screen_shared_is_kept_unless_the_answer_quotes_it(self):
+        """Live re-trial (S15): the screen is shared by default, and a like was dropped for that alone."""
+        def like(answer_text):
+            conversation = self.env["nudge.conversation"].with_user(self.user_a)._chat_open()
+            Message = self.env["nudge.message"].sudo()
+            Message.create({"conversation_id": conversation.id, "role": "user", "content": HOW, "snapshot": screen})
+            answer = Message.create({"conversation_id": conversation.id, "role": "assistant", "content": answer_text})
+            answer.with_user(self.user_a).rate("up")
+            return self.Memory.search([("conversation_id", "=", conversation.id)])
+
+        screen = {
+            "v": 1, "model": "sale.order", "view_type": "form", "record": {"id": 7, "name": "S00042"},
+            "fields": [{"name": "partner_id", "type": "many2one", "value": "Deco Addict"},
+                       {"name": "state", "type": "selection", "value": "Quotation"},
+                       {"name": "amount_total", "type": "monetary", "value": "$ 1,150.00"}],
+        }
+        kept = like(STEPS)
+        self.assertEqual((kept.state, kept.model_name, kept.view_type, kept.screen_bound),
+                         ("proposed", "sale.order", "form", True), "Served on its screen until a manager widens it")
+        for quoted in ("S00042 waits for the customer: confirm it.", "Deco Addict still owes 1,150.00 on it."):
+            self.Memory.search([]).unlink()
+            self.assertFalse(like(quoted), quoted)
 
     def test_documentation_tools_are_kept(self):
         conversation = self.env["nudge.conversation"].with_user(self.user_a)._chat_open()
