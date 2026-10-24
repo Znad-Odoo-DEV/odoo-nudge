@@ -468,6 +468,14 @@ class NudgeConversation(models.Model):
             fallback._ensure_capabilities()
             return fallback, self._chat_fallback_notice(fallback, "budget")
         provider = self._chat_provider(mode)
+        if not provider._egress_allowed():
+            # NP-15: the company's list of allowed destinations refuses this provider: the one
+            # chosen to stand in answers when the list allows it (private mode applies to it as
+            # always); otherwise the refusal stays, said when the request goes out
+            fallback = Provider._get_fallback()
+            if fallback and fallback != provider and fallback._egress_allowed():
+                fallback._ensure_capabilities()
+                return fallback, self._chat_fallback_notice(fallback, "destination")
         named = Provider._get_named(mode or MODE_TALK)
         if named and provider != named and provider == Provider._get_fallback():
             private = Provider._is_private_mode() and not named.runs_locally
@@ -476,7 +484,7 @@ class NudgeConversation(models.Model):
 
     @api.model
     def _chat_fallback_notice(self, provider, reason):
-        """:param reason: why it stands in: "error", "not_ready", "private" or "budget"
+        """:param reason: why it stands in: "error", "not_ready", "private", "destination" or "budget"
         :return: the event telling the person who answers, kept with the answer"""
         return {"type": "fallback", "provider": provider.name or "", "model": provider.model_name or "",
                 "local": bool(provider.runs_locally), "reason": reason}
