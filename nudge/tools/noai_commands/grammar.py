@@ -15,6 +15,8 @@ KINDS = ("contact", "product", "quotation", "sales_order", "sales", "purchase_or
 STATES = ("unpaid", "paid", "overdue", "draft", "confirmed", "posted", "cancelled")
 PERIODS = ("today", "yesterday", "tomorrow", "this_week", "last_week", "this_month", "last_month",
            "next_month", "this_year", "last_year")
+# Negations the lexicon may not carry as one word
+NEGATING = frozenset(("don't", "dont", "doesn't", "بدون", "لا"))
 PRESS = ("press_confirm", "press_validate", "press_post", "press_approve")
 FIELDS = ("phone", "mobile", "email", "price", "name", "deadline", "date", "city", "street")
 VERBS = ("open", "show", "find", "create", "update", "count", "sum", "avg", "list", *PRESS)
@@ -369,6 +371,13 @@ def _interpret(text, spans, screen):
     head = next((span for span in spans if span.cats & set(VERBS) and not span.cats <= GLUE), None)
     names = _name_of(spans)
     free_count = len([span for span in spans if not span.cats])
+
+    # A verb that is negated ("do not publish", "don't send") is never read as the verb: the rules leave the
+    # sentence to a reader who understands the whole of it
+    for index, span in enumerate(spans):
+        if ("neg" in span.cats or span.raw.lower() in NEGATING) and any(
+                nxt.cats & set(VERBS) for nxt in spans[index + 1:index + 3]):
+            return result
 
     # 1. Press a button of the record on screen
     pressing = next((span for span in spans[:4] if span.cats & set(PRESS)), None)

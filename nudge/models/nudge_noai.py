@@ -88,6 +88,21 @@ class Plan:
         self.parsed = parsed
 
 
+# A request of several sentences, lines or clauses is not one the rules read whole
+MULTI_SENTENCE = re.compile(r"[.!?؟;]\s+\S|\n\s*\S|\b(?:and then|then|after that|also)\b", re.I)
+COUNT_WORDS = (r"\d+|two|three|four|five|six|seven|eight|nine|ten|several|many|"
+               "اثنين|ثلاثة|أربعة|"
+               "خمسة")
+COUNTED_CREATE = re.compile(
+    r"\b(?:create|add|make|new|أنشئ|أضف)\s+(?:%s)\s+\w+" % COUNT_WORDS, re.I)
+ACTION_WORDS = re.compile(r"\b(?:create|add|make|delete|remove|update|change|set|confirm|cancel|send|post)\b", re.I)
+NAMED_INTENTS = ("open", "find", "latest", "filter", "aggregate", "create", "update", "press")
+WEBSITE = re.compile(
+    r"\bweb ?(?:site|page)s?\b|\blanding page\b|\u0645\u0648\u0642\u0639 (?:\u0648\u064a\u0628|\u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a|\u0627\u0644\u0643\u062a\u0631\u0648\u0646\u064a)", re.I)
+NEGATED = re.compile(r"\b(?:do not|don't|dont|never|doesn't)\b|(?<!\w)(?:\u0644\u0627|\u0628\u062f\u0648\u0646)\s+\w+", re.I)
+MAX_NAME_WORDS = 5
+
+
 class NudgeNoai(models.AbstractModel):
     _name = "nudge.noai"
     _description = "Nudge Common Requests Without AI"
@@ -179,6 +194,8 @@ class NudgeNoai(models.AbstractModel):
             return self._deliver(conversation, text, mode, learned, learned.parsed, values)
         with self._company_words():
             parsed = noai_commands.parse(text, screen)
+        if has_ai and self._not_read_whole(text, parsed):
+            return None
         plan = None
         if not (parsed.intent and parsed.confidence >= noai_commands.THRESHOLD):
             # NP-11: the day of the person is counted, and a sentence nearly understood is offered back
@@ -202,6 +219,21 @@ class NudgeNoai(models.AbstractModel):
                 return None
             plan = Plan(self._what_i_understood(parsed), parsed=parsed)
         return self._deliver(conversation, text, mode, plan, parsed, values)
+
+    @api.model
+    def _not_read_whole(self, text, parsed):
+        """:return: whether the rules did not read ``text`` whole: several sentences or actions, a count with a
+        plural create ("create three contacts"), or words left over in the name. The AI answers these, the
+        rules only take a request they understand to the end"""
+        return bool(MULTI_SENTENCE.search(text.strip()) or COUNTED_CREATE.search(text)
+                    or WEBSITE.search(text) or NEGATED.search(text)
+                    or len(ACTION_WORDS.findall(text)) > 1
+                    or (parsed.intent in NAMED_INTENTS and self._unplaced_name(parsed)))
+
+    @api.model
+    def _unplaced_name(self, parsed):
+        name = str((parsed.slots or {}).get("name") or "")
+        return len(name.split()) >= MAX_NAME_WORDS or bool(ACTION_WORDS.search(name))
 
     @api.model
     def _serve_count(self, conversation, text, mode, snapshot):
