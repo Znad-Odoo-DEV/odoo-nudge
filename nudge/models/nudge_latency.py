@@ -17,6 +17,10 @@ HOOK_COLUMNS = ("first_line_ms", "queue_wait_ms")
 USAGE_BY_MESSAGE = (
     "SELECT message_id, MIN(provider_id) AS provider_id, MIN(tier) AS tier, SUM(cost_saved) AS cost_saved "
     "FROM nudge_usage WHERE message_id IS NOT NULL GROUP BY message_id")
+# The same for the answer ``m`` alone, through the index of message_id
+USAGE_OF_MESSAGE = (
+    "SELECT MIN(provider_id) AS provider_id, MIN(tier) AS tier, SUM(cost_saved) AS cost_saved "
+    "FROM nudge_usage WHERE message_id = m.id")
 
 
 class NudgeLatencyReport(models.Model):
@@ -83,41 +87,44 @@ class NudgeLatencyReport(models.Model):
         cr.execute(f"DROP VIEW IF EXISTS {self._table} CASCADE")
         first = self._hook_sql("first_line_ms")
         queue = self._hook_sql("queue_wait_ms")
+        # The id of a row is the first answer of its group: it stays while people chat (a number
+        # over the groups changed between the search and the read of a list). With no numbering
+        # over the whole, the filters of a read (the last 30 days of the menu, the companies)
+        # reach the answers, and only theirs are grouped and looked up in the ledger
         cr.execute(f"""
             CREATE VIEW {self._table} AS (
-                SELECT row_number() OVER () AS id, grouped.* FROM (
-                    SELECT
-                        (m.create_date AT TIME ZONE 'UTC')::date AS date,
-                        m.mode AS mode,
-                        u.provider_id AS provider_id,
-                        c.user_id AS user_id,
-                        c.company_id AS company_id,
-                        u.tier AS tier,
-                        COUNT(*) AS answers,
-                        COUNT(*) FILTER (WHERE m.duration_ms > 0) AS timed_answers,
-                        COUNT(*) FILTER (WHERE m.state = 'error') AS errors,
-                        COUNT(*) FILTER (WHERE m.state = 'refused') AS refusals,
-                        COALESCE(SUM(COALESCE(m.input_tokens, 0) + COALESCE(m.output_tokens, 0)
-                                     + COALESCE(m.cache_read_tokens, 0) + COALESCE(m.cache_write_tokens, 0)), 0)::int AS tokens,
-                        COALESCE(SUM(m.cost), 0) AS cost,
-                        COALESCE(SUM(u.cost_saved), 0) AS cost_saved,
-                        percentile_cont(0.5) WITHIN GROUP (ORDER BY m.duration_ms)
-                            FILTER (WHERE m.duration_ms > 0) AS duration_p50,
-                        percentile_cont(0.95) WITHIN GROUP (ORDER BY m.duration_ms)
-                            FILTER (WHERE m.duration_ms > 0) AS duration_p95,
-                        AVG(m.duration_ms) FILTER (WHERE m.duration_ms > 0) AS duration_avg,
-                        {first[0]} AS first_line_samples,
-                        {first[1]} AS first_line_p50,
-                        {first[2]} AS first_line_p95,
-                        {queue[0]} AS queue_wait_samples,
-                        {queue[1]} AS queue_wait_p50,
-                        {queue[2]} AS queue_wait_p95
-                    FROM nudge_message m
-                    JOIN nudge_conversation c ON c.id = m.conversation_id
-                    LEFT JOIN ({USAGE_BY_MESSAGE}) u ON u.message_id = m.id
-                    WHERE m.role = 'assistant'
-                    GROUP BY 1, 2, 3, 4, 5, 6
-                ) grouped
+                SELECT
+                    MIN(m.id) AS id,
+                    (m.create_date AT TIME ZONE 'UTC')::date AS date,
+                    m.mode AS mode,
+                    u.provider_id AS provider_id,
+                    c.user_id AS user_id,
+                    c.company_id AS company_id,
+                    u.tier AS tier,
+                    COUNT(*) AS answers,
+                    COUNT(*) FILTER (WHERE m.duration_ms > 0) AS timed_answers,
+                    COUNT(*) FILTER (WHERE m.state = 'error') AS errors,
+                    COUNT(*) FILTER (WHERE m.state = 'refused') AS refusals,
+                    COALESCE(SUM(COALESCE(m.input_tokens, 0) + COALESCE(m.output_tokens, 0)
+                                 + COALESCE(m.cache_read_tokens, 0) + COALESCE(m.cache_write_tokens, 0)), 0)::int AS tokens,
+                    COALESCE(SUM(m.cost), 0) AS cost,
+                    COALESCE(SUM(u.cost_saved), 0) AS cost_saved,
+                    percentile_cont(0.5) WITHIN GROUP (ORDER BY m.duration_ms)
+                        FILTER (WHERE m.duration_ms > 0) AS duration_p50,
+                    percentile_cont(0.95) WITHIN GROUP (ORDER BY m.duration_ms)
+                        FILTER (WHERE m.duration_ms > 0) AS duration_p95,
+                    AVG(m.duration_ms) FILTER (WHERE m.duration_ms > 0) AS duration_avg,
+                    {first[0]} AS first_line_samples,
+                    {first[1]} AS first_line_p50,
+                    {first[2]} AS first_line_p95,
+                    {queue[0]} AS queue_wait_samples,
+                    {queue[1]} AS queue_wait_p50,
+                    {queue[2]} AS queue_wait_p95
+                FROM nudge_message m
+                JOIN nudge_conversation c ON c.id = m.conversation_id
+                LEFT JOIN LATERAL ({USAGE_OF_MESSAGE}) u ON TRUE
+                WHERE m.role = 'assistant'
+                GROUP BY 2, 3, 4, 5, 6, 7
             )""")
 
     @api.model

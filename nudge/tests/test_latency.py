@@ -75,6 +75,20 @@ class TestLatencyPanel(NudgeCase, TransactionCase):
         empty = self.Report.with_user(self.manager).panel(self.today - relativedelta(days=5), self.today - relativedelta(days=1))
         self.assertEqual(empty["by_mode"], [])
 
+    def test_a_row_keeps_its_id_and_a_filter_on_the_day_reaches_the_answers(self):
+        # Review odoo-tech #15: the rows were numbered over the whole history in no order, at every
+        # read: a row opened was not always the one clicked, and the last 30 days grouped it all
+        first = self.answer(self.user_a, "agent", 1000)
+        self.answer(self.user_a, "agent", 2000)
+        self.assertEqual(self.row("agent").id, first.id)
+        self.answer(self.user_b, "agent", 3000)
+        self.answer(self.user_a, "talk", 500)
+        self.assertEqual(self.row("agent").id, first.id, "New answers elsewhere do not move it")
+        self.env.cr.execute("EXPLAIN SELECT id FROM nudge_latency_report WHERE date >= %s", (self.today,))
+        plan = [line for [line] in self.env.cr.fetchall()]
+        self.assertTrue(any(("Filter" in line or "Cond" in line) and "create_date" in line for line in plan),
+                        "\n".join(plan))
+
     def test_managers_only(self):
         self.answer(self.user_a, "agent", 1000)
         for user in (self.user_a, self.agent, self.outsider):
