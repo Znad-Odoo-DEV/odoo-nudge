@@ -667,14 +667,37 @@ def render_skills(texts):
     return "\n".join(text.strip("\n") + "\n" for text in texts if text and text.strip())
 
 
+# The full text of the skills of a question is a block of its own, after the last block of the
+# rules: what changes from one question to the next comes after the prefix Claude keeps in its
+# cache (llm/anthropic_adapter.py), which is then read, never written again
+SKILLS_GIVEN = "## The skills of this question\n"
+
+
+def is_question_block(block):
+    """:return: whether this system block changes from one question to the next (the skills of the
+    question), and so stays out of the cached prefix"""
+    return isinstance(block, str) and block.startswith(SKILLS_GIVEN)
+
+
 def with_skills(blocks, index="", loaded=""):
-    """:return: ``blocks`` of :func:`build_system_blocks` with the index and the skills of the
-    question at the end of the last block, after the rules of the mode: the blocks before it,
-    the same for everybody who may know the same, are left as they are"""
-    added = "\n".join(block.strip("\n") + "\n" for block in (index, loaded) if block)
-    if not added or not blocks or blocks[0] == FOCUS_PERSONA:
+    """:param index: what every question of this person gets, the same from one to the next: added at
+        the end of the last block, after the rules of the mode
+    :param loaded: the full text of the skills of this question, a text or a list of texts: in a
+        block of its own after it, a text already there not given twice
+    :return: ``blocks`` of :func:`build_system_blocks` with the skills; the blocks before the last
+        one, the same for everybody who may know the same, are left as they are"""
+    texts = [loaded] if isinstance(loaded, str) else list(loaded or ())
+    texts = [text.strip("\n") for text in texts if text and text.strip()]
+    if not (index or texts) or not blocks or blocks[0] == FOCUS_PERSONA:
         return blocks
-    return [*blocks[:-1], blocks[-1].rstrip("\n") + "\n\n" + added]
+    blocks = list(blocks)
+    given = blocks.pop() if is_question_block(blocks[-1]) and len(blocks) > 1 else ""
+    if index:
+        blocks[-1] = blocks[-1].rstrip("\n") + "\n\n" + index.strip("\n") + "\n"
+    for text in texts:
+        if text not in given:
+            given = (given + "\n" if given else SKILLS_GIVEN) + text + "\n"
+    return [*blocks, given] if given else blocks
 
 
 def render_context(values):
