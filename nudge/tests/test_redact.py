@@ -224,8 +224,8 @@ class TestSecretFields(NudgeCase, TransactionCase):
     def test_a_field_this_person_may_not_read_never_leaves(self):
         partner = self.env["res.partner"].create({"name": "Raghad", "city": "Dubai"})
         Partner = type(self.env["res.partner"])
-        real = Partner._has_field_access
-        with patch.object(Partner, "_has_field_access",
+        real = records.has_field_access
+        with patch.object(records, "has_field_access",
                           lambda model, field, op: field.name != "city" and real(model, field, op)):
             row = records.describe(self.env, partner, ["city"])[0]
         self.assertEqual(row["city"], "[hidden]")

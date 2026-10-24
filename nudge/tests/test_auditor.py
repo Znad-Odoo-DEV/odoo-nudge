@@ -288,7 +288,8 @@ class TestAuditor(NudgeCase, HttpCase):
 
     # -- the wizard -------------------------------------------------------------
     def test_the_wizard_makes_an_auditor_with_the_one_group_and_nothing_else(self):
-        admin = new_test_user(self.env, login="nudge_adm_wiz", groups="base.group_system")
+        admin = new_test_user(
+            self.env, login="nudge_adm_wiz", groups="base.group_system,base.group_partner_manager")
         wizard = self.env["nudge.auditor.wizard"].with_user(admin).create({
             "name": "Raghad Auditor", "login": "raghad.auditor@example.com",
             "company_ids": [Command.set(self.company_one.ids)],
