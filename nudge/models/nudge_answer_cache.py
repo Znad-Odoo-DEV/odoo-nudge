@@ -297,7 +297,9 @@ class NudgeAnswerCache(models.Model):
             return
         conversation.cache_pending = False
         answer = (message.content or "").strip()
-        events = [event for event in message.screen_events or [] if event.get("type") != "fallback"]
+        # What a round before the last did on the screen (a screen opened) is not done again by a cached reply,
+        # and an answer of the stand-in model (NP-10) would be served for days after the main one is back
+        events = [event for other in later | message for event in other.screen_events or []]
         if (not question or len(users) != 1 or not answer or len(answer) > MAX_ANSWER_CHARS or events
                 or message.state != "complete" or message.is_remembered
                 or self.env.company.sudo().nudge_private_mode
