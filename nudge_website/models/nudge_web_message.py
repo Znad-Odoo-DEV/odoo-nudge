@@ -4,6 +4,9 @@ import logging
 from datetime import timedelta
 
 from odoo import api, fields, models
+from odoo.modules import module as odoo_module
+
+from odoo.addons.nudge.models.nudge_slot import committed_cursor
 
 RATE_MESSAGES_PARAM = "nudge_website.rate_messages"
 RATE_MINUTES_PARAM = "nudge_website.rate_minutes"
@@ -92,9 +95,22 @@ class NudgeWebMessage(models.Model):
     @api.model
     def _reserve(self, website, user, ip_hash, session_hash, question, kind="ask"):
         """Take a place before anything is paid for: the lock of the address makes the count and
-        the line one step, so parallel requests cannot all pass. The caller commits, then answers.
+        the line one step, so parallel requests cannot all pass. On a cursor of its own, committed
+        at once: the snapshot of the request is older than the lines the others committed while
+        it waited for the lock. A test works in the one transaction it never commits. The caller
+        commits, then answers.
 
-        :return: the line written, or an empty recordset when the address or session is limited"""
+        :return: the line written, in the environment of the request (it reads it once it
+            commits), or an empty recordset when the address or session is limited"""
+        args = (website, user, ip_hash, session_hash, question, kind)
+        if odoo_module.current_test:
+            return self._reserve_locked(*args)
+        with committed_cursor(self.env) as cr:
+            line_id = self.with_env(self.env(cr=cr))._reserve_locked(*args).id
+        return self.browse(line_id)
+
+    @api.model
+    def _reserve_locked(self, website, user, ip_hash, session_hash, question, kind):
         self.env.cr.execute("SELECT pg_advisory_xact_lock(hashtext(%s))", (f"nudge_web_ip:{ip_hash}",))
         if self._is_limited(ip_hash, session_hash, kind):
             return self.browse()

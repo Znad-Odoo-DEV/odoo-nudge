@@ -1,6 +1,13 @@
-from odoo import fields
-from odoo.tests import TransactionCase, tagged
+from unittest import mock
 
+import psycopg2.errors
+
+from odoo import SUPERUSER_ID, api, fields
+from odoo.sql_db import db_connect
+from odoo.tests import TransactionCase, tagged
+from odoo.tools import mute_logger
+
+from ..models import nudge_web_message as web_message
 from ..tools import assistant
 from .common import WebsiteCase
 
@@ -189,6 +196,33 @@ class TestAssistant(WebsiteCase, TransactionCase):
         Message = self.env["nudge.web.message"]
         self.assertEqual(Message._hash_address("2001:db8:1:2::1"), Message._hash_address("2001:db8:1:2:ffff::9"))
         self.assertNotEqual(Message._hash_address("2001:db8:1:2::1"), Message._hash_address("2001:db8:1:3::1"))
+
+    def test_the_limit_counts_what_other_requests_committed_meanwhile(self):
+        # Review odoo-tech #2: the lock of the address was taken in the request, whose snapshot is
+        # older than the lines the other requests committed while it waited: they all passed
+        Message = self.env["nudge.web.message"]
+        dbname = self.env.cr.dbname
+        ip_hash = "review-odoo-tech-2"
+        self.env.cr.execute("SELECT 1")  # the snapshot of this request is taken
+
+        def forget():
+            with db_connect(dbname).cursor() as cr:
+                cr.execute("DELETE FROM nudge_web_message WHERE ip_hash = %s", [ip_hash])
+
+        self.addCleanup(forget)
+        with db_connect(dbname).cursor() as other:
+            other.execute(
+                "INSERT INTO nudge_web_message (ip_hash, kind, active, create_date) VALUES (%s, 'ask', true, %s)",
+                [ip_hash, fields.Datetime.now()])
+        self.patch(type(Message), "_limits", lambda message: (1, 10))
+        with mock.patch.object(web_message.odoo_module, "current_test", None):
+            self.assertFalse(Message._reserve(self.website, self.public_user, ip_hash, None, "one too many"))
+            self.patch(type(Message), "_limits", lambda message: (2, 10))
+            line = Message._reserve(self.website, self.public_user, ip_hash, None, "still allowed")
+        self.assertTrue(line)
+        with db_connect(dbname).cursor() as other:
+            other.execute("SELECT question FROM nudge_web_message WHERE id = %s", [line.id])
+            self.assertEqual(other.fetchone(), ("still allowed",), "Committed at once: the others count it")
 
     def test_visitor_lines_are_archived_after_the_days_of_the_company_not_deleted(self):
         Message = self.env["nudge.web.message"]

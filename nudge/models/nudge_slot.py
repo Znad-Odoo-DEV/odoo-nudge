@@ -20,6 +20,8 @@ import logging
 import math
 from datetime import timedelta
 
+from psycopg2.extensions import ISOLATION_LEVEL_READ_COMMITTED
+
 from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, UserError
 from odoo.modules import module as odoo_module
@@ -72,6 +74,19 @@ SWEEPS = [
 ]
 
 
+@contextlib.contextmanager
+def committed_cursor(env):
+    """:return: a cursor of its own on the database of ``env``, committed when the block ends and
+    rolled back on an error (a lock of the transaction goes with it), in read committed: every
+    statement sees what was committed before it began. A lock is waited for in a statement of
+    its own, so what is read once it is held is what its last holder committed; repeatable read,
+    the isolation of Odoo, keeps the snapshot of that statement, taken before the wait."""
+    with env.registry.cursor() as cr:
+        # Before the first statement: the isolation is that of the next transaction
+        cr.connection.set_isolation_level(ISOLATION_LEVEL_READ_COMMITTED)
+        yield cr
+
+
 class NudgeInLine(UserError):
     """The question waits for a place. Nothing of it is kept but its place in line, written once
     what the question started is rolled back (:meth:`NudgeSlot._wait`)."""
@@ -119,12 +134,13 @@ class NudgeSlot(models.Model):
         if odoo_module.current_test:
             yield self.sudo()
             return
-        with self.env.registry.cursor() as cr:
+        with committed_cursor(self.env) as cr:
             yield self.with_env(self.env(cr=cr, su=True))
 
     def _lock(self):
         """Every claim and hand-out, one at a time, until the transaction ends (a few milliseconds).
-        Never waited for long: a worker is not left hanging on it"""
+        Never waited for long: a worker is not left hanging on it. Taken in the transaction of
+        :meth:`_own`, which reads what its last holder committed"""
         self.env.cr.execute("SET LOCAL lock_timeout = %s", [LOCK_TIMEOUT])
         self.env.cr.execute("SELECT pg_advisory_xact_lock(hashtext(%s))", [LOCK_KEY])
 
