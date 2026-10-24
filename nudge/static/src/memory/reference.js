@@ -65,13 +65,16 @@ export class NudgeReference extends Component {
         this.info.loadedFor = props.messageId;
         const cache = saidOf(this.nudge);
         if (!cache.has(props.messageId)) {
-            cache.set(
-                props.messageId,
-                this.orm.call("nudge.memory", "reference_info", [props.messageId]).catch(
-                    // Gone, or not of this person: nothing is said under it
-                    () => ({ label: "", choices: [] })
-                )
+            // The service itself, not the one bound to this component: the call is kept for the whole page,
+            // and a bound one never settles once this component is destroyed, so a later one would wait for ever
+            const call = this.env.services.orm.call("nudge.memory", "reference_info", [props.messageId]).catch(
+                // Gone, or not of this person: nothing is said under it, and the next one asks again
+                () => {
+                    cache.delete(props.messageId);
+                    return { label: "", choices: [] };
+                }
             );
+            cache.set(props.messageId, call);
         }
         const info = await cache.get(props.messageId);
         this.info.label = info?.label || "";

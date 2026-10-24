@@ -1,6 +1,6 @@
 import { expect, test } from "@odoo/hoot";
 import { click } from "@odoo/hoot-dom";
-import { animationFrame } from "@odoo/hoot-mock";
+import { animationFrame, Deferred } from "@odoo/hoot-mock";
 
 import {
     defineModels,
@@ -92,6 +92,26 @@ test("an answer from memory says who approved it and when, and is not saved agai
     expect(".o_nudge_reference_label").toHaveText(LABEL);
     expect(".o_nudge_remembered_ask").toHaveText("Ask the AI instead");
     expect(".o_nudge_reference_save").toHaveCount(0);
+});
+
+test("a label asked for by a message that is gone still reaches the one drawn next", async () => {
+    const gate = new Deferred();
+    onRpc("nudge.memory", "reference_info", async () => {
+        await gate;
+        return { label: LABEL, choices: [] };
+    });
+    const nudge = await start({ answer: () => FROM_MEMORY(), config: { is_manager: true } });
+    await nudge.send("What are the payment terms?");
+    await animationFrame();
+    // The panel is closed before the answer of the server arrives, and opened again
+    nudge.close();
+    await animationFrame();
+    nudge.open();
+    await animationFrame();
+    gate.resolve();
+    await animationFrame();
+    await animationFrame();
+    expect(".o_nudge_reference_label").toHaveText(LABEL);
 });
 
 test("close references are offered as choices, and the one picked is the answer", async () => {
