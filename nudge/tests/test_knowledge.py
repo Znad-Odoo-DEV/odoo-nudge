@@ -173,7 +173,7 @@ class TestDocumentation(NudgeCase, TransactionCase):
 
         self.assertFalse(Passage._search_text(""))
         self.assertFalse(Passage._search_text("   "))
-        self.assertFalse(Passage._search_text("كيف أؤكد الطلب"), "Other scripts find nothing, quietly")
+        self.assertFalse(Passage._search_text("كيف حالك"), "Other scripts with no known word find nothing, quietly")
         self.assertFalse(Passage._search_text("xqzv wprtk"))
 
     def test_the_screen_puts_its_app_first(self):

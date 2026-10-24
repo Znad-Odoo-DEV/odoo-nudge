@@ -55,6 +55,10 @@ def phrases_of(category, group=None):
 # inside ``extended``: they add to the files, they never replace a word of them
 _EXTRA = contextvars.ContextVar("nudge_lexicon_extra", default=None)
 CATEGORIES = frozenset(tag for tags in PHRASES.values() for tag in tags if "=" not in tag)
+# The nouns: the kinds of record a sentence can be about
+CATEGORIES_OF_KIND = frozenset((
+    "contact", "product", "quotation", "sales_order", "sales", "purchase_order", "invoice", "bill",
+    "task", "lead", "ticket", "timeoff", "employee"))
 
 
 def tags_of(key):

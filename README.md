@@ -318,6 +318,22 @@ sentence typed right; a sentence that changes something and needed a slip correc
 two things, stays under the threshold and is only offered. The parse carries `corrections` (what was read as
 what) and, under the threshold, `candidates`: the sentences it may have meant, each with the corrected text, for
 a “Did you mean” offer. A parse between 0.4 and 0.7 is offered the same way and is never acted on.
+
+A sentence that is nearly understood is given back as up to two choices (“Did you mean: …?”), each sent as
+written when chosen; a choice that lacks a word (the name of a contact, the dates of a time off) is put in the
+message box to be finished, and the missing word is asked for. A choice never executes anything. When an AI
+provider is set up, only a slip or Arabic in Latin letters stops the sentence for a choice. “What is waiting for me
+today” (and “أجندتي اليوم”, “ايش عندي اليوم”) is answered by rules: the activities due and overdue, the approvals
+asked of the person, and the lines of the morning digest that need them (time off to approve, overdue invoices and
+tasks, tasks due today, attendance to check), each counted by Odoo as the person.
+
+Managers see what the rules missed in Nudge, What Nudge Knows, Missed Sentences: the sentences asked in the last
+seven days that the rules did not understand, the most asked first, from the counted recurring questions (redacted
+samples, never who asked). Write the word the rules did not know and what it means, then Make entry: it becomes a
+command word of the company and the sentence is read again at once. Or Save as an answer, which opens the form of a
+remembered answer. The built-in documentation search is English text; an Arabic question finds its pages through the
+English words of the nouns of the lexicon, the words the company added, and a glossary of topics
+(`tools/noai_commands/bridge.py`).
 ### The prompt library
 
 Requests worth asking again are kept as prompts (Nudge ‣ Prompts). A prompt has a title and a text in
