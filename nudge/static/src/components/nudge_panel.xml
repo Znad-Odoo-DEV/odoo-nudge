@@ -23,6 +23,13 @@
                         t-on-click="() => this.nudge.newConversation()">
                     <i class="fa fa-plus"/>
                 </button>
+                <button t-if="state.view === 'chat' and state.commands.length" type="button"
+                        class="o_nudge_icon_button o_nudge_help" title="Commands and shortcuts"
+                        aria-label="Commands and shortcuts" aria-haspopup="dialog"
+                        t-att-aria-expanded="help.open ? 'true' : 'false'"
+                        t-on-click="toggleHelp">
+                    <i class="fa fa-question-circle-o"/>
+                </button>
                 <button t-if="state.view === 'chat'" type="button" class="o_nudge_icon_button o_nudge_history"
                         title="History" aria-label="History" t-on-click="() => this.nudge.showHistory()">
                     <i class="fa fa-history"/>
@@ -41,11 +48,36 @@
                 </button>
             </header>
 
+            <!-- NP-23: what can be typed, in one place -->
+            <div t-if="help.open" class="o_nudge_shortcuts" role="dialog" aria-label="Commands and shortcuts">
+                <div class="o_nudge_shortcuts_head">
+                    <strong>Commands and shortcuts</strong>
+                    <button type="button" class="o_nudge_icon_button o_nudge_help_close" title="Close" aria-label="Close"
+                            t-on-click="toggleHelp">
+                        <i class="fa fa-times"/>
+                    </button>
+                </div>
+                <dl class="o_nudge_shortcuts_list">
+                    <t t-foreach="state.commands" t-as="command" t-key="command.name">
+                        <dt><bdi dir="ltr" t-esc="command.words[0]"/></dt>
+                        <dd t-esc="command.hint"/>
+                    </t>
+                    <t t-if="hotkeyHint">
+                        <dt><kbd t-esc="hotkeyHint"/></dt>
+                        <dd>Calls Nudge from anywhere</dd>
+                    </t>
+                </dl>
+            </div>
             <div t-if="state.isOutdated" class="o_nudge_outdated" role="alert">
                 <span>Nudge was updated. Reload the page to use the new version.</span>
                 <button type="button" class="btn btn-sm btn-primary" t-on-click="() => this.nudge.reloadPage()">Reload</button>
             </div>
-            <div class="o_nudge_body" t-ref="body">
+            <!-- UI-01: a log read aloud politely; busy while the answer streams, so that it is announced once, whole -->
+            <div class="o_nudge_body" t-ref="body"
+                 t-att-role="state.view === 'chat' ? 'log' : undefined"
+                 t-att-aria-live="state.view === 'chat' ? 'polite' : undefined"
+                 t-att-aria-relevant="state.view === 'chat' ? 'additions text' : undefined"
+                 t-att-aria-busy="state.view === 'chat' ? (state.isStreaming ? 'true' : 'false') : undefined">
                 <t t-if="state.view === 'history'">
                     <p t-if="!state.conversations.length" class="o_nudge_empty_text">No conversation yet.</p>
                     <ul t-else="" class="o_nudge_history_list">
@@ -94,6 +126,14 @@
                         <button type="button" class="btn btn-sm btn-light o_nudge_unmute_warnings"
                                 t-on-click="showMutedWarnings">Show the ones I muted again</button>
                     </div>
+                    <h6 class="o_nudge_settings_title">Look</h6>
+                    <label t-foreach="lookChoices" t-as="look" t-key="look.name"
+                           class="o_nudge_setting o_nudge_setting_inline">
+                        <input type="checkbox" class="form-check-input" t-att-class="'o_nudge_look_' + look.name"
+                               t-att-checked="state[look.name]"
+                               t-on-change="(ev) => this.nudge.setLook(look.name, ev.target.checked)"/>
+                        <span class="o_nudge_setting_label" t-esc="look.label"/>
+                    </label>
                     <label class="o_nudge_setting">
                         <span class="o_nudge_setting_label">Colour</span>
                         <select class="o_nudge_theme form-select"
@@ -574,18 +614,22 @@
                     <i class="fa" t-att-class="meeting.on ? 'fa-stop-circle' : 'fa-circle'"/>
                     <span t-if="meeting.on" class="o_nudge_meeting_time" t-esc="meetingTime"/>
                 </button>
-                <ul t-if="commandChoices.length" class="o_nudge_commands" role="listbox"
+                <ul t-if="commandChoices.length" class="o_nudge_commands" role="listbox" id="o_nudge_commands"
                     aria-label="Commands">
                     <li t-foreach="commandChoices" t-as="choice" t-key="choice.name" role="option"
+                        t-att-id="'o_nudge_command_' + choice_index"
                         t-att-aria-selected="choice_index === commandIndex ? 'true' : 'false'"
                         t-att-class="{ o_nudge_command_active: choice_index === commandIndex }"
                         t-on-mousedown.prevent="() => this.pickCommand(choice)">
-                        <strong t-esc="wordOf(choice)"/>
+                        <strong><bdi dir="ltr" t-esc="wordOf(choice)"/></strong>
                         <span t-if="choice.kind === 'focused'" class="badge text-bg-info o_nudge_found_ai">AI</span>
                         <span class="o_nudge_command_hint" t-esc="choice.hint"/>
                     </li>
                 </ul>
                 <textarea class="o_nudge_input" rows="1" dir="auto" maxlength="8000"
+                          role="combobox" aria-autocomplete="list" aria-controls="o_nudge_commands"
+                          t-att-aria-expanded="commandChoices.length ? 'true' : 'false'"
+                          t-att-aria-activedescendant="commandChoices.length ? 'o_nudge_command_' + commandIndex : undefined"
                           t-att-placeholder="placeholder" aria-label="Message"
                           t-ref="input" t-model="state.draft" t-on-keydown="onInputKeydown"
                           t-att-readonly="isListening"

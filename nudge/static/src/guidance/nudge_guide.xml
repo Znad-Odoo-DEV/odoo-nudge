@@ -17,9 +17,8 @@
                      inline: the same in both directions of writing. -->
                 <div class="o_nudge_cursor" t-ref="cursor" aria-hidden="true"
                      t-att-class="{ o_nudge_cursor_pressing: phase ==='press', o_nudge_cursor_still: phase ==='shown' }">
-                    <span class="o_nudge_cursor_ripple" style="top: -12px; left: -12px;"/>
-                    <svg class="o_nudge_cursor_arrow" viewBox="0 0 32 32" focusable="false"
-                         style="transform-origin: 2px 2px;">
+                    <span class="o_nudge_cursor_ripple"/>
+                    <svg class="o_nudge_cursor_arrow" viewBox="0 0 32 32" focusable="false">
                         <path class="o_nudge_cursor_body"
                               d="M3 2.5 L3 25 L9 19.5 L13.2 29 L18.2 26.8 L14 17.4 L22.5 17.4 Z"/>
                         <circle class="o_nudge_cursor_eye" cx="8.6" cy="10.2" r="2"/>

@@ -7,7 +7,7 @@
                     title="Nudge" aria-label="Nudge"
                     t-att-class="{ show: state.isOpen }"
                     t-on-click="() => this.nudge.toggle()">
-                <i class="fa fa-lg fa-commenting-o" role="img"/>
+                <NudgeFace isThinking="state.isStreaming"/>
             </button>
         </div>
     </t>

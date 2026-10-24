@@ -30,7 +30,7 @@
         width: 10px;
         height: 10px;
         border-radius: 50%;
-        background: #dc3545;
+        background: var(--bs-danger);
         animation: o_nudge_tour_blink 1.2s ease-in-out infinite;
     }
 
