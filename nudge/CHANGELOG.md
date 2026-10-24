@@ -1,6 +1,6 @@
 # Changelog
 
-Current version: nudge 19.0.1.59.1, nudge_mcp 19.0.1.1.0, nudge_connect 19.0.1.0.0 (new), nudge_messaging 19.0.1.0.5, nudge_ai 19.0.1.0.10, nudge_studio 19.0.1.0.10, nudge_documents 19.0.1.0.7, nudge_spreadsheet 19.0.1.0.9, nudge_builder 19.0.1.0.4, nudge_mail 19.0.1.0.13.
+Current version: nudge 18.0.1.59.1, nudge_mcp 18.0.1.1.0, nudge_connect 18.0.1.0.2, nudge_messaging 18.0.1.0.5, nudge_ai 18.0.1.0.10, nudge_studio 18.0.1.0.11, nudge_documents 18.0.1.0.7, nudge_spreadsheet 18.0.1.0.10, nudge_builder 18.0.1.0.6, nudge_mail 18.0.1.0.14, nudge_discuss 18.0.1.0.8, nudge_website 18.0.1.0.1.
 
 ## 19.0.1.59.1 (unreleased)
 
@@ -26,6 +26,7 @@ Current version: nudge 19.0.1.59.1, nudge_mcp 19.0.1.1.0, nudge_connect 19.0.1.0
 - Review: the address of a documentation page or passage becomes a link only when it is a safe one.
 - Review: a spreadsheet is saved five seconds after the last change, not only on leaving, and the website build bar retries a failed status poll before giving up.
 - Review: the website handover form refuses a second submit while one is sent, its log lines align by their own language, and a second start of the meeting recorder opens no second microphone.
+- Review: the changelog line of current versions lists the real versions of the twelve modules (the ports give it their series), and the certificate model is named without a list of versions in the README.
 ## 19.0.1.59.0
 
 - Fix, found in the live trial: on a real server every question failed with "Record does not exist or has been deleted (nudge.slot)". The place a question claims (NP-04) is committed on a cursor of its own, and the request, whose snapshot is older (repeatable read), read it back. `_handover` and `_waited_ms` now work on a cursor of their own; the place stops counting once the request commits (both count for that instant, never one place too many), at once for the external assistants and the messaging apps whose mark is committed already. The tests share one transaction, which is why they never saw it.

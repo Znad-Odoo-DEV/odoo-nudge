@@ -1,0 +1,75 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* nudge_studio
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-25 10:00+0000\n"
+"PO-Revision-Date: 2026-10-25 10:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: nudge_studio
+#. odoo-python
+#: code:addons/nudge_studio/tools/approvals.py:0
+msgid "Approvers"
+msgstr ""
+
+#. module: nudge_studio
+#. odoo-python
+#: code:addons/nudge_studio/tools/approvals.py:0
+msgid "Approval group"
+msgstr ""
+
+#. module: nudge_studio
+#. odoo-python
+#: code:addons/nudge_studio/tools/approvals.py:0
+msgid "Step"
+msgstr ""
+
+#. module: nudge_studio
+#. odoo-python
+#: code:addons/nudge_studio/tools/approvals.py:0
+msgid "Exclusive"
+msgstr ""
+
+#. module: nudge_studio
+#. odoo-python
+#: code:addons/nudge_studio/tools/approvals.py:0
+msgid "Notifies"
+msgstr ""
+
+#. module: nudge_studio
+#. odoo-python
+#: code:addons/nudge_studio/tools/approvals.py:0
+msgid "Shown on the button"
+msgstr ""
+
+#. module: nudge_studio
+#. odoo-python
+#: code:addons/nudge_studio/tools/approvals.py:0
+msgid "Create: approval rule on “%s”"
+msgstr ""
+
+#. module: nudge_studio
+#. odoo-python
+#: code:addons/nudge_studio/tools/approvals.py:0
+msgid "Read the approval rules"
+msgstr ""
+
+#. module: nudge_studio
+#. odoo-python
+#: code:addons/nudge_studio/tools/approvals.py:0
+msgid "Pointed inside Studio"
+msgstr ""
+
+#. module: nudge_studio
+#: model:nudge.skill,name:nudge_studio.skill_studio_approvals
+msgid "Studio approval rules"
+msgstr ""
