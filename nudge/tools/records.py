@@ -521,6 +521,8 @@ class SearchRecords(base.Tool):
                 "description": "Such as \"date_order desc\". None keeps the order of the model.",
             },
             "limit": {"type": "integer", "minimum": 1, "maximum": MAX_ROWS},
+            "offset": {"type": "integer", "minimum": 0, "maximum": 980,
+                       "description": "Records skipped: the next page of a long list, in the same order."},
         },
     }
 
@@ -534,17 +536,20 @@ class SearchRecords(base.Tool):
         if order:
             get_fields(model, [part.split()[0] for part in order.split(",")])
         limit = arguments.get("limit") or DEFAULT_ROWS
-        records = model.search(domain, limit=limit, order=order)
-        total = len(records) if len(records) < limit else model.search_count(domain)
+        offset = arguments.get("offset") or 0
+        records = model.search(domain, limit=limit, offset=offset, order=order)
+        total = len(records) + offset if len(records) < limit else model.search_count(domain)
         result = {
             "model": model._name,
             "total": total,
             "records": describe(env, records, names),
         }
-        if total > len(records):
+        if total > len(records) + offset:
             result["note"] = (
-                f"{len(records)} of {total} are listed. Add conditions to narrow the search. To "
-                f"change all {total}, prepare_plan with these conditions: never the ids of this page.")
+                f"{len(records)} of {total} are listed (from {offset}). Add conditions to narrow the search. To "
+                f"change all {total}, prepare_plan with these conditions: never the ids of this page. To change "
+                "only the first N in this order (the 25 most recent), read the next pages with offset, then give "
+                "prepare_plan every one of those ids (up to 1000): more than 20 records is never a reason to stop.")
         elif not total and arguments.get("conditions"):
             # A value looked for as a record is often the text of a field
             result["note"] = (

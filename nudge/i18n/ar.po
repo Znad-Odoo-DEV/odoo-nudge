@@ -8935,6 +8935,7 @@ msgstr "آخر تقرير"
 #: model:ir.model.fields,field_description:nudge.field_nudge_compliance_pack__last_summary
 #: model:ir.model.fields,field_description:nudge.field_nudge_recipe_source__last_message
 #: model:ir.model.fields,field_description:nudge.field_nudge_task__last_result
+#: model:ir.model.fields,field_description:nudge.field_nudge_task__last_result_html
 msgid "Last Result"
 msgstr "آخر نتيجة"
 
@@ -25518,3 +25519,294 @@ msgid ""
 "The notes of the steps of the explanation in this language, as JSON: the "
 "note, then its translation."
 msgstr "ملاحظات خطوات الشرح بهذه اللغة بصيغة JSON: الملاحظة ثم ترجمتها."
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared a new record"
+msgstr "جهّزت سجلاً جديداً"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared a change to a record"
+msgstr "جهّزت تعديلاً على سجل"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Ran an action on a record"
+msgstr "نفّذت إجراءً على سجل"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Counted and added up records"
+msgstr "عددت السجلات وجمعتها"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared an approval flow"
+msgstr "جهّزت مسار موافقات"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Looked over the database"
+msgstr "راجعت قاعدة البيانات"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared a change to a screen"
+msgstr "جهّزت تعديلاً على شاشة"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared a button"
+msgstr "جهّزت زراً"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared a field"
+msgstr "جهّزت حقلاً"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared a change to many records"
+msgstr "جهّزت تعديلاً على سجلات كثيرة"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Drew a chart"
+msgstr "رسمت مخططاً"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Looked through the company files"
+msgstr "بحثت في ملفات الشركة"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Read the settings"
+msgstr "قرأت الإعدادات"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Read the configuration"
+msgstr "قرأت التهيئة"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Looked at an app"
+msgstr "نظرت في تطبيق"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Read the code of a module"
+msgstr "قرأت كود وحدة"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared a change of settings"
+msgstr "جهّزت تغييراً في الإعدادات"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Showed the settings"
+msgstr "عرضت الإعدادات"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared a fix"
+msgstr "جهّزت إصلاحاً"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared a rule that runs by itself"
+msgstr "جهّزت قاعدة تعمل تلقائياً"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared a server action"
+msgstr "جهّزت إجراء خادم"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared an email template"
+msgstr "جهّزت قالب بريد"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared a deletion"
+msgstr "جهّزت حذفاً"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared taking back what was built"
+msgstr "جهّزت التراجع عما بنيته"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared a scheduled task"
+msgstr "جهّزت مهمة مجدولة"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Looked in the Odoo documentation"
+msgstr "بحثت في توثيق أودو"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Looked for a record"
+msgstr "بحثت عن سجل"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Opened more tools"
+msgstr "فتحت أدوات إضافية"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Noted a lesson"
+msgstr "دوّنت درساً"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Summarised a meeting"
+msgstr "لخّصت اجتماعاً"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Turned a meeting into records"
+msgstr "حوّلت اجتماعاً إلى سجلات"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Showed the way to a screen"
+msgstr "عرضت الطريق إلى شاشة"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared a plan"
+msgstr "جهّزت خطة"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Looked for products"
+msgstr "بحثت عن منتجات"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Looked for where the data lives"
+msgstr "بحثت عن مكان البيانات"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Worked something out"
+msgstr "حسبت أمراً"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Filtered the screen"
+msgstr "رشّحت الشاشة"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared a report design"
+msgstr "جهّزت تصميم تقرير"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared a report"
+msgstr "جهّزت تقريراً"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared putting a value back"
+msgstr "جهّزت إرجاع قيمة"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Saved a report"
+msgstr "حفظت تقريراً"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Read the setup"
+msgstr "قرأت حالة الإعداد"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared a setup step"
+msgstr "جهّزت خطوة إعداد"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Got ready for this kind of work"
+msgstr "تهيأت لهذا النوع من العمل"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Queried the data"
+msgstr "استعلمت عن البيانات"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared a task"
+msgstr "جهّزت مهمة"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Started a tour"
+msgstr "بدأت جولة"
+
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared an email design"
+msgstr "جهّزت تصميم بريد"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Reviewed an email"
+msgstr "راجعت بريداً"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Made a spreadsheet"
+msgstr "أنشأت جدول بيانات"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Checked the website"
+msgstr "فحصت الموقع"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared a fix for the website"
+msgstr "جهّزت إصلاحاً للموقع"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared an online shop"
+msgstr "جهّزت متجراً إلكترونياً"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Started the website builder"
+msgstr "بدأت منشئ المواقع"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Read a page of the website"
+msgstr "قرأت صفحة من الموقع"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared a change to a page section"
+msgstr "جهّزت تعديلاً على جزء من صفحة"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared a change to the page's search settings"
+msgstr "جهّزت تعديلاً على إعدادات البحث للصفحة"
+
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared taking back a website change"
+msgstr "جهّزت التراجع عن تعديل في الموقع"
