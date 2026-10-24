@@ -56,14 +56,16 @@ class NudgeConversationSummary(models.Model):
     def _summary_cut(self, messages):
         """:return: the id of the first message replayed whole, 0 when all of them are"""
         self.ensure_one()
-        latest = messages.filtered(lambda message: message.role == "user")[-1:]
+        questions = messages.filtered(lambda message: message.role == "user")
+        latest = questions[-1:]
+        # Only the screen of the latest question is replayed, and the one a later question says is unchanged
+        screens = {latest.id, *self._chat_screen_sources(questions).values()}
         items = []
         for message in messages:
             tokens = max(summary.estimate_tokens(message.content),
                          summary.estimate_tokens(message.content_blocks))
             tokens += summary.estimate_tokens(message.tool_calls) + summary.estimate_tokens(message.tool_results)
-            if message == latest:
-                # Only the screen of the latest question is replayed
+            if message.id in screens:
                 tokens += summary.estimate_tokens(message.context_text)
             items.append((message.id, message.role, tokens))
         return summary.first_kept(items, self.summary_upto_id, self._summary_get_turns())
