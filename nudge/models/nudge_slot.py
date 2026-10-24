@@ -367,16 +367,39 @@ class NudgeSlot(models.Model):
 
     def _waited_ms(self):
         """:return: how long the question of this place waited in line, in milliseconds; 0 when
-        it did not wait"""
-        slot = self.sudo()[:1]
-        if not (slot.waiting_since and slot.started_at):
+        it did not wait. Read on a cursor of its own: the place was committed after the request
+        began, and the request's snapshot (repeatable read) does not hold it"""
+        if not self:
             return 0
-        return max(0, int((slot.started_at - slot.waiting_since).total_seconds() * 1000))
+        with self._own() as Slot:
+            slot = Slot.browse(self.ids[:1]).exists()
+            if not (slot.waiting_since and slot.started_at):
+                return 0
+            return max(0, int((slot.started_at - slot.waiting_since).total_seconds() * 1000))
 
-    def _handover(self):
-        """The answer starts: in the transaction that writes the mark of the conversation, the
-        place stops counting by itself, and the mark counts instead"""
-        self.sudo().filtered(lambda slot: slot.state == "claimed").state = "streaming"
+    def _handover(self, mark_committed=False):
+        """The answer starts: once the transaction that writes the mark of the conversation is
+        committed, the place stops counting and the mark counts instead (for that instant both
+        count: never one place too many). The place is written on a cursor of its own: the request
+        cannot see it, committed after it began (repeatable read)
+
+        :param mark_committed: the mark was committed already, on a cursor of its own (the calls of
+            the external assistants and of the messaging apps): the place stops counting at once"""
+        if not self:
+            return
+        if odoo_module.current_test:
+            self.sudo().filtered(lambda slot: slot.state == "claimed").state = "streaming"
+            return
+        ids = self.ids
+        if mark_committed:
+            self._streaming(ids)
+        else:
+            self.env.cr.postcommit.add(lambda: self._streaming(ids))
+
+    @api.model
+    def _streaming(self, ids):
+        with self._own() as Slot:
+            Slot.browse(ids).exists().filtered(lambda slot: slot.state == "claimed").state = "streaming"
 
     @api.model
     def _finish(self, slot_id):

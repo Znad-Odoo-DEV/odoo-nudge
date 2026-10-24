@@ -363,7 +363,7 @@ class NudgeMessaging(models.AbstractModel):
         slot = self.env["nudge.slot"]._claim_channel(self._conversation(channel), provider)
         try:
             self._mark(channel, True, provider)
-            slot._handover()
+            slot._handover(mark_committed=True)
             yield slot
         finally:
             try:
