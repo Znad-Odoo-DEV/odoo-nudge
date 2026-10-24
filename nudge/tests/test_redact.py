@@ -1,4 +1,5 @@
 import json
+import types
 from unittest.mock import patch
 
 from odoo.tests import BaseCase, TransactionCase, tagged
@@ -187,6 +188,17 @@ class TestSecretFields(NudgeCase, TransactionCase):
             self.assertTrue(screen.SENSITIVE_NAME.search(name), name)
         for name in ("key", "name", "keyboard", "pinned", "city", "email", "monkey", "x_studio_ref"):
             self.assertFalse(screen.SENSITIVE_NAME.search(name), name)
+
+    def test_the_email_signature_of_a_user_is_not_a_secret_but_real_signatures_are(self):
+        users = self.env["res.users"]
+        self.assertEqual(users._fields["signature"].type, "html")
+        self.assertFalse(records.is_secret(users._fields["signature"]), "An e-mail signature is written text")
+        for name, kind in (("signature", "binary"), ("signature", "char"), ("authorize_signature_key", "char"),
+                           ("signature_hash", "text"), ("hmac_signature", "char"), ("adyen_hmac_key", "char")):
+            field = types.SimpleNamespace(name=name, type=kind)
+            self.assertTrue(records.is_secret(field), (name, kind))
+        # Names alone (a key of a payload, a column) stay masked as before
+        self.assertTrue(screen.SENSITIVE_NAME.search("signature"))
 
     def test_the_password_widget_hides_the_value_the_screen_sends(self):
         sanitized = screen.sanitize({"v": 1, "model": "x", "fields": [
