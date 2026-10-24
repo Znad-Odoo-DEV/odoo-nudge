@@ -46,3 +46,4 @@ from . import setup
 from . import compliance
 from . import revert
 from . import meeting
+from . import skills

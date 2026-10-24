@@ -13,7 +13,7 @@ import queue
 import threading
 import time
 
-from . import base
+from . import base, prompt
 
 _logger = logging.getLogger(__name__)
 
@@ -287,3 +287,6 @@ def run(job, record):
         if step.get("tools"):
             # A small model asked for more tools: offered from now on
             job["tools"] = step["tools"]
+        if step.get("skills"):
+            # NP-03: the skill the model asked for with use_skill joins its instructions from now on
+            job["system"] = prompt.with_skills(job["system"], loaded=step["skills"])

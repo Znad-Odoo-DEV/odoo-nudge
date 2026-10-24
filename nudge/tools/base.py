@@ -208,6 +208,14 @@ def available(env, mode=MODE_TALK, tool_set="full", extra=(), background=False):
             names |= ASK_TOOLS
     else:
         names = {name for name, tool in TOOLS.items() if not getattr(tool, "small_models_only", False)}
+    # NP-03: the skills given with the question bring the tools they need (a small model gets them
+    # without asking), and use_skill comes with their index only. Each name still passes is_available
+    # below, as the person and in this mode: a skill narrows what is offered, it never gives a tool
+    skills = env.context.get("nudge_skills") or {}
+    names = set(names) | {name for name in skills.get("tools") or () if name in TOOLS
+                          and not getattr(TOOLS[name], "small_models_only", False)}
+    if not skills.get("index"):
+        names.discard("use_skill")
     if background:
         names -= SCREEN_TOOLS
     return [tool for name, tool in sorted(TOOLS.items()) if name in names and tool.is_available(env, mode)]
