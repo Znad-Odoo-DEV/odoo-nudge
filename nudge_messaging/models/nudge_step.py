@@ -31,7 +31,8 @@ class NudgeStep(models.Model):
         if not isinstance(tool, tool_base.Action) or not tool.is_available(self.env, MODE_AGENT):
             raise UserError(self.env._("This can no longer be done. Nothing was changed."))
         try:
-            self.env.cr.execute("SELECT id FROM nudge_step WHERE id = %s FOR UPDATE NOWAIT", (step.id,))
+            with self.env.cr.savepoint(flush=False):  # a refused lock must not abort the transaction
+                self.env.cr.execute("SELECT id FROM nudge_step WHERE id = %s FOR UPDATE NOWAIT", (step.id,))
         except pg_errors.LockNotAvailable:
             raise UserError(self.env._("This is being done already.")) from None
         step.invalidate_recordset(["state"])

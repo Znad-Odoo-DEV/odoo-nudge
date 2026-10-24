@@ -1705,7 +1705,8 @@ class NudgeConversation(models.Model):
             raise UserError(self.env._("This is no longer waiting for you."))
         try:
             # Two clicks, two windows: decided once
-            self.env.cr.execute("SELECT id FROM nudge_step WHERE id = %s FOR UPDATE NOWAIT", (step.id,))
+            with self.env.cr.savepoint(flush=False):  # a refused lock must not abort the transaction
+                self.env.cr.execute("SELECT id FROM nudge_step WHERE id = %s FOR UPDATE NOWAIT", (step.id,))
         except pg_errors.LockNotAvailable:
             raise UserError(self.env._("This is being done already.")) from None
         step.invalidate_recordset(["state"])
