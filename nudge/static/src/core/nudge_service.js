@@ -10,7 +10,7 @@ import { NudgeRoot } from "../components/nudge_root";
 import { writeInField } from "../context/form_writer";
 import { holdable } from "./hold";
 import { DEFAULT_DICTATION_HOTKEY, DEFAULT_HOTKEY, NO_HOTKEY } from "./hotkeys";
-import { DEFAULT_THEME, readPosition, THEMES } from "./looks";
+import { DEFAULT_THEME, LOOK_SETTINGS, readCompanyColor, readPosition, THEMES } from "./looks";
 import { renderMarkdown } from "./markdown";
 import { asksWithoutAi, isSpreadsheet } from "../import/import_service";
 import { streamBulk, streamChat, streamDecision } from "./stream_client";
@@ -253,6 +253,14 @@ export const nudgeService = {
             // Where and in what colour the person wants Nudge
             theme: THEMES.includes(settings.nudge_theme) ? settings.nudge_theme : DEFAULT_THEME,
             position: readPosition(settings.nudge_position),
+            // NP-23: high contrast, large text, compact tiles, docked drawer, the colour of the company
+            highContrast: Boolean(settings.nudge_high_contrast),
+            largeText: Boolean(settings.nudge_large_text),
+            compact: Boolean(settings.nudge_compact),
+            dock: Boolean(settings.nudge_dock),
+            companyAccent: Boolean(settings.nudge_company_accent),
+            // Read from the company when the person asks for it, never before
+            companyColor: "",
             hotkey: settings.nudge_hotkey || DEFAULT_HOTKEY,
             dictationHotkey: settings.nudge_dictation_hotkey || DEFAULT_DICTATION_HOTKEY,
             // What is worked on in the background, and what ended since the
@@ -491,6 +499,35 @@ function isReadable(file) {
         function setTheme(theme) {
             state.theme = THEMES.includes(theme) ? theme : DEFAULT_THEME;
             return saveSetting("nudge_theme", state.theme);
+        }
+
+        /**
+         * NP-23: one of the toggles of the look (see LOOK_SETTINGS)
+         * @param {string} name a key of LOOK_SETTINGS
+         */
+        function setLook(name, value) {
+            if (!(name in LOOK_SETTINGS)) {
+                return Promise.resolve();
+            }
+            state[name] = Boolean(value);
+            if (name === "companyAccent" && state.companyAccent) {
+                loadCompanyColor();
+            }
+            return saveSetting(LOOK_SETTINGS[name], state[name]);
+        }
+
+        /** The colour set on the company of the person, read once and only when the accent follows it */
+        async function loadCompanyColor() {
+            const companyId = user.activeCompany?.id;
+            if (!companyId || state.companyColor) {
+                return;
+            }
+            try {
+                const [company] = await orm.read("res.company", [companyId], ["primary_color"]);
+                state.companyColor = readCompanyColor(company?.primary_color);
+            } catch {
+                // The theme colour stays
+            }
         }
 
         /**
@@ -2224,6 +2261,9 @@ function isReadable(file) {
                     .catch(() => {});
             }
             registerHotkeys();
+            if (state.companyAccent) {
+                loadCompanyColor();
+            }
             browser.addEventListener("resize", () => {
                 state.isMobile = detectMobile();
             });
@@ -2272,6 +2312,7 @@ function isReadable(file) {
             setShareScreen,
             setMode,
             setTheme,
+            setLook,
             setPosition,
             setHotkey,
             setDictationHotkey,

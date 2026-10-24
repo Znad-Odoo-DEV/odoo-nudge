@@ -67,13 +67,14 @@ class ResUsersSettings(models.Model):
     )
     nudge_theme = fields.Selection(
         [
+            ("odoo", "Odoo colour"),
             ("violet", "Violet"),
             ("teal", "Teal"),
             ("amber", "Amber"),
             ("rose", "Rose"),
             ("slate", "Slate"),
         ],
-        string="Nudge Colour", required=True, default="violet",
+        string="Nudge Colour", required=True, default="odoo",
     )
     nudge_position = fields.Char(
         string="Nudge Position",
@@ -83,3 +84,21 @@ class ResUsersSettings(models.Model):
     nudge_validator_muted = fields.Char(
         string="Entry Warnings Muted",
         help="The checks of the warnings at entry time this person asked not to see, by key.")
+
+    # NP-23: how Nudge looks and fits the screen of this person; read by the panel, written by the person only
+    nudge_high_contrast = fields.Boolean(
+        string="Nudge High Contrast", default=False,  # NP-23
+        help="Stronger borders and text, and a thick focus ring, in the panel and the Nudge home page.")
+    nudge_large_text = fields.Boolean(
+        string="Nudge Large Text", default=False,  # NP-23
+        help="Bigger text in the panel and the Nudge home page.")
+    nudge_compact = fields.Boolean(
+        string="Nudge Compact Tiles", default=False,  # NP-23
+        help="Smaller tiles on the Nudge home page, so more of them fit on the screen.")
+    nudge_dock = fields.Boolean(
+        string="Nudge Docked Panel", default=False,  # NP-23
+        help="The panel is a drawer at the side of the screen that leaves the page its room, "
+             "instead of a window over the page.")
+    nudge_company_accent = fields.Boolean(
+        string="Nudge in the Company Colour", default=False,  # NP-23
+        help="The panel takes the colour set on the company instead of the colour chosen above.")

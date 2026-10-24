@@ -4,8 +4,27 @@
  * depending on the service (which depends on the root, which depends on them).
  */
 
-export const THEMES = ["violet", "teal", "amber", "rose", "slate"];
-export const DEFAULT_THEME = "violet";
+// "odoo" takes the primary colour of Odoo (and so the colour of the company, the theme and the dark mode);
+// the others are Nudge's own, kept as a choice
+export const THEMES = ["odoo", "violet", "teal", "amber", "rose", "slate"];
+export const DEFAULT_THEME = "odoo";
+
+// NP-23: the per-person toggles of the look, with the setting each is kept in
+export const LOOK_SETTINGS = {
+    highContrast: "nudge_high_contrast",
+    largeText: "nudge_large_text",
+    compact: "nudge_compact",
+    dock: "nudge_dock",
+    companyAccent: "nudge_company_accent",
+};
+
+/**
+ * @param {*} value what the company holds as its colour
+ * @returns {string} the colour when it is a plain #rrggbb, else empty: it goes into a style attribute
+ */
+export function readCompanyColor(value) {
+    return typeof value === "string" && /^#[0-9a-fA-F]{6}$/.test(value.trim()) ? value.trim() : "";
+}
 
 /**
  * @param {string} saved what the setting holds
