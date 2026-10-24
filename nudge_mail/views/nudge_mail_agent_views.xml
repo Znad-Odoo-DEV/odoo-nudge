@@ -119,6 +119,10 @@
         <field name="name">What the Mail Agent Learned</field>
         <field name="res_model">nudge.mail.rule</field>
         <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Nothing learned yet</p>
+            <p>When you correct how the Mail Agent sorts a message, the rule it learned is listed here.</p>
+        </field>
     </record>
 
     <menuitem id="nudge_mail_menu_proposals" name="Mail Proposals" parent="nudge.nudge_menu_root"
