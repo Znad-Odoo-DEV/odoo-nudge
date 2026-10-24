@@ -1,5 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_nudge_connector_system,nudge.connector.system,model_nudge_connector,base.group_system,1,1,1,0
+access_nudge_connector_system,nudge.connector.system,model_nudge_connector,base.group_system,1,1,1,1
 access_nudge_connector_tool_system,nudge.connector.tool.system,model_nudge_connector_tool,base.group_system,1,1,0,0
 access_nudge_connector_call_system,nudge.connector.call.system,model_nudge_connector_call,base.group_system,1,0,0,0
 access_nudge_connector_call_manager,nudge.connector.call.manager,model_nudge_connector_call,nudge.group_nudge_manager,1,0,0,0
