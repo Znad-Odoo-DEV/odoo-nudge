@@ -139,7 +139,8 @@ edit("nudge/models/nudge_conversation.py", [
     ("from odoo.exceptions import AccessError, LockError, UserError\n",
      "from psycopg2 import errors as pg_errors\n\nfrom odoo.exceptions import AccessError, UserError\n"),
     ("            step.lock_for_update()\n        except LockError:\n",
-     "            self.env.cr.execute(\"SELECT id FROM nudge_step WHERE id = %s FOR UPDATE NOWAIT\", (step.id,))\n"
+     "            with self.env.cr.savepoint(flush=False):  # a refused lock must not abort the transaction\n"
+     "                self.env.cr.execute(\"SELECT id FROM nudge_step WHERE id = %s FOR UPDATE NOWAIT\", (step.id,))\n"
      "        except pg_errors.LockNotAvailable:\n"),
 ])
 
@@ -338,6 +339,9 @@ if os.path.exists(ROOT + REFRESH) and "rpcBus" in read(REFRESH):
     write(REFRESH, s)
     print("ported", REFRESH)
 
+# The line of the changelog that lists the versions of the modules says the version of this series
+sub("nudge/CHANGELOG.md", r"(?m)^Current version: .*$", lambda m: m.group(0).replace("19.0.1.", "18.0.1."))
+
 # ---------------------------------------------------------------- the words "Odoo 19"
 for name in ("nudge/llm/prompt.py", "nudge/README.md", "nudge/README.ar.md", "nudge/static/description/index.html",
              "nudge/doc/user-guide.md", "nudge/doc/user-guide.ar.md", "nudge/doc/security.md", "nudge/__manifest__.py"):
@@ -354,7 +358,8 @@ edit("nudge_mcp/models/nudge_mcp.py", [
     ("from odoo.exceptions import AccessError, LockError, UserError\n",
      "from psycopg2 import errors as pg_errors\n\nfrom odoo.exceptions import AccessError, UserError\n"),
     ("            step.lock_for_update()\n        except LockError:\n",
-     "            self.env.cr.execute(\"SELECT id FROM nudge_step WHERE id = %s FOR UPDATE NOWAIT\", (step.id,))\n"
+     "            with self.env.cr.savepoint(flush=False):  # a refused lock must not abort the transaction\n"
+     "                self.env.cr.execute(\"SELECT id FROM nudge_step WHERE id = %s FOR UPDATE NOWAIT\", (step.id,))\n"
      "        except pg_errors.LockNotAvailable:\n"),
 ])
 
@@ -494,7 +499,8 @@ edit("nudge_messaging/models/nudge_step.py", [
     ("from odoo.exceptions import AccessError, LockError, UserError\n",
      "from psycopg2 import errors as pg_errors\n\nfrom odoo.exceptions import AccessError, UserError\n"),
     ("            step.lock_for_update()\n        except LockError:\n",
-     "            self.env.cr.execute(\"SELECT id FROM nudge_step WHERE id = %s FOR UPDATE NOWAIT\", (step.id,))\n"
+     "            with self.env.cr.savepoint(flush=False):  # a refused lock must not abort the transaction\n"
+     "                self.env.cr.execute(\"SELECT id FROM nudge_step WHERE id = %s FOR UPDATE NOWAIT\", (step.id,))\n"
      "        except pg_errors.LockNotAvailable:\n"),
 ])
 

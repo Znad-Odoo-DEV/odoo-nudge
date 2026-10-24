@@ -76,6 +76,9 @@ print("Hoot tests removed:", not files("nudge/static/tests/*.js"))
 # LEAD RULE (17): the functions of report_explain have no `context` or `cr` for 17's _(): _tr gives them.
 # The source keeps env._( so that the terms are still extracted into nudge.pot
 sub("nudge/tools/report_explain.py", r"(?<![\w.])env\._\(", "_tr(env, ")
+# REVIEW RULE 2 (17): the task cron writes in the owner's language through a local `env` of that language
+# (the _tr helper is added by REVIEW RULE 1 below)
+sub("nudge/models/nudge_task.py", r"last_result=env\._\(", "last_result=_tr(env, ")
 for name in files("nudge/**/*.py", "nudge_mail/**/*.py", "nudge_discuss/**/*.py", "nudge_mcp/**/*.py", "nudge_website/**/*.py", "nudge_builder/**/*.py", "nudge_messaging/**/*.py", "nudge_connect/**/*.py"):  # R2 RULE
     s = read(name)
     # self.env._( / env._( / record.env._( / self.env["x"].env._( → _(
@@ -130,11 +133,34 @@ edit("nudge/models/__init__.py", [("from . import nudge_provider\n", "from . imp
 for name in files("nudge/**/*.py", "nudge_mail/**/*.py", "nudge_mcp/**/*.py", "nudge_website/**/*.py", "nudge_builder/**/*.py", "nudge_messaging/**/*.py", "nudge_connect/**/*.py"):  # R2 RULE
     if name.endswith("compat17.py"):
         continue
-    n = sub(name, r"\.has_access\(", "._nudge_has_access(")
+    # `x.check_access("r") if hasattr(x, "check_access") else x.check_access_rights("r")` becomes the helper whole:
+    # swapped branch by branch, the helper would sit in a branch that never runs on 17
+    n = sub(name, r'(\w+)\.check_access\("(\w+)"\) if hasattr\(\1, "check_access"\) else \1\.check_access_rights\("\2"\)',
+            r'\1._nudge_check_access("\2")')
+    n += sub(name, r"\.has_access\(", "._nudge_has_access(")
     n += sub(name, r"\.check_access\(", "._nudge_check_access(")
     n += sub(name, r"\.has_groups\(", ".user_has_groups(")
     if n:
         print("ported", name, n, "access calls")
+
+# ---------------------------------------------------------------- ir.cron.numbercall: 17 runs a cron once by default
+# numbercall defaults to 1 on 17 and the job is switched off after its run; 18 and 19 have no such field
+for name in files("nudge*/**/*.xml"):
+    if 'model="ir.cron"' not in read(name):
+        continue
+
+    def add_numbercall(match):
+        body = match.group(2)
+        if "numbercall" in body:
+            return match.group(0)
+        indent = re.search(r"\n([ \t]*)<field", body)
+        return (match.group(1) + body + "\n" + (indent.group(1) if indent else "        ")
+                + '<field name="numbercall">-1</field>' + match.group(3))
+
+    if sub(name, r'(<record\b[^>]*\bmodel="ir\.cron"[^>]*>)(.*?)(\n[ \t]*</record>)', add_numbercall, flags=re.S):
+        print("ported", name, "numbercall")
+# A scheduled task made by Developer mode needs it too (the migration of nudge switches the stopped ones on again)
+sub("nudge/tools/developer.py", r'(\n( +)"usage": "ir_cron",\n)(?! +"numbercall")', r'\1\2"numbercall": -1,\n')
 
 # ---------------------------------------------------------------- res.lang._get_data is 18
 edit("nudge/models/nudge_conversation.py", [
@@ -343,6 +369,9 @@ for module in sorted(os.listdir(ROOT)):
                 sub(f"{module}/tests/{name}", r'(\.migrate\(cr, ")18\.0\.', r"\g<1>17.0.")  # R2 RULE 13b
                 sub(f"{module}/tests/{name}" if name == "test_saved_reports.py" else "nudge/none", r'("migrations", ")18\.0\.', r"\g<1>17.0.")  # R2 RULE 13
 
+# The line of the changelog that lists the versions of the modules says the version of this series
+sub("nudge/CHANGELOG.md", r"(?m)^Current version: .*$", lambda m: m.group(0).replace("18.0.1.", "17.0.1."))
+
 # ---------------------------------------------------------------- the words "Odoo 18"
 for name in ("nudge/llm/prompt.py", "nudge/README.md", "nudge/README.ar.md", "nudge/static/description/index.html",
              "nudge/doc/user-guide.md", "nudge/doc/user-guide.ar.md", "nudge/doc/security.md", "nudge/__manifest__.py"):
@@ -472,5 +501,23 @@ sub(T, r'faq\.xpath\("\.//div\[contains\(@class,\'accordion-collapse\'\)\]/@id"\
 sub(T, r'faq\.xpath\("\.//button/@data-bs-target"\)', 'faq.xpath(".//a[@data-bs-toggle=\'collapse\']/@data-bs-target")')
 sub(T, r"\.//div\[contains\(@class,'accordion-body'\)\]", ".//div[contains(@class,'card-body')]")
 sub(T, r"        self\.assertEqual\(section\.xpath\(\"\.//p\[contains\(@class,'lead'\)\]\"\)\[0\]\.text, \"Three reasons\.\"\)\n", "        # 17: s_features has no lead text\n")
+# REVIEW RULE 1 (17): `told = self.with_context(lang=...).env` then `told._(...)`, a text in the language of the person
+# it is for. 17 has no env._ and its _() reads the locals `context` and `cr` of the frame that calls it: _tr gives them
+for _name in ("nudge/models/nudge_task.py", "nudge/models/nudge_run.py"):
+    if not os.path.exists(ROOT + _name):
+        continue
+    _s = read(_name)
+    if "told._(" not in _s:
+        continue
+    _s = _s.replace("told._(", "_tr(told, ")
+    if "def _tr(env, source" not in _s:
+        _s = _s.replace("\n\nclass ", (
+            "\n\ndef _tr(env, source, *args, **kwargs):  # REVIEW RULE 1: 17's _() reads these two locals\n"
+            "    context = env.context  # noqa: F841\n"
+            "    cr = env.cr  # noqa: F841\n"
+            "    return _(source, *args, **kwargs)\n\n\nclass "), 1)
+    write(_name, _s)
+    print("ported", _name, "told")
+
 # R2 RULE 17: 17's features block has no title slot, and a title is added only to a block that has items (the test gives none)
 sub("nudge_builder/tests/test_snippets.py", r'snippets\.fill\(section, "s_features", \{"title": "Hello <script>alert\(1\)</script>"\}\)', 'snippets.fill(section, "s_features", {"title": "Hello <script>alert(1)</script>", "items": [{"title": "One", "text": "x"}]})')

@@ -87,6 +87,7 @@ test("unsafe links keep their label only", () => {
     expect(isSafeUrl("JaVaScRiPt:alert(1)")).toBe(false);
     expect(isSafeUrl("data:text/html;base64,AAAA")).toBe(false);
     expect(isSafeUrl("//evil.example/x")).toBe(false);
+    expect(isSafeUrl("/\\evil.example/x")).toBe(false);
     expect(isSafeUrl("vbscript:x")).toBe(false);
     expect(isSafeUrl("/odoo/action-1")).toBe(true);
     expect(isSafeUrl("mailto:someone@example.com")).toBe(true);

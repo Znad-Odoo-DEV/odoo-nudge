@@ -23,7 +23,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 MANIFEST = ROOT / "addons" / "nudge" / "__manifest__.py"
 DEFAULT_OUT = ROOT / "docs" / "quality_gate"
-LOCK_TOOL = Path("C:/Users/Ibrahim Elzenad/SSC_LLC_dev0/tools/nudge_audit/odoo_lock.py")
+# Optional: a script that serialises the Odoo runs of one machine (acquire/release a label)
+LOCK_TOOL = Path(os.environ["NUDGE_LOCK_TOOL"]) if os.environ.get("NUDGE_LOCK_TOOL") else None
 MODES = ("talk", "agent", "dev")
 LANGUAGES = ("en", "ar", "arabizi")
 
@@ -121,7 +122,7 @@ def run_odoo(args, report_path):
         command[command.index("-u"):command.index("-u")] = ["-i", args.install]
     env = dict(os.environ, NUDGE_GATE_REPORT=str(report_path), MSYS_NO_PATHCONV="1")
     log = Path(args.log)
-    locked = args.lock_label and LOCK_TOOL.exists()
+    locked = args.lock_label and LOCK_TOOL and LOCK_TOOL.exists()
     if locked:
         subprocess.run([args.python, "-I", str(LOCK_TOOL), "acquire", args.lock_label], check=True)
     try:
@@ -136,7 +137,7 @@ def run_odoo(args, report_path):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--db", default="nudge_gate")
-    parser.add_argument("--odoo-dir", default=os.environ.get("ODOO_DIR", "C:/Users/Ibrahim Elzenad/odoo/odoo_bootcamp"))
+    parser.add_argument("--odoo-dir", default=os.environ.get("ODOO_DIR"), required=not os.environ.get("ODOO_DIR"))
     parser.add_argument("--addons-path", default="")
     parser.add_argument("--python", default=sys.executable)
     parser.add_argument("--db-host", default="localhost")
