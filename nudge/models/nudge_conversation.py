@@ -61,6 +61,8 @@ SUMMARY_BOOKKEEPING = frozenset({
     "summary_extra", "summary_upto_id", "summary_count", "summary_edited", "summary_ai", "summary_dirty"})
 
 SCREEN_SHARING_PARAM = "nudge.screen_sharing"
+# What a question says when its screen is the one of the question before it
+UNCHANGED_SCREEN = screen.render(None, unchanged=True)
 AGENT_PARAM = "nudge.agent"
 # Whether the agent may compute with Python; off until an administrator says so
 PYTHON_PARAM = "nudge.python"
@@ -956,18 +958,21 @@ class NudgeConversation(models.Model):
         """:return: the conversation as the adapters read it; a question
         asked with a focused command is read without what came before.
 
-        PERF-08 and NP-22: only the latest question carries its screen, and past the turns set in
-        Settings (or the token budget of the history) the oldest ones are replaced by their
-        summary, which is data about the past and is put in front of the first question kept"""
+        PERF-08 and NP-22: only the latest question carries its screen (and the one that showed a
+        screen a later question says is unchanged, see :meth:`_chat_replayed_contexts`), and past
+        the turns set in Settings (or the token budget of the history) the oldest ones are replaced
+        by their summary, which is data about the past and is put in front of the first question kept"""
         self.ensure_one()
         turns = []
         messages = self.message_ids.sorted("id")
-        question = messages.filtered(lambda message: message.role == "user")[-1:]
+        questions = messages.filtered(lambda message: message.role == "user")
+        question = questions[-1:]
         summary_text = ""
         if question.command in tools.commands.FOCUS:
             messages = messages.filtered(lambda message: message.id >= question.id)
         else:
             messages, summary_text = self._summary_block(messages)
+        contexts = self._chat_replayed_contexts(questions, question, set(messages.ids))
         for message, following in zip(messages, list(messages[1:]) + [messages.browse()]):
             if message.role == "tool":
                 if turns and turns[-1].get("tool_calls"):
@@ -985,7 +990,7 @@ class NudgeConversation(models.Model):
                 "role": message.role,
                 "text": text,
                 # The screen of an old question is not sent again: the latest one is the screen now
-                "context": (message.context_text or "") if message == question else "",
+                "context": contexts.get(message.id, ""),
                 "images": self._chat_images_of(message),
                 "blocks": (message.content_blocks or []) if calls or message.content else [],
                 "provider_kind": message.provider_kind or "",
@@ -993,6 +998,41 @@ class NudgeConversation(models.Model):
                 "tool_calls": calls or [],
             })
         return turns
+
+    @api.model
+    def _chat_screen_sources(self, questions):
+        """:param questions: the questions of a conversation, in their order
+        :return: ``{question id: id of the question that showed its screen}`` for each question whose
+            screen was sent as unchanged, the same as the screen of the question before it"""
+        sources, source, previous = {}, False, None
+        for question in questions:
+            digest = question.snapshot_hash
+            if digest and previous is not None and previous.snapshot_hash == digest:
+                if source:
+                    sources[question.id] = source
+            else:
+                source = question.id if digest else False
+            previous = question
+        return sources
+
+    def _chat_replayed_contexts(self, questions, latest, kept):
+        """What each question replayed carries besides its text (PERF-08): the latest one its context;
+        an old one nothing, unless a later question replayed says its screen is unchanged, which points
+        at the screen this one showed. When that screen is no longer replayed (summarised, or before a
+        focused command), the latest question gets its own screen in full instead of the pointer.
+
+        :param kept: ids of the messages replayed
+        :return: ``{question id: context}``"""
+        sources = self._chat_screen_sources(questions)
+        shown = {source for question_id, source in sources.items() if question_id in kept and source in kept}
+        contexts = {question.id: question.context_text or "" for question in questions
+                    if question.id in shown and question != latest}
+        context = latest.context_text or ""
+        if latest.id in sources and sources[latest.id] not in kept and isinstance(latest.snapshot, dict):
+            context = context.replace(UNCHANGED_SCREEN, screen.render(latest.snapshot), 1)
+        if latest:
+            contexts[latest.id] = context
+        return contexts
 
     def _chat_pointer_from_text(self, text):
         """:return: the guidance event made from the text of an answer, when
