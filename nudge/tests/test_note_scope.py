@@ -1,3 +1,4 @@
+import glob
 import importlib.util
 import os
 
@@ -104,8 +105,10 @@ class TestNoteScope(NudgeCase, TransactionCase):
         self.assertTrue(listed.not_sent)
 
     def test_the_migration_gives_old_notes_the_company_of_their_writer(self):
-        spec = importlib.util.spec_from_file_location(
-            "post_ext02", os.path.join(os.path.dirname(__file__), "..", "migrations", "19.0.1.58.0", "post-ext02.py"))
+        # The folder is named for the version of the module (19.0, 18.0 or 17.0 as ported)
+        [path] = glob.glob(os.path.join(
+            os.path.dirname(__file__), "..", "migrations", "[0-9][0-9].0.1.58.0", "post-ext02.py"))
+        spec = importlib.util.spec_from_file_location("post_ext02", path)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         written = self.Note.with_user(self.manager_a).create({"name": "W", "body": "x"})

@@ -107,7 +107,11 @@ class TestLatencyPanel(NudgeCase, TransactionCase):
         self.assertIn("nudge_usage_company_date_sums_idx", names)
         self.answer(self.user_a, "agent", 1000, tokens=10)
         cr.execute("SAVEPOINT np20_plan")
+        # Only the covering index can serve the sum without the table: the planner of a tiny table
+        # may otherwise pick the plain index of the date, so the choice is left to the cover
         cr.execute("SET LOCAL enable_seqscan = off")
+        cr.execute("SET LOCAL enable_indexscan = off")
+        cr.execute("SET LOCAL enable_bitmapscan = off")
         cr.execute(
             "EXPLAIN SELECT SUM(tokens), SUM(cost) FROM nudge_usage WHERE user_id = %s AND date = %s",
             (self.user_a.id, self.today))
