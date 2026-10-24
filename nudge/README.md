@@ -759,3 +759,14 @@ the group, instructions hidden in a record treated as data, and the most tokens 
 - Budgets (`DEFAULT_BUDGET` in `spec.py`) are the measured size of today's requests plus about 8%: raise
   them on purpose, in the same commit as the change that makes a request heavier.
 - A scenario that fails on current code is a finding about the product; do not weaken the scenario.
+
+## Requests that come back become rules (S9)
+
+When people ask the AI the same thing again and again, Nudge proposes a rule so that the next time it costs nothing.
+
+- **How it finds them.** Once a night (cron "Nudge: find the requests that come back", no provider, nothing on the request path) it reads the Talk and Agent turns the AI answered in the last 30 days, company by company. Turns that say the same thing once their changing parts (a name from the arguments of the tool, a number, today's date) are cut out, and that the AI answered with the same single tool and the same shape of arguments, form a group. A group that reaches the threshold of the recurring questions (Settings, Nudge, Recurring questions, default 5) and has at least one sentence written the same way twice becomes a proposal.
+- **What the managers see.** Nudge, What Nudge Knows, Recurring Requests: the patterns (`How many contacts are named {name} please`), what the tool does in words, how many times and how many different people (never who). Accept, Reject, Bring back. "Find Recurring Requests" in the Action menu runs the job now.
+- **Accept.** A tool that only reads (`aggregate_records`, `search_records`, `open_screen`, `filter_screen`) becomes a rule of the no-AI router: a sentence that fits a pattern fills the template and the tool runs as the person, with the same rights, with zero provider calls (the answer is counted as a no-AI answer of intent `rule`). A tool that writes (`prepare_create`, `prepare_write`, `call_method`) becomes a company prompt of the library (NP-09) instead: it is never done on its own. Reject hides the proposal and it is not proposed again.
+- **Privacy.** Only the shape is kept: the pattern with `{slots}`, the template of the arguments with the same slots, counts. A value the AI used that the sentence did not say (a record id, a name it looked up, a date that is not today) makes the turn unfit to be learned. No answer, no record, nobody who asked. Turns said in private mode (flag `nudge.message.private_mode`, set when the message is written), commands and files are never read, nor are turns before the job was first run (`nudge.rules_observe_from`). A sentence is data: it is stored and matched as text, never run.
+- **Tests.** `/nudge:TestLearnedPattern,/nudge:TestRecurringRequests`.
+

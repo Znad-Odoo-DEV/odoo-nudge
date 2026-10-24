@@ -172,6 +172,10 @@ class NudgeNoai(models.AbstractModel):
             return None
         values, _text = conversation._chat_screen(snapshot)
         screen = self._screen_of(values.get("snapshot") or {})
+        # S9: a request people kept asking the AI, accepted by a manager as a rule: answered at once
+        learned = self.env["nudge.rule"]._plan_for(text, screen, mode, self)
+        if learned:
+            return self._deliver(conversation, text, mode, learned, learned.parsed, values)
         with self._company_words():
             parsed = noai_commands.parse(text, screen)
         plan = None

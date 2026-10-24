@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- S9: the requests people keep asking the AI, proposed as rules that cost nothing -->
+    <record id="nudge_rule_view_list" model="ir.ui.view">
+        <field name="name">nudge.rule.view.list</field>
+        <field name="model">nudge.rule</field>
+        <field name="arch" type="xml">
+            <list string="Recurring Requests" create="0" delete="0" edit="0"
+                  decoration-muted="state == 'rejected'" decoration-success="state == 'accepted'"
+                  decoration-warning="state == 'proposed'">
+                <field name="name"/>
+                <field name="kind"/>
+                <field name="times"/>
+                <field name="user_count" optional="show"/>
+                <field name="use_count" optional="show"/>
+                <field name="last_seen" optional="show"/>
+                <field name="state" widget="badge" decoration-warning="state == 'proposed'"
+                       decoration-success="state == 'accepted'"/>
+                <field name="company_id" optional="show" groups="base.group_multi_company"/>
+                <button name="action_accept" type="object" string="Accept" icon="fa-check"
+                        class="btn-link text-success" invisible="state != 'proposed'"/>
+                <button name="action_reject" type="object" string="Reject" icon="fa-times"
+                        class="btn-link text-danger" invisible="state == 'rejected'"/>
+                <button name="action_reopen" type="object" string="Bring back" icon="fa-undo"
+                        class="btn-link" invisible="state != 'rejected'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_rule_view_form" model="ir.ui.view">
+        <field name="name">nudge.rule.view.form</field>
+        <field name="model">nudge.rule</field>
+        <field name="arch" type="xml">
+            <form string="Recurring Request" create="0" delete="0" edit="0">
+                <header>
+                    <button name="action_accept" type="object" string="Accept" class="btn-primary"
+                            invisible="state != 'proposed'"/>
+                    <button name="action_reject" type="object" string="Reject" invisible="state == 'rejected'"/>
+                    <button name="action_reopen" type="object" string="Bring back" invisible="state != 'rejected'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="proposed,accepted"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="kind"/>
+                            <field name="tool_name"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="times"/>
+                            <field name="user_count"/>
+                            <field name="last_seen"/>
+                            <field name="use_count"/>
+                            <field name="prompt_id" invisible="not prompt_id"/>
+                        </group>
+                    </group>
+                    <group string="What it does">
+                        <field name="example" nolabel="1"/>
+                    </group>
+                    <group string="Patterns">
+                        <field name="patterns_text" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_rule_view_search" model="ir.ui.view">
+        <field name="name">nudge.rule.view.search</field>
+        <field name="model">nudge.rule</field>
+        <field name="arch" type="xml">
+            <search string="Recurring Requests">
+                <field name="name"/>
+                <filter name="proposed" string="To Decide" domain="[('state', '=', 'proposed')]"/>
+                <filter name="accepted" string="Accepted" domain="[('state', '=', 'accepted')]"/>
+                <filter name="rejected" string="Rejected" domain="[('state', '=', 'rejected')]"/>
+                <separator/>
+                <filter name="rules" string="Rules Without AI" domain="[('kind', '=', 'rule')]"/>
+                <filter name="prompts" string="Prompts" domain="[('kind', '=', 'prompt')]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_rule_action" model="ir.actions.act_window">
+        <field name="name">Recurring Requests</field>
+        <field name="res_model">nudge.rule</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_proposed': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No request comes back often enough yet</p>
+            <p>
+                When people ask the AI the same thing again and again, Nudge proposes a rule here: the next time it
+                is answered with no AI and no cost. A request that only reads becomes a rule; one that changes data
+                becomes a prompt of the library and is never done on its own. Nothing of what was asked is kept,
+                only the shape of the sentence.
+            </p>
+        </field>
+    </record>
+
+    <record id="nudge_rule_observe_action" model="ir.actions.server">
+        <field name="name">Find Recurring Requests</field>
+        <field name="model_id" ref="model_nudge_rule"/>
+        <field name="state">code</field>
+        <field name="code">model.action_observe_now()</field>
+        <field name="binding_model_id" ref="model_nudge_rule"/>
+        <field name="binding_type">action</field>
+    </record>
+
+    <menuitem id="nudge_menu_rules" name="Recurring Requests" sequence="24"
+              parent="nudge_menu_knowledge" action="nudge_rule_action"
+              groups="nudge.group_nudge_manager"/>
+</odoo>
