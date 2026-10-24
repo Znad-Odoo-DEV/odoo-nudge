@@ -1,5 +1,5 @@
 from datetime import date
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from odoo.exceptions import AccessError
 from odoo.tests import TransactionCase, new_test_user, tagged
@@ -126,6 +126,37 @@ class TestCredentialExpiry(TransactionCase):
         with patch.object(nudge_credential, "SOURCES", (source,)):
             self.run_cron()
         self.assertEqual(self.thresholds("Ebrahim"), [7])
+
+    def test_the_words_follow_the_kind_and_the_day(self):
+        for name, days in (("ETA before", 5), ("ETA on", 0), ("ETA after", -1)):
+            self.credential(name, days)
+        messages = {}
+        for _user, message in self.run_cron():
+            messages.setdefault(message["title"].split(" ")[0] + " " + message["title"].split(" ")[1], set()).add(
+                message["message"])
+        self.assertEqual(set(messages), {"ETA before", "ETA on", "ETA after"}, messages)
+        self.assertTrue(all("e-invoicing" not in text for texts in messages.values() for text in texts), messages)
+        self.assertTrue(all("before it stops working" in text for text in messages["ETA before"]), messages)
+        self.assertTrue(all("Renew it today" in text for text in messages["ETA on"]), messages)
+        self.assertTrue(all("no longer works" in text for text in messages["ETA after"]), messages)
+        notice = self.Notice.create({"company_id": self.mine.id, "pack": "credential", "check_key": "k",
+                                     "threshold": 7, "deadline": TODAY, "title": "ZATCA"})
+        with patch(NOTIFY, side_effect=lambda user, kind, message: messages.setdefault("z", set()).add(message["message"])):
+            notice._tell_credential(self.mine, "ZATCA", 3, "zatca")
+        self.assertTrue(any("before e-invoicing stops" in text for text in messages["z"]), messages)
+
+    def test_a_replaced_certificate_is_not_alerted(self):
+        source = Source("certificate", "certificate.certificate", "date_end", "company_id", "name")
+        model = MagicMock()
+        model._fields = {"scope": 1, "subject_common_name": 1}
+        model.browse.return_value.read.return_value = [
+            {"id": 1, "scope": "a", "subject_common_name": "Raghad"},
+            {"id": 2, "scope": "a", "subject_common_name": "Raghad"},
+            {"id": 3, "scope": "b", "subject_common_name": "Raghad"}]
+        records = [{"id": 1, "date_end": TODAY, "name": "old"}, {"id": 2, "date_end": date(2999, 1, 1), "name": "new"},
+                   {"id": 3, "date_end": TODAY, "name": "other kind"}]
+        kept = self.Credential._certificates_in_use(model, records, source)
+        self.assertEqual([record["id"] for record in kept], [2, 3])
 
     def test_no_source_names_a_secret_field(self):
         for source in nudge_credential.SOURCES:
