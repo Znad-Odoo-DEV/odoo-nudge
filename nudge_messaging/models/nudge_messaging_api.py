@@ -6,6 +6,7 @@ logged is the kind of failure only. Tests replace this model, so no test
 reaches a network."""
 import logging
 import time
+from urllib.parse import urlsplit
 
 import requests
 
@@ -28,6 +29,10 @@ MAX_TEXT = 3500
 CHANNELS = ("whatsapp", "telegram")
 SECRET_KEYS = (
     "whatsapp.app_secret", "whatsapp.access_token", "telegram.bot_token", "telegram.webhook_secret")
+# Where Graph serves the files of WhatsApp: the access token goes there and nowhere else
+WHATSAPP_MEDIA_HOSTS = ("lookaside.fbsbx.com",)
+WHATSAPP_MEDIA_DOMAINS = (".fbsbx.com", ".fbcdn.net")
+LABELS = {"whatsapp": "WhatsApp", "telegram": "Telegram"}
 
 
 class MessagingError(UserError):
@@ -60,6 +65,21 @@ class NudgeMessagingApi(models.AbstractModel):
         return bool(self._param("telegram.webhook_secret"))
 
     @api.model
+    def _check_egress(self, channel, url):
+        """NP-15: the allowed destinations of the company hold for the channels too.
+
+        :raise UserError: before anything is sent, when the host is not on the list"""
+        self.env["nudge.egress"].check(url, LABELS.get(channel, channel))
+
+    @api.model
+    def _is_media_host(self, url):
+        """:return: whether ``url`` is a file of WhatsApp on Meta's servers, the only place its token is sent"""
+        parts = urlsplit(str(url or ""))
+        host = (parts.hostname or "").lower()
+        return parts.scheme == "https" and (
+            host in WHATSAPP_MEDIA_HOSTS or host.endswith(WHATSAPP_MEDIA_DOMAINS))
+
+    @api.model
     def _redact(self, text):
         """:return: ``text`` without any of the keys"""
         text = str(text or "")
@@ -81,6 +101,7 @@ class NudgeMessagingApi(models.AbstractModel):
                 phone_id, token = self._param("whatsapp.phone_id"), self._param("whatsapp.access_token")
                 if not (phone_id and token):
                     return False
+                self._check_egress(channel, WHATSAPP_API)
                 reply = requests.post(
                     f"{WHATSAPP_API}/{phone_id}/messages", timeout=TIMEOUT,
                     headers={"Authorization": f"Bearer {token}"},
@@ -90,6 +111,7 @@ class NudgeMessagingApi(models.AbstractModel):
                 token = self._param("telegram.bot_token")
                 if not token:
                     return False
+                self._check_egress(channel, TELEGRAM_API)
                 reply = requests.post(
                     f"{TELEGRAM_API}/bot{token}/sendMessage", timeout=TIMEOUT,
                     json={"chat_id": to, "text": text, "disable_web_page_preview": True})
@@ -97,6 +119,9 @@ class NudgeMessagingApi(models.AbstractModel):
                 _logger.info("Nudge messaging: %s refused a message (%s)", channel, reply.status_code)
                 return False
             return True
+        except UserError:
+            _logger.info("Nudge messaging: a message to %s was not sent: not an allowed destination", channel)
+            return False
         except requests.RequestException as error:
             # The address of a Telegram call holds the token: only the kind of failure is kept
             _logger.info("Nudge messaging: a message to %s did not leave (%s)", channel, type(error).__name__)
@@ -114,13 +139,20 @@ class NudgeMessagingApi(models.AbstractModel):
             if channel == "whatsapp":
                 token = self._param("whatsapp.access_token")
                 headers = {"Authorization": f"Bearer {token}"}
+                self._check_egress(channel, WHATSAPP_API)
                 info = requests.get(f"{WHATSAPP_API}/{media['id']}", headers=headers, timeout=TIMEOUT)
                 info.raise_for_status()
                 described = info.json()
+                if not self._is_media_host(described["url"]):
+                    # The token is not handed to an address an answer named: only to Meta's file servers
+                    _logger.info("Nudge messaging: a file of WhatsApp was not at a host of Meta, not downloaded")
+                    raise MessagingError(_("The file could not be downloaded."))
+                self._check_egress(channel, described["url"])
                 data = requests.get(described["url"], headers=headers, timeout=TIMEOUT, stream=True)
                 mime = described.get("mime_type") or media.get("mime") or ""
             else:
                 token = self._param("telegram.bot_token")
+                self._check_egress(channel, TELEGRAM_API)
                 info = requests.get(f"{TELEGRAM_API}/bot{token}/getFile", params={"file_id": media["id"]},
                                     timeout=TIMEOUT)
                 info.raise_for_status()
@@ -134,6 +166,9 @@ class NudgeMessagingApi(models.AbstractModel):
             return content, mime
         except MessagingError:
             raise
+        except UserError as refusal:
+            # Not an allowed destination: said as the list says it
+            raise MessagingError(str(refusal)) from None
         except (requests.RequestException, KeyError, ValueError, TypeError) as error:
             _logger.info("Nudge messaging: a file of %s could not be had (%s)", channel, type(error).__name__)
             raise MessagingError(_("The file could not be downloaded.")) from None
@@ -164,10 +199,14 @@ class NudgeMessagingApi(models.AbstractModel):
         if not (token and secret):
             return False
         try:
+            self._check_egress("telegram", TELEGRAM_API)
             reply = requests.post(
                 f"{TELEGRAM_API}/bot{token}/setWebhook", timeout=TIMEOUT,
                 json={"url": url, "secret_token": secret, "allowed_updates": ["message"]})
             return reply.status_code < 400 and bool(reply.json().get("ok"))
+        except UserError:
+            _logger.info("Nudge messaging: the webhook was not set: Telegram is not an allowed destination")
+            return False
         except (requests.RequestException, ValueError) as error:
             _logger.info("Nudge messaging: the webhook could not be set (%s)", type(error).__name__)
             return False
