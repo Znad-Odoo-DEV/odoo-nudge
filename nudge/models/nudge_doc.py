@@ -15,6 +15,8 @@ import logging
 from odoo import api, fields, models
 from odoo.tools import file_path, sql
 
+from ..tools import noai_commands
+
 _logger = logging.getLogger(__name__)
 
 CORPUS = "nudge/data/odoo_docs.jsonl.gz"
@@ -233,7 +235,13 @@ class NudgeDocPassage(models.Model):
         query = " ".join((query or "").split())[:MAX_QUERY_CHARS]
         if not query:
             return self.browse()
-        params = [query]
+        # An Arabic question looks for the English pages by the English words of what it names (NP-12)
+        keywords = query
+        if noai_commands.bridge.has_arabic(query):
+            # sudo: the words the companies of the person added are Nudge's own configuration
+            words = noai_commands.bridge.terms(query, self.env["nudge.lexicon.entry"].sudo()._pairs())
+            keywords = " or ".join(words)
+        params = [keywords]
         app_filter = ""
         if app:
             # The pages of an app folder carry its name as their category;
@@ -250,7 +258,7 @@ class NudgeDocPassage(models.Model):
             ORDER BY rank DESC, p.id
             LIMIT %s
         """, params)
-        rows = self.env.cr.fetchall()
+        rows = self.env.cr.fetchall() if keywords else []
         marks = [f" {module} " for module in (modules or [])]
         # By meaning too, when the local search model is there: the keyword hits
         # are re-ranked, and when they are few (none, for a question in Arabic)

@@ -18,7 +18,7 @@ from odoo.exceptions import UserError
 
 from ..llm import base as llm
 from ..llm import snapshot as screen_snapshot
-from ..tools import approval_sentence, base, commands, noai_commands, revert, setup, setup_sentence
+from ..tools import approval_sentence, base, commands, digest, home, noai_commands, revert, setup, setup_sentence
 from ..tools.base import MODE_AGENT, MODE_DEV, MODE_TALK
 from ..tools.noai_commands import grammar
 from ..tools.records import Refused
@@ -175,6 +175,11 @@ class NudgeNoai(models.AbstractModel):
         with self._company_words():
             parsed = noai_commands.parse(text, screen)
         plan = None
+        if not (parsed.intent and parsed.confidence >= noai_commands.THRESHOLD):
+            # NP-11: the day of the person is counted, and a sentence nearly understood is offered back
+            plan = self._offer_agenda(text) or self._offer_choices(parsed, screen, mode, has_ai)
+            if plan:
+                return self._deliver(conversation, text, mode, plan, plan.parsed, values)
         # A person who cannot act is not told what was not understood: the provider, or its absence, answers
         if (not self.env.user.has_group("nudge.group_nudge_agent")
                 and not (parsed.intent and parsed.confidence >= noai_commands.THRESHOLD)):
@@ -272,6 +277,105 @@ class NudgeNoai(models.AbstractModel):
     # ------------------------------------------------------------------
     # Planning: the sentence on the data
     # ------------------------------------------------------------------
+    # -- NP-11: what is waiting today, and "Did you mean" ---------------
+    AGENDA_KEYS = ("time_off_to_approve", "overdue_invoices", "overdue_tasks", "tasks_due_today", "attendance_to_check")
+
+    @api.model
+    def _offer_agenda(self, text):
+        """"What is waiting for me today": counted by Odoo as the person, from the lines of the digest, their
+        activities and the approvals asked of them. No provider, no token.
+        :return: the :class:`Plan`, or None when the sentence does not ask for it"""
+        if not noai_commands.agenda.asks(text):
+            return None
+        env = self.env
+        lines = []
+        if "mail.activity" in env and digest.can_read(env, "mail.activity"):
+            today = fields.Date.context_today(env["res.users"])
+            mine = [("user_id", "=", env.uid)]
+            late = env["mail.activity"].search_count(mine + [("date_deadline", "<", today)])
+            due = env["mail.activity"].search_count(mine + [("date_deadline", "=", today)])
+            if due:
+                lines.append(env._("Activities due today: %s", due))
+            if late:
+                lines.append(env._("Activities overdue: %s", late))
+        approvals = home._pending_approvals(env)
+        if approvals:
+            lines.append(env._("Approvals waiting for you: %s", len(approvals)))
+            lines += ["  - %s" % approval["text"] for approval in approvals]
+        for block in digest.gather(env):
+            for line in block["lines"] if block["key"] != "overview" else []:
+                if line.get("key") in self.AGENDA_KEYS:
+                    lines.append(digest.sentence(env, line))
+        agenda = grammar.Parse(text)
+        agenda.intent, agenda.confidence = "agenda", 1.0
+        if not lines:
+            return Plan(env._("Nothing is waiting for you today."), parsed=agenda)
+        return Plan("\n".join([env._("Waiting for you today:")] + lines), parsed=agenda)
+
+    def _missing_slot(self, candidate, screen):
+        """:return: the question that asks for what a sentence lacks, or "" when it has all it needs"""
+        slots = candidate.get("slots") or {}
+        intent, kind = candidate.get("intent"), candidate.get("kind")
+        if intent == "create":
+            if kind in ("contact", "product") and not slots.get("name"):
+                return self.env._("What is its name?")
+            if kind in ("task", "lead", "ticket") and not slots.get("title"):
+                return self.env._("What is its title?")
+            if kind == "timeoff" and not slots.get("dates"):
+                return self.env._("For which dates?")
+            if kind in grammar.CREATABLE and kind not in ("contact", "product", "task", "lead", "ticket", "timeoff"):
+                if not slots.get("partner"):
+                    return self.env._("For which contact?")
+                if not slots.get("lines") and kind not in ("invoice", "bill", "quotation", "sales_order", "purchase_order"):
+                    return self.env._("Which products, and how many?")
+        if intent in ("find", "update") and not slots.get("name") and not screen.get("record_id"):
+            return self.env._("Which one do you mean? Write its name.")
+        return ""
+
+    def _candidate_parse(self, candidate):
+        """:return: the :class:`grammar.Parse` of a candidate dict, to describe it in words"""
+        parsed = grammar.Parse(candidate.get("text") or "")
+        parsed.intent, parsed.kind = candidate.get("intent") or "", candidate.get("kind")
+        parsed.confidence = candidate.get("confidence") or 0.0
+        parsed.slots = dict(candidate.get("slots") or {})
+        parsed.states = list(candidate.get("states") or [])
+        return parsed
+
+    def _offer_choices(self, parsed, screen, mode, has_ai):
+        """A sentence that is not sure enough to be acted on, and that looks like something Nudge does, is
+        given back as up to two sentences to choose from, each sent as it is written when it is chosen:
+        nothing is done by the choice itself. What a sentence lacks is asked for.
+        :return: the :class:`Plan`, or None to go on (to the AI, or to the words of what can be done)"""
+        candidates = list(parsed.candidates or [])
+        if not candidates:
+            return None
+        if has_ai and not any(candidate.get("corrections") for candidate in candidates):
+            # Only a slip or Arabic in Latin letters is worth stopping the AI for
+            return None
+        acts = self.env.user.has_group("nudge.group_nudge_agent") and mode != MODE_TALK
+        candidates = [c for c in candidates if acts or c.get("intent") in READ_INTENTS][:2]
+        if not candidates:
+            return None
+        chosen = []
+        words = []
+        question = ""
+        for candidate in candidates:
+            described = self._describe(self._candidate_parse(candidate))
+            missing = self._missing_slot(candidate, screen)
+            question = question or missing
+            words.append(described)
+            sentence = candidate["text"]
+            chosen.append({
+                # Complete: it is sent as it is. Lacking a word: put in the message box, to be finished
+                "name": sentence, "words": [sentence if not missing else sentence + " "], "at_once": not missing,
+                "hint": described, "example": missing, "kind": "did_you_mean"})
+        text = self.env._("Did you mean: %s?", self.env._(" or ").join("“%s”" % word for word in words))
+        if question:
+            text = "%s %s" % (text, question)
+        guess = grammar.Parse(parsed.text)
+        guess.intent, guess.confidence = "did_you_mean", parsed.confidence
+        return Plan(text, events=[{"type": "found", "commands": chosen}], parsed=guess)
+
     def _plan(self, parsed, screen, mode):
         """:return: the :class:`Plan` for ``parsed``, or None when it cannot be done here"""
         method = getattr(self, f"_plan_{parsed.intent}", None)
