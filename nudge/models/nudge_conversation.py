@@ -475,9 +475,17 @@ class NudgeConversation(models.Model):
             # chosen to stand in answers when the list allows it (private mode applies to it as
             # always); otherwise the refusal stays, said when the request goes out
             fallback = Provider._get_fallback()
-            if fallback and fallback != provider and fallback._egress_allowed():
-                fallback._ensure_capabilities()
-                return fallback, self._chat_fallback_notice(fallback, "destination")
+            if fallback and fallback != provider:
+                if fallback._egress_allowed():
+                    fallback._ensure_capabilities()
+                    return fallback, self._chat_fallback_notice(fallback, "destination")
+                # Refused too: the refusal says so, the person need not wonder whether it was tried
+                try:
+                    provider._check_egress()
+                except UserError as refusal:
+                    raise UserError(_(
+                        "%(refusal)s The model chosen to stand in (%(model)s) is not on the list either.",
+                        refusal=refusal.args[0], model=fallback.model_name or fallback.name)) from None
         named = Provider._get_named(mode or MODE_TALK)
         if named and provider != named and provider == Provider._get_fallback():
             private = Provider._is_private_mode() and not named.runs_locally
