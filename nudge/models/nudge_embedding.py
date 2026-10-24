@@ -385,7 +385,23 @@ class NudgeEmbedding(models.Model):
 
     @api.model
     def _set_download_state(self, **state):
+        """Written when the download starts, fails or ends, never while it runs: a parameter
+        written empties the caches of every worker"""
         self.env["ir.config_parameter"].sudo().set_param(DOWNLOAD_PARAM, json.dumps(state) if state else False)
+
+    @api.model
+    def _downloaded(self, files):
+        """:return: how many bytes of ``files`` are on the disk, whole or half made: how far the
+        download is, read where it writes"""
+        directory = self._model_dir()
+        done = 0
+        for item in files:
+            for name in (item["name"], item["name"] + ".part"):
+                path = os.path.join(directory, name)
+                if os.path.isfile(path):
+                    done += min(os.path.getsize(path), item["size"])
+                    break
+        return done
 
     @api.model
     def _check_admin(self):
@@ -407,7 +423,7 @@ class NudgeEmbedding(models.Model):
         if state.get("state") == "running":
             total = state.get("total") or 1
             return _("Downloading %(title)s: %(percent)s%% of %(size)s MB.",
-                     title=spec["title"], percent=int(100 * (state.get("done") or 0) / total),
+                     title=spec["title"], percent=min(100, int(100 * self._downloaded(spec["files"]) / total)),
                      size=round(total / 1048576))
         if state.get("state") == "error":
             return _("The download failed: %s", state.get("error") or "")
@@ -437,7 +453,7 @@ class NudgeEmbedding(models.Model):
             raise UserError(_(
                 "The model %s is not one Nudge downloads: put its model.onnx and tokenizer.json in %s.",
                 self._model_name(), self._model_dir()))
-        self._set_download_state(state="running", done=0, total=sum(item["size"] for item in spec["files"]))
+        self._set_download_state(state="running", total=sum(item["size"] for item in spec["files"]))
         self._start()
         return self._notify(_("The download started in the background."))
 
@@ -490,19 +506,11 @@ class NudgeEmbedding(models.Model):
         if state.get("state") != "running":
             return embedder.files_present(self._model_dir())
         spec = embedder.spec_of(self._model_name())
-        last = [time.monotonic()]
-
-        def progress(done, total):
-            if time.monotonic() - last[0] > 2:
-                last[0] = time.monotonic()
-                self._set_download_state(state="running", done=done, total=total)
-                self._commit()
-
         try:
             for item in spec["files"]:  # NP-15
                 self.env["nudge.egress"].check(item["url"], "model")
-            finished = embedder.download(
-                spec["files"], self._model_dir(), progress=progress, budget=DOWNLOAD_BUDGET)
+            # How far it is, the Settings read on the disk (_downloaded)
+            finished = embedder.download(spec["files"], self._model_dir(), budget=DOWNLOAD_BUDGET)
         except Exception as error:  # noqa: BLE001 - said in the Settings, not lost in a log
             _logger.warning("Nudge: the download of the local search model failed: %s", error)
             self._set_download_state(state="error", error=str(error)[:300])
