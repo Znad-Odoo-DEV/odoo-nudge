@@ -165,6 +165,35 @@ class TestTasks(BackgroundCase, TransactionCase):
         self.assertEqual(task.run_count, count)
         self.assertEqual(task.skip_count, 1)
 
+    def test_a_watch_finds_and_counts_the_new_records_in_the_database(self):
+        # Review odoo-tech #5: every record created since the last look was loaded and filtered in
+        # Python: a watch paused for a month on a busy model held up every task behind it
+        self.use_adapter(script=[saying("Three new contacts.")])
+        self.patch(nudge_task, "MAX_NEW_IDS", 2)
+        self.patch(nudge_task, "MAX_NEW_COUNTED", 2)
+        task = self.make(kind="watch", model_name="res.partner", conditions=NAMED)
+        task.sudo().last_check = fields.Datetime.now() - timedelta(minutes=5)
+        Partner = self.env["res.partner"]
+        new = Partner.create([{"name": f"Nudge Watched {n}"} for n in range(3)])
+        others = Partner.create([{"name": f"Raghad Other {n}"} for n in range(2)])
+        (new | others).flush_recordset()
+        self.env.cr.execute("UPDATE res_partner SET create_date = %s WHERE id IN %s",
+                            (fields.Datetime.now() - timedelta(minutes=1), tuple((new | others).ids)))
+        Partner.invalidate_model(["create_date"])
+        limits = []
+        search = type(Partner).search
+
+        def spy(model, domain, *args, **kwargs):
+            if "create_date" in str(domain):
+                limits.append(kwargs.get("limit"))
+            return search(model, domain, *args, **kwargs)
+
+        self.patch(type(Partner), "search", spy)
+        self.cron()
+        message = task.conversation_id.message_ids[0].content
+        self.assertIn(f"ids {new[0].id}, {new[1].id} (and more: over 2 in all)", message)
+        self.assertEqual(limits, [3], "One page, found by the database")
+
     def test_a_change_waits_for_its_owner(self):
         self.use_adapter(script=[
             asking(call("prepare_write", {
