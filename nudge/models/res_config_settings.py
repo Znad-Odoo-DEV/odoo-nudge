@@ -333,3 +333,17 @@ class ResConfigSettings(models.TransientModel):
         help="Calls to the AI provider older than this many whole months are removed from the usage list every "
              "day, a batch at a time. The current month is always kept, so budgets read the same totals. "
              "0 keeps everything.")
+    # NP-10: the model standing in when the provider of a conversation cannot answer
+    nudge_fallback_provider_id = fields.Many2one(
+        "nudge.provider", string="Fallback Model", config_parameter="nudge.fallback_provider_id",
+        help="Answers once, in place of the provider, when it fails or has no key; when the budget "
+             "of a person is used up, if it runs on your own server; and always in private mode, "
+             "where only a provider of your own server may answer. Each answer it gives says so. "
+             "Empty: the person is told why there is no answer, and the requests understood "
+             "without AI still work.")
+    # NP-04: past the answers at the same time, the questions wait in line rather than being refused
+    nudge_max_line = fields.Integer(
+        string="Questions Waiting at Most", config_parameter="nudge.max_line", default=20,
+        help="When Nudge answers as many people as it may at once, the next questions wait in line "
+             "and start as soon as an answer ends; the person sees their place and can cancel. "
+             "Past this many waiting, a question is refused.")

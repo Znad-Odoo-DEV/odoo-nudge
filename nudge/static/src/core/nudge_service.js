@@ -1,4 +1,4 @@
-import { reactive } from "@odoo/owl";
+import { reactive, toRaw } from "@odoo/owl";
 
 import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
@@ -15,6 +15,38 @@ import { DEFAULT_THEME, readPosition, THEMES } from "./looks";
 import { renderMarkdown } from "./markdown";
 import { asksWithoutAi, isSpreadsheet } from "../import/import_service";
 import { streamBulk, streamChat, streamDecision } from "./stream_client";
+
+// NP-04: a question waiting in line asks where it stands this often; the bus tells its turn at once
+const LINE_FIRST_POLL_MS = 2000;
+const LINE_POLL_MS = 4000;
+
+/**
+ * NP-10: what the person is told of an answer given by the model standing in.
+ * @param {Object} event the "fallback" event: provider, model, local
+ * @returns {string}
+ */
+export function fallbackLabel(event) {
+    const model = event.model || event.provider || "";
+    return event.local
+        ? _t("Answered by the local model (%s)", model)
+        : _t("Answered by the fallback model (%s)", model);
+}
+
+/**
+ * NP-04: where a question waiting in line stands, in the words of the person.
+ * @param {Object} place position (1 is next) and seconds, about how long it still waits
+ * @returns {string}
+ */
+export function placeInLine(place) {
+    const seconds = Math.max(1, Math.round(place.seconds || 0));
+    if ((place.position || 1) <= 1) {
+        return _t("You are next in line (about %s s).", seconds);
+    }
+    return _t("You are number %(position)s in line (about %(seconds)s s).", {
+        position: place.position,
+        seconds,
+    });
+}
 
 /**
  * Whether an answer shows nothing at all: no words, no card, no chart, no list of
@@ -236,6 +268,10 @@ export const nudgeService = {
         });
         let abortController = null;
         let localId = 0;
+        // NP-04: the question waiting for its turn, one at a time: { answer, finish, timer }
+        let waiting = null;
+        // What each answer asked, to ask it again when its turn comes or after a wait too long
+        const requests = new WeakMap();
         let removeHotkeys = [];
 
         async function refreshStatus() {
@@ -621,6 +657,17 @@ function isReadable(file) {
         // --------------------------------------------------------------
 
         function stop() {
+            if (waiting) {
+                cancelLine();
+            }
+            if (abortController && state.conversationId) {
+                // PERF-02: the server lets the worker go and frees the place at once, even while
+                // the provider says nothing; closing the connection alone is seen at its next word
+                const conversationId = state.conversationId;
+                orm.silent
+                    .call("nudge.conversation", "action_stop_answer", [[conversationId]])
+                    .catch(() => {});
+            }
             abortController?.abort();
             voice.stopSpeaking();
         }
@@ -890,6 +937,7 @@ function isReadable(file) {
             const screens = events.find((event) => event.type === "found");
             const chart = events.find((event) => event.type === "chart");
             const changes = events.find((event) => event.type === "changes");
+            const fallback = events.find((event) => event.type === "fallback");
             const told = events
                 .filter((event) =>
                     ["navigate", "write", "open", "filter", "open_action"].includes(event.type)
@@ -910,6 +958,8 @@ function isReadable(file) {
                 choice: "",
                 spoken: Boolean(message.is_spoken),
                 attachment: message.attachment_name || "",
+                // Answered by the model standing in, said under the answer (NP-10)
+                screen: fallback ? fallbackLabel(fallback) : "",
                 feedback: message.feedback || "",
                 remembered: Boolean(message.is_remembered),
                 card: cards[message.id] || null,
@@ -1561,6 +1611,16 @@ function isReadable(file) {
                     answer.id = event.message_id;
                     answer.state = "waiting";
                     break;
+                case "in_line":
+                    // NP-04: every place is taken: the question waits for its turn, and is asked
+                    // again then; nothing of it was kept on the server but its place
+                    answer.state = "in_line";
+                    answer.line = { slotId: event.slot_id };
+                    answer.progress = placeInLine(event);
+                    break;
+                case "fallback":
+                    answer.screen = fallbackLabel(event);
+                    break;
                 case "queued": {
                     // Left to the background: what comes next comes through the bus
                     answer.state = "queued";
@@ -1682,6 +1742,117 @@ function isReadable(file) {
                 state.isStreaming = false;
                 abortController = null;
             }
+        }
+
+        /**
+         * NP-04: ask, and when every place is taken wait in line without holding the server:
+         * where the question stands is shown with Cancel; its turn comes through the bus (or the
+         * next time it asks), and it is asked again then.
+         *
+         * @param {Object} answer the message the stream is written in
+         * @param {(params: Object) => Promise} request what is asked of the server
+         */
+        async function ask(answer, request) {
+            requests.set(toRaw(answer), request);
+            let slot = null;
+            for (;;) {
+                await receive(answer, (params) => request({ ...params, slot }));
+                if (answer.state !== "in_line") {
+                    return;
+                }
+                const turn = await waitForTurn(answer);
+                if (turn !== "ready") {
+                    return;
+                }
+                slot = answer.line.slotId;
+                answer.state = "streaming";
+                answer.progress = "";
+            }
+        }
+
+        /**
+         * @param {Object} answer waiting in line
+         * @returns {Promise<string>} "ready" when its turn came, or why it no longer waits
+         */
+        function waitForTurn(answer) {
+            return new Promise((resolve) => {
+                const finish = (turn) => {
+                    if (waiting?.answer !== answer) {
+                        return;
+                    }
+                    browser.clearTimeout(waiting.timer);
+                    waiting = null;
+                    state.isStreaming = false;
+                    resolve(turn);
+                };
+                const poll = async () => {
+                    try {
+                        const place = await orm.silent.call("nudge.slot", "wait_status", [[answer.line.slotId]]);
+                        if (waiting?.answer !== answer) {
+                            return;
+                        }
+                        if (place.state === "ready") {
+                            return finish("ready");
+                        }
+                        if (place.state !== "waiting") {
+                            lineOver(answer);
+                            return finish(place.state);
+                        }
+                        answer.progress = placeInLine(place);
+                    } catch {
+                        // Not reached this time: asked again at the next beat
+                    }
+                    if (waiting?.answer === answer) {
+                        waiting.timer = browser.setTimeout(poll, LINE_POLL_MS);
+                    }
+                };
+                // Waiting is being answered: the question box waits, and Stop cancels it
+                state.isStreaming = true;
+                waiting = { answer, finish, timer: browser.setTimeout(poll, LINE_FIRST_POLL_MS) };
+                bus.start();
+            });
+        }
+
+        /** The wait was too long: the question is kept, to be asked again with one click */
+        function lineOver(answer) {
+            answer.state = "line_expired";
+            answer.progress = "";
+            answer.error = _t("Nudge is still busy. Your question is kept: try it again in a moment.");
+        }
+
+        function onSlot(payload) {
+            if (waiting && payload.state === "ready" && payload.slot_id === waiting.answer.line?.slotId) {
+                waiting.finish("ready");
+            }
+        }
+
+        /** NP-04: the person no longer waits for their turn */
+        async function cancelLine() {
+            const current = waiting;
+            if (!current) {
+                return;
+            }
+            const { answer } = current;
+            answer.state = "aborted";
+            answer.progress = "";
+            current.finish("cancelled");
+            try {
+                await orm.silent.call("nudge.slot", "cancel_wait", [[answer.line.slotId]]);
+            } catch {
+                // Not reached: the place is given up when the browser stops asking for it
+            }
+        }
+
+        /** NP-04: ask again the question whose wait was too long, as it was asked */
+        async function retryLine() {
+            const answer = state.messages.findLast((message) => message.state === "line_expired");
+            const request = answer && requests.get(toRaw(answer));
+            if (!request || state.isStreaming) {
+                return;
+            }
+            answer.state = "streaming";
+            answer.error = "";
+            await ask(answer, request);
         }
 
         /**
@@ -1858,7 +2029,7 @@ function isReadable(file) {
         ) {
             const answer = addAnswer();
             answer.explain = explain || "";
-            await receive(answer, (params) =>
+            await ask(answer, (params) =>
                 streamChat({
                     message: text,
                     conversationId: state.conversationId,
@@ -2045,6 +2216,8 @@ function isReadable(file) {
                 bus.start();
                 loadNews();
             }
+            // NP-04: the turn of a question waiting in line; the bus is started when one waits
+            bus.subscribe("nudge.slot", onSlot);
             // The screen changed under an open panel: tell what is seen now
             env.bus.addEventListener("ACTION_MANAGER:UI-UPDATED", () => {
                 if (state.isOpen) {
@@ -2104,6 +2277,8 @@ function isReadable(file) {
             toggleTalk,
             dictate,
             stopRun,
+            cancelLine,
+            retryLine,
             reloadPage,
             setAttachment,
             rate,

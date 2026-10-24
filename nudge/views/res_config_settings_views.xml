@@ -290,6 +290,15 @@
                             </div>
                         </setting>
                     </block>
+                    <!-- NP-04, NP-10 -->
+                    <block title="Busy Times and Fallback" name="nudge_capacity_container">
+                        <setting help="When Nudge answers as many people as it may at once, the next questions wait in line instead of being refused: the person sees their place and about how long, and can cancel. Their answer starts as soon as one ends. A provider may also take fewer at once (Answers at Once, on the provider; one for Ollama).">
+                            <field name="nudge_max_line"/>
+                        </setting>
+                        <setting help="A provider that answers in place of the usual one, once, when it fails or has no key; when the budget of a person is used up, if it runs on your own server (it costs nothing); and always in private mode, if it runs on your own server. Each answer it gives says so. Nothing is sent to a provider you did not choose here or above.">
+                            <field name="nudge_fallback_provider_id" options="{'no_create': True, 'no_open': True}"/>
+                        </setting>
+                    </block>
                     <block title="Your First Week" name="nudge_coach_container">
                         <setting help="A card in the panel shows a new person (in their first 14 days, or put in training by a manager) how many of the key screens of their role they opened and the tours left to take. No AI is used and only the screens opened are kept. Switched off, nobody is followed.">
                             <field name="nudge_coach_enabled"/>
