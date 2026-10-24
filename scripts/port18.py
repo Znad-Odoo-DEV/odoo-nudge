@@ -555,3 +555,7 @@ edit("nudge/static/src/context/snapshot.js", [
      "        if (field.type === \"many2one\" && Number.isInteger(linkedId)) {\n"
      "            entry.rid = linkedId;\n"),
 ])
+
+# FIX-18 RULE 1: a test patches Partner._has_field_access (19); on 18 it patches the shim of the records tool
+sub("nudge/tests/test_redact.py", r"        real = Partner\._has_field_access\n", "        real = records.has_field_access\n")
+sub("nudge/tests/test_redact.py", r'patch\.object\(Partner, "_has_field_access",', 'patch.object(records, "has_field_access",')

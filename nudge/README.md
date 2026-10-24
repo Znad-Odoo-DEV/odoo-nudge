@@ -49,6 +49,7 @@ What is left is listed under [What is not there yet](#what-is-not-there-yet). A 
 | **Website Builder** (companion module `nudge_builder`) | Six questions, three directions of the home page to compare, then unpublished pages made of Odoo's own snippets, with 12 sector templates in Arabic and English, an optional shop part and a Site Check. Nothing is published or deleted until you say so. Needs Website; Odoo 19 for now. |
 | **Mail agent** (companion module `nudge_mail`, Nudge: Emails) | Sorts the mail of a shared mailbox into proposals a manager approves (a lead, a ticket, a vendor bill, a reply); a rejection teaches a rule that is used afterwards without AI. Off per company until switched on. |
 | **Report in any shape** | A chart, a pivot or a list asked for in words of any dialect, shown on a card and, on yes, kept in **Nudge ‣ My Reports**, a menu only its owner sees. The period moves with the day (this month, last 30 days). |
+| **Explain this report** | The Explain button on a saved report writes short sentences from its numbers, with no AI: the total, who drives it, the movers against the previous period, rows that changed sign, empty columns. Read with the rights of the person who asks. *Add a summary* (only with a provider that private mode and the budgets allow) asks for one paragraph from those sentences alone, in the background; a number it adds that is not in the sentences is flagged. |
 | **Meeting audio summary** | Attach or record a meeting (m4a, mp3, ogg, wav, webm, up to 10 MB) and ask for the summary. Nudge writes the summary, decisions and action items; tasks, activities, calendar events and notes are offered as drafts, each with its own yes. The recording is forgotten after one hour and the transcript is kept nowhere. Needs a provider that accepts audio, or the words the browser heard while recording when that is allowed. |
 | **Module scaffold** | In Developer mode, a complete Odoo module for 17, 18 or 19 from a described need: a spec card first, checked in memory after the yes, downloaded as a ZIP. Nothing is written on the server or installed. |
 | **Mobile-first panel** | Under 600 px, with `?mobile=1` or in the Odoo app, the panel is a full-screen sheet with a hold-to-talk button and up to five quick tiles (clock, photo of a bill, my tasks, ask about this record, record a note) that the company can switch off in Settings. A tile of an app that is not installed is not shown. |
@@ -436,6 +437,10 @@ rewritten into a file path.
 ## Known limits
 
 - One answer at a time per user. An answer is cut after 90 seconds.
+- A provider that answers "busy" (limit reached, overloaded) is left alone for the time it asks,
+  at most a minute, by every request of the same server: the next questions are told at once
+  "The provider is busy, try again in N s". Waits and retries never go past the deadline of the
+  answer, and Claude's SDK does not retry on its own.
 - In Agent mode the model is called 8 times at most between two of your answers, and a request
   takes 25 steps at most. Past that, Nudge tells what was done and what is left.
 - Agent mode was tried with `gemini-3.5-flash-lite`, on Sales and Contacts, in English and in

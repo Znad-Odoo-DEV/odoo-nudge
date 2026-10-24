@@ -12,7 +12,7 @@ import time
 
 import requests
 
-from . import base, transcription
+from . import base, resilience, transcription
 from .prompt import render_user_text
 
 _logger = logging.getLogger(__name__)
@@ -110,13 +110,13 @@ class OpenAICompatAdapter(base.BaseAdapter):
             headers["Authorization"] = f"Bearer {self.config.api_key}"
         return headers
 
-    def _post(self, payload, stream, read_timeout):
+    def _post(self, payload, stream, read_timeout, deadline=None):
         return requests.post(
             self._url("/chat/completions"),
             json=payload,
             headers=self._headers(),
             stream=stream,
-            timeout=(CONNECT_TIMEOUT, read_timeout),
+            timeout=(resilience.connect_timeout(deadline, CONNECT_TIMEOUT), read_timeout),
         )
 
     def _redact(self, value):
@@ -227,29 +227,41 @@ class OpenAICompatAdapter(base.BaseAdapter):
     def _retry(self, send, deadline):
         """Send a request, again when the refusal is of a kind that passes.
 
+        Nothing waits longer than the deadline allows, and a provider that
+        said it is busy is left alone by the next requests of the process.
+
         :param send: callable sending the request and returning the response
+        :raise AdapterError: when the provider is busy and the wait does not fit
         """
+        key = resilience.cooldown_key(self.config)
+        left = resilience.cooldown_left(key)
+        if left > 0:
+            raise base.AdapterError(base.ERROR_RATE_LIMIT, resilience.busy_message(left))
         delays = list(RETRY_DELAYS)
         waited = False
         while True:
             response = send()
-            if response.status_code == RATE_LIMITED and not waited:
+            if response.status_code == RATE_LIMITED:
                 delay = rate_wait(response)
-                if delay is None or delay > MAX_RATE_WAIT or (
-                        deadline is not None
-                        and time.monotonic() + delay + MIN_ANSWER_SECONDS >= deadline):
-                    return response
-                _logger.info(
-                    "Nudge: %s is at its limit, trying again in %.0fs", self.config.base_url, delay)
-                response.close()
-                time.sleep(delay)
-                waited = True
-                continue
-            if response.status_code not in RETRY_STATUSES or not delays:
+                if not waited and delay is not None and delay <= MAX_RATE_WAIT and resilience.fits(delay, deadline):
+                    _logger.info(
+                        "Nudge: %s is at its limit, trying again in %.0fs", self.config.base_url, delay)
+                    response.close()
+                    time.sleep(delay)
+                    waited = True
+                    continue
+                resilience.start_cooldown(
+                    key, delay if delay is not None else resilience.DEFAULT_RATE_COOLDOWN)
+                if delay is not None:
+                    response.close()
+                    raise base.AdapterError(base.ERROR_RATE_LIMIT, resilience.busy_message(delay))
+                return response
+            if response.status_code not in RETRY_STATUSES:
+                return response
+            if not delays or not resilience.fits(delays[0], deadline):
+                resilience.start_cooldown(key, resilience.DEFAULT_ERROR_COOLDOWN)
                 return response
             delay = delays.pop(0)
-            if deadline is not None and time.monotonic() + delay >= deadline:
-                return response
             _logger.info(
                 "Nudge: %s answered %s, trying again in %ss",
                 self.config.base_url, response.status_code, delay)
@@ -262,7 +274,7 @@ class OpenAICompatAdapter(base.BaseAdapter):
         def send():
             read_timeout = base.remaining(deadline, self.config.timeout)
             self._read_timeout = read_timeout
-            response = self._post(payload, stream=True, read_timeout=read_timeout)
+            response = self._post(payload, stream=True, read_timeout=read_timeout, deadline=deadline)
             if response.status_code == 400 and "does not support tools" in (response.text or ""):
                 # Nothing taken out of the request changes that: told as it is
                 return response
@@ -300,7 +312,12 @@ class OpenAICompatAdapter(base.BaseAdapter):
                     code = base.ERROR_UNSUPPORTED
                 yield base.error_event(code, detail)
                 return
-            yield from self._consume(response, deadline)
+            # A provider gone silent between two chunks ends with the deadline
+            with resilience.watch(deadline, response.close):
+                yield from self._consume(response, deadline)
+        except base.AdapterError as exc:
+            # Busy: told at once, with the time to wait
+            yield base.error_event(exc.code, exc.detail)
         except requests.exceptions.ReadTimeout as exc:
             # Reached, and silent: the time given was not enough
             waited = int(getattr(self, "_read_timeout", 0) or 0)
@@ -310,6 +327,10 @@ class OpenAICompatAdapter(base.BaseAdapter):
         except requests.exceptions.RequestException as exc:
             _logger.info(
                 "Nudge: request to %s failed: %s", self.config.base_url, self._redact(exc))
+            if response is not None and base.expired(deadline):
+                # The watchdog closed a stream that had gone silent
+                yield base.stop_event(base.STOP_DEADLINE)
+                return
             yield base.error_event(base.ERROR_NETWORK, type(exc).__name__)
         finally:
             if response is not None:
@@ -349,12 +370,23 @@ class OpenAICompatAdapter(base.BaseAdapter):
                 call["id"] or f"call_{position}", call["name"], arguments,
                 extra=call["extra"], invalid=invalid)
 
+    @staticmethod
+    def _lines(response, deadline):
+        """The lines of the stream; a stream the watchdog closed at the
+        deadline just ends, whatever the transport raises for it."""
+        try:
+            yield from response.iter_lines(chunk_size=64)
+        except (requests.exceptions.RequestException, ValueError, OSError, AttributeError):
+            if not base.expired(deadline):
+                raise
+
     def _consume(self, response, deadline):
         usage = {}
         finish = None
         model = ""
         calls = {}
-        for raw in response.iter_lines(chunk_size=64):
+        finished = False
+        for raw in self._lines(response, deadline):
             if base.expired(deadline):
                 yield base.stop_event(base.STOP_DEADLINE, usage=usage, model=model)
                 return
@@ -365,6 +397,7 @@ class OpenAICompatAdapter(base.BaseAdapter):
                 continue
             data = line[5:].strip()
             if data == "[DONE]":
+                finished = True
                 break
             try:
                 chunk = json.loads(data)
@@ -387,6 +420,10 @@ class OpenAICompatAdapter(base.BaseAdapter):
                     yield base.text_event(text)
                 self._collect_calls(calls, delta.get("tool_calls") or [])
                 finish = choice.get("finish_reason") or finish
+        if not finished and finish is None and base.expired(deadline):
+            # The watchdog closed the stream: the answer stopped for lack of time
+            yield base.stop_event(base.STOP_DEADLINE, usage=usage, model=model)
+            return
         reason = FINISH_REASONS.get(finish, base.STOP_END)
         # Cut short or refused: what was written of a call is not to be run.
         # Otherwise a call is a call, whatever reason the provider gives:
@@ -501,7 +538,7 @@ class OpenAICompatAdapter(base.BaseAdapter):
 
         def send():
             read_timeout = base.remaining(deadline, self.config.timeout)
-            return self._post(payload, stream=False, read_timeout=read_timeout)
+            return self._post(payload, stream=False, read_timeout=read_timeout, deadline=deadline)
 
         body = self._read_json(send, deadline)
         try:
@@ -535,7 +572,7 @@ class OpenAICompatAdapter(base.BaseAdapter):
                 data=data,
                 files={"file": (f"speech.{audio_format}", audio, "audio/" + ("mpeg" if audio_format == "mp3" else audio_format))},
                 headers=headers,
-                timeout=(CONNECT_TIMEOUT, base.remaining(deadline, self.config.timeout)),
+                timeout=(resilience.connect_timeout(deadline, CONNECT_TIMEOUT), base.remaining(deadline, self.config.timeout)),
             )
 
         body = self._read_json(send, deadline)

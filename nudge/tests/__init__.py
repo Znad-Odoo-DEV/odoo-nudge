@@ -55,6 +55,7 @@ from . import test_private_mode
 from . import test_tours
 from . import test_health
 from . import test_upgrade_check
+from . import test_report_explain
 from . import test_saved_reports
 from . import test_home
 from . import test_approval_flow

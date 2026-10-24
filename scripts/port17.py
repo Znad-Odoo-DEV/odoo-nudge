@@ -61,7 +61,7 @@ for module in ("nudge_spreadsheet", "nudge_documents", "nudge_studio"):
     if os.path.isdir(ROOT + module):
         shutil.rmtree(ROOT + module)
         print("dropped", module)
-for module in ("nudge", "nudge_mail", "nudge_discuss", "nudge_mcp", "nudge_website", "nudge_builder", "nudge_messaging"):  # R2 RULE: release-2 modules
+for module in ("nudge", "nudge_mail", "nudge_discuss", "nudge_mcp", "nudge_website", "nudge_builder", "nudge_messaging", "nudge_connect"):  # R2 RULE: release-2 modules
     sub(f"{module}/__manifest__.py", r'"version": "18\.0\.', '"version": "17.0.')
 
 # ---------------------------------------------------------------- Hoot does not exist in 17
@@ -73,7 +73,10 @@ for path in files("nudge/static/tests/*.js"):
 print("Hoot tests removed:", not files("nudge/static/tests/*.js"))
 
 # ---------------------------------------------------------------- env._ is 18
-for name in files("nudge/**/*.py", "nudge_mail/**/*.py", "nudge_discuss/**/*.py", "nudge_mcp/**/*.py", "nudge_website/**/*.py", "nudge_builder/**/*.py", "nudge_messaging/**/*.py"):  # R2 RULE
+# LEAD RULE (17): the functions of report_explain have no `context` or `cr` for 17's _(): _tr gives them.
+# The source keeps env._( so that the terms are still extracted into nudge.pot
+sub("nudge/tools/report_explain.py", r"(?<![\w.])env\._\(", "_tr(env, ")
+for name in files("nudge/**/*.py", "nudge_mail/**/*.py", "nudge_discuss/**/*.py", "nudge_mcp/**/*.py", "nudge_website/**/*.py", "nudge_builder/**/*.py", "nudge_messaging/**/*.py", "nudge_connect/**/*.py"):  # R2 RULE
     s = read(name)
     # self.env._( / env._( / record.env._( / self.env["x"].env._( → _(
     s2, n = re.subn(r"(?<![\w.\]])(?:[A-Za-z_]\w*(?:\[[^\[\]]*\])?\.)*env\._\(", "_(", s)
@@ -124,7 +127,7 @@ class Base(models.AbstractModel):
         self.check_access_rule(operation)
 ''')
 edit("nudge/models/__init__.py", [("from . import nudge_provider\n", "from . import compat17\nfrom . import nudge_provider\n")])
-for name in files("nudge/**/*.py", "nudge_mail/**/*.py", "nudge_mcp/**/*.py", "nudge_website/**/*.py", "nudge_builder/**/*.py", "nudge_messaging/**/*.py"):  # R2 RULE
+for name in files("nudge/**/*.py", "nudge_mail/**/*.py", "nudge_mcp/**/*.py", "nudge_website/**/*.py", "nudge_builder/**/*.py", "nudge_messaging/**/*.py", "nudge_connect/**/*.py"):  # R2 RULE
     if name.endswith("compat17.py"):
         continue
     n = sub(name, r"\.has_access\(", "._nudge_has_access(")
@@ -180,7 +183,7 @@ if os.path.exists(ROOT + "nudge/tests/test_building.py"):
     sub("nudge/tests/test_building.py", r'"view_type": "list"', '"view_type": "tree"')
     sub("nudge/tests/test_building.py", r'assertIn\("\(list\)"', 'assertIn("(tree)"')
 
-for name in files("nudge/**/*.xml", "nudge_mail/**/*.xml", "nudge_mcp/**/*.xml", "nudge_website/**/*.xml", "nudge_builder/**/*.xml", "nudge_messaging/**/*.xml"):  # R2 RULE
+for name in files("nudge/**/*.xml", "nudge_mail/**/*.xml", "nudge_mcp/**/*.xml", "nudge_website/**/*.xml", "nudge_builder/**/*.xml", "nudge_messaging/**/*.xml", "nudge_connect/**/*.xml"):  # R2 RULE
     n = sub(name, r"<list(?=[\s>])", "<tree")
     n += sub(name, r"</list>", "</tree>")
     n += sub(name, r'(<field name="view_mode">)list', r"\1tree")
@@ -362,6 +365,20 @@ sub("nudge_mcp/views/nudge_mcp_views.xml", r'(<xpath expr="//header" position="i
 
 # QA RULE 13 (17, merged from the QA copy): `_ = self.env._` is an alias, not a call: the env._( rule never sees it
 sub("nudge/models/nudge_embedding.py", r"^(\s*)_ = self\.env\._\n", r"\1from odoo import _  # noqa: PLC0415\n", flags=re.M)
+
+# FIX-17 RULE 1: `_ = self.env._` is an alias on any model, not only nudge_embedding: 17 has no env._
+for _name in files("nudge*/models/*.py", "nudge*/tools/*.py"):
+    sub(_name, r"^(\s*)_ = self\.env\._\n", r"\1from odoo import _  # noqa: PLC0415\n", flags=re.M)
+# FIX-17 RULE 2: Ask the data links its list; 17 names the list view "tree" and the action mode too
+sub("nudge/tools/analytics.py", r'model\.get_view\(view_type="list"\)', 'model.get_view(view_type="tree")')
+sub("nudge/tools/analytics.py", r'"views": \[\[False, "list"\], \[False, "form"\]\], "view_mode": "list,form"',
+    '"views": [[False, "tree"], [False, "form"]], "view_mode": "tree,form"')
+
+# FIX-17 RULE 3: 17 puts every internal user in base.group_no_one (base.group_user implies it; only the views hide
+# it outside debug mode), so has_group says nothing there: Developer mode is the debug flag of the session
+sub("nudge/tools/explainer.py", r'user\.has_group\("base\.group_no_one"\)',
+    'bool(odoo.http.request and odoo.http.request.session.debug)')
+sub("nudge/tools/explainer.py", r"^import re\n", "import re\n\nimport odoo.http\n", flags=re.M)
 
 # QA RULE 12 (17, merged from the QA copy): res.lang._get_data is 18; 17 has _lang_get
 sub("nudge/models/nudge_history.py", r'self\.env\["res\.lang"\]\._get_data\(code=user\.lang or "en_US"\)', 'self.env["res.lang"]._lang_get(user.lang or "en_US")')

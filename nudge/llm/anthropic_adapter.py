@@ -4,8 +4,9 @@ The SDK is imported lazily: the module installs without it, and the provider
 reports a clear error when it is selected but not installed.
 """
 import logging
+import time
 
-from . import base
+from . import base, resilience
 from .prompt import render_user_text
 
 _logger = logging.getLogger(__name__)
@@ -107,12 +108,27 @@ class AnthropicAdapter(base.BaseAdapter):
             ) from exc
         return anthropic
 
-    def _client(self, anthropic):
+    def _timeout(self, deadline):
+        """:return: the time the SDK may take: connect and each wait for the
+        provider bounded by what is left of the deadline"""
+        whole = float(self.config.timeout)
+        if deadline is None:
+            return whole
+        left = max(0.5, min(whole, deadline - time.monotonic()))
+        try:
+            import httpx  # noqa: PLC0415
+        except ImportError:
+            return left
+        return httpx.Timeout(left, connect=min(10.0, left))
+
+    def _client(self, anthropic, deadline=None):
         # Answers come gzipped, never in brotli: the SDK's HTTP client calls
         # brotli with a keyword the brotli of many servers predates, and every
         # answer that came back failed with "process() takes no keyword arguments"
         headers = {"Accept-Encoding": "gzip, deflate"}
-        kwargs = {"timeout": float(self.config.timeout), "max_retries": 2, "default_headers": headers}
+        # No retries of the SDK: they would run past the deadline. Nudge retries on
+        # its own terms (``stream_chat``), inside the time left
+        kwargs = {"timeout": self._timeout(deadline), "max_retries": 0, "default_headers": headers}
         # Without a stored key the SDK resolves credentials from the environment
         if self.config.api_key:
             kwargs["api_key"] = self.config.api_key
@@ -220,49 +236,105 @@ class AnthropicAdapter(base.BaseAdapter):
         except base.AdapterError as exc:
             yield base.error_event(exc.code, exc.detail)
             return
+        key = resilience.cooldown_key(self.config)
+        left = resilience.cooldown_left(key)
+        if left > 0:
+            yield base.error_event(base.ERROR_RATE_LIMIT, resilience.busy_message(left))
+            return
         params = self._build_params(system, turns, tools, tool_choice)
-        try:
-            client = self._client(anthropic)
-            # Every request goes through the beta namespace, where the
-            # binding of the thinking blocks is controlled
-            manager = client.beta.messages.stream(**params)
-            # The SDK raises ValueError for tool arguments it cannot read at all
-            with manager as stream:
-                for event in stream:
+        delays = list(resilience.RETRY_DELAYS)
+        while True:
+            started = []
+            try:
+                yield from self._attempt(anthropic, params, deadline, started)
+                return
+            except anthropic.APIError as exc:
+                code, detail = self._map_error(anthropic, exc)
+                _logger.info("Nudge: Anthropic request failed (%s): %s", code, detail)
+                wait = self._wait_after(exc, code, delays, deadline)
+                if wait is not None and not started:
+                    # Nothing has reached the user yet, so asking again cannot answer twice
+                    time.sleep(wait)
+                    continue
+                if code in (base.ERROR_RATE_LIMIT, base.ERROR_UNAVAILABLE, base.ERROR_NETWORK):
+                    asked = self._retry_after(exc)
+                    resilience.start_cooldown(
+                        key, asked if asked is not None else (
+                            resilience.DEFAULT_RATE_COOLDOWN if code == base.ERROR_RATE_LIMIT
+                            else resilience.DEFAULT_ERROR_COOLDOWN))
+                    if code == base.ERROR_RATE_LIMIT and asked is not None:
+                        detail = resilience.busy_message(asked)
+                yield base.error_event(code, detail)
+                return
+            except ValueError as exc:
+                _logger.info("Nudge: Anthropic answer could not be read: %s", exc)
+                yield base.error_event(base.ERROR_UNKNOWN, "unreadable tool arguments")
+                return
+
+    @staticmethod
+    def _retry_after(exc):
+        response = getattr(exc, "response", None)
+        return resilience.retry_after(getattr(response, "headers", None))
+
+    def _wait_after(self, exc, code, delays, deadline):
+        """:return: the seconds to wait before asking again, None when the
+        failure is not of a kind that passes or the wait does not fit the deadline"""
+        if code == base.ERROR_RATE_LIMIT:
+            asked = self._retry_after(exc)
+            if asked is None or asked > resilience.MAX_RETRY_AFTER or not resilience.fits(asked, deadline):
+                return None
+            return asked
+        if code in (base.ERROR_UNAVAILABLE, base.ERROR_NETWORK) and delays and resilience.fits(delays[0], deadline):
+            return delays.pop(0)
+        return None
+
+    def _attempt(self, anthropic, params, deadline, started):
+        """One request. ``started`` gets an item as soon as something is shown to the user."""
+        client = self._client(anthropic, deadline)
+        # Every request goes through the beta namespace, where the
+        # binding of the thinking blocks is controlled
+        manager = client.beta.messages.stream(**params)
+        # The SDK raises ValueError for tool arguments it cannot read at all
+        with manager as stream:
+            # A provider gone silent between two chunks ends with the deadline
+            with resilience.watch(deadline, getattr(stream, "close", lambda: None)):
+                try:
+                    for event in stream:
+                        if base.expired(deadline):
+                            snapshot = stream.current_message_snapshot
+                            yield base.stop_event(
+                                base.STOP_DEADLINE,
+                                usage=self._normalize_usage(snapshot.to_dict().get("usage")),
+                                model=snapshot.model,
+                                request_id=stream.request_id,
+                            )
+                            return
+                        if event.type == "content_block_delta" and event.delta.type == "text_delta":
+                            started.append(True)
+                            yield base.text_event(event.delta.text)
+                    final = stream.get_final_message().to_dict()
+                except anthropic.APIError:
                     if base.expired(deadline):
-                        snapshot = stream.current_message_snapshot
-                        yield base.stop_event(
-                            base.STOP_DEADLINE,
-                            usage=self._normalize_usage(snapshot.to_dict().get("usage")),
-                            model=snapshot.model,
-                            request_id=stream.request_id,
-                        )
+                        # Closed by the watchdog
+                        yield base.stop_event(base.STOP_DEADLINE, request_id=stream.request_id)
                         return
-                    if event.type == "content_block_delta" and event.delta.type == "text_delta":
-                        yield base.text_event(event.delta.text)
-                final = stream.get_final_message().to_dict()
-                request_id = stream.request_id
-            reason = STOP_REASONS.get(final.get("stop_reason"), base.STOP_END)
-            if reason == base.STOP_TOOL_USE:
-                # Not on max_tokens nor on a refusal: a call cut short reads
-                # as a valid, shorter one
-                for block in final.get("content") or []:
-                    if block.get("type") == "tool_use":
-                        yield base.tool_use_event(block["id"], block["name"], block.get("input"))
-            yield base.stop_event(
-                reason,
-                usage=self._normalize_usage(final.get("usage")),
-                blocks=final.get("content"),
-                model=final.get("model"),
-                request_id=request_id,
-            )
-        except anthropic.APIError as exc:
-            code, detail = self._map_error(anthropic, exc)
-            _logger.info("Nudge: Anthropic request failed (%s): %s", code, detail)
-            yield base.error_event(code, detail)
-        except ValueError as exc:
-            _logger.info("Nudge: Anthropic answer could not be read: %s", exc)
-            yield base.error_event(base.ERROR_UNKNOWN, "unreadable tool arguments")
+                    raise
+            request_id = stream.request_id
+        reason = STOP_REASONS.get(final.get("stop_reason"), base.STOP_END)
+        if reason == base.STOP_TOOL_USE:
+            # Not on max_tokens nor on a refusal: a call cut short reads
+            # as a valid, shorter one
+            for block in final.get("content") or []:
+                if block.get("type") == "tool_use":
+                    started.append(True)
+                    yield base.tool_use_event(block["id"], block["name"], block.get("input"))
+        yield base.stop_event(
+            reason,
+            usage=self._normalize_usage(final.get("usage")),
+            blocks=final.get("content"),
+            model=final.get("model"),
+            request_id=request_id,
+        )
 
     @staticmethod
     def _normalize_usage(usage):

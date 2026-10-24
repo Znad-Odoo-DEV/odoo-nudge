@@ -13,7 +13,7 @@ from odoo.tests import BaseCase, HttpCase, TransactionCase, tagged
 from odoo.tools.misc import file_path
 
 from odoo.addons.nudge import tools
-from odoo.addons.nudge.llm import base, loop, openai_compat_adapter, transcription
+from odoo.addons.nudge.llm import base, loop, openai_compat_adapter, resilience, transcription
 from odoo.addons.nudge.llm.openai_compat_adapter import OpenAICompatAdapter
 from odoo.addons.nudge.models.nudge_voice import VOICE_ENGINE_PARAM, VOICE_PARAM
 
@@ -121,12 +121,15 @@ class TestSpeechAdapter(BaseCase):
         super().setUp()
         self.slept = []
         self.patch(openai_compat_adapter.time, "sleep", self.slept.append)
+        # A cool-down is remembered by the process: each test starts without one
+        resilience.reset()
+        self.addCleanup(resilience.reset)
 
     def answer(self, adapter, *responses):
         responses = list(responses)
         posted = []
 
-        def post(payload, stream, read_timeout):
+        def post(payload, stream, read_timeout, **kwargs):
             posted.append({"payload": payload, "stream": stream, "read_timeout": read_timeout})
             return responses.pop(0)
 
@@ -252,6 +255,7 @@ class TestSpeechAdapter(BaseCase):
             (FakeResponse(body={"choices": []}), base.ERROR_BAD_REQUEST),
         ]
         for response, code in cases:
+            resilience.reset()
             self.answer(adapter, response)
             with self.assertRaises(base.AdapterError) as capture:
                 adapter.transcribe(wav())
@@ -261,7 +265,7 @@ class TestSpeechAdapter(BaseCase):
     def test_network_failure(self):
         adapter = self.adapter(stt_mode=base.STT_CHAT)
 
-        def post(payload, stream, read_timeout):
+        def post(payload, stream, read_timeout, **kwargs):
             raise requests.exceptions.ConnectTimeout("refused for key sk-test")
 
         self.patch(adapter, "_post", post)

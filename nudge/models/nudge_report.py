@@ -129,6 +129,11 @@ class NudgeReport(models.Model):
             raise UserError(self.env._("This report has no screen any more."))
         return self.action_id.sudo()._get_action_dict()
 
+    def action_explain(self):
+        """:return: the window that explains the report in sentences, read as the person who asks"""
+        self.ensure_one()
+        return self.env["nudge.report.explain"]._explain(self)._reopen()
+
     def action_toggle_home(self):
         for report in self:
             report.home = not report.home
