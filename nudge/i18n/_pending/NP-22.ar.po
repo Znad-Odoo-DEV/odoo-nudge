@@ -1,0 +1,42 @@
+#. NP-22: Settings, conversation form
+msgid "Long Conversations"
+msgstr "المحادثات الطويلة"
+
+msgid "Summarise Long Conversations After"
+msgstr "تلخيص المحادثات الطويلة بعد"
+
+msgid "Summary"
+msgstr "الملخص"
+
+msgid "Summary of the Earlier Messages"
+msgstr "ملخص الرسائل السابقة"
+
+msgid "Added After Your Edit"
+msgstr "أُضيف بعد تعديلك"
+
+msgid "Messages Summarised"
+msgstr "الرسائل الملخصة"
+
+msgid "Edited by the Owner"
+msgstr "عدّله صاحب المحادثة"
+
+msgid "Improved by the Provider"
+msgstr "حسّنه المزوّد"
+
+msgid "Nudge: improve the summaries of long conversations"
+msgstr "Nudge: تحسين ملخصات المحادثات الطويلة"
+
+msgid "Nothing is summarised yet: the whole conversation is sent with every question."
+msgstr "لم يُلخَّص شيء بعد: تُرسل المحادثة كاملة مع كل سؤال."
+
+msgid "Only the owner of a conversation can change its summary."
+msgstr "صاحب المحادثة وحده يستطيع تغيير ملخصها."
+
+msgid "Only Nudge writes the bookkeeping of a summary."
+msgstr "Nudge وحده يكتب بيانات تتبّع الملخص."
+
+msgid "After this many questions the older ones are replaced, in what Nudge reads, by a short summary that the person can read and correct in the conversation. Fewer tokens for every later question; the messages stay in the panel. 0 keeps the whole history."
+msgstr "بعد هذا العدد من الأسئلة يُستبدل القديم منها، فيما يقرؤه Nudge، بملخص قصير يستطيع الشخص قراءته وتصحيحه في المحادثة. رموز أقل لكل سؤال لاحق، وتبقى الرسائل في اللوحة. القيمة 0 تُبقي السجل كاملاً."
+
+msgid "What Nudge reads in place of the earlier messages, once the conversation is long. You can correct it: your text is kept as you wrote it. Clear it to have it made again."
+msgstr "ما يقرؤه Nudge بدلاً من الرسائل السابقة حين تطول المحادثة. يمكنك تصحيحه: يبقى نصك كما كتبته. امسحه ليُنشأ من جديد."

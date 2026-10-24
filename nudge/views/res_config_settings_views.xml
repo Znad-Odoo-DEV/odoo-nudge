@@ -228,6 +228,11 @@
                             </div>
                         </setting>
                     </block>
+                    <block title="Long Conversations" name="nudge_summary_container">
+                        <setting help="After this many questions the older ones are replaced, in what Nudge reads, by a short summary that the person can read and correct in the conversation. Fewer tokens for every later question; the messages stay in the panel. 0 keeps the whole history.">
+                            <field name="nudge_summary_after_turns"/>
+                        </setting>
+                    </block>
                     <block title="Answer Memory" name="nudge_memory_container">
                         <setting help="A thumbs-up on an explanation keeps it for a manager to approve; an approved answer then answers the same question of the others at once, without the AI provider and without cost. Nothing that changed data or showed values of the database is kept.">
                             <field name="nudge_answer_memory"/>

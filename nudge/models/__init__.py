@@ -1,6 +1,7 @@
 from . import nudge_recipe
 from . import nudge_provider
 from . import nudge_conversation
+from . import nudge_conversation_summary
 from . import nudge_message
 from . import nudge_run
 from . import nudge_task

@@ -633,3 +633,18 @@ where to allow it. Private mode stays stricter: with both on, a provider must ru
 on the list. The list matches host names as written; it does not resolve them, so a name that points
 somewhere else is for the network firewall. When a shared screen held a password or key field (its value is
 hidden before sending), the system administrators of the company get one notice a day per screen model.
+## Long conversations
+
+A long chat is not sent whole with every question. Only the latest question carries its screen, and
+once a conversation holds more questions than **Settings, Nudge, Long Conversations** (12 by
+default, 0 to keep everything) the older ones are replaced, in what Nudge reads, by a short
+summary kept on the conversation: who asked what, what Nudge answered, the cards and how they ended
+and the records touched, made with no AI at the time of the question. The newest half of the limit
+is kept whole, and the summary is made once for a batch of questions, not for each one. The history
+sent is also capped by an estimate of 24,000 tokens. When a provider is usable a job reads the
+summary again, a few conversations at a time, and rewords it shorter; its call is in the usage
+ledger and counts against the budgets, and in private mode only a provider on your own server is
+asked. The summary is data about the past, never instructions, and a confirmation card never
+relies on it. The owner reads and corrects it in **Nudge, Conversations, Summary** (nobody else,
+a manager included); a corrected text is kept as written and what ages out afterwards is added
+beside it. Emptying the text makes it again. The panel always shows every message.
