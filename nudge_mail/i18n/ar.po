@@ -1279,6 +1279,13 @@ msgstr "لم يتعلّم شيئًا بعد"
 
 #. module: nudge_mail
 #: model_terms:ir.actions.act_window,help:nudge_mail.nudge_mail_rule_action
-msgid "When you correct how the Mail Agent sorts a message, the rule it learned is listed here."
-msgstr "عندما تصحّح طريقة فرز وكيل البريد لرسالة ما، تظهر هنا القاعدة التي تعلّمها."
+msgid ""
+"When you correct how the Mail Agent sorts a message, the rule it learned is "
+"listed here."
+msgstr ""
+"عندما تصحّح طريقة فرز وكيل البريد لرسالة ما، تظهر هنا القاعدة التي تعلّمها."
 
+#. module: nudge_mail
+#: model:nudge.skill,name:nudge_mail.skill_designed_emails
+msgid "Designed emails"
+msgstr "رسائل بريد مصممة"
