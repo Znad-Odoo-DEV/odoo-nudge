@@ -149,6 +149,14 @@ class TestMentions(NudgeCase, TransactionCase):
         self.outsider.sudo().lang = "fr_FR"
         self.assertEqual(refused._lang(), "fr_FR")
 
+    def test_answered_as_the_one_who_posts_not_as_the_author_they_name(self):
+        self.use_adapter(reply="Tiles.")
+        # message_post over RPC keeps the author it is given: it does not lend that person's rights
+        question = self.mention(self.user_contacts, author_id=self.agent.partner_id.id)
+        self.assertEqual(question.author_id, self.agent.partner_id)
+        mention = self.Mention.search([("message_id", "=", question.id)])
+        self.assertEqual(mention.user_id, self.user_contacts)
+
     def test_only_when_named(self):
         self.use_adapter()
         self.mention(self.user_contacts, text="Nudge, are you there?", partners=self.env["res.partner"])

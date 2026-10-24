@@ -163,10 +163,7 @@ class NudgeMention(models.Model):
     error = fields.Char()
 
     @api.model
-    def _queue(self, message, thread):
-        user = message.author_id.user_ids[:1]
-        if message.author_id == self.env.user.partner_id:
-            user = self.env.user
+    def _queue(self, message, thread, user):
         self.create({
             "message_id": message.id,
             "model": thread._name,
