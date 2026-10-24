@@ -288,7 +288,7 @@ class TestConnectorUse(ConnectCase, TransactionCase):
 
     def test_reads_of_one_conversation_send_a_limited_total_without_a_card(self):
         conversation = self.env["nudge.conversation"].sudo().create({"user_id": self.agent.id})
-        env = self.env(user=self.agent).with_context(nudge_conversation_id=conversation.id)
+        env = self.env(user=self.agent, context=dict(self.env.context, nudge_conversation_id=conversation.id))
         connectors.sync(env)
         call_read = lambda text: nudge_tools.base.call(env, READ, {"query": text}, None, "agent")  # noqa: E731
         for number in range(5):
@@ -301,7 +301,7 @@ class TestConnectorUse(ConnectCase, TransactionCase):
         self.assertEqual(len(self.server.calls("tools/call")), sent)
         # Another conversation has its own allowance
         other = self.env["nudge.conversation"].sudo().create({"user_id": self.agent.id})
-        env = env.with_context(nudge_conversation_id=other.id)
+        env = env(context=dict(env.context, nudge_conversation_id=other.id))
         self.assertFalse(nudge_tools.base.call(env, READ, {"query": "Ra"}, None, "agent").is_error)
 
     def test_kill_switches(self):

@@ -225,6 +225,7 @@ class TestConnectorSignIn(SignInCase, TransactionCase):
         row = self.tokens(self.agent)
         row.expires = fields.Datetime.now() + timedelta(seconds=5)
         refreshes = len(self.server.calls("token"))
+        self.server.tokens.add("access-renewed-elsewhere")
 
         def renewed(this, **kwargs):
             this.write({"access_token": "access-renewed-elsewhere", "expires": fields.Datetime.now() + timedelta(hours=1)})
