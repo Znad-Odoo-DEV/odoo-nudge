@@ -72,12 +72,13 @@ test("the avatar is dragged where the person wants it, and stays there", async (
     nudge.close();
     await animationFrame();
 
-    press(avatar, "pointerdown", 30, 850);
-    press(avatar, "pointermove", 300, 400);
+    // The avatar starts at the inline-end of the screen: dragged towards the inline-start
+    press(avatar, "pointerdown", 300, 850);
+    press(avatar, "pointermove", 30, 400);
     await animationFrame();
     expect(avatar).toHaveClass("o_nudge_avatar_dragging");
     expect(root).toHaveClass("o_nudge_moved");
-    press(avatar, "pointerup", 300, 400);
+    press(avatar, "pointerup", 30, 400);
     await animationFrame();
 
     expect(nudge.state.position).not.toBe(null);
@@ -117,7 +118,7 @@ test("the position and the colour are remembered", async () => {
     expect(root).toHaveAttribute("data-theme", "rose");
     expect(asked.saved.at(-1)).toEqual({ nudge_theme: "rose" });
     await nudge.setTheme("neon");
-    expect(nudge.state.theme).toBe("violet");
+    expect(nudge.state.theme).toBe("odoo");
     expect(getComputedStyle(root).getPropertyValue("--nudge-accent").trim()).not.toBe("");
 });
 
