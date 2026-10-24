@@ -1,0 +1,845 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The prompts that come with Nudge. Archive the ones you do not want; nothing here is
+     rewritten by an update (noupdate), and an update never deletes one you changed. -->
+<odoo>
+    <data noupdate="1">
+    <record id="prompt_talk_screen_next_step" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-talk-screen-next-step</field>
+        <field name="name">What do I do next on this screen?</field>
+        <field name="description">Reads the shared screen and points at the next field or button.</field>
+        <field name="body">Look at my screen. Tell me what is still missing before I can save or confirm this {{record_kind}}, and show me the next field or button on the screen, one step at a time.</field>
+        <field name="variables" eval="[{'name': 'record_kind', 'type': 'string', 'required': True, 'label': {'en': 'Record (e.g. quotation)', 'ar': 'السجل (مثلاً عرض سعر)'}, 'default': 'record'}]"/>
+        <field name="mode">talk</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names"></field>
+        <field name="apps"></field>
+        <field name="version">1.0.0</field>
+        <field name="tags">onboarding,screen,talk,any</field>
+        <field name="sequence">10</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_user'))]"/>
+        <field name="expects" eval="{'tools_any': ['show_on_screen'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_talk_sales_flow" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-talk-sales-flow</field>
+        <field name="name">Explain the sales flow for my products</field>
+        <field name="description">Quotation to invoice, as this database is set up (not generic Odoo).</field>
+        <field name="body">Explain, as this database is set up, the path of a sale of {{product_type}} from quotation to payment: which documents are created, which settings change the path (delivery, invoicing policy), and who does each step. Read the settings first; do not describe options that are switched off.</field>
+        <field name="variables" eval="[{'name': 'product_type', 'type': 'selection', 'required': True, 'label': {'en': 'Product type', 'ar': 'نوع المنتج'}, 'default': 'storable products', 'options': ['storable products', 'services', 'consumables', 'subscriptions']}]"/>
+        <field name="mode">talk</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">sale.order</field>
+        <field name="apps">sale</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">process,talk,any</field>
+        <field name="sequence">20</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_user'))]"/>
+        <field name="expects" eval="{'tools_any': ['read_settings', 'search_odoo_documentation'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_talk_bank_reconcile" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-talk-bank-reconcile</field>
+        <field name="name">Walk me through bank reconciliation</field>
+        <field name="description">Pointer tour of the reconciliation screen with the person's own journal.</field>
+        <field name="body">Show me on screen how to reconcile the bank statement lines of the journal {{journal}}: where to match an invoice, how to write off a small difference, and how to leave a line for later.</field>
+        <field name="variables" eval="[{'name': 'journal', 'type': 'many2one', 'required': True, 'label': {'en': 'Bank journal', 'ar': 'دفتر البنك'}, 'model': 'account.journal', 'domain': [['type', '=', 'bank']]}]"/>
+        <field name="mode">talk</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">account.bank.statement.line</field>
+        <field name="apps">account</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">accounting,tour,talk,any</field>
+        <field name="sequence">30</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_user'))]"/>
+        <field name="expects" eval="{'tools_any': ['show_menu_path', 'show_on_screen'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_talk_negative_stock" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-talk-negative-stock</field>
+        <field name="name">Why is this product's stock negative?</field>
+        <field name="description">Traces the moves that pushed the on-hand quantity below zero.</field>
+        <field name="body">The on-hand quantity of {{product}} is negative in {{warehouse}}. Read its stock moves of the last {{days}} days and tell me which deliveries left before the receipts arrived, and what setting allows it. Answer with a short table: date, document, quantity, running balance.</field>
+        <field name="variables" eval="[{'name': 'product', 'type': 'many2one', 'required': True, 'label': {'en': 'Product', 'ar': 'المنتج'}, 'model': 'product.product'}, {'name': 'warehouse', 'type': 'many2one', 'required': True, 'label': {'en': 'Warehouse', 'ar': 'المستودع'}, 'model': 'stock.warehouse'}, {'name': 'days', 'type': 'integer', 'required': True, 'label': {'en': 'Days back', 'ar': 'عدد الأيام'}, 'default': 90}]"/>
+        <field name="mode">talk</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">product.product,product.template,stock.quant</field>
+        <field name="apps">stock</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">inventory,diagnosis,talk,any</field>
+        <field name="sequence">40</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_user'))]"/>
+        <field name="expects" eval="{'tools_any': ['search_records', 'aggregate_records'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_talk_setup_advisor" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-talk-setup-advisor</field>
+        <field name="name">Which settings fit my business?</field>
+        <field name="description">Setup advisor: reads the settings and suggests what to switch on, without changing anything.</field>
+        <field name="body">We are a {{business_type}} with about {{employees}} employees, selling in {{country}}. Read how {{app}} is set up here and tell me what to switch on, what to leave off and why, in a short list. Change nothing; at the end offer to apply it or to show me where.</field>
+        <field name="variables" eval="[{'name': 'business_type', 'type': 'string', 'required': True, 'label': {'en': 'Business type', 'ar': 'نوع النشاط'}, 'default': 'trading company'}, {'name': 'employees', 'type': 'integer', 'required': True, 'label': {'en': 'Employees', 'ar': 'عدد الموظفين'}, 'default': 20}, {'name': 'country', 'type': 'string', 'required': True, 'label': {'en': 'Country', 'ar': 'الدولة'}, 'default': 'the UAE'}, {'name': 'app', 'type': 'selection', 'required': True, 'label': {'en': 'App', 'ar': 'التطبيق'}, 'default': 'Inventory', 'options': ['Sales', 'Purchase', 'Inventory', 'Accounting', 'Project', 'Employees']}]"/>
+        <field name="mode">talk</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names"></field>
+        <field name="apps"></field>
+        <field name="version">1.0.0</field>
+        <field name="tags">setup,talk,any</field>
+        <field name="sequence">50</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_user'))]"/>
+        <field name="expects" eval="{'tools_any': ['read_settings', 'assess_database'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_talk_import_check" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-talk-import-check</field>
+        <field name="name">Will this file import?</field>
+        <field name="description">Dry-run import check of an attached file, problems by row and column.</field>
+        <field name="body">Check the attached file before I import it into {{target}}. Match its columns to the fields, test it without saving, and list every problem with its row and column and how to fix it in the file.</field>
+        <field name="variables" eval="[{'name': 'target', 'type': 'string', 'required': True, 'label': {'en': 'Import into', 'ar': 'الاستيراد إلى'}, 'default': 'Contacts'}]"/>
+        <field name="mode">talk</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names"></field>
+        <field name="apps"></field>
+        <field name="version">1.0.0</field>
+        <field name="tags">import,talk,any</field>
+        <field name="sequence">60</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_user'))]"/>
+        <field name="expects" eval="{'tools_any': ['match_import_columns', 'test_import'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_talk_leave_policy" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-talk-leave-policy</field>
+        <field name="name">How does our time off work?</field>
+        <field name="description">Explains allocation, accrual and approval of one leave type as configured.</field>
+        <field name="body">Explain how the time off type {{leave_type}} works in your company: how days are allocated or accrued, who approves, and what an employee like Raghad sees when she asks for it. Use our company files if they describe the policy, and say which part comes from them.</field>
+        <field name="variables" eval="[{'name': 'leave_type', 'type': 'many2one', 'required': True, 'label': {'en': 'Time off type', 'ar': 'نوع الإجازة'}, 'model': 'hr.leave.type'}]"/>
+        <field name="mode">talk</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">hr.leave,hr.leave.allocation</field>
+        <field name="apps">hr_holidays</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">hr,talk,any</field>
+        <field name="sequence">70</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_user'))]"/>
+        <field name="expects" eval="{'tools_any': ['search_company_files', 'search_records'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_talk_explain_term" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-talk-explain-term</field>
+        <field name="name">Explain this term in plain words</field>
+        <field name="description">Explains an Odoo term or field with an example from this database.</field>
+        <field name="body">Explain "{{term}}" in plain business words, in three sentences, with one example taken from this database. Then tell me where I meet it on screen.</field>
+        <field name="variables" eval="[{'name': 'term', 'type': 'string', 'required': True, 'label': {'en': 'Term or field', 'ar': 'المصطلح أو الحقل'}, 'default': 'Analytic distribution'}]"/>
+        <field name="mode">talk</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names"></field>
+        <field name="apps"></field>
+        <field name="version">1.0.0</field>
+        <field name="tags">learning,talk,any</field>
+        <field name="sequence">80</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_user'))]"/>
+        <field name="expects" eval="{'tools_any': ['search_odoo_documentation', 'describe_model'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_agent_overdue_followup" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-agent-overdue-followup</field>
+        <field name="name">Follow up overdue invoices</field>
+        <field name="description">Lists overdue customer invoices and prepares one follow-up activity per customer, after a yes.</field>
+        <field name="body">Find posted customer invoices overdue by more than {{days}} days. Group them by customer with the total due and the oldest due date, as a table. Then prepare one activity "Call about overdue invoices" per customer for {{assignee}}, due {{due}}, in one card for my approval.</field>
+        <field name="variables" eval="[{'name': 'days', 'type': 'integer', 'required': True, 'label': {'en': 'Overdue by (days)', 'ar': 'متأخرة بأكثر من (أيام)'}, 'default': 30}, {'name': 'assignee', 'type': 'many2one', 'required': True, 'label': {'en': 'Assign to', 'ar': 'إسناد إلى'}, 'default': 'me', 'model': 'res.users'}, {'name': 'due', 'type': 'date', 'required': True, 'label': {'en': 'Activity date', 'ar': 'تاريخ النشاط'}, 'default': 'today'}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">account.move,res.partner</field>
+        <field name="apps">account</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">collections,agent,any</field>
+        <field name="sequence">90</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+        <field name="expects" eval="{'tools_any': ['aggregate_records', 'bulk_apply'], 'confirmation_card': True}"/>
+    </record>
+    <record id="prompt_agent_quote_from_text" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-agent-quote-from-text</field>
+        <field name="name">Make a quotation from my words</field>
+        <field name="description">Drafts a quotation with lines; nothing is created before the card's yes.</field>
+        <field name="body">Prepare a quotation for {{customer}}: {{lines}}. Use the customer's pricelist and payment terms, find each product by the name I used, and ask me when two products match. Show me the card before creating it.</field>
+        <field name="variables" eval="[{'name': 'customer', 'type': 'many2one', 'required': True, 'label': {'en': 'Customer', 'ar': 'العميل'}, 'model': 'res.partner', 'example': 'Raghad'}, {'name': 'lines', 'type': 'text', 'required': True, 'label': {'en': 'Lines (qty x product)', 'ar': 'السطور (الكمية × المنتج)'}, 'example': '10 x office chair, 2 x desk'}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">sale.order,res.partner</field>
+        <field name="apps">sale</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">sales,agent,any</field>
+        <field name="sequence">100</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+        <field name="expects" eval="{'tools_any': ['find_record', 'prepare_create'], 'confirmation_card': True}"/>
+    </record>
+    <record id="prompt_agent_reorder_low_stock" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-agent-reorder-low-stock</field>
+        <field name="name">Reorder what is running low</field>
+        <field name="description">Finds products under a threshold and prepares draft RFQs grouped by vendor.</field>
+        <field name="body">List storable products in {{category}} whose forecasted quantity is below {{min_qty}}, with their main vendor and last purchase price. Then prepare one draft request for quotation per vendor, quantity = {{order_up_to}} minus forecast, for my approval. Do not confirm any order.</field>
+        <field name="variables" eval="[{'name': 'category', 'type': 'many2one', 'required': False, 'label': {'en': 'Product category', 'ar': 'فئة المنتج'}, 'model': 'product.category'}, {'name': 'min_qty', 'type': 'number', 'required': True, 'label': {'en': 'Below', 'ar': 'أقل من'}, 'default': 10}, {'name': 'order_up_to', 'type': 'number', 'required': True, 'label': {'en': 'Order up to', 'ar': 'اطلب حتى'}, 'default': 50}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">product.product,purchase.order</field>
+        <field name="apps">purchase,stock</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">purchase,agent,any</field>
+        <field name="sequence">110</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+        <field name="expects" eval="{'tools_any': ['search_records', 'prepare_plan'], 'confirmation_card': True}"/>
+    </record>
+    <record id="prompt_agent_stale_opportunities" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-agent-stale-opportunities</field>
+        <field name="name">Wake up stale opportunities</field>
+        <field name="description">Opportunities with no activity for N days; one call activity each, one approval.</field>
+        <field name="body">Find open opportunities of the team {{team}} with no activity and no message for {{days}} days. Show them by salesperson with expected revenue. Then schedule a "Call" activity on each for its salesperson, due in {{in_days}} days, all in one card.</field>
+        <field name="variables" eval="[{'name': 'team', 'type': 'many2one', 'required': False, 'label': {'en': 'Sales team', 'ar': 'فريق المبيعات'}, 'model': 'crm.team'}, {'name': 'days', 'type': 'integer', 'required': True, 'label': {'en': 'Idle for (days)', 'ar': 'راكدة منذ (أيام)'}, 'default': 21}, {'name': 'in_days', 'type': 'integer', 'required': True, 'label': {'en': 'Call in (days)', 'ar': 'الاتصال بعد (أيام)'}, 'default': 2}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">crm.lead</field>
+        <field name="apps">crm</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">crm,agent,any</field>
+        <field name="sequence">120</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+        <field name="expects" eval="{'tools_any': ['search_records', 'bulk_apply'], 'confirmation_card': True}"/>
+    </record>
+    <record id="prompt_agent_project_status" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-agent-project-status</field>
+        <field name="name">Weekly project status</field>
+        <field name="description">Overdue and due-this-week tasks of one project, as a table saved to My Reports.</field>
+        <field name="body">For the project {{project}}: tasks overdue, tasks due this week, and tasks with no assignee, each as a short table (task, assignee, deadline, stage). Add one line on what blocks the most. Save it to My Reports as "{{project}} weekly status".</field>
+        <field name="variables" eval="[{'name': 'project', 'type': 'many2one', 'required': True, 'label': {'en': 'Project', 'ar': 'المشروع'}, 'model': 'project.project'}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">project.project,project.task</field>
+        <field name="apps">project</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">project,report,agent,any</field>
+        <field name="sequence">130</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+        <field name="expects" eval="{'tools_any': ['search_records', 'save_report'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_agent_stock_value_chart" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-agent-stock-value-chart</field>
+        <field name="name">Stock value by category</field>
+        <field name="description">Sum of stock value by category and warehouse, as a chart.</field>
+        <field name="body">Sum the stock value on hand by product category and by warehouse, top {{top}} categories, as a bar chart, with the total in the currency of your company. Say which valuation the figures use.</field>
+        <field name="variables" eval="[{'name': 'top', 'type': 'integer', 'required': True, 'label': {'en': 'Top categories', 'ar': 'أعلى الفئات'}, 'default': 10}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">stock.quant</field>
+        <field name="apps">stock</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">inventory,chart,agent,any</field>
+        <field name="sequence">140</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+        <field name="expects" eval="{'tools_any': ['aggregate_records', 'show_chart'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_agent_onboard_employee" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-agent-onboard-employee</field>
+        <field name="name">Onboard a new employee</field>
+        <field name="description">Creates the employee and the onboarding activities in one plan, after a yes.</field>
+        <field name="body">Prepare the onboarding of {{employee_name}}, {{job}} in {{department}}, starting {{start}}: create the employee with manager {{manager}}, then activities for IT (laptop, email), HR (contract, documents) and the manager (first-week plan). One plan, one card.</field>
+        <field name="variables" eval="[{'name': 'employee_name', 'type': 'string', 'required': True, 'label': {'en': 'Name', 'ar': 'الاسم'}, 'example': 'Raghad'}, {'name': 'job', 'type': 'string', 'required': True, 'label': {'en': 'Job title', 'ar': 'المسمى الوظيفي'}, 'default': 'Accountant'}, {'name': 'department', 'type': 'many2one', 'required': True, 'label': {'en': 'Department', 'ar': 'القسم'}, 'model': 'hr.department'}, {'name': 'manager', 'type': 'many2one', 'required': True, 'label': {'en': 'Manager', 'ar': 'المدير'}, 'model': 'hr.employee', 'example': 'Ebrahim'}, {'name': 'start', 'type': 'date', 'required': True, 'label': {'en': 'Start date', 'ar': 'تاريخ البدء'}}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">hr.employee</field>
+        <field name="apps">hr</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">hr,agent,any</field>
+        <field name="sequence">150</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+        <field name="expects" eval="{'tools_any': ['prepare_plan'], 'confirmation_card': True}"/>
+    </record>
+    <record id="prompt_agent_bill_from_pdf" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-agent-bill-from-pdf</field>
+        <field name="name">Vendor bill from this PDF</field>
+        <field name="description">Reads the attached vendor PDF into a draft bill; lines checked against products.</field>
+        <field name="body">Read the attached vendor document and prepare a draft vendor bill: vendor, bill reference, date, due date, lines with product, quantity, price and taxes. Flag any line whose price differs by more than {{tolerance}}% from the last purchase price. Leave it in draft.</field>
+        <field name="variables" eval="[{'name': 'tolerance', 'type': 'number', 'required': True, 'label': {'en': 'Price tolerance %', 'ar': 'هامش السعر %'}, 'default': 5}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">account.move</field>
+        <field name="apps">account,purchase</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">documents,agent,any</field>
+        <field name="sequence">160</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+        <field name="expects" eval="{'tools_any': ['document_to_record'], 'confirmation_card': True}"/>
+    </record>
+    <record id="prompt_agent_monthly_sales_kpi" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-agent-monthly-sales-kpi</field>
+        <field name="name">This month's sales by salesperson</field>
+        <field name="description">This month vs last month per salesperson, chart + saved report.</field>
+        <field name="body">Compare confirmed sales of this month with last month, per salesperson: amount untaxed, number of orders, change in %. Show a bar chart and save it to My Reports{{home}}.</field>
+        <field name="variables" eval="[{'name': 'home', 'type': 'selection', 'required': False, 'label': {'en': 'Pin to home page', 'ar': 'تثبيت في الصفحة الرئيسية'}, 'default': '', 'options': ['', ' and pin it to my home page']}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">sale.order</field>
+        <field name="apps">sale</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">kpi,agent,any</field>
+        <field name="sequence">170</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+        <field name="expects" eval="{'tools_any': ['aggregate_records', 'show_chart', 'save_report'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_agent_duplicate_contacts" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-agent-duplicate-contacts</field>
+        <field name="name">Find duplicate contacts</field>
+        <field name="description">Lists likely duplicates by email, phone or name; changes nothing (merge stays manual).</field>
+        <field name="body">Find contacts that are probably the same person or company: same email, same phone digits, or names that differ only by spaces or case. List them in groups with their number of sales orders and invoices, so I can decide which to keep. Change nothing.</field>
+        <field name="variables" eval="[]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">res.partner</field>
+        <field name="apps">contacts</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">data quality,agent,any</field>
+        <field name="sequence">180</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+        <field name="expects" eval="{'tools_any': ['search_records', 'aggregate_records'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_agent_morning_brief_task" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-agent-morning-brief-task</field>
+        <field name="name">My morning brief, every working day</field>
+        <field name="description">Creates a scheduled task (switched on after a yes) that writes the brief each morning.</field>
+        <field name="body">Every working day at {{hour}}:00, tell me: my activities due today, quotations expiring this week, invoices that became overdue yesterday, and anything assigned to me since yesterday. Make it a scheduled task{{email}}.</field>
+        <field name="variables" eval="[{'name': 'hour', 'type': 'integer', 'required': True, 'label': {'en': 'Hour', 'ar': 'الساعة'}, 'default': 8}, {'name': 'email', 'type': 'selection', 'required': False, 'label': {'en': 'Also by email', 'ar': 'بالبريد أيضاً'}, 'default': '', 'options': ['', ' and email it to me']}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names"></field>
+        <field name="apps"></field>
+        <field name="version">1.0.0</field>
+        <field name="tags">schedule,brief,agent,any</field>
+        <field name="sequence">190</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+        <field name="expects" eval="{'tools_any': ['prepare_task'], 'confirmation_card': True}"/>
+    </record>
+    <record id="prompt_agent_pos_day_close" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-agent-pos-day-close</field>
+        <field name="name">Point of Sale: today's close</field>
+        <field name="description">Sales of the day by payment method and by hour, with refunds and discounts.</field>
+        <field name="body">For the point of sale {{pos}}, today: total sales, number of orders, average ticket, totals by payment method, refunds and discounts given, and sales by hour as a chart. Note any cash difference of the closed sessions.</field>
+        <field name="variables" eval="[{'name': 'pos', 'type': 'many2one', 'required': True, 'label': {'en': 'Point of sale', 'ar': 'نقطة البيع'}, 'model': 'pos.config'}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">pos.order,pos.session</field>
+        <field name="apps">point_of_sale</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">pos,agent,restaurant,retail,coffee</field>
+        <field name="sequence">200</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+        <field name="expects" eval="{'tools_any': ['aggregate_records', 'show_chart'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_dev_big_order_alert" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-dev-big-order-alert</field>
+        <field name="name">Alert on big confirmed orders</field>
+        <field name="description">Automation rule + email, tested on a dummy record before it is switched on.</field>
+        <field name="body">When a sales order above {{amount}} is confirmed, email {{recipient}} with the customer, the amount, the salesperson and a link to the order. Build it as an automation rule, try it on a dummy record, and show me what it would send before switching it on.</field>
+        <field name="variables" eval="[{'name': 'amount', 'type': 'number', 'required': True, 'label': {'en': 'Amount above', 'ar': 'مبلغ أكبر من'}, 'default': 50000}, {'name': 'recipient', 'type': 'many2one', 'required': True, 'label': {'en': 'Notify', 'ar': 'إشعار'}, 'model': 'res.users', 'example': 'Ebrahim'}]"/>
+        <field name="mode">dev</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">sale.order</field>
+        <field name="apps">sale</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">automation,dev,any</field>
+        <field name="sequence">210</field>
+        <field name="group_ids" eval="[Command.link(ref('base.group_system'))]"/>
+        <field name="expects" eval="{'tools_any': ['prepare_automation', 'try_automation'], 'confirmation_card': True}"/>
+    </record>
+    <record id="prompt_dev_add_field" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-dev-add-field</field>
+        <field name="name">Add a field to a form</field>
+        <field name="description">New field + view change, previewed, undoable.</field>
+        <field name="body">Add a field "{{label}}" of type {{type}} to {{model}}, shown on the form after the field {{after}}{{list}}. Show me the change before making it.</field>
+        <field name="variables" eval="[{'name': 'label', 'type': 'string', 'required': True, 'label': {'en': 'Label', 'ar': 'التسمية'}, 'default': 'Site engineer'}, {'name': 'type', 'type': 'selection', 'required': True, 'label': {'en': 'Type', 'ar': 'النوع'}, 'default': 'many2one to employees', 'options': ['text', 'number', 'date', 'yes/no', 'selection', 'many2one to employees', 'many2one to contacts']}, {'name': 'model', 'type': 'string', 'required': True, 'label': {'en': 'Record type', 'ar': 'نوع السجل'}, 'default': 'Project'}, {'name': 'after', 'type': 'string', 'required': True, 'label': {'en': 'After the field', 'ar': 'بعد الحقل'}, 'default': 'Customer'}, {'name': 'list', 'type': 'selection', 'required': False, 'label': {'en': 'Also in the list', 'ar': 'في القائمة أيضاً'}, 'default': '', 'options': ['', ' and as a column of the list']}]"/>
+        <field name="mode">dev</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names"></field>
+        <field name="apps"></field>
+        <field name="version">1.0.0</field>
+        <field name="tags">customization,dev,any</field>
+        <field name="sequence">220</field>
+        <field name="group_ids" eval="[Command.link(ref('base.group_system'))]"/>
+        <field name="expects" eval="{'tools_any': ['prepare_field', 'prepare_view_change'], 'confirmation_card': True}"/>
+    </record>
+    <record id="prompt_dev_purchase_approval" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-dev-purchase-approval</field>
+        <field name="name">Approval for big purchases</field>
+        <field name="description">Approval workflow from one sentence: threshold, approver group, button guard.</field>
+        <field name="body">Purchase orders above {{amount}} must be approved by {{approver}} before they can be confirmed. The buyer sees why the button is blocked; the approver gets an activity. Build it and test it on a dummy order.</field>
+        <field name="variables" eval="[{'name': 'amount', 'type': 'number', 'required': True, 'label': {'en': 'Above', 'ar': 'أكبر من'}, 'default': 20000}, {'name': 'approver', 'type': 'string', 'required': True, 'label': {'en': 'Approver (user or group)', 'ar': 'الموافِق (مستخدم أو مجموعة)'}, 'example': 'Ebrahim'}]"/>
+        <field name="mode">dev</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">purchase.order</field>
+        <field name="apps">purchase</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">approval,dev,any</field>
+        <field name="sequence">230</field>
+        <field name="group_ids" eval="[Command.link(ref('base.group_system'))]"/>
+        <field name="expects" eval="{'tools_any': ['prepare_approval_flow'], 'confirmation_card': True}"/>
+    </record>
+    <record id="prompt_dev_quote_followup_email" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-dev-quote-followup-email</field>
+        <field name="name">Designed follow-up email for quotations</field>
+        <field name="description">Email template in one of four styles + the reviewer's check.</field>
+        <field name="body">Design a {{style}} email template for quotations sent {{days}} days ago and not answered: the customer's first name, the quotation number and total, a button to view it online, and a short polite line. In English and Arabic. Review it, then send me a test.</field>
+        <field name="variables" eval="[{'name': 'style', 'type': 'selection', 'required': True, 'label': {'en': 'Style', 'ar': 'النمط'}, 'default': 'modern', 'options': ['classic', 'modern', 'minimal', 'bold']}, {'name': 'days', 'type': 'integer', 'required': True, 'label': {'en': 'After (days)', 'ar': 'بعد (أيام)'}, 'default': 5}]"/>
+        <field name="mode">dev</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">mail.template</field>
+        <field name="apps">sale,mail</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">email,dev,any</field>
+        <field name="sequence">240</field>
+        <field name="group_ids" eval="[Command.link(ref('base.group_system'))]"/>
+        <field name="expects" eval="{'tools_any': ['prepare_email_design', 'prepare_email_review', 'send_test_email'], 'confirmation_card': True}"/>
+    </record>
+    <record id="prompt_dev_archive_lost_leads" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-dev-archive-lost-leads</field>
+        <field name="name">Archive old lost leads every month</field>
+        <field name="description">Scheduled action that archives (never deletes) lost leads older than N months.</field>
+        <field name="body">Every month, archive the leads and opportunities marked lost more than {{months}} months ago. Never delete them. Show me how many it would archive today before you build it.</field>
+        <field name="variables" eval="[{'name': 'months', 'type': 'integer', 'required': True, 'label': {'en': 'Older than (months)', 'ar': 'أقدم من (أشهر)'}, 'default': 12}]"/>
+        <field name="mode">dev</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">crm.lead</field>
+        <field name="apps">crm</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">housekeeping,dev,any</field>
+        <field name="sequence">250</field>
+        <field name="group_ids" eval="[Command.link(ref('base.group_system'))]"/>
+        <field name="expects" eval="{'tools_any': ['aggregate_records', 'prepare_scheduled_action'], 'confirmation_card': True}"/>
+    </record>
+    <record id="prompt_dev_bilingual_delivery_slip" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-dev-bilingual-delivery-slip</field>
+        <field name="name">Bilingual delivery slip</field>
+        <field name="description">Printed report design, Arabic + English, right-to-left aware.</field>
+        <field name="body">Design the delivery slip in Arabic and English side by side: your company's logo, the customer, the lines with product, quantity and unit, and a signature box for the receiver{{extra}}. Arabic on the right. Show me a preview on a real delivery first.</field>
+        <field name="variables" eval="[{'name': 'extra', 'type': 'string', 'required': False, 'label': {'en': 'Extra column', 'ar': 'عمود إضافي'}, 'default': '', 'example': ', and the lot number'}]"/>
+        <field name="mode">dev</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">stock.picking</field>
+        <field name="apps">stock</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">report,arabic,dev,any</field>
+        <field name="sequence">260</field>
+        <field name="group_ids" eval="[Command.link(ref('base.group_system'))]"/>
+        <field name="expects" eval="{'tools_any': ['prepare_report_design'], 'confirmation_card': True}"/>
+    </record>
+    <record id="prompt_dev_why_failed" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-dev-why-failed</field>
+        <field name="name">Why did this automation fail?</field>
+        <field name="description">Reads the logs and the rule, explains the failure, proposes a fix as a card.</field>
+        <field name="body">The automation "{{name}}" did not run as expected on {{record}}. Read what runs on this model, find why it failed or did not trigger, explain it in two sentences, and propose the fix as a change I can approve.</field>
+        <field name="variables" eval="[{'name': 'name', 'type': 'string', 'required': True, 'label': {'en': 'Automation name', 'ar': 'اسم الأتمتة'}}, {'name': 'record', 'type': 'string', 'required': True, 'label': {'en': 'On which record', 'ar': 'على أي سجل'}, 'example': 'S00042'}]"/>
+        <field name="mode">dev</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names"></field>
+        <field name="apps"></field>
+        <field name="version">1.0.0</field>
+        <field name="tags">debug,dev,any</field>
+        <field name="sequence">270</field>
+        <field name="group_ids" eval="[Command.link(ref('base.group_system'))]"/>
+        <field name="expects" eval="{'tools_any': ['read_automations', 'diagnose_failure', 'prepare_code_fix'], 'confirmation_card': True}"/>
+    </record>
+    <record id="prompt_ind_contracting_cost_vs_budget" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-ind-contracting-cost-vs-budget</field>
+        <field name="name">Contracting: projects over budget</field>
+        <field name="description">Costs (timesheets, vendor bills, stock) vs the contract amount per project.</field>
+        <field name="body">For each active project, compare its costs so far (analytic lines of timesheets, vendor bills and stock moves) with the amount of its sales order. List the projects above {{percent}}% of the contract amount, with progress of the tasks, as a table sorted by risk.</field>
+        <field name="variables" eval="[{'name': 'percent', 'type': 'integer', 'required': True, 'label': {'en': 'Above % of contract', 'ar': 'أكثر من % من العقد'}, 'default': 80}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">project.project,account.analytic.line</field>
+        <field name="apps">project,account,sale</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">contracting,cost,industry,contracting</field>
+        <field name="sequence">280</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+        <field name="expects" eval="{'tools_any': ['aggregate_records', 'search_records'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_ind_restaurant_menu_margin" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-ind-restaurant-menu-margin</field>
+        <field name="name">Restaurant: menu items by margin</field>
+        <field name="description">POS sales of the last N days per menu item with cost and margin.</field>
+        <field name="body">For the last {{days}} days of the point of sale, list each menu item with quantity sold, revenue, cost (from its bill of materials or cost price) and margin %. Show the {{top}} best and {{top}} worst by margin as a chart.</field>
+        <field name="variables" eval="[{'name': 'days', 'type': 'integer', 'required': True, 'label': {'en': 'Days', 'ar': 'الأيام'}, 'default': 30}, {'name': 'top', 'type': 'integer', 'required': True, 'label': {'en': 'How many', 'ar': 'العدد'}, 'default': 5}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">pos.order.line,product.product</field>
+        <field name="apps">point_of_sale</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">restaurant,margin,industry,restaurant,coffee</field>
+        <field name="sequence">290</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+        <field name="expects" eval="{'tools_any': ['aggregate_records', 'show_chart'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_ind_clinic_tomorrow_reminders" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-ind-clinic-tomorrow-reminders</field>
+        <field name="name">Clinic: remind tomorrow's patients</field>
+        <field name="description">Tomorrow's calendar appointments → draft reminder messages, sent only after a yes.</field>
+        <field name="body">List tomorrow's appointments in the calendar of {{doctor}} with the patient, time and phone. Prepare a short reminder for each in the patient's language (Arabic or English) with the time and the address of your company, and show me the list before anything is sent.</field>
+        <field name="variables" eval="[{'name': 'doctor', 'type': 'many2one', 'required': True, 'label': {'en': 'Doctor', 'ar': 'الطبيب'}, 'model': 'res.users', 'example': 'Raghad'}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">calendar.event</field>
+        <field name="apps">calendar</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">clinic,reminders,industry,clinic</field>
+        <field name="sequence">300</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+        <field name="expects" eval="{'tools_any': ['search_records', 'bulk_apply'], 'confirmation_card': True}"/>
+    </record>
+    <record id="prompt_ind_retail_slow_movers" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-ind-retail-slow-movers</field>
+        <field name="name">Retail: slow movers in stock</field>
+        <field name="description">In-stock products with no sale for N days, with stock value tied up.</field>
+        <field name="body">List products with stock on hand that have not been sold (sales or point of sale) in the last {{days}} days, with quantity, stock value and last sale date, sorted by value. Suggest which could go on a promotion, and save the list to My Reports.</field>
+        <field name="variables" eval="[{'name': 'days', 'type': 'integer', 'required': True, 'label': {'en': 'No sale for (days)', 'ar': 'بلا بيع منذ (أيام)'}, 'default': 90}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">product.product</field>
+        <field name="apps">stock</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">retail,industry,retail,coffee</field>
+        <field name="sequence">310</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+        <field name="expects" eval="{'tools_any': ['aggregate_records', 'save_report'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_ind_coffee_seasonal_reorder" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-ind-coffee-seasonal-reorder</field>
+        <field name="name">Coffee supplies: seasonal reorder</field>
+        <field name="description">Average monthly sales of beans, cups and syrups vs stock → months of cover.</field>
+        <field name="body">For the categories {{categories}}, compute the average monthly quantity sold over the last {{months}} months and the same month last year, then the months of cover of the current stock. List what has less than {{cover}} months of cover, with the main vendor and lead time.</field>
+        <field name="variables" eval="[{'name': 'categories', 'type': 'string', 'required': True, 'label': {'en': 'Categories', 'ar': 'الفئات'}, 'default': 'Coffee beans, Cups, Syrups'}, {'name': 'months', 'type': 'integer', 'required': True, 'label': {'en': 'Months of history', 'ar': 'أشهر السجل'}, 'default': 6}, {'name': 'cover', 'type': 'number', 'required': True, 'label': {'en': 'Months of cover below', 'ar': 'أشهر تغطية أقل من'}, 'default': 1.5}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">product.product</field>
+        <field name="apps">sale,stock,purchase</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">coffee,forecast,industry,coffee</field>
+        <field name="sequence">320</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+        <field name="expects" eval="{'tools_any': ['aggregate_records'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_ind_real_estate_unit_interest" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-ind-real-estate-unit-interest</field>
+        <field name="name">Real estate: available units and interested leads</field>
+        <field name="description">Units (products tagged as units) not yet sold, matched to open leads by tag and budget.</field>
+        <field name="body">List the units of the project {{project_tag}} that are still available (not on a confirmed sales order), with type, area and price. For each, show the open leads tagged {{project_tag}} whose expected revenue is within {{margin}}% of the price, and who handles them.</field>
+        <field name="variables" eval="[{'name': 'project_tag', 'type': 'string', 'required': True, 'label': {'en': 'Project tag', 'ar': 'وسم المشروع'}, 'default': 'Tower A'}, {'name': 'margin', 'type': 'integer', 'required': True, 'label': {'en': 'Budget margin %', 'ar': 'هامش الميزانية %'}, 'default': 10}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">crm.lead,product.template</field>
+        <field name="apps">crm,sale</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">real estate,industry,real_estate</field>
+        <field name="sequence">330</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+        <field name="expects" eval="{'tools_any': ['search_records', 'aggregate_records'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_role_ceo_weekly" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-role-ceo-weekly</field>
+        <field name="name">CEO: the week in one table</field>
+        <field name="description">Revenue, cash, receivables, payables, pipeline, with last week for comparison.</field>
+        <field name="body">Give me the week of your company in one table, this week vs last week: invoiced revenue, cash in bank, receivables overdue, payables due in 7 days, new opportunities and their value, confirmed sales. Then three lines: what improved, what worsened, what needs a decision.</field>
+        <field name="variables" eval="[]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names"></field>
+        <field name="apps">account,sale,crm</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">brief,kpi,role,any</field>
+        <field name="sequence">340</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+        <field name="expects" eval="{'tools_any': ['aggregate_records'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_role_accountant_month_end" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-role-accountant-month-end</field>
+        <field name="name">Accountant: month-end checklist</field>
+        <field name="description">What blocks closing the month: drafts, unreconciled lines, missing bills.</field>
+        <field name="body">Before I close {{month}}: count draft journal entries and draft bills dated in it, unreconciled bank lines, customer payments not matched, receipts without a vendor bill, and the lock date now set. One checklist line each, with Show me links.</field>
+        <field name="variables" eval="[{'name': 'month', 'type': 'string', 'required': True, 'label': {'en': 'Month', 'ar': 'الشهر'}, 'default': 'last month'}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">account.move</field>
+        <field name="apps">account</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">closing,role,any</field>
+        <field name="sequence">350</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+        <field name="expects" eval="{'tools_any': ['aggregate_records', 'search_records'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_role_sales_my_day" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-role-sales-my-day</field>
+        <field name="name">Salesperson: my day</field>
+        <field name="description">My activities, quotations expiring soon, customers waiting for an answer.</field>
+        <field name="body">What is waiting for me today: my activities due or late, my quotations expiring in {{days}} days, and customers whose last message to me has no answer. Shortest list first, with Show me links.</field>
+        <field name="variables" eval="[{'name': 'days', 'type': 'integer', 'required': True, 'label': {'en': 'Expiring within (days)', 'ar': 'تنتهي خلال (أيام)'}, 'default': 7}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names"></field>
+        <field name="apps">sale</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">daily,role,any</field>
+        <field name="sequence">360</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+        <field name="expects" eval="{'tools_any': ['search_records'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_role_warehouse_late_receipts" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-role-warehouse-late-receipts</field>
+        <field name="name">Warehouse: late receipts</field>
+        <field name="description">Receipts past their scheduled date, by vendor, with what they block.</field>
+        <field name="body">List incoming receipts late by more than {{days}} days, by vendor: reference, scheduled date, products, and the customer orders waiting for those products. Prepare a reminder activity on each purchase order for its buyer, for my approval.</field>
+        <field name="variables" eval="[{'name': 'days', 'type': 'integer', 'required': True, 'label': {'en': 'Late by (days)', 'ar': 'متأخرة بأكثر من (أيام)'}, 'default': 3}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">stock.picking</field>
+        <field name="apps">stock,purchase</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">inventory,role,any</field>
+        <field name="sequence">370</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+        <field name="expects" eval="{'tools_any': ['search_records', 'bulk_apply'], 'confirmation_card': True}"/>
+    </record>
+    <record id="prompt_role_hr_contracts_ending" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-role-hr-contracts-ending</field>
+        <field name="name">HR: contracts ending soon</field>
+        <field name="description">Employees whose contract ends within N days, with a renewal activity each.</field>
+        <field name="body">Which employees have a contract ending within {{days}} days? Show name, department, end date and manager. Then prepare a "Renewal decision" activity for each manager, in one card.</field>
+        <field name="variables" eval="[{'name': 'days', 'type': 'integer', 'required': True, 'label': {'en': 'Within (days)', 'ar': 'خلال (أيام)'}, 'default': 60}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names">hr.employee</field>
+        <field name="apps">hr</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">hr,role,any</field>
+        <field name="sequence">380</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+        <field name="expects" eval="{'tools_any': ['describe_model', 'search_records', 'bulk_apply'], 'confirmation_card': True}"/>
+    </record>
+    <record id="prompt_web_restaurant" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-web-restaurant</field>
+        <field name="name">Website: restaurant</field>
+        <field name="description">Opens the Website Builder interview pre-filled for restaurant (template restaurant); pages stay unpublished.</field>
+        <field name="body">Build a website for your company, a restaurant serving {{cuisine}} in {{city}}, with dine-in, takeaway and delivery. Languages: {{languages}}, Arabic pages right to left. Pages: home, menu (from our products in the category Menu), about, reservations (contact form), gallery, location and opening hours, FAQ. Tone: {{tone}}. Use the colours of our logo. Write an SEO title (under 60 characters) and a meta description (under 160) for every page, alt text for every picture, and keep everything unpublished until I say so.</field>
+        <field name="variables" eval="[{'name': 'cuisine', 'type': 'string', 'required': True, 'label': {'en': 'Cuisine', 'ar': 'المطبخ'}, 'default': 'Levantine and Gulf dishes'}, {'name': 'city', 'type': 'string', 'required': True, 'label': {'en': 'City', 'ar': 'المدينة'}, 'default': 'Dubai'}, {'name': 'languages', 'type': 'selection', 'required': True, 'label': {'en': 'Languages', 'ar': 'اللغات'}, 'default': 'Arabic and English', 'options': ['Arabic and English', 'English', 'Arabic']}, {'name': 'tone', 'type': 'selection', 'required': True, 'label': {'en': 'Tone', 'ar': 'الأسلوب'}, 'default': 'friendly', 'options': ['formal', 'friendly', 'short']}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names"></field>
+        <field name="apps">website</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">website,restaurant,website,restaurant</field>
+        <field name="sequence">390</field>
+        <field name="expects" eval="{'tools_any': ['start_website_builder'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_web_contracting" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-web-contracting</field>
+        <field name="name">Website: contracting company</field>
+        <field name="description">Opens the Website Builder interview pre-filled for contracting (template contracting); pages stay unpublished.</field>
+        <field name="body">Build a website for your company, a contracting company doing {{works}} in {{city}} for {{clients}}. Languages: {{languages}}, Arabic pages right to left. Pages: home, services, projects (from our project names, only if I allow it), HSE and quality, certificates, careers, request a quotation, contact. Tone: {{tone}}. Use the colours of our logo. Write an SEO title (under 60 characters) and a meta description (under 160) for every page, alt text for every picture, and keep everything unpublished until I say so.</field>
+        <field name="variables" eval="[{'name': 'works', 'type': 'string', 'required': True, 'label': {'en': 'Works', 'ar': 'الأعمال'}, 'default': 'civil, MEP and fit-out works'}, {'name': 'city', 'type': 'string', 'required': True, 'label': {'en': 'City', 'ar': 'المدينة'}, 'default': 'Abu Dhabi'}, {'name': 'clients', 'type': 'string', 'required': True, 'label': {'en': 'Clients', 'ar': 'العملاء'}, 'default': 'developers and government'}, {'name': 'languages', 'type': 'selection', 'required': True, 'label': {'en': 'Languages', 'ar': 'اللغات'}, 'default': 'Arabic and English', 'options': ['Arabic and English', 'English', 'Arabic']}, {'name': 'tone', 'type': 'selection', 'required': True, 'label': {'en': 'Tone', 'ar': 'الأسلوب'}, 'default': 'friendly', 'options': ['formal', 'friendly', 'short']}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names"></field>
+        <field name="apps">website</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">website,contracting,website,contracting</field>
+        <field name="sequence">400</field>
+        <field name="expects" eval="{'tools_any': ['start_website_builder'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_web_clinic" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-web-clinic</field>
+        <field name="name">Website: clinic</field>
+        <field name="description">Opens the Website Builder interview pre-filled for clinic (template clinic); pages stay unpublished.</field>
+        <field name="body">Build a website for your company, a {{specialty}} clinic in {{city}} with {{doctors}} doctors. Languages: {{languages}}, Arabic pages right to left. Pages: home, specialties, doctors (public names and titles only), book an appointment, insurance accepted, patient instructions, FAQ, contact; no patient data anywhere. Tone: {{tone}}. Use the colours of our logo. Write an SEO title (under 60 characters) and a meta description (under 160) for every page, alt text for every picture, and keep everything unpublished until I say so.</field>
+        <field name="variables" eval="[{'name': 'specialty', 'type': 'string', 'required': True, 'label': {'en': 'Specialty', 'ar': 'التخصص'}, 'default': 'dental'}, {'name': 'city', 'type': 'string', 'required': True, 'label': {'en': 'City', 'ar': 'المدينة'}, 'default': 'Riyadh'}, {'name': 'doctors', 'type': 'integer', 'required': True, 'label': {'en': 'Doctors', 'ar': 'عدد الأطباء'}, 'default': 4}, {'name': 'languages', 'type': 'selection', 'required': True, 'label': {'en': 'Languages', 'ar': 'اللغات'}, 'default': 'Arabic and English', 'options': ['Arabic and English', 'English', 'Arabic']}, {'name': 'tone', 'type': 'selection', 'required': True, 'label': {'en': 'Tone', 'ar': 'الأسلوب'}, 'default': 'friendly', 'options': ['formal', 'friendly', 'short']}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names"></field>
+        <field name="apps">website</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">website,clinic,website,clinic</field>
+        <field name="sequence">410</field>
+        <field name="expects" eval="{'tools_any': ['start_website_builder'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_web_retail" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-web-retail</field>
+        <field name="name">Website + shop: retail store</field>
+        <field name="description">Opens the Website Builder interview pre-filled for retail (template fashion_shop); pages stay unpublished.</field>
+        <field name="body">Build a website for your company, a retail store selling {{goods}} with an online shop and pick-up in store. Languages: {{languages}}, Arabic pages right to left. Pages: home, shop (categories from our product categories), new arrivals, offers, about, store location, delivery and returns policy, contact. Add the online shop. Tone: {{tone}}. Use the colours of our logo. Write an SEO title (under 60 characters) and a meta description (under 160) for every page, alt text for every picture, and keep everything unpublished until I say so.</field>
+        <field name="variables" eval="[{'name': 'goods', 'type': 'string', 'required': True, 'label': {'en': 'Goods', 'ar': 'البضائع'}, 'default': 'clothing and accessories'}, {'name': 'languages', 'type': 'selection', 'required': True, 'label': {'en': 'Languages', 'ar': 'اللغات'}, 'default': 'Arabic and English', 'options': ['Arabic and English', 'English', 'Arabic']}, {'name': 'tone', 'type': 'selection', 'required': True, 'label': {'en': 'Tone', 'ar': 'الأسلوب'}, 'default': 'friendly', 'options': ['formal', 'friendly', 'short']}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names"></field>
+        <field name="apps">website,website_sale</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">website,fashion_shop,website,retail</field>
+        <field name="sequence">420</field>
+        <field name="expects" eval="{'tools_any': ['start_website_builder'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_web_coffee_supplies" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-web-coffee-supplies</field>
+        <field name="name">Website + shop: coffee supplies</field>
+        <field name="description">Opens the Website Builder interview pre-filled for coffee supplies (template food_products_shop); pages stay unpublished.</field>
+        <field name="body">Build a website for your company, a coffee supplies trader selling {{goods}} to cafés and home baristas, wholesale and retail. Languages: {{languages}}, Arabic pages right to left. Pages: home, shop (beans, equipment, cups and packaging, syrups), wholesale enquiry form, brewing guides, about our roastery partners, delivery, contact. Add the online shop. Tone: {{tone}}. Use the colours of our logo. Write an SEO title (under 60 characters) and a meta description (under 160) for every page, alt text for every picture, and keep everything unpublished until I say so.</field>
+        <field name="variables" eval="[{'name': 'goods', 'type': 'string', 'required': True, 'label': {'en': 'Goods', 'ar': 'البضائع'}, 'default': 'specialty beans, grinders, cups and syrups'}, {'name': 'languages', 'type': 'selection', 'required': True, 'label': {'en': 'Languages', 'ar': 'اللغات'}, 'default': 'Arabic and English', 'options': ['Arabic and English', 'English', 'Arabic']}, {'name': 'tone', 'type': 'selection', 'required': True, 'label': {'en': 'Tone', 'ar': 'الأسلوب'}, 'default': 'friendly', 'options': ['formal', 'friendly', 'short']}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names"></field>
+        <field name="apps">website,website_sale</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">website,food_products_shop,website,coffee_supplies</field>
+        <field name="sequence">430</field>
+        <field name="expects" eval="{'tools_any': ['start_website_builder'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_web_real_estate" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-web-real-estate</field>
+        <field name="name">Website: real estate</field>
+        <field name="description">Opens the Website Builder interview pre-filled for real estate (template real_estate); pages stay unpublished.</field>
+        <field name="body">Build a website for your company, a real estate company {{activity}} in {{city}}. Languages: {{languages}}, Arabic pages right to left. Pages: home, properties (one page per project, unpublished drafts), services, about, register your interest (lead form), FAQ, contact. Tone: {{tone}}. Use the colours of our logo. Write an SEO title (under 60 characters) and a meta description (under 160) for every page, alt text for every picture, and keep everything unpublished until I say so.</field>
+        <field name="variables" eval="[{'name': 'activity', 'type': 'string', 'required': True, 'label': {'en': 'Activity', 'ar': 'النشاط'}, 'default': 'selling and leasing apartments'}, {'name': 'city', 'type': 'string', 'required': True, 'label': {'en': 'City', 'ar': 'المدينة'}, 'default': 'Cairo'}, {'name': 'languages', 'type': 'selection', 'required': True, 'label': {'en': 'Languages', 'ar': 'اللغات'}, 'default': 'Arabic and English', 'options': ['Arabic and English', 'English', 'Arabic']}, {'name': 'tone', 'type': 'selection', 'required': True, 'label': {'en': 'Tone', 'ar': 'الأسلوب'}, 'default': 'friendly', 'options': ['formal', 'friendly', 'short']}]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="model_names"></field>
+        <field name="apps">website</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">website,real_estate,website,real_estate</field>
+        <field name="sequence">440</field>
+        <field name="expects" eval="{'tools_any': ['start_website_builder'], 'confirmation_card': False}"/>
+    </record>
+    <record id="prompt_starter_overdue_invoices" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-starter-overdue-invoices</field>
+        <field name="name">Show my overdue invoices</field>
+        <field name="description">Lists the customer invoices that are overdue, understood by Nudge's own rules.</field>
+        <field name="body">Show my overdue invoices</field>
+        <field name="variables" eval="[]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="apps">account</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">starter</field>
+        <field name="noai" eval="True"/>
+        <field name="sequence">1450</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+    </record>
+    <record id="prompt_starter_unpaid_bills" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-starter-unpaid-bills</field>
+        <field name="name">Show unpaid vendor bills</field>
+        <field name="description">Lists the vendor bills that are not paid yet.</field>
+        <field name="body">Show unpaid vendor bills</field>
+        <field name="variables" eval="[]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="apps">account</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">starter</field>
+        <field name="noai" eval="True"/>
+        <field name="sequence">1460</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+    </record>
+    <record id="prompt_starter_month_quotations" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-starter-month-quotations</field>
+        <field name="name">Show my quotations from this month</field>
+        <field name="description">Lists the quotations of this month.</field>
+        <field name="body">Show my quotations from this month</field>
+        <field name="variables" eval="[]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="apps">sale</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">starter</field>
+        <field name="noai" eval="True"/>
+        <field name="sequence">1470</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+    </record>
+    <record id="prompt_starter_week_orders" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-starter-week-orders</field>
+        <field name="name">Show sales orders this week</field>
+        <field name="description">Lists the sales orders of this week.</field>
+        <field name="body">Show sales orders this week</field>
+        <field name="variables" eval="[]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="apps">sale</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">starter</field>
+        <field name="noai" eval="True"/>
+        <field name="sequence">1480</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+    </record>
+    <record id="prompt_starter_open_tasks" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-starter-open-tasks</field>
+        <field name="name">Show my open tasks</field>
+        <field name="description">Opens the list of your tasks.</field>
+        <field name="body">Show my open tasks</field>
+        <field name="variables" eval="[]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="apps">project</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">starter</field>
+        <field name="noai" eval="True"/>
+        <field name="sequence">1490</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+    </record>
+    <record id="prompt_starter_open_opportunities" model="nudge.prompt">
+        <field name="recipe_key">nudge-prompt-starter-open-opportunities</field>
+        <field name="name">Show my open opportunities</field>
+        <field name="description">Opens the list of your opportunities.</field>
+        <field name="body">Show my open opportunities</field>
+        <field name="variables" eval="[]"/>
+        <field name="mode">agent</field>
+        <field name="scope">company</field>
+        <field name="origin">module</field>
+        <field name="apps">crm</field>
+        <field name="version">1.0.0</field>
+        <field name="tags">starter</field>
+        <field name="noai" eval="True"/>
+        <field name="sequence">1500</field>
+        <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_agent'))]"/>
+    </record>
+    </data>
+</odoo>

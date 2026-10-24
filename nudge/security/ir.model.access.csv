@@ -57,3 +57,5 @@ access_nudge_compliance_notice_manager,nudge.compliance.notice manager,model_nud
 access_nudge_compliance_update_manager,nudge.compliance.update manager,model_nudge_compliance_update,group_nudge_manager,1,0,0,0
 access_nudge_compliance_update_admin,nudge.compliance.update admin,model_nudge_compliance_update,base.group_system,1,1,1,1
 access_nudge_report_explain_user,nudge.report.explain user,model_nudge_report_explain,group_nudge_user,1,1,1,1
+access_nudge_prompt_user,nudge.prompt user,model_nudge_prompt,group_nudge_user,1,1,1,1
+access_nudge_prompt_manager,nudge.prompt manager,model_nudge_prompt,group_nudge_manager,1,1,1,1
