@@ -39,6 +39,7 @@ Installed from Apps by an administrator who wants it, with Nudge and Nudge MCP.
         "views/nudge_messaging_views.xml",
         "views/res_config_settings_views.xml",
     ],
+    "uninstall_hook": "uninstall_hook",
     "auto_install": False,
     "installable": True,
 }
