@@ -149,6 +149,13 @@ package the feature that needs it says what is missing and the rest works.
   unpublished pages from 12 sector templates; see its README. Nudge WhatsApp & Telegram (`nudge_messaging`) answers from
   linked phones and installs Nudge: MCP Server with it (switched off); see its README. Both are for Odoo 19 for now.
 
+## Look and accessibility
+
+In the preferences, under Look, each person can switch on high contrast, large text, compact tiles on the home page,
+a panel docked at the side of the screen (wide screens only), and the colour of their company as the accent. The
+default colour is the primary colour of Odoo; violet, teal, amber, rose and slate remain as choices. The "?" button in
+the panel lists the commands. The choices are kept in the settings of the user and read by nobody else.
+
 ## Security
 
 Nudge acts as the person, never beyond them: every tool runs with their rights, their
