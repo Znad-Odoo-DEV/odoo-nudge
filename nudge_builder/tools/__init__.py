@@ -7,5 +7,7 @@ from . import snippets
 from . import pictures
 from . import copy
 from . import preview
+from . import sections
 from . import legal
 from . import builder_tool
+from . import site_edit

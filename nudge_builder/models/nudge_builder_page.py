@@ -23,6 +23,8 @@ class NudgeBuilderPage(models.Model):
     menu_id = fields.Many2one("website.menu", ondelete="set null")
     sequence = fields.Integer(default=10)
     is_published = fields.Boolean(related="page_id.is_published", string="Published")
+    seo_title = fields.Char(related="view_id.website_meta_title", string="SEO title")
+    seo_description = fields.Text(related="view_id.website_meta_description", string="SEO description")
 
     def action_open_editor(self):
         """Open the page in the website editor"""
