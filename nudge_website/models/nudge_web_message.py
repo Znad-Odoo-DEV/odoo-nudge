@@ -7,6 +7,7 @@ from odoo import api, fields, models
 from odoo.modules import module as odoo_module
 
 from odoo.addons.nudge.models.nudge_slot import committed_cursor
+from odoo.addons.nudge.tools.batches import in_batches
 
 RATE_MESSAGES_PARAM = "nudge_website.rate_messages"
 RATE_MINUTES_PARAM = "nudge_website.rate_minutes"
@@ -145,14 +146,27 @@ class NudgeWebMessage(models.Model):
         return turns
 
     @api.model
-    def _cron_archive_old(self):
-        """Archive (never delete) the visitor lines older than the days each company keeps them.
-        0 days: that company keeps them."""
+    def _cron_archive_old(self, batch=ARCHIVE_BATCH):
+        """Archive (never delete) the visitor lines older than the days each company keeps them,
+        a batch at a time, each committed, until none is left or the time of the pass is up (the
+        next pass goes on at once). 0 days: that company keeps them.
+
+        :return: how many lines were archived"""
+        now = fields.Datetime.now()
+        old = []
         for company in self.env["res.company"].sudo().search([("nudge_web_keep_days", ">", 0)]):
-            limit = fields.Datetime.now() - timedelta(days=company.nudge_web_keep_days)
-            rows = self.sudo().search(
-                [("company_id", "=", company.id), ("create_date", "<", limit)], limit=ARCHIVE_BATCH)
+            limit = now - timedelta(days=company.nudge_web_keep_days)
+            old = (["|"] if old else []) + old + [
+                "&", ("company_id", "=", company.id), ("create_date", "<", limit)]
+        if not old:
+            return 0
+
+        def archive(size):
+            rows = self.sudo().search(old, order="id", limit=size)
             rows.write({"active": False})
-            if rows:
-                _logger.info("Nudge: %s visitor lines of %s archived", len(rows), company.name)
-        return True
+            return len(rows)
+
+        archived = in_batches(self.env, "nudge_website.cron_archive_visitor_lines", archive, batch)
+        if archived:
+            _logger.info("Nudge: %s visitor lines archived", archived)
+        return archived

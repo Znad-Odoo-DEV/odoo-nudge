@@ -3,6 +3,8 @@ from dateutil.relativedelta import relativedelta
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 
+from ..tools.batches import in_batches
+
 # NP-20: how many months of the usage ledger are kept (0 or empty: all of it, as before)
 USAGE_RETENTION_PARAM = "nudge.usage_retention_months"
 PURGE_BATCH = 5000
@@ -170,22 +172,27 @@ class NudgeUsage(models.Model):
     @api.model
     def _cron_apply_retention(self, batch=PURGE_BATCH):
         """Forget the calls older than the months set in Settings (0: keep all), a batch at a
-        time. The cut is at the first day of a month, `months` months back from this one, so the
-        current month stays whole: budgets read the current month (the company) and today (the
-        person), and their totals are the same after the purge. The ledger refuses ``unlink``
-        (a log that can be edited tells nothing), so the rows are removed by the one statement
-        of this method, which only this cron runs.
+        time, each committed, until none is left or the time of the pass is up (the next pass
+        goes on at once). The cut is at the first day of a month, `months` months back from this
+        one, so the current month stays whole: budgets read the current month (the company) and
+        today (the person), and their totals are the same after the purge. The ledger refuses
+        ``unlink`` (a log that can be edited tells nothing), so the rows are removed by the one
+        statement of this method, which only this cron runs.
 
         :return: how many rows were deleted"""
         months = self._retention_months()
         if months <= 0:
             return 0
         cutoff = fields.Date.context_today(self).replace(day=1) - relativedelta(months=months)
-        self.env.cr.execute(
-            """DELETE FROM nudge_usage WHERE id IN (
-                   SELECT id FROM nudge_usage WHERE date < %s ORDER BY id LIMIT %s
-                   FOR UPDATE SKIP LOCKED)""", (cutoff, batch))
-        deleted = self.env.cr.rowcount
+
+        def purge(size):
+            self.env.cr.execute(
+                """DELETE FROM nudge_usage WHERE id IN (
+                       SELECT id FROM nudge_usage WHERE date < %s ORDER BY id LIMIT %s
+                       FOR UPDATE SKIP LOCKED)""", (cutoff, size))
+            return self.env.cr.rowcount
+
+        deleted = in_batches(self.env, "nudge.cron_usage_retention", purge, batch)
         if deleted:
             self.env.invalidate_all()
         return deleted
