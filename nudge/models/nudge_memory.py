@@ -1062,6 +1062,7 @@ class NudgeMemory(models.Model):
         """Write the question (unless ``ask`` is False) and ``memory`` as its answer, in the language of
         the question, at no cost, and return the job of the stream"""
         record = conversation.sudo()
+        self._leave_open_work(record)
         if not record.name:
             record.name = text[:60].strip()
         language = self._language_of(text)
@@ -1090,10 +1091,21 @@ class NudgeMemory(models.Model):
         }
 
     @api.model
+    def _leave_open_work(self, record):
+        """As every other answer does (nudge.noai._deliver): a card waiting for a decision is left, the run is
+        ended. Otherwise a yes on the old card dropped its call and the turns ended on this answer"""
+        if record.waiting_step_id:
+            record._agent_leave_undecided()
+        if record.run_id:
+            record.run_id._end(record.run_id._outcome("stopped"))
+            record.run_id = False
+
+    @api.model
     def _offer(self, conversation, text, near, mode=MODE_TALK):
         """Close matches, none sure: offered to choose from, with Ask the AI instead. Nothing is spent.
         :return: the job of the stream"""
         record = conversation.sudo()
+        self._leave_open_work(record)
         if not record.name:
             record.name = text[:60].strip()
         language = self._language_of(text)
@@ -1168,6 +1180,7 @@ class NudgeMemory(models.Model):
         if not memory_id or memory_id not in offered:
             raise AccessError(self.env._("This answer was not offered here."))
         conversation = message.conversation_id
+        conversation._chat_check_not_at_work()
         question = conversation.message_ids.filtered(
             lambda other: other.role == "user" and other.id < message.id)[-1:]
         text = question.content or ""
