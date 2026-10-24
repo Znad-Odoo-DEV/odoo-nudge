@@ -40,7 +40,7 @@ class ConnectOAuth(http.Controller):
         if error:
             # The state is spent: a refused sign-in cannot be finished later
             try:
-                request.env["nudge.connector.oauth.state"]._consume(state)
+                request.env["nudge.connector.oauth.state"]._consume(state, request.env.uid)
             except UserError:
                 pass
             return _page("Nudge", "The provider did not let you sign in.", 400)
@@ -48,6 +48,9 @@ class ConnectOAuth(http.Controller):
             connector = request.env["nudge.connector.oauth.state"]._complete(state, code)
         except UserError as refused:
             return _page("Nudge", str(refused.args[0]), 400)
+        if request.env.user.has_group("base.group_system"):
+            return request.redirect(
+                f"/web#model=nudge.connector&id={connector.id}&view_type=form", code=303)
         return _page("Nudge", f"You are signed in to {connector.name}. You can close this tab and ask again.")
 
     @http.route("/nudge_connect/oauth/signout/<int:connector_id>", type="http", auth="user", methods=["POST"],
