@@ -190,6 +190,22 @@ class TestSnapshotInChat(NudgeCase, TransactionCase):
         self.assertIn('"name":"Deco Addict"', job["turns"][-1]["context"])
         self.assertIn('"name":"Azure Interior"', job["turns"][0]["context"], "History is not rewritten")
 
+    def test_a_screen_no_longer_replayed_is_sent_whole_again(self):
+        # Past two turns the oldest is summarised: the screen the last question points at goes with it
+        self.env["ir.config_parameter"].sudo().set_param("nudge.summary_after_turns", "2")
+        self.use_adapter()
+        conversation, _job = self.ask_with_screen("First", SNAPSHOT)
+        self.ask_with_screen("Second", SNAPSHOT, conversation.id)
+        _conversation, job = self.ask_with_screen("Third", SNAPSHOT, conversation.id)
+        questions = [turn for turn in job["turns"] if turn["role"] == "user"]
+        self.assertEqual(len(questions), 2, "The first turn is summarised")
+        self.assertNotIn("screen_snapshot", questions[0]["context"])
+        self.assertIn('"name":"Azure Interior"', questions[-1]["context"],
+                      "No pointer to a screen the model no longer sees: the screen itself")
+        self.assertNotIn('unchanged="true"', questions[-1]["context"])
+        stored = conversation.message_ids.filtered(lambda message: message.role == "user")[-1].sudo()
+        self.assertIn('<screen_snapshot unchanged="true"/>', stored.context_text, "Kept as it was recorded")
+
     def test_no_screen(self):
         self.use_adapter()
         for snapshot in (None, "", "{broken", "[]"):
