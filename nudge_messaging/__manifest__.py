@@ -24,7 +24,7 @@ Talk to Nudge from your phone, on WhatsApp (Business Cloud API) or Telegram.
 Installed from Apps by an administrator who wants it, with Nudge and Nudge MCP.
 """,
     "category": "Productivity",
-    "version": "19.0.1.0.4",
+    "version": "19.0.1.0.5",
     "author": "Ibrahim Elzenad",
     "website": "https://znad-odoo-dev.github.io",
     "support": "https://github.com/Znad-Odoo-DEV/odoo-nudge/issues",
