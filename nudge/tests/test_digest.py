@@ -97,6 +97,51 @@ class TestDigest(BackgroundCase, TransactionCase):
                               domain + [("color", "=", 10)], "color", "x")
         self.assertEqual(line["change"], -50)
 
+    def test_today_is_the_whole_local_day_in_utc(self):
+        """Review (functional 14): at 08:00 nobody on leave since 09:00 was listed"""
+        env = self.env(user=self.seller, context={"tz": "Asia/Dubai"})
+        start, end = digest._bounds(env, fields.Date.to_date("2026-10-26"))
+        self.assertEqual((start, end), ("2026-10-25 20:00:00", "2026-10-26 20:00:00"))
+        env = self.env(user=self.seller, context={"tz": "America/New_York"})
+        self.assertEqual(digest._bounds(env, fields.Date.to_date("2026-10-26"))[0], "2026-10-26 04:00:00")
+
+    def test_a_vendor_bill_to_pay_is_a_positive_amount(self):
+        """Review (functional 12): the residual of a vendor bill is negative in Odoo"""
+        self.need("account.move")
+        env = self.env
+        partner = env["res.partner"].create({"name": "Nudge Raghad Supplies"})
+        bill = env["account.move"].create({
+            "move_type": "in_invoice", "partner_id": partner.id, "invoice_date": fields.Date.today(),
+            "invoice_line_ids": [(0, 0, {"name": "Cement", "quantity": 1, "price_unit": 100.0})]})
+        bill.action_post()
+        self.assertLess(bill.amount_residual_signed, 0)
+        block = digest._purchase(env, fields.Datetime.now(), fields.Date.today(), None)
+        line = next(line for line in block if line and line["label"] == "Vendor bills to pay")
+        self.assertNotIn("-", line["amount"])
+        mine = digest._line(env, "x", "account.move", [("id", "=", bill.id)], amount="amount_residual_signed", sign=-1)
+        self.assertIn("100", mine["amount"])
+
+    def test_amounts_in_another_currency_are_converted_to_the_company_currency(self):
+        """Review (functional 13): a sum over USD and AED documents is one currency"""
+        self.need("sale.order")
+        env = self.env
+        company = env.company
+        foreign = env["res.currency"].with_context(active_test=False).search(
+            [("id", "!=", company.currency_id.id)], limit=1)
+        foreign.active = True
+        env["res.currency.rate"].create({
+            "currency_id": foreign.id, "company_id": company.id, "rate": 0.5, "name": "2000-01-01"})
+        pricelist = env["product.pricelist"].create({"name": "Nudge foreign", "currency_id": foreign.id})
+        partner = env["res.partner"].create({"name": "Nudge Foreign Buyer"})
+        order = env["sale.order"].create({
+            "partner_id": partner.id, "pricelist_id": pricelist.id,
+            "order_line": [(0, 0, {"name": "Cement", "product_uom_qty": 1, "price_unit": 1000.0})]})
+        self.assertEqual(order.currency_id, foreign)
+        total = digest._sum(env, env["sale.order"], [("id", "=", order.id)], "amount_total")
+        self.assertAlmostEqual(total, foreign._convert(order.amount_total, company.currency_id, company,
+                                                        fields.Date.today()), places=2)
+        self.assertNotAlmostEqual(total, order.amount_total, places=2)
+
     def test_with_a_provider_the_narrative_wraps_the_numbers(self):
         self.quote()
         adapter = self.use_adapter(reply="Quotations are waiting for you.")

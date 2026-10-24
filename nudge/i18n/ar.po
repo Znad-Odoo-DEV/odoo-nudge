@@ -25888,3 +25888,14 @@ msgstr ""
 "من أنشأ المستند لا يمكنه الموافقة عليه، إلا إذا كان الوحيد في مجموعة "
 "الموافقة."
 
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/report_explain.py:0
+msgid ""
+"The amounts of this report are in several currencies (%(names)s), so a "
+"total or a comparison would add different money together. Filter one "
+"currency, or group the report by currency."
+msgstr ""
+"مبالغ هذا التقرير بعدة عملات (%(names)s)، فأي إجمالي أو مقارنة ستجمع "
+"أموالاً مختلفة معاً. صفِّ حسب عملة واحدة أو جمّع التقرير حسب العملة."
+

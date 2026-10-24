@@ -13,7 +13,7 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import fields
 
-from . import saved_reports
+from . import digest, saved_reports
 from .analytics import TooBig, grouped
 from .records import Refused, build_domain, get_model
 
@@ -51,9 +51,27 @@ def _money(env, model, spec, value):
     """:return: a value of a measure as the person reads it: money with its currency, else a plain number"""
     field = _spec_field(model, spec)
     if field is not None and field.type == "monetary":
-        return env.company.currency_id.format(value)
+        currency = env["res.currency"].browse(env.context.get("nudge_currency")) or env.company.currency_id
+        return currency.format(value)
     value = float(value or 0)
     return f"{value:,.0f}" if value == int(value) else f"{value:,.2f}"
+
+
+def _currencies(env, model, domain, spec):
+    """:return: the currencies the amounts of a monetary measure are written in, as a recordset"""
+    field = _spec_field(model, spec)
+    currencies = env["res.currency"]
+    if field is None or field.type != "monetary":
+        return currencies
+    name = digest.currency_field_of(field, model)
+    if not name or name not in model._fields or not model._fields[name].store:
+        return currencies
+    try:
+        for currency, _count in model._read_group(domain, [name], ["__count"]):
+            currencies |= currency
+    except Exception:  # noqa: BLE001 - a currency that cannot be read is no reason to refuse the explanation
+        return env["res.currency"]
+    return currencies
 
 
 def _measure_name(env, model, spec):
@@ -175,6 +193,14 @@ def facts(env, definition, domain_source):
         raise Refused(str(error)) from error
     if not count:
         return [{"key": "empty", "text": _tr(env, "There is no data in this report: no record matches it.")}]
+    currencies = _currencies(env, model, domain, spec)
+    if len(currencies) > 1:
+        return [{"key": "currencies", "text": _tr(env, 
+            "The amounts of this report are in several currencies (%(names)s), so a total or a comparison would add "
+            "different money together. Filter one currency, or group the report by currency.",
+            names=", ".join(currencies.mapped("name")))}]
+    if currencies and currencies != env.company.currency_id:
+        env = env(context=dict(env.context, nudge_currency=currencies.id))
     records = f"{count:,}"
     out = [{"key": "total", "text": _tr(env, 
         "Overall, %(measure)s is %(total)s over %(count)s records.",

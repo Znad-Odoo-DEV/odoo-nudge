@@ -8,6 +8,8 @@ numbers.
 """
 from datetime import datetime, time, timedelta
 
+import pytz
+
 from odoo import _, fields
 
 # The groups that open a block, and the managers that get the condensed view
@@ -59,7 +61,45 @@ def _money(env, amount):
         return f"{amount:,.2f}"
 
 
-def _line(env, label, model, domain, amount=None, name=None, key=None):
+def _bounds(env, today):
+    """:return: the start and the end of the day ``today`` of the person, as the UTC text of the datetime columns:
+    what is "today" is the whole local day, not the instant the digest runs"""
+    try:
+        zone = pytz.timezone(env.context.get("tz") or env.user.tz or "UTC")
+    except pytz.UnknownTimeZoneError:
+        zone = pytz.utc
+    start = zone.localize(datetime.combine(today, time.min)).astimezone(pytz.utc).replace(tzinfo=None)
+    end = zone.localize(datetime.combine(today + timedelta(days=1), time.min)).astimezone(pytz.utc).replace(tzinfo=None)
+    return fields.Datetime.to_string(start), fields.Datetime.to_string(end)
+
+
+def currency_field_of(field, model):
+    """:return: the name of the field that holds the currency of a monetary field, or None"""
+    if hasattr(field, "get_currency_field"):
+        return field.get_currency_field(model)
+    return field.currency_field or ("currency_id" if "currency_id" in model._fields else None)
+
+
+def _sum(env, records, domain, amount):
+    """:return: the sum of a monetary field in the money of the company: documents in another currency are
+    converted at today's rate, so the figure is one currency and not a mixture"""
+    field = records._fields[amount]
+    target = env.company.currency_id
+    name = currency_field_of(field, records) if field.type == "monetary" else None
+    if name and name in records._fields and records._fields[name].store:
+        today = fields.Date.context_today(env["res.users"])
+        total = 0.0
+        for currency, value in records._read_group(domain, [name], [f"{amount}:sum"]):
+            value = value or 0.0
+            if currency and currency != target:
+                value = currency._convert(value, target, env.company, today)
+            total += value
+        return total
+    [(total,)] = records._read_group(domain, [], [f"{amount}:sum"])
+    return total or 0.0
+
+
+def _line(env, label, model, domain, amount=None, name=None, key=None, sign=1):
     """:return: ``{"label", "count", "amount", "model", "domain", "name"}`` or None when
     nothing matches, the model is missing or the person may not read it"""
     if not can_read(env, model):
@@ -75,8 +115,7 @@ def _line(env, label, model, domain, amount=None, name=None, key=None):
         return None
     text = ""
     if amount and count:
-        [(total,)] = records._read_group(domain, [], [f"{amount}:sum"])
-        text = _money(env, total or 0)
+        text = _money(env, _sum(env, records, domain, amount) * sign)
     return {"label": label, "count": count, "amount": text, "model": model, "domain": domain,
             "name": name or label, "change": None, "key": key}
 
@@ -86,9 +125,7 @@ def _change(env, label, model, domain_now, domain_before, amount, name, key=None
     if not can_read(env, model) or amount not in env[model]._fields:
         return None
     records = env[model]
-    [(now,)] = records._read_group(domain_now, [], [f"{amount}:sum"])
-    [(before,)] = records._read_group(domain_before, [], [f"{amount}:sum"])
-    now, before = now or 0, before or 0
+    now, before = _sum(env, records, domain_now, amount), _sum(env, records, domain_before, amount)
     if not now and not before:
         return None
     line = {"label": label, "count": records.search_count(domain_now), "amount": _money(env, now),
@@ -135,7 +172,7 @@ def _purchase(env, now, today, since):
         _line(env, _("Vendor bills to pay"), "account.move",
               [("move_type", "=", "in_invoice"), ("state", "=", "posted"),
                ("payment_state", "in", ["not_paid", "partial"])],
-              amount="amount_residual_signed", name=_("Vendor bills"), key="vendor_bills"),
+              amount="amount_residual_signed", sign=-1, name=_("Vendor bills"), key="vendor_bills"),
     ]
 
 
@@ -156,7 +193,7 @@ def _accounting(env, now, today, since):
 
 
 def _inventory(env, now, today, since):
-    end_of_day = fields.Datetime.to_string(datetime.combine(today, time.max))
+    end_of_day = _bounds(env, today)[1]
     open_states = ["confirmed", "waiting", "assigned"]
     return [
         _line(env, _("Products with negative stock"), "stock.quant",
@@ -164,7 +201,7 @@ def _inventory(env, now, today, since):
               name=_("Negative stock"), key="negative_stock"),
         _line(env, _("Receipts due today or before"), "stock.picking",
               [("picking_type_code", "=", "incoming"), ("state", "in", open_states),
-               ("scheduled_date", "<=", end_of_day)], name=_("Receipts due"), key="receipts_due"),
+               ("scheduled_date", "<", end_of_day)], name=_("Receipts due"), key="receipts_due"),
         _line(env, _("Deliveries late"), "stock.picking",
               [("picking_type_code", "=", "outgoing"), ("state", "in", open_states),
                ("scheduled_date", "<", fields.Datetime.to_string(now))], name=_("Late deliveries"), key="late_deliveries"),
@@ -174,13 +211,13 @@ def _inventory(env, now, today, since):
 def _project(env, now, today, since):
     mine = [("user_ids", "in", [env.uid])]
     open_ = [("state", "not in", ["1_done", "1_canceled"])]
-    day = fields.Date.to_string(today)
+    start, end = _bounds(env, today)
     return [
         _line(env, _("Your tasks overdue"), "project.task",
-              mine + open_ + [("date_deadline", "<", fields.Datetime.to_string(datetime.combine(today, time.min)))],
+              mine + open_ + [("date_deadline", "<", start)],
               name=_("Overdue tasks"), key="overdue_tasks"),
         _line(env, _("Your tasks due today"), "project.task",
-              mine + open_ + [("date_deadline", ">=", day + " 00:00:00"), ("date_deadline", "<=", day + " 23:59:59")],
+              mine + open_ + [("date_deadline", ">=", start), ("date_deadline", "<", end)],
               name=_("Tasks due today"), key="tasks_due_today"),
         _line(env, _("Your tasks that changed stage in the last day"), "project.task",
               mine + [("date_last_stage_update", ">=", since)], name=_("Stage changes"), key="stage_changes"),
@@ -188,13 +225,13 @@ def _project(env, now, today, since):
 
 
 def _hr(env, now, today, since):
-    now_text = fields.Datetime.to_string(now)
+    start, end = _bounds(env, today)
     lines = [
         _line(env, _("Time off requests waiting for you"), "hr.leave", [("state", "=", "confirm")],
               name=_("Time off to approve"), key="time_off_to_approve"),
     ]
     off = _line(env, _("People off today"), "hr.leave",
-                [("state", "=", "validate"), ("date_from", "<=", now_text), ("date_to", ">=", now_text)],
+                [("state", "=", "validate"), ("date_from", "<", end), ("date_to", ">", start)],
                 name=_("People off today"), key="people_off_today")
     if off:
         names = _names(env, "hr.leave", off["domain"], "employee_id.name") if "employee_id" in env["hr.leave"]._fields else []
@@ -203,7 +240,7 @@ def _hr(env, now, today, since):
         lines.append(off)
     lines.append(_line(
         env, _("Open attendances since before today"), "hr.attendance",
-        [("check_out", "=", False), ("check_in", "<", fields.Datetime.to_string(datetime.combine(today, time.min)))],
+        [("check_out", "=", False), ("check_in", "<", start)],
         name=_("Attendance to check"), key="attendance_to_check"))
     return lines
 

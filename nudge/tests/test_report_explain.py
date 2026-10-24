@@ -124,6 +124,28 @@ class TestExplainReport(NudgeCase, TransactionCase):
         two = self.keep(OLD, measures=["amount_total:sum", "amount_tax:sum"], name="Two columns")
         self.assertTrue(any("is empty" in text for text in self.texts(self.explain(two))))
 
+    def test_amounts_in_several_currencies_are_not_added_together(self):
+        """Review (functional 13): a total over USD and AED orders was written in the company's currency"""
+        company = self.env.company
+        foreign = self.env["res.currency"].with_context(active_test=False).search(
+            [("id", "!=", company.currency_id.id)], limit=1)
+        foreign.active = True
+        pricelist = self.env["product.pricelist"].create({"name": "Nudge explain foreign", "currency_id": foreign.id})
+        ref = "nudge-explain-currencies"
+        self.order(self.raghad_user, 0, 100.0, ref)
+        other = self.order(self.raghad_user, 0, 100.0, ref)
+        other.pricelist_id = pricelist
+        self.assertEqual(other.currency_id, foreign)
+        texts = self.texts(self.explain(self.keep(ref)))
+        self.assertEqual(len(texts), 1)
+        self.assertIn("several currencies", texts[0])
+        # only the foreign one: the total is written in its currency
+        ref = "nudge-explain-foreign-only"
+        only = self.order(self.raghad_user, 0, 100.0, ref)
+        only.pricelist_id = pricelist
+        texts = self.texts(self.explain(self.keep(ref)))
+        self.assertIn(foreign.format(100.0), texts[0])
+
     def test_the_sentences_are_in_the_arabic_of_the_reader(self):
         self.env["res.lang"]._activate_lang("ar_001")
         # a database made from scratch has the language but not yet the terms of the module
