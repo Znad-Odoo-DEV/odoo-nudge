@@ -47,6 +47,15 @@ class TestApprovalSentence(TransactionCase):
             self.assertEqual(parsed["model"], model, sentence)
             self.assertEqual([(level["amount"], level["group"]) for level in parsed["levels"]], levels, sentence)
 
+    def test_a_vendor_invoice_is_a_vendor_bill_not_a_customer_invoice(self):
+        for sentence in ("Vendor invoices above 10,000 need the CFO", "Any supplier invoice over 10k needs the finance manager",
+                         "A purchase invoice above 10000 requires approval from the accounting manager"):
+            parsed = approval_sentence.parse(sentence)
+            self.assertTrue(parsed, sentence)
+            self.assertEqual(parsed["kind"], "vendor_bill", sentence)
+        self.assertEqual(approval_sentence.parse("Customer invoices above 10,000 need the CFO")["kind"], "customer_invoice")
+        self.assertEqual(approval_sentence.parse("Invoices above 10,000 need the CFO")["kind"], "customer_invoice")
+
     def test_what_is_not_an_approval_rule_is_left_alone(self):
         for sentence in ("Create a purchase order for Raghad", "كم عدد طلبات الشراء؟", "hello", "",
                          "Any purchase order above 50k"):
@@ -237,6 +246,91 @@ class TestApprovalFlow(NudgeCase, TransactionCase):
         self.action("approve", order, boss)
         order.button_confirm()
         self.assertEqual(order.state, "purchase")
+
+    def test_an_approval_holds_for_the_amount_it_was_given_for(self):
+        """Review (functional 1): approved at 60,000 and edited to 5,000,000 must be asked again"""
+        self.make({"model": "purchase.order", "levels": [{"amount": 50000, "group": "account.group_account_manager"}]})
+        order = self.order(60000)
+        self.action("request", order, self.buyer)
+        self.action("approve", order, self.finance)
+        self.assertAlmostEqual(order.x_nudge_approved_amount, 60000, places=2)
+        order.order_line.price_unit = 5000000
+        with self.assertRaises(UserError) as stopped:
+            order.button_confirm()
+        self.assertIn("approved", str(stopped.exception))
+        self.assertEqual(order.state, "draft")
+        # asked again, approved again, then it goes through
+        self.action("request", order, self.buyer)
+        self.assertEqual(order.x_nudge_approval_state, "pending")
+        self.action("approve", order, self.finance)
+        order.button_confirm()
+        self.assertEqual(order.state, "purchase")
+        # a smaller amount than the approved one is still approved
+        other = self.order(60000)
+        self.action("request", other, self.buyer)
+        self.action("approve", other, self.finance)
+        other.order_line.price_unit = 55000
+        other.button_confirm()
+        self.assertEqual(other.state, "purchase")
+
+    def test_the_limit_is_in_the_currency_of_the_company(self):
+        self.make({"model": "purchase.order", "levels": [{"amount": 50000, "group": "account.group_account_manager"}]})
+        company = self.env.company
+        foreign = self.env["res.currency"].with_context(active_test=False).search(
+            [("id", "!=", company.currency_id.id)], limit=1)
+        foreign.active = True
+        self.env["res.currency.rate"].create({
+            "currency_id": foreign.id, "company_id": company.id, "rate": 0.5, "name": "2000-01-01"})
+        # 30,000 of the foreign currency are 60,000 of the company's
+        big = self.order(30000)
+        big.currency_id = foreign
+        with self.assertRaises(UserError) as stopped:
+            big.button_confirm()
+        self.assertIn(company.currency_id.name, str(stopped.exception))
+        # at a rate of 4 of the foreign currency to one of the company's, 100,000 are 25,000 and pass
+        self.env["res.currency.rate"].create({
+            "currency_id": foreign.id, "company_id": company.id, "rate": 4, "name": "2001-01-01"})
+        small = self.order(100000)
+        small.currency_id = foreign
+        small.date_order = "2001-06-01"
+        small.button_confirm()
+        self.assertEqual(small.state, "purchase")
+
+    def test_the_system_and_the_visitor_are_not_stopped_but_the_person_is(self):
+        self.make({"model": "purchase.order", "levels": [{"amount": 50000, "group": "account.group_account_manager"}]})
+        portal = new_test_user(self.env, login="nudge_flow_portal", groups="base.group_portal")
+        big = self.order(60000)
+        with self.assertRaises(UserError):
+            big.button_confirm()
+        # the scheduled actions run as OdooBot, a website payment as the visitor or the portal customer
+        big.with_user(portal).sudo().button_confirm()
+        self.assertEqual(big.state, "purchase")
+        again = self.order(70000)
+        again.with_user(1).button_confirm()
+        self.assertEqual(again.state, "purchase")
+
+    def test_who_made_the_document_does_not_approve_it_unless_alone(self):
+        maker = new_test_user(self.env, login="nudge_flow_maker", groups="base.group_user,purchase.group_purchase_user")
+        solo = self.env["res.groups"].create({"name": "Nudge solo approvers"})
+        users_field = approval_flow.users_field(self.env)
+        solo[users_field] = [(6, 0, [maker.id])]
+        self.make({"model": "purchase.order", "levels": [{"amount": 50000, "group": "Nudge solo approvers"}]})
+        mine = self.order(60000, user=maker)
+        self.action("request", mine, maker)
+        # the only one of the group: allowed
+        self.action("approve", mine, maker)
+        self.assertEqual(mine.x_nudge_approval_state, "approved")
+        # with a second member, the maker is refused and the other approves
+        second = new_test_user(self.env, login="nudge_flow_second", groups="base.group_user,purchase.group_purchase_user")
+        solo[users_field] = [(4, second.id)]
+        theirs = self.order(60000, user=maker)
+        self.action("request", theirs, maker)
+        with self.assertRaises(UserError) as stopped:
+            self.action("approve", theirs, maker)
+        self.assertIn("You made this document", str(stopped.exception))
+        self.action("approve", theirs, second)
+        theirs.button_confirm()
+        self.assertEqual(theirs.state, "purchase")
 
     def test_the_generated_actions_lock_the_row_before_they_read_it(self):
         """Release-2 review S7: two approvers at the same instant are told one after the other"""
