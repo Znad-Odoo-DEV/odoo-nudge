@@ -20,8 +20,6 @@ access_nudge_step_agent,nudge.step agent,model_nudge_step,group_nudge_agent,1,0,
 access_nudge_digest_link_user,nudge.digest.link user,model_nudge_digest_link,group_nudge_user,1,1,0,0
 access_nudge_task_agent,nudge.task agent,model_nudge_task,group_nudge_agent,1,1,1,1
 access_nudge_usage_manager,nudge.usage manager,model_nudge_usage,group_nudge_manager,1,0,0,0
-access_ir_model_nudge_agent,ir.model nudge agent,base.model_ir_model,group_nudge_agent,1,0,0,0
-access_ir_model_fields_nudge_agent,ir.model.fields nudge agent,base.model_ir_model_fields,group_nudge_agent,1,0,0,0
 access_nudge_tour_user,nudge.tour user,model_nudge_tour,group_nudge_user,1,0,0,0
 access_nudge_tour_manager,nudge.tour manager,model_nudge_tour,group_nudge_manager,1,1,1,1
 access_nudge_tour_step_user,nudge.tour.step user,model_nudge_tour_step,group_nudge_user,1,0,0,0

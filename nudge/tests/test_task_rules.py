@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from odoo import fields
 from odoo.exceptions import AccessError, UserError, ValidationError
-from odoo.tests import TransactionCase, tagged
+from odoo.tests import Form, TransactionCase, tagged
 
 from .test_background import BackgroundCase
 
@@ -109,6 +109,40 @@ class TestTaskRules(BackgroundCase, TransactionCase):
         self.assertEqual(task.model_name, "res.partner")
         task.rule_model_id = self.env["ir.model"]._get_id("res.partner.category")
         self.assertEqual(task.model_name, "res.partner.category")
+
+    def test_an_agent_reads_no_model_row_and_picks_only_what_they_may_read(self):
+        # Stock Odoo gives employees no right on these rows: the count of every table, the code of custom fields
+        for name in ("ir.model", "ir.model.fields"):
+            with self.assertRaises(AccessError):
+                self.env[name].with_user(self.agent).search_read([], ["name"], limit=1)
+        Model = self.env["ir.model"].with_user(self.agent)
+        partner = self.env["ir.model"]._get("res.partner")
+        offered = dict(Model.name_search("", [], limit=None))
+        self.assertIn(partner.id, offered)
+        self.assertNotIn(self.env["ir.model"]._get_id("ir.config_parameter"), offered)
+        self.assertIn(partner.id, [line["id"] for line in Model.web_name_search(partner.name, {"display_name": {}})])
+        listed = Model.web_search_read([("id", "=", partner.id)], {"name": {}, "count": {}})
+        self.assertEqual(listed["records"], [{"id": partner.id, "name": partner.name}])
+        # A search on anything but names and types is refused as before: no path to the code of a field
+        with self.assertRaises(AccessError):
+            Model.name_search("", [("field_id.compute", "!=", False)])
+        Fields = self.env["ir.model.fields"].with_user(self.agent)
+        color = self.env["ir.model.fields"]._get("res.partner", "color")
+        numbers = dict(Fields.name_search("", [("model_id", "=", partner.id), ("ttype", "in", ["integer", "float"])]))
+        self.assertIn(color.id, numbers)
+        hidden = [name for name, field in self.env["res.partner"]._fields.items()
+                  if field.groups and not self.env["res.partner"].with_user(self.agent)._has_field_access(field, "read")]
+        names = dict(Fields.name_search("", [("model_id", "=", partner.id)], limit=None))
+        for name in hidden:
+            self.assertNotIn(self.env["ir.model.fields"]._get("res.partner", name).id, names)
+        # The form of a rule, as they fill it in
+        with Form(self.env["nudge.task"].with_user(self.agent)) as form:
+            form.name = "Raghad's tiles"
+            form.engine = "rule"
+            form.rule_model_id = partner
+            form.rule_measure = "sum"
+            form.rule_field_id = color
+        self.assertEqual((form.record.model_name, form.record.rule_field_id), ("res.partner", color))
 
     def test_limit_applies(self):
         self.env["ir.config_parameter"].sudo().set_param("nudge.tasks_per_user", "1")

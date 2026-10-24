@@ -158,7 +158,7 @@ class NudgeValidatorPolicy(models.Model):
 
     @api.constrains("model_id", "field_id")
     def _check_field_model(self):
-        for policy in self:
+        for policy in self.sudo():
             if policy.field_id.model_id != policy.model_id:
                 raise ValidationError(_("The field must belong to the form chosen."))
 

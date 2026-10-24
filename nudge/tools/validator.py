@@ -595,7 +595,8 @@ class PolicyRequired(Check):
     def policies(self, env, model):
         if "nudge.validator.policy" not in env.registry:
             return env["nudge.validator.policy"]
-        return env["nudge.validator.policy"].search([("model_name", "=", model)])
+        # sudo once found: the field of a policy is read by people with no right on ir.model.fields
+        return env["nudge.validator.policy"].search([("model_name", "=", model)]).sudo()
 
     def applies(self, env, model):
         return model in env.registry and bool(self.policies(env, model))

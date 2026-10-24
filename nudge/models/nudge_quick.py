@@ -719,11 +719,12 @@ class NudgeQuick(models.AbstractModel):
             return {}
         if re.fullmatch(MODEL_PATTERN, text) and text in self.env:
             return {"model": text}
-        models_ = self.env["ir.model"].search(["|", ("name", "=ilike", text), ("model", "=ilike", text)], limit=2)
+        # sudo: names of models only, found for a tool that checks the rights of the person itself
+        models_ = self.env["ir.model"].sudo().search(["|", ("name", "=ilike", text), ("model", "=ilike", text)], limit=2)
         if len(models_) != 1:
             # Its name in any spelling, in the language of the person or in English
             terms = commands.fold(text).split()
-            Model = self.env["ir.model"]
+            Model = self.env["ir.model"].sudo()
             english = dict(Model.with_context(lang="en_US").search_fetch([], ["name"]).mapped(lambda m: (m.id, m.name)))
             models_ = Model.search_fetch([], ["name", "model"]).filtered(
                 lambda m: terms and commands.matches(terms, f"{m.name} {english.get(m.id, '')}"))
