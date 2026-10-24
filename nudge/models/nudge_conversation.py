@@ -224,7 +224,8 @@ class NudgeConversation(models.Model):
                 raise AccessError(self.env._("Only the title of a conversation can be changed."))
         if not self.env.su and "summary_text" in vals:
             # NP-22: the summary is the owner's to correct, and to nobody else's, a manager included
-            if any(conversation.user_id != self.env.user for conversation in self)                     or SUMMARY_BOOKKEEPING & vals.keys():
+            if (any(conversation.user_id != self.env.user for conversation in self)
+                    or SUMMARY_BOOKKEEPING & vals.keys()):
                 raise AccessError(self.env._("Only the owner of a conversation can change its summary."))
             # Kept as written; emptied, it is made again from the messages
             vals = dict(vals, summary_edited=bool((vals["summary_text"] or "").strip()), summary_ai=False,
