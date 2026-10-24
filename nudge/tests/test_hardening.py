@@ -2,6 +2,9 @@ from odoo import fields
 from odoo.exceptions import AccessError, UserError
 from odoo.tests import TransactionCase, tagged
 
+from odoo.addons.nudge.llm import base as llm
+from odoo.addons.nudge.models.nudge_conversation import TOO_MANY_AT_ONCE
+
 from .common import NudgeCase
 from .test_snapshot import SNAPSHOT
 
@@ -111,6 +114,17 @@ class TestHardening(NudgeCase, TransactionCase):
         self.assertFalse(acted.active, "and the conversation put away")
         self.assertEqual((streaming | waiting | recent).exists(), streaming | waiting | recent)
         self.assertTrue(all((streaming | waiting | recent).mapped("active")))
+
+    def test_one_step_of_talk_runs_a_bounded_number_of_tools(self):
+        """Review (ai #9): forty reads asked at once in Talk were all run and replayed in every round after."""
+        calls = [llm.tool_use_event(f"call_{index}", "find_screen", {"words": "quotation"}) for index in range(12)]
+        self.use_adapter(script=[calls + [llm.stop_event(llm.STOP_TOOL_USE)],
+                                 [llm.text_event("Here they are."), llm.stop_event(llm.STOP_END)]])
+        conversation, _event = self.ask(self.user_a, "Find the screens of quotations twelve times")
+        results = conversation.sudo().message_ids.filtered(lambda message: message.role == "tool")[0].tool_results
+        refused = [result for result in results if result["content"] == TOO_MANY_AT_ONCE]
+        self.assertEqual((len(results), len(refused)), (12, 2))
+        self.assertTrue(all(result["is_error"] for result in refused))
 
     def test_a_tool_error_tells_only_what_the_model_can_act_on(self):
         from odoo.addons.nudge.tools.base import guarded
