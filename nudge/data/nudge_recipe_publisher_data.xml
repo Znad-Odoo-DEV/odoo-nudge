@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- S2: the key that signs the skills of the catalogue that comes with Nudge. An administrator may archive it
+         (Nudge, Configuration, Recipes, Trusted Publishers); its recipes are then treated as unsigned. -->
+    <record id="recipe_publisher_nudge" model="nudge.recipe.publisher">
+        <field name="name">Nudge</field>
+        <field name="builtin" eval="True"/>
+        <field name="public_key">-----BEGIN PUBLIC KEY-----
+MCowBQYDK2VwAyEAZ//o9Hn2ktH5x6PYDeHOPris9nBPa/NDAUn/xNtTp20=
+-----END PUBLIC KEY-----</field>
+    </record>
+</odoo>

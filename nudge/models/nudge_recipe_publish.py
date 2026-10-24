@@ -20,7 +20,7 @@ from .nudge_recipe_wizard import FLAGS
 INDEX_KIND_OF = {
     "tour": "tour", "rule": "rules", "preset": "rules", "lexicon": "lexicon", "memory": "answers",
     "health": "pack", "file": "pack", "screen": "pack",
-    "prompt": "prompts",
+    "prompt": "prompts", "skill": "skills",
 }
 
 
@@ -94,6 +94,7 @@ class NudgeRecipePublish(models.TransientModel):
             package = Recipe._export(group, files=self.include_files)
             if not package["recipe"]["items"]:
                 continue
+            package = Recipe._sign(package)  # unsigned when no key is set
             key = f"{self.key}-{index_kind}" if self.split else self.key
             raw = canonical(package).encode("utf-8")
             path = f"recipes/{key}.json"
