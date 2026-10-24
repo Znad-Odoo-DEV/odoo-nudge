@@ -21,7 +21,7 @@ from datetime import timedelta
 
 import requests
 
-from odoo import api, fields, models, tools
+from odoo import _, api, fields, models, tools
 from odoo.exceptions import UserError
 
 from odoo.addons.nudge.tools.deadline import cap as worker_cap
@@ -125,12 +125,12 @@ class NudgeConnector(models.Model):
     def _check_key(self):
         for connector in self:
             if not KEY.match(connector.key or ""):
-                raise UserError(self.env._(
+                raise UserError(_(
                     "The key starts with a small letter and holds small letters, digits and _ only, "
                     "20 at most: %s", connector.key))
             if self.with_context(active_test=False).search_count([
                     ("key", "=", connector.key), ("id", "!=", connector.id)]):
-                raise UserError(self.env._("Another connector has the key %s.", connector.key))
+                raise UserError(_("Another connector has the key %s.", connector.key))
 
     @api.constrains("url", "runs_locally", "oauth_token_url", "auth_type")
     def _check_url(self):
@@ -139,7 +139,7 @@ class NudgeConnector(models.Model):
                 try:
                     mcp_client.check_url(url, allow_private=True)
                 except mcp_client.McpError:
-                    raise UserError(self.env._(
+                    raise UserError(_(
                         "%s: the address must start with https:// (http:// only for this machine, localhost).",
                         url)) from None
 
@@ -147,9 +147,9 @@ class NudgeConnector(models.Model):
     def _check_limits(self):
         for connector in self:
             if not 1 <= connector.timeout <= MAX_TIMEOUT:
-                raise UserError(self.env._("The time allowed is between 1 and %s seconds.", MAX_TIMEOUT))
+                raise UserError(_("The time allowed is between 1 and %s seconds.", MAX_TIMEOUT))
             if not 200 <= connector.max_result_chars <= MAX_RESULT_CHARS:
-                raise UserError(self.env._("The longest answer is between 200 and %s characters.", MAX_RESULT_CHARS))
+                raise UserError(_("The longest answer is between 200 and %s characters.", MAX_RESULT_CHARS))
 
     # ------------------------------------------------------------------ the list of each process
     @api.model_create_multi
@@ -197,7 +197,7 @@ class NudgeConnector(models.Model):
             return self._notify(told, "danger")
         self.write({"protocol_version": self._era_label(found["era"]), "server_name": found["server"],
                     "last_error": False})
-        return self._notify(self.env._("The server answers (%(server)s, protocol %(protocol)s).",
+        return self._notify(_("The server answers (%(server)s, protocol %(protocol)s).",
                                        server=found["server"] or "?", protocol=self.protocol_version), "success")
 
     def action_sync_tools(self):
@@ -240,7 +240,7 @@ class NudgeConnector(models.Model):
             "protocol_version": self._era_label(client.era), "server_name": client._server_name(),
             "last_sync": fields.Datetime.now(), "last_error": False,
         })
-        told = self.env._("%(count)s tools read: %(new)s new, %(changed)s changed and no longer allowed, "
+        told = _("%(count)s tools read: %(new)s new, %(changed)s changed and no longer allowed, "
                           "%(gone)s gone.", count=len(seen), new=len(fresh), changed=changed, gone=len(gone))
         return self._notify(told, "warning" if changed else "success")
 
@@ -445,10 +445,10 @@ class NudgeConnectorTool(models.Model):
     def _compute_hint_warning(self):
         for tool in self:
             if tool.access == "read" and not tool.read_only_hint:
-                tool.hint_warning = self.env._(
+                tool.hint_warning = _(
                     "The server does not say this tool only reads: a read runs without asking the person.")
             elif tool.access == "read" and tool.destructive_hint:
-                tool.hint_warning = self.env._("The server says this tool may delete.")
+                tool.hint_warning = _("The server says this tool may delete.")
             else:
                 tool.hint_warning = False
 

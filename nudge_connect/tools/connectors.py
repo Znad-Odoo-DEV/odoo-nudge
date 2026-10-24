@@ -13,6 +13,7 @@ is an Action: the person sees the exact payload on a card and nothing is sent be
 comes back is data: framed as every result of a tool is, cut to the size the connector allows, with
 the connector's own secrets taken out.
 """
+from odoo import _
 import hashlib
 import json
 import re
@@ -234,19 +235,19 @@ class ConnectorWrite(ConnectorTool, base.Action):
                 f"a card ({MAX_PAYLOAD_SHOWN} at most): nothing is sent that they cannot read. Send less.",
                 is_error=True)
         lines = [
-            {"label": env._("Connector"), "value": connector.name},
-            {"label": env._("Tool"), "value": tool.title or tool.remote_name},
-            {"label": env._("Address"), "value": connector.url},
-            {"label": env._("Sends"), "value": payload},
+            {"label": _("Connector"), "value": connector.name},
+            {"label": _("Tool"), "value": tool.title or tool.remote_name},
+            {"label": _("Address"), "value": connector.url},
+            {"label": _("Sends"), "value": payload},
         ]
         read_before = tool._connect_read_before()
         if read_before:
-            lines.append({"label": env._("Read before in this conversation"), "value": ", ".join(read_before)})
+            lines.append({"label": _("Read before in this conversation"), "value": ", ".join(read_before)})
         _summarize(self.name, connector.name, tool.remote_name, self.access)
         return base.ToolResult(
             "The person is being asked whether this is sent.",
             pending={
-                "summary": env._("Send to %(connector)s: %(tool)s", connector=connector.name,
+                "summary": _("Send to %(connector)s: %(tool)s", connector=connector.name,
                                  tool=tool.title or tool.remote_name),
                 "res_model": TOOL_MODEL,
                 "res_ids": tool.ids,

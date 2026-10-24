@@ -5,7 +5,7 @@
         <field name="name">nudge.connector.view.list</field>
         <field name="model">nudge.connector</field>
         <field name="arch" type="xml">
-            <list string="Connectors" decoration-muted="state != 'active'">
+            <tree string="Connectors" decoration-muted="state != 'active'">
                 <field name="name"/>
                 <field name="key"/>
                 <field name="url"/>
@@ -14,7 +14,7 @@
                 <field name="last_sync" optional="show"/>
                 <field name="state" widget="badge" decoration-success="state == 'active'"
                        decoration-danger="state == 'stopped'"/>
-            </list>
+            </tree>
         </field>
     </record>
 
@@ -88,7 +88,7 @@
                                 is not allowed any more until it is allowed again.
                             </div>
                             <field name="tool_ids">
-                                <list editable="bottom" create="false" delete="false"
+                                <tree editable="bottom" create="false" delete="false"
                                       decoration-muted="missing" decoration-warning="needs_review">
                                     <field name="remote_name"/>
                                     <field name="title" optional="hide"/>
@@ -99,12 +99,12 @@
                                     <field name="needs_review" optional="show"/>
                                     <field name="missing" optional="show"/>
                                     <field name="access"/>
-                                </list>
+                                </tree>
                             </field>
                         </page>
                         <page string="Calls" name="calls">
                             <field name="call_ids" readonly="1">
-                                <list>
+                                <tree>
                                     <field name="create_date" string="On"/>
                                     <field name="user_id"/>
                                     <field name="tool_name"/>
@@ -112,7 +112,7 @@
                                     <field name="state"/>
                                     <field name="result_chars"/>
                                     <field name="duration_ms"/>
-                                </list>
+                                </tree>
                             </field>
                         </page>
                     </notebook>
@@ -140,7 +140,7 @@
     <record id="nudge_connector_action" model="ir.actions.act_window">
         <field name="name">Connectors</field>
         <field name="res_model">nudge.connector</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">tree,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">Connect Nudge to an outside system</p>
             <p>A connector is an outside system that speaks MCP: a sister company's Odoo, a calendar, a chat,
@@ -196,7 +196,7 @@
         <field name="name">nudge.connector.call.view.list</field>
         <field name="model">nudge.connector.call</field>
         <field name="arch" type="xml">
-            <list string="Connector Calls" create="false" edit="false" delete="false"
+            <tree string="Connector Calls" create="false" edit="false" delete="false"
                   decoration-danger="state == 'failed'" decoration-muted="state == 'refused'">
                 <field name="create_date" string="On"/>
                 <field name="user_id"/>
@@ -207,7 +207,7 @@
                 <field name="result_chars"/>
                 <field name="duration_ms"/>
                 <field name="company_id" groups="base.group_multi_company" optional="hide"/>
-            </list>
+            </tree>
         </field>
     </record>
 
@@ -263,7 +263,7 @@
     <record id="nudge_connector_call_action" model="ir.actions.act_window">
         <field name="name">Connector Calls</field>
         <field name="res_model">nudge.connector.call</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">tree,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">No call to a connector yet</p>
             <p>Every call Nudge makes to a connector is kept here: who asked, what was sent (secrets masked),
