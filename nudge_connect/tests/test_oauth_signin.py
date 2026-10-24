@@ -2,10 +2,11 @@
 import json
 import logging
 from datetime import timedelta
+from unittest.mock import patch
 from urllib.parse import parse_qs, urlencode, urlsplit
 
 from odoo import fields
-from odoo.exceptions import AccessError, UserError
+from odoo.exceptions import AccessError, LockError, UserError
 from odoo.tests import HttpCase, TransactionCase, new_test_user, tagged
 
 from odoo.addons.nudge import tools as nudge_tools
@@ -196,6 +197,43 @@ class TestConnectorSignIn(SignInCase, TransactionCase):
         self.assertNotEqual(old, new)
         self.assertEqual(self.server.calls("token")[-1]["body"]["grant_type"], "refresh_token")
         self.assertEqual(self.server.calls()[-1]["headers"]["authorization"], "Bearer " + new)
+
+    def test_a_renewal_in_progress_elsewhere_does_not_cost_the_token(self):
+        self.sign_in(self.agent)
+        row = self.tokens(self.agent)
+        old = row.access_token
+        row.expires = fields.Datetime.now() + timedelta(seconds=5)
+        refreshes = len(self.server.calls("token"))
+        held = patch.object(type(row), "lock_for_update", side_effect=LockError("held"))
+        with held:
+            result = self.ask(self.agent)
+        self.assertFalse(result.is_error, result.content)
+        self.assertEqual(self.server.calls()[-1]["headers"]["authorization"], "Bearer " + old)
+        self.assertEqual(len(self.server.calls("token")), refreshes, "The refresh token is not sent twice")
+        self.assertEqual(self.tokens(self.agent), row)
+        # An ended token cannot be reused: the person is asked again, and the token is still there
+        row.expires = fields.Datetime.now() - timedelta(seconds=5)
+        with held:
+            result = self.ask(self.agent)
+        self.assertTrue(result.is_error)
+        self.assertNotIn("Sign in to", result.content)
+        self.assertEqual(self.tokens(self.agent), row)
+        self.assertEqual(len(self.server.calls("token")), refreshes)
+
+    def test_a_token_renewed_while_waiting_for_the_lock_is_used_as_it_is(self):
+        self.sign_in(self.agent)
+        row = self.tokens(self.agent)
+        row.expires = fields.Datetime.now() + timedelta(seconds=5)
+        refreshes = len(self.server.calls("token"))
+
+        def renewed(this, **kwargs):
+            this.write({"access_token": "access-renewed-elsewhere", "expires": fields.Datetime.now() + timedelta(hours=1)})
+
+        with patch.object(type(row), "lock_for_update", renewed):
+            result = self.ask(self.agent)
+        self.assertFalse(result.is_error, result.content)
+        self.assertEqual(self.server.calls()[-1]["headers"]["authorization"], "Bearer access-renewed-elsewhere")
+        self.assertEqual(len(self.server.calls("token")), refreshes)
 
     def test_a_token_that_cannot_be_renewed_asks_for_a_sign_in(self):
         self.server.expires_in = 1

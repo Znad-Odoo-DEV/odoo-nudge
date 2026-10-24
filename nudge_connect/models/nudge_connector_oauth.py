@@ -23,7 +23,7 @@ from urllib.parse import quote, urlencode, urlparse, urlsplit, urlunsplit
 import requests
 
 from odoo import api, fields, models
-from odoo.exceptions import AccessError, UserError
+from odoo.exceptions import AccessError, LockError, UserError
 
 from odoo.addons.nudge.tools.records import Refused
 
@@ -443,6 +443,10 @@ class NudgeConnectorToken(models.Model):
         return self.sudo().create(dict(values, connector_id=connector.id, user_id=user.id))
 
     @api.model
+    def _ends_soon(self, row):
+        return bool(row.expires) and row.expires <= fields.Datetime.now() + timedelta(seconds=RENEW_BEFORE)
+
+    @api.model
     def _bearer(self, connector):
         """:return: the access token of the person of this environment for ``connector``, renewed when it
         ends. Never another person's.
@@ -451,7 +455,18 @@ class NudgeConnectorToken(models.Model):
         row = self.sudo().search([("connector_id", "=", connector.id), ("user_id", "=", self.env.uid)], limit=1)
         if not row or not row.access_token:
             raise mcp_client.McpError("signin")
-        if row.expires and row.expires <= fields.Datetime.now() + timedelta(seconds=RENEW_BEFORE):
+        if self._ends_soon(row):
+            # One renewal at a time: a provider that rotates refresh tokens refuses the second use of one,
+            # and that refusal must not delete the token the first renewal just stored
+            try:
+                row.lock_for_update()
+            except LockError:
+                if row.expires > fields.Datetime.now():
+                    return row.access_token
+                raise mcp_client.McpError("timeout", "The sign-in is being renewed by another request: ask again.")
+            row.invalidate_recordset()
+            if not self._ends_soon(row):
+                return row.access_token
             if not row.refresh_token:
                 row.unlink()
                 raise mcp_client.McpError("signin")
