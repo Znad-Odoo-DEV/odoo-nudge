@@ -107,7 +107,7 @@ class TestActivity(NudgeCase, TransactionCase):
         conversation = self.env["nudge.conversation"].with_user(self.user_contacts)._chat_open(None)
         job = conversation._chat_prepare("How many contacts do we have?")
         self.assertIn("## Where the work is", "\n".join(job["system"]))
-        self.assertTrue(job["system"][-1].startswith(prompt.TALK_MODE), "The rules stay last")
+        self.assertTrue(job["system"][-1].startswith(prompt.TALK_MODE_ASK), "The rules stay last")
 
     def test_arabic_is_read_however_it_is_written(self):
         # By the root: a salary and the salaries, however they are written
