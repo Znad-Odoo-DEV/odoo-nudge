@@ -30,7 +30,7 @@ class TestExplain(NudgeCase, TransactionCase):
         self.assertIn('"explain":"on the screen"',
                       self.context_of(self.agent, explain="screen", mode="agent"))
         self.assertNotIn('"explain"', self.context_of(self.agent, mode="agent"))
-        self.assertIn("they asked how", prompt.AGENT_MODE)
+        self.assertIn("they asked how", prompt.SITUATIONS["explain"])
 
     def test_the_pointer_makes_the_model_reach_for_a_tool(self):
         conversation = self.env["nudge.conversation"].with_user(self.user_a)._chat_open(None)
@@ -50,8 +50,8 @@ class TestExplain(NudgeCase, TransactionCase):
                          "The browser reads the choice with the other settings")
 
     def test_the_prompt_knows_the_words(self):
-        self.assertIn('"explain": "on the screen"', prompt.SYSTEM_PERSONA)
-        self.assertIn('"explain": "in writing"', prompt.SYSTEM_PERSONA)
+        self.assertIn('"explain": "on the screen"', prompt.SITUATIONS["explain"])
+        self.assertIn('"explain": "in writing"', prompt.SITUATIONS["explain"])
         self.assertIn("show_menu_path", prompt.SYSTEM_PERSONA)
 
     def test_a_report_as_a_spreadsheet(self):
@@ -72,7 +72,7 @@ class TestExplain(NudgeCase, TransactionCase):
         conversation.sudo().write({"stream_started_at": False})
         job = conversation._chat_prepare("Compare the salaries", mode="agent", report="chat")
         self.assertIsNone(job["tool_choice"])
-        self.assertIn('"report": "spreadsheet"', prompt.SYSTEM_PERSONA)
+        self.assertIn('"report": "spreadsheet"', prompt.SITUATIONS["report"])
 
     def test_the_first_rounds_are_forced_and_the_last_is_free(self):
         """A model that keeps looking is forced twice, then left to answer."""

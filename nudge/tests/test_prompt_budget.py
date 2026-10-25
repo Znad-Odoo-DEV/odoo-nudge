@@ -19,8 +19,10 @@ _logger = logging.getLogger(__name__)
 
 # What a call may weigh, in tokens: the card asks under 12k for Agent; the base prompt, the overview of
 # the database and the index of the skills leave about 14k for a typical question of that mode. Talk measured
-# 11.1k for an import question once 24 skills were in the index (about 35 tokens each)
-BUDGET = {"talk": 11500, "agent": 15000, "agent_heaviest": 16500, "dev": 20000}
+# 11.1k for an import question once 24 skills were in the index (about 35 tokens each). Since the trial
+# (NP-03, 2026-10-25) what only some questions need comes with them and the model reads a lighter schema:
+# Agent 12.7k became 11.3k, Talk 10.3k 9.3k, Developer 17.3k 15.4k
+BUDGET = {"talk": 10800, "agent": 13800, "agent_heaviest": 14500, "dev": 17000}
 
 PLAIN = "How do I record a payment from a customer?"
 INVOICE = "Which invoices of Raghad are still unpaid?"
@@ -129,6 +131,51 @@ class TestPromptBudget(NudgeCase, TransactionCase):
                                     for tool in first[0]["tools"][:stable + 1]), f"{mode}: the core first")
             self.assertLess(total[1], BUDGET[mode], mode)
         _logger.info("S8 call sizes in tokens (system, tools and the context of the question): %s", sizes)
+
+    def test_what_only_some_questions_need_comes_with_them(self):
+        """The Import screen, Studio, a choice of the person, a spoken question and a file are told
+        with the questions they come with, after the part of the prompt every call shares"""
+        for key, text in prompt.SITUATIONS.items():
+            self.assertNotIn(text.strip("\n- ")[:60], prompt.SYSTEM_PERSONA + prompt.AGENT_MODE, key)
+        _conversation, calls = self.first_call(self.admin, PLAIN)
+        sent = "\n".join(llm.system_texts(calls[0]["system"]))
+        self.assertNotIn(prompt.SITUATIONS_HEADING, sent, "A plain question is told none of them")
+        adapter = self.use_adapter()
+        conversation = self.env["nudge.conversation"].with_user(self.admin)._chat_open(None)
+        job = conversation._chat_prepare("What do these errors mean?", mode="agent", explain="screen",
+                                         snapshot={"model": "res.partner", "import": {"errors": ["x"]}})
+        list(loop.run(job, conversation._chat_record))
+        system = adapter.calls[0]["system"]
+        self.assertTrue(prompt.is_question_block(system[-1]))
+        for key in ("explain", "import"):
+            self.assertIn(prompt.SITUATIONS[key], system[-1], key)
+        for key in ("studio", "voice", "read_aloud", "report", "attachment"):
+            self.assertNotIn(prompt.SITUATIONS[key], system[-1], key)
+        self.assertEqual(system[:-1], calls[0]["system"][:-1], "The shared part stays the same")
+        self.assertEqual(prompt.situations('<nudge_context>{"input":"voice","report":"spreadsheet"}</nudge_context>'),
+                         prompt.SITUATIONS_HEADING + prompt.SITUATIONS["report"] + prompt.SITUATIONS["voice"])
+        # Written by the person, it is no choice of theirs
+        self.assertEqual(prompt.situations('<nudge_context>{"user_name":"\\"explain\\":"}</nudge_context>\n"explain":'), "")
+
+    def test_the_model_reads_a_lighter_schema(self):
+        """Nudge checks every call against the whole schema: the model is not shown the lengths of a
+        text, nor "no other argument", and a long description once"""
+        tool = base.TOOLS["prepare_create"]
+        sent = base.dump(tool.definition())
+        for word in ('"maxLength"', '"minLength"', '"additionalProperties"'):
+            self.assertNotIn(word, sent)
+        self.assertIn('"additionalProperties":false', base.dump(tool.input_schema), "The schema itself is whole")
+        self.assertIn('"maxLength":4000', base.dump(tool.input_schema))
+        self.assertIn("Same as above.", sent)
+        self.assertEqual(sent.count("Always written as text."), 1)
+        self.assertIn('"enum"', base.dump(base.TOOLS["search_records"].definition()))
+        self.assertIn('"pattern"', base.dump(base.TOOLS["search_records"].definition()), "A form is shown, never told")
+        result = base.call(self.env(user=self.admin), "search_records", {"model": "res.partner", "colour": "red"}, mode="agent")
+        self.assertTrue(result.is_error)
+        self.assertIn("colour", result.content)
+        # An argument named as a keyword of the schema keeps its name
+        self.assertEqual(base.model_schema({"type": "object", "properties": {"maxLength": {"type": "integer"}}}),
+                         {"type": "object", "properties": {"maxLength": {"type": "integer"}}})
 
     # ------------------------------------------------------------- the right tools
     def test_each_question_gets_the_tools_and_instructions_of_its_work(self):
