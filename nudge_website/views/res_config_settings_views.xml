@@ -9,7 +9,7 @@
                 <block title="Website Assistant" name="nudge_website_container">
                     <setting help="A chat bubble on the website and in the portal. Visitors with no login are answered only from the published products, the company files marked public and the published pages. Customers who are logged in are also answered about their own orders and invoices.">
                         <field name="website_id" options="{'no_open': True, 'no_create': True}"/>
-                        <field name="nudge_assistant"/>
+                        <div class="mt8"><field name="nudge_assistant"/> <label for="nudge_assistant"/></div>
                         <div class="content-group" invisible="not nudge_assistant">
                             <div class="row mt8">
                                 <label for="nudge_greeting" class="col-lg-4 o_light_label"/>
