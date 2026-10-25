@@ -23,6 +23,9 @@
                 <div t-if="props.spoken" class="o_nudge_seen o_nudge_said">
                     <i class="fa fa-microphone"/> <span>Said</span>
                 </div>
+                <div t-if="!isAssistant and props.state === 'next'" class="o_nudge_seen o_nudge_next">
+                    <i class="fa fa-clock-o" aria-hidden="true"/> <span>Sent when this answer ends</span>
+                </div>
                 <!-- An answer: who gave it, when the model standing in did (NP-10) -->
                 <div t-if="props.screen and isAssistant" class="o_nudge_seen o_nudge_fallback" t-att-title="props.screen">
                     <i class="fa fa-server" aria-hidden="true"/> <span t-esc="props.screen"/>

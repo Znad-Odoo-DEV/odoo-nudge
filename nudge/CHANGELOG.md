@@ -13,6 +13,8 @@ Current version: nudge 18.0.1.59.2, nudge_mcp 18.0.1.1.1, nudge_connect 18.0.1.0
 
 - Trial: Developer mode, "Undo what you just did" did not hang. Typed right after the No to the approval card, it was never sent: Enter is dropped while the answer after the No is being written (fixed with S13 above), and the trial waited 240 s for the answer to a question not asked. With nothing built, the undo is refused once and the model answers in words, no card (test).
 
+- Trial: S13, a question sent right after a yes or a no, while the answer that follows it is being written, waits for that answer: it shows under it, marked "Sent when this answer ends", and goes once the answer ends. Before, Enter dropped it, and the button in the place of Send was Stop, which cut the answer short ("Stopped."). An answer that ends on a new card gives the question back to the message box, so does Stop. On the server a question of the same person is refused while an answer is written before the memory can answer it in the middle.
+
 ## 19.0.1.59.2 (unreleased)
 
 - Review: the Latency and Cost panel counts the days of the period in the manager's time zone, not in UTC: in Dubai the evening answers of the 24th belonged to the 25th, and the panel of "today" missed them (two tests failed every evening after 20:00 UTC).

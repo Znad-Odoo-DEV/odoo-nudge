@@ -668,7 +668,12 @@
                         title="Stop" aria-label="Stop" t-on-click="() => this.nudge.stop()">
                     <i class="fa fa-stop"/>
                 </button>
-                <button t-else="" type="submit" class="o_nudge_send" title="Send" aria-label="Send"
+                <!-- Written while Nudge answers: sent once the answer ends, after it (S13) -->
+                <button t-if="state.isStreaming and canSend" type="submit" class="o_nudge_send o_nudge_send_next"
+                        title="Send when this answer ends" aria-label="Send when this answer ends">
+                    <i class="fa fa-arrow-up"/>
+                </button>
+                <button t-if="!state.isStreaming" type="submit" class="o_nudge_send" title="Send" aria-label="Send"
                         t-att-disabled="!canSend">
                     <i class="fa fa-arrow-up"/>
                 </button>

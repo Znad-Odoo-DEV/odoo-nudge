@@ -328,6 +328,43 @@ class TestStop(LineCase, TransactionCase):
 
 
 @tagged("post_install", "-at_install")
+class TestAfterYes(LineCase, TransactionCase):
+    """S13 (trial): a question sent while the answer that follows a yes is still being written."""
+
+    def test_a_question_during_the_answer_after_a_yes_comes_after_it(self):
+        from .test_agent import asking, call, saying, values  # noqa: PLC0415
+
+        how = "How do I create a quotation in Sales?"
+        steps = "Open Sales, press New, pick the customer and add the products."
+        self.Parameter.set_param(nudge_conversation.MAX_STREAMS_PARAM, "8")
+        self.Parameter.set_param("nudge.answer_memory", "True")
+        # Answered from memory, with no provider: it would land in the middle of the answer
+        self.env["nudge.memory"].create({"question": how, "answer": steps, "state": "approved"})
+        self.use_adapter(script=[
+            asking(call("prepare_create", {"model": "res.partner", "values": values(name="Raghad Trial")})),
+            saying("Raghad Trial is made."),
+        ])
+        conversation, _events = self.order(self.agent, "Create the contact Raghad Trial")
+        step = conversation.sudo().waiting_step_id
+        follow = conversation._agent_decide(step.id, "confirm")
+
+        before = conversation.sudo().message_ids
+        for text in (how, "Now give her the city Jenin"):
+            with self.assertRaisesRegex(UserError, "still answering"):
+                conversation._chat_prepare(text)
+        self.assertEqual(conversation.sudo().message_ids, before, "Nothing written in the middle")
+        self.assertEqual(conversation.sudo().run_id, step.run_id, "The run of the yes goes on")
+
+        answer = list(loop.run(follow, conversation._chat_record))
+        self.assertEqual(answer[-1]["state"], "complete")
+        _same, last = self.ask(self.agent, how, conversation.id)
+        self.assertEqual(last["type"], "done")
+        said = conversation.sudo().message_ids.sorted("id").filtered(
+            lambda message: message.role in ("user", "assistant") and message.content)
+        self.assertEqual(said.mapped("content")[-3:], ["Raghad Trial is made.", how, steps])
+
+
+@tagged("post_install", "-at_install")
 class TestWaitingRoomHttp(LineCase, HttpCase):
 
     def post(self, login, message="Hello", slot=None):

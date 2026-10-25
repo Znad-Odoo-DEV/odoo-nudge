@@ -493,15 +493,16 @@ export class NudgePanel extends Component {
     // ------------------------------------------------------------------
 
     get canSend() {
+        // While an answer is being written, one question may be sent to follow it (S13)
         return (
             Boolean(this.state.draft.trim() || this.state.attachment) &&
-            !this.state.isStreaming &&
+            !(this.state.isStreaming && this.state.next) &&
             !this.isListening
         );
     }
 
     send(text, options = {}) {
-        if (this.state.isStreaming) {
+        if (this.state.isStreaming && this.state.next) {
             return;
         }
         this.nudge.send(text, options);
