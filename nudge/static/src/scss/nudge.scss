@@ -15,6 +15,10 @@ $o-nudge-text-muted: $o-gray-600 !default;
 $o-nudge-danger: $danger !default;
 $o-nudge-shadow: 0 12px 40px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08) !default;
 
+// What the tokens below fall back to where the page defines no Bootstrap variables (the backend of Odoo
+// Enterprise 19 has no --bs-primary: without these the avatar and the panel header turned white on white)
+$o-nudge-primary: if(type-of($primary) == color, $primary, $o-nudge-violet);
+
 $o-nudge-avatar-size: 56px;
 $o-nudge-gap: 16px;
 $o-nudge-radius: 18px;
@@ -29,20 +33,20 @@ $o-nudge-radius: 18px;
 
 .o_nudge {
     // Design tokens (the table of the UI audit, section 5): Nudge owns no palette, it consumes Odoo's
-    --nudge-accent: var(--bs-primary);
-    --nudge-accent-strong: color-mix(in srgb, var(--bs-primary) 85%, black);
-    --nudge-accent-rgb: var(--bs-primary-rgb);
-    --nudge-accent-strong-rgb: var(--bs-primary-rgb);
-    --nudge-on-accent: var(--bs-white);
-    --nudge-surface: var(--bs-body-bg);
-    --nudge-surface-muted: var(--bs-tertiary-bg);
-    --nudge-border: var(--bs-border-color);
-    --nudge-text: var(--bs-body-color);
-    --nudge-text-muted: var(--bs-secondary-color);
-    --nudge-danger: var(--bs-danger);
-    --nudge-success: var(--bs-success);
-    --nudge-warning: var(--bs-warning);
-    --nudge-info: var(--bs-info);
+    --nudge-accent: var(--bs-primary, #{$o-nudge-primary});
+    --nudge-accent-strong: color-mix(in srgb, var(--bs-primary, #{$o-nudge-primary}) 85%, black);
+    --nudge-accent-rgb: var(--bs-primary-rgb, #{red($o-nudge-primary)}, #{green($o-nudge-primary)}, #{blue($o-nudge-primary)});
+    --nudge-accent-strong-rgb: var(--bs-primary-rgb, #{red($o-nudge-primary)}, #{green($o-nudge-primary)}, #{blue($o-nudge-primary)});
+    --nudge-on-accent: var(--bs-white, #{$o-nudge-on-accent});
+    --nudge-surface: var(--bs-body-bg, #{$o-nudge-surface});
+    --nudge-surface-muted: var(--bs-tertiary-bg, #{$o-nudge-surface-muted});
+    --nudge-border: var(--bs-border-color, #{$o-nudge-border});
+    --nudge-text: var(--bs-body-color, #{$o-nudge-text});
+    --nudge-text-muted: var(--bs-secondary-color, #{$o-nudge-text-muted});
+    --nudge-danger: var(--bs-danger, #{$o-nudge-danger});
+    --nudge-success: var(--bs-success, #{$success});
+    --nudge-warning: var(--bs-warning, #{$warning});
+    --nudge-info: var(--bs-info, #{$info});
     --nudge-focus: var(--nudge-accent);
     --nudge-dock-width: 400px;
     position: fixed;
