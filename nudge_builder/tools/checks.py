@@ -23,7 +23,7 @@ from lxml import etree
 from odoo.exceptions import AccessError
 from odoo.tools import html_escape, is_html_empty
 
-from odoo.addons.nudge.tools import egress
+from odoo.addons.nudge.tools import egress, pinned_http
 
 _logger = logging.getLogger(__name__)
 
@@ -213,9 +213,10 @@ def head_status(url, allowed=None):
         if not _safe_target(url) or (allowed and not allowed(url)):
             return 0
         try:
-            response = requests.head(url, timeout=EXTERNAL_TIMEOUT, allow_redirects=False,
-                                     headers={"User-Agent": "Mozilla/5.0 (Nudge site check)"})
-        except requests.RequestException:
+            # S11: to an address pinned_http judged again, never to a second answer of the DNS
+            response = pinned_http.head(url, timeout=EXTERNAL_TIMEOUT, allow_redirects=False,
+                                        headers={"User-Agent": "Mozilla/5.0 (Nudge site check)"})
+        except requests.RequestException:  # pinned_http.Refused among them
             return 0
         location = response.headers.get("Location")
         if response.status_code in (301, 302, 303, 307, 308) and location:

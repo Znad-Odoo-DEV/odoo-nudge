@@ -19,6 +19,8 @@ from odoo.addons.nudge.llm import base as llm
 from odoo.addons.nudge.tests.common import NudgeCase
 from odoo.addons.nudge.tools.records import Refused
 
+from odoo.addons.nudge.tools import pinned_http
+
 from .. import mcp_client
 from ..models import nudge_connector
 from ..tools import connectors
@@ -450,7 +452,7 @@ class TestConnectorSafety(ConnectCase, TransactionCase):
                     yield b" " * size
 
         response = Endless()
-        with patch.object(mcp_client.requests, "post", return_value=response):
+        with patch.object(pinned_http, "post", return_value=response):
             with self.assertRaises(mcp_client.McpError) as error:
                 self.connector._oauth_token()
         self.assertEqual(error.exception.code, "toobig")
@@ -463,7 +465,7 @@ class TestConnectorSafety(ConnectCase, TransactionCase):
                     yield b" "
 
         self.patch(nudge_connector, "worker_cap", lambda seconds: 0.2)
-        with patch.object(mcp_client.requests, "post", return_value=Slow()):
+        with patch.object(pinned_http, "post", return_value=Slow()):
             with self.assertRaises(mcp_client.McpError) as error:
                 self.connector._oauth_token()
         self.assertEqual(error.exception.code, "timeout", "One deadline for the whole answer, not per read")

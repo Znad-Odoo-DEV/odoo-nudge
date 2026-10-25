@@ -25,6 +25,7 @@ import requests
 from odoo import api, fields, models
 from odoo.exceptions import AccessError, LockError, UserError
 
+from odoo.addons.nudge.tools import pinned_http
 from odoo.addons.nudge.tools.records import Refused
 
 from .. import mcp_client
@@ -217,10 +218,13 @@ class NudgeConnector(models.Model):
             raise mcp_client.McpError("egress", refused.args[0]) from None
         try:
             seconds = self._seconds()
-            with requests.request(
-                    method, url, data=data, json=body, headers={"Accept": "application/json"},
-                    timeout=seconds, allow_redirects=False, stream=True) as response:
+            with pinned_http.request(
+                    method, url, allow_private=self.runs_locally, data=data, json=body,
+                    headers={"Accept": "application/json"}, timeout=seconds, allow_redirects=False,
+                    stream=True) as response:
                 raw = mcp_client.read_capped(response, MAX_DOCUMENT, seconds)
+        except pinned_http.Refused as refused:
+            raise mcp_client.McpError(refused.code) from None
         except requests.Timeout:
             raise mcp_client.McpError("timeout") from None
         except requests.RequestException:

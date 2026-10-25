@@ -21,6 +21,8 @@ from urllib.parse import urlparse
 
 import requests
 
+from odoo.addons.nudge.tools import pinned_http
+
 PROTOCOL = "2026-07-28"
 # The revisions of the handshake era this client can go on in, newest first
 LEGACY_PROTOCOLS = ("2025-11-25", "2025-06-18", "2025-03-26")
@@ -337,8 +339,10 @@ class Client:
         if name is not None:
             sent["Mcp-Name"] = header_value(name)
         try:
-            with requests.post(self.url, data=json.dumps(body, ensure_ascii=False).encode(), headers=sent,
-                               timeout=self._left(), stream=True, allow_redirects=False) as response:
+            # S11: the socket goes to an address pinned_http judged, never to a second answer of the DNS
+            with pinned_http.post(self.url, allow_private=self.allow_private, headers=sent,
+                                  data=json.dumps(body, ensure_ascii=False).encode(),
+                                  timeout=self._left(), stream=True, allow_redirects=False) as response:
                 if 300 <= response.status_code < 400:
                     raise McpError("redirect", response.status_code)
                 if response.status_code in (401, 403):
@@ -351,6 +355,8 @@ class Client:
                 else:
                     message = self._read_json(response)
                 return response.status_code, response.headers, message
+        except pinned_http.Refused as refused:
+            raise McpError(refused.code) from None
         except requests.Timeout:
             raise McpError("timeout") from None
         except requests.RequestException as error:

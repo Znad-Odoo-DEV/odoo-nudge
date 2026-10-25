@@ -95,7 +95,7 @@ class TestSiteChecks(TransactionCase):
         def public_only(url):
             return "169.254" not in url and "127.0.0.1" not in url and url.startswith(("http://", "https://"))
 
-        with patch.object(checks, "_safe_target", public_only), patch("requests.head", head):
+        with patch.object(checks, "_safe_target", public_only), patch("odoo.addons.nudge.tools.pinned_http.head", head):
             self.assertEqual(checks.head_status("https://public.example/r"), 0, "The redirect to a private address stops")
             self.assertEqual([url for url, _k in asked], ["https://public.example/r"])
             self.assertFalse(any(k["allow_redirects"] for _u, k in asked), "Redirects are followed here, checked")
@@ -247,7 +247,7 @@ class TestSiteChecks(TransactionCase):
             self.assertFalse(kwargs.get("allow_redirects"))
             return Reply(302, "http://127.0.0.1:8069/web") if len(asked) == 1 else Reply(200)
 
-        with patch("requests.head", head), patch.object(checks, "_safe_target", lambda url: "127.0.0.1" not in url):
+        with patch("odoo.addons.nudge.tools.pinned_http.head", head), patch.object(checks, "_safe_target", lambda url: "127.0.0.1" not in url):
             self.assertEqual(checks.head_status("https://public.example/r"), 0)
         self.assertEqual(asked, ["https://public.example/r"])
 
@@ -264,7 +264,7 @@ class TestSiteChecks(TransactionCase):
 
         self.env.company.sudo().nudge_egress_hosts = "example.org"
         checks.new_page(self.env, self.website, "Outside", "/t-outside", '<a href="https://unlisted.example/">x</a>')
-        with patch("requests.head", head), patch.object(checks, "_safe_target", lambda url: True):
+        with patch("odoo.addons.nudge.tools.pinned_http.head", head), patch.object(checks, "_safe_target", lambda url: True):
             found, _skipped = self.run_check(groups=["links"], external=True)
         self.assertNotIn("https://unlisted.example/", asked, "Not on the list: not visited")
         self.assertNotIn("https://elsewhere.example/", asked, "Nor followed to when a listed page redirects there")

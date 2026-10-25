@@ -20,7 +20,7 @@ from odoo.addons.nudge.models.nudge_recipe import canonical, checksum_of
 from .common import NudgeCase
 
 DOWNLOAD = "odoo.addons.nudge.models.nudge_recipe_market._download"
-GET = "odoo.addons.nudge.models.nudge_recipe_market.requests.get"
+GET = "odoo.addons.nudge.tools.pinned_http.get"
 INDEX_URL = "https://recipes.example.test/nudge/index.json"
 
 
