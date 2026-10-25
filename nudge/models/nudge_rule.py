@@ -16,6 +16,8 @@ import logging
 from collections import Counter
 from datetime import timedelta
 
+from psycopg2 import OperationalError
+
 from odoo import api, fields, models
 from odoo.exceptions import AccessError, UserError
 
@@ -349,7 +351,18 @@ class NudgeRule(models.Model):
                 return None
             plan.text = self._render(rule.tool_name, result)
             plan.events = [result.event] if result.event else []
-        self.env.cr.execute("UPDATE nudge_rule SET use_count = COALESCE(use_count, 0) + 1, last_used = now() AT TIME ZONE 'UTC' WHERE id = %s", [rule.id])
+        # Never waits and never fails, as the counters of the memory and of the answer cache: a rule another
+        # answer is counting at this instant (SKIP LOCKED), or counted since this one began (a serialization
+        # error under repeatable read), is not counted this time; the figure is an indication
+        try:
+            with self.env.cr.savepoint():
+                self.env.cr.execute(
+                    "UPDATE nudge_rule SET use_count = COALESCE(use_count, 0) + 1, "
+                    "last_used = now() AT TIME ZONE 'UTC' "
+                    "WHERE id IN (SELECT id FROM nudge_rule WHERE id = %s FOR UPDATE SKIP LOCKED)",
+                    [rule.id], log_exceptions=False)
+        except OperationalError:
+            _logger.info("Nudge: rule %s counted by another answer at the same time, left uncounted", rule.id)
         self.env["nudge.rule"].invalidate_model(["use_count", "last_used"])
         return plan
 

@@ -4,10 +4,16 @@ A prompt is text. It gives nobody any right: the filled text is sent as a messag
 clicked, with their rights and the same confirmation cards as anything they type. It never goes
 into the system prompt, and it is never sent by itself.
 """
+import logging
+
+from psycopg2 import OperationalError
+
 from odoo import api, fields, models
 from odoo.exceptions import AccessError, UserError, ValidationError
 
 from ..tools import noai_commands, prompt_vars
+
+_logger = logging.getLogger(__name__)
 
 # Chips shown at most, and the prompts looked at to find them
 CHIP_LIMIT = 8
@@ -273,8 +279,17 @@ class NudgePrompt(models.Model):
         out = self._fill(self, values)
         if not out["text"]:
             raise UserError(self.env._("The prompt is empty."))
-        # One statement, so that two people using it at once both count (the person has read the prompt above)
-        self.env.cr.execute("UPDATE nudge_prompt SET use_count = COALESCE(use_count, 0) + 1 WHERE id = %s", [self.id])
+        # Never waits and never fails, as the counters of the memory and of the answer cache: a prompt another
+        # person is counting at this instant (SKIP LOCKED), or counted since this request began (a serialization
+        # error under repeatable read), is not counted this time; the figure is an indication
+        try:
+            with self.env.cr.savepoint():
+                self.env.cr.execute(
+                    "UPDATE nudge_prompt SET use_count = COALESCE(use_count, 0) + 1 "
+                    "WHERE id IN (SELECT id FROM nudge_prompt WHERE id = %s FOR UPDATE SKIP LOCKED)",
+                    [self.id], log_exceptions=False)
+        except OperationalError:
+            _logger.info("Nudge: prompt %s counted by another use at the same time, left uncounted", self.id)
         self.invalidate_recordset(["use_count"])
         return {"text": out["text"], "mode": self.mode}
 
