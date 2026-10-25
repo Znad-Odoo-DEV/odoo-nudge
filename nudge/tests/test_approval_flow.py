@@ -82,7 +82,8 @@ class TestApprovalFlow(NudgeCase, TransactionCase):
             cls.env, login="nudge_flow_finance", groups="base.group_user,account.group_account_manager")
         cls.env["ir.config_parameter"].sudo().set_param(DEVELOPER_PARAM, "yes")
         cls.supplier = cls.env["res.partner"].create({"name": "Raghad Supplies"})
-        cls.product = cls.env["product.product"].create({"name": "Ebrahim Cement"})
+        # No purchase tax: the amounts compared are those of the lines, whatever taxes the database adds by default
+        cls.product = cls.env["product.product"].create({"name": "Ebrahim Cement", "supplier_taxes_id": [(6, 0, [])]})
 
     def setUp(self):
         # Fields made in a test go with its rollback: the registry forgets them after it (cleanups run last in, first out)
@@ -287,6 +288,8 @@ class TestApprovalFlow(NudgeCase, TransactionCase):
         # 30,000 of the foreign currency are 60,000 of the company's
         big = self.order(30000)
         big.currency_id = foreign
+        # On the date of this rate: the rates the database holds for today are not those of the test
+        big.date_order = "2000-06-01"
         with self.assertRaises(UserError) as stopped:
             big.button_confirm()
         self.assertIn(company.currency_id.name, str(stopped.exception))
