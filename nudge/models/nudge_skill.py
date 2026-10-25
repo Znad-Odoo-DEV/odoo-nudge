@@ -420,6 +420,9 @@ class NudgeConversation(models.Model):
         question, previous = self._skill_questions()
         if not inline and not compact and question:
             plan["offer"] = {"route": self._tool_route(mode, question, previous)}
+        # NP-03: what only this question needs to be told (a small model reads its own short rules)
+        situation = "" if compact else prompt.situations(question.context_text, question.snapshot)
+        plan["text"] = [situation] if situation else []
         visible = Skill._visible(mode)
         if not visible:
             return plan
@@ -452,7 +455,8 @@ class NudgeConversation(models.Model):
             # A list cut to the question changes from one question to the next: it goes with the skills of
             # the question, after the part of the prompt the cache keeps; a whole list is the same each time
             index=prompt.render_skills(texts) if inline else ("" if shown is not None else prompt.render_skill_index(entries)),
-            text=[] if inline else ([prompt.render_skill_index(entries)] if shown is not None and entries else []) + list(texts),
+            text=plan["text"] + ([] if inline else (
+                [prompt.render_skill_index(entries)] if shown is not None and entries else []) + list(texts)),
             given=given,
             offer={**plan["offer"],
                    "tools": sorted({name for skill in given for name in skill_rules.split_names(skill.tool_names)}),

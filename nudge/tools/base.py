@@ -49,6 +49,39 @@ class ToolResult:
         self.card_lines = card_lines
 
 
+# NP-03: what the model is shown of a schema. Every call is checked against the whole schema
+# (schema.validate), which says in words what is wrong: the lengths of a text and "no other
+# argument" are left out of what the model reads, and a long description is given once
+LEFT_OUT = ("minLength", "maxLength")
+REPEATED_CHARS = 120
+
+
+def model_schema(value, seen=None):
+    """:return: ``value``, a JSON schema, as the model reads it: a new value, the schema itself is not
+    changed; a description of more than ``REPEATED_CHARS`` characters met again is replaced by
+    "Same as above." """
+    seen = set() if seen is None else seen
+    if isinstance(value, list):
+        return [model_schema(item, seen) for item in value]
+    if not isinstance(value, dict):
+        return value
+    out = {}
+    for key, item in value.items():
+        if key in LEFT_OUT or (key == "additionalProperties" and item is False):
+            continue
+        if key == "properties" and isinstance(item, dict):
+            # The names of the arguments are kept whatever they are
+            out[key] = {name: model_schema(schema_of, seen) for name, schema_of in item.items()}
+        elif key == "description" and isinstance(item, str) and len(item) > REPEATED_CHARS:
+            out[key] = "Same as above." if item in seen else item
+            seen.add(item)
+        elif key in ("enum", "required", "default", "pattern"):
+            out[key] = item
+        else:
+            out[key] = model_schema(item, seen)
+    return out
+
+
 class Tool:
     name = None
     description = None
@@ -81,7 +114,7 @@ class Tool:
         return {
             "name": self.name,
             "description": self.description,
-            "input_schema": self.input_schema,
+            "input_schema": model_schema(self.input_schema),
         }
 
     def run(self, env, arguments, screen):
