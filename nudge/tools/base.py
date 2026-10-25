@@ -6,6 +6,7 @@ The list of tools is closed; a model cannot call what is not registered.
 """
 import json
 import logging
+import re
 
 from odoo.exceptions import UserError
 
@@ -240,6 +241,11 @@ OUTSIDE_TOOLS = frozenset({
 })
 # The questions asked about a record with its mails (an @Nudge mention in the chatter)
 OUTSIDE_COMMANDS = ("mention",)
+# A Char value longer than this is written text rather than a name, a code or a label
+SHORT_LABEL = 60
+# In what search_records and read_record answer (dump): the model, then each field with a text value
+RECORD_MODEL = re.compile(r'"model":"([\w.]+)"')
+STRING_VALUE = re.compile(r'"(\w+)":"((?:[^"\\]|\\.)*)')
 
 TOOL_SETS = ("full", "essential")
 
@@ -367,21 +373,53 @@ def as_data(name, content, is_error=False):
     return f'<data source="{name}">{content.replace("<", "&lt;")}</data>'
 
 
+def free_text_read(env, content):
+    """:return: whether ``content``, what a tool answered, gives the value of a field of text of a
+    record: a Text or Html field, or a Char longer than a short label. What anybody may have written
+    is there (a mail, a web form, a note); numbers, dates, choices, the names of linked records and
+    short codes are not text of that kind"""
+    text = str(content or "")
+    found = RECORD_MODEL.search(text)
+    if not found or found.group(1) not in env:
+        return False
+    fields = env[found.group(1)]._fields
+    # The values of the records, after what the tool says of them
+    start = max(text.find('"record":{', found.end()), text.find('"records":[', found.end()))
+    if start < 0:
+        return False
+    for name, value in STRING_VALUE.findall(text, start):
+        field = fields.get(name)
+        if field is not None and value.strip() and (
+                field.type in ("text", "html") or (field.type == "char" and len(value) > SHORT_LABEL)):
+            return True
+    return False
+
+
 def holds_outside(env):
     """:return: whether the conversation of ``env`` holds text from outside: a file sent with a
-    question, a record asked about with its mails, or what a tool of ``OUTSIDE_TOOLS`` read. A
-    module adds its own sources (nudge_connect: the answers of the connectors)."""
+    question, a record asked about with its mails, what a tool of ``OUTSIDE_TOOLS`` read, or the
+    text of a record the model read (:func:`free_text_read`). A module adds its own sources
+    (nudge_connect: the answers of the connectors)."""
     conversation_id = env.context.get("nudge_conversation_id")
     if not conversation_id:
         return False
     # sudo: whether, not what; the conversation is the person's
-    if env["nudge.message"].sudo().search_count([
+    Message = env["nudge.message"].sudo()
+    if Message.search_count([
             ("conversation_id", "=", conversation_id), ("role", "=", "user"),
             "|", ("attachment_name", "!=", False), ("command", "in", OUTSIDE_COMMANDS)], limit=1):
         return True
-    return bool(env["nudge.step"].sudo().search_count([
-        ("run_id.conversation_id", "=", conversation_id), ("tool", "in", sorted(OUTSIDE_TOOLS)),
-        ("state", "!=", "failed")], limit=1))
+    if env["nudge.step"].sudo().search_count([
+            ("run_id.conversation_id", "=", conversation_id), ("tool", "in", sorted(OUTSIDE_TOOLS)),
+            ("state", "!=", "failed")], limit=1):
+        return True
+    # What the model read back, in every mode
+    for message in Message.search([("conversation_id", "=", conversation_id), ("role", "=", "tool")]):
+        for result in message.tool_results or []:
+            if isinstance(result, dict) and not result.get("is_error") and (
+                    result.get("name") in OUTSIDE_TOOLS or free_text_read(env, result.get("content"))):
+                return True
+    return False
 
 
 def dump(value):

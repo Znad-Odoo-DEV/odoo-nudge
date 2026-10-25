@@ -3,6 +3,7 @@
 ## 19.0.1.59.5 (unreleased)
 
 - Review: once a conversation holds text from outside (an answer of a connector, a file sent with a question, the mails of a record, a company file or source), a connector read that would send words the person did not type asks first, on a card with the exact payload, as a write does; a No sends nothing. Words the person typed, and the names and choices of the tool, still go at once within the caps of 1000 characters per read and 5000 per conversation (review ai #8).
+- Review: a read after the model read the text of a record (a description, a note, a mail body) asks on a card too, when its words were not typed by the person; after a count or a list of names it still runs at once (audit AUD-02).
 
 ## 19.0.1.59.2 (unreleased)
 
