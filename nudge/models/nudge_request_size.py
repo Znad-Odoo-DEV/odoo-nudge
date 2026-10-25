@@ -12,7 +12,7 @@ from ..tools.base import MODE_AGENT, MODE_DEV, MODE_TALK
 _logger = logging.getLogger(__name__)
 
 # The limits of the quality gate, used when the tests are not shipped with the module
-FALLBACK_LIMITS = {MODE_TALK: 17800, MODE_AGENT: 24500, MODE_DEV: 26000}
+FALLBACK_LIMITS = {MODE_TALK: 16300, MODE_AGENT: 22000, MODE_DEV: 26000}
 SAMPLE_QUESTION = "Show me my open sales orders."
 
 
