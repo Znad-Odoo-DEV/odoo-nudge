@@ -99,6 +99,7 @@ Without them the rest works and the feature says what is missing.
         "views/nudge_plugin_views.xml",
         "views/nudge_memory_menu.xml",
         "views/nudge_provider_tier_views.xml",
+        "views/nudge_screens_views.xml",
     ],
     "assets": {
         "web.assets_backend": [
