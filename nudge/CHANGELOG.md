@@ -5,6 +5,7 @@ Current version: nudge 19.0.1.59.2, nudge_mcp 19.0.1.1.1, nudge_connect 19.0.1.0
 ## 19.0.1.59.3 (unreleased)
 
 - A module update is no longer stopped by a person left in the Nudge Auditor group from before the rule (an administrator added through the Users tab of the group): the update goes on and writes the person in the log, and such an administrator is never archived by the hourly cron nor refused at sign-in as an expired auditor. The dev_0 builds failed on it at nudge/security/nudge_security.xml:13.
+- An update of Nudge on Odoo 19 writes no warning of its own any more: odoo.osv (deprecated) is imported only on 17 and 18, the plain-text result of a scheduled task is labelled Last Result (Plain Text) apart from the shown Last Result, and a person left in the auditor group is written in the log once per update.
 
 ## 19.0.1.59.2 (unreleased)
 

@@ -11,6 +11,8 @@ _logger = logging.getLogger(__name__)
 AUDITOR_GROUP = "nudge.group_nudge_auditor"
 # What an auditor can never be: someone Nudge acts for, builds for or manages
 NEVER_AUDITOR = ("nudge.group_nudge_agent", "nudge.group_nudge_manager", "base.group_system")
+# (database, user id) of the people left in the auditor group already written in the log by this process
+_TOLD_IN_UPDATE = set()
 
 
 class ResUsers(models.Model):
@@ -77,7 +79,10 @@ class ResUsers(models.Model):
                 continue
             if not loading:
                 raise ValidationError(problem)
-            _logger.warning("Nudge: user %s (id %s) left as it is by the update: %s", user.login, user.id, problem)
+            # once per person and update, though the update writes the groups many times
+            if (self.env.cr.dbname, user.id) not in _TOLD_IN_UPDATE:
+                _TOLD_IN_UPDATE.add((self.env.cr.dbname, user.id))
+                _logger.warning("Nudge: user %s (id %s) left as it is by the update: %s", user.login, user.id, problem)
 
     # -- the end ----------------------------------------------------------------
     @api.model
