@@ -216,17 +216,24 @@ class ChangePageSeo(base.Action):
         "(\"change the SEO title of the About page to ...\"), after the person has read the before and after on a "
         "card. The text is written for one language of the site (its main one by default). Title up to 70 "
         "characters, description up to 170. It can be undone.")
+    # Not "description": a model wrote a description of the call there, and it was shown and written as the
+    # new SEO description (trial L5)
     input_schema = {"type": "object", "properties": {
         "page": {"type": "string", "description": "The page: its name, address or key."},
-        "title": {"type": "string", "maxLength": 200}, "description": {"type": "string", "maxLength": 400},
-        "keywords": {"type": "string", "maxLength": 300},
+        "title": {"type": "string", "maxLength": 200,
+                  "description": "The new SEO title itself, word for word as the person gave it."},
+        "meta_description": {"type": "string", "maxLength": 400, "description": (
+            "The new meta description itself, the words shown under the page in search results, word for word "
+            "as the person gave them. Never a summary of this change.")},
+        "keywords": {"type": "string", "maxLength": 300, "description": "Only when the person asks for keywords."},
         "lang": {"type": "string", "description": "2 letter code of the language the text is in; the site's main by default."},
         "site_id": {"type": "integer"}, "website_id": {"type": "integer"}},
         "required": ["page"], "additionalProperties": False}
 
     @staticmethod
     def _changes(arguments):
-        return {"website_meta_title": arguments.get("title"), "website_meta_description": arguments.get("description"),
+        return {"website_meta_title": arguments.get("title"),
+                "website_meta_description": arguments.get("meta_description"),
                 "website_meta_keywords": arguments.get("keywords")}
 
     def run(self, env, arguments, screen):
@@ -255,8 +262,11 @@ class ChangePageSeo(base.Action):
                                        expect_hash=values.get("hash"))
         except (AccessError, UserError) as error:
             return _refuse(error)
+        # The texts themselves: the model tells what was written, not what it meant to write
+        written = "; ".join("%s: %s" % (site._seo_label(name), text)
+                            for name, text in site._seo_values(values.get("changes") or {}).items())
         return base.ToolResult(
-            "Done: %s. Change %s keeps what it was." % (revision.name, revision.id),
+            "Done: %s. Written: %s. Change %s keeps what it was." % (revision.name, written, revision.id),
             records=("website.page", [page.page_id.id], [page.name]),
             card_lines=[{"label": env._("Changed"), "value": revision.name}])
 

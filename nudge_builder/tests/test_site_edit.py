@@ -5,7 +5,7 @@ from unittest.mock import patch
 from odoo.exceptions import AccessError, UserError
 from odoo.tests import TransactionCase, new_test_user, tagged
 
-from odoo.addons.nudge.tools import base
+from odoo.addons.nudge.tools import agent_plan, base
 from odoo.addons.nudge_builder.tools import compat, library, sections, site_edit
 
 MEAN = "<script>alert(1)</script><img src=x onerror=alert(1)>Hello {{ 1 }} ${x} t-esc=\"x\" onclick=boom()"
@@ -112,12 +112,40 @@ class TestSiteEdit(TransactionCase):
         site = self.make()
         about = self.page(site, "about")
         text = "We build villas and towers across the Emirates since 1998."
-        result = self.tool("change_page_seo", {"page": "about", "description": text})
+        result = self.tool("change_page_seo", {"page": "about", "meta_description": text})
         values = {line["label"]: line["value"] for line in result.pending["preview"]["lines"]}
         self.assertEqual(values["SEO description: after"], text)
         self.assertEqual(result.pending["values"]["changes"]["website_meta_description"], text)
         self.assertFalse(self.confirm("change_page_seo", result).is_error)
         self.assertEqual(about.view_id.with_context(lang="en_US").website_meta_description, text)
+
+    def test_a_description_of_the_call_is_never_taken_for_the_seo_description(self):
+        # Trial (L5): a model put "Update SEO title and meta description for the Services page" in the
+        # argument named description; the card showed it as the new description and it was written
+        site = self.make()
+        about = self.page(site, "about")
+        before = about.view_id.with_context(lang="en_US").website_meta_description
+        self.assertNotIn("description", base.TOOLS["change_page_seo"].input_schema["properties"])
+        refused = base.call(self.env_d, "change_page_seo", {
+            "page": "About", "title": "About Raghad Contracting",
+            "description": "Update SEO title and meta description for the About page"}, None, "agent")
+        self.assertTrue(refused.is_error)
+        self.assertIn("meta_description", refused.content)
+        self.assertFalse(refused.pending)
+
+        text = "Villas, fit-out and renovation by Raghad Contracting."
+        result = base.call(self.env_d, "change_page_seo", {
+            "page": "About", "title": "About Raghad Contracting", "meta_description": text}, None, "agent")
+        lines = {line["label"]: line["value"] for line in result.pending["preview"]["lines"]}
+        self.assertEqual(lines["SEO description: before"], before)
+        self.assertEqual(lines["SEO description: after"], text)
+        done = self.confirm("change_page_seo", result)
+        self.assertIn(text, done.content, "The model reads what was written")
+        self.assertEqual(about.view_id.with_context(lang="en_US").website_meta_description, text)
+        # Never a step of a plan: two SEO changes in one answer are two cards, each with its text
+        calls = [{"id": str(n), "name": "change_page_seo", "input": {"page": "About", "meta_description": text}}
+                 for n in (1, 2)]
+        self.assertEqual(agent_plan.plan_calls(self.env_d, calls, "agent"), [])
 
     def test_the_id_of_the_site_given_as_website_id_finds_the_site(self):
         site = self.make()
@@ -133,7 +161,7 @@ class TestSiteEdit(TransactionCase):
     def test_the_seo_description_in_arabic_and_the_limits(self):
         site = self.make()
         about = self.page(site, "about")
-        result = self.tool("change_page_seo", {"page": "/about", "description": "وصف جديد للصفحة", "lang": "ar"})
+        result = self.tool("change_page_seo", {"page": "/about", "meta_description": "وصف جديد للصفحة", "lang": "ar"})
         self.confirm("change_page_seo", result)
         self.assertEqual(about.view_id.with_context(lang="ar_001").website_meta_description, "وصف جديد للصفحة")
         self.assertNotEqual(about.view_id.with_context(lang="en_US").website_meta_description, "وصف جديد للصفحة")
