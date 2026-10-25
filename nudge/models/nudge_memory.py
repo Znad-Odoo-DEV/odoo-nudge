@@ -969,7 +969,7 @@ class NudgeMemory(models.Model):
             text, floor=not provider, mode=mode, screen_model=screen_model, steps_only=explain == "screen")
         if memory:
             return self._answer_with(conversation, text, memory, mode=mode)
-        if near and provider:
+        if near and provider and not self.env["nudge.noai"]._slip_offered(text):
             return self._offer(conversation, text, near, mode=mode)
         return None
 

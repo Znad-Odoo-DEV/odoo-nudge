@@ -349,6 +349,17 @@ class NudgeNoai(models.AbstractModel):
             return Plan(env._("Nothing is waiting for you today."), parsed=agenda)
         return Plan("\n".join([env._("Waiting for you today:")] + lines), parsed=agenda)
 
+    @api.model
+    def _slip_offered(self, text):
+        """:return: whether the rules would give ``text`` back as “Did you mean” with its words corrected: a
+        near-miss of a command or a record kind, offered before any remembered answer is"""
+        if not (self._is_enabled() and self._may_ask()):
+            return False
+        with self._company_words():
+            parsed = noai_commands.parse(str(text or "")[:400], {})
+        return (not (parsed.intent and parsed.confidence >= noai_commands.THRESHOLD)
+                and any(candidate.get("corrections") for candidate in parsed.candidates or []))
+
     def _missing_slot(self, candidate, screen):
         """:return: the question that asks for what a sentence lacks, or "" when it has all it needs"""
         slots = candidate.get("slots") or {}
@@ -376,6 +387,7 @@ class NudgeNoai(models.AbstractModel):
         parsed.confidence = candidate.get("confidence") or 0.0
         parsed.slots = dict(candidate.get("slots") or {})
         parsed.states = list(candidate.get("states") or [])
+        parsed.corrections = list(candidate.get("corrections") or [])
         return parsed
 
     def _offer_choices(self, parsed, screen, mode, has_ai):
@@ -1091,7 +1103,9 @@ class NudgeNoai(models.AbstractModel):
         what = self._label_of(kind["model"]) if kind and kind["model"] in self.env else ""
         said = self._what_is_said(parsed)
         if intent == "open":
-            return self.env._("Open: %s", slots.get("words") or what)
+            words = str(slots.get("words") or "")
+            # A slip corrected: the chip names the screen as written, "Sales Orders", not the typed words
+            return self.env._("Open: %s", words.title() if words and parsed.corrections else words or what)
         if intent == "find":
             return self.env._("Find: %s", " ".join(part for part in (what, slots.get("name") or "") if part))
         if intent == "filter":

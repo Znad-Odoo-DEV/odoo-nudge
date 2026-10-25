@@ -239,6 +239,20 @@ class TestAnswerMemory(NudgeCase, TransactionCase):
         self.assertFalse(self.Memory.search([("conversation_id", "=", conversation.id)]), "Nothing is kept either")
         self.assertFalse(self.Memory.with_user(self.user_b).suggest(SAME))
 
+    def test_a_slip_in_a_bare_name_is_offered_back_before_a_close_answer(self):
+        # Live trial NP-05: "qoutations" got the offer of a remembered answer, not "Did you mean"
+        self.remember()
+        self.env["ir.config_parameter"].sudo().set_param("nudge.noai_first", "1")
+        self.use_adapter(reply="From the AI")
+        for text in ("qoutations", "sales ordrs"):
+            with self.subTest(text=text):
+                conversation = self.env["nudge.conversation"].with_user(self.user_b)._chat_open(None)
+                job = conversation._chat_prepare(text, mode="talk")
+                events = job.get("first_events", [])
+                said = "".join(e.get("text", "") for e in events if e["type"] == "delta")
+                self.assertIn("Did you mean", said, events)
+                self.assertNotIn("close to yours", said.lower())
+
     def test_without_a_provider_the_best_above_the_floor_is_offered(self):
         self.remember()
         self.env["nudge.provider"].search([]).write({"active": False})
