@@ -26237,3 +26237,47 @@ msgid ""
 msgstr ""
 "الأدوات المعروضة في هذه المحادثة زيادةً على أدوات الوضع الأساسية: تُعرض مع "
 "كل سؤال تالٍ."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_coverage.py:0
+msgid ""
+"“%s” is too common a word to teach: write the word that only this "
+"request uses."
+msgstr ""
+"“%s” كلمة شائعة جدا لا تصلح للتعليم: اكتب الكلمة التي لا يستخدمها إلا "
+"هذا الطلب."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_noai.py:0
+msgid ""
+"I read this as an approval rule. Approval rules are built in Developer "
+"mode, which is not open to you: ask an administrator."
+msgstr ""
+"فهمت هذا كقاعدة موافقة. قواعد الموافقة تُبنى في وضع المطور، وهو غير "
+"متاح لك: اطلب ذلك من المسؤول."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_noai.py:0
+msgid ""
+"I read this as an approval rule. Approval rules are built in Developer "
+"mode: switch to it and I will show you the flow before anything is "
+"built."
+msgstr ""
+"فهمت هذا كقاعدة موافقة. قواعد الموافقة تُبنى في وضع المطور: انتقل إليه "
+"وسأعرض عليك المسار قبل بناء أي شيء."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_noai.py:0
+msgid "Switch to Developer mode"
+msgstr "الانتقال إلى وضع المطور"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_noai.py:0
+msgid "Build this approval rule"
+msgstr "ابنِ قاعدة الموافقة هذه"
+

@@ -466,7 +466,8 @@ class TestApprovalInAgentMode(NudgeCase, TransactionCase):
 
     def test_the_model_is_told_it_is_built_in_developer_mode(self):
         self.env["ir.config_parameter"].sudo().set_param(DEVELOPER_PARAM, "yes")
-        self.env["ir.config_parameter"].sudo().set_param("nudge.noai_first", "1")
+        # The rules answer an approval sentence first (the next test); here the model is the one asked
+        self.env["ir.config_parameter"].sudo().set_param("nudge.noai_first", "0")
         admin = new_test_user(self.env, login="nudge_h20_admin",
                               groups="nudge.group_nudge_agent,base.group_system,base.group_partner_manager")
         system, call = self.sent(admin)
@@ -478,3 +479,32 @@ class TestApprovalInAgentMode(NudgeCase, TransactionCase):
         # Someone who may not build is sent to their administrator, approvals included
         system, _call = self.sent(self.agent)
         self.assertIn("approval rules", system[system.index("## Mode: Agent"):])
+
+    def test_the_rules_say_it_is_built_in_developer_mode_and_offer_the_switch(self):
+        # Round 5: no call to a provider for a sentence the rules read as an approval rule
+        from odoo.addons.nudge.llm import loop
+        self.env["ir.config_parameter"].sudo().set_param(DEVELOPER_PARAM, "yes")
+        self.env["ir.config_parameter"].sudo().set_param("nudge.noai_first", "1")
+        admin = new_test_user(self.env, login="nudge_r5_admin",
+                              groups="nudge.group_nudge_agent,base.group_system,base.group_partner_manager")
+        for user, offered in ((admin, True), (self.agent, False)):
+            with self.subTest(user=user.login):
+                adapter = self.use_adapter()
+                conversation = self.env["nudge.conversation"].with_user(user)._chat_open()
+                events = list(loop.run(conversation._chat_prepare(self.SENTENCE, mode="agent"),
+                                       conversation._chat_record))
+                self.assertFalse(adapter.calls, "No provider is called")
+                said = "".join(event.get("text", "") for event in events if event["type"] == "delta")
+                self.assertIn("built in Developer mode", said)
+                chips = [command for event in events if event["type"] == "found"
+                         for command in event.get("commands") or []]
+                self.assertEqual(bool(chips), offered, events)
+                if offered:
+                    self.assertEqual((chips[0]["kind"], chips[0]["mode"], chips[0]["text"]),
+                                     ("switch_mode", "dev", self.SENTENCE))
+        # Anything else is not taken for an approval rule
+        adapter = self.use_adapter()
+        conversation = self.env["nudge.conversation"].with_user(admin)._chat_open()
+        list(loop.run(conversation._chat_prepare("hello", mode="agent"),
+                      conversation._chat_record))
+        self.assertTrue(adapter.calls)

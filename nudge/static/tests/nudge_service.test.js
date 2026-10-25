@@ -356,6 +356,41 @@ test("a conversation read again keeps what it showed", async () => {
     expect(nudge.state.messages[2].content).toBe("Going.\n\nTo the orders.");
 });
 
+test("a slip of a name asks the server before the choice of how, and any error shows the choice", async () => {
+    const answer = () => streamed([lines(
+        { type: "start", conversation_id: 5 },
+        { type: "done", message_id: 8, state: "complete", message: "Did you mean" }
+    )]);
+    let fail = false;
+    onRpc("nudge.noai", "slip_offered", ({ args }) => {
+        expect.step(args[0]);
+        if (fail) {
+            throw new Error("down");
+        }
+        return args[0] === "sales ordrs";
+    });
+    const { nudge, requests } = await startNudge(
+        { is_configured: true, can_share_screen: true }, answer, { nudge_explain: "ask" });
+    nudge.open();
+
+    // A slip: no choice, the server answers
+    await nudge.send("sales ordrs");
+    expect(nudge.state.asking).toBe(null);
+    expect(requests).toHaveLength(1);
+    // A short text the server does not take for a slip: the choice
+    await nudge.send("Thanks!");
+    expect(nudge.state.asking).not.toBe(null);
+    // A question of how never asks the server
+    await nudge.send("Where do I type the email?");
+    expect(nudge.state.asking).not.toBe(null);
+    // An error: the choice, as before
+    fail = true;
+    await nudge.send("sales ordrs");
+    expect(nudge.state.asking).not.toBe(null);
+    expect(requests).toHaveLength(1);
+    expect.verifySteps(["sales ordrs", "Thanks!", "sales ordrs"]);
+});
+
 test("a question asked with the screen asks how first", async () => {
     const steps = [{ target: { type: "field", name: "email" }, text: "Here.", advance: "auto" }];
     const answer = () => streamed([lines(

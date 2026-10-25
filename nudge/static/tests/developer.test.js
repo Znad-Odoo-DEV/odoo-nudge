@@ -56,6 +56,19 @@ test("Developer mode is a third button, for those it is open to", async () => {
     expect(".o_nudge_agent_text").toHaveCount(1);
 });
 
+test("the switch offered with an approval sentence moves to Developer mode and sends the sentence", async () => {
+    const { asked, nudge } = await start();
+    nudge.setMode("agent");
+    expect(nudge.state.mode).toBe("agent");
+    await nudge.useFound("command", {
+        name: "switch_to_developer", kind: "switch_mode", mode: "dev", at_once: true,
+        words: ["Switch to Developer mode"], text: "Purchase orders above 50,000 need Purchase Manager approval",
+    });
+    await animationFrame();
+    expect(nudge.state.mode).toBe("dev");
+    expect(asked.messages.at(-1).message).toBe("Purchase orders above 50,000 need Purchase Manager approval");
+});
+
 test("without the switch, there is no Developer mode", async () => {
     const { nudge } = await start({ config: { can_develop: false } });
     expect(queryAllTexts(".o_nudge_mode")).toEqual(["Talk", "Agent"]);
