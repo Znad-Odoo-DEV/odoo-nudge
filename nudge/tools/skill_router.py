@@ -83,7 +83,8 @@ same s t get got let like want need would tell show give make let ok okay hi hel
 _STOP_ARABIZI = """el al la lal lel ll w wa ma mn men min 3ala 3al 3la hal hayda hay hayy hadi hadol shu shou shoo
 shi eh eish wesh kif kifak kayf keef lesh leish lamma lama eza iza ya kol kul bas kaman marra bdi baddi bade
 bdna baddna abghi abi ureed 3ndi 3ndna 3andi 3ndak 3ndkon 3ndha 3ndo 3and ana ent inta inti huwa hiye hom
-nahnu fi fih feh feha fe 3am ba3d abel abl ma3 eli elli illi lli lazem mumken momken bs""".split()
+nahnu fi fih feh feha fe 3am ba3d abel abl ma3 eli elli illi lli lazem mumken momken bs
+taba3 tab3 bta3 bta3at ely elly mish mesh msh di dah da dol ayz 3ayz 3ayzeen ayza ezay emta wein wen bel bil wel""".split()
 
 STOP = frozenset(commands.fold(word) for word in _STOP) | _STOP | frozenset(_STOP_ARABIZI)
 # What the Latin spelling of an Arabic word has written onto it: the article and the particles, the endings
@@ -118,7 +119,11 @@ ARABIC = re.compile("[؀-ۿ]")
 WORD = re.compile(r"\w+")
 AR_PREFIXES = "وبلكف"
 AR_TAILS = "نته"
-MIN_SKELETON = 3
+# The consonants of a word say what it is from this many; a root of two (sar, khata) only for a spelling that is
+# close to it, the rule of the commands (NP-05) with the vowels of a dialect word counted for little
+MIN_SKELETON = fuzzy.MIN_SKELETON
+SHORT_SKELETON = fuzzy.SHORT_SKELETON
+SHORT_COST = 0.8
 
 _lock = threading.Lock()
 _static = {}
@@ -352,7 +357,7 @@ class Index:
                     continue
                 for term in self.skeletons.get(reading, ()):
                     cost = arabic.arabizi_cost(variant, term)
-                    if cost is not None:
+                    if cost is not None and (len(reading) >= SHORT_SKELETON or cost <= SHORT_COST):
                         out.append((cost + penalty, term))
         out.sort()
         seen, terms = set(), []
