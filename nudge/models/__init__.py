@@ -67,3 +67,5 @@ from . import nudge_agent_plan  # S10, S11
 from . import nudge_plugin  # L3: plugins, after the skills, prompts and quick search it extends
 from . import nudge_provider_cache  # S8
 from . import nudge_provider_tier  # S6: after the skills, the tier sees the skills of the question
+from . import nudge_request_size  # screen: the size of a request by mode
+from . import nudge_search_try  # screen: try the search by meaning

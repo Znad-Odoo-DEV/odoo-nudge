@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Request Size: what each mode would send, against the limits of the quality gate -->
+    <record id="nudge_request_size_view_form" model="ir.ui.view">
+        <field name="name">nudge.request.size.view.form</field>
+        <field name="model">nudge.request.size</field>
+        <field name="arch" type="xml">
+            <form string="Request Size" create="0" delete="0">
+                <header>
+                    <button name="action_measure" type="object" string="Measure now" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <div class="text-muted mb-3">
+                        The request each mode would send for the sentence below, as you: the instructions, the
+                        tools and the skills. Nothing is sent to any provider and nothing is written. The limits
+                        are those of the quality gate of each release.
+                    </div>
+                    <group>
+                        <group>
+                            <field name="user_id"/>
+                            <field name="company_id"/>
+                        </group>
+                        <group>
+                            <field name="question"/>
+                        </group>
+                    </group>
+                    <field name="line_ids" nolabel="1">
+                        <list>
+                            <field name="mode"/>
+                            <field name="total"/>
+                            <field name="limit"/>
+                            <field name="state" widget="badge"
+                                   decoration-success="state == 'ok'" decoration-danger="state == 'over'"
+                                   decoration-warning="state in ('skipped', 'error')"/>
+                            <field name="system_tokens" optional="show"/>
+                            <field name="tools_tokens" optional="show"/>
+                            <field name="turns_tokens" optional="show"/>
+                            <field name="tool_count" optional="show"/>
+                            <field name="note"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_request_size_action" model="ir.actions.server">
+        <field name="name">Request Size</field>
+        <field name="model_id" ref="model_nudge_request_size"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open()</field>
+    </record>
+
+    <!-- Try Search by Meaning -->
+    <record id="nudge_search_try_view_form" model="ir.ui.view">
+        <field name="name">nudge.search.try.view.form</field>
+        <field name="model">nudge.search.try</field>
+        <field name="arch" type="xml">
+            <form string="Try Search by Meaning" create="0" delete="0">
+                <header>
+                    <button name="action_search" type="object" string="Search" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <div class="alert alert-info" role="alert" invisible="model_ready">
+                        <field name="status" nolabel="1"/>
+                        <field name="howto" nolabel="1" widget="text"/>
+                    </div>
+                    <group>
+                        <group string="The Index">
+                            <field name="model_ready" invisible="1"/>
+                            <field name="status" invisible="not model_ready"/>
+                            <field name="doc_passages"/>
+                            <field name="source_passages"/>
+                            <field name="indexed"/>
+                            <field name="waiting"/>
+                            <field name="last_indexed"/>
+                        </group>
+                        <group string="Look for">
+                            <field name="query" nolabel="1" placeholder="Words or a question, in any language"/>
+                            <field name="message" nolabel="1" invisible="not message"/>
+                        </group>
+                    </group>
+                    <field name="line_ids" nolabel="1">
+                        <list>
+                            <field name="score"/>
+                            <field name="source"/>
+                            <field name="excerpt"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="nudge_search_try_action" model="ir.actions.server">
+        <field name="name">Try Search by Meaning</field>
+        <field name="model_id" ref="model_nudge_search_try"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open()</field>
+    </record>
+
+    <menuitem id="nudge_menu_request_size" name="Request Size" sequence="36"
+              parent="nudge_menu_configuration" action="nudge_request_size_action"
+              groups="nudge.group_nudge_manager"/>
+    <menuitem id="nudge_menu_search_try" name="Try Search by Meaning" sequence="37"
+              parent="nudge_menu_configuration" action="nudge_search_try_action"
+              groups="nudge.group_nudge_manager"/>
+</odoo>

@@ -26033,3 +26033,182 @@ msgstr "ملف Excel هذا أكبر بكثير عند فتحه مما يوحي 
 #: model:ir.model.fields,field_description:nudge.field_nudge_task__last_result
 msgid "Last Result (Plain Text)"
 msgstr "آخر نتيجة (نص عادي)"
+#. odoo-python
+msgid "Request Size"
+msgstr "حجم الطلب"
+
+#. module: nudge
+#. odoo-python
+msgid "Try Search by Meaning"
+msgstr "جرّب البحث بالمعنى"
+
+#. module: nudge
+#. odoo-python
+msgid "Only Nudge managers measure the size of a request."
+msgstr "مديرو Nudge فقط يقيسون حجم الطلب."
+
+#. module: nudge
+#. odoo-python
+msgid "Only Nudge managers try the search by meaning."
+msgstr "مديرو Nudge فقط يجرّبون البحث بالمعنى."
+
+#. module: nudge
+#. odoo-python
+msgid "Agent mode is not open to this user."
+msgstr "وضع الوكيل غير متاح لهذا المستخدم."
+
+#. module: nudge
+#. odoo-python
+msgid "Developer mode is not open to this user."
+msgstr "وضع المطوّر غير متاح لهذا المستخدم."
+
+#. module: nudge
+#. odoo-python
+msgid "No AI provider is set up, so there is no request to measure."
+msgstr "لا يوجد مزوّد ذكاء اصطناعي مُعدّ، فلا يوجد طلب لقياسه."
+
+#. module: nudge
+#. odoo-python
+msgid "Write what to look for."
+msgstr "اكتب ما تريد البحث عنه."
+
+#. module: nudge
+#. odoo-python
+msgid "No passage is near the meaning of this text."
+msgstr "لا توجد فقرة قريبة من معنى هذا النص."
+
+#. module: nudge
+#. odoo-python
+msgid "The search by meaning is off, so nothing was searched: %s"
+msgstr "البحث بالمعنى متوقف، فلم يُبحث عن شيء: %s"
+
+#. module: nudge
+#. odoo-python
+msgid "Odoo documentation: %s"
+msgstr "توثيق أودو: %s"
+
+#. module: nudge
+#. odoo-python
+msgid "Company file: %s"
+msgstr "ملف الشركة: %s"
+
+#. module: nudge
+#. odoo-python
+msgid "%(file)s, page %(page)s"
+msgstr "%(file)s، صفحة %(page)s"
+
+#. module: nudge
+#. odoo-python
+msgid "Off: the Python packages %s are not installed on the server."
+msgstr "متوقف: حزم بايثون %s غير مثبتة على الخادم."
+
+#. module: nudge
+#. odoo-python
+msgid "The model %s is downloading now."
+msgstr "يجري تنزيل النموذج %s الآن."
+
+#. module: nudge
+#. odoo-python
+msgid "Wait for the download to end (Settings, Nudge, Local Search Model), then search."
+msgstr "انتظر انتهاء التنزيل (الإعدادات، Nudge، نموذج البحث المحلي) ثم ابحث."
+
+#. module: nudge
+#. odoo-python
+msgid "Off: the model %(title)s is not downloaded."
+msgstr "متوقف: النموذج %(title)s غير منزَّل."
+
+#. module: nudge
+#. odoo-python
+msgid "On: the model %s is downloaded."
+msgstr "يعمل: النموذج %s منزَّل."
+
+#. module: nudge
+#. odoo-python
+msgid "Ask your administrator to run: pip install %s. Then open Settings, Nudge, Local Search Model and press Download."
+msgstr "اطلب من المسؤول تنفيذ: pip install %s. ثم افتح الإعدادات، Nudge، نموذج البحث المحلي واضغط تنزيل."
+
+#. module: nudge
+#. odoo-python
+msgid "An administrator opens Settings, Nudge, Local Search Model and presses Download (%(size)s MB, kept in the filestore). The passages are then indexed by the scheduled action in the background."
+msgstr "يفتح المسؤول الإعدادات، Nudge، نموذج البحث المحلي ويضغط تنزيل (%(size)s ميغابايت، تُحفظ في مخزن الملفات). بعدها تُفهرس الفقرات بالإجراء المجدول في الخلفية."
+
+#. module: nudge
+#. odoo-python
+msgid "%(provider)s, %(model)s"
+msgstr "%(provider)s، %(model)s"
+
+#. module: nudge
+msgid "Measure now"
+msgstr "قِس الآن"
+
+#. module: nudge
+msgid "The request each mode would send for the sentence below, as you: the instructions, the tools and the skills. Nothing is sent to any provider and nothing is written. The limits are those of the quality gate of each release."
+msgstr "الطلب الذي سيرسله كل وضع للجملة أدناه، بصفتك أنت: التعليمات والأدوات والمهارات. لا يُرسل شيء إلى أي مزوّد ولا يُكتب شيء. الحدود هي حدود بوابة الجودة لكل إصدار."
+
+#. module: nudge
+msgid "Within the limit"
+msgstr "ضمن الحد"
+
+#. module: nudge
+msgid "Over the limit"
+msgstr "فوق الحد"
+
+#. module: nudge
+msgid "Not open"
+msgstr "غير متاح"
+
+#. module: nudge
+msgid "Not measured"
+msgstr "لم يُقَس"
+
+#. module: nudge
+msgid "Instructions and Skills"
+msgstr "التعليمات والمهارات"
+
+#. module: nudge
+msgid "Tool Schemas"
+msgstr "مخططات الأدوات"
+
+#. module: nudge
+msgid "Limit"
+msgstr "الحد"
+
+#. module: nudge
+msgid "Look for"
+msgstr "ابحث عن"
+
+#. module: nudge
+msgid "How to start it"
+msgstr "كيف تبدأه"
+
+#. module: nudge
+msgid "The Index"
+msgstr "الفهرس"
+
+#. module: nudge
+msgid "Documentation Passages"
+msgstr "فقرات التوثيق"
+
+#. module: nudge
+msgid "Company File Passages"
+msgstr "فقرات ملفات الشركة"
+
+#. module: nudge
+msgid "Indexed"
+msgstr "مفهرس"
+
+#. module: nudge
+msgid "Waiting to Be Indexed"
+msgstr "بانتظار الفهرسة"
+
+#. module: nudge
+msgid "Last Indexed"
+msgstr "آخر فهرسة"
+
+#. module: nudge
+msgid "Passages Found"
+msgstr "الفقرات الموجودة"
+
+#. module: nudge
+msgid "Words or a question, in any language"
+msgstr "كلمات أو سؤال، بأي لغة"
