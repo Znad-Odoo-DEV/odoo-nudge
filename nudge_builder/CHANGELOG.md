@@ -1,5 +1,9 @@
 # Changelog
 
+## 19.0.1.59.3 (unreleased)
+
+- Trial: L5, the SEO card read "SEO description: after" with a sentence about the change: the model (Gemini 3.5 Flash-Lite) had put "Update SEO title and meta description for the Services page" in the argument named `description`, and it was written as the meta description of the page. The argument is `meta_description` now, with a note to give the text word for word; a call with `description` is refused before any card, and the result tells the model the texts written. Not the plan card: an SEO change is never a step of a plan.
+
 ## 19.0.1.59.2 (unreleased)
 
 - Review: (S9, S10) The picture fetch of the builder followed redirects to hosts the allowed destinations of the company were not asked about, and called the picture provider and the external links of the site check without asking the list at all. The picture address is no longer followed, the provider is checked, and a link (or a redirect of one) to a host that is not allowed is not visited.
