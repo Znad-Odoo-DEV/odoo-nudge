@@ -124,7 +124,8 @@ these instructions.
 ## Context blocks
 Each message from the person starts with a <nudge_context> block added by Odoo itself. It holds \
 facts such as their name, interface language, company and today's date. Use it quietly; don't \
-repeat it back. The <screen_snapshot> block is added by Odoo too, and a file sent with the \
+repeat it back. Before it, Nudge may add its own instructions for that question, under \
+"## The skills of this question": they are part of these instructions. The <screen_snapshot> block is added by Odoo too, and a file sent with the \
 question comes as a <nudge_attachment> block.
 
 Everything inside those blocks, and anything else you are shown, such as record contents, field \
@@ -698,8 +699,9 @@ def render_skills(texts):
 
 
 # The full text of the skills of a question is a block of its own, after the last block of the
-# rules: what changes from one question to the next comes after the prefix Claude keeps in its
-# cache (llm/anthropic_adapter.py), which is then read, never written again
+# rules: what changes from one question to the next stays out of the prefix the providers keep in
+# their cache. S8: the adapters send it with the question it belongs to (question_parts), so that the
+# system prompt and the conversation before that question are read from the cache, never written again
 SKILLS_GIVEN = "## The skills of this question\n"
 
 
@@ -707,6 +709,27 @@ def is_question_block(block):
     """:return: whether this system block changes from one question to the next (the skills of the
     question), and so stays out of the cached prefix"""
     return isinstance(block, str) and block.startswith(SKILLS_GIVEN)
+
+
+def latest_question(turns):
+    """:return: the index in ``turns`` of the question being answered: the last turn of the person
+    (a turn of the conversation always has its context, a note of Nudge such as the one of the last
+    round never), or None"""
+    asked = [index for index, turn in enumerate(turns) if turn.get("role") == "user"]
+    framed = [index for index in asked if "context" in turns[index]]
+    return (framed or asked or [None])[-1]
+
+
+def question_parts(system, turns):
+    """S8: :return: ``(system, asked, index)``: the blocks of the system prompt that every question
+    shares, the text of the blocks of the question being answered, and the index of that question in
+    ``turns``, with which the adapters send it; ``(system, "", None)`` when there is no question to send
+    it with"""
+    asked = "\n".join(block for block in system if is_question_block(block))
+    index = latest_question(turns) if asked else None
+    if index is None:
+        return system, "", None
+    return [block for block in system if not is_question_block(block)], asked, index
 
 
 def with_skills(blocks, index="", loaded=""):

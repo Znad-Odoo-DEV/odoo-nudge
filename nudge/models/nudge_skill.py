@@ -376,6 +376,9 @@ class NudgeConversation(models.Model):
     skill_keys = fields.Char(
         copy=False, readonly=True,
         help="The skills the model asked for with use_skill: given with every next question of the conversation.")
+    offered_tools = fields.Char(
+        copy=False, readonly=True,
+        help="The tools offered beyond the core of the mode in this conversation: offered with every next question.")
 
     def _skill_keep(self, skill):
         """use_skill: the skill is given with every next question, the last ones asked for kept"""
@@ -480,8 +483,21 @@ class NudgeConversation(models.Model):
             # NP-03: the core of the mode, the tools of the groups the question needs and those of its
             # skills, rather than every tool; each still passes Tool.is_available (tools/base.py)
             tool_set = "core"
-            offer = {**offer, "tools": sorted(set(offer.get("tools") or ()) | set(offer["route"]))}
+            names = set(offer.get("tools") or ()) | set(offer["route"])
+            offer = {**offer, "tools": sorted(names | self._tools_kept(names))}
         return super(NudgeConversation, self.with_context(nudge_skills=offer))._chat_tools(mode, tool_set)
+
+    def _tools_kept(self, names):
+        """S8: a tool offered beyond the core of the mode stays offered for the rest of the conversation.
+        The tools are the start of every request: a list that changed from one question to the next made
+        the provider write the system prompt and the conversation after it again, rather than read them
+        from its cache. :return: the tools offered before in this conversation; ``names`` join them"""
+        conversation = self.sudo()
+        kept = {name for name in (conversation.offered_tools or "").split(",") if name}
+        if not set(names) <= kept:
+            # sudo: the conversation is the person's own, as with more_tools (tool_groups)
+            conversation.offered_tools = ",".join(sorted(kept | set(names)))
+        return kept
 
     def _chat_job(self, provider, mode, rounds):
         # One plan for the question: the tools it offers (_chat_tools) and the instructions it adds

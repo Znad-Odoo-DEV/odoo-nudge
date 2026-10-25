@@ -26226,3 +26226,14 @@ msgstr "أرسلها عند انتهاء هذه الإجابة"
 #: code:addons/nudge/static/src/components/nudge_message.xml:0
 msgid "Sent when this answer ends"
 msgstr "تُرسل عند انتهاء هذه الإجابة"
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__offered_tools
+msgid "Offered Tools"
+msgstr "الأدوات المعروضة"
+
+#: model:ir.model.fields,help:nudge.field_nudge_conversation__offered_tools
+msgid ""
+"The tools offered beyond the core of the mode in this conversation: offered "
+"with every next question."
+msgstr ""
+"الأدوات المعروضة في هذه المحادثة زيادةً على أدوات الوضع الأساسية: تُعرض مع "
+"كل سؤال تالٍ."
