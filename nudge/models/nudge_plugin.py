@@ -174,9 +174,9 @@ class NudgePlugin(models.Model):
         self._apply()
         return True
 
-    @api.model
     def action_find_plugins(self):
-        """Look again at the installed modules: a plugin installed before this version of Nudge is recorded"""
+        """Look again at the installed modules: a plugin installed before this version of Nudge is recorded.
+        Not api.model: the button of the list sends the selected ids, or none"""
         self._check_system()
         self.sudo()._sync_installed()
         return True

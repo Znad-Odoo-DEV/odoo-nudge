@@ -16,6 +16,11 @@ from odoo.addons.nudge.tools import base, registry
 
 from .common import NudgeCase
 
+try:
+    from odoo.service.model import call_kw  # Odoo 19
+except ImportError:  # Odoo 17 and 18
+    from odoo.api import call_kw
+
 FAKE_PLUGIN = "nudge_plugin_zz_test"
 
 
@@ -199,6 +204,12 @@ class TestToolRegistry(NudgeCase, TransactionCase):
             # What a plugin brings is read from its module, never typed in
             plugin.with_user(self.admin).write({"state": "allowed"})
         self.assertEqual(plugin.state, "pending")
+
+    def test_look_for_plugins_runs_from_its_button_with_or_without_a_selection(self):
+        # As the web client calls the button of the list: with the selected ids, or none
+        Plugin = self.env["nudge.plugin"].with_user(self.admin)
+        for ids in ([], self.make_plugin("zz_plugin_listed").ids):
+            self.assertTrue(call_kw(Plugin, "action_find_plugins", [ids], {}))
 
     def test_a_plugin_that_cannot_be_allowed_is_refused(self):
         plugin = self.make_plugin("zz_plugin_broken")
