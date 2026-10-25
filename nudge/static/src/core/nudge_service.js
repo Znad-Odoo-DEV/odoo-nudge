@@ -139,22 +139,6 @@ export function asksHowTo(text) {
     return HOW_TO.test(String(text || ""));
 }
 
-// The first word of a short order ("create contact", "اعمل عرض"): not a bare name
-const ORDER_WORD = /^(create|new|add|make|edit|change|delete|remove|send|confirm|cancel|أنشئ|انشئ|اعمل|سوي|ضيف|أضف|اضف|عدل|عدّل|احذف|امسح|ابعت|أرسل|ارسل|أكد|اكد|الغي|ألغ)$/i;
-
-/**
- * @param {string} text
- * @returns {boolean} whether the message is a bare name ("sales ordrs", "عروض الأسعار"): one or two words, no
- *     question, no order. The rules read it first (Did you mean, Open), so the person is not asked how before them
- */
-export function isBareName(text) {
-    const words = String(text || "").trim().split(/\s+/).filter(Boolean);
-    return (
-        words.length > 0 && words.length <= 2 && !/[?؟]/.test(text) && !asksHowTo(text) &&
-        !ORDER_WORD.test(words[0])
-    );
-}
-
 // A question of figures: "how many contacts", "كم عدد الموظفين", "قديش", "kam". It asks for a number, not for
 // steps, so it is never offered the guided tour
 const FIGURES = new RegExp(
@@ -2183,10 +2167,6 @@ function isReadable(file) {
                 // explanation: either they are asked, or it is the work
                 explain =
                     state.mode !== MODE_TALK && state.explain !== EXPLAIN_ASK ? null : state.explain;
-            }
-            if (explain === EXPLAIN_ASK && isBareName(text)) {
-                // A bare name with a slip gets its Did you mean from the rules, not the choice first
-                explain = null;
             }
             if (explain === EXPLAIN_ASK) {
                 // Theirs to say first: on the screen, or in writing
