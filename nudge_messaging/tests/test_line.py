@@ -1,8 +1,10 @@
+from datetime import timedelta
+
 from odoo import fields
 from odoo.tests import HttpCase, tagged
 
 from odoo.addons.nudge.llm import base as llm
-from odoo.addons.nudge.models.nudge_slot import NudgeBusy
+from odoo.addons.nudge.models.nudge_slot import HANDOVER_SECONDS, NudgeBusy
 
 from .test_messaging import RAGHAD_PHONE, MessagingCase
 
@@ -83,6 +85,36 @@ class TestMessagingLine(MessagingCase, HttpCase):
         self.assertFalse(conversation.provider_id, "Nothing but the answer wrote the conversation")
         self.assertEqual(conversation.message_count, 4)
         self.assertEqual(self.Slot._taken(), 0)
+
+    def test_a_long_answer_keeps_its_place_until_it_ends(self):
+        """Review (odoo-tech #6): the place of an answer on a phone counted for a minute only (HANDOVER_SECONDS),
+        the time a question of the panel has to commit: past it one more answer could start. It counts until
+        the answer ends"""
+        seen = []
+        adapter = self.use_adapter(reply="Done.")
+        original = adapter.stream_chat
+
+        def long_answer(*args, **kwargs):
+            slot = self.places()
+            slot.started_at = fields.Datetime.now() - timedelta(seconds=HANDOVER_SECONDS + 20)
+            self.Slot._sweep()
+            seen.append((slot.state, self.Slot._taken(), self.Slot._taken(provider=self.provider),
+                         self.Slot._is_answering(self.raghad)))
+            return original(*args, **kwargs)
+        adapter.stream_chat = long_answer
+        self.assertEqual(self.receive().state, "answered")
+        self.assertEqual(seen, [("claimed", 1, 1, True)], "Still counted, still answering")
+        self.assertFalse(self.places())
+        self.assertEqual(self.Slot._taken(), 0, "Given back when the answer ends")
+
+    def test_the_place_of_a_worker_that_died_expires(self):
+        conversation = self.env["nudge.messaging"].with_user(self.raghad)._conversation("whatsapp")
+        slot = self.env["nudge.slot"].with_user(self.raghad)._claim_channel(conversation, self.provider)
+        self.assertEqual(self.Slot._taken(), 1)
+        slot.started_at = fields.Datetime.now() - timedelta(hours=1)
+        self.assertEqual(self.Slot._taken(), 0, "A worker that died does not keep its place for ever")
+        self.Slot._sweep()
+        self.assertEqual(slot.state, "expired")
 
     def test_at_the_limit_the_message_stays_queued_and_is_answered_when_a_place_frees(self):
         holder = self.hold(self.ebrahim)

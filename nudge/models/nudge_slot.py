@@ -8,9 +8,11 @@ bus tells it its turn), and its answer starts when a place frees.
 
 What takes a place:
 - the mark of a conversation that is answering (``stream_started_at``), as before: the calls of
-  the external assistants and of the messaging apps carry it too;
+  the external assistants carry it too, when their log conversation is committed;
 - a place claimed in the instant between the claim and the commit of the question (``claimed``):
   the claim is committed at once, on a cursor of its own, so that every worker sees it;
+- a place claimed by a call of an external assistant or a messaging app (``is_channel``), until the
+  call ends, however long it runs, unless the mark of its conversation counts it instead;
 - a place kept for the first in line until they come for it (``ready``).
 The claim and the hand-out of the places are made under one advisory lock: two questions that
 arrive together cannot both take the last place, nor one person start two answers (PERF-04).
@@ -25,6 +27,7 @@ from psycopg2.extensions import ISOLATION_LEVEL_READ_COMMITTED
 from odoo import api, fields, models
 from odoo.exceptions import AccessError, UserError
 from odoo.modules import module as odoo_module
+from odoo.tools import config
 
 from ..tools.bus import notify_user
 
@@ -63,15 +66,18 @@ LOCK_TIMEOUT = "10s"
 # claim whose question never committed
 _SWEEP = """
     UPDATE nudge_slot SET state = '{new}', ended_at = %(now)s, write_date = %(now)s
-     WHERE id IN (SELECT id FROM nudge_slot WHERE state = '{state}' AND {since} < %(limit)s
+     WHERE id IN (SELECT id FROM nudge_slot WHERE state = '{state}' AND {since} < %(limit)s{only}
                   FOR UPDATE SKIP LOCKED)
 """
 SWEEPS = [
-    (_SWEEP.format(new="cancelled", state="waiting", since="seen_at"), HEARTBEAT_SECONDS),
-    (_SWEEP.format(new="expired", state="waiting", since="waiting_since"), WAIT_SECONDS),
-    (_SWEEP.format(new="expired", state="ready", since="ready_at"), READY_SECONDS),
-    (_SWEEP.format(new="done", state="claimed", since="started_at"), HANDOVER_SECONDS),
+    (_SWEEP.format(new="cancelled", state="waiting", since="seen_at", only=""), HEARTBEAT_SECONDS),
+    (_SWEEP.format(new="expired", state="waiting", since="waiting_since", only=""), WAIT_SECONDS),
+    (_SWEEP.format(new="expired", state="ready", since="ready_at", only=""), READY_SECONDS),
+    (_SWEEP.format(new="done", state="claimed", since="started_at", only=" AND is_channel IS NOT TRUE"),
+     HANDOVER_SECONDS),
 ]
+# The place of a call of an assistant or a messaging app whose worker died
+CHANNEL_SWEEP = _SWEEP.format(new="expired", state="claimed", since="started_at", only=" AND is_channel")
 
 
 @contextlib.contextmanager
@@ -121,6 +127,9 @@ class NudgeSlot(models.Model):
     ready_at = fields.Datetime(string="Turn Given")
     started_at = fields.Datetime(string="Answer Started")
     ended_at = fields.Datetime()
+    is_channel = fields.Boolean(
+        string="Assistant or Messaging Call",
+        help="A call of an external assistant or an answer on a messaging app: its place counts until it ends.")
 
     # ------------------------------------------------------------------
     # Infrastructure
@@ -153,13 +162,30 @@ class NudgeSlot(models.Model):
         longest = max(Conversation._get_stream_seconds(provider) for provider in providers)
         return fields.Datetime.now() - timedelta(seconds=longest)
 
+    def _channel_start(self):
+        """:return: the oldest place of a call of an assistant or a messaging app that still counts. It
+        counts until the call ends; a worker that died leaves it, and it expires once the server would
+        have stopped that worker (its limit on a request or on a scheduled action), or with the
+        longest an answer may take when that is later"""
+        limit = max(config["limit_time_real"] or 0, config.get("limit_time_real_cron") or 0, 0)
+        return min(self._window_start(), fields.Datetime.now() - timedelta(seconds=limit))
+
+    def _claimed(self):
+        """:return: the domain of the places claimed that count: a question of the panel until it
+        commits (it is counted by the mark of its conversation then), a call of an assistant or a
+        messaging app until it ends"""
+        return ["&", ("state", "=", "claimed"), "|",
+                "&", ("is_channel", "=", False),
+                ("started_at", ">=", fields.Datetime.now() - timedelta(seconds=HANDOVER_SECONDS)),
+                "&", ("is_channel", "=", True), ("started_at", ">=", self._channel_start())]
+
     def _taken(self, provider=None):
         """:param provider: count the places of this provider only
-        :return: how many places are taken: answers streaming, places claimed an instant ago,
-            places kept for the first in line"""
+        :return: how many places are taken: answers streaming, places claimed, places kept for the
+            first in line"""
         now = fields.Datetime.now()
         marks = [("stream_started_at", ">=", self._window_start())]
-        slots = ["|", "&", ("state", "=", "claimed"), ("started_at", ">=", now - timedelta(seconds=HANDOVER_SECONDS)),
+        slots = ["|", *self._claimed(),
                  "&", ("state", "=", "ready"), ("ready_at", ">=", now - timedelta(seconds=READY_SECONDS))]
         if provider:
             marks.append(("provider_id", "=", provider.id))
@@ -173,9 +199,7 @@ class NudgeSlot(models.Model):
         if Conversation.search_count([
                 ("user_id", "=", user.id), ("stream_started_at", ">=", self._window_start())], limit=1):
             return True
-        return bool(self.search_count([
-            ("user_id", "=", user.id), ("state", "=", "claimed"),
-            ("started_at", ">=", fields.Datetime.now() - timedelta(seconds=HANDOVER_SECONDS))], limit=1))
+        return bool(self.search_count([("user_id", "=", user.id), *self._claimed()], limit=1))
 
     def _max_line(self):
         value = self.env["ir.config_parameter"].sudo().get_param(LINE_PARAM) or ""
@@ -192,6 +216,7 @@ class NudgeSlot(models.Model):
         self.flush_model()
         for query, seconds in SWEEPS:
             self.env.cr.execute(query, {"now": now, "limit": now - timedelta(seconds=seconds)})
+        self.env.cr.execute(CHANNEL_SWEEP, {"now": now, "limit": self._channel_start()})
         self.env.cr.execute("""
             DELETE FROM nudge_slot WHERE id IN (
                 SELECT id FROM nudge_slot WHERE write_date < %s AND state NOT IN ('waiting', 'ready', 'claimed')
@@ -343,7 +368,7 @@ class NudgeSlot(models.Model):
                 slot_id = Slot.create({
                     "user_id": user.id, "company_id": self.env.company.id,
                     "conversation_ref": conversation.id, "provider_id": provider.id or False,
-                    "state": "claimed", "started_at": now, "seen_at": now}).id
+                    "state": "claimed", "started_at": now, "seen_at": now, "is_channel": True}).id
             else:
                 ahead = Slot.search_count([("state", "=", "waiting")]) + 1
                 places = self.env["nudge.conversation"]._get_max_streams()
