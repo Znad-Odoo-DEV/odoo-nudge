@@ -13,7 +13,7 @@ import time
 import requests
 
 from . import base, resilience, transcription
-from .prompt import render_user_text
+from .prompt import question_parts, render_user_text
 
 _logger = logging.getLogger(__name__)
 
@@ -166,10 +166,13 @@ class OpenAICompatAdapter(base.BaseAdapter):
 
     def _build_messages(self, system, turns):
         messages = []
+        # S8: these servers cache the prompt by its prefix: the skills of the question go with it,
+        # after the system prompt and the conversation every later question shares
+        system, asked, at = question_parts(system, turns)
         system_text = "\n\n".join(block for block in system if block)
         if system_text:
             messages.append({"role": "system", "content": system_text})
-        for turn in turns:
+        for index, turn in enumerate(turns):
             role = turn["role"]
             if role == "tool":
                 messages.extend(
@@ -178,6 +181,8 @@ class OpenAICompatAdapter(base.BaseAdapter):
                 )
                 continue
             text = render_user_text(turn) if role == "user" else turn["text"]
+            if index == at:
+                text = asked.strip("\n") + "\n\n" + text
             calls = turn.get("tool_calls") if role == "assistant" else None
             if calls:
                 messages.append({

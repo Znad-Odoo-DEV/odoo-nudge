@@ -7,7 +7,7 @@ import logging
 import time
 
 from . import base, resilience
-from .prompt import is_question_block, render_user_text
+from .prompt import is_question_block, question_parts, render_user_text
 
 _logger = logging.getLogger(__name__)
 
@@ -161,8 +161,10 @@ class AnthropicAdapter(base.BaseAdapter):
 
         S8: the tools render first, before the system prompt. Those every question of the mode is
         offered come first, and a read point after the last of them (``base.CACHE_POINT``) keeps
-        them in the cache when a question brings tools of its own after them. With the one of the
-        system prompt and the one on the conversation, three of the four the API allows."""
+        them in the cache when a question brings tools of its own after them. A list with nothing
+        after them is marked on its last tool all the same: the next question that brings tools
+        reads them from there. With the one of the system prompt, the one before the question and
+        the one on the conversation, the four the API allows."""
         built, marked = [], False
         for tool in tools:
             definition = {key: value for key, value in tool.items() if key != base.CACHE_POINT}
@@ -172,11 +174,27 @@ class AnthropicAdapter(base.BaseAdapter):
                 definition["cache_control"] = {"type": "ephemeral"}
                 marked = True
             built.append(definition)
+        if built and not marked:
+            built[-1]["cache_control"] = {"type": "ephemeral"}
         return built
 
-    def _build_messages(self, turns):
+    @staticmethod
+    def _mark_before(messages, at):
+        """S8: a read point on the last block before the message ``at``, the question being answered:
+        the next question reads the conversation up to there, although this question is sent again
+        without its screen and its skills. A thinking block takes none."""
+        for message in reversed(messages[:at]):
+            for block in reversed(message["content"]):
+                if block.get("type") not in ("thinking", "redacted_thinking"):
+                    block["cache_control"] = {"type": "ephemeral"}
+                    return
+
+    def _build_messages(self, turns, asked="", at=None):
+        """:param asked: the skills of the question being answered (``prompt.question_parts``), sent
+            with it, before its context
+        :param at: the index of that question in ``turns``"""
         messages = []
-        for turn in turns:
+        for index, turn in enumerate(turns):
             role = turn["role"]
             if role == "tool":
                 role = "user"
@@ -207,9 +225,12 @@ class AnthropicAdapter(base.BaseAdapter):
                     *({"type": "image", "source": {
                         "type": "base64", "media_type": image["media_type"], "data": image["data"]}}
                       for image in turn.get("images") or []),
+                    *([{"type": "text", "text": asked}] if asked and index == at else []),
                     {"type": "text", "text": render_user_text(turn)},
                 ]
             if content:
+                if index == at:
+                    self._mark_before(messages, len(messages))
                 messages.append({"role": role, "content": content})
         return messages
 
@@ -218,11 +239,13 @@ class AnthropicAdapter(base.BaseAdapter):
         if tools and tool_choice == "required":
             # Not forced, which the API refuses: told, and left to choose
             turns = [*turns, {"role": "user", "text": TOOL_NOTE}]
+        # S8: the skills of the question go with it, after the system prompt every question shares
+        system, asked, at = question_parts(system, turns)
         params = {
             "model": config.model,
             "max_tokens": config.max_output_tokens or DEFAULT_MAX_TOKENS,
             "system": self._build_system(system),
-            "messages": self._build_messages(turns),
+            "messages": self._build_messages(turns, asked, at),
             # Automatic breakpoint on the growing conversation tail
             "cache_control": {"type": "ephemeral"},
         }
