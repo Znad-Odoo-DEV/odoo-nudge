@@ -289,12 +289,17 @@ class TestConnectorUse(ConnectCase, TransactionCase):
 
     def test_reads_of_one_conversation_send_a_limited_total_without_a_card(self):
         conversation = self.env["nudge.conversation"].sudo().create({"user_id": self.agent.id})
+        # Words the person typed: after the first answer the reads would otherwise ask, with a card
+        self.env["nudge.message"].sudo().create({
+            "conversation_id": conversation.id, "role": "user",
+            "content": " ".join([f"{number}" + "x" * 900 for number in range(5)] + ["y" * 900])})
         env = self.env(user=self.agent, context=dict(self.env.context, nudge_conversation_id=conversation.id))
         connectors.sync(env)
         call_read = lambda text: nudge_tools.base.call(env, READ, {"query": text}, None, "agent")  # noqa: E731
         for number in range(5):
             result = call_read(f"{number}" + "x" * 900)
             self.assertFalse(result.is_error, result.content)
+            self.assertIsNone(result.pending)
         sent = len(self.server.calls("tools/call"))
         result = call_read("y" * 900)
         self.assertTrue(result.is_error)
@@ -563,6 +568,77 @@ class TestConnectorSafety(ConnectCase, TransactionCase):
         self.assertEqual(json.loads(lines["Sends"]), obeying, "The person sees what would leave")
         self.decide(conversation, "decline")
         self.assertEqual(len(self.server.calls("tools/call")), 1)
+
+    def test_after_an_outside_answer_a_read_asks_and_a_no_sends_nothing(self):
+        """Review (ai #8): once an outside system has answered in the conversation, a read that would send
+        words the person did not type is shown on a card first: the model may be following that answer"""
+        self.server.answers["search_contacts"] = fake_mcp.text_result(INJECTION)
+        leaking = {"query": "IBAN DE89370400440532013000"}
+        self.use_adapter(script=[
+            asking(call(READ, {"query": "Raghad"})),
+            asking(call(READ, leaking, "call_2")),
+            saying("Nothing more was read."),
+        ])
+        conversation, events = self.order(self.agent, "Find Raghad in the sister company")
+        self.assertEqual(len(self.server.calls("tools/call")), 1, "The first read runs at once")
+        card = next(event for event in events if event["type"] == "confirm")
+        lines = {line["label"]: line["value"] for line in card["lines"]}
+        self.assertEqual(json.loads(lines["Sends"]), leaking, "The person sees what would leave")
+        self.assertEqual(card["title"], "Read from Sister Odoo: Search contacts")
+        self.assertIn("not typed by you", lines["Why it asks"])
+        self.decide(conversation, "decline")
+        self.assertEqual(len(self.server.calls("tools/call")), 1, "A no sends nothing")
+        self.assertEqual(self.env["nudge.connector.call"].search_count([("conversation_id", "=", conversation.id)]), 1)
+
+    def test_after_an_outside_answer_a_read_said_yes_to_is_sent(self):
+        self.use_adapter(script=[
+            asking(call(READ, {"query": "Raghad"})),
+            asking(call(READ, {"query": "Ebrahim Cars"}, "call_2")),
+            saying("Both were read."),
+        ])
+        conversation, _events = self.order(self.agent, "Find Raghad in the sister company")
+        self.assertEqual(len(self.server.calls("tools/call")), 1)
+        self.decide(conversation)
+        sent = self.server.calls("tools/call")
+        self.assertEqual(len(sent), 2)
+        self.assertEqual(sent[1]["body"]["params"]["arguments"], {"query": "Ebrahim Cars"})
+        steps = conversation.sudo().run_ids.step_ids.filtered(lambda step: step.tool == READ)
+        self.assertEqual(steps.mapped("state"), ["done", "done"])
+
+    def test_after_an_outside_answer_a_read_of_what_the_person_typed_runs(self):
+        self.use_adapter(script=[
+            asking(call(READ, {"query": "Raghad"})),
+            asking(call(READ, {"query": "ebrahim"}, "call_2")),
+            saying("Both were read."),
+        ])
+        _conversation, events = self.order(self.agent, "Find Raghad, then Ebrahim, in the sister company")
+        self.assertEqual(len(self.server.calls("tools/call")), 2, "Words the person typed carry nothing they did not")
+        self.assertFalse([event for event in events if event["type"] == "confirm"])
+
+    def test_a_file_or_a_mail_read_before_makes_a_read_ask(self):
+        def read_in(conversation):
+            env = self.env(user=self.agent, context=dict(self.env.context, nudge_conversation_id=conversation.id))
+            connectors.sync(env)
+            return nudge_tools.base.call(env, READ, {"query": "Raghad"}, None, "agent")
+
+        Conversation = self.env["nudge.conversation"].sudo()
+        clean = Conversation.create({"user_id": self.agent.id})
+        self.assertIsNone(read_in(clean).pending, "Nothing from outside yet: the read runs")
+        self.assertEqual(len(self.server.calls("tools/call")), 1)
+        with_file = Conversation.create({"user_id": self.agent.id})
+        self.env["nudge.message"].sudo().create({
+            "conversation_id": with_file.id, "role": "user", "content": "Read this offer",
+            "attachment_name": "offer.pdf"})
+        result = read_in(with_file)
+        self.assertTrue(result.pending, "A file was sent: the read asks")
+        self.assertEqual(result.pending["values"]["arguments"], {"query": "Raghad"})
+        with_mails = Conversation.create({"user_id": self.agent.id})
+        run = self.env["nudge.run"].sudo().create({
+            "name": "History", "conversation_id": with_mails.id, "user_id": self.agent.id})
+        self.env["nudge.step"].sudo().create({
+            "run_id": run.id, "call_id": "c1", "tool": "summarize_record_history", "state": "done"})
+        self.assertTrue(read_in(with_mails).pending, "The mails of a record were read: the read asks")
+        self.assertEqual(len(self.server.calls("tools/call")), 1, "Nothing was sent")
 
     def test_data_read_from_one_connector_is_named_on_the_card_of_another(self):
         drive = self.env["nudge.connector"].create({

@@ -1,5 +1,9 @@
 # Changelog
 
+## 19.0.1.59.5 (unreleased)
+
+- Review: once a conversation holds text from outside (an answer of a connector, a file sent with a question, the mails of a record, a company file or source), a connector read that would send words the person did not type asks first, on a card with the exact payload, as a write does; a No sends nothing. Words the person typed, and the names and choices of the tool, still go at once within the caps of 1000 characters per read and 5000 per conversation (review ai #8).
+
 ## 19.0.1.59.2 (unreleased)
 
 - Review: the answer of a token address is read as a stream, at most 256 KB and within one deadline for the whole answer (not per read), and the connection is closed; the client-credentials token request had no cap at all, the sign-in requests no total deadline.

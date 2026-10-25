@@ -292,7 +292,8 @@ class TestConnectorCache(ConnectCase, TransactionCase):
         adapter = self.use_adapter(script=[
             asking(call(READ, {"query": "Ra"}, "call_1")), asking(call(READ, {"query": "Ra"}, "call_2")),
             saying("Done.")])
-        self.order(self.agent, "Who are the contacts of the sister company?")
+        # "Ra" typed by the person: read again after the first answer without a card
+        self.order(self.agent, "Who are the contacts of the sister company named Ra?")
         self.assertEqual(self.sent(), 1)
         self.assertEqual(self.states(), ["done", "hit"])
         for turn in (1, 2):
