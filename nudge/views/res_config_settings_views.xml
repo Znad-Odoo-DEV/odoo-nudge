@@ -52,7 +52,7 @@
                                 A provider on your own server listens to the voice. Without one, voice stays off.
                             </div>
                             <div class="content-group mt8" invisible="not nudge_private_mode">
-                                <field name="nudge_private_browser_speech"/>
+                                <div><field name="nudge_private_browser_speech"/> <label for="nudge_private_browser_speech"/></div>
                                 <div class="text-muted">
                                     Lets the speech of the browser be used when no provider on your own server listens,
                                     for talking, dictating and reading answers aloud. Chrome and Edge may send the sound
@@ -60,7 +60,7 @@
                                 </div>
                             </div>
                             <div class="content-group mt8" invisible="not nudge_private_mode">
-                                <field name="nudge_allow_recipe_index"/>
+                                <div><field name="nudge_allow_recipe_index"/> <label for="nudge_allow_recipe_index"/></div>
                                 <div class="text-muted">
                                     Lets the marketplace read recipe indexes and download recipe files (HTTPS only,
                                     each file checked against its index). It is not an AI call, but the site that
@@ -108,17 +108,17 @@
                     <block title="Warnings While Typing" name="nudge_validator_container">
                         <setting help="A small strip under the title of a form warns about a mistake while the person fills it in, before they save. Nothing is blocked: the person decides. No AI is used, except when someone clicks Ask Nudge about this. Each person can mute a warning for themselves.">
                             <div class="content-group">
-                                <div class="mt8"><field name="nudge_validate_partner_duplicate"/></div>
-                                <div class="mt8"><field name="nudge_validate_product_duplicate"/></div>
-                                <div class="mt8"><field name="nudge_validate_vat_format"/></div>
-                                <div class="mt8"><field name="nudge_validate_bill_number_reuse"/></div>
-                                <div class="mt8"><field name="nudge_validate_phone_format"/></div>
-                                <div class="mt8"><field name="nudge_validate_email_syntax"/></div>
-                                <div class="mt8"><field name="nudge_validate_price_below_cost"/></div>
-                                <div class="mt8"><field name="nudge_validate_price_above_last_purchase"/></div>
-                                <div class="mt8"><field name="nudge_validate_quantity_far_above"/></div>
-                                <div class="mt8"><field name="nudge_validate_date_in_the_past"/></div>
-                                <div class="mt8"><field name="nudge_validate_policy_required"/></div>
+                                <div class="mt8"><field name="nudge_validate_partner_duplicate"/> <label for="nudge_validate_partner_duplicate"/></div>
+                                <div class="mt8"><field name="nudge_validate_product_duplicate"/> <label for="nudge_validate_product_duplicate"/></div>
+                                <div class="mt8"><field name="nudge_validate_vat_format"/> <label for="nudge_validate_vat_format"/></div>
+                                <div class="mt8"><field name="nudge_validate_bill_number_reuse"/> <label for="nudge_validate_bill_number_reuse"/></div>
+                                <div class="mt8"><field name="nudge_validate_phone_format"/> <label for="nudge_validate_phone_format"/></div>
+                                <div class="mt8"><field name="nudge_validate_email_syntax"/> <label for="nudge_validate_email_syntax"/></div>
+                                <div class="mt8"><field name="nudge_validate_price_below_cost"/> <label for="nudge_validate_price_below_cost"/></div>
+                                <div class="mt8"><field name="nudge_validate_price_above_last_purchase"/> <label for="nudge_validate_price_above_last_purchase"/></div>
+                                <div class="mt8"><field name="nudge_validate_quantity_far_above"/> <label for="nudge_validate_quantity_far_above"/></div>
+                                <div class="mt8"><field name="nudge_validate_date_in_the_past"/> <label for="nudge_validate_date_in_the_past"/></div>
+                                <div class="mt8"><field name="nudge_validate_policy_required"/> <label for="nudge_validate_policy_required"/></div>
                                 <button name="%(nudge_validator_policy_action)d" type="action"
                                         string="Fields the Company Requires" icon="oi-arrow-right" class="btn-link"/>
                             </div>
@@ -347,7 +347,7 @@
                     <block title="Compliance Packs" name="nudge_compliance_feed_container">
                         <setting help="Country checklists can be updated from a feed signed by its publisher. It is off while the address or the key is empty. Nudge then fetches one small file a day from that address only, checks its signature with the key below, and shows what would change: nothing is replaced until a system administrator approves it. The checklists that come with Nudge stay the fallback.">
                             <field name="nudge_compliance_feed_url" placeholder="https://"/>
-                            <field name="nudge_compliance_feed_key"/>
+                            <div class="mt8"><label for="nudge_compliance_feed_key" class="o_light_label"/> <field name="nudge_compliance_feed_key"/></div>
                             <div class="mt8">
                                 <button name="action_nudge_compliance_feed_check" type="object"
                                         string="Check the Feed Now" icon="oi-arrow-right" class="btn-link"/>
