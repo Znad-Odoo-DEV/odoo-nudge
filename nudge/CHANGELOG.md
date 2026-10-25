@@ -10,6 +10,8 @@ Current version: nudge 19.0.1.59.4, nudge_mcp 19.0.1.1.1, nudge_connect 19.0.1.0
 - Round 5: in Agent mode an approval sentence ("Purchase orders above 50,000 need Purchase Manager approval") is answered by the rules, with no provider: approvals are built in Developer mode, and the switch is offered (an administrator to ask when Developer mode is not open to the person).
 - Round 5: the index of skills of a call lists only the skills the question scored for above a floor (and those already in the conversation), so a plain question carries none of the 8 irrelevant ones (about 345 tokens).
 - Round 5: the "Where the work is" block of every call leaves out the kinds of records that are set up once rather than worked in (countries and states, currencies and rates, languages, calendars, units, taxes and the accounting set-up, product attributes), so the room goes to the business models; locate_data still finds them when asked.
+- Round 5: an outside auditor allowed one company of several reads the log of that company only: Made by Nudge rows with no company were visible to them (a rule for the auditor group is added), and tests now cover two companies for the run, the steps, Made by Nudge and its log, the step page and the wizard's company choice (NP-16).
+
 
 ## 19.0.1.59.4 (unreleased)
 

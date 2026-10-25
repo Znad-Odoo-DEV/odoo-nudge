@@ -164,6 +164,63 @@ class TestAuditor(NudgeCase, HttpCase):
         found = self.env(user=self.auditor)["nudge.built"].search([("id", "in", (mine | other).ids)])
         self.assertEqual(found, mine)
 
+    def test_made_by_nudge_with_no_company_and_its_log_are_the_companies_of_the_auditor_only(self):
+        Built, as_auditor = self.env["nudge.built"].sudo(), self.env(user=self.auditor)
+        mine = Built.create({"name": "Rule A", "kind": "automation", "res_model": "base.automation", "res_id": 1,
+                             "company_id": self.company_one.id})
+        other = Built.create({"name": "Rule B", "kind": "automation", "res_model": "base.automation", "res_id": 2,
+                              "company_id": self.company_two.id})
+        nobody = Built.create({"name": "Rule C", "kind": "automation", "res_model": "base.automation", "res_id": 3,
+                               "company_id": False})
+        logs = self.env["nudge.built.log"]
+        for built in (mine, other, nobody):
+            logs |= logs.sudo().create({"built_id": built.id, "company_id": built.company_id.id,
+                                        "action": "switch_off", "summary": built.name})
+        self.assertEqual(as_auditor["nudge.built"].search([("id", "in", (mine | other | nobody).ids)]), mine,
+                         "A row with no company is not theirs, as in the run and the steps")
+        found = as_auditor["nudge.built.log"].search([("id", "in", logs.ids)])
+        self.assertEqual(found.built_id, mine)
+        with self.assertRaises(AccessError), self.cr.savepoint():
+            logs[1].with_env(as_auditor).summary
+        with self.assertRaises(AccessError), self.cr.savepoint():
+            other.with_env(as_auditor).name
+        # Allowed the second company too, they read it as well
+        self.auditor.write({"company_ids": [Command.link(self.company_two.id)]})
+        both = self.env(user=self.auditor, context={"allowed_company_ids": [self.company_one.id, self.company_two.id]})
+        self.assertEqual(both["nudge.built"].search([("id", "in", (mine | other | nobody).ids)]), mine | other)
+        self.assertEqual(both["nudge.built.log"].search([("id", "in", logs.ids)]).built_id, mine | other)
+
+    def test_the_log_of_the_other_company_is_closed_by_every_path(self):
+        as_auditor = self.env(user=self.auditor)
+        elsewhere_run, elsewhere_step = self.runs[1].with_env(as_auditor), self.steps[1].with_env(as_auditor)
+        for record in (elsewhere_run, elsewhere_step):
+            with self.assertRaises(AccessError, msg=record._name), self.cr.savepoint():
+                record.name if record._name == "nudge.run" else record.summary
+        # The ORM readers a list or a form uses
+        for model, record in (("nudge.run", self.runs[1]), ("nudge.step", self.steps[1])):
+            with self.assertRaises(AccessError, msg=model), self.cr.savepoint():
+                as_auditor[model].browse(record.id).read(["id", "create_date"])
+            with self.assertRaises(AccessError, msg=model), self.cr.savepoint():
+                as_auditor[model].browse(record.id).unlink()
+            self.assertFalse(as_auditor[model].search_count([("id", "=", record.id)]), model)
+            self.assertFalse(as_auditor[model].search_read([("id", "=", record.id)], ["id"]), model)
+            self.assertFalse(as_auditor[model].web_search_read([("id", "=", record.id)], {"id": {}})["records"], model)
+        # The steps of a run of their company are theirs, the others' steps are not reached through a run
+        self.assertEqual(self.runs[0].with_env(as_auditor).step_ids, self.steps[0])
+
+    def test_the_step_page_follows_the_companies_of_the_auditor(self):
+        self.authenticate(AUDITOR_LOGIN, AUDITOR_LOGIN)
+        self.assertEqual(self.url_open("/nudge/step/%s/open" % self.steps[1].id, allow_redirects=False).status_code, 403)
+        self.auditor.sudo().write({"company_ids": [Command.link(self.company_two.id)]})
+        self.env.flush_all()
+        self.env.registry.clear_all_caches()
+        self.assertNotEqual(self.url_open("/nudge/step/%s/open" % self.steps[1].id, allow_redirects=False).status_code, 403,
+                            "Once allowed the second company, its step is theirs to read")
+        self.auditor.sudo().write({"company_ids": [Command.unlink(self.company_two.id)]})
+        self.env.flush_all()
+        self.env.registry.clear_all_caches()
+        self.assertEqual(self.url_open("/nudge/step/%s/open" % self.steps[1].id, allow_redirects=False).status_code, 403)
+
     def test_the_auditor_gets_the_audit_menu_and_a_user_does_not(self):
         menu = self.env.ref("nudge.nudge_menu_audit")
         self.assertIn(menu.id, self.env["ir.ui.menu"].with_user(self.auditor)._visible_menu_ids())
@@ -303,6 +360,21 @@ class TestAuditor(NudgeCase, HttpCase):
         self.assertEqual(user.sudo().nudge_auditor_until, self.today + timedelta(days=20))
         self.assertEqual(user.company_ids, self.company_one)
         self.assertFalse(user.share)
+
+    def test_the_wizard_respects_the_company_that_is_chosen(self):
+        admin = new_test_user(self.env, login="nudge_adm_wi4", groups="base.group_system")
+        wizard = self.env["nudge.auditor.wizard"].with_user(admin).create({
+            "name": "Second Company Auditor", "login": "second.auditor@example.com",
+            "company_ids": [Command.set(self.company_two.ids)], "send_invitation": False,
+            "until": self.today + timedelta(days=5)})
+        user = self.env["res.users"].browse(wizard.action_create()["res_id"])
+        self.assertEqual(user.company_ids, self.company_two)
+        self.assertEqual(user.company_id, self.company_two)
+        as_second = self.env(user=user)
+        self.assertEqual(as_second["nudge.run"].search([("id", "in", self.runs.ids)]), self.runs[1])
+        self.assertEqual(as_second["nudge.step"].search([("id", "in", self.steps.ids)]), self.steps[1])
+        with self.assertRaises(AccessError), self.cr.savepoint():
+            self.runs[0].with_env(as_second).name
 
     def test_the_wizard_refuses_what_acts_and_the_past(self):
         admin = new_test_user(self.env, login="nudge_adm_wi2", groups="base.group_system")
