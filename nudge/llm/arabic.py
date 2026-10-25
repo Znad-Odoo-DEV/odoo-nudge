@@ -58,8 +58,8 @@ ARABIZI_PAIRS = {
 }
 # A Latin letter or digit: the consonants it can stand for
 ARABIZI_CONSONANTS = {
-    "b": "ب", "p": "ب", "t": "تط", "j": "ج", "d": "دض",
-    "r": "ر", "z": "زذظ", "s": "سص", "f": "ف", "v": "ف",
+    "b": "ب", "p": "ب", "t": "تطث", "j": "ج", "d": "دضذ",
+    "r": "ر", "z": "زذظ", "s": "سصث", "f": "ف", "v": "ف",
     "q": "قك", "k": "ك", "l": "ل", "m": "م", "n": "ن",
     "h": "هح", "g": "جقغك", "c": "كس", "x": "ك",
     # The digits people type for the letters a keyboard does not have

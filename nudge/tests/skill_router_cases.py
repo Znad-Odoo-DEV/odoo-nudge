@@ -256,3 +256,35 @@ FRESH2 = [
     ("awal ma yo3allem el tiket 3ajel nabbeh mas2oul el da3m", AUTO, "az"),
     ("lazem mowafaqet el mohaseb abel ma yersal el estirdad aktar mn 500", ("approval-flows",), "az"),
 ]
+
+# Arabizi written after the round that tuned the Arabizi reading: never used to set a weight or a word list
+HELD_OUT_AZ = [
+    ("shu el tareeqa la nfa3el el tasleem 3ala marhaltein bel mustawda3", ("odoo-setup",), "az"),
+    ("el malaf taba3 el mowarridin ma 5ala9 w tale3 fi 5ata2", ("import-files",), "az"),
+    ("7ebb a3mel taswim helo lal risale elli btousal lal zboun ba3d el shira", EMAIL, "az"),
+    ("el mohema el mojadwala wa2afat w ma 3reft laysh", ("failure-diagnosis",), "az"),
+    ("bdi a3mel modul jdeed la tasjeel el tadreeb", ("module-scaffold",), "az"),
+    ("2olli shu el barameg el mothabbata w mish mostakhdama", ("database-assessment",), "az"),
+    ("meen aktar bayyi3 jab dakhl bel rob3 el madi", ("data-analysis",), "az"),
+    ("eftah el 3aqd taba3 raghad w maddid el modda sitta ashhor", ("record-work",), "az"),
+    ("ghayyer el hala la kol el tazakir elli 3and ebrahim", ("bulk-work",), "az"),
+    ("kol akher el shahr zakkirni bel fawateer el mota2akhkhira", ("recurring-tasks",), "az"),
+    ("shu kan el se3er abl ma ye3adduloh bel talab", ("record-history",), "az"),
+    ("fi 3ndkon shanta jild asmar", ("product-search",), "az"),
+]
+
+# A second batch, written blind (Gulf and Egyptian spellings too) and only measured at the start and at the end
+HELD_OUT_AZ2 = [
+    ("ayz a3raf ezay a5ally el nezam yeh7seb el 3omola le kol mandoob 7asab el target", ("odoo-setup",), "az"),
+    ("el sheet el ely 3ndi feeh 3amood esmo el ragm el marge3y, hayetqabel lama a3mello upload?", ("import-files",), "az"),
+    ("wesh el khata2 elly tal3 lama ishtaghal el job el layli", ("failure-diagnosis",), "az"),
+    ("abi tatbeeq jadeed le idarat el 7odoor wel ensraf yenzel 3ndi", ("module-scaffold",), "az"),
+    ("qaren el dakhl bta3 el sana di bel sana elly fatet", ("data-analysis",), "az"),
+    ("sajjel 3emeel jdeed esmo ebrahim wa rakamo 0501234567", ("record-work",), "az"),
+    ("kol youm el sobh ba3tholi mulakhas bel talabat el jdeeda", ("recurring-tasks",), "az"),
+    ("fa7lil el egtema3 elly 3amalnah ams w tal3 li el qararat", ("meetings",), "az"),
+    ("meen ghayyar el se3r 3ala hal talab w emta", ("record-history",), "az"),
+    ("e7na 3ayzeen mawqe3 saghir le matjar el 7alawiyat", ("website-builder",), "az"),
+    ("wein a2dar alqa shashat el mowazzafeen", ("guided-tours",), "az"),
+    ("lazem el modeer yowafeq abl ma ye3taded ay masroof fo2 alf dirham", ("approval-flows", "studio-approvals"), "az"),
+]

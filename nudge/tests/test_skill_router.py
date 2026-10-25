@@ -18,7 +18,7 @@ from odoo.addons.nudge.tools import base, skill_router
 from odoo.addons.nudge.tools.sql import SQL_PARAM
 
 from .common import NudgeCase
-from .skill_router_cases import CASES, FRESH, FRESH2, NOTHING, SCREENS
+from .skill_router_cases import CASES, FRESH, FRESH2, HELD_OUT_AZ, HELD_OUT_AZ2, NOTHING, SCREENS
 
 _logger = logging.getLogger(__name__)
 
@@ -110,14 +110,39 @@ class TestSkillRouter(NudgeCase, TransactionCase):
                     self.assertGreaterEqual(hits / measured, floor, f"{name}: top-2 hits {hits}/{measured}")
         _logger.info("S1 router, no model:\n%s", "\n".join(report))
 
+    def test_the_languages_are_reported(self):
+        # Not an assertion: the figures per language, and what missed, for the log
+        lines = []
+        for language in ("en", "ar", "az"):
+            for name, cases in (("tuned", CASES), ("fresh", FRESH + FRESH2), ("held-out", HELD_OUT_AZ), ("blind", HELD_OUT_AZ2)):
+                subset = [case for case in cases if case[2] == language]
+                if not subset:
+                    continue
+                measured, hits, _brought, _right = self.measure(subset)
+                lines.append(f"{language} {name}: top-2 {hits}/{measured}")
+        visible = self.visible()
+        index = skill_router.index_of(self.env, visible)
+        for text, expected, language in CASES + FRESH + FRESH2 + HELD_OUT_AZ + HELD_OUT_AZ2:
+            if language == "az" and not set(visible.mapped("key")) & set(expected):
+                continue
+            keys = skill_router.route(index, text).keys
+            if language == "az" and not any(key in expected for key in keys):
+                lines.append(f"MISS {text!r} wants {expected} got {keys}")
+        _logger.info("S1 languages:\n%s", "\n".join(lines))
+
     def test_each_language_is_reached(self):
         for language in ("en", "ar", "az"):
             subset = [case for case in CASES + FRESH if case[2] == language]
             measured, hits, _brought, _right = self.measure(subset)
-            # Arabizi is the weak one: 0.80 (20 of 25) with the particles, endings and "2" read as the Arabic
-            # stems are, with or without the spreadsheet skill; the floor leaves 0.05 for the weights that
-            # fewer skills change
-            self.assertGreaterEqual(hits / measured, 0.75 if language == "az" else 0.9, language)
+            # Arabizi was the weak one: 0.80 before the roots of two consonants, the th/dh/s readings and the
+            # dialect words; 0.96 (26 of 27) after
+            self.assertGreaterEqual(hits / measured, 0.9, language)
+
+    def test_arabizi_written_afterwards_is_reached(self):
+        # Written after the Arabizi reading was set, never used to set anything (the honest figure: 0.75)
+        for name, cases in (("held-out", HELD_OUT_AZ), ("blind", HELD_OUT_AZ2)):
+            measured, hits, _brought, _right = self.measure(cases)
+            self.assertGreaterEqual(hits / measured, 0.65, f"{name}: {hits}/{measured}")
 
     def test_a_sentence_with_no_work_in_it_brings_no_skill(self):
         index = skill_router.index_of(self.env, self.visible())
