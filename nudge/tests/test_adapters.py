@@ -577,9 +577,12 @@ class TestAnthropicAdapter(BaseCase):
         self.assertEqual(rules, ["You are Nudge.", "Talk mode: explain, and Raghad decides."], "Not changed in place")
         list(self.adapter().stream_chat(first, TURNS))
         system = self.calls[0][1]["system"]
-        self.assertEqual([bool(block.get("cache_control")) for block in system], [False, True, False])
+        self.assertEqual([bool(block.get("cache_control")) for block in system], [False, True])
         self.assertIn("## Skills", system[1]["text"], "The index is the same for every question: cached")
-        self.assertIn("## Setting Odoo up", system[2]["text"])
+        # S8: the skills go with the question, before it, and the conversation before it is cached
+        messages = self.calls[0][1]["messages"]
+        self.assertEqual(messages[-1]["content"], [{"type": "text", "text": first[-1]}, {"type": "text", "text": "How are you?"}])
+        self.assertTrue(messages[-2]["content"][-1].get("cache_control"))
         self.assertEqual([bool(block.get("cache_control")) for block in self.adapter()._build_system(rules)],
                          [False, True])
         # use_skill in the middle of an answer: one block of skills, a text already there not given twice
@@ -587,7 +590,7 @@ class TestAnthropicAdapter(BaseCase):
         self.assertEqual(again[:-1], first[:-1])
         self.assertEqual(again[-1].count("## Setting Odoo up"), 1)
         self.assertIn("## Importing files", again[-1])
-        # Every other adapter reads the same text, the skills last
+        # With no question to send them with, the skills stay last in the system prompt
         messages = OpenAICompatAdapter.__new__(OpenAICompatAdapter)._build_messages(again, [])
         self.assertTrue(messages[0]["content"].endswith("## Importing files\n- Test first.\n"))
 
