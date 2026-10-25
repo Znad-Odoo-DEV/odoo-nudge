@@ -1,6 +1,6 @@
 # Changelog
 
-Current version: nudge 19.0.1.59.4, nudge_mcp 19.0.1.1.1, nudge_connect 19.0.1.0.3, nudge_messaging 19.0.1.0.6, nudge_ai 19.0.1.0.11, nudge_studio 19.0.1.0.12, nudge_documents 19.0.1.0.8, nudge_spreadsheet 19.0.1.0.11, nudge_builder 19.0.1.0.8, nudge_mail 19.0.1.0.15, nudge_discuss 19.0.1.0.9, nudge_website 19.0.1.0.3.
+Current version: nudge 19.0.1.59.5, nudge_mcp 19.0.1.1.1, nudge_connect 19.0.1.0.4, nudge_messaging 19.0.1.0.6, nudge_ai 19.0.1.0.11, nudge_studio 19.0.1.0.12, nudge_documents 19.0.1.0.8, nudge_spreadsheet 19.0.1.0.11, nudge_builder 19.0.1.0.9, nudge_mail 19.0.1.0.15, nudge_discuss 19.0.1.0.9, nudge_website 19.0.1.0.4.
 
 ## 19.0.1.59.5 (unreleased)
 

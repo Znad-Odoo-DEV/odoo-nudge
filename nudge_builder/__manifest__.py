@@ -20,7 +20,7 @@ Installed from Apps by an administrator who wants it, with Nudge and Website;
 never by itself.
 """,
     "category": "Website",
-    "version": "19.0.1.0.8",
+    "version": "19.0.1.0.9",
     "author": "Ibrahim Elzenad",
     "website": "https://znad-odoo-dev.github.io",
     "support": "https://github.com/Znad-Odoo-DEV/odoo-nudge/issues",
