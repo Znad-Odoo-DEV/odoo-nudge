@@ -55,26 +55,38 @@ class ResUsers(models.Model):
         if dated:
             dated.write({"nudge_auditor_until": False})
 
+    def _nudge_holds_never_auditor(self):
+        """:return: whether the user holds a group an auditor can never have"""
+        return any(self.has_group(xml_id) for xml_id in NEVER_AUDITOR)
+
     def _nudge_check_auditor(self):
+        # An update of a module writes groups from its data (implied_ids, users): a person left in the auditor
+        # group from before the rule is written in the log, never the reason the update stops
+        loading = self.env.context.get("install_mode")
         for user in self:
             if not user.has_group(AUDITOR_GROUP):
                 continue
-            for xml_id in NEVER_AUDITOR:
-                if user.has_group(xml_id):
-                    raise ValidationError(self.env._(
-                        "%(user)s is a Nudge Auditor: the auditor is read-only and cannot also be an "
-                        "Agent User, a Nudge Manager or an administrator.", user=user.name))
-            if not user.sudo().nudge_auditor_until:
-                raise ValidationError(self.env._(
-                    "Give the date an auditor can sign in until: the access of an auditor always has an end."))
+            if user._nudge_holds_never_auditor():
+                problem = self.env._(
+                    "%(user)s is a Nudge Auditor: the auditor is read-only and cannot also be an "
+                    "Agent User, a Nudge Manager or an administrator.", user=user.name)
+            elif not user.sudo().nudge_auditor_until:
+                problem = self.env._(
+                    "Give the date an auditor can sign in until: the access of an auditor always has an end.")
+            else:
+                continue
+            if not loading:
+                raise ValidationError(problem)
+            _logger.warning("Nudge: user %s (id %s) left as it is by the update: %s", user.login, user.id, problem)
 
     # -- the end ----------------------------------------------------------------
     @api.model
     def _nudge_auditor_expired(self, user_id):
         """:return: whether the user is an auditor whose last day has passed (checked on each request)"""
         user = self.sudo().browse(user_id)
-        # the group first (cached): the date is read only for the few who are auditors
-        if not user.has_group(AUDITOR_GROUP):
+        # the group first (cached): the date is read only for the few who are auditors. An administrator left in
+        # the auditor group from before the rule is never locked out as one
+        if not user.has_group(AUDITOR_GROUP) or user._nudge_holds_never_auditor():
             return False
         until = user.nudge_auditor_until
         return bool(until) and until < fields.Date.today()
@@ -110,7 +122,7 @@ class ResUsers(models.Model):
         # Nudge's own infrastructure: the cron ends the access of people, whoever they are, and only of auditors:
         # a date left on someone else never archives them
         expired = self.sudo().search([("nudge_auditor_until", "<", fields.Date.today())])
-        expired = expired.filtered(lambda user: user.has_group(AUDITOR_GROUP))
+        expired = expired.filtered(lambda user: user.has_group(AUDITOR_GROUP) and not user._nudge_holds_never_auditor())
         expired._nudge_end_auditor("the date was reached")
         return len(expired)
 

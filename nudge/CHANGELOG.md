@@ -2,6 +2,10 @@
 
 Current version: nudge 18.0.1.59.2, nudge_mcp 18.0.1.1.1, nudge_connect 18.0.1.0.3, nudge_messaging 18.0.1.0.6, nudge_ai 18.0.1.0.11, nudge_studio 18.0.1.0.12, nudge_documents 18.0.1.0.8, nudge_spreadsheet 18.0.1.0.11, nudge_builder 18.0.1.0.7, nudge_mail 18.0.1.0.15, nudge_discuss 18.0.1.0.9, nudge_website 18.0.1.0.2.
 
+## 19.0.1.59.3 (unreleased)
+
+- A module update is no longer stopped by a person left in the Nudge Auditor group from before the rule (an administrator added through the Users tab of the group): the update goes on and writes the person in the log, and such an administrator is never archived by the hourly cron nor refused at sign-in as an expired auditor. The dev_0 builds failed on it at nudge/security/nudge_security.xml:13.
+
 ## 19.0.1.59.2 (unreleased)
 
 - Review: the Latency and Cost panel counts the days of the period in the manager's time zone, not in UTC: in Dubai the evening answers of the 24th belonged to the 25th, and the panel of "today" missed them (two tests failed every evening after 20:00 UTC).
