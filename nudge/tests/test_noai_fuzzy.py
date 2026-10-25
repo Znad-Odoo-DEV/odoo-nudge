@@ -118,6 +118,7 @@ class TestNoaiFuzzy(BaseCase):
                 parsed = grammar.parse(text, SCREEN)
                 self.assertEqual(understood(parsed), "", parsed)
                 self.assertEqual([(c["intent"], c["kind"]) for c in parsed.candidates], [("open", kind)])
+                self.assertNotIn(text, parsed.candidates[0]["slots"]["words"], "The corrected words, not the typed ones")
         self.assertEqual(grammar.parse("sales orders", SCREEN).candidates, [])
 
     def test_a_slip_in_a_phrase_finds_the_phrase(self):
