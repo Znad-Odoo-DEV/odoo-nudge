@@ -4,6 +4,7 @@ Current version: nudge 19.0.1.59.2, nudge_mcp 19.0.1.1.1, nudge_connect 19.0.1.0
 
 ## 19.0.1.59.3 (unreleased)
 
+- Nudge > Plugins > Look for Plugins works again: the button of the list sent the selected ids to a method that took none (TypeError on dev_0).
 - Trial (NP-05): a bare name of one or two words with no question and no order ("sales ordrs", "qoutations") is sent as it is in Talk with the screen shared: the rules offer Did you mean first, the choice of how to be shown no longer comes before them.
 - Trial: a Nudge manager sees what each mode would send. Configuration > Request Size builds the request of Talk, Agent and Developer for the current user and company (instructions, skills, tool schemas), counts its tokens as the quality gate does, shows them against the gate limits and says when one is over; nothing is sent to a provider and nothing is kept. Tests: `/nudge:TestRequestSize`.
 - Trial: a Nudge manager can try the search by meaning. Configuration > Try Search by Meaning shows the state of the index (model downloaded or not, passages indexed, last indexed), searches a text by meaning and lists the passages found with their source and score; when the model is not downloaded it says so and where an administrator starts the download. No provider is called. Tests: `/nudge:TestSearchTry`.
