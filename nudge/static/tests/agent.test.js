@@ -13,7 +13,7 @@ import {
     webModels,
 } from "@web/../tests/web_test_helpers";
 
-import { asksForFigures, asksForReport, asksHowTo, asksToDoIt } from "@nudge/core/nudge_service";
+import { asksForFigures, asksForReport, asksHowTo, asksToDoIt, isBareName } from "@nudge/core/nudge_service";
 
 import { answered, lines, setupNudge, streamed } from "./voice_helpers";
 
@@ -742,6 +742,26 @@ test("a question of figures is not asked how, a question of how still is", async
     await nudge.send("How do I create a contact?");
     await animationFrame();
     expect(".o_nudge_ask").toHaveCount(1, { message: "A question of how still is" });
+});
+
+test("a bare name is read by the rules first, without asking how", async () => {
+    for (const text of ["sales ordrs", "qoutations", "عروض الأسعار", "Contacts"]) {
+        expect(isBareName(text)).toBe(true, { message: text });
+    }
+    for (const text of ["How do I create a contact?", "sales orders?", "show me the quotations",
+        "Create a quotation for Raghad today", "create contact", "اعمل عرض", "open sales orders", ""]) {
+        expect(isBareName(text)).toBe(false, { message: text });
+    }
+    const { asked, nudge } = await start({
+        settings: { nudge_explain: "ask" },
+        answer: answered({ type: "delta", text: "Did you mean: Open: Sales Orders?" }),
+    });
+    nudge.open();
+    await animationFrame();
+    await nudge.send("sales ordrs");
+    await animationFrame();
+    expect(".o_nudge_ask").toHaveCount(0, { message: "A bare name is sent as it is" });
+    expect(asked.messages.at(-1).message).toBe("sales ordrs");
 });
 
 test("an order in Agent mode is the work, without asking how", async () => {
