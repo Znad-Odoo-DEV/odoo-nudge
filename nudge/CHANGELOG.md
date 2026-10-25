@@ -4,6 +4,7 @@ Current version: nudge 17.0.1.59.2, nudge_mcp 17.0.1.1.1, nudge_connect 17.0.1.0
 
 ## 19.0.1.59.3 (unreleased)
 
+- The colours of Nudge fall back to the primary colour of Odoo where the page defines no Bootstrap variables: on Odoo 19 Enterprise there is no --bs-primary, and the avatar, the panel header and its buttons (New chat, History, Preferences, Close) were white on white.
 - Nudge > Plugins > Look for Plugins works again: the button of the list sent the selected ids to a method that took none (TypeError on dev_0).
 - Trial (NP-05): a bare name of one or two words with no question and no order ("sales ordrs", "qoutations") is sent as it is in Talk with the screen shared: the rules offer Did you mean first, the choice of how to be shown no longer comes before them.
 - Trial: a Nudge manager sees what each mode would send. Configuration > Request Size builds the request of Talk, Agent and Developer for the current user and company (instructions, skills, tool schemas), counts its tokens as the quality gate does, shows them against the gate limits and says when one is over; nothing is sent to a provider and nothing is kept. Tests: `/nudge:TestRequestSize`.
