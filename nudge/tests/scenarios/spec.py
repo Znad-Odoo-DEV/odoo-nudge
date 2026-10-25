@@ -16,8 +16,9 @@ LANGUAGES = ("en", "ar", "arabizi")
 # A scenario may set its own. Measured on 19.0.1.59.0, skills and caching in (largest request: talk 16.4k, agent 22.6k,
 # dev 21.1k; 18.7k, 29.5k and 47.6k on 19.0.1.58.0) plus about 8% room, more for dev whose scenarios that need
 # base_automation are skipped without it: a release that makes a request heavier than this fails the gate until the
-# budget is raised on purpose.
-DEFAULT_BUDGET = {TALK: 17800, AGENT: 24500, DEV: 26000}
+# budget is raised on purpose. NP-03 after the trial (19.0.1.59.3): talk 15.1k, agent 20.4k, dev 19.3k (24.4k with
+# base_automation, whose scenarios are skipped without it).
+DEFAULT_BUDGET = {TALK: 16300, AGENT: 22000, DEV: 26000}
 
 
 def round_(text="", *calls):

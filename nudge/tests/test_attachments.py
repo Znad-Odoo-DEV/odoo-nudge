@@ -182,7 +182,7 @@ class TestWithTheQuestion(NudgeCase, TransactionCase):
 
     def test_told_to_the_model(self):
         self.assertIn("<nudge_attachment>", prompt.SYSTEM_PERSONA)
-        self.assertIn("find_products", prompt.SYSTEM_PERSONA)
+        self.assertIn("find_products", prompt.SITUATIONS["attachment"])
 
 
 @tagged("post_install", "-at_install")
