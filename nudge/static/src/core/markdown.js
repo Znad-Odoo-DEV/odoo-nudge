@@ -16,26 +16,54 @@ const ALLOWED_TAGS = [
 ];
 const ALLOWED_ATTR = ["href", "target", "rel", "start"];
 
+// Every span is capped: a mark with no closing one scans at most this far, so the work on a line
+// is linear in its length (an open "[" or "**" used to scan to the end of the line, each time)
 const INLINE = new RegExp(
     [
-        "(`[^`\\n]+`)", // 1 code
-        "(\\[[^\\]\\n]+\\]\\([^)\\s]+\\))", // 2 link
-        "(https?:\\/\\/[^\\s<>()\\[\\]]+)", // 3 bare url
-        "(\\*\\*[^\\n]+?\\*\\*)", // 4 bold
-        "(\\*[^*\\s][^*\\n]*\\*)", // 5 italic
-        "(~~[^~\\n]+~~)", // 6 strike
+        "(`[^`\\n]{1,500}`)", // 1 code
+        "(\\[[^\\]\\n]{1,200}\\]\\([^)\\s]{1,500}\\))", // 2 link
+        "(https?:\\/\\/[^\\s<>()\\[\\]]{1,2000})", // 3 bare url
+        "(\\*\\*[^\\n]{1,500}?\\*\\*)", // 4 bold
+        "(\\*[^*\\s][^*\\n]{0,500}\\*)", // 5 italic
+        "(~~[^~\\n]{1,500}~~)", // 6 strike
     ].join("|"),
     "g"
 );
 
 const FENCE = /^\s*```/;
-const HEADING = /^\s{0,3}(#{1,6})\s+(.*?)\s*#*\s*$/;
+const HEADING = /^\s{0,3}(#{1,6})\s+(.*)$/;
 const RULE = /^\s{0,3}([-*_])(\s*\1){2,}\s*$/;
 const QUOTE = /^\s{0,3}>\s?(.*)$/;
 const BULLET = /^\s*[-*+]\s+(.*)$/;
 const NUMBER = /^\s*\d{1,9}[.)]\s+(.*)$/;
-const TABLE_ROW = /^\s*\|.*\|\s*$/;
-const TABLE_RULE = /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/;
+const RULE_CELL = /^:?-{2,}:?$/;
+
+function isTableRow(line) {
+    const row = line.trim();
+    return row.length >= 2 && row.startsWith("|") && row.endsWith("|");
+}
+
+// "|---|:--:|", "---|---" and the like; split, not one regex with blanks inside a repeated group
+function isTableRule(line) {
+    let row = line.trim();
+    if (row.startsWith("|")) {
+        row = row.slice(1);
+    }
+    if (row.endsWith("|")) {
+        row = row.slice(0, -1);
+    }
+    return row.split("|").every((cell) => RULE_CELL.test(cell.trim()));
+}
+
+/** @returns {string} the title of a heading with the closing # taken off */
+function headingTitle(text) {
+    let title = text.trimEnd();
+    let end = title.length;
+    while (end > 0 && title[end - 1] === "#") {
+        end--;
+    }
+    return title.slice(0, end).trimEnd();
+}
 
 export function escapeHtml(text) {
     return String(text).replace(/[&<>"']/g, (character) => ESCAPES[character]);
@@ -75,7 +103,11 @@ function renderInline(text) {
             html += renderLink(token.slice(split + 2, -1), renderInline(token.slice(1, split)));
         } else if (match[3]) {
             // Punctuation ending a sentence is not part of the address
-            const url = token.replace(/[.,;:!?]+$/, "");
+            let end = token.length;
+            while (end > 0 && ".,;:!?".includes(token[end - 1])) {
+                end--;
+            }
+            const url = token.slice(0, end);
             html += renderLink(url, escapeHtml(url)) + escapeHtml(token.slice(url.length));
         } else if (match[4]) {
             html += `<strong>${renderInline(token.slice(2, -2))}</strong>`;
@@ -115,7 +147,7 @@ function isBlockStart(lines, index) {
         QUOTE.test(line) ||
         BULLET.test(line) ||
         NUMBER.test(line) ||
-        (TABLE_ROW.test(line) && TABLE_RULE.test(lines[index + 1] || ""))
+        (isTableRow(line) && isTableRule(lines[index + 1] || ""))
     );
 }
 
@@ -181,7 +213,7 @@ export function markdownToHtml(text) {
         } else if (HEADING.test(line)) {
             const [, marks, title] = line.match(HEADING);
             const level = Math.min(marks.length + 3, 6);
-            blocks.push(`<h${level}>${renderInline(title)}</h${level}>`);
+            blocks.push(`<h${level}>${renderInline(headingTitle(title))}</h${level}>`);
             index++;
         } else if (RULE.test(line)) {
             blocks.push("<hr>");
@@ -197,11 +229,11 @@ export function markdownToHtml(text) {
             const start = Number(line.match(/\d+/)[0]);
             const opening = start > 1 ? '<ol start="' + start + '">' : "<ol>";
             blocks.push(opening + collectItems(NUMBER).join("") + "</ol>");
-        } else if (TABLE_ROW.test(line) && TABLE_RULE.test(lines[index + 1] || "")) {
+        } else if (isTableRow(line) && isTableRule(lines[index + 1] || "")) {
             const header = splitRow(line);
             index += 2;
             const rows = [];
-            while (index < lines.length && TABLE_ROW.test(lines[index])) {
+            while (index < lines.length && isTableRow(lines[index])) {
                 rows.push(splitRow(lines[index]));
                 index++;
             }
@@ -228,4 +260,48 @@ export function renderMarkdown(text) {
         html = window.DOMPurify.sanitize(html, { ALLOWED_TAGS, ALLOWED_ATTR });
     }
     return markup(html);
+}
+
+// An answer that streams grows by a few characters at a time: it is shown again at most this often
+export const STREAM_RENDER_INTERVAL = 50;
+
+/**
+ * Renders the answer of one message. The same text is rendered once, and while the answer streams a
+ * new text is rendered at most once every STREAM_RENDER_INTERVAL ms (the one in between shows the
+ * last rendering: `stale` says a newer text waits, and the caller asks again later). A finished
+ * answer is always rendered exactly.
+ */
+export class MarkdownRenderer {
+    /** @param {() => number} [clock] milliseconds */
+    constructor(clock = () => performance.now()) {
+        this.clock = clock;
+        this.renders = 0;
+        this.stale = false;
+        this.text = null;
+        this.value = markup("");
+        this.at = -Infinity;
+    }
+
+    /**
+     * @param {string} text
+     * @param {boolean} streaming whether the answer is still being written
+     * @returns {ReturnType<markup>}
+     */
+    render(text, streaming) {
+        if (text === this.text) {
+            this.stale = false;
+            return this.value;
+        }
+        const now = this.clock();
+        if (streaming && this.text !== null && now - this.at < STREAM_RENDER_INTERVAL) {
+            this.stale = true;
+            return this.value;
+        }
+        this.text = text;
+        this.value = renderMarkdown(text);
+        this.at = now;
+        this.renders++;
+        this.stale = false;
+        return this.value;
+    }
 }
