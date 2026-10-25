@@ -37,7 +37,7 @@ SYNONYMS = (
     "approve approval signoff authorise authorize permission sign clear موافقه اعتماد اعتمد وافق يوقع توقيع يصدق",
     "manager director boss supervisor head owner مدير مسؤول رئيس",
     "history log trail story timeline previous old revert restore undo rollback تاريخ رجع ارجع استرجع قديم",
-    "total sum amount figures count average statistics revenue expense cost spending مجموع اجمالي عدد متوسط ايرادات مصروف مصاريف تكلفه كم",
+    "total sum amount figures count average statistics revenue expense cost spending مجموع اجمالي عدد متوسط ايرادات مصروف مصاريف تكلفه كم دخل ايراد",
     "chart graph plot diagram visual dashboard مخطط رسم بياني",
     "website site web online shop webshop ecommerce homepage موقع متجر",
     "module app application addon extension custom تطبيق موديول مديول اضافه برمجيه",
@@ -64,6 +64,8 @@ SYNONYMS = (
     "package bundle zip installable حزمه تركيب",
     "exception traceback crash استثناء",
     "weekly week friday monday daily morning evening night afternoon اسبوع جمعه صبح ليل عصر مساء",
+    "commission commissions target targets quota salesman عموله عمولات هدف مندوب مندوبين",
+    "compare comparison versus against قارن مقارنه",
     "decision decisions owner owners attendee agreed قرار قرارات مسؤول اتفقنا",
 )
 
@@ -74,15 +76,15 @@ CUES = {
         "landed costs valuation costing tracking serial barcode units variants pricelist multi currency "
         "suit fits business what should we how should we what do i need can odoo "
         "افعل فعل شغل تفعيل خيار ميزه خاصيه انسب افضل طريقه ترتيب رتب نظام مرحله مراحل استلام استلم ينفع يناسب "
-        "سياسه كيف ارتب تتبع ارقام تسلسليه دفعات تكلفه"),
+        "سياسه كيف ارتب تتبع ارقام تسلسليه دفعات تكلفه احسب يحسب خلي يخلي اخلي عايز اعرف"),
     "import-files": (
         "rejected rejects reject refused load loading upload comma separated column columns mismatch line up "
         "duplicates header rows validate before list customers contacts leads excel csv go in bring in "
-        "ملف رفع انرفع حمل احمل اعمده عمود صفوف تكرار سليمه ازاي قائمه اكسل تحميل ينفع ادخل ارقام جوالات"),
+        "ملف رفع انرفع حمل احمل اعمده عمود صفوف تكرار سليمه ازاي قائمه اكسل تحميل ينفع ادخل ارقام جوالات خلص طلع يتقبل"),
     "email-design": (
         "message note nice looking professional branded logo header sample style welcome buyer confirmation "
         "mail sent goes out beautiful "
-        "رساله رسائل جميله راقي شعار ترحيب نموذج نسخه تجريبيه صمم تصميم ايميل بريد ترسل تنرسل اكتب"),
+        "رساله رسائل جميله راقي شعار ترحيب نموذج نسخه تجريبيه صمم تصميم ايميل بريد ترسل تنرسل اكتب حلو حلوه رسايل بعد الشراء"),
     "designed-emails": (
         "message note nice looking professional branded logo header sample style welcome buyer confirmation "
         "mail sent goes out beautiful "
@@ -104,11 +106,13 @@ CUES = {
     "data-analysis": (
         "which most least best worst top delay late average over year quarter breakdown break down by category "
         "per brought revenue compare trend how long figures numbers how many how much count each month "
-        "اكثر اقل افضل ايرادات الربع متوسط تاخير حسب تصنيف مقارنه كم صرفنا مصروف عدد بكل شهر السنه متاخره"),
+        "اكثر اقل افضل ايرادات الربع متوسط تاخير حسب تصنيف مقارنه كم صرفنا مصروف عدد بكل شهر السنه متاخره "
+        "قارن دخل ايراد الماضي الماضيه فات اللي فات سنه سنوي"),
     "record-work": (
         "look up register new contact phone mark confirmed set date due update cancel open find move edit "
         "purchase order delivery "
-        "دور ابحث سجل جهه اتصال عدل بدل تاريخ استحقاق اعتمد افتح موعد طلب شراء حق"),
+        "دور ابحث سجل جهه اتصال عدل بدل تاريخ استحقاق اعتمد افتح موعد طلب شراء حق "
+        "عميل اسمه رقمه جوال هاتف تلفون"),
     "bulk-work": (
         "every each close open tasks at once in one go same discount tag status draft apply all together "
         "pending older cancel many "
@@ -129,7 +133,7 @@ CUES = {
         "story happened so far from the beginning who modified changed touched edited price bring old one "
         "back previous what went on after confirmation "
         "ايش صار من البدايه مين بدل غير رجعه كما كان قديم ارجعه شو صار بعد التاكيد قبل ما غيروه قبل التعديل "
-        "مين عدل متى تغير السعر قبل"),
+        "مين عدل متى تغير السعر قبل يعدلوه عدلوه غيروه يغيروه كان السعر"),
     "product-search": (
         "available blue size colour like this picture something similar shoes chair do we have catalogue "
         "wireless headphones under price dollars sneakers white show me items "
@@ -146,7 +150,8 @@ CUES = {
     "automations-build": (
         "whenever confirmed assign activity team first day of every month archive old automatically when saved "
         "run something happens stage reaches follow up call create "
-        "لما يتاكد انشئ نشاط تلقائيا اول الشهر ارشف تلقائي اذا صار مرحله متابعه مكالمه"),
+        "لما يتاكد انشئ نشاط تلقائيا اول الشهر ارشف تلقائي اذا صار مرحله متابعه مكالمه "
+        "اول ما يعلم عاجل نبه مسؤول الدعم تكت تيكت تذكره"),
     "screens-fields-build": (
         "extra box customer form store tax number layout pdf bank details look of add show on selection field "
         "contact card level "

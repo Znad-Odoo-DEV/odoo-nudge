@@ -151,7 +151,10 @@ class TestPromptBudget(NudgeCase, TransactionCase):
             self.assertIn(prompt.SITUATIONS[key], system[-1], key)
         for key in ("studio", "voice", "read_aloud", "report", "attachment"):
             self.assertNotIn(prompt.SITUATIONS[key], system[-1], key)
-        self.assertEqual(system[:-1], calls[0]["system"][:-1], "The shared part stays the same")
+        # The plain question lists no skill (none is near), this one does: what is cached is the same
+        cached = [block for block in system if not (isinstance(block, str) and (
+            block.startswith("## Mode") or prompt.is_question_block(block)))]
+        self.assertEqual(cached[:3], calls[0]["system"][:3], "The shared part stays the same")
         self.assertEqual(prompt.situations('<nudge_context>{"input":"voice","report":"spreadsheet"}</nudge_context>'),
                          prompt.SITUATIONS_HEADING + prompt.SITUATIONS["report"] + prompt.SITUATIONS["voice"])
         # Written by the person, it is no choice of theirs

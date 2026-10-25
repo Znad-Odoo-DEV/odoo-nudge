@@ -18,7 +18,7 @@ from odoo.addons.nudge.tools import base, skill_router
 from odoo.addons.nudge.tools.sql import SQL_PARAM
 
 from .common import NudgeCase
-from .skill_router_cases import CASES, FRESH, FRESH2, HELD_OUT_AZ, HELD_OUT_AZ2, NOTHING, SCREENS
+from .skill_router_cases import CASES, FRESH, FRESH2, HELD_OUT_AZ, HELD_OUT_AZ2, HELD_OUT_AZ3, NOTHING, SCREENS
 
 _logger = logging.getLogger(__name__)
 
@@ -114,7 +114,7 @@ class TestSkillRouter(NudgeCase, TransactionCase):
         # Not an assertion: the figures per language, and what missed, for the log
         lines = []
         for language in ("en", "ar", "az"):
-            for name, cases in (("tuned", CASES), ("fresh", FRESH + FRESH2), ("held-out", HELD_OUT_AZ), ("blind", HELD_OUT_AZ2)):
+            for name, cases in (("tuned", CASES), ("fresh", FRESH + FRESH2), ("held-out", HELD_OUT_AZ), ("blind", HELD_OUT_AZ2), ("blind3", HELD_OUT_AZ3)):
                 subset = [case for case in cases if case[2] == language]
                 if not subset:
                     continue
@@ -122,7 +122,7 @@ class TestSkillRouter(NudgeCase, TransactionCase):
                 lines.append(f"{language} {name}: top-2 {hits}/{measured}")
         visible = self.visible()
         index = skill_router.index_of(self.env, visible)
-        for text, expected, language in CASES + FRESH + FRESH2 + HELD_OUT_AZ + HELD_OUT_AZ2:
+        for text, expected, language in CASES + FRESH + FRESH2 + HELD_OUT_AZ + HELD_OUT_AZ2 + HELD_OUT_AZ3:
             if language == "az" and not set(visible.mapped("key")) & set(expected):
                 continue
             keys = skill_router.route(index, text).keys
@@ -140,7 +140,7 @@ class TestSkillRouter(NudgeCase, TransactionCase):
 
     def test_arabizi_written_afterwards_is_reached(self):
         # Written after the Arabizi reading was set, never used to set anything (the honest figure: 0.75)
-        for name, cases in (("held-out", HELD_OUT_AZ), ("blind", HELD_OUT_AZ2)):
+        for name, cases in (("held-out", HELD_OUT_AZ), ("blind", HELD_OUT_AZ2), ("blind3", HELD_OUT_AZ3)):
             measured, hits, _brought, _right = self.measure(cases)
             self.assertGreaterEqual(hits / measured, 0.65, f"{name}: {hits}/{measured}")
 
@@ -271,8 +271,17 @@ class TestSkillRouter(NudgeCase, TransactionCase):
         self.assertIn("use_skill", [tool["name"] for tool in calls[0]["tools"]])
         # A question about nothing lists few or none, never all
         _conversation, calls = self.call_for(self.admin, "Hello")
-        self.assertLessEqual(len(self.indexed(calls)), skill_router.INDEX_MAX)
+        self.assertEqual(self.indexed(calls), [], "Nothing is near: nothing is listed")
         self.assertIn("use_skill", [tool["name"] for tool in calls[0]["tools"]], "Any skill can still be asked for")
+
+    def test_the_index_lists_only_skills_above_a_relevance_floor(self):
+        choice = skill_router.Choice()
+        choice.ranked = [("near", 9.0), ("fair", skill_router.INDEX_FLOOR), ("far", skill_router.INDEX_FLOOR - 0.1),
+                         ("farther", 0.2)]
+        self.assertEqual(skill_router.offered(choice, []), {"near", "fair"})
+        # What the conversation already has stays, whatever the score
+        self.assertEqual(skill_router.offered(choice, ["kept"]), {"kept", "near", "fair"})
+        self.assertEqual(skill_router.offered(skill_router.Choice(), []), set())
 
     def test_a_skill_already_in_the_conversation_stays_in_the_index(self):
         for number in range(12):

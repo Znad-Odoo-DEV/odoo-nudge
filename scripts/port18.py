@@ -510,8 +510,8 @@ sub("nudge_messaging/views/nudge_messaging_views.xml", r"page\[@name='page_secur
 # R2 RULE 4: tools/revert.py calls model._has_field_access (19); the shim of records.py does it on 18
 sub("nudge/tools/revert.py", r"\b(\w+)\._has_field_access\(", r"has_field_access(\1, ")
 edit("nudge/tools/revert.py", [
-    ("from .records import MODEL_PATTERN, Refused, cut, get_model, get_records, is_secret\n",
-     "from .records import MODEL_PATTERN, Refused, cut, get_model, get_records, has_field_access, is_secret\n"),
+    ("from .records import MODEL_PATTERN, Refused, cut, get_model, get_records, holds_secret\n",
+     "from .records import MODEL_PATTERN, Refused, cut, get_model, get_records, has_field_access, holds_secret\n"),
 ])
 # R2 RULE 4b: the test of it patches BaseModel._has_field_access: on 18 it patches the shim of the tool
 sub("nudge/tests/test_revert.py", r"        real = models\.BaseModel\._has_field_access\n",
