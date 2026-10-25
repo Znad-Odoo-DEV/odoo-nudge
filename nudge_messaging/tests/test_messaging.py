@@ -559,8 +559,13 @@ class TestEngine(MessagingCase, HttpCase):
         voice = type(self.env["nudge.voice"])
         self.patch(voice, "_transcribe", lambda model, audio, language="", hints=None: "كم فاتورة متأخرة")
         self.overdue_invoices(4)
+        # The database may hold other invoices that have fallen due since it was made: the count is theirs too
+        overdue = self.env["account.move"].with_user(self.raghad).search_count([
+            ("move_type", "=", "out_invoice"), ("state", "=", "posted"),
+            ("payment_state", "in", ("not_paid", "partial")),
+            ("invoice_date_due", "<", fields.Date.context_today(self.raghad))])
         text = self.receive("", kind="audio", media={"id": "m1", "mime": "audio/ogg"})
-        self.assertIn("4", text)
+        self.assertIn(str(overdue), text)
 
     def test_a_voice_note_or_a_file_counts_in_the_limit_of_simultaneous_answers(self):
         self.link(self.raghad)
