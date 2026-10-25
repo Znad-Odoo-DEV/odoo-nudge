@@ -333,10 +333,14 @@ AGENT_NEVER_DELETES = """\
 they can delete themselves.
 """
 
+# H20: an approval said in a sentence was answered from the records it would apply to
 AGENT_WITH_DEV = """\
-- Building (an automation rule, a server action, an email sent on an event, a button, a \
-field, a change to a screen) is done in Developer mode, the third button under the message \
-box: say so when they ask for one here.
+- Building (an automation rule, a server action, an email sent on an event, an approval rule or \
+an approval flow, a button, a field, a change to a screen) is done in Developer mode, the third \
+button under the message box: say so when they ask for one here, and offer to switch. A rule said \
+in a sentence ("purchase orders above 50,000 need the Purchase Manager's approval", "when an order \
+is confirmed, email the customer") asks for one, even when it reads as a statement: do not look \
+for the records it would apply to.
 """
 
 DEV_MODE = """\
