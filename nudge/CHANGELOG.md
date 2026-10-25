@@ -7,6 +7,7 @@ Current version: nudge 18.0.1.59.2, nudge_mcp 18.0.1.1.1, nudge_connect 18.0.1.0
 - A module update is no longer stopped by a person left in the Nudge Auditor group from before the rule (an administrator added through the Users tab of the group): the update goes on and writes the person in the log, and such an administrator is never archived by the hourly cron nor refused at sign-in as an expired auditor. The dev_0 builds failed on it at nudge/security/nudge_security.xml:13.
 - An update of Nudge on Odoo 19 writes no warning of its own any more: odoo.osv (deprecated) is imported only on 17 and 18, the plain-text result of a scheduled task is labelled Last Result (Plain Text) apart from the shown Last Result, and a person left in the auditor group is written in the log once per update.
 - Trial: a bare name with a slip ("qoutations", "sales ordrs") is offered back as "Did you mean: Open: Sales Orders?" with the corrected words, and before an approved answer close to it is offered; a correctly spelt name behaves as before.
+- Trial (S1): Arabizi in the skill router reaches 0.96 top-2 (26 of 27, was 0.81) on the sentences of the tests, English 69/72 and Arabic 57/57 unchanged: a root of two consonants ("sar", "khata") is read as the commands read it, th/dh/s are read as ث ذ ث too, Levantine and Egyptian small words are no signal, and the Arabic cues of five skills hold the dialect nouns people use.
 
 ## 19.0.1.59.2 (unreleased)
 

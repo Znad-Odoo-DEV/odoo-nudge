@@ -99,7 +99,8 @@ CUES = {
     "database-assessment": (
         "overall picture healthy health overview where to begin improving installed unused nobody uses missing "
         "apps status condition configured badly mistakes wrong problems review everything "
-        "نظره شامله وضع النظام ناقص مثبت مثبته يستخدم ما حد تحسين اعدادات غلط اشرح قاعده بيانات"),
+        "نظره شامله وضع النظام ناقص مثبت مثبته يستخدم ما حد تحسين اعدادات غلط اشرح قاعده بيانات برامج تطبيقات "
+        "مستخدمه"),
     "data-analysis": (
         "which most least best worst top delay late average over year quarter breakdown break down by category "
         "per brought revenue compare trend how long figures numbers how many how much count each month "
@@ -111,7 +112,7 @@ CUES = {
     "bulk-work": (
         "every each close open tasks at once in one go same discount tag status draft apply all together "
         "pending older cancel many "
-        "جميع كل مره وحده دفعه واحده غير الحاله اغلق الغ كل القديمه"),
+        "جميع كل مره وحده دفعه واحده غير الحاله اغلق الغ كل القديمه تذاكر طلبات عروض سجلات غير حاله"),
     "recurring-tasks": (
         "start of each week every day morning notify remind watch for new tell me about summary digest list "
         "regularly friday afternoon email me send me still open "
@@ -127,11 +128,13 @@ CUES = {
     "record-history": (
         "story happened so far from the beginning who modified changed touched edited price bring old one "
         "back previous what went on after confirmation "
-        "ايش صار من البدايه مين بدل غير رجعه كما كان قديم ارجعه شو صار بعد التاكيد"),
+        "ايش صار من البدايه مين بدل غير رجعه كما كان قديم ارجعه شو صار بعد التاكيد قبل ما غيروه قبل التعديل "
+        "مين عدل متى تغير السعر قبل"),
     "product-search": (
         "available blue size colour like this picture something similar shoes chair do we have catalogue "
         "wireless headphones under price dollars sneakers white show me items "
-        "عندنا لون مقاس يشبه كراسي كرسي موجود حجم ابيض سعر"),
+        "عندنا عندكم لون مقاس يشبه كراسي كرسي موجود متوفر حجم ابيض اسود اسمر بني ازرق احمر سعر شنطه حقيبه محفظه جلد "
+        "حذاء ساعه طاوله مكتب قماش"),
     "database-setup": (
         "just installed new company initial configuration guide currency languages branch country fiscal "
         "prepare getting started brand new start chart of accounts users "
