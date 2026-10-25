@@ -31,7 +31,7 @@ from .records import (
     format_value,
     get_model,
     get_records,
-    is_secret,
+    holds_secret,
     model_label,
     read_choice,
     refusing,
@@ -127,7 +127,7 @@ def writable_field(model, name, trial=False):
         raise Refused(
             f"{model._name} has no field {name!r} that this person can change.{hint} "
             "describe_model lists the fields.")
-    if name in KEPT_FIELDS or is_secret(field):
+    if name in KEPT_FIELDS or holds_secret(model, field):
         raise Refused(f"The field {name!r} is not one Nudge writes in.")
     if field.type not in WRITABLE_TYPES:
         raise Refused(

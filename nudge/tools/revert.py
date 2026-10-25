@@ -21,7 +21,7 @@ from odoo.exceptions import AccessError, MissingError
 from . import base
 from .actions import check_screen, name_records, writable_field
 from .plans import snapshot
-from .records import MODEL_PATTERN, Refused, cut, get_model, get_records, is_secret
+from .records import MODEL_PATTERN, Refused, cut, get_model, get_records, holds_secret
 
 MAX_CHANGES = 40
 MAX_MESSAGES = 60
@@ -185,7 +185,7 @@ def find_changes(env, record, field_name=None, message_id=None, since=None, unti
             if not tracking.field_id or tracking.field_id.model != record._name:
                 continue
             field = model._fields.get(tracking.field_id.name)
-            if field is None or not model._has_field_access(field, "read") or is_secret(field):
+            if field is None or not model._has_field_access(field, "read") or holds_secret(model, field):
                 continue
             if field_name and field.name != field_name:
                 continue

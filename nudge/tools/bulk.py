@@ -34,7 +34,7 @@ from .records import (
     field_label,
     get_model,
     get_records,
-    is_secret,
+    holds_secret,
     refusing,
 )
 
@@ -108,7 +108,7 @@ def default_sources(model, exclude):
     names = []
     for name, field in model._fields.items():
         if (name in exclude or name in KEPT_FIELDS or not field.store or field.type not in SOURCE_TYPES
-                or is_secret(field) or not model._has_field_access(field, "read")
+                or holds_secret(model, field) or not model._has_field_access(field, "read")
                 or name.startswith(("message_", "activity_"))):
             continue
         names.append(name)
@@ -285,7 +285,7 @@ class Job:
         name = self.field.name
         if (REFUSED_MODEL.match(model._name) or self.field.model_name != model._name and
                 REFUSED_MODEL.match(self.field.model_name) or name in REFUSED_FIELDS or
-                name in sum(map(list, KEPT_WHOLE.values()), []) or is_secret(self.field)):
+                name in sum(map(list, KEPT_WHOLE.values()), []) or holds_secret(model, self.field)):
             raise Refused(
                 f"{name!r} on {model._name} is not written by the AI: rights, people who may log in, "
                 "passwords, and settings are changed by a person, one at a time.")
@@ -307,7 +307,7 @@ class Job:
         given = list(arguments.get("source_fields") or [])
         for name in given:
             source = model._fields.get(name)
-            if source is None or not model._has_field_access(source, "read") or is_secret(source):
+            if source is None or not model._has_field_access(source, "read") or holds_secret(model, source):
                 raise Refused(f"{model._name} has no field {name!r} that this person can read.")
         if operation == TRANSLATE:
             given = given or [field.name]

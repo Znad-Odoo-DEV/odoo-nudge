@@ -3,7 +3,7 @@ from unittest.mock import patch
 from odoo import fields, models
 from odoo.tests import TransactionCase, new_test_user, tagged
 
-from odoo.addons.nudge.tools import base, revert
+from odoo.addons.nudge.tools import base, records, revert
 from odoo.addons.nudge.tools.records import Refused
 from odoo.addons.nudge.tools.noai_commands import grammar
 
@@ -121,6 +121,15 @@ class TestRevert(NudgeCase, TransactionCase):
             return real(model, field, operation)
 
         with patch.object(models.BaseModel, "_has_field_access", deny_hours):
+            fields_listed = {row["field"] for row in self.rows()}
+        self.assertIn("name", fields_listed)
+        self.assertNotIn("allocated_hours", fields_listed)
+
+    def test_a_field_that_holds_a_secret_under_another_name_is_not_listed(self):
+        """Review (security S2): a field a view shows as a password holds a secret whatever it is called"""
+        self.change(name="Fit the windows", allocated_hours=9.0)
+        with patch.object(records, "password_fields",
+                          lambda model: {"allocated_hours"} if model._name == "project.task" else set()):
             fields_listed = {row["field"] for row in self.rows()}
         self.assertIn("name", fields_listed)
         self.assertNotIn("allocated_hours", fields_listed)
