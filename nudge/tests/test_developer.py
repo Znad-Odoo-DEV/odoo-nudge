@@ -1053,7 +1053,8 @@ class TestDeveloper(NudgeCase, TransactionCase):
         off = "\n".join(prompt.build_system_blocks(mode="agent", is_administrator=True))
         self.assertIn("Settings ‣ Nudge ‣ Nudge for Developers", off)
         self.assertIn("Never give another reason", off)
-        self.assertIn("approval rule on that button", dev)
+        # NP-03: the rules of approvals are a skill of Developer mode, given with the questions about them
+        self.assertIn("approval rule on that button", self.env.ref("nudge.skill_approval_flows").instructions)
 
     def test_what_a_module_owns_is_never_deleted(self):
         self.switch(True)
