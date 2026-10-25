@@ -349,6 +349,27 @@ class TestAuditor(NudgeCase, HttpCase):
         with self.assertRaises(ValidationError), self.cr.savepoint():
             auditor_group.write({users_field: [Command.link(self.manager.id)]})
 
+    def test_an_administrator_left_in_the_auditor_group_never_stops_a_module_update(self):
+        # Put there before the rule existed (the Users tab of the group): the update writes the groups of its data
+        # and goes on, and the administrator is neither archived nor refused at sign-in as an expired auditor
+        admin = new_test_user(self.env, login="nudge_adm_left", groups="base.group_system")
+        self.env.cr.execute("INSERT INTO res_groups_users_rel (gid, uid) VALUES (%s, %s)",
+                            (self.env.ref("nudge.group_nudge_auditor").id, admin.id))
+        self.env.cr.execute("UPDATE res_users SET nudge_auditor_until = %s WHERE id = %s",
+                            (self.today - timedelta(days=1), admin.id))
+        self.env.invalidate_all()
+        self.env.registry.clear_all_caches()
+        self.assertTrue(admin.has_group("nudge.group_nudge_auditor"))
+        user_group = self.env.ref("nudge.group_nudge_user")
+        implied = {"implied_ids": [Command.link(self.env.ref("base.group_user").id)]}
+        with self.assertRaises(ValidationError), self.cr.savepoint():
+            user_group.write(implied)
+        with self.assertLogs("odoo.addons.nudge.models.res_users_auditor", "WARNING"):
+            user_group.with_context(install_mode=True).write(implied)
+        self.assertEqual(self.env["res.users"]._cron_nudge_end_auditors(), 0)
+        self.assertTrue(admin.active)
+        self.assertFalse(self.env["res.users"]._nudge_auditor_expired(admin.id))
+
     def test_an_expired_auditor_cannot_sign_in_over_rpc(self):
         def authenticate():
             reply = self.url_open("/jsonrpc", data=json.dumps({"jsonrpc": "2.0", "method": "call", "id": 1, "params": {
