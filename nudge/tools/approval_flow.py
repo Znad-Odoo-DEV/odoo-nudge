@@ -617,9 +617,12 @@ class PrepareApprovalFlow(Building):
             existing = env["base.automation"].with_context(active_test=False).search_count([
                 ("model_id", "=", ir_model(env, model).id), ("name", "=like", f"{NAME_PREFIX}:%")])
             if existing:
+                # H20: read as it is by the person when no model answers: no technical name
                 raise Refused(
-                    f"{model._name} has an approval flow made by Nudge already. Undo it first (prepare_undo), "
-                    "then make the new one.")
+                    f"{model_label(model)} has an approval flow made by Nudge already: its automation rules are "
+                    f"named “{NAME_PREFIX}: …”. Switch them off or delete them (Settings ‣ Technical ‣ Automation "
+                    "Rules), or take back what was built in the conversation that made them, then send the "
+                    "sentence again.")
         builds = self._plan(env, model, kind, profile, levels)
         return base.ToolResult(
             "The person is being shown the approval flow, in words.",

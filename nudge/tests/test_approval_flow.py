@@ -393,6 +393,9 @@ class TestApprovalFlow(NudgeCase, TransactionCase):
         again = self.ask({"sentence": SENTENCES[1][0]})
         self.assertTrue(again.is_error)
         self.assertIn("already", again.content)
+        # H20: the person may read it as it is, with no model in between
+        self.assertNotIn("prepare_undo", again.content)
+        self.assertNotIn("purchase.order", again.content)
 
     # ------------------------------------------------------------ the way in: a sentence, no AI
     def test_a_sentence_in_developer_mode_gets_a_card_without_any_ai_and_a_yes_builds_it(self):
@@ -443,3 +446,35 @@ class TestApprovalFlow(NudgeCase, TransactionCase):
             self.skipTest("Studio approval rules are not installed here")
         self.make({"sentence": SENTENCES[1][0]})
         self.assertTrue(self.env["studio.approval.rule"].sudo().search([("model_name", "=", "purchase.order")]))
+
+
+@tagged("post_install", "-at_install")
+class TestApprovalInAgentMode(NudgeCase, TransactionCase):
+    """H20: an approval said in a sentence in Agent mode, where nothing builds it. The model is told that
+    it asks for a flow, built in Developer mode, rather than for the records it would apply to."""
+
+    SENTENCE = "Purchase orders above 50,000 need Purchase Manager approval"
+
+    def sent(self, user, mode="agent"):
+        from odoo.addons.nudge.llm import base as llm, loop
+        adapter = self.use_adapter()
+        conversation = self.env["nudge.conversation"].with_user(user)._chat_open()
+        events = list(loop.run(conversation._chat_prepare(self.SENTENCE, mode=mode), conversation._chat_record))
+        self.assertFalse([event for event in events if event["type"] == "confirm"], "Nothing to say yes to here")
+        self.assertTrue(adapter.calls, "The model answers it")
+        return "\n".join(llm.system_texts(adapter.calls[0]["system"])), adapter.calls[0]
+
+    def test_the_model_is_told_it_is_built_in_developer_mode(self):
+        self.env["ir.config_parameter"].sudo().set_param(DEVELOPER_PARAM, "yes")
+        self.env["ir.config_parameter"].sudo().set_param("nudge.noai_first", "1")
+        admin = new_test_user(self.env, login="nudge_h20_admin",
+                              groups="nudge.group_nudge_agent,base.group_system,base.group_partner_manager")
+        system, call = self.sent(admin)
+        self.assertNotIn("prepare_approval_flow", [tool["name"] for tool in call["tools"]])
+        rules = system[system.index("## Mode: Agent"):]
+        self.assertIn("an approval rule or an approval flow", rules)
+        self.assertIn("even when it reads as a statement", rules)
+        self.assertIn("offer to switch", rules)
+        # Someone who may not build is sent to their administrator, approvals included
+        system, _call = self.sent(self.agent)
+        self.assertIn("approval rules", system[system.index("## Mode: Agent"):])
