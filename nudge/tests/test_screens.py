@@ -5,8 +5,10 @@ from odoo.tests import TransactionCase, new_test_user, tagged
 
 from odoo.addons.nudge.models import nudge_embedding
 from odoo.addons.nudge.models.nudge_conversation import DEVELOPER_PARAM
+from odoo.addons.nudge.models.nudge_request_size import FALLBACK_LIMITS
 
 from .common import NudgeCase
+from .scenarios.spec import DEFAULT_BUDGET
 from .test_embedding import FakeEmbedder, with_fake
 
 
@@ -36,7 +38,9 @@ class TestRequestSize(NudgeCase, TransactionCase):
             self.assertGreater(line.total, 1000)
             self.assertGreater(line.tool_count, 0)
             self.assertEqual(line.state == "over", line.total > line.limit)
-        self.assertEqual((lines["talk"].limit, lines["agent"].limit, lines["dev"].limit), (17800, 24500, 26000))
+        # The limits are the gate's own, and the fallback the screen carries says the same
+        self.assertEqual({mode: lines[mode].limit for mode in lines}, dict(DEFAULT_BUDGET))
+        self.assertEqual(FALLBACK_LIMITS, dict(DEFAULT_BUDGET))
         self.assertGreater(lines["agent"].tool_count, lines["talk"].tool_count)
         self.assertEqual(adapter.calls, [], "No request went to a provider")
         after = {name: self.env[name].sudo().search_count([]) for name in before}
