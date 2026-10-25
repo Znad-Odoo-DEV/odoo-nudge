@@ -26212,3 +26212,17 @@ msgstr "الفقرات الموجودة"
 #. module: nudge
 msgid "Words or a question, in any language"
 msgstr "كلمات أو سؤال، بأي لغة"
+#. odoo-javascript
+#: code:addons/nudge/static/src/core/nudge_service.js:0
+msgid "Nudge is waiting for your yes or no: your message is back in the box."
+msgstr "ينتظر Nudge موافقتك أو رفضك: عادت رسالتك إلى مربع الرسالة."
+
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Send when this answer ends"
+msgstr "أرسلها عند انتهاء هذه الإجابة"
+
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_message.xml:0
+msgid "Sent when this answer ends"
+msgstr "تُرسل عند انتهاء هذه الإجابة"
