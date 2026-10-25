@@ -152,7 +152,7 @@ class NudgeTask(models.Model):
     last_run = fields.Datetime(readonly=True)
     last_check = fields.Datetime(
         readonly=True, help="When records appear: records created after it are new.")
-    last_result = fields.Text(readonly=True)
+    last_result = fields.Text(string="Last Result (Plain Text)", readonly=True)
     last_result_html = fields.Html(string="Last Result", compute="_compute_last_result_html", sanitize=False)
     run_count = fields.Integer(string="Runs", readonly=True)
     skip_count = fields.Integer(

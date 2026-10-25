@@ -10,13 +10,13 @@ _has_field_access are used only where they exist.
 """
 from odoo import _, api, models
 from odoo.exceptions import AccessError
-from odoo.osv import expression
 
 from odoo.addons.nudge.tools.records import is_closed
 
 try:
-    from odoo.fields import Domain  # Odoo 19
+    from odoo.fields import Domain  # Odoo 19: odoo.osv warns that it is deprecated
 except ImportError:  # Odoo 17 and 18: domains are lists
+    from odoo.osv import expression
     Domain = None
 
 readonly = getattr(api, "readonly", lambda method: method)
