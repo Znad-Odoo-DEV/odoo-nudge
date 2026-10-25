@@ -584,6 +584,8 @@ def parse(text, screen=None):
             summary = _summary(shown)
             for fix in shown.corrections:
                 summary["text"] = summary["text"].replace(fix["word"], fix["to"])
+                # The chip shows the corrected words, not the slip
+                summary["slots"]["words"] = str(summary["slots"].get("words") or "").replace(fix["word"], fix["to"])
             summary["corrections"] = list(shown.corrections)
             shown.candidates = [summary] if shown.confidence >= OFFER_FROM else []
             return shown
