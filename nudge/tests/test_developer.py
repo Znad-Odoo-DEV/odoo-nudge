@@ -805,6 +805,33 @@ class TestDeveloper(NudgeCase, TransactionCase):
         card = self.env["nudge.step"].with_user(self.admin).get_cards(conversation.id)[step.message_id.id]
         self.assertEqual(card["lines"], [{"label": "Deleted", "value": "All of it"}])
 
+    def test_an_undo_asked_right_after_a_no_ends_in_words(self):
+        # Trial: "Undo what you just did" after a No to a card of Developer mode, nothing built:
+        # the undo is refused once, the model says so, and the answer ends with no card
+        from .test_agent import asking, call, saying  # noqa: PLC0415
+
+        self.switch(True)
+        adapter = self.use_adapter(script=[
+            asking(call("prepare_server_action", {
+                "name": "Nudge Never Made", "model": "res.partner",
+                "action": {"kind": "update", "field": "function", "value": "Buyer"}})),
+            saying("Nothing was made."),
+            asking(call("prepare_undo", {})),
+            saying("Nothing was built here, so there is nothing to undo."),
+        ])
+        conversation = self.env["nudge.conversation"].with_user(self.admin)._chat_open()
+        job = conversation._chat_prepare("Make an action that sets the job to Buyer", mode="dev")
+        list(loop.run(job, conversation._chat_record))
+        self.decide(conversation, "decline")
+
+        job = conversation._chat_prepare("Undo what you just did", mode="dev")
+        events = list(loop.run(job, conversation._chat_record))
+        self.assertEqual((events[-1]["type"], events[-1]["state"]), ("done", "complete"))
+        self.assertFalse(conversation.sudo().waiting_step_id)
+        self.assertFalse(conversation.sudo().stream_started_at)
+        self.assertEqual(len(adapter.calls), 4, "One refusal, read once")
+        self.assertIn("nothing to undo", str(adapter.calls[3]["turns"][-1]))
+
     def test_what_an_undo_leaves_as_it_is_is_named(self):
         self.switch(True)
         conversation = self.env["nudge.conversation"].with_user(self.admin)._chat_open()

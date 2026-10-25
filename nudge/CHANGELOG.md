@@ -11,6 +11,8 @@ Current version: nudge 19.0.1.59.2, nudge_mcp 19.0.1.1.1, nudge_connect 19.0.1.0
 - Trial: a bare name with a slip ("qoutations", "sales ordrs") is offered back as "Did you mean: Open: Sales Orders?" with the corrected words, and before an approved answer close to it is offered; a correctly spelt name behaves as before.
 - Trial (S1): Arabizi in the skill router reaches 0.96 top-2 (26 of 27, was 0.81) on the sentences of the tests, English 69/72 and Arabic 57/57 unchanged: a root of two consonants ("sar", "khata") is read as the commands read it, th/dh/s are read as ث ذ ث too, Levantine and Egyptian small words are no signal, and the Arabic cues of five skills hold the dialect nouns people use.
 
+- Trial: Developer mode, "Undo what you just did" did not hang. Typed right after the No to the approval card, it was never sent: Enter is dropped while the answer after the No is being written (fixed with S13 above), and the trial waited 240 s for the answer to a question not asked. With nothing built, the undo is refused once and the model answers in words, no card (test).
+
 ## 19.0.1.59.2 (unreleased)
 
 - Review: the Latency and Cost panel counts the days of the period in the manager's time zone, not in UTC: in Dubai the evening answers of the 24th belonged to the 25th, and the panel of "today" missed them (two tests failed every evening after 20:00 UTC).
