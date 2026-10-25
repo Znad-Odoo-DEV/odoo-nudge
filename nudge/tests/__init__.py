@@ -109,3 +109,4 @@ from . import test_plugins  # EXT-01 / L3
 from . import test_references  # S15
 from . import test_economy_tier  # S6
 from . import test_prompt_cache  # S8
+from . import test_screens  # S12 and T21 screens

@@ -86,3 +86,7 @@ access_nudge_plugin_system,nudge.plugin system,model_nudge_plugin,base.group_sys
 access_nudge_plugin_item_system,nudge.plugin.item system,model_nudge_plugin_item,base.group_system,1,0,0,0
 access_nudge_memory_translation_manager,nudge.memory.translation manager,model_nudge_memory_translation,group_nudge_manager,1,1,1,1
 access_nudge_memory_save_manager,nudge.memory.save manager,model_nudge_memory_save,group_nudge_manager,1,1,1,1
+access_nudge_request_size_manager,nudge.request.size manager,model_nudge_request_size,group_nudge_manager,1,1,1,1
+access_nudge_request_size_line_manager,nudge.request.size.line manager,model_nudge_request_size_line,group_nudge_manager,1,1,1,1
+access_nudge_search_try_manager,nudge.search.try manager,model_nudge_search_try,group_nudge_manager,1,1,1,1
+access_nudge_search_try_line_manager,nudge.search.try.line manager,model_nudge_search_try_line,group_nudge_manager,1,1,1,1
