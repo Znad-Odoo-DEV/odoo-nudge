@@ -693,16 +693,18 @@ class NudgeConversation(models.Model):
             self.env["nudge.question"]._record(text)
         # An answer from memory too would land in the middle of work going on in the background
         self._chat_check_not_at_work()
-        served = self.env["nudge.memory"]._chat_serve(
-            self, text, mode, focus, found, explain, background, fresh=fresh, snapshot=snapshot)
-        if served:
-            return served
         if not inner:
             # ``inner``: a one-off call made by a tool inside the person's own answer (the summary
             # of a record), not a second question of theirs, and no stream of its own for the http
             # workers. An argument, not a key of the context, which a request could carry.
-            # Past the cap the question is not refused: it claims its place below, or waits
+            # Past the cap the question is not refused: it claims its place below, or waits.
+            # Before the memory: its answer too would land in the middle of the one being written
+            # (S13, the answer that follows a yes)
             self._chat_check_not_busy(cap=False)
+        served = self.env["nudge.memory"]._chat_serve(
+            self, text, mode, focus, found, explain, background, fresh=fresh, snapshot=snapshot)
+        if served:
+            return served
         limit = AGENT_MAX_MESSAGES if self.sudo().run_ids else MAX_MESSAGES
         if self.message_count >= limit:
             raise UserError(self.env._("This conversation is getting long. Start a new one."))

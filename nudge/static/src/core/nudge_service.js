@@ -249,6 +249,8 @@ export const nudgeService = {
             title: "",
             messages: [],
             isStreaming: false,
+            // S13: the question written while an answer is being written, sent once it ends
+            next: null,
             conversations: [],
             // What is being written, or said, in the message box
             draft: "",
@@ -717,6 +719,8 @@ function isReadable(file) {
         // --------------------------------------------------------------
 
         function stop() {
+            // What was written to follow the answer is not sent: it goes back to the message box
+            takeBackNext();
             if (waiting) {
                 cancelLine();
             }
@@ -1818,7 +1822,79 @@ function isReadable(file) {
             } finally {
                 state.isStreaming = false;
                 abortController = null;
+                answerEnded();
             }
+        }
+
+        /**
+         * S13: a question written while an answer is being written (the one that follows a yes, or
+         * any other) waits for that answer: shown after it, and sent once it ends, never in the
+         * middle of it. One at a time.
+         */
+        function holdUntilAnswered(text, typed, attachment, options) {
+            if (state.next) {
+                return;
+            }
+            state.attachment = null;
+            const question = {
+                id: `local_${++localId}`,
+                role: "user",
+                content: text,
+                state: "next",
+                error: "",
+                screen: "",
+                spoken: options.spoken,
+                attachment: attachment?.name || "",
+            };
+            state.messages.push(question);
+            state.next = {
+                messageId: question.id,
+                text,
+                typed,
+                options: { ...options, file: attachment?.file || null },
+            };
+        }
+
+        /** The question kept for later goes back to the message box, with its file */
+        function takeBackNext() {
+            const next = state.next;
+            if (!next) {
+                return;
+            }
+            state.next = null;
+            state.messages = state.messages.filter((message) => message.id !== next.messageId);
+            state.draft = [next.typed, state.draft.trim()].filter(Boolean).join("\n");
+            if (next.options.file && !state.attachment) {
+                const { file } = next.options;
+                state.attachment = { file, name: file.name, size: file.size };
+            }
+            state.focusRequest++;
+        }
+
+        function answerEnded() {
+            if (state.next) {
+                // Once what follows the end of the answer has run: the card of a yes is settled,
+                // a question waiting in line has taken up its turn again
+                browser.setTimeout(sendNext, 0);
+            }
+        }
+
+        async function sendNext() {
+            const next = state.next;
+            if (!next || state.isStreaming) {
+                return;
+            }
+            if (state.messages.some((message) => message.card?.state === "pending")) {
+                // The answer ends on a card: the person reads it first, and their question would leave it
+                takeBackNext();
+                notification.add(_t("Nudge is waiting for your yes or no: your message is back in the box."), {
+                    type: "info",
+                });
+                return;
+            }
+            state.next = null;
+            state.messages = state.messages.filter((message) => message.id !== next.messageId);
+            await send(next.text, next.options);
         }
 
         /**
@@ -1860,6 +1936,7 @@ function isReadable(file) {
                     browser.clearTimeout(waiting.timer);
                     waiting = null;
                     state.isStreaming = false;
+                    answerEnded();
                     resolve(turn);
                 };
                 const poll = async () => {
@@ -1994,11 +2071,16 @@ function isReadable(file) {
             { spoken = false, background = false, explain = null, report = null, file = null } = {}
         ) {
             text = (text || "").trim();
+            const words = text;
             const attachment = file ? { file, name: file.name, size: file.size } : state.attachment;
             if (!text && attachment) {
                 text = attachment.name;
             }
-            if (!text || state.isStreaming) {
+            if (!text) {
+                return;
+            }
+            if (state.isStreaming) {
+                holdUntilAnswered(text, words, attachment, { spoken, background, explain, report });
                 return;
             }
             state.attachment = null;
