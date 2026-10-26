@@ -8,6 +8,7 @@ class ResConfigSettings(models.TransientModel):
 
     nudge_assistant = fields.Boolean(related="website_id.nudge_assistant", readonly=False)
     nudge_greeting = fields.Char(related="website_id.nudge_greeting", readonly=False)
+    nudge_privacy_url = fields.Char(related="website_id.nudge_privacy_url", readonly=False)
     nudge_lang_ids = fields.Many2many(related="website_id.nudge_lang_ids", readonly=False)
     nudge_public_budget = fields.Integer(related="company_id.nudge_public_budget", readonly=False)
     nudge_web_keep_days = fields.Integer(related="company_id.nudge_web_keep_days", readonly=False)

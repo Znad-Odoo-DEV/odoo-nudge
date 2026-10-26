@@ -3,6 +3,7 @@ from unittest import mock
 import psycopg2.errors
 
 from odoo import SUPERUSER_ID, api, fields
+from odoo.exceptions import ValidationError
 from odoo.sql_db import db_connect
 from odoo.tests import TransactionCase, tagged
 from odoo.tools import mute_logger
@@ -389,3 +390,14 @@ class TestAssistant(WebsiteCase, TransactionCase):
         self.assertIn("250", result["text"])
         self.assertNotIn("900", result["text"])
         self.assertIn({"label": bills[0].name, "url": f"/my/invoices/{bills[0].id}"}, result["links"])
+
+    # ------------------------------------------------------------------
+    # The privacy policy link
+    # ------------------------------------------------------------------
+    def test_the_privacy_policy_link_is_a_web_address_or_a_path_only(self):
+        for good in ("https://example.com/privacy", "http://example.com/p?a=1", "/privacy", False):
+            self.website.nudge_privacy_url = good
+        for bad in ("javascript:alert(1)", "JavaScript:alert(1)", "data:text/html,x", "//evil.example",
+                    "ftp://example.com", "privacy", "https://example.com/a b"):
+            with self.subTest(bad=bad), self.assertRaises(ValidationError):
+                self.website.nudge_privacy_url = bad
