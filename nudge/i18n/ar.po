@@ -26281,3 +26281,11 @@ msgstr "الانتقال إلى وضع المطور"
 msgid "Build this approval rule"
 msgstr "ابنِ قاعدة الموافقة هذه"
 
+#: model:ir.model.fields,field_description:nudge.field_nudge_slot__is_channel
+msgid "Assistant or Messaging Call"
+msgstr "طلب من مساعد أو تطبيق مراسلة"
+
+#: model:ir.model.fields,help:nudge.field_nudge_slot__is_channel
+"A call of an external assistant or an answer on a messaging app: its place "
+"counts until it ends."
+"طلب من مساعد خارجي أو إجابة في تطبيق مراسلة: يُحتسب مكانه حتى ينتهي."
