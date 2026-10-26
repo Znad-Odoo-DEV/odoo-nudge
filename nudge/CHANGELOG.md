@@ -2,6 +2,10 @@
 
 Current version: nudge 18.0.1.59.5, nudge_mcp 18.0.1.1.1, nudge_connect 18.0.1.0.4, nudge_messaging 18.0.1.0.6, nudge_ai 18.0.1.0.11, nudge_studio 18.0.1.0.12, nudge_documents 18.0.1.0.8, nudge_spreadsheet 18.0.1.0.11, nudge_builder 18.0.1.0.9, nudge_mail 18.0.1.0.15, nudge_discuss 18.0.1.0.9, nudge_website 18.0.1.0.4.
 
+## 19.0.1.59.6 (unreleased)
+
+- Dashboard: new report "Token Dashboard" (Nudge menu, managers, company-scoped like Latency and Cost): per day, mode, role (the highest of Nudge User, Agent User, Manager, Administrator), provider, model, company and answer source (AI call, remembered answer, answer cache, understood without AI, other), the answers, the four token counts, the cost and the tool calls; graph by week and mode, pivot, filters for mode, role, source and the last 30 days. `nudge.token.dashboard.summary()` gives the exact ratios of a period: tokens per answer, cache hit rate (cache read / (input + cache read)), share of answers without any AI, tool calls per answer. It reads the usage ledger, which already records the answer cache, the memory and the rules router with zero tokens, so nothing new is written. New SQL-view model `nudge.token.dashboard` (schema change: model, access, rule, menu; no field added to `nudge.usage`). Tests: `/nudge:TestTokenDashboard`.
+
 ## 19.0.1.59.5 (unreleased)
 
 - Round 5: a slip of a name in Talk with the screen shared ("sales ordrs", "qoutations") gets the "Did you mean" at once, no longer the choice of how first: the chat asks the server (`nudge.noai.slip_offered`) for a short text that is not a how-to question, and shows the choice as before on any error.
