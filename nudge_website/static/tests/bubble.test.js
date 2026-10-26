@@ -18,6 +18,7 @@ const BUBBLE = /* html */ `
             <form class="o_nudge_web_handover" hidden="hidden">
                 <input type="text" name="name"/>
                 <input type="email" name="email"/>
+                <div class="o_nudge_web_hp" aria-hidden="true"><input type="text" name="homepage" tabindex="-1"/></div>
                 <input type="checkbox" name="consent"/>
                 <button type="submit">Send to the team</button>
             </form>
@@ -135,6 +136,8 @@ test("the details go to the team with the questions asked, and the conversation 
     expect(sent.name).toBe("Ebrahim");
     expect(sent.email).toBe("ebrahim@nudge.example");
     expect(sent.consent).toBe(false);
+    // The field a person does not see goes along, empty
+    expect(sent.homepage).toBe("");
     expect(sent.transcript).toEqual([]);
     expect(sent.message).toBe("I want a quote");
     expect(queryAllTexts(".o_nudge_web_bot").at(-1)).toBe("Thank you Ebrahim, someone will write to you.");

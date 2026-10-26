@@ -157,7 +157,8 @@ class TestEgressPaths(NudgeCase, TransactionCase):
             return Answer()
 
         self.env.company.nudge_egress_hosts = "recipes.example.test"
-        with patch.object(market, "_require_https", lambda url: None), patch("requests.get", get), \
+        with patch.object(market, "_require_https", lambda url: None), \
+                patch("odoo.addons.nudge.tools.pinned_http.get", get), \
                 self.assertRaises(UserError) as error:
             self.env["nudge.recipe.source"]._get("https://recipes.example.test/index.json")
         self.assertEqual(asked, ["https://recipes.example.test/index.json"])

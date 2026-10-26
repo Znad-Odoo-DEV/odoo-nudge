@@ -33,6 +33,10 @@
                         <p>Leave your details and someone will write to you.</p>
                         <input type="text" name="name" maxlength="100" class="form-control" placeholder="Your name" aria-label="Your name"/>
                         <input type="email" name="email" maxlength="200" class="form-control" placeholder="Your email" aria-label="Your email"/>
+                        <!-- Out of sight and out of the tab order: only a robot fills it -->
+                        <div class="o_nudge_web_hp" aria-hidden="true">
+                            <input type="text" name="homepage" tabindex="-1" autocomplete="off"/>
+                        </div>
                         <label class="form-check">
                             <input type="checkbox" name="consent" class="form-check-input"/>
                             <span>Attach this conversation to my request</span>

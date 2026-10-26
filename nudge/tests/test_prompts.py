@@ -1,5 +1,8 @@
 import base64
 import json
+from unittest.mock import patch
+
+from psycopg2 import errors
 
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tests import TransactionCase, new_test_user, tagged
@@ -174,6 +177,25 @@ class TestPrompts(NudgeCase, TransactionCase):
         with self.assertRaises(UserError):
             prompt.render({"amount": "5"})
         self.assertEqual(prompt.use_count, 1, "A refused fill is not a use")
+
+    def test_a_count_made_meanwhile_does_not_fail_the_fill(self):
+        """Review (odoo-tech #9): a second person using the prompt at the same instant got a serialization error
+        on the counter (repeatable read), which failed their fill; it is left uncounted instead"""
+        prompt = self.prompt(self.raghad, body="Chase the late payers", variables=[])
+        cursor = type(self.env.cr)
+        execute = cursor.execute
+
+        def busy(cr, query, params=None, log_exceptions=True):
+            if "SET use_count" in str(query):
+                raise errors.SerializationFailure("could not serialize access due to concurrent update")
+            return execute(cr, query, params, log_exceptions)
+
+        with patch.object(cursor, "execute", busy):
+            out = prompt.render({})
+        self.assertEqual(out["text"], "Chase the late payers")
+        self.assertEqual(prompt.use_count, 0, "Not counted this time; the text is given")
+        prompt.render({})
+        self.assertEqual(prompt.use_count, 1)
 
     def test_a_record_is_picked_with_the_rights_of_the_person(self):
         prompt = self.prompt(

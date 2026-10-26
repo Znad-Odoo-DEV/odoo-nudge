@@ -20,7 +20,7 @@ from odoo.tools.safe_eval import datetime as safe_datetime, safe_eval, time as s
 from . import base
 from .analytics import GROUP_PATTERN, MAX_GROUPS, MEASURE_PATTERN, NUMERIC_TYPES, TooBig, grouped
 from .records import (
-    CONDITION_SCHEMA_ITEMS, MAX_CONDITIONS, MODEL_PATTERN, Refused, build_domain, get_fields, get_model, is_secret,
+    CONDITION_SCHEMA_ITEMS, MAX_CONDITIONS, MODEL_PATTERN, Refused, build_domain, get_fields, get_model, holds_secret,
     model_label, refusing,
 )
 
@@ -81,7 +81,7 @@ def _groups(model, specs):
     for spec in specs or []:
         name, _separator, interval = spec.partition(":")
         field = get_fields(model, [name])[name]
-        if is_secret(field):
+        if holds_secret(model, field):
             raise Refused(f"Nothing can be grouped by {name}.")
         if interval and field.type not in ("date", "datetime"):
             raise Refused(f"{name} is not a date: it cannot be grouped by {interval}.")
@@ -97,7 +97,7 @@ def _measures(model, specs):
         if spec != "count":
             name, _separator, aggregate = spec.partition(":")
             field = get_fields(model, [name])[name]
-            if is_secret(field):
+            if holds_secret(model, field):
                 raise Refused(f"Nothing can be summed on {name}.")
             if field.type not in NUMERIC_TYPES:
                 raise Refused(f"{name} is not a number: it cannot be {aggregate}med. Use count.")

@@ -264,8 +264,11 @@ class TestCachedPrefix(NudgeCase, TransactionCase):
         return best
 
     def test_a_request_reads_what_the_one_before_wrote(self):
-        written, starts, previous, sizes = set(), {}, None, []
+        written, starts, previous, sizes, skilled = set(), {}, None, [], None
         for number, round_, call, params in self.requests():
+            if prompt.is_question_block(call["system"][-1]):
+                # The index lists only the skills a question scores for: not every question has one
+                skilled = (call, params)
             blocks, points, question = positions(params)
             self.assertLessEqual(sum(points), 4, "The API allows four read points")
             self.assertFalse([block for block in params["system"] if prompt.is_question_block(block["text"])],
@@ -289,7 +292,8 @@ class TestCachedPrefix(NudgeCase, TransactionCase):
             sizes.append(f"Q{number + 1}.{round_ + 1}: {sum(map(len, blocks[:read])) // 4}/{sum(map(len, blocks)) // 4}")
         _logger.info("S8 tokens read from the cache / sent, per request of one conversation: %s", ", ".join(sizes))
         # The skills of a question are given with it, in its message, before its context
-        self.assertTrue(prompt.is_question_block(call["system"][-1]), "The test needs a question with skills")
+        self.assertIsNotNone(skilled, "The test needs a question with skills")
+        call, params = skilled
         asked = next(message for message in reversed(params["messages"]) if message["role"] == "user"
                      and any("<nudge_context>" in block.get("text", "") for block in message["content"]))
         self.assertEqual(asked["content"][0]["text"], call["system"][-1])

@@ -89,6 +89,15 @@
         padding: 0 0.75rem 0.5rem;
     }
 
+    // The field only a robot fills: out of sight, not display: none, which some robots skip
+    .o_nudge_web_hp {
+        position: absolute;
+        left: -10000px;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+    }
+
     .o_nudge_web_handover {
         display: flex;
         flex-direction: column;

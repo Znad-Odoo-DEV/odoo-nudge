@@ -25,6 +25,7 @@ from odoo import api, fields, models, tools
 from odoo.exceptions import UserError
 
 from odoo.addons.nudge.tools.deadline import cap as worker_cap
+from odoo.addons.nudge.tools import pinned_http
 from odoo.addons.nudge.tools.records import Refused
 
 from .. import mcp_client, presets
@@ -400,11 +401,13 @@ class NudgeConnector(models.Model):
             data["scope"] = self.oauth_scope
         try:
             seconds = self._seconds()
-            with requests.post(self.oauth_token_url, data=data, timeout=seconds, stream=True,
-                               auth=(self.oauth_client_id, self.oauth_client_secret),
-                               allow_redirects=False) as response:
+            with pinned_http.post(self.oauth_token_url, allow_private=self.runs_locally, data=data,
+                                  timeout=seconds, stream=True, auth=(self.oauth_client_id, self.oauth_client_secret),
+                                  allow_redirects=False) as response:
                 answer = (json.loads(mcp_client.read_capped(response, 256 * 1024, seconds))
                           if response.status_code == 200 else {})
+        except pinned_http.Refused as refused:
+            raise mcp_client.McpError(refused.code) from None
         except requests.Timeout:
             raise mcp_client.McpError("timeout") from None
         except (requests.RequestException, ValueError):

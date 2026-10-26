@@ -1,5 +1,9 @@
 # Changelog
 
+## 19.0.1.59.5 (unreleased)
+
+- Review: the check of outside links connects to the address it checked (S11, DNS rebinding), and a picture the images endpoint gives as an address is fetched from a public address only, unless the provider runs on our own server. That download had no check at all: a provider could point it at 169.254.169.254 and the answer would have become a picture of the site. Tests: `/nudge_builder:TestBuilderRebinding`.
+
 ## 19.0.1.59.3 (unreleased)
 
 - Trial: L5, the SEO card read "SEO description: after" with a sentence about the change: the model (Gemini 3.5 Flash-Lite) had put "Update SEO title and meta description for the Services page" in the argument named `description`, and it was written as the meta description of the page. The argument is `meta_description` now, with a note to give the text word for word; a call with `description` is refused before any card, and the result tells the model the texts written. Not the plan card: an SEO change is never a step of a plan.
