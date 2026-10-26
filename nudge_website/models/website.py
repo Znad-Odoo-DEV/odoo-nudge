@@ -1,4 +1,10 @@
+import re
+
 from odoo import api, fields, models
+from odoo.exceptions import ValidationError
+
+
+PRIVACY_URL = re.compile(r"^(https?://[^\s<>\"']+|/(?!/)[^\s<>\"']*)$", re.IGNORECASE)
 
 
 class Website(models.Model):
@@ -9,9 +15,23 @@ class Website(models.Model):
     nudge_greeting = fields.Char(
         string="Greeting", translate=True,
         help="The first line of the bubble. Empty: a line that says what it can answer.")
+    nudge_privacy_url = fields.Char(
+        string="Privacy Policy Link",
+        help="The page of your privacy policy. The notice under the greeting links to it. "
+             "A full address starting with http:// or https://, or a path starting with /.")
     nudge_lang_ids = fields.Many2many(
         "res.lang", "nudge_website_lang_rel", "website_id", "lang_id", string="Assistant Languages",
         help="The bubble shows only in these languages of the website. Empty: in all of them.")
+
+    @api.constrains("nudge_privacy_url")
+    def _check_nudge_privacy_url(self):
+        """The link is shown to every visitor: only a web address or a path of the site may be there,
+        never javascript: or data:."""
+        for website in self:
+            url = website.nudge_privacy_url
+            if url and not PRIVACY_URL.match(url):
+                raise ValidationError(self.env._(
+                    "The privacy policy link must start with http://, https:// or a single /."))
 
     def nudge_assistant_on(self, lang_code=None):
         """:return: whether the bubble answers on this website, in this language"""

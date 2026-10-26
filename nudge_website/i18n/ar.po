@@ -584,3 +584,38 @@ msgstr "لم ينفق مساعد الموقع شيئًا بعد"
 msgid "Every call the website assistant makes to an AI provider is written here, with its tokens and its cost."
 msgstr "كل استدعاء يجريه مساعد الموقع لمزوّد الذكاء الاصطناعي يُكتب هنا مع رموزه وتكلفته."
 
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.assistant_bubble
+msgid ""
+"<span>Answers are written by an AI service: what you write here is sent to "
+"it. Please do not share passwords or card numbers.</span>"
+msgstr ""
+"<span>الإجابات يكتبها نظام ذكاء اصطناعي: ما تكتبه هنا يُرسل إليه. يرجى عدم "
+"مشاركة كلمات المرور أو أرقام البطاقات.</span>"
+
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.assistant_bubble
+msgid "Privacy policy"
+msgstr "سياسة الخصوصية"
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_res_config_settings__nudge_privacy_url
+#: model:ir.model.fields,field_description:nudge_website.field_website__nudge_privacy_url
+msgid "Privacy Policy Link"
+msgstr "رابط سياسة الخصوصية"
+
+#. module: nudge_website
+#: model:ir.model.fields,help:nudge_website.field_res_config_settings__nudge_privacy_url
+#: model:ir.model.fields,help:nudge_website.field_website__nudge_privacy_url
+msgid ""
+"The page of your privacy policy. The notice under the greeting links to it. "
+"A full address starting with http:// or https://, or a path starting with /."
+msgstr ""
+"صفحة سياسة الخصوصية لديك. يشير إليها التنبيه تحت التحية. عنوان كامل يبدأ "
+"بـ http:// أو https://، أو مسار يبدأ بـ /."
+
+#. module: nudge_website
+#. odoo-python
+#: code:addons/nudge_website/models/website.py:0
+msgid "The privacy policy link must start with http://, https:// or a single /."
+msgstr "يجب أن يبدأ رابط سياسة الخصوصية بـ http:// أو https:// أو بشرطة مائلة واحدة /."

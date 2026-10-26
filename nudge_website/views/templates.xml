@@ -21,6 +21,10 @@
                     <div class="o_nudge_web_log" aria-live="polite">
                         <p class="o_nudge_web_bot" t-out="website.nudge_greeting or website.nudge_default_greeting()"/>
                     </div>
+                    <p class="o_nudge_web_notice">
+                        <span>Answers are written by an AI service: what you write here is sent to it. Please do not share passwords or card numbers.</span>
+                        <a t-if="website.nudge_privacy_url" t-att-href="website.nudge_privacy_url" target="_blank" rel="noopener">Privacy policy</a>
+                    </p>
                     <form class="o_nudge_web_form" autocomplete="off">
                         <input type="text" name="message" maxlength="400" class="form-control"
                                placeholder="Write your question" aria-label="Write your question" required="required"/>
