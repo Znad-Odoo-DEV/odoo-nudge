@@ -2,6 +2,14 @@
 
 Current version: nudge 17.0.1.59.4, nudge_mcp 17.0.1.1.1, nudge_connect 17.0.1.0.3, nudge_messaging 17.0.1.0.6, nudge_ai 17.0.1.0.11, nudge_studio 17.0.1.0.12, nudge_documents 17.0.1.0.8, nudge_spreadsheet 17.0.1.0.11, nudge_builder 17.0.1.0.8, nudge_mail 17.0.1.0.15, nudge_discuss 17.0.1.0.9, nudge_website 17.0.1.0.3.
 
+## 19.0.1.59.5 (unreleased)
+
+- Round 5: a slip of a name in Talk with the screen shared ("sales ordrs", "qoutations") gets the "Did you mean" at once, no longer the choice of how first: the chat asks the server (`nudge.noai.slip_offered`) for a short text that is not a how-to question, and shows the choice as before on any error.
+- Round 5: more Arabizi in the skill router (commission, compare, income, "customer named", the words of a ticket), so the blind sets of Arabizi sentences are reached (AZ2 0.75 to 1.00 once its misses were used, AZ3 written blind at 1.00 before any change); English, Arabic and the sentences with no work in them are unchanged.
+- Round 5: "Missed sentences > Make entry" no longer proposes, nor accepts, one common word ("do", "the", "show") as a command word.
+- Round 5: in Agent mode an approval sentence ("Purchase orders above 50,000 need Purchase Manager approval") is answered by the rules, with no provider: approvals are built in Developer mode, and the switch is offered (an administrator to ask when Developer mode is not open to the person).
+- Round 5: the index of skills of a call lists only the skills the question scored for above a floor (and those already in the conversation), so a plain question carries none of the 8 irrelevant ones (about 345 tokens).
+
 ## 19.0.1.59.4 (unreleased)
 
 - Trial: a call to the model carries less (NP-03). What only some questions need (the Import screen, Studio, a spoken question, an answer read aloud, a file, the choice of the pointer or of a spreadsheet) is told with those questions, after the part of the prompt every call shares, instead of in every call; and the model reads the schema of a tool without the lengths of a text, without "no other argument" and without a long description given twice, all of which Nudge still checks on every call. Quality gate, largest request per mode: Talk 16.5k to 15.1k tokens, Agent 22.7k to 20.4k, Developer 21.2k to 19.3k (Agent average 18.5k to 16.6k); its budgets follow for Talk (16.3k) and Agent (22k), Developer stays at 26k (24.4k measured with Automation Rules installed).

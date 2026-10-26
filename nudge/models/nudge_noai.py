@@ -173,6 +173,8 @@ class NudgeNoai(models.AbstractModel):
             return self._serve_count(conversation, text, mode, snapshot)
         if mode == MODE_AGENT:
             served = self._serve_setup(conversation, text, mode, (fresh, focus, found, background, explain), snapshot)
+            served = served or self._serve_approval_hint(
+                conversation, text, (fresh, focus, found, background, explain), snapshot)
             if served:
                 return served
         if mode == MODE_DEV:
@@ -311,6 +313,29 @@ class NudgeNoai(models.AbstractModel):
                     calls=[("prepare_approval_flow", {"sentence": text[:600]})], parsed=parsed)
         return self._deliver(conversation, text, mode, plan, parsed, values)
 
+    @api.model
+    def _serve_approval_hint(self, conversation, text, state, snapshot):
+        """An approval rule said in a sentence, in Agent mode: approvals are built in Developer mode, so the
+        person is told so and offered the switch, with no call to a provider. Anything else goes on."""
+        fresh, focus, found, background, explain = state
+        if (fresh or focus or found or background or explain == "screen" or not self._is_enabled()
+                or not approval_sentence.parse(text)):
+            return None
+        values, _text = conversation._chat_screen(snapshot)
+        parsed = grammar.Parse(text)
+        parsed.intent, parsed.confidence = "approval_flow", 0.98
+        if not conversation._can_develop():
+            return self._deliver(conversation, text, MODE_AGENT, Plan(_(
+                "I read this as an approval rule. Approval rules are built in Developer mode, which is not "
+                "open to you: ask an administrator."), parsed=parsed), parsed, values)
+        chip = {"name": "switch_to_developer", "words": [_("Switch to Developer mode")],
+                "at_once": True, "hint": _("Build this approval rule"), "example": "",
+                "kind": "switch_mode", "mode": MODE_DEV, "text": text[:600]}
+        plan = Plan(_("I read this as an approval rule. Approval rules are built in Developer mode: "
+                               "switch to it and I will show you the flow before anything is built."),
+                    events=[{"type": "found", "commands": [chip]}], parsed=parsed)
+        return self._deliver(conversation, text, MODE_AGENT, plan, parsed, values)
+
     # ------------------------------------------------------------------
     # Planning: the sentence on the data
     # ------------------------------------------------------------------
@@ -348,6 +373,16 @@ class NudgeNoai(models.AbstractModel):
         if not lines:
             return Plan(_("Nothing is waiting for you today."), parsed=agenda)
         return Plan("\n".join([_("Waiting for you today:")] + lines), parsed=agenda)
+
+    @api.model
+    def slip_offered(self, text):
+        """For the chat before it asks how a question is wanted: whether ``text`` is a slip the rules would
+        give back as “Did you mean”. It reads no record: only the words, cut short."""
+        self.env["nudge.quick"]._check_user()
+        text = str(text or "").strip()
+        if not text or len(text) > 80:
+            return False
+        return bool(self._slip_offered(text))
 
     @api.model
     def _slip_offered(self, text):
