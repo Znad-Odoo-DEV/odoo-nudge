@@ -191,6 +191,30 @@ class TestProfile(NudgeCase, TransactionCase):
         self.assertIn("overview", third.changes["changed"])
         self.assertIn("Added: ", third.changes_text)
 
+    def test_where_the_work_is_leaves_the_configuration_out(self):
+        # Records people changed this week, of kinds that are set up once rather than worked in
+        country = self.env.ref("base.ae")
+        self.env["res.country.state"].create({"name": "Nudge State", "code": "NS", "country_id": country.id})
+        self.env["res.currency.rate"].create({"currency_id": self.env.ref("base.EUR").id, "rate": 1.5,
+                                              "name": fields.Date.today() - timedelta(days=3000)})
+        self.env["resource.calendar"].create({"name": "Nudge Hours"})
+        self.env["res.partner"].create({"name": "Nudge Busy Contact"})
+        profile = builder.build(self.env, "manual")
+        pieces = profile.slice_ids.filtered(lambda piece: piece.kind == "activity")
+        for model in ("res.country.state", "res.currency.rate", "resource.calendar.attendance"):
+            self.assertTrue(pieces.filtered(lambda piece: piece.model_name == model and piece.data.get("changed")),
+                            f"{model} is changed, so only the rule can leave it out")
+        work = retrieval.where_the_work_is(self.env, profile)
+        self.assertIn("(res.partner)", work)
+        for model in ("res.country.state", "res.currency.rate", "resource.calendar.attendance", "res.lang"):
+            self.assertNotIn(f"({model})", work, model)
+        for model in ("sale.order", "account.move", "stock.picking", "hr.leave", "project.task",
+                      "account.move.line", "res.partner", "product.template"):
+            self.assertFalse(retrieval.is_configuration(model), model)
+        for model in ("account.tax.repartition.line", "account.tax", "uom.uom", "res.country.state",
+                      "res.currency.rate", "res.lang", "resource.calendar.attendance", "res.partner.category"):
+            self.assertTrue(retrieval.is_configuration(model), model)
+
     def test_old_versions_are_removed(self):
         for _index in range(builder.KEPT_VERSIONS + 3):
             builder.build(self.env, "manual")

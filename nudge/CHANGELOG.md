@@ -9,6 +9,7 @@ Current version: nudge 17.0.1.59.4, nudge_mcp 17.0.1.1.1, nudge_connect 17.0.1.0
 - Round 5: "Missed sentences > Make entry" no longer proposes, nor accepts, one common word ("do", "the", "show") as a command word.
 - Round 5: in Agent mode an approval sentence ("Purchase orders above 50,000 need Purchase Manager approval") is answered by the rules, with no provider: approvals are built in Developer mode, and the switch is offered (an administrator to ask when Developer mode is not open to the person).
 - Round 5: the index of skills of a call lists only the skills the question scored for above a floor (and those already in the conversation), so a plain question carries none of the 8 irrelevant ones (about 345 tokens).
+- Round 5: the "Where the work is" block of every call leaves out the kinds of records that are set up once rather than worked in (countries and states, currencies and rates, languages, calendars, units, taxes and the accounting set-up, product attributes), so the room goes to the business models; locate_data still finds them when asked.
 
 ## 19.0.1.59.4 (unreleased)
 
