@@ -833,6 +833,10 @@ class TestAgent(AgentCase, TransactionCase):
         return self.env["res.partner"].search([("name", "=", "Nudge Made")])
 
     def test_modes(self):
+        # The rules of the mode end the prompt when the index of skills is whole (a small catalogue); a cut index
+        # comes after them, with the question (S1), so the skills of the apps are put aside here
+        self.env["nudge.skill"].sudo().search(
+            ["|", ("key", "=like", "accounting-%"), ("key", "=like", "inventory-%")]).active = False
         adapter = self.use_adapter()
         self.order(self.agent, "Do it")
         self.assertIn("## Mode: Agent", adapter.calls[0]["system"][-1])

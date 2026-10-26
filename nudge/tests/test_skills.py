@@ -65,6 +65,9 @@ class TestSkills(NudgeCase, TransactionCase):
         self.assertNotIn("## Importing files", prompt.SYSTEM_PERSONA)
         self.assertNotIn("prepare_module_scaffold", prompt.DEV_MODE)
         self.assertIn("never say that a Community feature", prompt.SYSTEM_PERSONA, "The edition stays for all")
+        # The whole index of a small catalogue: the skills of the apps are put aside, as with more skills than
+        # INDEX_MAX the index lists only what the question scored for (S1)
+        self.Skill.sudo().search(["|", ("key", "=like", "accounting-%"), ("key", "=like", "inventory-%")]).active = False
         _conversation, calls = self.call_for(self.user_a, "Hello")
         system = calls[0]["system"]
         self.assertTrue(system[-1].startswith(prompt.TALK_MODE_ASK), "The rules stay first in the last block")

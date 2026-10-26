@@ -46,8 +46,9 @@ F_IN_PHRASE, F_PAIR, F_TOOL, F_CUE = 1.2, 3.5, 1.0, 1.6
 MINOR = frozenset(("on", "up", "off", "out", "down"))
 # The things every business question is about say what it is about, not what is wanted: they count for
 # little in a question (the work is told by the verbs and the rest)
+# (and "lot", a word of everyday speech as much as of the stock: "thanks a lot" asks for no skill)
 GENERIC_WORDS = ("customer client invoice order payment product record contact employee company sale purchase "
-                 "vendor supplier account document item amount price number user person team "
+                 "vendor supplier account document item amount price number user person team lot "
                  "عميل فاتوره طلب دفع منتج موظف شركه سعر")
 W_GENERIC = 0.35
 F_TEXT_MAX = 1.5
