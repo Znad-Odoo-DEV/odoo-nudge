@@ -3,12 +3,13 @@ import types
 from unittest.mock import patch
 
 from odoo.exceptions import UserError, ValidationError
-from odoo.tests import BaseCase, TransactionCase, tagged
+from odoo.tests import BaseCase, TransactionCase, new_test_user, tagged
 
+from odoo.addons.nudge import tools
 from odoo.addons.nudge.llm import base, redact
 from odoo.addons.nudge.llm import snapshot as screen
 from odoo.addons.nudge.llm.fake_adapter import FakeAdapter
-from odoo.addons.nudge.tools import actions, bulk, records, saved_reports
+from odoo.addons.nudge.tools import actions, bulk, developer, records, saved_reports
 
 from .common import NudgeCase
 
@@ -223,6 +224,51 @@ class TestSecretFields(NudgeCase, TransactionCase):
         self.assertEqual(row, {"id": partner.id, "ref": "[hidden]", "city": "Dubai"})
         with self.assertRaises(records.Refused):
             records.build_domain(self.env["res.partner"], [{"field": "ref", "operator": "contains", "value": "tell"}])
+
+    def test_a_field_shown_as_a_password_is_hidden_by_every_way_a_value_is_shown(self):
+        """STU-04: format_value, the records of a configuration menu and the changes of a Developer-mode action hide
+        a field a view shows as a password, whatever it is called, not only a field named like a secret"""
+        Partner = self.env["res.partner"]
+        email_field = Partner._fields["email"]
+        self.assertFalse(records.is_secret(email_field), "An innocent name")
+        self.assertEqual(records.format_value(self.env, email_field, "hush@example.com"), "hush@example.com")
+
+        admin = new_test_user(
+            self.env, login="nudge_stu04_admin",
+            groups="nudge.group_nudge_agent,nudge.group_nudge_manager,base.group_system,base.group_partner_manager")
+        # The one partner of the test, whatever else the database holds: the menu shows the first rows only
+        action = self.env["ir.actions.act_window"].sudo().create({
+            "name": "Nudge STU-04 partners", "res_model": "res.partner",
+            "domain": "[('email', '=', 'hush@example.com')]"})
+        menu = self.env["ir.ui.menu"].sudo().create({
+            "name": "Nudge STU-04 partners", "action": f"ir.actions.act_window,{action.id}"})
+        Partner.create({"name": "Raghad", "email": "hush@example.com"})
+
+        def read_menu():
+            return tools.base.call(self.env(user=admin), "read_configuration", {"menu_id": menu.id}, None, "agent")
+
+        shown = read_menu()
+        self.assertFalse(shown.is_error, shown.content)
+        self.assertIn("hush@example.com", shown.content, "Without the password view, a column like another")
+
+        hidden = patch.object(records, "password_fields",
+                              lambda model: {"email"} if model._name == "res.partner" else set())
+        with hidden:
+            self.assertEqual(records.format_value(self.env, email_field, "hush@example.com"), "[hidden]")
+            seen = {}
+            self.assertEqual(records.format_value(self.env, email_field, "hush@example.com", seen), "[hidden]")
+            self.assertEqual(seen, {("res.partner", "email"): True}, "Judged once for the loop")
+            self.assertEqual(records.format_value(self.env, Partner._fields["city"], "Dubai", seen), "Dubai")
+            shown = read_menu()
+            self.assertFalse(shown.is_error, shown.content)
+            self.assertNotIn("hush@example.com", shown.content)
+            self.assertIn("[hidden]", shown.content)
+            changes = developer._changes(
+                self.env, Partner, ["email", "city"],
+                {"email": "old@example.com", "city": "Abu Dhabi"}, {"email": "hush@example.com", "city": "Dubai"})
+        text = "\n".join(changes)
+        self.assertNotIn("example.com", text)
+        self.assertIn("'Abu Dhabi' → 'Dubai'", text, "An ordinary field is still told")
 
     def test_a_field_this_person_may_not_read_never_leaves(self):
         partner = self.env["res.partner"].create({"name": "Raghad", "city": "Dubai"})

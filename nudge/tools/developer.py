@@ -1654,10 +1654,11 @@ def _watched_fields(model):
 def _changes(env, model, names, before, after):
     labels = model.fields_get(names, ["string"])
     changed = []
+    seen = {}
     for name in names:
         was, now = before.get(name), after.get(name)
         if was != now:
-            shown = [format_value(env, model._fields[name], value) for value in (was, now)]
+            shown = [format_value(env, model._fields[name], value, seen) for value in (was, now)]
             shown = [value.get("name") if isinstance(value, dict) else value for value in shown]
             changed.append(f"{labels.get(name, {}).get('string') or name}: {shown[0]!r} → {shown[1]!r}")
     return changed
