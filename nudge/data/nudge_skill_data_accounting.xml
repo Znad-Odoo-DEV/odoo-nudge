@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Accounting skills of Nudge (nudge): what the official Odoo documentation says about closing, bank reconciliation,
+     invoices, vendor bills and payments, taxes, currencies, reports and audit, analytic accounting and budgets.
+     noupdate: an update never rewrites one you changed; archive the ones you do not want. -->
+<odoo>
+    <data noupdate="1">
+    <record id="skill_acc_closing" model="nudge.skill">
+        <field name="key">accounting-closing</field>
+        <field name="recipe_key">nudge-skill-accounting-closing</field>
+        <field name="name">Closing a period or a year</field>
+        <field name="summary">Month-end and year-end closing: checks before closing, lock dates and exceptions, the result of the year, fiscal periods.</field>
+        <field name="trigger_words">year end, year-end, month end, month-end, period end, closing, close the books, closing entries, lock date, lock dates, lock everything, hard lock, annual closing, اقفال, اغلاق الحسابات, اقفال الشهر, اقفال السنة, تاريخ القفل, قفل الفترة, eqfal, iqfal, eghlaq</field>
+        <field name="tool_names">show_menu_path,open_screen,find_screen,search_odoo_documentation,search_records,aggregate_records,read_settings,prepare_create</field>
+        <field name="modes">talk,agent</field>
+        <field name="version">1.0.0</field>
+        <field name="sequence">210</field>
+        <field name="state">published</field>
+        <field name="origin">module</field>
+        <field name="test_sentence">What do I check before the year end closing and the lock date</field>
+        <field name="test_expect">show_menu_path</field>
+        <field name="instructions">## Closing a period or a year
+- To answer, give the steps and point to each screen with show_menu_path. To do the work, read what is open (draft entries, balances) and prepare an entry on a card. Nothing is locked or posted without the person's yes; never say a period is ready before reading the facts.
+- Before closing a year (the year-end page of the documentation): every bank account reconciled up to the year end, with the ending balances equal to the bank statements; all customer invoices and vendor bills created and every draft entry confirmed or cancelled; expenses validated; received payments encoded and confirmed; suspense accounts closed; loans registered; receivables and payables overdue by more than 60 days reviewed for a provision or an allowance; depreciation and deferred revenue entries booked.
+- Then: run the tax report and check it; reconcile the balance sheet accounts with the aged receivable and aged payable reports; audit every account.
+- Lock dates: Accounting > Accounting > Lock Dates. A Lock Everything date stops changes to posted entries and new postings on or before it (a new entry gets the day after the lock date). An administrator can add an exception, for the user or for everyone, for a time, with a reason. The Hard Lock date cannot be undone or overridden whatever the access rights: set it only once the date is certain. The tax return lock date moves the tax of a late transaction to the next open tax period.
+- The result of the year shows as the dynamic line Result Brought Forward in the trial balance and general ledger of the next year. To clear it, a manual journal entry dated at the year end debits (profit) or credits (loss) current year earnings accounts, against equity, reserve or dividend accounts. Take the amount from the report; offer to prepare the entry.
+- Fiscal period: Accounting > Configuration > Settings > Fiscal Periods, Last Day. For a period that is not 12 months, enable Fiscal Years and create the year with its dates.
+- In Odoo 18: the same, with a Hard Lock date; the profit is booked to an equity account by a miscellaneous entry dated at the year end. In Odoo 17: the Journal Entries Lock Date and the All Users Lock Date (the Irreversible Lock Date module makes the second one irreversible), a Tax Lock Date, and one current year's earnings account (999999 by default) allocated by a miscellaneous entry.
+Sources: https://www.odoo.com/documentation/19.0/applications/finance/accounting/reporting/year_end.html https://www.odoo.com/documentation/19.0/applications/finance/accounting/reporting/tax_returns.html
+</field>
+    </record>
+    <record id="skill_acc_bank_reconciliation" model="nudge.skill">
+        <field name="key">accounting-bank-reconciliation</field>
+        <field name="recipe_key">nudge-skill-accounting-bank-reconciliation</field>
+        <field name="name">Bank reconciliation</field>
+        <field name="summary">Bank transactions and statements, matching them with invoices, bills and payments, and reconciliation models for fees and transfers.</field>
+        <field name="trigger_words">reconcile, reconciling, reconciliation, bank statement, bank statements, bank transaction, bank matching, reconciliation model, suspense account, bank fees, unmatched, تسوية بنكية, تسويه, مطابقة بنكية, كشف حساب بنكي, كشف البنك, حركات البنك, tasweya, taswiya, tasweyah banky</field>
+        <field name="tool_names">find_screen,open_screen,show_menu_path,search_odoo_documentation,search_records,prepare_create</field>
+        <field name="modes">talk,agent</field>
+        <field name="version">1.0.0</field>
+        <field name="sequence">220</field>
+        <field name="state">published</field>
+        <field name="origin">module</field>
+        <field name="test_sentence">Reconcile the bank statement lines and set up a reconciliation model for bank fees</field>
+        <field name="test_expect">search_odoo_documentation</field>
+        <field name="instructions">## Bank reconciliation
+- Reconciling means matching each bank transaction with the invoices, bills and payments it settles, or writing it off. Until it is matched, the transaction sits on the bank journal's suspense account. When done, the bank account balance in Odoo equals the bank statement balance. The matching clicks are the person's: point to the screen with show_menu_path or open_screen and say so; Nudge creates records only on a card.
+- Where: Accounting Dashboard, click the journal name or its Transactions button for all transactions, or the button "x to reconcile" for the unmatched ones (Bank Matching view).
+- Automatic matching: with no partner on the transaction, its label is compared with the number, customer reference, bill reference and payment reference of invoices, bills and payments. With a partner, the amount is compared, by rules in order: exact match, discounted match (early payment terms), amount found in the label.
+- Manual: expand the line, then Set Partner, Set Account (write the whole amount off to an account), Receivable or Payable (the partner's account), Reconcile (pick existing journal items), Batches (a batch payment), or a button of a manual reconciliation model. If the transaction is less than the invoice, the difference stays open or the invoice is marked fully paid; if it is more, the rest is matched again.
+- Reconciliation models: from the dashboard, the journal menu, Models under Reconciliation. Manual ones appear as buttons; automated ones apply by themselves, the first in the sequence wins. Matching conditions (journals, partners, amount, label contains, does not contain or regex) must all hold. Counterpart items give partner and/or account (one of the two is needed), amount (fixed, percentage of balance, percentage of the statement line, from the label), taxes, analytic and label.
+- Getting transactions in: bank synchronization, an imported file (CAMT.053, CSV, XLSX, OFX, QIF, CODA in Belgium), or New on the journal with a label and a date. Actions > Find Duplicate Transactions lists likely duplicates for the person to review.
+- In Odoo 17/18: the screen has three sections (transactions, counterpart entries, resulting entry); the dashboard button is Reconcile items, and the resulting entry is validated or marked To Check.
+Sources: https://www.odoo.com/documentation/19.0/applications/finance/accounting/bank/reconciliation.html https://www.odoo.com/documentation/19.0/applications/finance/accounting/bank/reconciliation_models.html https://www.odoo.com/documentation/19.0/applications/finance/accounting/bank/transactions.html
+</field>
+    </record>
+    <record id="skill_acc_customer_invoices" model="nudge.skill">
+        <field name="key">accounting-customer-invoices</field>
+        <field name="recipe_key">nudge-skill-accounting-customer-invoices</field>
+        <field name="name">Customer invoices, credit notes and payment terms</field>
+        <field name="summary">Customer invoices from draft to paid, credit and debit notes, payment terms, installments and cash discounts.</field>
+        <field name="trigger_words">credit note, credit notes, debit note, customer invoice, customer invoices, payment terms, payment term, early discount, cash discount, installment, refund, reset to draft, send the invoice, اشعار دائن, اشعار مدين, فاتورة عميل, فواتير العملاء, شروط الدفع, خصم نقدي, خصم الدفع المبكر, esh3ar daen, eshaar da2en, shorot el dafa</field>
+        <field name="tool_names">find_record,search_records,read_record,prepare_create,prepare_write,call_method,open_record,search_odoo_documentation,show_menu_path</field>
+        <field name="modes">talk,agent</field>
+        <field name="version">1.0.0</field>
+        <field name="sequence">230</field>
+        <field name="state">published</field>
+        <field name="origin">module</field>
+        <field name="test_sentence">Issue a credit note for a customer invoice and change the payment terms</field>
+        <field name="test_expect">find_record</field>
+        <field name="instructions">## Customer invoices, credit notes and payment terms
+- Flow: a draft invoice (from a sales order, or New in Accounting > Customers > Invoices) has no accounting effect. Confirm posts it, gives it its number and creates the journal entry. A posted invoice cannot be edited: Reset to draft, or a credit note. Send emails or posts it. Pay registers the payment; the invoice is In payment until a bank transaction is reconciled, then Paid.
+- The customer on the invoice brings the invoice address, payment terms, fiscal position and receivable account; change them on the invoice for one document, on the contact for the future.
+- A credit note is the only legal way to cancel, refund or change a validated invoice. From the invoice, click Credit Note, give the Reason, the journal and the reversal date, then Reverse (a draft credit note, prefilled, to edit for a partial refund) or Reverse and Create invoice (a credit note validated and reconciled, plus a new draft invoice). From scratch: Accounting > Customers > Credit Notes. A credit note's number starts with R plus the invoice number. A refund of money is a payment afterwards. A debit note comes from the invoice's Debit Note button. Vendor refunds work the same way on vendor bills.
+- Payment terms: Accounting > Configuration > Payment Terms. Each term says what share is due and after how many days; terms are computed in order of due date; "Days end of the month on" adds a buffer after the month end; a negative After value counts back from the month end. Show installment dates prints each installment. Test with the Example line.
+- Cash discount: tick Early Discount on the payment term (percentage, days) and choose the tax reduction: Always, On early payment, or Never. The gain and loss accounts are in Accounting > Configuration > Settings, Default Accounts.
+- To do the work: find the invoice with find_record; prepare_create, prepare_write and call_method show a card; confirm, send and credit-note buttons are pressed only after a yes. Never delete an invoice: reset it to draft or issue a credit note.
+- In Odoo 17: the payment button is Register Payment (Pay in 18 and 19). Credit notes and payment terms work the same in 17 and 18.
+Sources: https://www.odoo.com/documentation/19.0/applications/finance/accounting/customer_invoices.html https://www.odoo.com/documentation/19.0/applications/finance/accounting/customer_invoices/credit_notes.html https://www.odoo.com/documentation/19.0/applications/finance/accounting/customer_invoices/payment_terms.html https://www.odoo.com/documentation/19.0/applications/finance/accounting/customer_invoices/cash_discounts.html
+</field>
+    </record>
+    <record id="skill_acc_vendor_bills_payments" model="nudge.skill">
+        <field name="key">accounting-vendor-payments</field>
+        <field name="recipe_key">nudge-skill-accounting-vendor-payments</field>
+        <field name="name">Vendor bills and payments</field>
+        <field name="summary">Registering and posting vendor bills, matching purchase orders, paying bills singly, in groups, by check or in batch payments.</field>
+        <field name="trigger_words">vendor payment, supplier payment, supplier bill, supplier bills, bill payment, pay the vendor, pay the bills, pay supplier, batch payment, batch payments, register payment, partial payment, outgoing payment, pay by check, check payment, sepa, nacha, aged payable, self-billing, auto-post, دفع المورد, دفع للمورد, سداد الموردين, دفعات مجمعة, تسجيل دفعة, دفعة جزئية, شيك, daf3a, dafaat, shek</field>
+        <field name="tool_names">find_record,search_records,prepare_create,prepare_write,call_method,open_screen,show_menu_path,search_odoo_documentation</field>
+        <field name="modes">talk,agent</field>
+        <field name="version">1.0.0</field>
+        <field name="sequence">240</field>
+        <field name="state">published</field>
+        <field name="origin">module</field>
+        <field name="test_sentence">Register payment on several supplier bills in a batch payment</field>
+        <field name="test_expect">search_odoo_documentation</field>
+        <field name="instructions">## Vendor bills and payments
+- A bill: Accounting > Vendors > Bills > New, by email to the purchase journal's alias, or by uploading a PDF (digitizing needs In-App Purchase credits). Fill the vendor, Bill Reference (the vendor's own number), bill date, accounting date, payment terms or due date, journal, and Recipient Bank (required for batch payment files). Auto-Complete copies a past bill or purchase order. On a vendor's contact, Auto-post bills can be Always, Ask after 3 validations without edits, or Never. A document taken from a file is the documents skill's work.
+- Purchase Matching smart button: pick the received purchase order lines and the draft bill, then Match; without an order, Add to PO builds one. Confirm posts the bill and gives it its number; Reset to draft if it must change.
+- Pay on the bill: choose the journal, payment date, payment method and amount, then Create Payment. A smaller amount is partial: with outstanding accounts, either keep the bill open or mark it fully paid by posting the difference to an account. The bill is In payment until the bank transaction is reconciled, then Paid.
+- Several bills at once: in Accounting > Vendors > Bills, group by Payment Method, select the bills, click Pay; Group Payments joins one vendor's bills into one payment. A contact's preferred payment method comes from its Sales and Purchase tab.
+- Batch payments: enable Batch Payments in Accounting > Configuration > Settings (Customer Payments). Accounting > Vendors > Batch Payments > New, or select registered payments and Create Batch. All payments must use the same payment method; Validate closes the batch, and the bank line is later reconciled with the batch. Checks (enable Checks under Vendor Payments, then print) and SEPA or NACHA files (their apps) are the other methods.
+- Accounting > Reporting > Aged Payable lists open bills and due dates.
+- To do the work: bills and payments are created or changed only through cards; a bill that is wrong is reset to draft or credited, never deleted.
+- In Odoo 17: the button is Register Payment (Pay in 18 and 19); there is no Purchase Matching button. In 18: Purchase Matching and Auto-post bills exist.
+Sources: https://www.odoo.com/documentation/19.0/applications/finance/accounting/vendor_bills.html https://www.odoo.com/documentation/19.0/applications/finance/accounting/payments.html https://www.odoo.com/documentation/19.0/applications/finance/accounting/payments/batch.html https://www.odoo.com/documentation/19.0/applications/finance/accounting/payments/pay_checks.html
+</field>
+    </record>
+    <record id="skill_acc_taxes" model="nudge.skill">
+        <field name="key">accounting-taxes</field>
+        <field name="recipe_key">nudge-skill-accounting-taxes</field>
+        <field name="name">Taxes and fiscal positions</field>
+        <field name="summary">How taxes are set, computed and mapped by fiscal positions, tax grids, cash basis and the tax return, in general terms.</field>
+        <field name="trigger_words">tax, taxes, vat, fiscal position, fiscal positions, tax mapping, tax return, tax report, tax grid, cash basis, reverse charge, tax included, withholding, ضريبة, ضرائب, ضريبة القيمة المضافة, اقرار ضريبي, الاقرار الضريبي, مركز ضريبي, dariba, daraib, darayeb</field>
+        <field name="tool_names">search_odoo_documentation,read_settings,show_menu_path,open_screen,search_records,find_record</field>
+        <field name="modes">talk,agent</field>
+        <field name="version">1.0.0</field>
+        <field name="sequence">250</field>
+        <field name="state">published</field>
+        <field name="origin">module</field>
+        <field name="test_sentence">How does a fiscal position change the VAT on invoices for a foreign customer</field>
+        <field name="test_expect">search_odoo_documentation</field>
+        <field name="instructions">## Taxes and fiscal positions
+- Rules of a country (the layout of its tax return, its e-invoicing, local reports and rates) are not in this skill: they come from the country checklist of Nudge. Point the person to it, and never state a local rate or deadline from memory.
+- How it works: a tax is put on each document line (a product brings its Sales Taxes and Purchase Taxes). Odoo computes the amount, creates a tax journal item with tax grids, and the Tax Return report adds bases and taxes per period. With Cash Basis, the tax is recorded when the invoice is reconciled with its payment.
+- Setup: Accounting > Configuration > Settings, Taxes (default taxes, prices tax included, EU distance selling, cash basis). Accounting > Configuration > Taxes lists them; the localization installs most and activates only the main rate; toggle Active to use another.
+- A tax: name and type (Sales, Purchase, None), label on invoices, tax group, computation (Group of Taxes, Fixed, Percentage of Price, Percentage of Price Tax Included, Custom Formula), Included in Price, and the distribution for invoices and for refunds (a base line, then % of tax lines totalling 100%, and the accounts and tax grids). Affect Base of Subsequent Taxes plus the order of the taxes handles extra taxes.
+- Fiscal positions: Accounting > Configuration > Fiscal Positions. They replace taxes and accounts by the customer's or vendor's location or kind of business. Applied by Detect Automatically (VAT Required, country or country group; the sequence decides when several fit), by hand in the Other Info tab of a document, or on the partner's Sales and Purchase tab. The tax mapping is set on the taxes (Fiscal Position and Replaces fields); the account mapping is on the position.
+- Tax return: Accounting > Accounting > Tax Returns; periodicity, deadline and journal are in the Settings. Closing a tax period is the closing skill.
+- In Odoo 17/18: the tax mapping table is on the fiscal position form itself, with the account mapping.
+- To do the work: change a tax or a position only on a card, and say which documents it will touch; posted entries keep their tax.
+Sources: https://www.odoo.com/documentation/19.0/applications/finance/accounting/taxes.html https://www.odoo.com/documentation/19.0/applications/finance/accounting/taxes/fiscal_positions.html https://www.odoo.com/documentation/19.0/applications/finance/accounting/taxes/tax_computation.html https://www.odoo.com/documentation/19.0/applications/finance/accounting/reporting/tax_returns.html
+</field>
+    </record>
+    <record id="skill_acc_multi_currency" model="nudge.skill">
+        <field name="key">accounting-multi-currency</field>
+        <field name="recipe_key">nudge-skill-accounting-multi-currency</field>
+        <field name="name">Foreign currencies and exchange differences</field>
+        <field name="summary">Enabling currencies, rates, foreign currency bank journals, exchange difference entries and the unrealized currency report.</field>
+        <field name="trigger_words">multi-currency, multi currency, foreign currency, currency, currencies, exchange rate, exchange rates, exchange difference, exchange differences, unrealized, revaluation, عملة, عملات, العملات الاجنبية, سعر الصرف, فروقات الصرف, فرق العملة, sa3r el sarf, forooq el sarf, 3omla</field>
+        <field name="tool_names">search_odoo_documentation,show_menu_path,open_screen,search_records,aggregate_records,read_settings</field>
+        <field name="modes">talk,agent</field>
+        <field name="version">1.0.0</field>
+        <field name="sequence">260</field>
+        <field name="state">published</field>
+        <field name="origin">module</field>
+        <field name="test_sentence">Why was an exchange difference posted when the customer paid in a foreign currency</field>
+        <field name="test_expect">show_menu_path</field>
+        <field name="instructions">## Foreign currencies and exchange differences
+- Every transaction is stored in the company currency; a foreign currency one also keeps the amount in its own currency. The main currency is in Accounting > Configuration > Settings > Currencies.
+- Enable a currency: Accounting > Configuration > Currencies, toggle Active. Rates: add a line in the Rates tab by hand, or use Automatic Currency Rates in the Settings (update now, or an interval of daily, weekly or monthly, and the web service; the European Central Bank by default). Rates are not invented; say where they come from.
+- On documents: choose the currency (and the journal) on the invoice or bill; the rate shows when it differs from the company currency. To pay in another currency, change the currency in the Amount field of the payment window. A bank transaction in a foreign currency carries the Foreign Currency and its amount; reconciliation shows both amounts.
+- Exchange difference: when a payment comes later at another rate, Odoo posts the gain or loss itself in the Exchange Difference journal. The journal and the gain and loss accounts are in Accounting > Configuration > Settings, Default Accounts. To see them: Accounting > Review > Journal Items, group by Miscellaneous.
+- Accounts and journals: a currency set on an account forces its moves into it (empty means all active currencies); a currency on a journal limits it to that currency. For a foreign currency bank account, create a bank journal with that currency; leaving the account's currency empty is the flexible choice.
+- Unrealized gains and losses on balance sheet items in a foreign currency: Accounting > Review > Unrealized Currencies. Exchange Rates changes the rate for the report (Reset to Odoo's Rate undoes it); Adjustment Entry asks for a journal, an expense account and an income account, and reverses itself at the Reversal Date. Offer it as a card only after the person chose the date and accounts.
+- In Odoo 17/18: the report is Reporting > Management: Unrealized Currency Gains/Losses; the exchange difference settings are the same.
+Sources: https://www.odoo.com/documentation/19.0/applications/finance/accounting/get_started/multi_currency.html https://www.odoo.com/documentation/19.0/applications/finance/accounting/bank/foreign_currency.html
+</field>
+    </record>
+    <record id="skill_acc_reports_audit" model="nudge.skill">
+        <field name="key">accounting-reports-audit</field>
+        <field name="recipe_key">nudge-skill-accounting-reports-audit</field>
+        <field name="name">Financial reports and audit</field>
+        <field name="summary">Balance sheet, profit and loss, trial balance, general ledger, aged balances, cash flow, the audit trail and secured entries.</field>
+        <field name="trigger_words">balance sheet, profit and loss, income statement, trial balance, general ledger, aged receivable, aged payable, aged receivables, aged payables, cash flow statement, executive summary, audit trail, inalterability, secure posted entries, accounting report, financial report, financial statements, الميزانية العمومية, قائمة الدخل, الارباح والخسائر, ميزان المراجعة, دفتر الاستاذ, اعمار الديون, تقرير مالي, تقارير مالية, سجل التدقيق, mizan el moraja3a, mizaniya 3omumiya</field>
+        <field name="tool_names">show_menu_path,open_screen,search_odoo_documentation,aggregate_records,show_chart,save_report,search_records</field>
+        <field name="modes">talk,agent</field>
+        <field name="version">1.0.0</field>
+        <field name="sequence">270</field>
+        <field name="state">published</field>
+        <field name="origin">module</field>
+        <field name="test_sentence">Show me the balance sheet and the aged receivable report with the audit trail</field>
+        <field name="test_expect">show_menu_path</field>
+        <field name="instructions">## Financial reports and audit
+- The reports are under Accounting > Reporting, for every country: balance sheet (assets, liabilities and equity at a date), profit and loss (income statement of a period), executive summary (margins, return on investment, debtor and creditor days, cash forecast, current ratio), general ledger (all accounts for a date range), aged receivable (what each customer owes, by age), aged payable (what is owed to each vendor, credit notes and overpayments included, by age), cash flow statement (operating, investing, financing), tax report (net and tax per tax) and the audit trail.
+- Use them: expand a line with the arrow, open the entry behind it, Annotate to comment, Comparison to set periods side by side, PDF or XLSX to export. Show the screen with show_menu_path or open_screen; to quote figures in the chat, read them with aggregate_records on the journal items and say it is a reading, not the report.
+- Customizing: with developer mode, Accounting > Configuration > Accounting Reports; a root report is the generic one, a variant is its country version.
+- Audit trail: it records the date and time, the user, the type of change, the previous and the new value of fields with accounting impact, in addition to the chatter. Accounting > Review > Audit Trail. The Restrictive Audit Trail option (Settings, Reporting) lets tracked records be cancelled or archived, never deleted.
+- Inalterability (some countries require it): on a sales, purchase or miscellaneous journal, Advanced Settings, Secure Posted Entries with Hash; every secured entry gets a SHA-256 hash chained to the previous one, and it cannot be edited. This cannot be switched off once an entry is posted there. The Secure Entries wizard secures all entries up to a date. The check report is downloaded from Settings, Reporting. Say plainly that securing is irreversible and ask first.
+- Before reading a balance sheet or a profit and loss as final, ask whether the period is closed and the bank is reconciled; draft entries are not in the reports.
+- In Odoo 17/18: the audit trail is a setting named Audit Trail (Accounting > Settings), irreversible once on, and the report is under Accounting > Reporting > Audit Trail; posted entries then can only be cancelled.
+Sources: https://www.odoo.com/documentation/19.0/applications/finance/accounting/reporting.html https://www.odoo.com/documentation/19.0/applications/finance/accounting/reporting/data_inalterability.html https://www.odoo.com/documentation/19.0/applications/finance/accounting/reporting/customize.html
+</field>
+    </record>
+    <record id="skill_acc_analytic_budgets" model="nudge.skill">
+        <field name="key">accounting-analytic-budgets</field>
+        <field name="recipe_key">nudge-skill-accounting-analytic-budgets</field>
+        <field name="name">Analytic accounting and budgets</field>
+        <field name="summary">Analytic plans, accounts and distribution of costs and revenues by project or department, distribution models and analytic budgets.</field>
+        <field name="trigger_words">analytic, analytic account, analytic accounts, analytic plan, analytic plans, analytic distribution, budget, budgets, budget management, cost center, محاسبة تحليلية, حساب تحليلي, خطة تحليلية, توزيع تحليلي, تحليلي, موازنة, ميزانية تقديرية, مركز تكلفة, tahlili, mawazna, markaz taklefa</field>
+        <field name="tool_names">show_menu_path,open_screen,search_odoo_documentation,search_records,aggregate_records,prepare_create,prepare_write,read_settings</field>
+        <field name="modes">talk,agent</field>
+        <field name="version">1.0.0</field>
+        <field name="sequence">280</field>
+        <field name="state">published</field>
+        <field name="origin">module</field>
+        <field name="test_sentence">Create an analytic plan and an analytic budget for the new project</field>
+        <field name="test_expect">show_menu_path</field>
+        <field name="instructions">## Analytic accounting and budgets
+- Analytic accounting follows costs and revenues by project, department or service apart from the general accounts. Enable Analytic Accounting in Accounting > Configuration > Settings, Analytics. Order: plans first, then accounts, then distribution, then budgets.
+- Analytic plans: Accounting > Configuration > Analytic Plans. A plan has an optional parent and a Default Applicability: Optional, Mandatory (an entry cannot be confirmed without an account of the plan) or Unavailable. Lines on the Applicability tab override it by domain, account prefix or product category. Each plan needs at least one analytic account.
+- Analytic accounts: Accounting > Configuration > Analytic Accounts: name, customer, reference, plan, company, currency.
+- Distribution: the Analytic Distribution column on an invoice or bill line splits a line by percentage across accounts, one column per plan. Many entries at once: Accounting > Review > Journal Items, select, edit the Analytic Distribution column, Update. Analytic distribution models (Accounting > Configuration > Analytic Distribution Models) apply a distribution by account prefix, partner, product, company, and also partner or product category; all conditions must hold, so one model per condition.
+- Analytic budgets: enable Budget Management in the Analytics settings. Accounting > Accounting > Analytic Budgets > New: name, period, type, and lines (plan columns, accounts, Budgeted amounts); Open it. After that the Committed and Achieved columns fill from the analytic distribution of the journal items; Theoretical shows what should be spent by today's date. Reset to Draft overwrites; Revise creates a new budget and keeps the old one as Revised. Generate makes monthly, quarterly or yearly budgets for chosen plans. A budget is deleted only in Draft or Cancelled, so prefer Cancel.
+- Financial budgets sit on the Profit and Loss report: choose the period, click Budget, name it, and enter the amounts per account.
+- To do the work: plans, accounts and budgets are created or changed only on a card; amounts come from the person, never guessed.
+- In Odoo 18: the same analytic plans and budgets. In Odoo 17: budgets use Budgetary Positions (Accounting > Configuration > Management: Budgetary Positions, a list of accounts) and Accounting > Management: Budgets, with analytic accounts under Analytic Accounting.
+Sources: https://www.odoo.com/documentation/19.0/applications/finance/accounting/reporting/analytic_accounting.html https://www.odoo.com/documentation/19.0/applications/finance/accounting/reporting/budget.html
+</field>
+    </record>
+    </data>
+</odoo>
