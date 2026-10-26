@@ -371,6 +371,11 @@ class TestMcpOAuth(HttpCase):
     # ------------------------------------------------------------------
     # The tokens
     # ------------------------------------------------------------------
+    def test_oauth_token_is_unaffected_by_the_end_of_legacy_keys(self):
+        _client, tokens = self.sign_in()
+        with patch.object(nudge_mcp, "today", return_value=nudge_mcp.LEGACY_KEYS_END + timedelta(days=1)):
+            self.assertEqual(self.rpc(tokens["access_token"], "ping").status_code, 200)
+
     def test_expired_access_token(self):
         client, tokens = self.sign_in()
         self.env["nudge.mcp.token"].sudo().search([("token_hash", "=", oauth.digest(tokens["access_token"]))]).write(

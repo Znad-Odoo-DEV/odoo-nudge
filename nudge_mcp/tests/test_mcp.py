@@ -1,6 +1,7 @@
 import base64
 import json
 from datetime import timedelta
+from unittest.mock import patch
 
 from odoo import fields
 from odoo.exceptions import AccessError, UserError
@@ -105,6 +106,37 @@ class TestMcp(HttpCase):
         self.assertEqual(self.rpc("initialize", key=self.make_key(self.agent, scope="rpc")).status_code, 401)
         self.assertEqual(self.rpc("initialize", key=self.make_key(self.agent, scope=None)).status_code, 401)
         self.assertEqual(self.rpc("initialize", key=self.make_key(self.no_group)).status_code, 401)
+
+    # ------------------------------------------------------------------
+    # The end of the keys of before OAuth (legacy)
+    # ------------------------------------------------------------------
+    def test_legacy_key_works_until_the_end_date_and_is_refused_from_it(self):
+        end = nudge_mcp.LEGACY_KEYS_END
+        with patch.object(nudge_mcp, "today", return_value=end - timedelta(days=1)):
+            self.assertEqual(self.rpc("initialize", key=self.key).status_code, 200)
+        with patch.object(nudge_mcp, "today", return_value=end):
+            response = self.rpc("initialize", key=self.key)
+            self.assertEqual(response.status_code, 401)
+            self.assertIn("invalid_token", response.headers["WWW-Authenticate"])
+            message = response.json()["error"]["message"]
+            self.assertIn(end.isoformat(), message)
+            self.assertIn("OAuth", message)
+            # Told why, not counted as a wrong key; a wrong key is still the plain refusal
+            wrong = self.rpc("initialize", key="0" * 40).json()["error"]["message"]
+            self.assertNotIn("OAuth", wrong)
+
+    def test_legacy_keys_warning_follows_the_keys(self):
+        Settings = self.env["res.config.settings"]
+        self.env["res.users.apikeys"].sudo().search([("scope", "=", nudge_mcp.SCOPE)]).unlink()
+        with patch.object(nudge_mcp, "today", return_value=nudge_mcp.LEGACY_KEYS_END - timedelta(days=30)):
+            self.assertFalse(Settings.create({}).nudge_mcp_legacy_keys)
+            self.make_key(self.agent)
+            settings = Settings.create({})
+            self.assertTrue(settings.nudge_mcp_legacy_keys)
+            self.assertEqual(settings.nudge_mcp_legacy_keys_end, nudge_mcp.LEGACY_KEYS_END)
+        # From the end date the keys are dead: nothing left to warn about
+        with patch.object(nudge_mcp, "today", return_value=nudge_mcp.LEGACY_KEYS_END):
+            self.assertFalse(Settings.create({}).nudge_mcp_legacy_keys)
 
     def test_expired_key(self):
         if "expiration_date" not in self.env["res.users.apikeys"]._fields:

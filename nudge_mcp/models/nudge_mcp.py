@@ -18,7 +18,7 @@ import json
 import logging
 import re
 import time
-from datetime import timedelta
+from datetime import date, datetime, timedelta, timezone
 
 from odoo import _, api, fields, models
 from psycopg2 import errors as pg_errors
@@ -76,6 +76,9 @@ SCOPE_DEVELOPER = "nudge.developer"
 SCOPES = (SCOPE_READ, SCOPE_WRITE, SCOPE_DEVELOPER)
 IMPLIED = {SCOPE_WRITE: {SCOPE_READ}, SCOPE_DEVELOPER: {SCOPE_READ}}
 LEGACY_SCOPES = (SCOPE_READ, SCOPE_WRITE)
+# The last day the keys of before OAuth (legacy) were a way in: from this date, by the UTC date of
+# the server, a call with one is refused and the assistant has to be connected with OAuth
+LEGACY_KEYS_END = date(2027, 1, 26)
 AUTH_CONTEXT = "nudge_mcp_auth"
 # The prompts of the company, when a module offers some (_mcp_prompts): the longest value of an argument
 MAX_PROMPT_ARGUMENT = 2000
@@ -110,6 +113,24 @@ def ordered(scopes):
 def legacy_auth():
     """What a key of before OAuth opens: reading and preparing changes, as it always did"""
     return {"legacy": True, "grant": False, "client": False, "client_name": False, "scopes": LEGACY_SCOPES}
+
+
+def today():
+    """:return: the UTC date of the server; the tests replace it to travel in time"""
+    return datetime.now(timezone.utc).date()
+
+
+def legacy_keys_ended():
+    """:return: whether the keys of before OAuth (legacy) no longer open anything"""
+    return today() >= LEGACY_KEYS_END
+
+
+def legacy_end_message(env):
+    """:return: what the person is told when a key of before is used after its end"""
+    return _(
+        "The keys made before ended on %s. Connect the assistant with OAuth: add the address of this "
+        "server as a connector in the assistant and sign in to Odoo (Settings, Nudge, How to Connect an "
+        "Assistant).", LEGACY_KEYS_END.isoformat())
 
 
 def error_response(message_id, code, text, data=None):

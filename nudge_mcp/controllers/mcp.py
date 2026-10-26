@@ -8,6 +8,7 @@ from odoo.tools import frozendict
 
 from ..models.nudge_mcp import (
     AUTH_CONTEXT, INVALID_REQUEST, PARSE_ERROR, InsufficientScope, clean_client, error_response, legacy_auth,
+    legacy_end_message, legacy_keys_ended,
 )
 from ..models.nudge_mcp_oauth import ACCESS_PREFIX
 
@@ -92,6 +93,10 @@ class NudgeMcpController(http.Controller):
             user, auth = OAuth._authenticate_access(key)
         elif scheme.lower() == "bearer":
             user, auth = Mcp._authenticate(key), legacy_auth()
+            if user and legacy_keys_ended():
+                # A right key, ended by date: told why, not counted as a wrong key
+                return _reply(error_response(None, -32001, legacy_end_message(env)), status=401,
+                              headers=[("WWW-Authenticate", OAuth._challenge(error="invalid_token"))])
         key_id = "" if is_token else key
         if not user:
             if _throttled(address, key_id):

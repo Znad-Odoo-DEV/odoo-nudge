@@ -1,6 +1,6 @@
-from odoo import fields, models
+from odoo import api, fields, models
 
-from .nudge_mcp import ENABLED_PARAM, EXPOSURE_PARAM, LOCAL_PARAM
+from .nudge_mcp import ENABLED_PARAM, EXPOSURE_PARAM, LEGACY_KEYS_END, LOCAL_PARAM, SCOPE, legacy_keys_ended
 from .nudge_mcp_oauth import REGISTRATION_PARAM
 
 
@@ -31,6 +31,21 @@ class ResConfigSettings(models.TransientModel):
         help="Claude and most assistants register themselves the first time someone connects them "
              "(dynamic client registration). A registration alone opens nothing: each person signs in "
              "and allows the assistant.")
+
+    nudge_mcp_legacy_keys = fields.Boolean(compute="_compute_nudge_mcp_legacy_keys")
+    nudge_mcp_legacy_keys_end = fields.Date(compute="_compute_nudge_mcp_legacy_keys")
+
+    @api.depends_context("uid")
+    def _compute_nudge_mcp_legacy_keys(self):
+        """Warns the administrator, until the keys of before OAuth end, while one of them is still alive"""
+        Keys = self.env["res.users.apikeys"].sudo()
+        domain = [("scope", "=", SCOPE)]
+        if "expiration_date" in Keys._fields:
+            domain += ["|", ("expiration_date", "=", False), ("expiration_date", ">", fields.Datetime.now())]
+        alive = not legacy_keys_ended() and bool(Keys.search_count(domain, limit=1))
+        for settings in self:
+            settings.nudge_mcp_legacy_keys = alive
+            settings.nudge_mcp_legacy_keys_end = LEGACY_KEYS_END
 
     def action_nudge_mcp_help(self):
         return self.env["nudge.mcp.help"].action_open()
