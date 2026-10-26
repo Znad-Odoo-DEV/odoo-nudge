@@ -55,6 +55,7 @@ from . import nudge_credential
 from . import nudge_prompt
 from . import nudge_built
 from . import nudge_latency
+from . import nudge_token_dashboard
 from . import nudge_slot
 from . import res_users_auditor
 from . import nudge_conversation_audit

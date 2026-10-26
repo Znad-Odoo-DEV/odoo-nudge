@@ -26294,3 +26294,129 @@ msgid ""
 msgstr ""
 "طلب من مساعد خارجي أو إجابة في تطبيق مراسلة: يُحتسب مكانه حتى ينتهي."
 
+
+#. module: nudge
+#: model:ir.actions.act_window,name:nudge.nudge_token_dashboard_action
+#: model:ir.ui.menu,name:nudge.nudge_menu_token_dashboard
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_token_dashboard_view_graph
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_token_dashboard_view_list
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_token_dashboard_view_pivot
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_token_dashboard_view_search
+msgid "Token Dashboard"
+msgstr "لوحة الرموز"
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_token_dashboard
+msgid "Nudge Token Dashboard"
+msgstr "لوحة رموز نودج"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_token_dashboard__role__user
+msgid "Nudge User"
+msgstr "مستخدم نودج"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_token_dashboard__role__admin
+msgid "Administrator"
+msgstr "مدير النظام"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_token_dashboard__source__ai
+msgid "AI Call"
+msgstr "طلب إلى الذكاء الاصطناعي"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_token_dashboard__source__other
+msgid "Other"
+msgstr "غير ذلك"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_token_dashboard__source
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_token_dashboard_view_search
+msgid "Answer Source"
+msgstr "مصدر الإجابة"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_token_dashboard__ai_answers
+msgid "Answers by AI"
+msgstr "إجابات بالذكاء الاصطناعي"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_token_dashboard__no_ai_answers
+msgid "Answers Without AI"
+msgstr "إجابات بلا ذكاء اصطناعي"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_token_dashboard_view_list
+msgid "Without AI"
+msgstr "بلا ذكاء اصطناعي"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_token_dashboard_view_list
+msgid "Cache Read"
+msgstr "قراءة من الذاكرة المؤقتة"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_token_dashboard_view_list
+msgid "Cache Write"
+msgstr "كتابة في الذاكرة المؤقتة"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_token_dashboard_view_search
+msgid "Nudge Users"
+msgstr "مستخدمو نودج"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_token_dashboard_view_search
+msgid "Agent Users"
+msgstr "مستخدمو الوكيل"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_token_dashboard_view_search
+msgid "Managers"
+msgstr "المديرون"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_token_dashboard_view_search
+msgid "Administrators"
+msgstr "مديرو النظام"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_token_dashboard_view_search
+msgid "Week"
+msgstr "الأسبوع"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_token_dashboard__role
+msgid "The highest Nudge role the person holds."
+msgstr "أعلى دور في نودج يشغله الشخص."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_token_dashboard__answers
+msgid "Answers: calls to a provider and answers given without one."
+msgstr "الإجابات: الطلبات إلى المزوّد والإجابات المعطاة دون مزوّد."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_token_dashboard__no_ai_answers
+msgid "Remembered, cached or understood without any AI."
+msgstr "إجابات محفوظة أو من الذاكرة المؤقتة أو مفهومة دون أي ذكاء اصطناعي."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_token_dashboard__tool_calls
+msgid "Tools the model called in these answers."
+msgstr "الأدوات التي استدعاها النموذج في هذه الإجابات."
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_token_dashboard_action
+msgid ""
+"The tokens Nudge used, by mode, role, provider and where the answer came "
+"from (a call to an AI, a remembered answer, the answer cache, or understood "
+"without any AI). Tokens read from the provider's cache and answers that "
+"needed no AI are what saves money. Only numbers are read here, never the "
+"text of a message."
+msgstr ""
+"الرموز التي استخدمها نودج، بحسب الوضع والدور والمزوّد ومصدر الإجابة (طلب "
+"إلى الذكاء الاصطناعي أو إجابة محفوظة أو الذاكرة المؤقتة للإجابات أو مفهومة "
+"دون ذكاء اصطناعي). الرموز المقروءة من ذاكرة المزوّد المؤقتة والإجابات التي "
+"لم تحتج إلى ذكاء اصطناعي هي ما يوفّر المال. تُقرأ هنا الأرقام فقط، لا نص "
+"أي رسالة."

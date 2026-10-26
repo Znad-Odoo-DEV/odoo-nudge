@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_token_dashboard_rule_company" model="ir.rule">
+        <field name="name">Nudge Token Dashboard: companies of the manager</field>
+        <field name="model_id" ref="model_nudge_token_dashboard"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[Command.link(ref('nudge.group_nudge_manager'))]"/>
+    </record>
+</odoo>

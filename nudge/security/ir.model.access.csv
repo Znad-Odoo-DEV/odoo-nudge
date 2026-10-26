@@ -90,3 +90,4 @@ access_nudge_request_size_manager,nudge.request.size manager,model_nudge_request
 access_nudge_request_size_line_manager,nudge.request.size.line manager,model_nudge_request_size_line,group_nudge_manager,1,1,1,1
 access_nudge_search_try_manager,nudge.search.try manager,model_nudge_search_try,group_nudge_manager,1,1,1,1
 access_nudge_search_try_line_manager,nudge.search.try.line manager,model_nudge_search_try_line,group_nudge_manager,1,1,1,1
+access_nudge_token_dashboard_manager,nudge.token.dashboard manager,model_nudge_token_dashboard,group_nudge_manager,1,0,0,0
