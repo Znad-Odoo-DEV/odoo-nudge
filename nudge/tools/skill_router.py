@@ -65,6 +65,9 @@ CONFIDENT = 9.0
 MAX_RANKED = 24
 # Skills the index of a call lists: those the question scored best for, and those already loaded
 INDEX_MAX = 8
+# The index of a call lists a skill only when the question scored at least this (measured on the test sentences:
+# 98% of the skills they want are above it, about 70% of the others are not)
+INDEX_FLOOR = 2.0
 MAX_QUERY = 500
 MAX_CACHED = 12
 MAX_MISSES = 100
@@ -511,10 +514,11 @@ def route(index, text, model=None, screen=None, limit=2, engine=None, layers=LAY
 
 def offered(choice, keep, limit=INDEX_MAX):
     """:return: the keys the index of a call lists: ``keep`` (the skills given or kept in the conversation)
-    first, then the best scored for the question, at most ``limit`` (more when ``keep`` is longer)"""
+    first, then the best scored for the question above ``INDEX_FLOOR``, at most ``limit`` (more when ``keep``
+    is longer): a question no skill is near lists none"""
     shown = list(dict.fromkeys(keep))
-    for key, _score in choice.ranked:
-        if len(shown) >= max(limit, len(keep)):
+    for key, score in choice.ranked:
+        if len(shown) >= max(limit, len(keep)) or score < INDEX_FLOOR:
             break
         if key not in shown:
             shown.append(key)
