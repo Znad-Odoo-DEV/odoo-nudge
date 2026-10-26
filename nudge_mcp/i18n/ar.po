@@ -1752,3 +1752,13 @@ msgstr ""
 "                        اربط كل مساعد عبر OAuth بدلًا منها: أضف عنوان هذا الخادم كموصّل\n"
 "                        في المساعد وسجّل دخولك إلى أودو (كيف تربط مساعدًا، أدناه).\n"
 "                        ثم احذف المفاتيح القديمة من أمان الحساب لكل شخص."
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_res_config_settings__nudge_mcp_legacy_keys
+msgid "Nudge Mcp Legacy Keys"
+msgstr "مفاتيح Nudge Mcp القديمة"
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_res_config_settings__nudge_mcp_legacy_keys_end
+msgid "Nudge Mcp Legacy Keys End"
+msgstr "نهاية مفاتيح Nudge Mcp القديمة"

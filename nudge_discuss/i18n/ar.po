@@ -181,3 +181,8 @@ msgstr "الموضوع: %(subject)s"
 #: model:ir.model,name:nudge_discuss.model_discuss_channel
 msgid "Discussion Channel"
 msgstr "قناة النقاش"
+
+#. module: nudge_discuss
+#: model:ir.model.fields.selection,name:nudge_discuss.selection__nudge_mention__state__answering
+msgid "Answering"
+msgstr "جارٍ الرد"

@@ -2383,3 +2383,23 @@ msgid ""
 msgstr ""
 "لا يوجد موقع بناه منشئ المواقع يطابق ذلك. site_id هو رقم الموقع و website_id "
 "رقم موقعه الإلكتروني. المواقع: %(sites)s."
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "<span class=\"flex-grow-1\">All pages of this site are published and its home page is the home page of the website.</span>"
+msgstr "<span class=\"flex-grow-1\">جميع صفحات هذا الموقع منشورة وصفحته الرئيسية هي الصفحة الرئيسية للموقع الإلكتروني.</span>"
+
+#. module: nudge_builder
+#: model:ir.model.fields,help:nudge_builder.field_nudge_builder_revision__before
+msgid "What the change replaced."
+msgstr "ما استبدله التغيير."
+
+#. module: nudge_builder
+#: model:ir.model.fields,help:nudge_builder.field_nudge_builder_revision__after
+msgid "What the change wrote: the fingerprint an undo checks first."
+msgstr "ما كتبه التغيير: البصمة التي يفحصها التراجع أولًا."
+
+#. module: nudge_builder
+#: model:ir.model.fields,help:nudge_builder.field_nudge_builder_revision__name
+msgid "What was changed, in one line."
+msgstr "ما الذي تغيّر، في سطر واحد."
