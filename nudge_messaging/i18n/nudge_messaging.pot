@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-17 17:02+0000\n"
-"PO-Revision-Date: 2026-10-17 17:02+0000\n"
+"POT-Creation-Date: 2026-10-26 12:20+0000\n"
+"PO-Revision-Date: 2026-10-26 12:20+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -35,8 +35,27 @@ msgid "A message is taken once."
 msgstr ""
 
 #. module: nudge_messaging
+#: model_terms:ir.actions.act_window,help:nudge_messaging.nudge_messaging_link_action
+msgid ""
+"A user links a phone number from their Nudge preferences: the link is listed"
+" here."
+msgstr ""
+
+#. module: nudge_messaging
 #: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_link__active
 msgid "Active"
+msgstr ""
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+#: code:addons/nudge_messaging/models/nudge_step.py:0
+msgid "Agent mode is not open to you. Ask your administrator."
+msgstr ""
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_res_config_settings__nudge_msg_allow_private
+msgid "Allow Messaging in Private Mode"
 msgstr ""
 
 #. module: nudge_messaging
@@ -228,9 +247,22 @@ msgid "ID"
 msgstr ""
 
 #. module: nudge_messaging
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.res_config_settings_view_form_messaging
+msgid ""
+"In private mode no company data goes to outside AI. A chat answer still "
+"travels through WhatsApp or Telegram, so by default the channel is closed "
+"while private mode is on."
+msgstr ""
+
+#. module: nudge_messaging
 #. odoo-python
 #: code:addons/nudge_messaging/models/nudge_step.py:0
 msgid "It could not be done: %s"
+msgstr ""
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_res_config_settings__nudge_msg_retention_days
+msgid "Keep the Message Log (Days)"
 msgstr ""
 
 #. module: nudge_messaging
@@ -304,6 +336,11 @@ msgid "No converter for voice notes on this server."
 msgstr ""
 
 #. module: nudge_messaging
+#: model_terms:ir.actions.act_window,help:nudge_messaging.nudge_messaging_link_action
+msgid "No phone linked yet"
+msgstr ""
+
+#. module: nudge_messaging
 #: model_terms:ir.actions.act_window,help:nudge_messaging.nudge_step_action_messaging_approvals
 msgid "Nothing waits for you"
 msgstr ""
@@ -346,6 +383,11 @@ msgid "Nudge Messaging Log"
 msgstr ""
 
 #. module: nudge_messaging
+#: model:ir.actions.server,name:nudge_messaging.cron_answer_ir_actions_server
+msgid "Nudge Messaging: answer the messages that wait"
+msgstr ""
+
+#. module: nudge_messaging
 #: model:ir.model.fields,field_description:nudge_messaging.field_res_config_settings__nudge_msg_telegram_keys_set
 msgid "Nudge Msg Telegram Keys Set"
 msgstr ""
@@ -356,9 +398,27 @@ msgid "Nudge Msg Whatsapp Keys Set"
 msgstr ""
 
 #. module: nudge_messaging
+#: model:ir.actions.server,name:nudge_messaging.ir_cron_nudge_messaging_purge_ir_actions_server
+msgid "Nudge messaging: forget the log after 90 days"
+msgstr ""
+
+#. module: nudge_messaging
+#: model:ir.model.fields,help:nudge_messaging.field_res_config_settings__nudge_msg_retention_days
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.res_config_settings_view_form_messaging
+msgid ""
+"Older lines of the log of received messages are deleted. The limit per "
+"sender and the check against a repeated message need only a few hours of it."
+msgstr ""
+
+#. module: nudge_messaging
 #. odoo-python
 #: code:addons/nudge_messaging/models/nudge_messaging.py:0
 msgid "Open in Odoo"
+msgstr ""
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_message__payload
+msgid "Payload"
 msgstr ""
 
 #. module: nudge_messaging
@@ -414,6 +474,20 @@ msgstr ""
 #. module: nudge_messaging
 #. odoo-python
 #: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "Private mode is on: this channel carries no company data."
+msgstr ""
+
+#. module: nudge_messaging
+#: model:ir.model.fields,help:nudge_messaging.field_res_config_settings__nudge_msg_allow_private
+msgid ""
+"Private mode keeps company data from outside AI, but a chat answer travels "
+"through the servers of WhatsApp or Telegram. Off: in private mode the "
+"channel answers only that it is closed."
+msgstr ""
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
 msgid ""
 "Reading a document needs the AI provider, which is not available now. Please"
 " send text."
@@ -454,6 +528,11 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge_messaging/models/nudge_messaging.py:0
 msgid "Something went wrong on the server. Try again in a moment."
+msgstr ""
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_message__started_at
+msgid "Started At"
 msgstr ""
 
 #. module: nudge_messaging
@@ -547,6 +626,12 @@ msgid "The file is too large."
 msgstr ""
 
 #. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging_api.py:0
+msgid "The file took too long to download."
+msgstr ""
+
+#. module: nudge_messaging
 #: model:ir.model.fields,help:nudge_messaging.field_res_config_settings__nudge_msg_whatsapp_phone_id
 msgid ""
 "The identifier of the business phone number in the WhatsApp Business Cloud "
@@ -576,6 +661,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge_messaging/models/nudge_messaging.py:0
 msgid "The voice note could not be converted."
+msgstr ""
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "The voice note is too long."
 msgstr ""
 
 #. module: nudge_messaging
@@ -611,6 +702,11 @@ msgstr ""
 #. module: nudge_messaging
 #: model:ir.model.fields.selection,name:nudge_messaging.selection__nudge_messaging_message__state__limited
 msgid "Too Many"
+msgstr ""
+
+#. module: nudge_messaging
+#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_message__tries
+msgid "Tries"
 msgstr ""
 
 #. module: nudge_messaging
@@ -688,6 +784,11 @@ msgid "WhatsApp Verify Token"
 msgstr ""
 
 #. module: nudge_messaging
+#: model:ir.model.fields,help:nudge_messaging.field_nudge_messaging_message__started_at
+msgid "When an answer was last begun: one that never ended is begun again."
+msgstr ""
+
+#. module: nudge_messaging
 #: model_terms:ir.actions.act_window,help:nudge_messaging.nudge_step_action_messaging_approvals
 msgid ""
 "When you ask Nudge for a change on WhatsApp or Telegram, it waits here until"
@@ -700,6 +801,11 @@ msgstr ""
 msgid ""
 "Without an AI provider I can count, sum and look up. For example: \"how many"
 " overdue invoices\", \"find Raghad\", \"create a task Call Ebrahim\"."
+msgstr ""
+
+#. module: nudge_messaging
+#: model:ir.model.fields.selection,name:nudge_messaging.selection__nudge_messaging_message__state__wrong_code
+msgid "Wrong Code"
 msgstr ""
 
 #. module: nudge_messaging
@@ -725,91 +831,4 @@ msgstr ""
 msgid ""
 "Your code: %(code)s. Send it as a message from your phone to the Nudge "
 "number on WhatsApp or to the Nudge bot on Telegram within 10 minutes."
-msgstr ""
-
-#. module: nudge_messaging
-#: model:ir.model.fields,field_description:nudge_messaging.field_res_config_settings__nudge_msg_allow_private
-msgid "Allow Messaging in Private Mode"
-msgstr ""
-
-#. module: nudge_messaging
-#: model_terms:ir.ui.view,arch_db:nudge_messaging.res_config_settings_view_form_messaging
-msgid ""
-"In private mode no company data goes to outside AI. A chat answer still "
-"travels through WhatsApp or Telegram, so by default the channel is closed "
-"while private mode is on."
-msgstr ""
-
-#. module: nudge_messaging
-#: model:ir.model.fields,field_description:nudge_messaging.field_res_config_settings__nudge_msg_retention_days
-msgid "Keep the Message Log (Days)"
-msgstr ""
-
-#. module: nudge_messaging
-#: model:ir.actions.server,name:nudge_messaging.cron_answer_ir_actions_server
-msgid "Nudge Messaging: answer the messages that wait"
-msgstr ""
-
-#. module: nudge_messaging
-#: model:ir.actions.server,name:nudge_messaging.ir_cron_nudge_messaging_purge_ir_actions_server
-msgid "Nudge messaging: forget the log after 90 days"
-msgstr ""
-
-#. module: nudge_messaging
-#: model:ir.model.fields,help:nudge_messaging.field_res_config_settings__nudge_msg_retention_days
-#: model_terms:ir.ui.view,arch_db:nudge_messaging.res_config_settings_view_form_messaging
-msgid ""
-"Older lines of the log of received messages are deleted. The limit per "
-"sender and the check against a repeated message need only a few hours of it."
-msgstr ""
-
-#. module: nudge_messaging
-#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_message__payload
-msgid "Payload"
-msgstr ""
-
-#. module: nudge_messaging
-#. odoo-python
-#: code:addons/nudge_messaging/models/nudge_messaging.py:0
-msgid "Private mode is on: this channel carries no company data."
-msgstr ""
-
-#. module: nudge_messaging
-#: model:ir.model.fields,help:nudge_messaging.field_res_config_settings__nudge_msg_allow_private
-msgid ""
-"Private mode keeps company data from outside AI, but a chat answer travels "
-"through the servers of WhatsApp or Telegram. Off: in private mode the "
-"channel answers only that it is closed."
-msgstr ""
-
-#. module: nudge_messaging
-#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_message__started_at
-msgid "Started At"
-msgstr ""
-
-#. module: nudge_messaging
-#. odoo-python
-#: code:addons/nudge_messaging/models/nudge_messaging_api.py:0
-msgid "The file took too long to download."
-msgstr ""
-
-#. module: nudge_messaging
-#. odoo-python
-#: code:addons/nudge_messaging/models/nudge_messaging.py:0
-msgid "The voice note is too long."
-msgstr ""
-
-#. module: nudge_messaging
-#: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_message__tries
-msgid "Tries"
-msgstr ""
-
-#. module: nudge_messaging
-#: model:ir.model.fields,help:nudge_messaging.field_nudge_messaging_message__started_at
-msgid "When an answer was last begun: one that never ended is begun again."
-msgstr ""
-
-#. module: nudge_messaging
-#: model:ir.model.fields.selection,name:nudge_messaging.selection__nudge_messaging_message__state__wrong_code
-msgid "Wrong Code"
 msgstr ""

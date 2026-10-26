@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-17 17:02+0000\n"
-"PO-Revision-Date: 2026-10-17 17:02+0000\n"
+"POT-Creation-Date: 2026-10-26 12:20+0000\n"
+"PO-Revision-Date: 2026-10-26 12:20+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -287,11 +287,17 @@ msgid "Decided By"
 msgstr ""
 
 #. module: nudge_mail
+#: model:nudge.skill,name:nudge_mail.skill_designed_emails
+msgid "Designed emails"
+msgstr ""
+
+#. module: nudge_mail
 #: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_email_review_view_form
 msgid "Discard"
 msgstr ""
 
 #. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_mail_thread__display_name
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__display_name
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__display_name
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__display_name
@@ -319,6 +325,11 @@ msgstr ""
 #. module: nudge_mail
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__template_id
 msgid "Email Template"
+msgstr ""
+
+#. module: nudge_mail
+#: model:ir.model,name:nudge_mail.model_mail_thread
+msgid "Email Thread"
 msgstr ""
 
 #. module: nudge_mail
@@ -424,6 +435,7 @@ msgid "Has Message"
 msgstr ""
 
 #. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_mail_thread__id
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__id
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_review__id
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__id
@@ -474,6 +486,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
 msgid "It asks for a quotation or prices"
+msgstr ""
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
+msgid "It could not be classified"
 msgstr ""
 
 #. module: nudge_mail
@@ -553,6 +571,12 @@ msgstr ""
 #: model:ir.actions.act_window,name:nudge_mail.nudge_mail_proposal_action
 #: model:ir.ui.menu,name:nudge_mail.nudge_mail_menu_proposals
 msgid "Mail Proposals"
+msgstr ""
+
+#. module: nudge_mail
+#. odoo-python
+#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
+msgid "Mail reaches the agent through the mailbox only."
 msgstr ""
 
 #. module: nudge_mail
@@ -654,6 +678,11 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge_mail/tools/emails.py:0
 msgid "Not written to"
+msgstr ""
+
+#. module: nudge_mail
+#: model_terms:ir.actions.act_window,help:nudge_mail.nudge_mail_rule_action
+msgid "Nothing learned yet"
 msgstr ""
 
 #. module: nudge_mail
@@ -846,6 +875,11 @@ msgid "Sender Address"
 msgstr ""
 
 #. module: nudge_mail
+#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__sender_verified
+msgid "Sender Verified"
+msgstr ""
+
+#. module: nudge_mail
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_email_flow__action_id
 msgid "Server Action"
 msgstr ""
@@ -976,6 +1010,13 @@ msgid ""
 msgstr ""
 
 #. module: nudge_mail
+#: model:ir.model.fields,help:nudge_mail.field_nudge_mail_proposal__sender_verified
+msgid ""
+"The receiving server vouched for the sender (DKIM, SPF or DMARC). Without it"
+" anybody can write any name in the From line."
+msgstr ""
+
+#. module: nudge_mail
 #. odoo-python
 #: code:addons/nudge_mail/models/nudge_email_review.py:0
 msgid "The record of this email is gone."
@@ -1086,6 +1127,13 @@ msgid ""
 msgstr ""
 
 #. module: nudge_mail
+#: model_terms:ir.actions.act_window,help:nudge_mail.nudge_mail_rule_action
+msgid ""
+"When you correct how the Mail Agent sorts a message, the rule it learned is "
+"listed here."
+msgstr ""
+
+#. module: nudge_mail
 #: model:ir.model.fields,help:nudge_mail.field_nudge_mail_proposal__taught_kind
 msgid ""
 "When you reject, Nudge learns that this sender (or domain) is this kind, and"
@@ -1187,6 +1235,12 @@ msgstr ""
 
 #. module: nudge_mail
 #. odoo-python
+#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
+msgid "sender not verified"
+msgstr ""
+
+#. module: nudge_mail
+#. odoo-python
 #: code:addons/nudge_mail/tools/emails.py:0
 msgid "sends the email"
 msgstr ""
@@ -1207,39 +1261,4 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge_mail/tools/emails.py:0
 msgid "“%s”"
-msgstr ""
-
-#. module: nudge_mail
-#: model:ir.model,name:nudge_mail.model_mail_thread
-msgid "Email Thread"
-msgstr ""
-
-#. module: nudge_mail
-#. odoo-python
-#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
-msgid "It could not be classified"
-msgstr ""
-
-#. module: nudge_mail
-#. odoo-python
-#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
-msgid "Mail reaches the agent through the mailbox only."
-msgstr ""
-
-#. module: nudge_mail
-#: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__sender_verified
-msgid "Sender Verified"
-msgstr ""
-
-#. module: nudge_mail
-#: model:ir.model.fields,help:nudge_mail.field_nudge_mail_proposal__sender_verified
-msgid ""
-"The receiving server vouched for the sender (DKIM, SPF or DMARC). Without it"
-" anybody can write any name in the From line."
-msgstr ""
-
-#. module: nudge_mail
-#. odoo-python
-#: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
-msgid "sender not verified"
 msgstr ""

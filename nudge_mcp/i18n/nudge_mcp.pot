@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 05:50+0000\n"
-"PO-Revision-Date: 2026-10-24 05:50+0000\n"
+"POT-Creation-Date: 2026-10-26 12:20+0000\n"
+"PO-Revision-Date: 2026-10-26 12:20+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -25,6 +25,15 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge_mcp/models/nudge_mcp_oauth.py:0
 msgid "%(uri)s: %(error)s"
+msgstr ""
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.res_config_settings_view_form_mcp
+msgid ""
+".\n"
+"                        Connect each assistant with OAuth instead: add the address of this server as a\n"
+"                        connector in the assistant and sign in to Odoo (How to Connect an Assistant, below).\n"
+"                        Then delete the old keys in each person's Account Security."
 msgstr ""
 
 #. module: nudge_mcp
@@ -67,6 +76,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge_mcp/models/nudge_mcp.py:0
 msgid "A tool call needs a name and its arguments as an object."
+msgstr ""
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.res_config_settings_view_form_mcp
+msgid ""
+"API keys made for assistants before the sign-in with OAuth stop working on"
 msgstr ""
 
 #. module: nudge_mcp
@@ -832,6 +847,16 @@ msgid "Nudge MCP Sign-in"
 msgstr ""
 
 #. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_res_config_settings__nudge_mcp_legacy_keys
+msgid "Nudge Mcp Legacy Keys"
+msgstr ""
+
+#. module: nudge_mcp
+#: model:ir.model.fields,field_description:nudge_mcp.field_res_config_settings__nudge_mcp_legacy_keys_end
+msgid "Nudge Mcp Legacy Keys End"
+msgstr ""
+
+#. module: nudge_mcp
 #: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_help_view_form
 msgid ""
 "Nudge is closed to external assistants. An administrator turns it on in\n"
@@ -1278,6 +1303,15 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge_mcp/controllers/mcp.py:0
 msgid "The key is missing or not valid."
+msgstr ""
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid ""
+"The keys made before ended on %s. Connect the assistant with OAuth: add the "
+"address of this server as a connector in the assistant and sign in to Odoo "
+"(Settings, Nudge, How to Connect an Assistant)."
 msgstr ""
 
 #. module: nudge_mcp
