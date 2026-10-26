@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-17 17:02+0000\n"
-"PO-Revision-Date: 2026-10-17 17:02+0000\n"
+"POT-Creation-Date: 2026-10-26 12:20+0000\n"
+"PO-Revision-Date: 2026-10-26 12:20+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -26,6 +26,13 @@ msgstr ""
 msgid ""
 "<span class=\"o_nudge_web_failed\" hidden=\"hidden\">Sorry, something went "
 "wrong. Please try again.</span>"
+msgstr ""
+
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.assistant_bubble
+msgid ""
+"<span>Answers are written by an AI service: what you write here is sent to "
+"it. Please do not share passwords or card numbers.</span>"
 msgstr ""
 
 #. module: nudge_website
@@ -154,6 +161,13 @@ msgid "Display Name"
 msgstr ""
 
 #. module: nudge_website
+#: model_terms:ir.actions.act_window,help:nudge_website.nudge_usage_website_action
+msgid ""
+"Every call the website assistant makes to an AI provider is written here, "
+"with its tokens and its cost."
+msgstr ""
+
+#. module: nudge_website
 #: model:ir.model.fields,field_description:nudge_website.field_res_config_settings__nudge_greeting
 #: model:ir.model.fields,field_description:nudge_website.field_website__nudge_greeting
 msgid "Greeting"
@@ -253,6 +267,16 @@ msgid "Minutes"
 msgstr ""
 
 #. module: nudge_website
+#: model_terms:ir.actions.act_window,help:nudge_website.nudge_web_message_action
+msgid "No visitor question yet"
+msgstr ""
+
+#. module: nudge_website
+#: model_terms:ir.actions.act_window,help:nudge_website.nudge_usage_website_action
+msgid "Nothing spent by the website assistant yet"
+msgstr ""
+
+#. module: nudge_website
 #: model:ir.model,name:nudge_website.model_nudge_source
 msgid "Nudge Company File"
 msgstr ""
@@ -308,6 +332,17 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge_website/controllers/main.py:0
 msgid "Please write your question."
+msgstr ""
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_res_config_settings__nudge_privacy_url
+#: model:ir.model.fields,field_description:nudge_website.field_website__nudge_privacy_url
+msgid "Privacy Policy Link"
+msgstr ""
+
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.assistant_bubble
+msgid "Privacy policy"
 msgstr ""
 
 #. module: nudge_website
@@ -395,6 +430,21 @@ msgstr ""
 #: model:ir.model.fields,help:nudge_website.field_website__nudge_greeting
 msgid ""
 "The first line of the bubble. Empty: a line that says what it can answer."
+msgstr ""
+
+#. module: nudge_website
+#: model:ir.model.fields,help:nudge_website.field_res_config_settings__nudge_privacy_url
+#: model:ir.model.fields,help:nudge_website.field_website__nudge_privacy_url
+msgid ""
+"The page of your privacy policy. The notice under the greeting links to it. "
+"A full address starting with http:// or https://, or a path starting with /."
+msgstr ""
+
+#. module: nudge_website
+#. odoo-python
+#: code:addons/nudge_website/models/website.py:0
+msgid ""
+"The privacy policy link must start with http://, https:// or a single /."
 msgstr ""
 
 #. module: nudge_website
@@ -499,6 +549,11 @@ msgid "What the assistant said; it builds the conversation of a request."
 msgstr ""
 
 #. module: nudge_website
+#: model_terms:ir.actions.act_window,help:nudge_website.nudge_web_message_action
+msgid "What visitors ask the website assistant is listed here."
+msgstr ""
+
+#. module: nudge_website
 #: model:ir.model.fields,help:nudge_website.field_res_company__nudge_web_keep_days
 #: model:ir.model.fields,help:nudge_website.field_res_config_settings__nudge_web_keep_days
 msgid ""
@@ -538,4 +593,9 @@ msgstr ""
 #. module: nudge_website
 #: model_terms:ir.ui.view,arch_db:nudge_website.assistant_bubble
 msgid "Your name"
+msgstr ""
+
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.res_config_settings_view_form_website
+msgid "https://example.com/privacy"
 msgstr ""

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-17 17:02+0000\n"
-"PO-Revision-Date: 2026-10-17 17:02+0000\n"
+"POT-Creation-Date: 2026-10-26 12:20+0000\n"
+"PO-Revision-Date: 2026-10-26 12:20+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -43,6 +43,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge_builder/tools/checks.py:0
 msgid "%(page)s: “%(text)s”"
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "%(snippet)s is not one of the sections the builder knows: %(known)s."
 msgstr ""
 
 #. module: nudge_builder
@@ -103,6 +109,18 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge_builder/tools/shop.py:0
 msgid "%s more are left for a next run."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "%s must be a colour like #1f3a5f."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "%s must be a font name: letters, digits, spaces."
 msgstr ""
 
 #. module: nudge_builder
@@ -234,6 +252,30 @@ msgstr ""
 
 #. module: nudge_builder
 #. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_revision.py:0
+msgid "%s was changed since and keeps its state."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "%s: after"
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "%s: before"
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "(empty)"
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
 #: code:addons/nudge_builder/models/nudge_builder_check.py:0
 msgid "... and %s more"
 msgstr ""
@@ -275,6 +317,13 @@ msgid "6. Tone"
 msgstr ""
 
 #. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid ""
+"<span class=\"flex-grow-1\">All pages of this site are published and its "
+"home page is the home page of the website.</span>"
+msgstr ""
+
+#. module: nudge_builder
 #: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_site__direction__a
 msgid "A"
 msgstr ""
@@ -292,6 +341,12 @@ msgid "A delivery method is available"
 msgstr ""
 
 #. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "A page keeps at least one section."
+msgstr ""
+
+#. module: nudge_builder
 #: model:ir.model.constraint,message:nudge_builder.constraint_nudge_builder_page_kind_key_unique
 msgid "A page kind has one key."
 msgstr ""
@@ -300,6 +355,14 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge_builder/tools/shop.py:0
 msgid "A payment provider is enabled"
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid ""
+"A picture must be one of the bundled ones (%s) or a /path or https:// "
+"address."
 msgstr ""
 
 #. module: nudge_builder
@@ -338,6 +401,19 @@ msgstr ""
 
 #. module: nudge_builder
 #. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "Add %(snippet)s to the page %(page)s"
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_revision__after
+msgid "After"
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
 #: code:addons/nudge_builder/tools/shop.py:0
 msgid "Already as proposed."
 msgstr ""
@@ -345,6 +421,12 @@ msgstr ""
 #. module: nudge_builder
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_run__external
 msgid "Also check external links"
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "Another site is being built on this website. Wait until it is done."
 msgstr ""
 
 #. module: nudge_builder
@@ -369,6 +451,11 @@ msgid "Arrange the shop too?"
 msgstr ""
 
 #. module: nudge_builder
+#: model_terms:ir.actions.act_window,help:nudge_builder.nudge_builder_action_sites
+msgid "Ask Nudge in Developer mode to build a website: it appears here."
+msgstr ""
+
+#. module: nudge_builder
 #: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_site__direction__b
 msgid "B"
 msgstr ""
@@ -386,6 +473,13 @@ msgid "Back to the site"
 msgstr ""
 
 #. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_revision__before
+msgid "Before"
+msgstr ""
+
+#. module: nudge_builder
 #: model:nudge.builder.page.kind,name:nudge_builder.kind_blog
 msgid "Blog / News"
 msgstr ""
@@ -397,6 +491,12 @@ msgid "Build the site first."
 msgstr ""
 
 #. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "Build the website %s"
+msgstr ""
+
+#. module: nudge_builder
 #: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
 msgid "Build this website"
 msgstr ""
@@ -405,6 +505,11 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge_builder/models/nudge_builder_site.py:0
 msgid "Building a website needs the Website Designer right."
+msgstr ""
+
+#. module: nudge_builder
+#: model:nudge.skill,name:nudge_builder.skill_website_builder
+msgid "Building a website or shop"
 msgstr ""
 
 #. module: nudge_builder
@@ -450,6 +555,36 @@ msgid "Cancel"
 msgstr ""
 
 #. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+msgid "Change"
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "Change the %(what)s of the page %(page)s"
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+msgid "Change the SEO of the page %s"
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "Change the texts or picture of section %(n)s (%(name)s) of %(page)s"
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+msgid "Changed"
+msgstr ""
+
+#. module: nudge_builder
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_fix__lines
 msgid "Changes"
 msgstr ""
@@ -457,6 +592,11 @@ msgstr ""
 #. module: nudge_builder
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_fix__changes_json
 msgid "Changes Json"
+msgstr ""
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "Changes after the build"
 msgstr ""
 
 #. module: nudge_builder
@@ -531,6 +671,9 @@ msgstr ""
 
 #. module: nudge_builder
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check__company_id
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__company_id
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__company_id
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_revision__company_id
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__company_id
 msgid "Company"
 msgstr ""
@@ -580,6 +723,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_run__create_uid
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__create_uid
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page_kind__create_uid
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_revision__create_uid
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_shop_confirm__create_uid
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__create_uid
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_template__create_uid
@@ -593,6 +737,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_run__create_date
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__create_date
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page_kind__create_date
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_revision__create_date
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_shop_confirm__create_date
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__create_date
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_template__create_date
@@ -667,6 +812,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_run__display_name
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__display_name
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page_kind__display_name
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_revision__display_name
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_shop_confirm__display_name
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__display_name
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_template__display_name
@@ -677,6 +823,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge_builder/models/nudge_builder_check.py:0
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_fix__done
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_revision__state__done
 msgid "Done"
 msgstr ""
 
@@ -684,6 +831,11 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge_builder/models/nudge_builder_site.py:0
 msgid "Done: nothing is published yet."
+msgstr ""
+
+#. module: nudge_builder
+#: model_terms:ir.actions.act_window,help:nudge_builder.nudge_builder_check_action
+msgid "Each check of a built site is kept here with what it found."
 msgstr ""
 
 #. module: nudge_builder
@@ -696,7 +848,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
 msgid ""
 "Every page of this site becomes visible to everybody, and its home page "
-"becomes the home page of the website. Continue?"
+"becomes the home page of the website. You can undo it afterwards. Continue?"
 msgstr ""
 
 #. module: nudge_builder
@@ -813,6 +965,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_run__id
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__id
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page_kind__id
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_revision__id
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_shop_confirm__id
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__id
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_template__id
@@ -854,6 +1007,7 @@ msgstr ""
 
 #. module: nudge_builder
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__kind
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_revision__kind
 msgid "Kind"
 msgstr ""
 
@@ -868,12 +1022,18 @@ msgid "Languages"
 msgstr ""
 
 #. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__last_publish_id
+msgid "Last Publish"
+msgstr ""
+
+#. module: nudge_builder
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check__write_uid
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__write_uid
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_fix__write_uid
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_run__write_uid
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__write_uid
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page_kind__write_uid
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_revision__write_uid
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_shop_confirm__write_uid
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__write_uid
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_template__write_uid
@@ -887,6 +1047,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_run__write_date
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__write_date
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page_kind__write_date
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_revision__write_date
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_shop_confirm__write_date
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__write_date
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_template__write_date
@@ -931,6 +1092,12 @@ msgstr ""
 
 #. module: nudge_builder
 #. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+msgid "Made"
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
 #: code:addons/nudge_builder/models/nudge_builder_site.py:0
 #: code:addons/nudge_builder/tools/shop.py:0
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__menu_id
@@ -956,8 +1123,15 @@ msgid "Model Name"
 msgstr ""
 
 #. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "Move section %(n)s (%(name)s) of %(page)s %(way)s"
+msgstr ""
+
+#. module: nudge_builder
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__name
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page_kind__name
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_revision__name
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__name
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_template__name
 msgid "Name"
@@ -1051,6 +1225,24 @@ msgid ""
 msgstr ""
 
 #. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+msgid ""
+"No site built by the Website Builder matches. site_id is the id of the site "
+"and website_id the id of its website. Sites: %(sites)s."
+msgstr ""
+
+#. module: nudge_builder
+#: model_terms:ir.actions.act_window,help:nudge_builder.nudge_builder_action_sites
+msgid "No site built yet"
+msgstr ""
+
+#. module: nudge_builder
+#: model_terms:ir.actions.act_window,help:nudge_builder.nudge_builder_check_action
+msgid "No site check yet"
+msgstr ""
+
+#. module: nudge_builder
 #: model:ir.model.fields,help:nudge_builder.field_nudge_builder_site__private
 msgid "No text or picture is written by an AI."
 msgstr ""
@@ -1097,6 +1289,11 @@ msgstr ""
 #. module: nudge_builder
 #: model:ir.model,name:nudge_builder.model_nudge_builder_page_kind
 msgid "Nudge Builder Page Kind"
+msgstr ""
+
+#. module: nudge_builder
+#: model:ir.model,name:nudge_builder.model_nudge_builder_revision
+msgid "Nudge Builder Revision"
 msgstr ""
 
 #. module: nudge_builder
@@ -1154,6 +1351,13 @@ msgid "Our best offers"
 msgstr ""
 
 #. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_revision__page_id
+msgid "Page"
+msgstr ""
+
+#. module: nudge_builder
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_template__page_count
 msgid "Page Count"
 msgstr ""
@@ -1201,6 +1405,12 @@ msgstr ""
 #. module: nudge_builder
 #: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
 msgid "Pick a direction"
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+msgid "Picture"
 msgstr ""
 
 #. module: nudge_builder
@@ -1263,6 +1473,11 @@ msgid "Promo banners"
 msgstr ""
 
 #. module: nudge_builder
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_revision__kind__publish
+msgid "Publish"
+msgstr ""
+
+#. module: nudge_builder
 #: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
 msgid "Publish all pages"
 msgstr ""
@@ -1271,6 +1486,17 @@ msgstr ""
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__is_published
 #: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_site__state__published
 msgid "Published"
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "Published %s pages"
+msgstr ""
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "Put the page back as it was before this change?"
 msgstr ""
 
 #. module: nudge_builder
@@ -1285,13 +1511,55 @@ msgid "Redraw the directions"
 msgstr ""
 
 #. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "Remove section %(n)s (%(name)s) from %(page)s"
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "Replace section %(n)s (%(name)s) of %(page)s with %(snippet)s"
+msgstr ""
+
+#. module: nudge_builder
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__report_id
 msgid "Report"
 msgstr ""
 
 #. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__revision_ids
+msgid "Revisions"
+msgstr ""
+
+#. module: nudge_builder
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check__user_id
 msgid "Run By"
+msgstr ""
+
+#. module: nudge_builder
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_revision__kind__seo
+msgid "SEO"
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__seo_description
+msgid "SEO description"
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "SEO keywords"
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__seo_title
+msgid "SEO title"
 msgstr ""
 
 #. module: nudge_builder
@@ -1301,8 +1569,37 @@ msgstr ""
 
 #. module: nudge_builder
 #. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "Say the new SEO title, description or keywords."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "Say what the new texts or picture are."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+msgid "Say which page."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "Say which section: its number on the page, from 1."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
 #: code:addons/nudge_builder/tools/checks.py:0
 msgid "Search engines (SEO)"
+msgstr ""
+
+#. module: nudge_builder
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_revision__kind__section
+msgid "Section"
 msgstr ""
 
 #. module: nudge_builder
@@ -1343,6 +1640,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge_builder/tools/shop.py:0
 msgid "Settings"
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+msgid "Several pages match %(text)s: %(names)s. Say which."
 msgstr ""
 
 #. module: nudge_builder
@@ -1429,6 +1732,7 @@ msgstr ""
 
 #. module: nudge_builder
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__site_id
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_revision__site_id
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_shop_confirm__site_id
 msgid "Site"
 msgstr ""
@@ -1469,6 +1773,7 @@ msgid "Speed"
 msgstr ""
 
 #. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_revision__state
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_site__state
 msgid "State"
 msgstr ""
@@ -1530,6 +1835,36 @@ msgstr ""
 
 #. module: nudge_builder
 #. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "That page does not belong to this site."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "That section is already the first."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "That section is already the last."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "The %(what)s is up to %(max)s characters; this one has %(n)s."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "The %s cannot be empty."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
 #: code:addons/nudge_builder/tools/shop.py:0
 msgid "The Delivery app is not installed."
 msgstr ""
@@ -1542,10 +1877,30 @@ msgstr ""
 
 #. module: nudge_builder
 #. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "The SEO of %s changed since you were shown this card; ask again."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_revision.py:0
+msgid ""
+"The SEO of the page %s was changed after this edit; undo is refused so that "
+"nothing newer is lost."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
 #: code:addons/nudge_builder/tools/shop.py:0
 msgid ""
 "The Website Sale app (eCommerce) is not installed: there is no shop to "
 "arrange."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "The build stopped on an error: look at the log of the site."
 msgstr ""
 
 #. module: nudge_builder
@@ -1568,8 +1923,47 @@ msgid "The header and footer layout was left as it is."
 msgstr ""
 
 #. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_revision.py:0
+msgid "The home page of the website was changed since and is left as it is."
+msgstr ""
+
+#. module: nudge_builder
 #: model:ir.model.fields,help:nudge_builder.field_nudge_builder_site__allow_projects
 msgid "The names of the projects are sent to the writer."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid ""
+"The page %(page)s has %(count)s sections; there is no number %(position)s."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "The page %s changed since you were shown this card; ask again."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "The page %s no longer exists on the website."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_revision.py:0
+msgid ""
+"The page %s was changed after this edit; undo is refused so that nothing "
+"newer is lost."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_revision.py:0
+msgid "The page of this change no longer exists."
 msgstr ""
 
 #. module: nudge_builder
@@ -1596,8 +1990,26 @@ msgid ""
 msgstr ""
 
 #. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+msgid "The site %(site)s has no page %(text)s. Its pages: %(names)s."
+msgstr ""
+
+#. module: nudge_builder
 #: model:ir.model.fields,help:nudge_builder.field_nudge_builder_page__snippet_keys
 msgid "The snippets of the page in order, separated by commas."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "The translation of %s was left as it was: its structure differs."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "The website %s is built. Nothing is published yet."
 msgstr ""
 
 #. module: nudge_builder
@@ -1615,6 +2027,24 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge_builder/models/nudge_builder_site.py:0
 msgid "Theme: colours and fonts"
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+msgid "There is no change to undo."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_revision.py:0
+msgid "There is no publish to undo."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+msgid "There is no site built by the Website Builder to edit."
 msgstr ""
 
 #. module: nudge_builder
@@ -1638,6 +2068,12 @@ msgstr ""
 
 #. module: nudge_builder
 #. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_revision.py:0
+msgid "This change was already undone."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
 #: code:addons/nudge_builder/models/nudge_builder_check.py:0
 msgid "This fix was applied already."
 msgstr ""
@@ -1646,6 +2082,24 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge_builder/tools/checks.py:0
 msgid "This is a draft: have it reviewed before publishing."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "This site has no language %s."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "This version of Odoo has no section %s."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "This version of Odoo has no such SEO field."
 msgstr ""
 
 #. module: nudge_builder
@@ -1695,9 +2149,44 @@ msgid "Translations"
 msgstr ""
 
 #. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "Undo"
+msgstr ""
+
+#. module: nudge_builder
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "Undo publish"
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+msgid "Undo: %s"
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tools/site_edit.py:0
+#: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_revision__state__undone
+msgid "Undone"
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_revision.py:0
+msgid "Undone: %s"
+msgstr ""
+
+#. module: nudge_builder
 #. odoo-python
 #: code:addons/nudge_builder/models/nudge_builder_site.py:0
 msgid "Unknown direction."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "Unknown edit %s."
 msgstr ""
 
 #. module: nudge_builder
@@ -1708,6 +2197,11 @@ msgstr ""
 #. module: nudge_builder
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_check_finding__urls_json
 msgid "Urls Json"
+msgstr ""
+
+#. module: nudge_builder
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_revision__user_id
+msgid "User"
 msgstr ""
 
 #. module: nudge_builder
@@ -1805,6 +2299,21 @@ msgid "What is your business?"
 msgstr ""
 
 #. module: nudge_builder
+#: model:ir.model.fields,help:nudge_builder.field_nudge_builder_revision__before
+msgid "What the change replaced."
+msgstr ""
+
+#. module: nudge_builder
+#: model:ir.model.fields,help:nudge_builder.field_nudge_builder_revision__after
+msgid "What the change wrote: the fingerprint an undo checks first."
+msgstr ""
+
+#. module: nudge_builder
+#: model:ir.model.fields,help:nudge_builder.field_nudge_builder_revision__name
+msgid "What was changed, in one line."
+msgstr ""
+
+#. module: nudge_builder
 #. odoo-python
 #: code:addons/nudge_builder/tools/checks.py:0
 msgid "Write the missing meta description from the first paragraph"
@@ -1817,8 +2326,20 @@ msgstr ""
 
 #. module: nudge_builder
 #. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "You may not edit the page %s."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
 #: code:addons/nudge_builder/tools/shop.py:0
 msgid "Your rights do not let you see this: ask an administrator."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "down"
 msgstr ""
 
 #. module: nudge_builder
@@ -1852,36 +2373,6 @@ msgstr ""
 
 #. module: nudge_builder
 #. odoo-python
-#: code:addons/nudge_builder/models/nudge_builder_site.py:0
-msgid "%s must be a colour like #1f3a5f."
-msgstr ""
-
-#. module: nudge_builder
-#. odoo-python
-#: code:addons/nudge_builder/models/nudge_builder_site.py:0
-msgid "%s must be a font name: letters, digits, spaces."
-msgstr ""
-
-#. module: nudge_builder
-#. odoo-python
-#: code:addons/nudge_builder/models/nudge_builder_site.py:0
-msgid "Another site is being built on this website. Wait until it is done."
-msgstr ""
-
-#. module: nudge_builder
-#. odoo-python
-#: code:addons/nudge_builder/models/nudge_builder_site.py:0
-msgid "Build the website %s"
-msgstr ""
-
-#. module: nudge_builder
-#. odoo-python
-#: code:addons/nudge_builder/models/nudge_builder_site.py:0
-msgid "The build stopped on an error: look at the log of the site."
-msgstr ""
-
-#. module: nudge_builder
-#. odoo-python
-#: code:addons/nudge_builder/models/nudge_builder_site.py:0
-msgid "The website %s is built. Nothing is published yet."
+#: code:addons/nudge_builder/models/nudge_builder_edit.py:0
+msgid "up"
 msgstr ""
