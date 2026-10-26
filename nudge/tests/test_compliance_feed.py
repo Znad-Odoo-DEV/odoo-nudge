@@ -253,6 +253,23 @@ class TestSignedFeed(TransactionCase):
                 self.Update._fetch()
             download.assert_not_called()
 
+    def test_use_the_nudge_feed_fills_the_address_and_the_publisher_key_without_fetching(self):
+        Parameter = self.env["ir.config_parameter"].sudo()
+        publisher = self.env.ref("nudge.recipe_publisher_nudge")
+        with patch(DOWNLOAD) as download:
+            self.env["res.config.settings"].with_user(self.admin).action_nudge_compliance_feed_use_nudge()
+            download.assert_not_called()
+        self.assertEqual(Parameter.get_param("nudge.compliance_feed_url"),
+                         "https://znad-odoo-dev.github.io/nudge/compliance/feed.json")
+        self.assertEqual(Parameter.get_param("nudge.compliance_feed_key"), publisher.public_key.strip())
+
+    def test_use_the_nudge_feed_is_refused_to_a_manager_who_is_not_a_system_administrator(self):
+        Parameter = self.env["ir.config_parameter"].sudo()
+        with self.assertRaises(AccessError):
+            self.env["res.config.settings"].with_user(self.manager).action_nudge_compliance_feed_use_nudge()
+        self.assertFalse(Parameter.get_param("nudge.compliance_feed_url"))
+        self.assertFalse(Parameter.get_param("nudge.compliance_feed_key"))
+
     def test_a_bad_signature_changes_nothing(self):
         with self.feed(self.signed(key=Ed25519PrivateKey.generate())):
             with self.assertRaises(UserError):
