@@ -72,6 +72,8 @@ Without them the rest works and the feature says what is missing.
         "views/nudge_answer_cache_views.xml",
         "data/nudge_answer_cache_cron.xml",
         "views/nudge_latency_menu.xml",
+        "security/nudge_token_dashboard_security.xml",
+        "views/nudge_token_dashboard_views.xml",
         "views/nudge_setup_wizard_menu.xml",
         "views/nudge_home_views.xml",
         "views/nudge_tour_views.xml",

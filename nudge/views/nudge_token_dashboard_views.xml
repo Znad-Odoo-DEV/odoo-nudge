@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_token_dashboard_view_list" model="ir.ui.view">
+        <field name="name">nudge.token.dashboard.view.list</field>
+        <field name="model">nudge.token.dashboard</field>
+        <field name="arch" type="xml">
+            <tree string="Token Dashboard" create="0" edit="0" delete="0">
+                <field name="date"/>
+                <field name="mode"/>
+                <field name="role"/>
+                <field name="source"/>
+                <field name="provider_id"/>
+                <field name="model_name" optional="hide"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                <field name="answers" sum="Answers"/>
+                <field name="no_ai_answers" sum="Without AI"/>
+                <field name="input_tokens" sum="Input" optional="show"/>
+                <field name="output_tokens" sum="Output" optional="show"/>
+                <field name="cache_read_tokens" sum="Cache Read" optional="show"/>
+                <field name="cache_write_tokens" sum="Cache Write" optional="hide"/>
+                <field name="tokens" sum="Tokens"/>
+                <field name="cost" sum="Cost"/>
+                <field name="tool_calls" sum="Tool Calls" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="nudge_token_dashboard_view_graph" model="ir.ui.view">
+        <field name="name">nudge.token.dashboard.view.graph</field>
+        <field name="model">nudge.token.dashboard</field>
+        <field name="arch" type="xml">
+            <graph string="Token Dashboard" type="bar" stacked="1">
+                <field name="date" interval="week"/>
+                <field name="mode"/>
+                <field name="tokens" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="nudge_token_dashboard_view_pivot" model="ir.ui.view">
+        <field name="name">nudge.token.dashboard.view.pivot</field>
+        <field name="model">nudge.token.dashboard</field>
+        <field name="arch" type="xml">
+            <pivot string="Token Dashboard">
+                <field name="mode" type="row"/>
+                <field name="date" interval="week" type="col"/>
+                <field name="answers" type="measure"/>
+                <field name="no_ai_answers" type="measure"/>
+                <field name="input_tokens" type="measure"/>
+                <field name="output_tokens" type="measure"/>
+                <field name="cache_read_tokens" type="measure"/>
+                <field name="cache_write_tokens" type="measure"/>
+                <field name="tokens" type="measure"/>
+                <field name="cost" type="measure"/>
+                <field name="tool_calls" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="nudge_token_dashboard_view_search" model="ir.ui.view">
+        <field name="name">nudge.token.dashboard.view.search</field>
+        <field name="model">nudge.token.dashboard</field>
+        <field name="arch" type="xml">
+            <search string="Token Dashboard">
+                <field name="provider_id"/>
+                <field name="model_name"/>
+                <filter name="last_30" string="Last 30 Days"
+                        domain="[('date', '&gt;=', (context_today() - relativedelta(days=30)).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter name="mode_talk" string="Talk" domain="[('mode', '=', 'talk')]"/>
+                <filter name="mode_agent" string="Agent" domain="[('mode', '=', 'agent')]"/>
+                <filter name="mode_dev" string="Developer" domain="[('mode', '=', 'dev')]"/>
+                <separator/>
+                <filter name="role_user" string="Nudge Users" domain="[('role', '=', 'user')]"/>
+                <filter name="role_agent" string="Agent Users" domain="[('role', '=', 'agent')]"/>
+                <filter name="role_manager" string="Managers" domain="[('role', '=', 'manager')]"/>
+                <filter name="role_admin" string="Administrators" domain="[('role', '=', 'admin')]"/>
+                <separator/>
+                <filter name="source_ai" string="AI Call" domain="[('source', '=', 'ai')]"/>
+                <filter name="source_noai" string="Without AI"
+                        domain="[('source', 'in', ('memory', 'cache', 'noai'))]"/>
+                <separator/>
+                <filter name="date" string="Date" date="date"/>
+                <group>
+                    <filter name="group_mode" string="Mode" context="{'group_by': 'mode'}"/>
+                    <filter name="group_role" string="Role" context="{'group_by': 'role'}"/>
+                    <filter name="group_source" string="Answer Source" context="{'group_by': 'source'}"/>
+                    <filter name="group_provider" string="Provider" context="{'group_by': 'provider_id'}"/>
+                    <filter name="group_model" string="Model" context="{'group_by': 'model_name'}"/>
+                    <filter name="group_company" string="Company" context="{'group_by': 'company_id'}"/>
+                    <filter name="group_week" string="Week" context="{'group_by': 'date:week'}"/>
+                    <filter name="group_day" string="Day" context="{'group_by': 'date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="nudge_token_dashboard_action" model="ir.actions.act_window">
+        <field name="name">Token Dashboard</field>
+        <field name="res_model">nudge.token.dashboard</field>
+        <field name="view_mode">graph,pivot,list</field>
+        <field name="context">{'search_default_last_30': 1, 'search_default_group_mode': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No answer to measure yet</p>
+            <p>The tokens Nudge used, by mode, role, provider and where the answer came from (a call to
+               an AI, a remembered answer, the answer cache, or understood without any AI). Tokens read
+               from the provider's cache and answers that needed no AI are what saves money. Only numbers
+               are read here, never the text of a message.</p>
+        </field>
+    </record>
+
+    <menuitem id="nudge_menu_token_dashboard" name="Token Dashboard" sequence="36"
+              parent="nudge_menu_root" action="nudge_token_dashboard_action"
+              groups="nudge.group_nudge_manager"/>
+</odoo>
