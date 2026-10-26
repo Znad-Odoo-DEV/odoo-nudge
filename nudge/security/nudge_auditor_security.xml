@@ -25,6 +25,14 @@
             <field name="groups" eval="[Command.link(ref('group_nudge_auditor'))]"/>
         </record>
 
+        <!-- Made by Nudge: the rule every user has lets a row with no company through, and the log had none at all -->
+        <record id="nudge_built_rule_auditor" model="ir.rule">
+            <field name="name">Nudge Made by Nudge: auditor, companies of the user</field>
+            <field name="model_id" ref="model_nudge_built"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[Command.link(ref('group_nudge_auditor'))]"/>
+        </record>
+
         <record id="nudge_built_log_rule_auditor" model="ir.rule">
             <field name="name">Nudge Made by Nudge Log: auditor, companies of the user</field>
             <field name="model_id" ref="model_nudge_built_log"/>
