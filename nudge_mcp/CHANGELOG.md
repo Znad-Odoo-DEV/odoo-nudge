@@ -1,5 +1,9 @@
 # Changelog of Nudge: MCP Server
 
+## 19.0.1.1.2 (unreleased)
+
+- STU-11: the keys made before the sign-in with OAuth (legacy) end on 2027-01-26 (`LEGACY_KEYS_END`, compared with the UTC date of the server). Until then they work as before; from that day a call with one is answered 401 with the reason and where to connect with OAuth, and is not counted as a wrong key. Until then, Settings, Nudge shows the administrator a warning while at least one live key of the scope `nudge_mcp` exists. A key still never confirms a change by itself.
+
 ## 19.0.1.1.0 (unreleased)
 
 - Review: the first tool call of a person counted nowhere against the stream cap: its log conversation was created by the request, not committed yet, so the mark written on another cursor found no row and the place was handed over at once. `_mark_call` now says whether it wrote the mark, and without one the place stays claimed, and counts, until the call ends. Its docstring says the call must not write the log's conversation after the mark (repeatable read refuses a row changed meanwhile).
