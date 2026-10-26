@@ -14,6 +14,7 @@ Current version: nudge 17.0.1.59.4, nudge_mcp 17.0.1.1.1, nudge_connect 17.0.1.0
 
 - Review: a very long line, or a line of unclosed marks, no longer freezes the tab (AUD-07). Every inline pattern scans a bounded span, the heading and table tests no longer backtrack on blanks, and an answer that streams is rendered at most every 50 ms and once per text.
 - Review: `tools.base.holds_outside()` tells whether a conversation holds text from outside: a file sent with a question, a record asked about with its mails (@Nudge), or what search_company_files, search_company_sources, document_to_record, the meeting tools or summarize_record_history read. nudge_connect asks before a connector read then (review ai #8).
+- Round 5: the place of a WhatsApp, Telegram or MCP call counts until the call ends (`_finish`), not only for the first 60 seconds (HANDOVER_SECONDS, the time a question of the panel has to commit), so a long answer no longer lets one more stream start past the cap; one person's long answer on a phone still counts as their answer. A worker that died leaves a place that expires once the server would have stopped it (its time limit on a request or a scheduled action, or the longest answer when that is later). New field `nudge.slot.is_channel` (schema change; review odoo-tech #6).
 
 ## 19.0.1.59.4 (unreleased)
 
