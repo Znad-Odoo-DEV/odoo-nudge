@@ -1,5 +1,5 @@
 from odoo import _, api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import AccessError, ValidationError
 
 from ..tools import base, validator
 from .nudge_conversation import (
@@ -8,6 +8,8 @@ from .nudge_conversation import (
 )
 from .nudge_provider import AGENT_PROVIDER_PARAM, DEFAULT_PROVIDER_PARAM, DEVELOPER_PROVIDER_PARAM
 from .nudge_voice import ENGINE_AUTO, ENGINE_BROWSER, ENGINE_PROVIDER, VOICE_ENGINE_PARAM, VOICE_PARAM
+
+NUDGE_COMPLIANCE_FEED_URL = "https://znad-odoo-dev.github.io/nudge/compliance/feed.json"
 
 
 class ResConfigSettings(models.TransientModel):
@@ -334,6 +336,20 @@ class ResConfigSettings(models.TransientModel):
         """Read the feed now (a system administrator, with the address and key as saved)
         :return: the list of the pack updates"""
         return self.env["nudge.compliance.update"].action_check_now()
+
+    def action_nudge_compliance_feed_use_nudge(self):
+        """Opt in to the feed Nudge publishes: fill its address and the key of the Nudge publisher (the one that
+        signs the skill catalogue). Nothing is fetched here; the daily cron or "Check the Feed Now" does that.
+        Only a system administrator may press it."""
+        if not self.env.is_superuser() and not self.env.user.has_group("base.group_system"):
+            raise AccessError(_("Only a system administrator sets the compliance feed."))
+        Parameter = self.env["ir.config_parameter"].sudo()
+        Parameter.set_param("nudge.compliance_feed_url", NUDGE_COMPLIANCE_FEED_URL)
+        publisher = self.env.ref("nudge.recipe_publisher_nudge", raise_if_not_found=False)
+        key = publisher.sudo().public_key if publisher else ""
+        if key and key.strip():
+            Parameter.set_param("nudge.compliance_feed_key", key.strip())
+        return False
 
     def action_nudge_compliance_feed_list(self):
         return self.env["ir.actions.actions"]._for_xml_id("nudge.nudge_compliance_update_action")

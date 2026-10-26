@@ -11,8 +11,9 @@ import binascii
 import json
 import re
 
-MAX_FEED_BYTES = 1024 * 1024
-MAX_PACKS = 30
+# A pack for every country there is, and room for its checks: the feed of Nudge holds 48 packs in 370 KB
+MAX_FEED_BYTES = 4 * 1024 * 1024
+MAX_PACKS = 300
 FORMAT = 1
 
 
