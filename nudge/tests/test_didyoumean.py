@@ -47,6 +47,14 @@ class TestDidYouMean(NudgeCase, TransactionCase):
         self.assertFalse([event for event in events if event["type"] in ("confirm", "waiting")], "A chip never executes")
         self.assertEqual(self.env["res.partner"].search_count([("name", "=", "Ebrahim Ali")]), before)
 
+    def test_the_chat_can_ask_whether_a_text_is_a_slip_before_it_asks_how(self):
+        # NP-05: "sales ordrs" got the choice of how first and its "Did you mean" only after
+        noai = self.env["nudge.noai"].with_user(self.raghad)
+        for slip in ("sales ordrs", "qoutations"):
+            self.assertTrue(noai.slip_offered(slip), slip)
+        for text in ("Thanks!", "First", "Once more", "", None, "sales ordrs " + "x" * 200):
+            self.assertFalse(noai.slip_offered(text), text)
+
     def test_the_chosen_sentence_is_understood_as_asked(self):
         _conversation, events = self.order(self.raghad, "creat contact Ebrahim Ali")
         sentence = self.commands_of(events)[0]["words"][0]
@@ -141,6 +149,23 @@ class TestCoverage(NudgeCase, TransactionCase):
         for sample in self.lines().mapped("sample"):
             self.assertNotIn("raghad@example.com", sample)
             self.assertNotIn("0501234567890", sample)
+
+    def test_a_common_word_is_not_proposed_nor_accepted_as_an_entry(self):
+        # NP-12: "Make entry" proposed "do" = open
+        self.missed("please do zorb the invoices", 4)
+        self.Coverage.with_user(self.manager).action_open()
+        line = self.lines().filtered(lambda one: one.sample == "please do zorb the invoices")
+        self.assertEqual(line.phrase, "zorb")
+        entries = self.env["nudge.lexicon.entry"].search_count([])
+        for word in ("do", "the", "Make", "show", "هل"):
+            with self.subTest(word=word):
+                line.with_user(self.manager).write({"phrase": word, "intent": "open"})
+                with self.assertRaises(UserError):
+                    line.with_user(self.manager).action_add_entry()
+        self.assertEqual(self.env["nudge.lexicon.entry"].search_count([]), entries)
+        # Several words are a phrase, not a generic word
+        line.with_user(self.manager).write({"phrase": "do zorb", "intent": "open"})
+        line.with_user(self.manager).action_add_entry()
 
     def test_an_entry_added_from_the_page_changes_the_next_parse(self):
         self.missed("please zorb the invoices", 4)

@@ -14,7 +14,7 @@ from odoo import api, fields, models
 from odoo.exceptions import AccessError, UserError
 
 from ..llm import fingerprint
-from ..tools import noai_commands
+from ..tools import noai_commands, skill_router
 from ..tools.noai_commands import grammar, normalise
 
 WINDOW_DAYS = 7
@@ -48,6 +48,14 @@ class NudgeCoverage(models.TransientModel):
             raise AccessError(self.env._("Only Nudge managers improve the words Nudge understands."))
 
     @api.model
+    def _too_generic(self, phrase):
+        """:return: whether ``phrase`` is one word that says nothing of the work (“do”, “the”, “make”): as a
+        command word it would turn most sentences into that command"""
+        words = normalise.tokenize(phrase)
+        return len(words) == 1 and (
+            words[0].raw.lower() in skill_router.STOP or words[0].norm in skill_router.STOP)
+
+    @api.model
     def _unknown_word(self, text):
         """:return: the first word of ``text`` that nothing in the lexicon explains, as written, or ''"""
         tokens = normalise.tokenize(text)
@@ -55,7 +63,8 @@ class NudgeCoverage(models.TransientModel):
             if span.cats or span.j - span.i != 1:
                 continue
             word = tokens[span.i].raw
-            if len(word) >= MIN_WORD_CHARS and not word.isdigit() and "@" not in word:
+            if (len(word) >= MIN_WORD_CHARS and not word.isdigit() and "@" not in word
+                    and not self._too_generic(word)):
                 return word
         return ""
 
@@ -124,6 +133,9 @@ class NudgeCoverage(models.TransientModel):
         phrase = " ".join((self.phrase or "").split())
         if not phrase or not self.intent:
             raise UserError(self.env._("Write the word and choose what it means."))
+        if self._too_generic(phrase):
+            raise UserError(self.env._(
+                "“%s” is too common a word to teach: write the word that only this request uses.", phrase))
         Entry = self.env["nudge.lexicon.entry"]
         key = normalise.phrase_key(phrase)
         known = Entry.search([("company_id", "=", self.company_id.id), ("intent", "=", self.intent)]).filtered(
