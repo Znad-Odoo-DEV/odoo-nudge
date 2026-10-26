@@ -231,6 +231,16 @@ DATA_TOOLS = frozenset({
     "summarize_record_history", "record_changes",
 })
 
+# The tools whose result is text from outside Odoo and its people: a file, a page of the web, a
+# mail. Once a conversation holds any of it, the model may be following what it says, and a tool
+# that sends words out of Odoo asks the person first (the reads of nudge_connect)
+OUTSIDE_TOOLS = frozenset({
+    "search_company_files", "search_company_sources", "document_to_record", "summarize_meeting",
+    "meeting_to_records", "summarize_record_history",
+})
+# The questions asked about a record with its mails (an @Nudge mention in the chatter)
+OUTSIDE_COMMANDS = ("mention",)
+
 TOOL_SETS = ("full", "essential")
 
 # What acts on the screen of the person: a run in the background has none
@@ -355,6 +365,23 @@ def as_data(name, content, is_error=False):
         return content
     content = content if isinstance(content, str) else str(content)
     return f'<data source="{name}">{content.replace("<", "&lt;")}</data>'
+
+
+def holds_outside(env):
+    """:return: whether the conversation of ``env`` holds text from outside: a file sent with a
+    question, a record asked about with its mails, or what a tool of ``OUTSIDE_TOOLS`` read. A
+    module adds its own sources (nudge_connect: the answers of the connectors)."""
+    conversation_id = env.context.get("nudge_conversation_id")
+    if not conversation_id:
+        return False
+    # sudo: whether, not what; the conversation is the person's
+    if env["nudge.message"].sudo().search_count([
+            ("conversation_id", "=", conversation_id), ("role", "=", "user"),
+            "|", ("attachment_name", "!=", False), ("command", "in", OUTSIDE_COMMANDS)], limit=1):
+        return True
+    return bool(env["nudge.step"].sudo().search_count([
+        ("run_id.conversation_id", "=", conversation_id), ("tool", "in", sorted(OUTSIDE_TOOLS)),
+        ("state", "!=", "failed")], limit=1))
 
 
 def dump(value):

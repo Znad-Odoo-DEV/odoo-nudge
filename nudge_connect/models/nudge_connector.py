@@ -771,6 +771,15 @@ class NudgeConnectorTool(models.Model):
             ("connector_id", "!=", self.connector_id.id)])
         return sorted(set(calls.mapped("connector_id.name")))
 
+    def _connect_answered(self):
+        """:return: whether an outside system answered in this conversation (a failure quotes it too):
+        text from outside, which the model may be following"""
+        conversation_id = self.env.context.get("nudge_conversation_id")
+        if not conversation_id:
+            return False
+        return bool(self.env["nudge.connector.call"].sudo().search_count([
+            ("conversation_id", "=", conversation_id), ("state", "in", ("done", "hit", "failed"))], limit=1))
+
     def _connect_read_sent(self):
         """:return: how many characters the reads of this conversation sent to outside systems in their
         arguments, without a card (answers kept and refusals sent nothing)"""

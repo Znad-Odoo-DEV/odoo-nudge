@@ -1326,3 +1326,25 @@ msgstr "عنوان تسجيل الخروج"
 #: model:ir.model.fields,help:nudge_connect.field_nudge_connector__oauth_revocation_url
 msgid "Where a token is revoked when a person signs out (RFC 7009), when the server offers it."
 msgstr "حيث يُلغى الرمز عند تسجيل خروج الشخص (RFC 7009) إذا قدّم الخادم ذلك."
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/tools/connectors.py:0
+msgid "Read from %(connector)s: %(tool)s"
+msgstr "قراءة من %(connector)s: %(tool)s"
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/tools/connectors.py:0
+msgid "Why it asks"
+msgstr "لماذا يسأل"
+
+#. module: nudge_connect
+#. odoo-python
+#: code:addons/nudge_connect/tools/connectors.py:0
+msgid ""
+"This conversation holds text from outside Odoo (a file, an e-mail, a web "
+"page or the answer of a connector), and these words were not typed by you."
+msgstr ""
+"في هذه المحادثة نص من خارج أودو (ملف أو بريد إلكتروني أو صفحة ويب أو جواب "
+"موصل)، وهذه الكلمات لم تكتبها أنت."
