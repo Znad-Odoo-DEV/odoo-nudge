@@ -11,8 +11,8 @@ Odoo and the company files, and, when you allow it, prepare changes.
 - Off until an administrator turns it on (Settings, Nudge).
 - The assistant signs in with OAuth 2.1 (PKCE): the person allows it in
   Odoo, chooses what it may do (read, prepare changes, read what developers
-  build) and can revoke it in their preferences. Keys made before still
-  work (legacy). The assistant acts as that person, with their access
+  build) and can revoke it in their preferences. Keys made before (legacy)
+  work until 2027-01-26 only. The assistant acts as that person, with their access
   rights, record rules and companies. Nothing runs as an administrator.
 - Reading and writing are separate. A change is never made at once: the
   assistant gets a token, shows the person what will change, and the change
@@ -25,7 +25,7 @@ Odoo and the company files, and, when you allow it, prepare changes.
 Installed from Apps by an administrator who wants it, with Nudge.
 """,
     "category": "Productivity",
-    "version": "18.0.1.1.1",
+    "version": "18.0.1.1.2",
     "author": "Ibrahim Elzenad",
     "website": "https://znad-odoo-dev.github.io",
     "support": "https://github.com/Znad-Odoo-DEV/odoo-nudge/issues",

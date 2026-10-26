@@ -1,6 +1,6 @@
 {
     "name": "Nudge",
-    "version": "18.0.1.59.6",
+    "version": "18.0.1.59.7",
     "category": "Productivity",
     "summary": "An AI companion that lives in the Odoo web client",
     "description": """
@@ -22,6 +22,18 @@ it is done, and when your answer is needed.
 
 Works with any OpenAI-compatible AI provider (Gemini, Groq, OpenRouter, a local
 Ollama) and with Anthropic Claude.
+
+What leaves the server: the question, the conversation, the screen the person
+is on and the records the answer needs go to the AI provider an administrator
+chose, with the company's own key; secrets are kept out, and the setup screen
+says, for each provider, what is sent and where before it is chosen. Without a
+provider nothing leaves: rules, commands, tours and approved answers still
+work. Nothing is ever sent to the author: no telemetry, no licence check.
+Optional downloads (the search model, recipe and check packs) are off until an
+administrator asks for them, are checked by signature or SHA-256, and are data,
+never code. Code runs only in Developer mode (off by default, system
+administrators): Python written by the AI provider is shown in full and runs,
+through Odoo's safe_eval, only after an administrator approves it.
 
 No Python package is required. Some optional ones add a feature when they are
 installed on the server: anthropic (the Claude provider), onnxruntime,
