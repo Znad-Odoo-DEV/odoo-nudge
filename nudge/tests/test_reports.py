@@ -117,7 +117,8 @@ class TestReports(NudgeCase, TransactionCase):
     def test_the_studio_pages_are_found_by_their_app(self):
         if not self.env["nudge.doc.page"].sudo().search_count([("category", "=", "studio")]):
             self.skipTest("The documentation is not loaded")
-        found = tools.base.call(self.env(user=self.user_a), "search_odoo_documentation", {"query": "approval step", "app": "studio"}, None, "talk")
+        # The words of the page in every version: the documentation of 17 never says "step" there
+        found = tools.base.call(self.env(user=self.user_a), "search_odoo_documentation", {"query": "approval rules", "app": "studio"}, None, "talk")
         self.assertFalse(found.is_error, found.content)
         self.assertIn("approval_rules", found.content)
 
