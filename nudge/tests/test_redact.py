@@ -2,12 +2,13 @@ import json
 import types
 from unittest.mock import patch
 
+from odoo.exceptions import UserError, ValidationError
 from odoo.tests import BaseCase, TransactionCase, tagged
 
 from odoo.addons.nudge.llm import base, redact
 from odoo.addons.nudge.llm import snapshot as screen
 from odoo.addons.nudge.llm.fake_adapter import FakeAdapter
-from odoo.addons.nudge.tools import records
+from odoo.addons.nudge.tools import actions, bulk, records, saved_reports
 
 from .common import NudgeCase
 
@@ -231,3 +232,40 @@ class TestSecretFields(NudgeCase, TransactionCase):
                           lambda model, field, op: field.name != "city" and real(model, field, op)):
             row = records.describe(self.env, partner, ["city"])[0]
         self.assertEqual(row["city"], "[hidden]")
+
+    def test_a_field_that_holds_a_secret_under_another_name_is_kept_out_everywhere(self):
+        """Review (security S2): saved reports, rules, bulk work and writes read the name of a field only; a field a
+        view shows as a password holds a secret whatever it is called (holds_secret)"""
+        Partner = self.env["res.partner"]
+        Fields = self.env["ir.model.fields"]
+        hidden = patch.object(records, "password_fields",
+                              lambda model: {"ref", "color"} if model._name == "res.partner" else set())
+        task_values = {"name": "Rule", "engine": "rule", "rule_model_id": self.env["ir.model"]._get_id("res.partner"),
+                       "rule_domain": "[]"}
+        Task = self.env["nudge.task"].with_user(self.agent)
+        summed = Task.create(dict(task_values, rule_measure="sum", rule_field_id=Fields._get("res.partner", "color").id))
+        grouped = Task.create(dict(task_values, rule_groupby_id=Fields._get("res.partner", "ref").id))
+        with hidden:
+            # A saved report: grouped by, summed on
+            with self.assertRaises(records.Refused):
+                saved_reports._groups(Partner, ["ref"])
+            with self.assertRaises(records.Refused):
+                saved_reports._measures(Partner, ["color:sum"])
+            # A rule: looked for, summed on, grouped by
+            with self.assertRaises(ValidationError):
+                Task.create(dict(task_values, rule_domain="[('ref', '=', 'x')]"))
+            with self.assertRaises(UserError):
+                summed._rule_measure()
+            with self.assertRaises(UserError):
+                grouped._rule_measure()
+            # Bulk work: not read as a source, not written
+            self.assertEqual(bulk.default_sources(Partner, set(Partner._fields) - {"name", "ref", "city"}),
+                             ["name", "city"])
+            with self.assertRaises(records.Refused):
+                bulk.Job(self.env, {"operation": bulk.SUMMARISE, "field": "function", "source_fields": ["ref"]}, Partner)
+            with self.assertRaises(records.Refused):
+                bulk.Job(self.env, {"operation": bulk.FILL, "field": "ref", "instruction": "x"}, Partner)
+            # A write
+            with self.assertRaises(records.Refused):
+                actions.writable_field(Partner, "ref")
+        self.assertEqual(actions.writable_field(Partner, "ref").name, "ref", "Without the view, an ordinary field")

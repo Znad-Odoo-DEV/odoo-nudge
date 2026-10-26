@@ -7,6 +7,7 @@ through ``tools.assistant``, in the environment of whoever is there: the public
 user of the site, or the logged-in customer with their own rights.
 """
 import re
+import time
 
 from odoo import _, http, release
 from odoo.http import request
@@ -22,6 +23,11 @@ MAX_EMAIL = 200
 MAX_MESSAGE = 1000
 MAX_BODY = 6000
 EMAIL = re.compile(r"^[^@\s]{1,64}@[^@\s]{1,255}\.[^@\s]{2,}$")
+# A robot fills the field a person does not see, or sends the form sooner than a person can fill it in
+HONEYPOT = "homepage"
+MIN_FILL_SECONDS = 3
+SHOWN_KEY = "nudge_website_handover_shown"
+_clock = time.time
 
 
 class NudgeWebsite(http.Controller):
@@ -117,6 +123,8 @@ class NudgeWebsite(http.Controller):
         name = " ".join(str(name or "").split())[:MAX_NAME]
         email = str(email or "").strip()[:MAX_EMAIL]
         if not (name and EMAIL.match(email)):
+            # The form is offered now: the request that follows is timed from here
+            request.session[SHOWN_KEY] = _clock()
             channel_url = self._livechat_url(website)
             if channel_url:
                 return {"type": "livechat", "url": channel_url}
@@ -129,6 +137,12 @@ class NudgeWebsite(http.Controller):
                 lines.append(f"{who}: {said[:MAX_TURN_CHARS]}")
         if "crm.lead" not in env.registry:
             return {"type": "contact", "url": contact}
+        thanks = {"type": "lead", "text": _("Thank you. Someone will write to you soon.")}
+        shown = request.session.get(SHOWN_KEY)
+        if (str(kwargs.get(HONEYPOT) or "").strip() or not isinstance(shown, (int, float))
+                or _clock() - shown < MIN_FILL_SECONDS):
+            # A robot is thanked as a person is, so it cannot tell, and nothing is made
+            return thanks
         body = "\n\n".join(part for part in (text, "\n".join(lines)) if part)[:MAX_BODY]
         # sudo: a visitor has no right on leads. This is the only record the assistant
         # creates, asked for by the visitor, with fields chosen here and no others. The
@@ -142,8 +156,8 @@ class NudgeWebsite(http.Controller):
             values["website_id"] = website.id
         # The company of the website, not the one of the public user
         values["company_id"] = website.company_id.id
-        lead = env["crm.lead"].sudo().create(values)
-        return {"type": "lead", "text": _("Thank you. Someone will write to you soon."), "id": lead.id}
+        env["crm.lead"].sudo().create(values)
+        return thanks
 
     @staticmethod
     def _livechat_url(website):

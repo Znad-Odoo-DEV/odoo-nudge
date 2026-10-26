@@ -29,6 +29,7 @@ try:
 except ImportError:  # Odoo 17 and 18 retry no such error: the refusal is shown, as before
     ConcurrencyError = None
 
+from ..tools import pinned_http
 from ..tools.deadline import cap as worker_cap
 from .nudge_provider import _is_private_address
 
@@ -100,8 +101,9 @@ def _download(url, cap=CAP, timeout=TIMEOUT, check=None):
         if check:
             check(url)
         try:
-            with requests.get(url, stream=True, timeout=timeout, allow_redirects=False,
-                              headers={"User-Agent": "Nudge-recipes"}) as response:
+            # S11: the socket goes to an address pinned_http judged, never to a second answer of the DNS
+            with pinned_http.get(url, stream=True, timeout=timeout, allow_redirects=False,
+                                 headers={"User-Agent": "Nudge-recipes"}) as response:
                 if response.status_code in (301, 302, 303, 307, 308):
                     url = urljoin(url, response.headers.get("Location") or "")
                     continue
@@ -120,6 +122,8 @@ def _download(url, cap=CAP, timeout=TIMEOUT, check=None):
                     if time.monotonic() > limit:
                         raise FetchError("timeout")
                 return bytes(data)
+        except pinned_http.Refused as refused:
+            raise FetchError("private" if refused.code == "private" else "network") from None
         except requests.Timeout:
             raise FetchError("timeout") from None
         except requests.RequestException:

@@ -3,6 +3,8 @@
 ## 19.0.1.59.5 (unreleased)
 
 - Review: once a conversation holds text from outside (an answer of a connector, a file sent with a question, the mails of a record, a company file or source), a connector read that would send words the person did not type asks first, on a card with the exact payload, as a write does; a No sends nothing. Words the person typed, and the names and choices of the tool, still go at once within the caps of 1000 characters per read and 5000 per conversation (review ai #8).
+- Review: a read after the model read the text of a record (a description, a note, a mail body) asks on a card too, when its words were not typed by the person; after a count or a list of names it still runs at once (audit AUD-02).
+- Review: the MCP calls, the sign-in discovery and the token request connect to the address that was checked (S11, DNS rebinding, through `nudge/tools/pinned_http.py`): a server name that answers a public address to the check and 127.0.0.1 or 169.254.169.254 afterwards is refused as private before anything is sent, the Bearer token and the client secret included. Tests: `/nudge_connect:TestConnectorRebinding`.
 
 ## 19.0.1.59.2 (unreleased)
 

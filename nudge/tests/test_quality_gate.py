@@ -297,7 +297,9 @@ class TestQualityGate(NudgeCase, TransactionCase):
         def spy(*args, **kwargs):
             network.append(args[:2])
             raise requests.exceptions.ConnectionError("no network in the gate")
+        # pinned_http.get/post/head all go through its request(): the outbound calls of Nudge's own tools
         patches = [patch("requests.request", spy), patch("requests.post", spy), patch("requests.get", spy),
+                   patch("odoo.addons.nudge.tools.pinned_http.request", spy),
                    patch.object(ollama.requests, "request", _no_server)]
         adapter = FakeAdapter(script=script)
         built = []

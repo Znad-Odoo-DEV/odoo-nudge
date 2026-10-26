@@ -6,6 +6,8 @@ from odoo.tests import TransactionCase, tagged
 from odoo.addons.nudge.tests.common import NudgeCase
 from odoo.addons.nudge.tools.records import Refused
 
+from odoo.addons.nudge.tools import pinned_http
+
 from .. import mcp_client
 
 
@@ -19,7 +21,7 @@ class TestConnectorEgress(NudgeCase, TransactionCase):
 
     def test_a_connector_off_the_list_is_refused_before_a_request(self):
         self.env.company.nudge_egress_hosts = "allowed.test"
-        with patch.object(mcp_client.requests, "post") as posted:
+        with patch.object(pinned_http, "post") as posted:
             result = self.connector.action_test()
         posted.assert_not_called()
         self.assertIn("allowed destinations", result["params"]["message"])

@@ -13,6 +13,8 @@ import requests
 
 from odoo.tools.misc import file_path
 
+from odoo.addons.nudge.tools import pinned_http
+
 from .schema import PLACEHOLDERS
 
 _logger = logging.getLogger(__name__)
@@ -123,8 +125,10 @@ def draw_picture(provider, model, prompt, timeout=60):
             return base64.b64decode(entry["b64_json"])
         if entry.get("url"):
             provider.env["nudge.egress"].check(entry["url"], "picture")  # NP-15: it lives on another host
-            # Not followed: a redirect would go to a host the list was not asked about
-            fetched = requests.get(entry["url"], timeout=timeout, allow_redirects=False)
+            # Not followed: a redirect would go to a host the list was not asked about. A public address
+            # only (S11), unless the provider is on our own network
+            fetched = pinned_http.get(entry["url"], timeout=timeout, allow_redirects=False,
+                                      allow_private=bool(provider.runs_locally or provider.looks_local))
             fetched.raise_for_status()
             return fetched.content
     except Exception:  # noqa: BLE001 - the placeholder takes over

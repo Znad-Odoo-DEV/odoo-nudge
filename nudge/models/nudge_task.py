@@ -209,7 +209,7 @@ class NudgeTask(models.Model):
     def _rule_domain_list(self):
         """:return: the domain of the rule as a list, checked
         :raise ValidationError: when it cannot be read or reaches a secret field"""
-        from ..tools.records import is_secret, target_field  # noqa: PLC0415
+        from ..tools.records import holds_secret, target_field  # noqa: PLC0415
         self.ensure_one()
         try:
             domain = ast.literal_eval(self.rule_domain or "[]")
@@ -222,7 +222,8 @@ class NudgeTask(models.Model):
             for term in domain:
                 if isinstance(term, (tuple, list)) and len(term) == 3:
                     try:
-                        secret = is_secret(target_field(model, term[0]))
+                        field = target_field(model, term[0])
+                        secret = holds_secret(model.env[field.model_name], field)
                     except Exception:  # noqa: BLE001
                         raise ValidationError(_("Unknown field: %s", term[0])) from None
                     if secret:
@@ -504,7 +505,7 @@ class NudgeTask(models.Model):
 
     def _rule_measure(self):
         """:return: ``{label: value}`` of the rule; self is in the environment of the owner"""
-        from ..tools.records import get_model, is_secret  # noqa: PLC0415
+        from ..tools.records import get_model, holds_secret  # noqa: PLC0415
         self.ensure_one()
         model = get_model(self.env, self.model_name)
         domain = self._rule_domain_list()
@@ -513,7 +514,7 @@ class NudgeTask(models.Model):
         # sudo: the names of the fields only; the owner has no right on ir.model.fields
         measure, field = self.rule_measure or "count", self.rule_field_id.sudo()
         if measure != "count":
-            if not field or field.name not in model._fields or is_secret(model._fields[field.name]):
+            if not field or field.name not in model._fields or holds_secret(model, model._fields[field.name]):
                 raise UserError(_("The field to add up cannot be read."))
             aggregate = f"{field.name}:{'sum' if measure == 'sum' else 'avg'}"
         else:
@@ -525,7 +526,7 @@ class NudgeTask(models.Model):
                 return {total: model.search_count(domain)}
             row = model._read_group(domain, [], [aggregate])
             return {total: (row[0][0] if row else 0) or 0}
-        if group.name not in model._fields or is_secret(model._fields[group.name]):
+        if group.name not in model._fields or holds_secret(model, model._fields[group.name]):
             raise UserError(_("The field to group by cannot be read."))
         gfield = model._fields[group.name]
         spec = f"{group.name}:month" if gfield.type in ("date", "datetime") else group.name

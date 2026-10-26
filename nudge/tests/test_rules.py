@@ -1,6 +1,9 @@
 """S9: the requests that come back to the AI are proposed as rules, accepted by a manager, and then
 answered with no provider. The pieces of the pattern (no database) and the proposals (the log)."""
 import datetime
+from unittest.mock import patch
+
+from psycopg2 import errors
 
 from odoo import fields
 from odoo.exceptions import AccessError, UserError
@@ -236,6 +239,28 @@ class TestRecurringRequests(NudgeCase, TransactionCase):
         # a sentence that is not the pattern still goes to the provider
         self.order(self.raghad, "tell me a story about contacts and numbers and nothing else of use")
         self.assertEqual(len(adapter.calls), 1)
+
+    def test_a_count_made_meanwhile_does_not_fail_the_answer(self):
+        """Review (odoo-tech #9): two people answered by the same rule at the same instant: the second got a
+        serialization error on the counter (repeatable read); the rule answers, uncounted this time"""
+        self.asked()
+        rule = self.observe()
+        rule.with_user(self.manager).action_accept()
+        adapter = self.use_adapter(reply="from the provider")
+        cursor = type(self.env.cr)
+        execute = cursor.execute
+
+        def busy(cr, query, params=None, log_exceptions=True):
+            if "SET use_count" in str(query):
+                raise errors.SerializationFailure("could not serialize access due to concurrent update")
+            return execute(cr, query, params, log_exceptions)
+
+        with patch.object(cursor, "execute", busy):
+            conversation, _events = self.order(self.raghad, "how many contacts are named Ebrahim Zed please?")
+        self.assertEqual(len(adapter.calls), 0, "Answered by the rule")
+        answer = conversation.message_ids.filtered(lambda m: m.role == "assistant")
+        self.assertEqual(answer.noai_intent, "rule")
+        self.assertEqual(rule.use_count, 0, "Not counted this time")
 
     def test_a_proposed_or_rejected_rule_answers_nothing(self):
         self.asked()

@@ -164,6 +164,7 @@
                     name: data.get("name"),
                     email: data.get("email"),
                     consent: data.get("consent") === "on",
+                    homepage: data.get("homepage") || "",
                     transcript: data.get("consent") === "on" ? transcript.slice(-MAX_TRANSCRIPT) : [],
                     message: transcript.filter((turn) => turn.role === "user").map((turn) => turn.text).join("\n"),
                 });
