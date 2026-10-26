@@ -86,6 +86,21 @@ class TestDoors(WebsiteCase, HttpCase):
         self.website.nudge_assistant = False
         self.assertNotIn('id="nudge_web_root"', self.url_open("/").text)
 
+    def test_the_panel_tells_the_visitor_the_text_goes_to_an_ai(self):
+        self.website.nudge_privacy_url = False
+        page = self.url_open("/").text
+        self.assertIn("o_nudge_web_notice", page)
+        self.assertIn("what you write here is sent to it", page)
+        self.assertNotIn("example.com/privacy", page, "No link while no address is set")
+
+    def test_the_notice_links_to_the_privacy_policy_when_it_is_set(self):
+        self.website.nudge_privacy_url = "https://example.com/privacy"
+        page = self.url_open("/").text
+        self.assertIn('href="https://example.com/privacy"', page)
+        self.assertIn('target="_blank"', page)
+        self.assertIn('rel="noopener"', page)
+        self.assertIn(">Privacy policy</a>", page)
+
     def test_a_customer_logged_in_is_answered_about_their_own_orders(self):
         self.need("sale.order")
         product = self.env["product.product"].create({"name": "Raghad table", "list_price": 40.0})

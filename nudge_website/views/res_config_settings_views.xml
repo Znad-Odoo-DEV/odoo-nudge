@@ -16,6 +16,10 @@
                                 <field name="nudge_greeting" class="col-lg-8"/>
                             </div>
                             <div class="row">
+                                <label for="nudge_privacy_url" class="col-lg-4 o_light_label"/>
+                                <field name="nudge_privacy_url" class="col-lg-8" placeholder="https://example.com/privacy"/>
+                            </div>
+                            <div class="row">
                                 <label for="nudge_lang_ids" class="col-lg-4 o_light_label"/>
                                 <field name="nudge_lang_ids" widget="many2many_tags" class="col-lg-8" options="{'no_create': True}"/>
                             </div>
