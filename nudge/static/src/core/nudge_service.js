@@ -1216,6 +1216,13 @@ function isReadable(file) {
             if (kind === "explain") {
                 return send(`/field ${item.field}`);
             }
+            if (kind === "command" && item.kind === "switch_mode") {
+                // An approval rule said in Agent mode: built in Developer mode, offered by the server
+                if (item.mode === MODE_DEV && state.canDevelop) {
+                    return Promise.resolve(setMode(MODE_DEV)).then(() => send(item.text));
+                }
+                return;
+            }
             if (kind === "command" && item.at_once) {
                 return send(item.words[0]);
             }
@@ -1356,6 +1363,21 @@ function isReadable(file) {
                     words,
                     context.capture()?.snapshot || null,
                 ]);
+            } catch {
+                return false;
+            }
+        }
+
+        /**
+         * Whether the server would offer ``text`` back as "Did you mean": only a short text that is not a
+         * question of how is asked. Any error means it is not.
+         */
+        async function isSlip(text) {
+            if (text.length > 60 || asksHowTo(text)) {
+                return false;
+            }
+            try {
+                return (await orm.call("nudge.noai", "slip_offered", [text])) === true;
             } catch {
                 return false;
             }
@@ -2167,6 +2189,10 @@ function isReadable(file) {
                 // explanation: either they are asked, or it is the work
                 explain =
                     state.mode !== MODE_TALK && state.explain !== EXPLAIN_ASK ? null : state.explain;
+            }
+            if (explain === EXPLAIN_ASK && (await isSlip(text))) {
+                // A slip of a name ("sales ordrs") gets the server's "Did you mean", not the choice of how
+                explain = null;
             }
             if (explain === EXPLAIN_ASK) {
                 // Theirs to say first: on the screen, or in writing
