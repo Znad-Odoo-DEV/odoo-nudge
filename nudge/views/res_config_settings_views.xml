@@ -349,6 +349,9 @@
                             <field name="nudge_compliance_feed_url" placeholder="https://"/>
                             <div class="mt8"><label for="nudge_compliance_feed_key" class="o_light_label"/> <field name="nudge_compliance_feed_key"/></div>
                             <div class="mt8">
+                                <button name="action_nudge_compliance_feed_use_nudge" type="object"
+                                        string="Use the Nudge Feed" icon="oi-arrow-right" class="btn-link"
+                                        groups="base.group_system"/>
                                 <button name="action_nudge_compliance_feed_check" type="object"
                                         string="Check the Feed Now" icon="oi-arrow-right" class="btn-link"/>
                                 <button name="action_nudge_compliance_feed_list" type="object"
