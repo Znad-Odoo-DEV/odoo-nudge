@@ -22,6 +22,9 @@ _logger = logging.getLogger(__name__)
 CORPUS = "nudge/data/odoo_docs.jsonl.gz"
 CORPUS_PARAM = "nudge.odoo_docs_hash"
 MAX_RESULTS = 5
+# What a passage of the app on the screen is worth against the others: 2.5, as in the documentation of 17 and 18
+# Studio's approval rules rank twice those of Time Off for "approval", and the screen of Time Off must still win
+SCREEN_BOOST = 2.5
 MAX_CHARS = 6000
 MAX_QUERY_CHARS = 200
 PAGES_PER_BATCH = 40
@@ -276,7 +279,7 @@ class NudgeDocPassage(models.Model):
                 known[passage.id] = passage.modules
 
             def blended_score(item):
-                boost = 2.0 if any(mark in (known.get(item[0]) or "") for mark in marks) else 1.0
+                boost = SCREEN_BOOST if any(mark in (known.get(item[0]) or "") for mark in marks) else 1.0
                 return (-item[1] * boost, item[0])
 
             return self.browse([key for key, _score in sorted(blended.items(), key=blended_score)[:limit]]).exists()
@@ -285,7 +288,7 @@ class NudgeDocPassage(models.Model):
 
         def score(row):
             passage_id, rank, page_modules = row
-            boost = 2.0 if any(mark in (page_modules or "") for mark in marks) else 1.0
+            boost = SCREEN_BOOST if any(mark in (page_modules or "") for mark in marks) else 1.0
             return (-rank * boost, passage_id)
 
         rows.sort(key=score)
