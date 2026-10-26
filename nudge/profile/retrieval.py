@@ -17,6 +17,13 @@ MAX_AT_WORK = 15
 # Between two pieces that match as well, the one that tells the most comes first
 KINDS = ("overview", "module", "configuration", "model", "automation", "security", "activity")
 WORD = re.compile(r"[\w.]+", re.UNICODE)
+# Kinds of records that are set up once and looked up ever after, not worked in: places, currencies and their
+# rates, languages, calendars, units, taxes and the accounting set-up, product attributes. They change when
+# someone sets the database up, and say nothing of where the business works.
+CONFIGURATION = re.compile(
+    r"^(res\.(country|currency|lang|bank|partner\.(category|title|industry|bank))|resource|uom|decimal|"
+    r"report|account\.(tax|account\.tag|fiscal\.position|payment\.term|journal|group|root|reconcile\.model|"
+    r"report|code\.mapping)|product\.(category|attribute|tag|public\.category))(\.|$)|\.repartition\.line$")
 
 
 def can_read(env, piece):
@@ -130,6 +137,11 @@ def label_of(env, data):
     return labels.get(env.lang or "en_US") or data.get("label") or data.get("model", "")
 
 
+def is_configuration(model):
+    """:return: whether the kind of record is set up rather than worked in"""
+    return bool(CONFIGURATION.search(model or ""))
+
+
 def where_the_work_is(env, profile):
     """:return: the kinds of records most used in this database, among
     those the person may read, in words rather than numbers; empty when
@@ -137,6 +149,7 @@ def where_the_work_is(env, profile):
     pieces = [
         piece for piece in profile.sudo().slice_ids
         if piece.kind == "activity" and (piece.data or {}).get("changed")
+        and not is_configuration(piece.model_name)
     ]
     pieces.sort(key=lambda piece: (-activity.activity(piece.data), piece.key))
     lines = []
