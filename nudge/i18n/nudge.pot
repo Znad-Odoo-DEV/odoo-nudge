@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-26 12:20+0000\n"
-"PO-Revision-Date: 2026-10-26 12:20+0000\n"
+"POT-Creation-Date: 2026-10-26 13:08+0000\n"
+"PO-Revision-Date: 2026-10-26 13:08+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -2898,6 +2898,11 @@ msgid ""
 msgstr ""
 
 #. module: nudge
+#: model:nudge.skill,name:nudge.skill_acc_analytic_budgets
+msgid "Analytic accounting and budgets"
+msgstr ""
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_doc_passage__anchor
 msgid "Anchor"
 msgstr ""
@@ -3859,6 +3864,11 @@ msgid "Bank lines to reconcile"
 msgstr ""
 
 #. module: nudge
+#: model:nudge.skill,name:nudge.skill_acc_bank_reconciliation
+msgid "Bank reconciliation"
+msgstr ""
+
+#. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_report__shape__bar
 msgid "Bar chart"
 msgstr ""
@@ -4791,6 +4801,11 @@ msgstr ""
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_cache_near_threshold
 msgid "Closeness Required"
+msgstr ""
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_acc_closing
+msgid "Closing a period or a year"
 msgstr ""
 
 #. module: nudge
@@ -5829,6 +5844,11 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/tools/digest.py:0
 msgid "Customer invoices overdue"
+msgstr ""
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_acc_customer_invoices
+msgid "Customer invoices, credit notes and payment terms"
 msgstr ""
 
 #. module: nudge
@@ -7491,6 +7511,11 @@ msgid "Filters the screen of %s"
 msgstr ""
 
 #. module: nudge
+#: model:nudge.skill,name:nudge.skill_acc_reports_audit
+msgid "Financial reports and audit"
+msgstr ""
+
+#. module: nudge
 #: model:ir.actions.server,name:nudge.nudge_question_find_action
 #: model:ir.ui.menu,name:nudge.nudge_menu_questions_find
 msgid "Find Recurring Questions"
@@ -7801,6 +7826,11 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/models/nudge_noai.py:0
 msgid "For which dates?"
+msgstr ""
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_acc_multi_currency
+msgid "Foreign currencies and exchange differences"
 msgstr ""
 
 #. module: nudge
@@ -9099,6 +9129,16 @@ msgid "Inventory"
 msgstr ""
 
 #. module: nudge
+#: model:nudge.skill,name:nudge.skill_inv_counts_adjustments
+msgid "Inventory counts and adjustments"
+msgstr ""
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_inv_valuation
+msgid "Inventory valuation"
+msgstr ""
+
+#. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/setup.py:0
 msgid "Invitation email"
@@ -9534,6 +9574,11 @@ msgstr ""
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_tour_step__label
 msgid "Label"
+msgstr ""
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_inv_landed_costs
+msgid "Landed costs"
 msgstr ""
 
 #. module: nudge
@@ -10453,6 +10498,11 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "Looked up: %s"
+msgstr ""
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_inv_lots_serials
+msgid "Lots, serial numbers and expiry"
 msgstr ""
 
 #. module: nudge
@@ -13528,6 +13578,12 @@ msgstr ""
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/models/res_config_settings.py:0
+msgid "Only a system administrator sets the compliance feed."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/models/nudge_recipe_sign.py:0
 msgid "Only a system administrator sets the signing key."
 msgstr ""
@@ -15782,6 +15838,11 @@ msgid "Receipts past their scheduled date, by vendor, with what they block."
 msgstr ""
 
 #. module: nudge
+#: model:nudge.skill,name:nudge.skill_inv_receipts_deliveries
+msgid "Receipts, deliveries and routes"
+msgstr ""
+
+#. module: nudge
 #: model:nudge.tour,name:nudge.tour_receive_purchase_order
 msgid "Receive a purchase order"
 msgstr ""
@@ -16268,6 +16329,11 @@ msgid ""
 msgstr ""
 
 #. module: nudge
+#: model:nudge.skill,name:nudge.skill_inv_replenishment
+msgid "Replenishment and reordering rules"
+msgstr ""
+
+#. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/reports.py:0
 #: model:ir.model.fields,field_description:nudge.field_nudge_health_finding__report_id
@@ -16439,6 +16505,11 @@ msgstr ""
 #. module: nudge
 #: model:nudge.prompt,name:nudge.prompt_ind_retail_slow_movers
 msgid "Retail: slow movers in stock"
+msgstr ""
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_inv_returns_scrap
+msgid "Returns and scrap"
 msgstr ""
 
 #. module: nudge
@@ -18532,6 +18603,11 @@ msgstr ""
 #: code:addons/nudge/tools/document_record.py:0
 #: code:addons/nudge/tools/health.py:0
 msgid "Taxes"
+msgstr ""
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_acc_taxes
+msgid "Taxes and fiscal positions"
 msgstr ""
 
 #. module: nudge
@@ -22119,6 +22195,11 @@ msgid "Use of the Data"
 msgstr ""
 
 #. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid "Use the Nudge Feed"
+msgstr ""
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.js:0
 msgid "Use the colour of my company"
@@ -22245,6 +22326,11 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/tools/digest.py:0
 msgid "Vendor bills"
+msgstr ""
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_acc_vendor_bills_payments
+msgid "Vendor bills and payments"
 msgstr ""
 
 #. module: nudge
@@ -22435,6 +22521,11 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/tools/setup.py:0
 msgid "Warehouses"
+msgstr ""
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_inv_warehouses_locations
+msgid "Warehouses and locations"
 msgstr ""
 
 #. module: nudge

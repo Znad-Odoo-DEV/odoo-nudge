@@ -12424,6 +12424,12 @@ msgstr "مسؤول النظام وحده يقرر في تحديث حزمة ال�
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/models/res_config_settings.py:0
+msgid "Only a system administrator sets the compliance feed."
+msgstr "مسؤول النظام وحده يضبط خلاصة الامتثال."
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/models/nudge_translation.py:0
 msgid "Only administrators translate a module."
 msgstr "الإداريون وحدهم يترجمون وحدة."
@@ -19921,6 +19927,11 @@ msgid "Use the colour of my company"
 msgstr "استخدام لون شركتي"
 
 #. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid "Use the Nudge Feed"
+msgstr "استخدم خلاصة Nudge"
+
+#. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_message__feedback__up
 msgid "Useful"
 msgstr "مفيد"
@@ -26420,3 +26431,83 @@ msgstr ""
 "دون ذكاء اصطناعي). الرموز المقروءة من ذاكرة المزوّد المؤقتة والإجابات التي "
 "لم تحتج إلى ذكاء اصطناعي هي ما يوفّر المال. تُقرأ هنا الأرقام فقط، لا نص "
 "أي رسالة."
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_acc_closing
+msgid "Closing a period or a year"
+msgstr "إقفال الفترة والسنة المحاسبية"
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_acc_bank_reconciliation
+msgid "Bank reconciliation"
+msgstr "التسوية البنكية"
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_acc_customer_invoices
+msgid "Customer invoices, credit notes and payment terms"
+msgstr "فواتير العملاء والإشعارات الدائنة"
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_acc_vendor_bills_payments
+msgid "Vendor bills and payments"
+msgstr "فواتير الموردين والمدفوعات"
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_acc_taxes
+msgid "Taxes and fiscal positions"
+msgstr "الضرائب والمراكز الضريبية"
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_acc_multi_currency
+msgid "Foreign currencies and exchange differences"
+msgstr "العملات الأجنبية وفروقات الصرف"
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_acc_reports_audit
+msgid "Financial reports and audit"
+msgstr "التقارير المالية والتدقيق"
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_acc_analytic_budgets
+msgid "Analytic accounting and budgets"
+msgstr "المحاسبة التحليلية والموازنات"
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_inv_receipts_deliveries
+msgid "Receipts, deliveries and routes"
+msgstr "الاستلام والتسليم والمسارات"
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_inv_counts_adjustments
+msgid "Inventory counts and adjustments"
+msgstr "جرد المخزون وتسويته"
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_inv_valuation
+msgid "Inventory valuation"
+msgstr "تقييم المخزون"
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_inv_replenishment
+msgid "Replenishment and reordering rules"
+msgstr "تجديد المخزون وقواعد إعادة الطلب"
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_inv_lots_serials
+msgid "Lots, serial numbers and expiry"
+msgstr "الدفعات والأرقام التسلسلية والصلاحية"
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_inv_warehouses_locations
+msgid "Warehouses and locations"
+msgstr "المستودعات والمواقع"
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_inv_returns_scrap
+msgid "Returns and scrap"
+msgstr "المرتجعات والهالك"
+
+#. module: nudge
+#: model:nudge.skill,name:nudge.skill_inv_landed_costs
+msgid "Landed costs"
+msgstr "تكاليف الاستيراد الإضافية"
