@@ -1,6 +1,12 @@
 # Changelog
 
-Current version: nudge 19.0.1.59.7, nudge_mcp 19.0.1.1.2, nudge_connect 19.0.1.0.4, nudge_messaging 19.0.1.0.6, nudge_ai 19.0.1.0.11, nudge_studio 19.0.1.0.12, nudge_documents 19.0.1.0.8, nudge_spreadsheet 19.0.1.0.11, nudge_builder 19.0.1.0.9, nudge_mail 19.0.1.0.15, nudge_discuss 19.0.1.0.9, nudge_website 19.0.1.0.5.
+Current version: nudge 19.0.1.59.8, nudge_mcp 19.0.1.1.2, nudge_connect 19.0.1.0.4, nudge_messaging 19.0.1.0.6, nudge_ai 19.0.1.0.11, nudge_studio 19.0.1.0.12, nudge_documents 19.0.1.0.8, nudge_spreadsheet 19.0.1.0.11, nudge_builder 19.0.1.0.9, nudge_mail 19.0.1.0.15, nudge_discuss 19.0.1.0.9, nudge_website 19.0.1.0.5.
+
+## 19.0.1.59.8 (unreleased)
+
+- Knowledge: the packages of 18 and 17 carry the official documentation of their own version (862 pages for 17.0, 971 for 18.0, built by `scripts/build_odoo_docs.py` into `docs_data/` and put in place by the port), no longer the pages of 19.0.
+- Skills: 8 for Accounting (closing a period, bank reconciliation, customer invoices and credit notes, vendor bills and payments, taxes and fiscal positions, currencies and exchange differences, reports and audit, analytic accounting and budgets) and 8 for Inventory (receipts, deliveries and routes, counts and adjustments, valuation, replenishment, lots and serial numbers, warehouses and locations, returns and scrap, landed costs), written from the official documentation, each with its sources and what differs in Odoo 17 and 18.
+- Country packs: "Use the Nudge Feed" (Settings, Compliance Packs, system administrators) fills the address of the signed feed of Nudge and the publisher key; nothing is fetched before. The feed carries the checklists of the countries the documentation of Odoo covers, drafted from that documentation and the tax authorities' own pages, each marked not yet reviewed: they arrive pending, for an administrator to approve. `scripts/build_compliance_feed.py` builds it, `scripts/validate_packs.py` checks a pack. A feed may hold 300 packs in 4 MB (it was 30 in 1 MB, made for the Gulf).
 
 ## 19.0.1.59.7 (unreleased)
 
