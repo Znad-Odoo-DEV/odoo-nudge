@@ -18,12 +18,16 @@ visitor agrees. Questions the assistant could not answer are listed apart, as Vi
 Questions, for a manager to read; they never become a lesson of Nudge.
 Visitor lines are archived after the days set in Settings (30 by default).
 
+What a visitor writes goes to the AI provider of Nudge; the chat panel says so
+before the first message, with a link to the privacy policy of the company when
+one is set in Settings.
+
 Without an AI provider, or in private mode, products and files are still
 found and shown, by rules alone. Installed from Apps by an administrator who
 wants it, with Nudge; never by itself.
 """,
     "category": "Website",
-    "version": "17.0.1.0.4",
+    "version": "17.0.1.0.5",
     "author": "Ibrahim Elzenad",
     "website": "https://znad-odoo-dev.github.io",
     "support": "https://github.com/Znad-Odoo-DEV/odoo-nudge/issues",
