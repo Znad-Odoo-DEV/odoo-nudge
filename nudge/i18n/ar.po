@@ -26511,3 +26511,411 @@ msgstr "المرتجعات والهالك"
 #: model:nudge.skill,name:nudge.skill_inv_landed_costs
 msgid "Landed costs"
 msgstr "تكاليف الاستيراد الإضافية"
+
+#. module: nudge
+#: model:ir.model.constraint,message:nudge.constraint_nudge_plugin_unique_name
+msgid "A module is recorded once as a plugin."
+msgstr "تُسجَّل الوحدة مرة واحدة فقط كإضافة."
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_plugin_action
+msgid ""
+"A plugin is an Odoo module named nudge_plugin_something that brings tools, skills, prompts and\n"
+"                commands to Nudge. Once installed it waits here: nothing of it reaches anyone before a system\n"
+"                administrator reads what it brings and allows it."
+msgstr "الإضافة هي وحدة Odoo باسم nudge_plugin_something تضيف أدوات ومهارات وموجّهات وأوامر إلى Nudge. بعد تثبيتها تنتظر هنا: لا يصل شيء منها إلى أي شخص قبل أن يقرأ مدير النظام ما تضيفه ويسمح به."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form_cache
+msgid "A question that nearly matches an earlier one is offered that answer, marked as an earlier answer to a very close question, with the button that asks the provider again. Off until you turn it on."
+msgstr "السؤال المطابق تقريبًا لسؤال سابق تُعرض عليه الإجابة السابقة، مع تنبيه بأنها إجابة سابقة عن سؤال مشابه جدًا، وزر لإعادة سؤال المزوّد. متوقف حتى تقوم بتفعيله."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_company__nudge_cache_near
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_cache_near
+msgid "A question that nearly matches an earlier one is offered the earlier answer, marked as such, with a button to ask the provider again."
+msgstr "السؤال المطابق تقريبًا لسؤال سابق تُعرض عليه الإجابة السابقة، مع تنبيه بذلك وزر لإعادة سؤال المزوّد."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_publisher_view_form
+msgid ""
+"A recipe signed by this key shows Signed by this name, and a manager may import it. Skills\n"
+"                        of any recipe still come in as drafts."
+msgstr "الوصفة الموقّعة بهذا المفتاح تظهر بعبارة موقّعة باسم هذا الاسم، ويمكن للمدير استيرادها. أما مهارات أي وصفة فتدخل دائمًا كمسودات."
+
+#. module: nudge
+#: model:ir.model.constraint,message:nudge.constraint_nudge_rule_unique_rule
+msgid "A request is proposed once in a company."
+msgstr "يُقترح الطلب مرة واحدة فقط في الشركة."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_form
+msgid ""
+"A tool runs as the person who asks, with their rights; a tool that writes shows the\n"
+"                                same confirmation card as every change, and nothing is done before their yes. A\n"
+"                                plugin never replaces a tool or a command of Nudge: a name already taken is refused."
+msgstr "تعمل الأداة بصفة الشخص الذي يطلبها وبصلاحياته؛ والأداة التي تكتب تعرض بطاقة التأكيد نفسها لكل تعديل، ولا يتم شيء قبل موافقته. لا تستبدل الإضافة أبدًا أداة أو أمرًا من Nudge: يُرفض الاسم المحجوز مسبقًا."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_rule__kind
+msgid "A tool that only reads becomes a rule that answers with no AI. One that writes becomes a prompt."
+msgstr "الأداة التي تقرأ فقط تتحول إلى قاعدة تجيب دون ذكاء اصطناعي. أما التي تكتب فتتحول إلى موجّه."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_signing_key_view_form
+msgid ""
+"An Ed25519 private key in PEM form. It is kept where only a system administrator can read it,\n"
+"                    is never shown again, and signs the recipes your managers export. Without it they are\n"
+"                    exported unsigned. Give the other databases the public key shown after saving."
+msgstr "مفتاح خاص من نوع Ed25519 بصيغة PEM. يُحفظ في مكان لا يقرؤه إلا مدير النظام، ولا يُعرض مرة أخرى، ويوقّع الوصفات التي يصدّرها مديروك. وبدونه تُصدَّر الوصفات غير موقّعة. أعطِ قواعد البيانات الأخرى المفتاح العام الذي يظهر بعد الحفظ."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_recipe_publisher__public_key
+msgid "An Ed25519 public key: PEM, or the 32 bytes in base64."
+msgstr "مفتاح عام من نوع Ed25519: بصيغة PEM، أو 32 بايت بترميز base64."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_recipe_import__acknowledged
+msgid "An unsigned recipe, or one signed by a key nobody here trusts, is imported only by a system administrator who read its instructions and accepts them as drafts."
+msgstr "الوصفة غير الموقّعة، أو الموقّعة بمفتاح لا يثق به أحد هنا، لا يستوردها إلا مدير النظام بعد أن يقرأ تعليماتها ويقبلها كمسودات."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/setup.py:0
+msgid "Applies to"
+msgstr "ينطبق على"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__cache_pending
+msgid "Cache Pending"
+msgstr "التخزين المؤقت معلّق"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_rule__decided_by
+msgid "Decided By"
+msgstr "تم القرار بواسطة"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_search_try_line__excerpt
+msgid "Excerpt"
+msgstr "مقتطف"
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_ir_model_fields
+msgid "Fields"
+msgstr "الحقول"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_cache_near_threshold
+msgid "How alike the words of two questions must be, from 0.5 to 1, for the earlier answer to be offered."
+msgstr "مدى تشابه كلمات السؤالين، من 0.5 إلى 1، حتى تُعرض الإجابة السابقة."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_rule__user_count
+msgid "How many different people asked, not who."
+msgstr "عدد الأشخاص المختلفين الذين سألوا، لا من هم."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_skill_market__installed_skill_id
+msgid "Installed Skill"
+msgstr "المهارة المثبّتة"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_market_view_form
+msgid ""
+"Installing makes a draft of your company. No model reads it until a manager reads its\n"
+"                        instructions and publishes it, and it never gives anybody a tool they do not already have."
+msgstr "يُنشئ التثبيت مسودة خاصة بشركتك. لا يقرؤها أي نموذج حتى يقرأ المدير تعليماتها وينشرها، ولا تمنح أحدًا أداة لا يملكها أصلًا."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_recipe_signing_key__key_file_name
+msgid "Key File Name"
+msgstr "اسم ملف المفتاح"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_skill_market__instructions
+msgid "Known for the skills that come with Nudge; the others are read when installed."
+msgstr "معروف للمهارات التي تأتي مع Nudge؛ أما الأخرى فتُقرأ عند تثبيتها."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_recipe_entry__languages
+#: model:ir.model.fields,help:nudge.field_nudge_skill_market__languages
+msgid "Language codes separated by commas."
+msgstr "رموز اللغات مفصولة بفواصل."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_rule__last_seen
+msgid "Last Seen"
+msgstr "آخر ظهور"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_search_try__model_ready
+msgid "Model Ready"
+msgstr "النموذج جاهز"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_recipe_import__needs_warning
+msgid "Needs Warning"
+msgstr "يحتاج إلى تحذير"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_export_view_form
+msgid ""
+"No signing key is set: the recipe is exported unsigned. A system administrator uploads one in\n"
+"                    Nudge / Configuration / Recipes / Signing Key."
+msgstr "لم يُعيَّن مفتاح توقيع: تُصدَّر الوصفة غير موقّعة. يرفع مدير النظام مفتاحًا من Nudge / الإعدادات / الوصفات / مفتاح التوقيع."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_import_view_form
+msgid ""
+"Nobody here vouches for who made this file. Only a system administrator imports it, after\n"
+"                    reading what its skills tell the model (below). Its skills come in as drafts."
+msgstr "لا أحد هنا يضمن هوية من أنشأ هذا الملف. لا يستورده إلا مدير النظام، بعد قراءة ما تقوله مهاراته للنموذج (أدناه). وتدخل مهاراته كمسودات."
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_rule
+msgid "Nudge Learned Rule"
+msgstr "قاعدة تعلّمها Nudge"
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_request_size
+msgid "Nudge Request Size"
+msgstr "حجم طلب Nudge"
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_request_size_line
+msgid "Nudge Request Size, One Mode"
+msgstr "حجم طلب Nudge، وضع واحد"
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_skill_market
+msgid "Nudge Skill Catalogue"
+msgstr "فهرس مهارات Nudge"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_rule__name
+msgid "One way the request is written, with its changing parts as {slots}."
+msgstr "إحدى صيغ كتابة الطلب، مع أجزائه المتغيرة على شكل {slots}."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_skill_market__package
+msgid "Package"
+msgstr "الحزمة"
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_recipe_publisher_action
+msgid "Paste the public key of a publisher to trust its signed recipes."
+msgstr "الصق المفتاح العام للناشر لتثق بوصفاته الموقّعة."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_rule__patterns
+msgid "Pattern List"
+msgstr "قائمة الأنماط"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_recipe_signing__private_key
+msgid "Private Key"
+msgstr "المفتاح الخاص"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_rule__kind__prompt
+msgid "Prompt of the library"
+msgstr "موجّه المكتبة"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_recipe_entry__publisher
+msgid "Publisher (as the Index Says)"
+msgstr "الناشر (كما يذكره الفهرس)"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_rule__kind__rule
+msgid "Rule without AI"
+msgstr "قاعدة دون ذكاء اصطناعي"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_search_try_line__score
+msgid "Score"
+msgstr "النتيجة"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_recipe_import__signature_state
+#: model:ir.model.fields,field_description:nudge.field_nudge_skill_market__signature_state
+msgid "Signature State"
+msgstr "حالة التوقيع"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_recipe_export__sign
+msgid "Signed with the key an administrator uploaded (Configuration, Recipes, Signing Key). With no key, the recipe is exported unsigned."
+msgstr "موقّعة بالمفتاح الذي رفعه المسؤول (الإعدادات، الوصفات، مفتاح التوقيع). وبدون مفتاح تُصدَّر الوصفة غير موقّعة."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_recipe_export__signing_available
+msgid "Signing Available"
+msgstr "التوقيع متاح"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_rule__slots
+msgid "Slots"
+msgstr "الفتحات"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_skill_market__source_kind
+msgid "Source Kind"
+msgstr "نوع المصدر"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_recipe_signing_key__stored
+msgid "Stored"
+msgstr "مخزّن"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_recipe_signing__stored_on
+msgid "Stored On"
+msgstr "مخزّن في"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_rule__template
+msgid "The arguments of the tool, with the changing parts as slots."
+msgstr "معاملات الأداة، مع أجزائها المتغيرة على شكل فتحات."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_message__private_mode
+msgid "The company asked that nothing of its data reaches an outside provider when this was said. Such a turn is never read to find the questions that come back."
+msgstr "طلبت الشركة ألا يصل شيء من بياناتها إلى مزوّد خارجي عند قول هذا. ولا يُقرأ مثل هذا الدور أبدًا لاستخراج الأسئلة المتكررة."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_conversation__cache_pending
+msgid "The key of the question being answered, when its answer may be kept in the answer cache."
+msgstr "مفتاح السؤال المُجاب عنه، عندما يجوز حفظ إجابته في ذاكرة الإجابات المؤقتة."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_answer_cache__qkey
+msgid "The question as the cache reads it: its words, folded and cut to their stems."
+msgstr "السؤال كما تقرؤه الذاكرة المؤقتة: كلماته بعد توحيدها واختصارها إلى جذورها."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_skill_market__package
+msgid "The recipe of a bundled skill."
+msgstr "وصفة مهارة مضمّنة."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_request_size_view_form
+msgid ""
+"The request each mode would send for the sentence below, as you: the instructions, the\n"
+"                        tools and the skills. Nothing is sent to any provider and nothing is written. The limits\n"
+"                        are those of the quality gate of each release."
+msgstr "الطلب الذي سيرسله كل وضع للجملة أدناه، بصفتك أنت: التعليمات والأدوات والمهارات. لا يُرسل شيء إلى أي مزوّد ولا يُكتب شيء. الحدود هي حدود بوابة الجودة لكل إصدار."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_company__nudge_cache_exact
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_cache_exact
+msgid "The same question, asked again with the same rights on the same kind of screen, is answered from what was kept instead of asking the AI provider again."
+msgstr "السؤال نفسه، عند تكراره بالصلاحيات نفسها وفي نوع الشاشة نفسه، يُجاب من المحفوظ بدلًا من سؤال مزوّد الذكاء الاصطناعي مرة أخرى."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form_cache
+msgid "The same question, asked again with the same rights, in the same company, on the same kind of screen, is answered from what was kept instead of asking the AI provider again. Only explanations that touched no record, no personal data and no secret are kept; a change of a skill, a lesson or a setting empties the cache; private mode never keeps anything."
+msgstr "السؤال نفسه، عند تكراره بالصلاحيات نفسها وفي الشركة نفسها وفي نوع الشاشة نفسه، يُجاب من المحفوظ بدلًا من سؤال مزوّد الذكاء الاصطناعي مرة أخرى. تُحفظ فقط الشروحات التي لم تمس أي سجل ولا بيانات شخصية ولا سرًّا؛ وأي تغيير في مهارة أو درس أو إعداد يفرّغ الذاكرة المؤقتة؛ والوضع الخاص لا يحفظ شيئًا أبدًا."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_request_size__question
+msgid "The sentence the request is built for: the skills and the tools offered depend on it."
+msgstr "الجملة التي يُبنى لها الطلب: تعتمد عليها المهارات والأدوات المعروضة."
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_skill_market_action
+msgid "The skills that come with Nudge are listed here, and those of the recipe sources you enabled."
+msgstr "المهارات التي تأتي مع Nudge مدرجة هنا، مع مهارات مصادر الوصفات التي فعّلتها."
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_token_dashboard_action
+msgid ""
+"The tokens Nudge used, by mode, role, provider and where the answer came from (a call to\n"
+"               an AI, a remembered answer, the answer cache, or understood without any AI). Tokens read\n"
+"               from the provider's cache and answers that needed no AI are what saves money. Only numbers\n"
+"               are read here, never the text of a message."
+msgstr "الرموز المميّزة التي استخدمها Nudge، حسب الوضع والدور والمزوّد ومصدر الإجابة (استدعاء ذكاء اصطناعي، أو إجابة محفوظة، أو ذاكرة الإجابات المؤقتة، أو فهم دون أي ذكاء اصطناعي). الرموز المقروءة من ذاكرة المزوّد المؤقتة والإجابات التي لم تحتج إلى ذكاء اصطناعي هي ما يوفّر المال. تُقرأ هنا الأرقام فقط، ولا يُقرأ نص أي رسالة أبدًا."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_rule__patterns
+msgid "The ways the request was written, the changing parts cut out."
+msgstr "صيغ كتابة الطلب بعد حذف الأجزاء المتغيرة."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_rule__times
+msgid "Times (30 Days)"
+msgstr "المرات (30 يومًا)"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_rule__use_count
+msgid "Times Answered"
+msgstr "عدد مرات الإجابة"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_recipe_entry__tools
+msgid "Tools the skill uses, separated by commas."
+msgstr "الأدوات التي تستخدمها المهارة، مفصولة بفواصل."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_publisher_view_form
+msgid "Trusted Publisher"
+msgstr "ناشر موثوق"
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_recipe_publisher
+msgid "Trusted Recipe Publisher"
+msgstr "ناشر الوصفات الموثوق"
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_search_try_line
+msgid "Try Search by Meaning, One Passage"
+msgstr "تجربة البحث بالمعنى، فقرة واحدة"
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_recipe_signing_key
+msgid "Upload the Recipe Signing Key"
+msgstr "رفع مفتاح توقيع الوصفات"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_market_view_form
+msgid "What changes in the instructions"
+msgstr "ما يتغير في التعليمات"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_answer_cache__scope
+msgid "What the answer depends on besides the words, as one fingerprint."
+msgstr "ما تعتمد عليه الإجابة إلى جانب الكلمات، كبصمة واحدة."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_answer_cache__tokens
+msgid "What the provider call that wrote it used."
+msgstr "ما استخدمه استدعاء المزوّد الذي كتبها."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_rule__example
+msgid "What the request does, in words: never an answer or a value."
+msgstr "ما يفعله الطلب، بالكلمات: لا إجابة ولا قيمة أبدًا."
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_rule_action
+msgid ""
+"When people ask the AI the same thing again and again, Nudge proposes a rule here: the next time it\n"
+"                is answered with no AI and no cost. A request that only reads becomes a rule; one that changes data\n"
+"                becomes a prompt of the library and is never done on its own. Nothing of what was asked is kept,\n"
+"                only the shape of the sentence."
+msgstr "عندما يسأل الناس الذكاء الاصطناعي عن الشيء نفسه مرارًا، يقترح Nudge هنا قاعدة: في المرة التالية يُجاب عنه دون ذكاء اصطناعي ودون تكلفة. الطلب الذي يقرأ فقط يتحول إلى قاعدة؛ والذي يغيّر البيانات يتحول إلى موجّه في المكتبة ولا يُنفَّذ من تلقاء نفسه أبدًا. لا يُحفظ شيء مما سُئل عنه، بل شكل الجملة فقط."
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_answer_cache_action
+msgid ""
+"When someone asks how to do something and the AI provider explains it, the explanation is\n"
+"                kept here for a few days. The same question of someone with the same rights, in the same\n"
+"                company, on the same kind of screen, is then answered from here at once, without a call\n"
+"                to the provider and without cost. Nothing that touched a record, a person's data or a\n"
+"                secret is kept. Delete an answer you do not trust."
+msgstr "عندما يسأل أحدهم كيف يفعل شيئًا ويشرحه مزوّد الذكاء الاصطناعي، يُحفظ الشرح هنا لبضعة أيام. وبعدها يُجاب سؤال شخص آخر بالصلاحيات نفسها وفي الشركة نفسها وفي نوع الشاشة نفسه من هنا فورًا، دون استدعاء المزوّد ودون تكلفة. لا يُحفظ أي شيء مس سجلًا أو بيانات شخص أو سرًّا. احذف أي إجابة لا تثق بها."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
+msgid "claude-haiku-5-5"
+msgstr "claude-haiku-5-5"

@@ -619,3 +619,8 @@ msgstr ""
 #: code:addons/nudge_website/models/website.py:0
 msgid "The privacy policy link must start with http://, https:// or a single /."
 msgstr "يجب أن يبدأ رابط سياسة الخصوصية بـ http:// أو https:// أو بشرطة مائلة واحدة /."
+
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.res_config_settings_view_form_website
+msgid "https://example.com/privacy"
+msgstr "https://example.com/privacy"
