@@ -288,3 +288,20 @@ HELD_OUT_AZ2 = [
     ("wein a2dar alqa shashat el mowazzafeen", ("guided-tours",), "az"),
     ("lazem el modeer yowafeq abl ma ye3taded ay masroof fo2 alf dirham", ("approval-flows", "studio-approvals"), "az"),
 ]
+
+# A third batch, written blind on 2026-10-25 (before its misses were looked at), only measured at the start and
+# at the end of the round that added vocabulary
+HELD_OUT_AZ3 = [
+    ("ana 3ayez a3mel e3dad awwali lel sherka el gedida: el 3omla wel lo3at wel far3", ("database-setup",), "az"),
+    ("saweli automation yaksar nashat la mas2ool el mabee3at awal ma yetaakkad el talab", AUTO, "az"),
+    ("shoofli sora lel fatoora wa a3melha musawwada bel nizam", ("documents-to-records",), "az"),
+    ("bdi a7ot 5ana ziyada bel namouzaj taba3 el zboun la raqam el dariba", ("screens-fields-build",), "az"),
+    ("ghayyer sa3er kol el montajat el mofattaha dafa3a wahda", ("bulk-work",), "az"),
+    ("a3tini jadwal excel bel mabee3at hasab kol 3emeel w kol shahr", ("spreadsheets", "data-analysis"), "az"),
+    ("ayna a2dar a2ra el tagrir 3an el 3omala el mota2akhkhira bel daf3", ("guided-tours", "data-analysis"), "az"),
+    ("laysh el rasael elly btetba3at lel zaboon btetla3 kharbaana", ("failure-diagnosis", "email-design", "designed-emails"), "az"),
+    ("sajjel el ijtima3 elli 3emelnah el yom w istakhrej el mahaam", ("meetings",), "az"),
+    ("eish el mouwafaqat el lazem ya5odha el masroof abl ma yindafa3", ("approval-flows", "studio-approvals"), "az"),
+    ("a7taj taqrir 3an ay tatbeeqat ma 7ad bystakhdemha 3andna", ("database-assessment",), "az"),
+    ("kam 7abba 3endi men el kursi el abyad fi el makhzan", ("product-search", "data-analysis"), "az"),
+]
