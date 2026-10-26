@@ -1,10 +1,10 @@
 /** @odoo-module **/
 
-import { Component, useEffect, useRef, useState } from "@odoo/owl";
+import { Component, onWillDestroy, useEffect, useRef, useState } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
 
-import { isSafeUrl, renderMarkdown } from "../core/markdown";
+import { MarkdownRenderer, STREAM_RENDER_INTERVAL, isSafeUrl } from "../core/markdown";
 import { NudgeChart } from "./nudge_chart";
 import { NudgePlanCard, draftFix } from "./nudge_plan_card";
 
@@ -67,6 +67,11 @@ export class NudgeMessage extends Component {
 
     setup() {
         this.feedback = useState({ asking: false, note: "" });
+        // The answer is rendered once per text, and not for every delta while it streams
+        this.markdown = new MarkdownRenderer();
+        this.refresh = useState({ tick: 0 });
+        this.refreshTimer = null;
+        onWillDestroy(() => clearTimeout(this.refreshTimer));
         // A no asks why: the cursor waits in the box
         const note = useRef("note");
         useEffect(
@@ -132,7 +137,15 @@ export class NudgeMessage extends Component {
     }
 
     get html() {
-        return renderMarkdown(this.props.content);
+        this.refresh.tick; // a rendering put off while streaming asks for this one
+        const html = this.markdown.render(this.props.content, this.props.state === "streaming");
+        if (this.markdown.stale && this.refreshTimer === null) {
+            this.refreshTimer = setTimeout(() => {
+                this.refreshTimer = null;
+                this.refresh.tick++;
+            }, STREAM_RENDER_INTERVAL);
+        }
+        return html;
     }
 
     get outcome() {
