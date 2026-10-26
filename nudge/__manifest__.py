@@ -1,6 +1,6 @@
 {
     "name": "Nudge",
-    "version": "18.0.1.59.7",
+    "version": "18.0.1.59.8",
     "category": "Productivity",
     "summary": "An AI companion that lives in the Odoo web client",
     "description": """
@@ -108,6 +108,8 @@ Without them the rest works and the feature says what is missing.
         "security/nudge_skill_security.xml",
         "data/nudge_skill_data.xml",
         "data/nudge_skill_data_np03.xml",
+        "data/nudge_skill_data_accounting.xml",
+        "data/nudge_skill_data_inventory.xml",
         "views/nudge_skill_views.xml",
         "views/res_config_settings_plan_views.xml",
         "views/nudge_plugin_views.xml",
