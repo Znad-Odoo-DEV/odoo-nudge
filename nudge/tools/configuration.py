@@ -458,10 +458,11 @@ class ReadConfiguration(base.Tool):
         records = model.search(literal_domain(action.domain), limit=MAX_CONFIG_ROWS)
         rows = records.read(readable) if readable else []
         lines = [f"{menu.complete_name} ({model._name}), {model.search_count(literal_domain(action.domain))} record(s):"]
+        seen = {}
         for record, row in zip(records, rows or [{}] * len(records)):
             shown = {}
             for name in readable:
-                value = format_value(env, model._fields[name], row.get(name))
+                value = format_value(env, model._fields[name], row.get(name), seen)
                 if isinstance(value, dict):
                     value = value.get("name") or value.get("count")
                 if value not in (None, "", False):

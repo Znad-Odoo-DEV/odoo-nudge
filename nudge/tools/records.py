@@ -255,10 +255,31 @@ def cut(text, size=MAX_TEXT):
     return text if len(text) <= size else text[:size - 1] + "…"
 
 
-def format_value(env, field, value):
-    """:param value: as ``read`` returns it
-    :return: the value as plain data, or None when there is none"""
+def hides_value(env, field, seen=None):
+    """STU-04: whether the value of ``field`` is kept out of what is shown: it holds a secret (``holds_secret``, which
+    also knows a field a view shows as a password and the value of a system parameter, whatever they are called).
+    A field without a model, as a stand-in made of a name only, is judged by its name.
+    :param seen: dict the caller keeps over a loop, so that the views of a model are read once, not once per value
+    :return: bool"""
     if is_secret(field):
+        return True
+    model_name = getattr(field, "model_name", None)
+    if not model_name or model_name not in env:
+        return False
+    key = (model_name, field.name)
+    if seen is None or key not in seen:
+        found = holds_secret(env[model_name], field)
+        if seen is None:
+            return found
+        seen[key] = found
+    return seen[key]
+
+
+def format_value(env, field, value, seen=None):
+    """:param value: as ``read`` returns it
+    :param seen: dict kept by the caller over a loop (see ``hides_value``)
+    :return: the value as plain data, or None when there is none"""
+    if hides_value(env, field, seen):
         return HIDDEN
     if field.type == "boolean":
         return bool(value)
@@ -302,6 +323,8 @@ def describe(env, records, names):
     parameter = records._name == PARAMETER_MODEL and "value" in read
     if parameter and "key" not in read:
         read.append("key")
+    # Judged here, by the key: format_value, which sees no key, would hide every parameter
+    seen = {(PARAMETER_MODEL, "value"): False}
     for values in records.read(read):
         row = {"id": values["id"]}
         for name in names:
@@ -314,7 +337,7 @@ def describe(env, records, names):
             if hidden:
                 row[name] = HIDDEN
             else:
-                row[name] = format_value(env, fields[name], values.get(name))
+                row[name] = format_value(env, fields[name], values.get(name), seen=seen)
         rows.append(row)
     return rows
 
