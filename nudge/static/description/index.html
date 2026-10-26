@@ -198,7 +198,7 @@
             <li>One answer holds one worker of the server while it streams: answers at the same time are capped for everybody together, by default the workers less two, under Settings ‣ Nudge.</li>
             <li>Python, SQL, the setup of Odoo and Developer mode are each behind a switch, <b>off by default</b>, for administrators only.</li>
             <li>In Developer mode, code and screen changes are checked before they are shown, a script in a view is refused, and what a module owns is never deleted.</li>
-            <li>No telemetry: nothing goes to the author, ever. Only two optional downloads reach the internet, and only after an administrator switches them on: the search model (Hugging Face) and recipe indexes of the marketplace; they send nothing of the database.</li>
+            <li>No telemetry: nothing goes to the author, ever. Only optional downloads reach the internet, and only after an administrator switches them on: the search model (Hugging Face), recipe packs and compliance check packs; they send nothing of the database. See Data and external services below.</li>
         </ul>
         <p style="font-size: 16px;">The security notes, the privacy notes, the user guide (English and Arabic) and a test plan are in the <code>doc</code> folder of the module.</p>
         <p style="font-size: 14px;">The Odoo documentation that comes with Nudge is &copy; Odoo S.A., licensed CC BY-SA 4.0 (the documentation repository of Odoo S.A.); the licence applies to that documentation only.</p>
@@ -227,6 +227,26 @@
             <li><b>Nudge: Discuss</b>: @Nudge in the chatter of any record and in the channels of Discuss, answered as an internal note. Installed from Apps by an administrator; needs Discuss.</li>
         </ul>
         <p style="font-size: 16px;">Nudge for Odoo AI, Nudge: Spreadsheets, Nudge for Documents and Nudge for Studio install themselves when Nudge and the app they bridge are both there. Nudge: Emails and Nudge: Discuss change how emails and the chatter behave, so an administrator installs them from Apps when they want them.</p>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan">Data and external services</h2>
+        <h3>AI providers</h3>
+        <p style="font-size: 16px;">Nudge needs an AI provider to write answers: Anthropic, an OpenAI-compatible provider, Gemini, Groq, OpenRouter or Ollama, chosen by an administrator, with your own key. What is sent to it: the question, the conversation, the screen the person is on and the records the answer needs; secrets are kept out. The setup screen states, for each provider, what is sent and where, before it is chosen. Without any provider, the rules, the commands, the tours and the approved answers still work, and nothing leaves your server.</p>
+        <h3>What the vendor receives</h3>
+        <p style="font-size: 16px;">Nothing: no telemetry, no licence check, no activation key, no call to any server of ours.</p>
+        <h3>Optional downloads</h3>
+        <p style="font-size: 16px;">All are off until an administrator acts.</p>
+        <ul style="font-size: 16px; line-height: 1.8;">
+            <li>The local search model: files from huggingface.co, with the size and the SHA-256 fixed in the code.</li>
+            <li>Recipe packs from a recipe source: signed, checked by SHA-256, and data only, never code.</li>
+            <li>Compliance check packs: signed, and approved by an administrator before use.</li>
+        </ul>
+        <h3>No downloaded code is ever run</h3>
+        <p style="font-size: 16px;">Nothing Nudge fetches is ever run as code. The one place where code is run is Developer mode, which is off by default and for system administrators only: the Python written by your AI provider is shown in full on a card, runs only after an administrator approves it, through the safe_eval of Odoo, can be tried first and undone, and what it builds is tagged "Made by Nudge".</p>
+        <p style="font-size: 16px;">The optional modules (Nudge Connect, Nudge MCP Server, Nudge Messaging and Nudge Website Assistant) have their own outside services, described on their own pages.</p>
     </div>
 </section>
 
