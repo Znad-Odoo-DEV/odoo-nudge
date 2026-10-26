@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Inventory skills of Nudge (nudge): how the Inventory app is set up and used, written from the official Odoo
+     documentation. noupdate: an update never rewrites one you changed; archive the ones you do not want. -->
+<odoo>
+    <data noupdate="1">
+    <record id="skill_inv_receipts_deliveries" model="nudge.skill">
+        <field name="key">inventory-receipts-deliveries</field>
+        <field name="recipe_key">nudge-skill-inventory-receipts-deliveries</field>
+        <field name="name">Receipts, deliveries and routes</field>
+        <field name="summary">Receive and deliver goods in one, two or three steps (input, quality, pick, pack, output), and how routes with push and pull rules move stock.</field>
+        <field name="trigger_words">receipts and deliveries, goods receipt, incoming shipment, outgoing shipment, delivery order, receive goods, input and stock, pick pack ship, pick and pack, quality control step, multi-step routes, push rule, pull rule, استلام البضاعة, استلام وتسليم, الاستلام والتسليم, امر تسليم, اوامر التسليم, الشحنات الواردة, الشحنات الصادرة, خطوة الجودة, استلام, تسليم, istilam, estilam wa tasleem, tasleem</field>
+        <field name="tool_names">read_configuration,read_settings,search_odoo_documentation,change_settings,show_settings,show_menu_path,search_records,prepare_create,prepare_write</field>
+        <field name="modes">talk,agent</field>
+        <field name="version">1.0.0</field>
+        <field name="sequence">300</field>
+        <field name="state">published</field>
+        <field name="origin">module</field>
+        <field name="test_sentence">How do I set up receipts and deliveries in two steps, input then stock?</field>
+        <field name="test_expect">read_configuration</field>
+        <field name="instructions">## Receipts, deliveries and routes
+- First read how it is set here: read_configuration for the warehouses and their steps, read_settings for the Multi-Step Routes setting. By default every warehouse receives and delivers in one step.
+- To use more steps: Inventory app &gt; Configuration &gt; Settings, Warehouse section, tick Multi-Step Routes (it also switches on Storage Locations). Then Inventory &gt; Configuration &gt; Warehouses, open the warehouse, tab Warehouse Configuration: Incoming Shipments and Outgoing Shipments are set separately, so receiving in two steps and delivering in three is allowed.
+- Receipts: 1 step goes straight to stock. 2 steps: vendor to WH/Input, then an internal transfer to stock. 3 steps: WH/Input, then WH/Quality Control, then stock. Stock is not available for further processing until it reaches stock.
+- Deliveries: 1 step ships from stock. 2 steps: pick from stock to WH/Output, then deliver. 3 steps: pick to WH/Packing Zone, pack to WH/Output, then deliver. A removal strategy (FIFO, LIFO, FEFO) decides what the pick takes.
+- Flow: a confirmed purchase order creates the receipt (WH/IN); a confirmed sales order creates the pick or delivery, and Odoo reserves the goods if they are in stock. The next transfers wait on the Inventory Overview cards (Receipts, Internal Transfers, Pick, Pack); Validate completes each one.
+- Routes are sets of push rules (move goods on to storage as they arrive) and pull rules (create a move when something is needed, working backward from the demand). Routes apply on products, product categories, shipping methods and sales order lines.
+- To answer: set out the choice and what it costs the team (more steps, more transfers to validate) and give the pages. To do the work: only when asked to apply, change_settings for the setting, prepare_write for the warehouse, one confirmation card at a time; or show_menu_path to show where to click. Never delete a warehouse or a transfer: archive or cancel.
+- In Odoo 17/18: the steps and names are the same; the product must be a storable one (Storable Product in 17, Goods with Track Inventory in 18).
+Sources: https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/shipping_receiving/daily_operations/receipts_delivery_two_steps.html https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/shipping_receiving/daily_operations/receipts_three_steps.html https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/shipping_receiving/daily_operations/delivery_three_steps.html https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/shipping_receiving/daily_operations/use_routes.html
+</field>
+    </record>
+    <record id="skill_inv_counts_adjustments" model="nudge.skill">
+        <field name="key">inventory-counts-adjustments</field>
+        <field name="recipe_key">nudge-skill-inventory-counts-adjustments</field>
+        <field name="name">Inventory counts and adjustments</field>
+        <field name="summary">Count stock on the Physical Inventory page, apply the differences, schedule yearly or cycle counts by location, and revert an adjustment.</field>
+        <field name="trigger_words">physical inventory, inventory count, count the stock, stock count, cycle count, inventory adjustment, adjust the stock, counted quantity, on hand does not match, annual inventory, جرد, جرد المخزون, الجرد الدوري, تسوية المخزون, تسوية الكمية, تعديل الكمية, الكمية المعدودة, jard, gard, jard el makhzon, taswiyet el makhzon</field>
+        <field name="tool_names">read_settings,search_odoo_documentation,change_settings,show_menu_path,search_records,aggregate_records,prepare_write,prepare_create</field>
+        <field name="modes">talk,agent</field>
+        <field name="version">1.0.0</field>
+        <field name="sequence">310</field>
+        <field name="state">published</field>
+        <field name="origin">module</field>
+        <field name="test_sentence">How do I do a physical inventory count and apply the adjustment?</field>
+        <field name="test_expect">search_records</field>
+        <field name="instructions">## Inventory counts and adjustments
+- Counts are made on Inventory app &gt; Operations &gt; Physical Inventory. It lists every product with a stock history, even below zero. A line shows On Hand (what the database says), Counted (what was really counted, blank by default), Difference, Last Count Date, Scheduled date and User. Extra columns are in the adjust icon of the list.
+- To count: write the real quantity in Counted (if it matches, enter the On Hand quantity, or select the lines and use Actions, Set to quantity on hand). Then apply: Apply on one line, Apply All, or select lines and Apply. Applying creates a stock move in Moves History for traceability, and the stock value changes by the cost times the difference.
+- Actions, Set to 0 clears a product; if it was reserved on sales orders, the forecast goes negative and it shows as unavailable for current deliveries.
+- To plan a count: select products and click Request a Count (date, user). The default scheduled date is the annual inventory day, 31 December; change it in Inventory &gt; Configuration &gt; Settings, Operations section, Annual Inventory Day and Month.
+- Cycle counts are by location: switch on Storage Locations, open the location (Inventory &gt; Configuration &gt; Locations), set Inventory Frequency in days (0 means none). After the first count the next date is set. On Physical Inventory, group by Location to count one place.
+- Products tracked by lots or serial numbers have one line per lot or serial number.
+- To undo an adjustment: Inventory &gt; Reporting &gt; Moves History, select the line, Actions, Revert Inventory Adjustment. The line stays and a new line marked [reverted] is added.
+- To answer: give the steps. To do the work: read the lines with search_records and show the differences first; apply only when asked, through prepare_write cards, one at a time; never delete a stock record.
+- In Odoo 17: the page is called Inventory Adjustments (same Counted and Apply logic).
+Sources: https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/warehouses_storage/inventory_management/count_products.html https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/warehouses_storage/inventory_management/cycle_counts.html https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/warehouses_storage/inventory_management/use_locations.html
+</field>
+    </record>
+    <record id="skill_inv_valuation" model="nudge.skill">
+        <field name="key">inventory-valuation</field>
+        <field name="recipe_key">nudge-skill-inventory-valuation</field>
+        <field name="name">Inventory valuation</field>
+        <field name="summary">Costing methods (standard, FIFO, average), perpetual or periodic valuation, the stock accounts and closing entries, and what each operation does to stock value.</field>
+        <field name="trigger_words">inventory valuation, stock valuation, valuation method, costing method, fifo, avco, average cost, standard price, standard cost, perpetual valuation, periodic valuation, automated valuation, manual valuation, stock closing entry, stock journal entry, تقييم المخزون, طريقة التكلفة, طريقة التقييم, متوسط التكلفة, التكلفة القياسية, السعر القياسي, الوارد اولا صادر اولا, قيد المخزون, taqyeem el makhzon, taqyim el makhzon, tarikat el taklefa</field>
+        <field name="tool_names">read_settings,read_configuration,search_odoo_documentation,change_settings,show_settings,show_menu_path,search_records,aggregate_records</field>
+        <field name="modes">talk,agent</field>
+        <field name="version">1.0.0</field>
+        <field name="sequence">320</field>
+        <field name="state">published</field>
+        <field name="origin">module</field>
+        <field name="test_sentence">Which inventory valuation method should we use, FIFO or average cost?</field>
+        <field name="test_expect">read_settings</field>
+        <field name="instructions">## Inventory valuation
+- Costing method (Accounting &gt; Configuration &gt; Settings, Inventory Valuation section, overridable on the product category): Standard Price (a fixed cost set by hand; receipts at another price do not change it), Average Cost (AVCO, the weighted average of all units, recomputed on each receipt, unchanged by sales), FIFO (oldest units leave first and each receipt keeps its own cost).
+- Accounting method, same section: Periodic (at closing) posts vendor bills as expenses and the stock valuation is updated by the closing entry (Continental practice); Perpetual (at invoicing) posts bills as assets and expenses the cost of goods sold when the invoice is posted (Anglo-Saxon practice). Also set the Valuation Account, the Variation account, the Journal, and optionally the closing process (Manual, Daily, Monthly). A Price Difference Account can be set on the category for Perpetual with Standard Price.
+- Inventory always values stock in real time from the moves: receipts, finished goods and customer returns add value; deliveries, component consumption, vendor returns and scrap remove it. Internal moves change nothing. Accounting is updated only on request: Accounting &gt; Review &gt; Inventory Valuation, Generate Entry (a draft stock closing entry to review and Post). Accrual entries come from the Bill To Receive, Invoices To Be Issued, Billed Not Received and Invoiced Not Delivered reports.
+- Loss and production accounts are set on Inventory Loss and Production locations. Reporting: Inventory &gt; Reporting &gt; Stock for quantity and value, click Unit Cost or Total Value to see where it comes from; Actions, Adjust Valuation changes the value of a remaining move in FIFO or AVCO.
+- Valuation by lot or serial number: enable it on a tracked product whose category is FIFO or AVCO.
+- Read the settings and the category before advising and say what is unknown. Warn that changing the method on a database with stock can leave stock value and accounting out of line; never apply it unasked, then only through change_settings with a confirmation. This is a decision for the accountant.
+- In Odoo 17/18: the choice is Manual (default) or Automated on the product category, shown once Automatic Accounting is ticked in Accounting settings; Automated posts a journal entry on every stock move using the stock input, output and valuation accounts. Odoo 19 no longer uses the stock input and output accounts. Valuation by lots is not in 17.
+Sources: https://www.odoo.com/documentation/19.0/applications/finance/accounting/get_started/inventory_valuation.html https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/inventory_valuation/cheat_sheet.html https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/inventory_valuation/operations_valuation.html https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/inventory_valuation/valuation_by_lots.html
+</field>
+    </record>
+    <record id="skill_inv_replenishment" model="nudge.skill">
+        <field name="key">inventory-replenishment</field>
+        <field name="recipe_key">nudge-skill-inventory-replenishment</field>
+        <field name="name">Replenishment and reordering rules</field>
+        <field name="summary">Reordering rules (min, max, auto or manual), the replenishment report, make to order (MTO) and resupplying one warehouse from another.</field>
+        <field name="trigger_words">reordering rule, reordering rules, reorder, replenish, replenishment, minimum stock, min and max, make to order, mto, replenish on order, low stock, running out of stock, اعادة الطلب, قاعدة اعادة الطلب, قواعد اعادة الطلب, الحد الادنى, الحد الاقصى, تجديد المخزون, تعويض المخزون, حسب الطلب, اعادة التموين, e3adet el talab, hadd adna, tamween</field>
+        <field name="tool_names">read_configuration,read_settings,search_odoo_documentation,change_settings,show_menu_path,search_records,aggregate_records,prepare_create,prepare_write</field>
+        <field name="modes">talk,agent</field>
+        <field name="version">1.0.0</field>
+        <field name="sequence">330</field>
+        <field name="state">published</field>
+        <field name="origin">module</field>
+        <field name="test_sentence">Set up a reordering rule with a minimum and maximum for this product</field>
+        <field name="test_expect">search_records</field>
+        <field name="instructions">## Replenishment and reordering rules
+- A reordering rule keeps the forecasted stock between a Min and a Max: when the forecast falls below Min, an order is created for the quantity that reaches Max (To Order). Create it in Inventory app &gt; Operations &gt; Replenishment, New (Product, Location, Min, Max), or from the Reordering Rules smart button on the product.
+- The product must be of type Goods with Track Inventory ticked. A purchased product needs the Purchase app, the Purchase option, and at least one vendor in its Purchase tab (the top vendor gets the RFQ). A manufactured product needs the Manufacturing app and a bill of materials. Buy creates a request for quotation, Manufacture creates a manufacturing order.
+- Trigger (a column to switch on with the adjust icon): Auto (the default) creates the order at once; Manual lists the product on the Replenishment report for a person to review and click Order. Other optional columns: Preferred route, Vendor, Bill of materials, Multiple.
+- Replenishment report: To Order can be edited; Snooze hides a rule for a period; Replenish, Order to Max orders up to Max even if the minimum is not reached (for discounts or delivery costs); Horizon days, set under Manual in the sidebar, look ahead that many days so future shortages show early; grouping by Vendor helps combine orders.
+- A 0/0/1 rule (Min 0, Max 0, To Order 1) replenishes one unit whenever a sales order creates demand, without reserving the unit for that order.
+- Replenish on Order (MTO): switch on Inventory &gt; Configuration &gt; Settings, Logistics, Replenish on Order (MTO); then on the product, Inventory tab, Routes. Confirming a sales order creates an RFQ or manufacturing order, linked to it by a smart button. Edit that document rather than cancel it; Odoo does not make a new one.
+- Resupply a warehouse from another: set Resupply From on its warehouse form; the product then gets the route X: Supply Product from Y, used with MTO or a reordering rule to create inter-warehouse transfers.
+- To answer: say which fits (rule for stock kept, MTO for stock bought or made only against an order). To do the work: read the rules with search_records; create or change one only when asked, through a prepare_create or prepare_write card; never delete a rule, archive it.
+- In Odoo 17: the product type is Storable Product and Horizon days do not exist. In Odoo 19 the Buy and Manufacture routes are hidden on the product form and applied from its configuration.
+Sources: https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/warehouses_storage/replenishment/reordering_rules.html https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/warehouses_storage/replenishment/report.html https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/warehouses_storage/replenishment/mto.html https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/warehouses_storage/replenishment/resupply_warehouses.html
+</field>
+    </record>
+    <record id="skill_inv_lots_serials" model="nudge.skill">
+        <field name="key">inventory-lots-serials</field>
+        <field name="recipe_key">nudge-skill-inventory-lots-serials</field>
+        <field name="name">Lots, serial numbers and expiry</field>
+        <field name="summary">Track products by lot or serial number, assign them on receipts and deliveries, expiration dates and FEFO removal, and fix stock that had no lots.</field>
+        <field name="trigger_words">lot number, lot numbers, lots and serial numbers, serial number, serial numbers, expiration date, expiration dates, expiry date, best before, traceability, fefo, product recall, track by lot, رقم الدفعة, ارقام الدفعات, رقم تسلسلي, الرقم التسلسلي, الارقام التسلسلية, تاريخ الانتهاء, تاريخ الصلاحية, تتبع المنتج, tarikh el salahiya, raqam tasalsoli, serial no</field>
+        <field name="tool_names">read_settings,read_configuration,search_odoo_documentation,change_settings,show_settings,show_menu_path,search_records,prepare_write</field>
+        <field name="modes">talk,agent</field>
+        <field name="version">1.0.0</field>
+        <field name="sequence">340</field>
+        <field name="state">published</field>
+        <field name="origin">module</field>
+        <field name="test_sentence">How do I track serial numbers and expiration date on a product?</field>
+        <field name="test_expect">read_settings</field>
+        <field name="instructions">## Lots, serial numbers and expiry
+- Switch it on: Inventory app &gt; Configuration &gt; Settings, Traceability section, tick Lots &amp; Serial Numbers (then Expiration Dates and Display Lots &amp; Serial Numbers on Delivery Slips appear). Check with read_settings first.
+- On the product (Inventory &gt; Products), General Information tab, type Goods, tick Track Inventory and choose By Lots (one number for a batch, good for recalls and large quantities) or By Unique Serial Number (one number per unit).
+- Serial numbers also need the operation type: Inventory &gt; Configuration &gt; Operations Types, Lots/Serial Numbers section, Create New on for receipts (usually off on deliveries, so nobody types a serial that does not exist).
+- On a receipt, a lot or serial must be assigned before Validate, or Odoo raises an error: on the product line open Details (Detailed Operations), Add a line with Lot/Serial Number and Quantity until the total equals the demand, or Import Serials/Lots to paste many. On a delivery, pick the existing numbers.
+- Expiration: with Expiration Dates on, tick Expiration Date on the product (Inventory tab, Traceability). Four values, in days: Expiration Date (after receiving), Best Before Date, Removal Date and Alert Date (each before expiry). They fill the dates of new lots automatically; otherwise set them by hand on receipt. Only lot or serial tracked products can have them.
+- FEFO (First Expiry First Out) takes the earliest removal date first: set it as the removal strategy on the location (Logistics heading) or on the product category.
+- Stock that existed before tracking was switched on: change Track Inventory, click the Quantity On Hand, set the Inventoried Quantity to zero for every location, then New with a Lot/Serial Number and the quantity (two inventory adjustments). History shows the original quantity.
+- Valuation by lot or serial number is a product checkbox for FIFO or AVCO categories.
+- To answer: set it out. To do the work: change_settings or prepare_write only when asked, one confirmation at a time; never delete a lot, archive it.
+- In Odoo 17: the product form has a Tracking field with By Lots, by Unique Serial Number, and the product is a Storable Product.
+Sources: https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/product_management/product_tracking/lots.html https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/product_management/product_tracking/serial_numbers.html https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/product_management/product_tracking/expiration_dates.html https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/product_management/product_tracking/reassign.html https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/shipping_receiving/removal_strategies/fefo.html
+</field>
+    </record>
+    <record id="skill_inv_warehouses_locations" model="nudge.skill">
+        <field name="key">inventory-warehouses-locations</field>
+        <field name="recipe_key">nudge-skill-inventory-warehouses-locations</field>
+        <field name="name">Warehouses and locations</field>
+        <field name="summary">Create warehouses and storage locations, location types, and move stock between locations and between warehouses.</field>
+        <field name="trigger_words">warehouse, warehouses, new warehouse, storage location, stock location, location type, internal transfer, transfer between warehouses, resupply from, transit location, مستودع, مستودعات, مخزن جديد, موقع التخزين, مواقع التخزين, نقل بين المستودعات, تحويل بين المخازن, تحويل داخلي, mustawda3, mostawda3, makhzan, naql bein el mustawda3at</field>
+        <field name="tool_names">read_configuration,read_settings,search_odoo_documentation,change_settings,show_menu_path,search_records,prepare_create,prepare_write</field>
+        <field name="modes">talk,agent</field>
+        <field name="version">1.0.0</field>
+        <field name="sequence">350</field>
+        <field name="state">published</field>
+        <field name="origin">module</field>
+        <field name="test_sentence">How do I add a new warehouse and a storage location?</field>
+        <field name="test_expect">read_configuration</field>
+        <field name="instructions">## Warehouses and locations
+- A warehouse is a physical place with an address; each database has one by default. Read what exists with read_configuration. Create or edit in Inventory app &gt; Configuration &gt; Warehouses, New: Warehouse name, Short Name (required, up to five characters, shown on its documents, for example WHA), Address, Company. With Multi-Step Routes on, also Incoming and Outgoing Shipments steps and Resupply From. Other options appear with the Purchase, Manufacturing and subcontracting apps (Buy to Resupply, Manufacture to Resupply).
+- Locations are places inside a warehouse. Switch on Storage Locations in Inventory &gt; Configuration &gt; Settings, Warehouse section, then Inventory &gt; Configuration &gt; Locations, New: Location Name and Parent Location (WH/Stock/Zone A/Refrigerator 1 is Refrigerator 1 under Zone A). The list is filtered on Internal; remove the filter to see all.
+- Location Type: Internal (real stock), Transit (goods between two warehouses of one company, still in inventory), Vendor, Customer, Inventory Loss, Production, Virtual. Only goods that enter or leave the internal and transit locations change stock value; moves between internal locations do not.
+- Other location fields: Storage Category, Is a Scrap Location, Replenish Location, Barcode, Inventory Frequency for cycle counts, removal strategy under Logistics.
+- Moves inside a warehouse are internal transfers (Internal Transfers card on the Inventory Overview). Between warehouses: give the receiving warehouse Resupply From, then use the route X: Supply Product from Y on the product with MTO or a reordering rule, and Odoo creates the transfers.
+- A new warehouse starts empty: add its stock with an inventory adjustment.
+- To answer: set out the options and ask how many sites and which steps they need. To do the work: create or change only when asked, through prepare_create or prepare_write cards; never delete a warehouse or a location, archive it.
+- In Odoo 17/18: the same screens and names.
+Sources: https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/warehouses_storage/inventory_management/warehouses.html https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/warehouses_storage/inventory_management/use_locations.html https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/warehouses_storage/replenishment/resupply_warehouses.html https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/inventory_valuation/operations_valuation.html
+</field>
+    </record>
+    <record id="skill_inv_returns_scrap" model="nudge.skill">
+        <field name="key">inventory-returns-scrap</field>
+        <field name="recipe_key">nudge-skill-inventory-returns-scrap</field>
+        <field name="name">Returns and scrap</field>
+        <field name="summary">Customer returns by reverse transfer (with a credit note after invoicing), how returns to a vendor are valued, and scrapping damaged stock.</field>
+        <field name="trigger_words">customer return, product return, return the goods, reverse transfer, return to vendor, return to supplier, scrap, scrapped, scrap order, damaged goods, damaged stock, write off stock, مرتجع, مرتجعات, مرتجع مبيعات, ارجاع بضاعة, ارجاع منتج, هالك, التالف, بضاعة تالفة, اتلاف, mortaja3, mortaj3, halek, talef</field>
+        <field name="tool_names">read_configuration,search_odoo_documentation,show_menu_path,search_records,prepare_create,prepare_write</field>
+        <field name="modes">talk,agent</field>
+        <field name="version">1.0.0</field>
+        <field name="sequence">360</field>
+        <field name="state">published</field>
+        <field name="origin">module</field>
+        <field name="test_sentence">A customer return came back with a damaged item, how do I scrap it?</field>
+        <field name="test_expect">search_records</field>
+        <field name="instructions">## Returns and scrap
+- Customer return before invoicing: Sales app, open the sales order, Delivery smart button, on the validated delivery click Return. The Reverse Transfer pop-up shows the delivered quantities; change them or remove lines, then Return. This creates an incoming operation; the warehouse validates it, the Delivered quantity on the order drops, and the invoice covers only what the customer keeps.
+- After invoicing the invoice cannot change: do the same Return, then on the invoice click Credit Note, enter the Reason, Journal and Reversal Date, choose Reverse or Reverse and Create Invoice, edit the draft and Confirm. The customer then has an outstanding credit.
+- Value: a customer return adds stock back at the unit cost at which the goods left. A vendor return removes value like any outbound move. With AVCO, goods go back to the vendor at the original purchase price while the internal average cost does not change; under Anglo-Saxon accounting the gap goes to the Price Difference Account of the product category.
+- Scrap removes goods that cannot be sold or repaired. Inventory app &gt; Operations &gt; Scrap, New: Product, Quantity (default 1), Source Location, Scrap Location (default Inventory adjustment), optional Source Document, Scrap Reason, Replenish Quantities (to trigger a reordering rule), then Validate; the Product Moves smart button shows the move. Lot or serial tracked products ask for the number.
+- Scrap from an operation: on a receipt, delivery or internal transfer, Actions icon, Scrap; a Scraps smart button then appears. The all-time list is under Operations, Scrap Orders.
+- To see scrap in the Profit and Loss report: enable Storage Locations, create a location of type Inventory Loss with a Loss Account (Inventory &gt; Configuration &gt; Locations), put the product category on FIFO or AVCO with Perpetual (at invoicing) valuation, and scrap to that location.
+- To answer: give the steps. To do the work: look up the delivery or order with search_records; create a scrap with prepare_create only when asked, one card at a time. Nothing here deletes a record: a return is a new reverse move, a credit note reverses an invoice.
+- In Odoo 17/18: the same Return and Scrap screens; for the Profit and Loss report the category uses Automated inventory valuation.
+Sources: https://www.odoo.com/documentation/19.0/applications/sales/sales/products_prices/returns.html https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/warehouses_storage/inventory_management/scrap_inventory.html https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/inventory_valuation/scrapped_inventory_valuation.html https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/inventory_valuation/operations_valuation.html https://www.odoo.com/documentation/19.0/applications/finance/accounting/get_started/avg_price_valuation.html
+</field>
+    </record>
+    <record id="skill_inv_landed_costs" model="nudge.skill">
+        <field name="key">inventory-landed-costs</field>
+        <field name="recipe_key">nudge-skill-inventory-landed-costs</field>
+        <field name="name">Landed costs</field>
+        <field name="summary">Add freight, insurance, customs and other extra costs to the value of received goods: set up, split methods, from a vendor bill or the Landed Costs menu.</field>
+        <field name="trigger_words">landed cost, landed costs, freight cost, shipping cost on a purchase, customs duties, import duties, additional costs on receipt, split method, cost of import, تكاليف الشحن, تكلفة الشحن, تكلفة الاستيراد, رسوم جمركية, الجمارك, التكاليف الاضافية, تكاليف اضافية, takalif el shahn, takalif el esti5rad, gomrok</field>
+        <field name="tool_names">read_settings,read_configuration,search_odoo_documentation,change_settings,show_settings,show_menu_path,search_records,prepare_create,prepare_write</field>
+        <field name="modes">talk,agent</field>
+        <field name="version">1.0.0</field>
+        <field name="sequence">370</field>
+        <field name="state">published</field>
+        <field name="origin">module</field>
+        <field name="test_sentence">How do I add landed costs for freight on a purchase?</field>
+        <field name="test_expect">read_settings</field>
+        <field name="instructions">## Landed costs
+- Purpose: take shipment, insurance, customs duties, taxes and other fees into the value of the goods received, raising their value without changing the quantity.
+- Switch on: Inventory app &gt; Configuration &gt; Settings, Valuation section, tick Landed Costs and Save; a Default Journal field appears: choose the journal for all landed cost entries. Check with read_settings first.
+- A landed cost product saves retyping: Inventory &gt; Products &gt; Products, New, Product Type Service (required), Purchase tab, tick Is a Landed Cost, and pick a Default Split Method: Equal (same share per product line), By Quantity, By Current Cost (dearer products take more), By Weight, By Volume.
+- From a vendor bill: confirm the purchase order and validate its receipt; open the draft vendor bill (Bill Matching smart button or upload), Add a line with the landed cost product; the bill line shows the Landed Costs checkbox ticked and a Create Landed Costs button appears at the top. Click it.
+- On the landed cost form pick the Transfers it belongs to (only validated ones), check the cost lines in the Additional Costs tab, click Compute, and read the Valuation Adjustments tab: Original Value, Additional Landed Cost, New Value. Validate posts the entry to the journal.
+- Without a bill: Inventory &gt; Operations &gt; Landed Costs, New, same steps.
+- The extra cost is part of the purchase price used by average cost (AVCO) when goods arrive.
+- To answer: suggest the split method that fits the cost; the accountant decides. To do the work: change_settings, prepare_create or prepare_write only when asked, one confirmation card at a time; validating a landed cost posts an entry, so ask before it. Never delete a landed cost record.
+- In Odoo 17/18: the same settings, fields and steps.
+Sources: https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/inventory_valuation/landed_costs.html https://www.odoo.com/documentation/19.0/applications/finance/accounting/get_started/avg_price_valuation.html
+</field>
+    </record>
+    </data>
+</odoo>
