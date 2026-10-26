@@ -362,7 +362,9 @@ class TestAuditor(NudgeCase, HttpCase):
         self.assertFalse(user.share)
 
     def test_the_wizard_respects_the_company_that_is_chosen(self):
-        admin = new_test_user(self.env, login="nudge_adm_wi4", groups="base.group_system")
+        # Creating a user makes a contact: on Odoo 17 and 18 the administrator needs the contact rights as well
+        admin = new_test_user(self.env, login="nudge_adm_wi4", groups="base.group_system,base.group_partner_manager",
+                              company_ids=[Command.set((self.company_one | self.company_two).ids)])
         wizard = self.env["nudge.auditor.wizard"].with_user(admin).create({
             "name": "Second Company Auditor", "login": "second.auditor@example.com",
             "company_ids": [Command.set(self.company_two.ids)], "send_invitation": False,
