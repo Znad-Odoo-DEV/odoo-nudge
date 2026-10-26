@@ -8,6 +8,15 @@
         <field name="arch" type="xml">
             <xpath expr="//block[@name='nudge_access_container']" position="after">
                 <block title="External Assistants (MCP)" name="nudge_mcp_container">
+                    <field name="nudge_mcp_legacy_keys" invisible="1"/>
+                    <field name="nudge_mcp_legacy_keys_end" invisible="1"/>
+                    <div class="alert alert-warning" role="alert" invisible="not nudge_mcp_legacy_keys">
+                        API keys made for assistants before the sign-in with OAuth stop working on
+                        <field name="nudge_mcp_legacy_keys_end" readonly="1" class="oe_inline fw-bold"/>.
+                        Connect each assistant with OAuth instead: add the address of this server as a
+                        connector in the assistant and sign in to Odoo (How to Connect an Assistant, below).
+                        Then delete the old keys in each person's Account Security.
+                    </div>
                     <setting help="Claude Desktop, ChatGPT and other assistants that speak MCP can use the tools of Nudge, as the person who signed them in: with that person's rights, record rules and companies. Each person of the group External Assistant signs their assistant in. Everything they do is kept in What Nudge Did.">
                         <field name="nudge_mcp_enabled"/>
                         <div class="content-group mt8" invisible="not nudge_mcp_enabled">

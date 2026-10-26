@@ -1720,3 +1720,35 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:nudge_mcp.nudge_mcp_client_view_form
 msgid "https://claude.ai/api/mcp/auth_callback"
 msgstr "https://claude.ai/api/mcp/auth_callback"
+
+#. module: nudge_mcp
+#. odoo-python
+#: code:addons/nudge_mcp/models/nudge_mcp.py:0
+msgid ""
+"The keys made before ended on %s. Connect the assistant with OAuth: add the "
+"address of this server as a connector in the assistant and sign in to Odoo "
+"(Settings, Nudge, How to Connect an Assistant)."
+msgstr ""
+"انتهت المفاتيح المنشأة من قبل في %s. اربط المساعد عبر OAuth: أضف عنوان هذا "
+"الخادم كموصّل في المساعد وسجّل دخولك إلى أودو (الإعدادات، Nudge، كيف تربط "
+"مساعدًا)."
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.res_config_settings_view_form_mcp
+msgid ""
+"API keys made for assistants before the sign-in with OAuth stop working on"
+msgstr ""
+"تتوقف مفاتيح API المنشأة للمساعدين قبل تسجيل الدخول عبر OAuth عن العمل في"
+
+#. module: nudge_mcp
+#: model_terms:ir.ui.view,arch_db:nudge_mcp.res_config_settings_view_form_mcp
+msgid ""
+".\n"
+"                        Connect each assistant with OAuth instead: add the address of this server as a\n"
+"                        connector in the assistant and sign in to Odoo (How to Connect an Assistant, below).\n"
+"                        Then delete the old keys in each person's Account Security."
+msgstr ""
+".\n"
+"                        اربط كل مساعد عبر OAuth بدلًا منها: أضف عنوان هذا الخادم كموصّل\n"
+"                        في المساعد وسجّل دخولك إلى أودو (كيف تربط مساعدًا، أدناه).\n"
+"                        ثم احذف المفاتيح القديمة من أمان الحساب لكل شخص."
