@@ -13,6 +13,7 @@ Current version: nudge 18.0.1.59.4, nudge_mcp 18.0.1.1.1, nudge_connect 18.0.1.0
 - Round 5: an outside auditor allowed one company of several reads the log of that company only: Made by Nudge rows with no company were visible to them (a rule for the auditor group is added), and tests now cover two companies for the run, the steps, Made by Nudge and its log, the step page and the wizard's company choice (NP-16).
 
 - Review: a very long line, or a line of unclosed marks, no longer freezes the tab (AUD-07). Every inline pattern scans a bounded span, the heading and table tests no longer backtrack on blanks, and an answer that streams is rendered at most every 50 ms and once per text.
+- Review: `tools.base.holds_outside()` tells whether a conversation holds text from outside: a file sent with a question, a record asked about with its mails (@Nudge), or what search_company_files, search_company_sources, document_to_record, the meeting tools or summarize_record_history read. nudge_connect asks before a connector read then (review ai #8).
 
 ## 19.0.1.59.4 (unreleased)
 
