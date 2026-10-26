@@ -1349,3 +1349,111 @@ msgstr ""
 "في هذه المحادثة نص من خارج أودو (ملف أو بريد إلكتروني أو صفحة ويب أو جواب "
 "موصل)، وهذه الكلمات لم تكتبها أنت."
 
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_token__access_token
+msgid "Access Token"
+msgstr "رمز الوصول"
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_cache__args_hash
+msgid "Args Hash"
+msgstr "بصمة المعاملات"
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid ""
+"Each person signs in once, with their own account at the provider: Nudge keeps\n"
+"                                their tokens for them alone and never uses another person's. Create the client\n"
+"                                at the provider with the redirect address above, or read how the server wants\n"
+"                                it (Find How to Sign In), which also registers a client when the server allows."
+msgstr "يسجّل كل شخص الدخول مرة واحدة بحسابه الخاص لدى المزوّد: يحتفظ Nudge برموزه له وحده ولا يستخدم رموز غيره أبدًا. أنشئ العميل لدى المزوّد بعنوان إعادة التوجيه أعلاه، أو اقرأ ما يريده الخادم (البحث عن طريقة تسجيل الدخول)، وهو يسجّل عميلًا أيضًا عندما يسمح الخادم بذلك."
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_cache__expires
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_oauth_state__expires
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_token__expires
+msgid "Expires"
+msgstr "ينتهي في"
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_usage__kind
+msgid "Kind"
+msgstr "النوع"
+
+#. module: nudge_connect
+#: model:ir.model,name:nudge_connect.model_nudge_connector_token
+msgid "Nudge Connector Sign-In"
+msgstr "تسجيل دخول موصّل Nudge"
+
+#. module: nudge_connect
+#: model:ir.model,name:nudge_connect.model_nudge_connector_oauth_state
+msgid "Nudge Connector Sign-In Started"
+msgstr "بدأ تسجيل دخول موصّل Nudge"
+
+#. module: nudge_connect
+#: model:ir.model,name:nudge_connect.model_nudge_usage
+msgid "Nudge Usage"
+msgstr "استخدام Nudge"
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid ""
+"Pick the kind of system to start from: the address, the credential and the\n"
+"                                tools that come in as Read are filled in. A preset is a starting point, not a\n"
+"                                promise that the server exists: the tools are read from the server, and every\n"
+"                                one comes in Not Allowed except those the preset marks Read. Never a Write."
+msgstr "اختر نوع النظام للبدء منه: يُملأ العنوان وبيانات الاعتماد والأدوات التي تدخل بصفة قراءة. القالب نقطة بداية وليس وعدًا بوجود الخادم: تُقرأ الأدوات من الخادم، وتدخل كل أداة بحالة غير مسموح بها إلا تلك التي يحدد القالب أنها قراءة. وليست أبدًا كتابة."
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_token__refresh_token
+msgid "Refresh Token"
+msgstr "رمز التحديث"
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid ""
+"Remember Reads: 0 is off. 60 seconds keeps a repeated read in one\n"
+"                                conversation from reaching the server. Writes are never kept."
+msgstr "تذكّر القراءات: 0 يعني الإيقاف. 60 ثانية تمنع القراءة المتكررة في المحادثة الواحدة من الوصول إلى الخادم. لا تُحفظ الكتابات أبدًا."
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_oauth_state__state_hash
+msgid "State Hash"
+msgstr "بصمة الحالة"
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_cache__text
+msgid "Text"
+msgstr "النص"
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_res_config_settings__nudge_connect_budget_user_calls
+msgid "The most calls one person may make to connectors in a day: a call costs no tokens but counts as one call. A kept answer is not a call. 0 is no limit."
+msgstr "أكبر عدد من الاستدعاءات يجريها شخص واحد إلى الموصّلات في اليوم: الاستدعاء لا يكلّف رموزًا لكنه يُحتسب استدعاءً واحدًا. الإجابة المحفوظة ليست استدعاءً. 0 يعني بلا حد."
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_res_config_settings__nudge_connect_budget_company_calls
+msgid "The most calls the company may make to connectors in a month. 0 is no limit."
+msgstr "أكبر عدد من الاستدعاءات تجريها الشركة إلى الموصّلات في الشهر. 0 يعني بلا حد."
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_cache__user_id
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_oauth_state__user_id
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_token__user_id
+msgid "User"
+msgstr "المستخدم"
+
+#. module: nudge_connect
+#: model:ir.model.fields,field_description:nudge_connect.field_nudge_connector_oauth_state__verifier
+msgid "Verifier"
+msgstr "المُتحقِّق"
+
+#. module: nudge_connect
+#: model:ir.model.fields,help:nudge_connect.field_nudge_connector_token__expires
+msgid "When the access token ends; empty when the provider did not say."
+msgstr "وقت انتهاء رمز الوصول؛ فارغ إذا لم يذكره المزوّد."
+
+#. module: nudge_connect
+#: model_terms:ir.ui.view,arch_db:nudge_connect.nudge_connector_view_form
+msgid "https://auth.example.com/authorize"
+msgstr "https://auth.example.com/authorize"
