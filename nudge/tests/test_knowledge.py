@@ -1,5 +1,6 @@
 import textwrap
 
+from odoo import release
 from odoo.tests import TransactionCase, tagged
 
 from odoo.addons.nudge import tools
@@ -122,17 +123,18 @@ class TestReader(TransactionCase):
 class TestDocumentation(NudgeCase, TransactionCase):
 
     def test_the_documentation_comes_with_the_module(self):
+        # The documentation of the version in use: the port puts the pages of 18 and 17 in their packages
         Page = self.env["nudge.doc.page"]
-        self.assertGreater(Page.search_count([]), 900)
-        page = Page.search([("path", "=", "sales/sales/sales_quotations/create_quotations")])
-        self.assertEqual(page.title, "Create quotations")
+        self.assertGreater(Page.search_count([]), 800)
+        page = Page.search([("path", "=", "sales/sales/invoicing/down_payment")])
+        self.assertEqual(page.title, "Down payments")
         self.assertEqual(page.app, "sales")
         self.assertEqual(page.category, "sales")
         self.assertIn(" sale ", page.modules)
         self.assertEqual(
             page.url,
-            "https://www.odoo.com/documentation/19.0/applications/sales/sales/sales_quotations/"
-            "create_quotations.html")
+            f"https://www.odoo.com/documentation/{release.serie}/applications/sales/sales/invoicing/"
+            "down_payment.html")
         self.assertGreater(page.passage_count, 3)
         self.assertGreater(self.env["nudge.doc.passage"].search_count([]), 5000)
 
@@ -141,7 +143,8 @@ class TestDocumentation(NudgeCase, TransactionCase):
         orm = Page.search([("path", "=", "developer/reference/backend/orm")])
         self.assertEqual(orm.title, "ORM API")
         self.assertEqual(orm.app, "reference")
-        self.assertEqual(orm.url, "https://www.odoo.com/documentation/19.0/developer/reference/backend/orm.html")
+        self.assertEqual(
+            orm.url, f"https://www.odoo.com/documentation/{release.serie}/developer/reference/backend/orm.html")
         self.assertFalse(orm.modules, "Not about an app: never offered for a screen")
         computed = orm.passage_ids.filtered(lambda passage: "Computed Fields" in (passage.heading or ""))
         self.assertIn("@api.depends('value', 'tax')\ndef _compute_total(self):", computed[0].body,
@@ -190,7 +193,7 @@ class TestDocumentation(NudgeCase, TransactionCase):
         found = self.env["nudge.doc.passage"]._search_text("quotation template", limit=2)
         text = found._render()
         self.assertTrue(text.startswith("## "))
-        self.assertIn("Source: https://www.odoo.com/documentation/19.0/applications/", text)
+        self.assertIn(f"Source: https://www.odoo.com/documentation/{release.serie}/applications/", text)
         self.assertEqual(text.count("Source: "), len(found))
         short = found._render(max_chars=300)
         self.assertLessEqual(len(short), 300)
@@ -205,7 +208,7 @@ class TestDocumentation(NudgeCase, TransactionCase):
         result = tools.base.call(env, "search_odoo_documentation",
                                  {"query": "quotation template", "app": "sales"})
         self.assertFalse(result.is_error)
-        self.assertIn("Source: https://www.odoo.com/documentation/19.0/applications/sales/", result.content)
+        self.assertIn(f"Source: https://www.odoo.com/documentation/{release.serie}/applications/sales/", result.content)
 
         result = tools.base.call(env, "search_odoo_documentation", {"query": "xqzv wprtk"})
         self.assertFalse(result.is_error)
@@ -240,7 +243,7 @@ class TestDocumentation(NudgeCase, TransactionCase):
         self.env["nudge.profile"]._cron_refresh()
         self.assertEqual(Page.search_count([]), count, "The cron loads it again when it changed")
         self.assertTrue(Page._is_loaded())
-        self.assertIn("pages of the official documentation of Odoo 19.0", Page._summary())
+        self.assertIn(f"pages of the official documentation of Odoo {release.serie}", Page._summary())
 
     def test_the_model_is_told(self):
         self.assertIn("search_odoo_documentation", prompt.SYSTEM_PERSONA)
