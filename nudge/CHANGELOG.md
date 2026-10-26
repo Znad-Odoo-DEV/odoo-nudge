@@ -1,6 +1,14 @@
 # Changelog
 
-Current version: nudge 19.0.1.59.6, nudge_mcp 19.0.1.1.1, nudge_connect 19.0.1.0.4, nudge_messaging 19.0.1.0.6, nudge_ai 19.0.1.0.11, nudge_studio 19.0.1.0.12, nudge_documents 19.0.1.0.8, nudge_spreadsheet 19.0.1.0.11, nudge_builder 19.0.1.0.9, nudge_mail 19.0.1.0.15, nudge_discuss 19.0.1.0.9, nudge_website 19.0.1.0.4.
+Current version: nudge 19.0.1.59.7, nudge_mcp 19.0.1.1.2, nudge_connect 19.0.1.0.4, nudge_messaging 19.0.1.0.6, nudge_ai 19.0.1.0.11, nudge_studio 19.0.1.0.12, nudge_documents 19.0.1.0.8, nudge_spreadsheet 19.0.1.0.11, nudge_builder 19.0.1.0.9, nudge_mail 19.0.1.0.15, nudge_discuss 19.0.1.0.9, nudge_website 19.0.1.0.5.
+
+## 19.0.1.59.7 (unreleased)
+
+- Study (nudge_website, STU-01): the chat panel of the website tells the visitor, under the greeting, that answers are written by an AI service and what they write is sent to it, and links to the privacy policy of the company when one is set (Website settings, Privacy Policy Link: a web address or a path of the site only, never javascript: or data:). The Apps Store asks for this opt-in before data leaves.
+- Study (STU-04, the rest of AUD-03): a value shown when the records of a configuration menu are read, or in the changes a Developer action made, is hidden when the field holds a secret under another name (shown as a password in a view), not only when its name says so (`records.hides_value`).
+- Study (nudge_mcp, STU-11): the API keys of before (scope nudge_mcp) stop working on 2027-01-26; until then Settings, Nudge warns while one exists, and from then a call with one is refused with how to connect with OAuth.
+- Study (STU-02, STU-03): the manifests and the store pages of nudge, nudge_connect, nudge_mcp, nudge_messaging and nudge_website say what leaves the server, to whom, and when; that nothing goes to the author; that downloads are data, never code; and that code runs only in Developer mode, after an administrator approves it.
+- Arabic: the .pot files are exported again from the code, so the Arabic entries added since they were last exported load (Odoo marks an entry of ar.po that the .pot lacks as obsolete and skips it).
 
 ## 19.0.1.59.6 (unreleased)
 
