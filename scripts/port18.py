@@ -573,3 +573,12 @@ for _dir, _dirs, _fs in os.walk(ROOT):
             _rel = os.path.relpath(os.path.join(_dir, _f), ROOT).replace(os.sep, "/")
             sub(_rel, r'(<record id="[^"]+" model="ir\.actions\.server">(?:(?!</record>).)*?)name="group_ids"',
                 r'\1name="groups_id"', flags=re.S)
+
+# DOCS RULE 1: the tree carries the Odoo documentation of its own version, not the one of 19
+# (docs_data/ is at the root of the repository, next to scripts/; built by addons/nudge/scripts/build_odoo_docs.py)
+_docs = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs_data", "odoo_docs_18.0.jsonl.gz")
+if os.path.exists(_docs) and os.path.isdir(ROOT + "nudge/data"):
+    shutil.copyfile(_docs, ROOT + "nudge/data/odoo_docs.jsonl.gz")
+    print("documentation of Odoo 18.0 put in nudge/data")
+else:
+    print("WARNING: no documentation of Odoo 18.0 found at", _docs, "- the 19 pages stay")

@@ -521,3 +521,12 @@ for _name in ("nudge/models/nudge_task.py", "nudge/models/nudge_run.py"):
 
 # R2 RULE 17: 17's features block has no title slot, and a title is added only to a block that has items (the test gives none)
 sub("nudge_builder/tests/test_snippets.py", r'snippets\.fill\(section, "s_features", \{"title": "Hello <script>alert\(1\)</script>"\}\)', 'snippets.fill(section, "s_features", {"title": "Hello <script>alert(1)</script>", "items": [{"title": "One", "text": "x"}]})')
+
+# DOCS RULE 1: the tree carries the Odoo documentation of its own version, not the one of 19
+# (docs_data/ is at the root of the repository, next to scripts/; built by addons/nudge/scripts/build_odoo_docs.py)
+_docs = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs_data", "odoo_docs_17.0.jsonl.gz")
+if os.path.exists(_docs) and os.path.isdir(ROOT + "nudge/data"):
+    shutil.copyfile(_docs, ROOT + "nudge/data/odoo_docs.jsonl.gz")
+    print("documentation of Odoo 17.0 put in nudge/data")
+else:
+    print("WARNING: no documentation of Odoo 17.0 found at", _docs, "- the 19 pages stay")

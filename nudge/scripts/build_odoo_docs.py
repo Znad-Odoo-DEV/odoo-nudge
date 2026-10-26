@@ -10,7 +10,11 @@ is enough:
 
 Then, from the folder of the module, with any Python 3.10+:
 
-    python scripts/build_odoo_docs.py <path to odoo_docs> [19.0]
+    python scripts/build_odoo_docs.py <path to odoo_docs> [19.0] [output file]
+
+The 18.0 and 17.0 documentation goes to docs_data/odoo_docs_<version>.jsonl.gz
+at the root of the repository (the ports copy it in): pass that path as the
+third argument.
 
 One line per page in the output, JSON: path, url, category, app, modules,
 title, description, sections [{heading, anchor, text}]. Nudge loads it when
@@ -158,7 +162,11 @@ def main(arguments):
         raise SystemExit(__doc__)
     version = arguments[1] if len(arguments) > 1 else "19.0"
     pages = build(arguments[0], version)
-    target = pathlib.Path(__file__).resolve().parent.parent / "data" / "odoo_docs.jsonl.gz"
+    if len(arguments) > 2:
+        target = pathlib.Path(arguments[2]).resolve()
+        target.parent.mkdir(parents=True, exist_ok=True)
+    else:
+        target = pathlib.Path(__file__).resolve().parent.parent / "data" / "odoo_docs.jsonl.gz"
     with gzip.open(target, "wt", encoding="utf-8", compresslevel=9) as output:
         output.write(json.dumps({"version": version, "pages": len(pages),
                                  "license": "CC BY-SA 4.0, https://github.com/odoo/documentation"},
