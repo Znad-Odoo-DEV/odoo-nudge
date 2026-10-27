@@ -698,6 +698,8 @@ class NudgeNoai(models.AbstractModel):
             return self._plan_open(grammar.Parse(parsed.text), screen, mode) if False else None
         status, candidates = self._pick(name, model_name, None, screen)
         if status == "none":
+            if not kind:
+                return None  # "where do I find the trial balance": a place or a report, not a record: the AI answers
             return Plan(_("I found nothing called “%s”.", name))
         if status == "many":
             return self._choice(candidates, _("Which one is “%s”?", name))

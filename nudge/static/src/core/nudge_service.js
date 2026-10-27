@@ -1019,7 +1019,12 @@ function isReadable(file) {
                 products: products?.items || null,
                 productQuery: products?.query || "",
                 found: screens
-                    ? { menus: screens.menus || [], records: screens.records || [], lists: screens.lists || [] }
+                    ? {
+                          menus: screens.menus || [],
+                          records: screens.records || [],
+                          lists: screens.lists || [],
+                          commands: screens.commands || [],
+                      }
                     : null,
                 chart: chart ? (({ type, ...drawn }) => drawn)(chart) : null,
                 changes: changes ? (({ type, ...listed }) => listed)(changes) : null,
@@ -1690,8 +1695,13 @@ function isReadable(file) {
                     break;
                 }
                 case "found":
-                    // Screens Nudge found itself: the pointer to each, or Open
-                    answer.found = { menus: event.menus || [], records: event.records || [], lists: event.lists || [] };
+                    // Screens Nudge found itself: the pointer to each, or Open; and a command to run, as a chip
+                    answer.found = {
+                        menus: event.menus || [],
+                        records: event.records || [],
+                        lists: event.lists || [],
+                        commands: event.commands || [],
+                    };
                     break;
                 case "filter":
                     answer.content = join(answer.content, event.text);
