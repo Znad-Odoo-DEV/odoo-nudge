@@ -560,7 +560,8 @@ function isReadable(file) {
 
         /** The colour set on the company of the person, read once and only when the accent follows it */
         async function loadCompanyColor() {
-            const companyId = user.activeCompany?.id;
+            // user.activeCompany is of Odoo 19; until 18 the session names the company in use
+            const companyId = user.activeCompany?.id || session.user_companies?.current_company;
             if (!companyId || state.companyColor) {
                 return;
             }
