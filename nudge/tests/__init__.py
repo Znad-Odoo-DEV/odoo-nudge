@@ -112,3 +112,4 @@ from . import test_economy_tier  # S6
 from . import test_prompt_cache  # S8
 from . import test_screens  # S12 and T21 screens
 from . import test_pinned_http  # S11
+from . import test_pinned_providers  # STU-05

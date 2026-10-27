@@ -1,6 +1,6 @@
 import logging
 
-import requests
+from odoo.addons.nudge.tools import pinned_http
 
 from .models.nudge_messaging_api import PARAM, TELEGRAM_API, TIMEOUT
 
@@ -15,7 +15,7 @@ def uninstall_hook(env):
     token = (Parameter.get_param(PARAM + "telegram.bot_token") or "").strip()
     if token:
         try:
-            reply = requests.post(f"{TELEGRAM_API}/bot{token}/deleteWebhook", timeout=TIMEOUT)
+            reply = pinned_http.post(f"{TELEGRAM_API}/bot{token}/deleteWebhook", timeout=TIMEOUT)
             if reply.status_code >= 400:
                 _logger.info("Nudge messaging uninstall: Telegram kept the webhook (%s)", reply.status_code)
         except Exception as error:  # noqa: BLE001 - whatever Telegram does, the uninstall goes on

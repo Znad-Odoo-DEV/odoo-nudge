@@ -513,6 +513,7 @@ class NudgeProvider(models.Model):
             stt_mode=self.stt_mode or base.STT_NONE,
             stt_model=(self.stt_model or "").strip(),
             stt_url=(self.stt_url or "").strip(),
+            runs_locally=bool(self.runs_locally),
         )
 
     @api.constrains("base_url")

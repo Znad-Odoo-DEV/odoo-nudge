@@ -63,6 +63,48 @@ class TestEgressList(TransactionCase):
 
 
 @tagged("post_install", "-at_install")
+class TestEgressMode(TransactionCase):
+    """STU-06: with an empty list, "Any address" allows everything and "Only the list" keeps only the AI providers."""
+
+    def setUp(self):
+        super().setUp()
+        self.env.company.nudge_egress_hosts = False
+        self.Egress = self.env["nudge.egress"]
+
+    def set_mode(self, mode):
+        self.env["ir.config_parameter"].sudo().set_param("nudge.egress_mode", mode)
+
+    def test_any_address_is_the_default_and_changes_nothing(self):
+        self.env["ir.config_parameter"].sudo().search([("key", "=", "nudge.egress_mode")]).unlink()
+        self.assertEqual(self.env["res.config.settings"].default_get(["nudge_egress_mode"])["nudge_egress_mode"], "any")
+        for purpose in ("chat", "voice", "picture", "connector", "recipes", "model", "feed"):
+            self.Egress.check("https://anything.test", purpose)
+
+    def test_only_the_list_with_an_empty_list_keeps_the_providers_only(self):
+        self.set_mode("list")
+        for purpose in ("chat", "voice", "picture"):
+            self.Egress.check("http://localhost:11434/v1", purpose)
+        for purpose in ("connector", "recipes", "model", "feed", "whatsapp"):
+            with self.assertRaises(UserError) as error:
+                self.Egress.check("https://anything.test", purpose)
+            self.assertIn("anything.test:443", str(error.exception))
+            self.assertIn("Settings, Nudge", str(error.exception))
+
+    def test_only_the_list_with_a_list_is_the_list(self):
+        self.set_mode("list")
+        self.env.company.nudge_egress_hosts = "allowed.test"
+        self.Egress.check("https://allowed.test", "connector")
+        with self.assertRaises(UserError):
+            self.Egress.check("https://other.test", "chat")
+
+    def test_any_address_with_a_list_is_the_list(self):
+        self.set_mode("any")
+        self.env.company.nudge_egress_hosts = "allowed.test"
+        with self.assertRaises(UserError):
+            self.Egress.check("https://other.test", "connector")
+
+
+@tagged("post_install", "-at_install")
 class TestEgressPaths(NudgeCase, TransactionCase):
 
     def setUp(self):
@@ -99,7 +141,7 @@ class TestEgressPaths(NudgeCase, TransactionCase):
         for call in (self.provider.action_test_connection, self.provider._ollama_detect,
                      self.provider._can_see_pictures,
                      lambda: self.provider._read_picture("image/png", "AAAA", "what", model="x")):
-            with patch("requests.request") as sent, patch("requests.post") as posted, \
+            with patch("odoo.addons.nudge.tools.pinned_http.request") as sent, patch("requests.post") as posted, \
                     self.assertRaises(UserError):
                 call()
             sent.assert_not_called()
