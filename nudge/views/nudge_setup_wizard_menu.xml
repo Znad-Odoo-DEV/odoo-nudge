@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<odoo>
-    <menuitem id="nudge_menu_setup_wizard" name="Setup Wizard" sequence="5"
-              parent="nudge_menu_configuration" action="nudge_setup_wizard_action"
-              groups="base.group_system"/>
-</odoo>

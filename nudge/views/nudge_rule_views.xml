@@ -108,7 +108,7 @@
         <field name="group_ids" eval="[Command.link(ref('nudge.group_nudge_manager'))]"/>
     </record>
 
-    <menuitem id="nudge_menu_rules" name="Recurring Requests" sequence="24"
+    <menuitem id="nudge_menu_rules" name="Recurring Requests" sequence="125"
               parent="nudge_menu_knowledge" action="nudge_rule_action"
-              groups="nudge.group_nudge_manager"/>
+              groups="-nudge.group_nudge_manager,-base.group_system,nudge.group_nudge_advanced_menus"/>
 </odoo>

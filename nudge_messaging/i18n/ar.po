@@ -878,3 +878,7 @@ msgstr "يربط المستخدم رقم هاتفه من تفضيلات Nudge: �
 msgid "Agent mode is not open to you. Ask your administrator."
 msgstr "وضع الوكيل غير متاح لك. تواصل مع مسؤول النظام."
 
+#. module: nudge_messaging
+#: model_terms:ir.ui.view,arch_db:nudge_messaging.res_config_settings_view_form_messaging_links
+msgid "The phones people linked to their Odoo user to ask Nudge on WhatsApp or Telegram."
+msgstr "الهواتف التي ربطها الناس بمستخدميهم في Odoo ليسألوا Nudge عبر واتساب أو تيليغرام."

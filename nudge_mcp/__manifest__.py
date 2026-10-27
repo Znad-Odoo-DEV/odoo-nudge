@@ -25,7 +25,7 @@ Odoo and the company files, and, when you allow it, prepare changes.
 Installed from Apps by an administrator who wants it, with Nudge.
 """,
     "category": "Productivity",
-    "version": "19.0.1.1.2",
+    "version": "19.0.1.1.3",
     "author": "Ibrahim Elzenad",
     "website": "https://znad-odoo-dev.github.io",
     "support": "id7sp22@gmail.com",

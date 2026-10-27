@@ -229,12 +229,10 @@
         <field name="target">new</field>
     </record>
 
-    <menuitem id="nudge_menu_recipe_market" name="Marketplace" sequence="5"
-              parent="nudge_menu_recipes" action="nudge_recipe_entry_action"/>
-    <menuitem id="nudge_menu_recipe_installed" name="Installed Recipes" sequence="6"
-              parent="nudge_menu_recipes" action="nudge_recipe_installed_action"/>
-    <menuitem id="nudge_menu_recipe_sources" name="Recipe Sources" sequence="7"
-              parent="nudge_menu_recipes" action="nudge_recipe_source_action"/>
-    <menuitem id="nudge_menu_recipe_publish" name="Publish" sequence="25"
-              parent="nudge_menu_recipes" action="nudge_recipe_publish_action"/>
+    <menuitem id="nudge_menu_recipe_market" name="Marketplace" sequence="50"
+              parent="nudge_menu_advanced" action="nudge_recipe_entry_action"/>
+    <menuitem id="nudge_menu_recipe_installed" name="Installed Recipes" sequence="60"
+              parent="nudge_menu_advanced" action="nudge_recipe_installed_action"/>
+    <menuitem id="nudge_menu_recipe_sources" name="Recipe Sources" sequence="70"
+              parent="nudge_menu_advanced" action="nudge_recipe_source_action"/>
 </odoo>

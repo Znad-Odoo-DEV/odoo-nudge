@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 09:03+0000\n"
-"PO-Revision-Date: 2026-10-27 09:03+0000\n"
+"POT-Creation-Date: 2026-10-27 10:18+0000\n"
+"PO-Revision-Date: 2026-10-27 10:18+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -2393,6 +2393,7 @@ msgstr ""
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/developer.py:0
+#: model:ir.ui.menu,name:nudge.nudge_menu_agent
 msgid "Activity"
 msgstr ""
 
@@ -2447,8 +2448,8 @@ msgstr ""
 
 #. module: nudge
 #: model:ir.actions.act_window,name:nudge.nudge_auditor_wizard_action
-#: model:ir.ui.menu,name:nudge.nudge_menu_auditor_add
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_auditor_wizard_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form_auditor
 msgid "Add an Auditor"
 msgstr ""
 
@@ -2545,6 +2546,11 @@ msgstr ""
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_token_dashboard_view_search
 msgid "Administrators"
+msgstr ""
+
+#. module: nudge
+#: model:ir.ui.menu,name:nudge.nudge_menu_advanced
+msgid "Advanced"
 msgstr ""
 
 #. module: nudge
@@ -2870,6 +2876,14 @@ msgid ""
 msgstr ""
 
 #. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form_auditor
+msgid ""
+"An auditor reads what Nudge did in their companies and nothing else, for a "
+"period you set. Add one here; revoke or extend from the Nudge Auditor tab of"
+" the user."
+msgstr ""
+
+#. module: nudge
 #. odoo-python
 #: code:addons/nudge/models/nudge_answer_cache.py:0
 msgid ""
@@ -3039,6 +3053,7 @@ msgstr ""
 #: code:addons/nudge/models/nudge_recipe_publish.py:0
 #: model:ir.model.fields,field_description:nudge.field_nudge_latency_report__answers
 #: model:ir.model.fields,field_description:nudge.field_nudge_token_dashboard__answers
+#: model:ir.ui.menu,name:nudge.nudge_menu_memory
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_latency_view_list
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_task_view_form
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_token_dashboard_view_list
@@ -3213,6 +3228,11 @@ msgstr ""
 msgid ""
 "Approval workflow from one sentence: threshold, approver group, button "
 "guard."
+msgstr ""
+
+#. module: nudge
+#: model:ir.ui.menu,name:nudge.nudge_menu_approvals
+msgid "Approvals"
 msgstr ""
 
 #. module: nudge
@@ -3771,6 +3791,11 @@ msgstr ""
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_res_users__nudge_auditor_until
 msgid "Auditor Access Until"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form_auditor
+msgid "Auditors"
 msgstr ""
 
 #. module: nudge
@@ -7254,11 +7279,6 @@ msgid "Explains an Odoo term or field with an example from this database."
 msgstr ""
 
 #. module: nudge
-#: model:ir.ui.menu,name:nudge.nudge_menu_recipe_export
-msgid "Export"
-msgstr ""
-
-#. module: nudge
 #: model:ir.model,name:nudge.model_nudge_recipe_export
 msgid "Export a Nudge Recipe"
 msgstr ""
@@ -7268,6 +7288,7 @@ msgstr ""
 #: code:addons/nudge/models/nudge_recipe_wizard.py:0
 #: model:ir.actions.act_window,name:nudge.nudge_recipe_export_action
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_export_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_market_view_list
 msgid "Export a recipe"
 msgstr ""
 
@@ -7537,7 +7558,6 @@ msgstr ""
 
 #. module: nudge
 #: model:ir.actions.server,name:nudge.nudge_question_find_action
-#: model:ir.ui.menu,name:nudge.nudge_menu_questions_find
 msgid "Find Recurring Questions"
 msgstr ""
 
@@ -7576,6 +7596,11 @@ msgid ""
 " by customer with the total due and the oldest due date, as a table. Then "
 "prepare one activity \"Call about overdue invoices\" per customer for "
 "{{assignee}}, due {{due}}, in one card for my approval."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_view_list_find
+msgid "Find recurring questions"
 msgstr ""
 
 #. module: nudge
@@ -8143,8 +8168,12 @@ msgid "Heading"
 msgstr ""
 
 #. module: nudge
-#: model:ir.model.fields.selection,name:nudge.selection__nudge_health_report__scope__health
 #: model:ir.ui.menu,name:nudge.nudge_menu_health
+msgid "Health & Compliance"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_health_report__scope__health
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
 msgid "Health Check"
 msgstr ""
@@ -8841,7 +8870,6 @@ msgstr ""
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_recipe_import_line__selected
-#: model:ir.ui.menu,name:nudge.nudge_menu_recipe_import
 msgid "Import"
 msgstr ""
 
@@ -8855,6 +8883,7 @@ msgstr ""
 #: code:addons/nudge/models/nudge_recipe_wizard.py:0
 #: model:ir.actions.act_window,name:nudge.nudge_recipe_import_action
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_import_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_market_view_list
 msgid "Import a recipe"
 msgstr ""
 
@@ -9400,8 +9429,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/models/nudge_question.py:0
 msgid ""
-"Keep an answer, record a tour or ignore it: Nudge, What Nudge Knows, "
-"Recurring Questions."
+"Keep an answer, record a tour or ignore it: Nudge, Knowledge, Recurring "
+"Questions (with Show advanced menus on)."
 msgstr ""
 
 #. module: nudge
@@ -9577,6 +9606,11 @@ msgstr ""
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_run__job
 msgid "Kind of Work"
+msgstr ""
+
+#. module: nudge
+#: model:ir.ui.menu,name:nudge.nudge_menu_knowledge
+msgid "Knowledge"
 msgstr ""
 
 #. module: nudge
@@ -10042,7 +10076,7 @@ msgid ""
 "mode: automation rules, server actions, emails sent on an event, buttons, "
 "fields and changes to the screens. Nudge explains first and shows everything"
 " on the card, the code included; nothing is made before a yes; deletion only"
-" when asked for by name. Every step is in What Nudge Did. Off by default."
+" when asked for by name. Every step is in Nudge, Activity. Off by default."
 msgstr ""
 
 #. module: nudge
@@ -10070,7 +10104,7 @@ msgid ""
 " server actions, emails sent on an event, buttons, fields and changes to the"
 " screens. Only the group Settings. Nudge explains first and shows everything"
 " on the card, the code included; nothing is made before a yes; deletion only"
-" when asked for by name. Every step is in What Nudge Did. Off by default."
+" when asked for by name. Every step is in Nudge, Activity. Off by default."
 msgstr ""
 
 #. module: nudge
@@ -10091,8 +10125,8 @@ msgid ""
 "a join or a report no other tool gives. Only the group Settings, and only "
 "those allowed in every company: a query knows no company rule. No change, no"
 " lock, no comment; the tables of Odoo they may read, never those of users, "
-"parameters or providers; 50 rows, 10 seconds. Every query is in What Nudge "
-"Did. Off by default."
+"parameters or providers; 50 rows, 10 seconds. Every query is in Nudge, "
+"Activity. Off by default."
 msgstr ""
 
 #. module: nudge
@@ -10138,8 +10172,8 @@ msgid ""
 "Let the agent compute with Python when counting and searching are not "
 "enough: a loop over records, a calculation per record. The code runs in the "
 "sandbox of Odoo, as the person, and reads only: what it writes is discarded,"
-" and changes still go through the yes of the person. Every run is in What "
-"Nudge Did. Off by default."
+" and changes still go through the yes of the person. Every run is in Nudge, "
+"Activity. Off by default."
 msgstr ""
 
 #. module: nudge
@@ -10835,6 +10869,7 @@ msgstr ""
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/scaffold.py:0
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
 msgid "Menus"
 msgstr ""
 
@@ -10912,6 +10947,11 @@ msgstr ""
 #: model:ir.ui.menu,name:nudge.nudge_menu_coverage
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_coverage_view_list
 msgid "Missed Sentences"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_view_list_coverage
+msgid "Missed sentences"
 msgstr ""
 
 #. module: nudge
@@ -11709,7 +11749,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_export_view_form
 msgid ""
 "No signing key is set: the recipe is exported unsigned. A system administrator uploads one in\n"
-"                    Nudge / Configuration / Recipes / Signing Key."
+"                    Nudge / Configuration / Advanced / Signing Key."
 msgstr ""
 
 #. module: nudge
@@ -12434,7 +12474,6 @@ msgstr ""
 
 #. module: nudge
 #: model:ir.actions.act_window,name:nudge.nudge_memory_action
-#: model:ir.ui.menu,name:nudge.nudge_menu_memory
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_view_list
 msgid "Nudge Memory"
 msgstr ""
@@ -13000,6 +13039,11 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_user_menu.js:0
 msgid "Nudge: On"
+msgstr ""
+
+#. module: nudge
+#: model:res.groups,name:nudge.group_nudge_advanced_menus
+msgid "Nudge: advanced menus"
 msgstr ""
 
 #. module: nudge
@@ -15394,7 +15438,6 @@ msgid "Public Key to Share"
 msgstr ""
 
 #. module: nudge
-#: model:ir.ui.menu,name:nudge.nudge_menu_recipe_publish
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_view_form
 msgid "Publish"
 msgstr ""
@@ -15409,6 +15452,7 @@ msgstr ""
 #: code:addons/nudge/models/nudge_recipe_publish.py:0
 #: model:ir.actions.act_window,name:nudge.nudge_recipe_publish_action
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_publish_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_market_view_list
 msgid "Publish our recipes"
 msgstr ""
 
@@ -15946,7 +15990,7 @@ msgstr ""
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_recipe_source__entry_ids
-#: model:ir.ui.menu,name:nudge.nudge_menu_recipes
+#: model:ir.ui.menu,name:nudge.nudge_menu_skill_market
 msgid "Recipes"
 msgstr ""
 
@@ -16378,6 +16422,7 @@ msgstr ""
 
 #. module: nudge
 #: model:ir.ui.menu,name:nudge.nudge_menu_health_reports
+#: model:ir.ui.menu,name:nudge.nudge_menu_reports
 msgid "Reports"
 msgstr ""
 
@@ -17355,11 +17400,6 @@ msgid "Setup State"
 msgstr ""
 
 #. module: nudge
-#: model:ir.ui.menu,name:nudge.nudge_menu_setup_wizard
-msgid "Setup Wizard"
-msgstr ""
-
-#. module: nudge
 #: model:nudge.prompt,description:nudge.prompt_talk_setup_advisor
 msgid ""
 "Setup advisor: reads the settings and suggests what to switch on, without "
@@ -17444,6 +17484,11 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 msgid "Shortcut to dictate in a field"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__group_nudge_advanced_menus
+msgid "Show advanced menus"
 msgstr ""
 
 #. module: nudge
@@ -17538,6 +17583,13 @@ msgstr ""
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_task_view_form
 msgid "Show the Records"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__group_nudge_advanced_menus
+msgid ""
+"Show the advanced menus of Nudge (prompts, training, usage, raw lists) to "
+"its managers."
 msgstr ""
 
 #. module: nudge
@@ -17652,6 +17704,22 @@ msgid "Shows"
 msgstr ""
 
 #. module: nudge
+#: model:res.groups,comment:nudge.group_nudge_advanced_menus
+msgid ""
+"Shows the advanced menus of Nudge (prompts, training, usage, raw lists). "
+"Turned on in Nudge Settings."
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid ""
+"Shows the menus a manager rarely needs: prompts, training, usage and cost, "
+"cached answers, recurring questions and requests, key screens, translations,"
+" recipe sources and the like. Nothing is removed when it is off; the menus "
+"are only hidden."
+msgstr ""
+
+#. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_recipe_export__sign
 msgid "Sign it"
 msgstr ""
@@ -17708,7 +17776,7 @@ msgstr ""
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_recipe_export__sign
 msgid ""
-"Signed with the key an administrator uploaded (Configuration, Recipes, "
+"Signed with the key an administrator uploaded (Configuration, Advanced, "
 "Signing Key). With no key, the recipe is exported unsigned."
 msgstr ""
 
@@ -17764,7 +17832,6 @@ msgstr ""
 #. module: nudge
 #: model:ir.actions.act_window,name:nudge.nudge_skill_market_action
 #: model:ir.actions.server,name:nudge.nudge_skill_market_open
-#: model:ir.ui.menu,name:nudge.nudge_menu_skill_market
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_market_view_list
 msgid "Skill Catalogue"
 msgstr ""
@@ -18269,7 +18336,6 @@ msgstr ""
 
 #. module: nudge
 #: model:ir.actions.act_window,name:nudge.nudge_memory_suggested_action
-#: model:ir.ui.menu,name:nudge.nudge_menu_memory_suggested
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form_memory
 msgid "Suggested References"
 msgstr ""
@@ -20005,7 +20071,7 @@ msgstr ""
 #: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_plan_one_yes_group_ids
 msgid ""
 "The people of these groups say one yes for a whole plan: its card shows "
-"every change in full, and each change is still written in What Nudge Did. "
+"every change in full, and each change is still written in Nudge, Activity. "
 "Everybody else sees the card of each change."
 msgstr ""
 
@@ -20173,7 +20239,8 @@ msgstr ""
 #: code:addons/nudge/models/nudge_recipe_market.py:0
 msgid ""
 "The recipe %(recipe)s fits %(app)s, which was installed this month. Find it "
-"in Nudge / Configuration / Recipes / Marketplace."
+"in Nudge / Configuration / Advanced / Marketplace (with Show advanced menus "
+"on)."
 msgstr ""
 
 #. module: nudge
@@ -20181,7 +20248,7 @@ msgstr ""
 msgid ""
 "The recipe is one file with a version and a checksum. It holds the setup of Nudge in this\n"
 "                    company, never conversations, keys or the data of your records. Another database reads it\n"
-"                    from Nudge / Configuration / Recipes / Import."
+"                    from Nudge / Configuration / Recipes, Import a recipe."
 msgstr ""
 
 #. module: nudge
@@ -20566,8 +20633,8 @@ msgid ""
 "The weekly health check of this company runs as this Nudge manager and looks"
 " at what they may read. Empty: no weekly check. The check, the compliance "
 "checklists (a checklist, not legal advice) and the check before an upgrade "
-"are run by a manager from Nudge, Health Check; none of them uses AI or "
-"changes anything."
+"are run by a manager from Nudge, Reports, Health & Compliance; none of them "
+"uses AI or changes anything."
 msgstr ""
 
 #. module: nudge
@@ -21831,7 +21898,6 @@ msgstr ""
 #: code:addons/nudge/models/nudge_search_try.py:0
 #: model:ir.actions.server,name:nudge.nudge_search_try_action
 #: model:ir.model,name:nudge.model_nudge_search_try
-#: model:ir.ui.menu,name:nudge.nudge_menu_search_try
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_search_try_view_form
 msgid "Try Search by Meaning"
 msgstr ""
@@ -21863,6 +21929,11 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 msgid "Try one of these. Nudge understands them without any AI:"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_view_list_search_try
+msgid "Try search by meaning"
 msgstr ""
 
 #. module: nudge
@@ -22860,13 +22931,11 @@ msgid "What It Means"
 msgstr ""
 
 #. module: nudge
-#: model:ir.ui.menu,name:nudge.nudge_menu_agent
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
 msgid "What Nudge Did"
 msgstr ""
 
 #. module: nudge
-#: model:ir.ui.menu,name:nudge.nudge_menu_knowledge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_profile_view_form
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
 msgid "What Nudge Knows"

@@ -57,10 +57,9 @@
         </field>
     </record>
 
-    <menuitem id="nudge_menu_website" name="Website Assistant" sequence="40"
-              parent="nudge.nudge_menu_root" groups="nudge.group_nudge_manager"/>
-    <menuitem id="nudge_menu_website_questions" name="Visitor Questions" sequence="10"
-              parent="nudge_menu_website" action="nudge_web_message_action"/>
-    <menuitem id="nudge_menu_website_usage" name="Usage" sequence="20"
-              parent="nudge_menu_website" action="nudge_usage_website_action"/>
+    <menuitem id="nudge_menu_website_questions" name="Website Questions" sequence="80"
+              parent="nudge.nudge_menu_reports" action="nudge_web_message_action"/>
+    <menuitem id="nudge_menu_website_usage" name="Website Usage" sequence="85"
+              parent="nudge.nudge_menu_reports" action="nudge_usage_website_action"
+              groups="-nudge.group_nudge_manager,-base.group_system,nudge.group_nudge_advanced_menus"/>
 </odoo>

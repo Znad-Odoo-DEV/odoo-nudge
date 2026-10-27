@@ -526,7 +526,7 @@ class TestLoop(NudgeCase, TransactionCase):
 
         self.assertEqual([event["type"] for event in events], ["start", "delta", "done"])
         result = adapter.calls[1]["turns"][-1]["results"][0]
-        self.assertIn("Nudge/Conversations", result["content"])
+        self.assertIn("Nudge/Activity/Conversations", result["content"])
         self.assertEqual(conversation.message_ids[-1].content, "It is under Nudge.")
 
     def test_text_after_a_tool_is_a_new_paragraph(self):

@@ -1,54 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- One app for every employee: it opens on My Nudge Home (nudge_home_views.xml gives it the action).
-         Each menu inside keeps to its own groups; the manager group of the old root comes off on update. -->
+    <!-- The menus of a Nudge manager: Home, Activity, Knowledge, Reports, Configuration.
+         "Advanced" menus carry only nudge.group_nudge_advanced_menus (Nudge Settings, Show advanced menus). That
+         group is held by managers only (the setting makes the Manager group imply it) and every advanced menu sits
+         under a parent that is visible to managers only, so it is "Manager AND advanced". An advanced menu that
+         also needs the system group sits under Configuration > Advanced, a folder that needs the advanced group:
+         there the two groups meet. -->
     <menuitem id="nudge_menu_root" name="Nudge" sequence="250"
               web_icon="nudge,static/description/icon.png"
               groups="base.group_user,-nudge.group_nudge_manager"/>
 
-    <menuitem id="nudge_menu_conversations" name="Conversations" sequence="10"
-              parent="nudge_menu_root" action="nudge_conversation_action"
+    <!-- Activity -->
+    <menuitem id="nudge_menu_agent" name="Activity" sequence="15"
+              parent="nudge_menu_root"
               groups="nudge.group_nudge_manager"/>
 
-    <menuitem id="nudge_menu_agent" name="What Nudge Did" sequence="15"
-              parent="nudge_menu_root"
+    <menuitem id="nudge_menu_conversations" name="Conversations" sequence="5"
+              parent="nudge_menu_agent" action="nudge_conversation_action"
               groups="nudge.group_nudge_manager"/>
 
     <menuitem id="nudge_menu_runs" name="Requests" sequence="10"
               parent="nudge_menu_agent" action="nudge_run_action"/>
 
     <menuitem id="nudge_menu_steps" name="Changes" sequence="20"
-              parent="nudge_menu_agent" action="nudge_step_action"/>
+              parent="nudge_menu_agent" action="nudge_step_action"
+              groups="-nudge.group_nudge_manager,-base.group_system,nudge.group_nudge_advanced_menus"/>
 
     <menuitem id="nudge_menu_tasks" name="Scheduled Tasks" sequence="30"
               parent="nudge_menu_agent" action="nudge_task_action"/>
 
-    <menuitem id="nudge_menu_knowledge" name="What Nudge Knows" sequence="20"
+    <!-- The folder of the three kinds of approvals: each module adds its own child, so a folder with no child is not shown -->
+    <menuitem id="nudge_menu_approvals" name="Approvals" sequence="50"
+              parent="nudge_menu_agent"
+              groups="nudge.group_nudge_manager"/>
+
+    <!-- Knowledge -->
+    <menuitem id="nudge_menu_knowledge" name="Knowledge" sequence="20"
               parent="nudge_menu_root"
               groups="nudge.group_nudge_manager"/>
 
-    <menuitem id="nudge_menu_profile" name="Database Profile" sequence="10"
-              parent="nudge_menu_knowledge" action="nudge_profile_action"/>
-
-    <menuitem id="nudge_menu_notes" name="Business Notes" sequence="20"
+    <menuitem id="nudge_menu_notes" name="Business Notes" sequence="40"
               parent="nudge_menu_knowledge" action="nudge_note_action"/>
 
-    <menuitem id="nudge_menu_memory" name="Nudge Memory" sequence="22"
+    <menuitem id="nudge_menu_memory" name="Answers" sequence="30"
               parent="nudge_menu_knowledge" action="nudge_memory_action"/>
 
-    <menuitem id="nudge_menu_sources" name="Company Files" sequence="25"
+    <menuitem id="nudge_menu_sources" name="Company Files" sequence="50"
               parent="nudge_menu_knowledge" action="nudge_source_action"/>
 
-    <menuitem id="nudge_menu_feedback" name="Feedback" sequence="28"
-              parent="nudge_menu_knowledge" action="nudge_feedback_action"/>
+    <menuitem id="nudge_menu_feedback" name="Feedback" sequence="60"
+              parent="nudge_menu_knowledge" action="nudge_feedback_action"
+              groups="-nudge.group_nudge_manager,-base.group_system,nudge.group_nudge_advanced_menus"/>
 
-    <menuitem id="nudge_menu_docs" name="Odoo Documentation" sequence="30"
+    <menuitem id="nudge_menu_docs" name="Odoo Documentation" sequence="20"
               parent="nudge_menu_knowledge" action="nudge_doc_page_action"/>
 
-    <menuitem id="nudge_menu_usage" name="Usage" sequence="30"
-              parent="nudge_menu_root" action="nudge_usage_action"
+    <menuitem id="nudge_menu_profile" name="Database Profile" sequence="110"
+              parent="nudge_menu_knowledge" action="nudge_profile_action"
+              groups="-nudge.group_nudge_manager,-base.group_system,nudge.group_nudge_advanced_menus"/>
+
+    <menuitem id="nudge_menu_questions" name="Recurring Questions" sequence="120"
+              parent="nudge_menu_knowledge" action="nudge_question_action"
+              groups="-nudge.group_nudge_manager,-base.group_system,nudge.group_nudge_advanced_menus"/>
+
+    <!-- Reports -->
+    <menuitem id="nudge_menu_reports" name="Reports" sequence="30"
+              parent="nudge_menu_root"
               groups="nudge.group_nudge_manager"/>
 
+    <menuitem id="nudge_menu_usage" name="Usage" sequence="30"
+              parent="nudge_menu_reports" action="nudge_usage_action"
+              groups="-nudge.group_nudge_manager,-base.group_system,nudge.group_nudge_advanced_menus"/>
+
+    <!-- Configuration -->
     <menuitem id="nudge_menu_configuration" name="Configuration" sequence="100"
               parent="nudge_menu_root"
               groups="nudge.group_nudge_manager"/>
@@ -57,16 +81,19 @@
               parent="nudge_menu_configuration" action="nudge_config_settings_action"
               groups="base.group_system"/>
 
-    <menuitem id="nudge_menu_validator_policy" name="Fields the Company Requires" sequence="25"
-              parent="nudge_menu_configuration" action="nudge_validator_policy_action"/>
-
     <menuitem id="nudge_menu_providers" name="AI Providers" sequence="20"
               parent="nudge_menu_configuration" action="nudge_provider_action"/>
+
+    <!-- Configuration > Advanced: the folder needs the advanced group; each child keeps its own groups, and a
+         child is seen only by someone with BOTH (its parent must be visible too) -->
+    <menuitem id="nudge_menu_advanced" name="Advanced" sequence="200"
+              parent="nudge_menu_configuration"
+              groups="-nudge.group_nudge_manager,-base.group_system,nudge.group_nudge_advanced_menus"/>
+
+    <menuitem id="nudge_menu_validator_policy" name="Fields the Company Requires" sequence="10"
+              parent="nudge_menu_advanced" action="nudge_validator_policy_action"/>
+
     <menuitem id="nudge_menu_translation" name="Translations" sequence="30"
-              parent="nudge_menu_configuration" action="nudge_translation_action"
+              parent="nudge_menu_advanced" action="nudge_translation_action"
               groups="base.group_system"/>
-    <menuitem id="nudge_menu_questions" name="Recurring Questions" sequence="21"
-              parent="nudge_menu_knowledge" action="nudge_question_action"/>
-    <menuitem id="nudge_menu_questions_find" name="Find Recurring Questions" sequence="23"
-              parent="nudge_menu_knowledge" action="nudge_question_find_action"/>
 </odoo>

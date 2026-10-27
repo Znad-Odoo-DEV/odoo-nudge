@@ -87,7 +87,7 @@ Off by default, each with its own word in Settings ▸ Nudge:
 
 ## What is written down
 
-Every call of a tool by the agent is a step in *What Nudge Did*: the tool, what the model
+Every call of a tool by the agent is a step in *Activity*: the tool, what the model
 asked, what was shown to the person, what they decided, what came back, how long it took;
 Python code and SQL queries included, with the purpose the model gave. Every call to a
 provider is a row of the usage ledger: who, when, how many tokens, at what price. Rows of the
@@ -173,4 +173,4 @@ steer Nudge was closed:
   on its form, never a write, an unlink or a sudo.
 - A test email goes to the administrator's own address only, after a yes.
 - The preview of an email on a card is drawn in a sandboxed frame without scripts.
-- Every step is in What Nudge Did, with what was asked and what was made.
+- Every step is in Activity, with what was asked and what was made.

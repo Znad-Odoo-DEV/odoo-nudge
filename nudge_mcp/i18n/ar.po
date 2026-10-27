@@ -353,16 +353,8 @@ msgstr ""
 
 #. module: nudge_mcp
 #: model_terms:ir.ui.view,arch_db:nudge_mcp.res_config_settings_view_form_mcp
-msgid ""
-"Claude Desktop, ChatGPT and other assistants that speak MCP can use the "
-"tools of Nudge, as the person who signed them in: with that person's rights,"
-" record rules and companies. Each person of the group External Assistant "
-"signs their assistant in. Everything they do is kept in What Nudge Did."
-msgstr ""
-"يمكن لـ Claude Desktop وChatGPT وغيرهما من المساعدين الذين يتحدثون MCP "
-"استخدام أدوات Nudge بصفة الشخص الذي سجّل دخولهم: بصلاحياته وقواعد سجلاته "
-"وشركاته. كل فرد في مجموعة المساعد الخارجي يسجّل دخول مساعده بنفسه. كل ما "
-"يفعلونه محفوظ في ماذا فعل Nudge."
+msgid "Claude Desktop, ChatGPT and other assistants that speak MCP can use the tools of Nudge, as the person who signed them in: with that person's rights, record rules and companies. Each person of the group External Assistant signs their assistant in. Everything they do is kept in Nudge, Activity."
+msgstr "يمكن لـ Claude Desktop وChatGPT وغيرهما من المساعدين الذين يتحدثون MCP استخدام أدوات Nudge بصفة الشخص الذي سجّل دخولهم: بصلاحياته وقواعد سجلاته وشركاته. كل فرد في مجموعة المساعد الخارجي يسجّل دخول مساعده بنفسه. كل ما يفعلونه محفوظ في ماذا فعل Nudge."
 
 #. module: nudge_mcp
 #: model:ir.model.fields,help:nudge_mcp.field_res_config_settings__nudge_mcp_oauth_registration

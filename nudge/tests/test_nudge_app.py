@@ -16,9 +16,21 @@ class TestNudgeApp(TransactionCase):
         cls.home_action = cls.env.ref("nudge.nudge_home_action")
         cls.manager_menus = {
             "nudge.nudge_menu_conversations", "nudge.nudge_menu_agent", "nudge.nudge_menu_knowledge",
-            "nudge.nudge_menu_usage", "nudge.nudge_menu_configuration", "nudge.nudge_menu_coach",
-            "nudge.nudge_menu_health", "nudge.nudge_menu_my_reports",
+            "nudge.nudge_menu_reports", "nudge.nudge_menu_configuration", "nudge.nudge_menu_memory",
+            "nudge.nudge_menu_health", "nudge.nudge_menu_my_reports", "nudge.nudge_menu_runs",
+            "nudge.nudge_menu_tasks", "nudge.nudge_menu_skills", "nudge.nudge_menu_providers",
         }
+        # shown only with Settings > Show advanced menus
+        cls.advanced_menus = {
+            "nudge.nudge_menu_usage", "nudge.nudge_menu_latency", "nudge.nudge_menu_coach",
+            "nudge.nudge_menu_prompts", "nudge.nudge_menu_profile", "nudge.nudge_menu_advanced",
+            "nudge.nudge_menu_translation", "nudge.nudge_menu_lexicon", "nudge.nudge_menu_steps",
+            "nudge.nudge_menu_built", "nudge.nudge_menu_auditor_questions", "nudge.nudge_menu_coverage",
+            "nudge.nudge_menu_feedback", "nudge.nudge_menu_health_reports", "nudge.nudge_menu_health_credentials",
+            "nudge.nudge_menu_upgrade_run", "nudge.nudge_menu_upgrade_reports",
+        }
+        cls.advanced = cls.env.ref("nudge.group_nudge_advanced_menus")
+        cls.groups_field = "group_ids" if "group_ids" in cls.env["res.users"]._fields else "groups_id"
 
     def reachable(self, user):
         """The xmlids of the nudge menus the web client of ``user`` can reach from the list of apps."""
@@ -52,3 +64,25 @@ class TestNudgeApp(TransactionCase):
     def test_a_manager_keeps_every_menu(self):
         menus = self.reachable(self.manager)
         self.assertLessEqual(self.manager_menus | {"nudge.nudge_menu_home"}, menus)
+
+    def test_the_advanced_menus_are_hidden_until_the_setting_is_on(self):
+        self.assertFalse(self.reachable(self.manager) & self.advanced_menus)
+
+    def test_the_advanced_menus_show_with_the_setting(self):
+        # Its own test: the groups of a user read once are kept for the rest of a test
+        system = self.env.ref("base.group_system")
+        self.manager.write({self.groups_field: [(4, self.advanced.id), (4, system.id)]})
+        self.assertLessEqual(self.advanced_menus, self.reachable(self.manager))
+
+    def test_the_advanced_group_alone_shows_a_non_manager_nothing(self):
+        # the group is held by managers only, but even given to a member the menus hang under Manager-only parents
+        self.member.write({self.groups_field: [(4, self.advanced.id)]})
+        self.assertEqual(self.reachable(self.member), {"nudge.nudge_menu_root", "nudge.nudge_menu_home"})
+
+    def test_the_setting_gives_the_advanced_group_to_managers_only(self):
+        manager_group = self.env.ref("nudge.group_nudge_manager")
+        self.assertFalse(self.advanced.implied_ids)
+        self.assertFalse(self.env["res.groups"].search([("implied_ids", "in", self.advanced.ids)]) - manager_group)
+        field = self.env["res.config.settings"]._fields["group_nudge_advanced_menus"]
+        self.assertEqual(field.group, "nudge.group_nudge_manager")
+        self.assertEqual(field.implied_group, "nudge.group_nudge_advanced_menus")

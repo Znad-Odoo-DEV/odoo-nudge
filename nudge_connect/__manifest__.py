@@ -27,7 +27,7 @@ client; the outside system is the server.
 Installed from Apps by an administrator who wants it, with Nudge.
 """,
     "category": "Productivity",
-    "version": "19.0.1.0.4",
+    "version": "19.0.1.0.5",
     "author": "Ibrahim Elzenad",
     "website": "https://znad-odoo-dev.github.io",
     "support": "id7sp22@gmail.com",

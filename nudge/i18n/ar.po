@@ -8682,11 +8682,8 @@ msgstr "حفظ إجابة"
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/models/nudge_question.py:0
-msgid ""
-"Keep an answer, record a tour or ignore it: Nudge, What Nudge Knows, "
-"Recurring Questions."
-msgstr ""
-"احفظ إجابة أو سجّل جولة أو تجاهله: نودج، ما يعرفه نودج، الأسئلة المتكررة."
+msgid "Keep an answer, record a tour or ignore it: Nudge, Knowledge, Recurring Questions (with Show advanced menus on)."
+msgstr "احفظ إجابة أو سجّل جولة أو تجاهله: نودج، المعرفة، الأسئلة المتكررة (مع تفعيل «إظهار القوائم المتقدمة»)."
 
 #. module: nudge
 #. odoo-python
@@ -9211,18 +9208,8 @@ msgstr "اسمح لـ Nudge برؤية شاشتي"
 
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_developer
-msgid ""
-"Let administrators (the group Settings) build through Nudge, in Developer "
-"mode: automation rules, server actions, emails sent on an event, buttons, "
-"fields and changes to the screens. Nudge explains first and shows everything"
-" on the card, the code included; nothing is made before a yes; deletion only"
-" when asked for by name. Every step is in What Nudge Did. Off by default."
-msgstr ""
-"السماح للمديرين (مجموعة الإعدادات) بالبناء عبر Nudge في وضع المطوّر: قواعد "
-"الأتمتة، إجراءات الخادم، رسائل البريد عند حدث، الأزرار، الحقول وتعديلات "
-"الشاشات. يشرح Nudge أولًا ويعرض كل شيء على البطاقة بما فيه الكود؛ لا يُصنع "
-"شيء قبل الموافقة؛ ولا حذف إلا بطلب صريح بالاسم. كل خطوة مسجّلة في What Nudge"
-" Did. مطفأ افتراضيًا."
+msgid "Let administrators (the group Settings) build through Nudge, in Developer mode: automation rules, server actions, emails sent on an event, buttons, fields and changes to the screens. Nudge explains first and shows everything on the card, the code included; nothing is made before a yes; deletion only when asked for by name. Every step is in Nudge, Activity. Off by default."
+msgstr "السماح للمديرين (مجموعة الإعدادات) بالبناء عبر Nudge في وضع المطوّر: قواعد الأتمتة، إجراءات الخادم، رسائل البريد عند حدث، الأزرار، الحقول وتعديلات الشاشات. يشرح Nudge أولًا ويعرض كل شيء على البطاقة بما فيه الكود؛ لا يُصنع شيء قبل الموافقة؛ ولا حذف إلا بطلب صريح بالاسم. كل خطوة مسجّلة في Nudge، النشاط. مطفأ افتراضيًا."
 
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_admin
@@ -9251,18 +9238,8 @@ msgstr ""
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
-msgid ""
-"Let administrators build through Nudge, in Developer mode: automation rules,"
-" server actions, emails sent on an event, buttons, fields and changes to the"
-" screens. Only the group Settings. Nudge explains first and shows everything"
-" on the card, the code included; nothing is made before a yes; deletion only"
-" when asked for by name. Every step is in What Nudge Did. Off by default."
-msgstr ""
-"السماح للمديرين بالبناء عبر Nudge في وضع المطوّر: قواعد الأتمتة، إجراءات "
-"الخادم، رسائل البريد عند حدث، الأزرار، الحقول وتعديلات الشاشات. لمجموعة "
-"الإعدادات فقط. يشرح Nudge أولًا ويعرض كل شيء على البطاقة بما فيه الكود؛ لا "
-"يُصنع شيء قبل الموافقة؛ ولا حذف إلا بطلب صريح بالاسم. كل خطوة مسجّلة في What"
-" Nudge Did. مطفأ افتراضيًا."
+msgid "Let administrators build through Nudge, in Developer mode: automation rules, server actions, emails sent on an event, buttons, fields and changes to the screens. Only the group Settings. Nudge explains first and shows everything on the card, the code included; nothing is made before a yes; deletion only when asked for by name. Every step is in Nudge, Activity. Off by default."
+msgstr "السماح للمديرين بالبناء عبر Nudge في وضع المطوّر: قواعد الأتمتة، إجراءات الخادم، رسائل البريد عند حدث، الأزرار، الحقول وتعديلات الشاشات. لمجموعة الإعدادات فقط. يشرح Nudge أولًا ويعرض كل شيء على البطاقة بما فيه الكود؛ لا يُصنع شيء قبل الموافقة؛ ولا حذف إلا بطلب صريح بالاسم. كل خطوة مسجّلة في Nudge، النشاط. مطفأ افتراضيًا."
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
@@ -9283,20 +9260,8 @@ msgstr ""
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
-msgid ""
-"Let administrators read the database with one SELECT through the agent, for "
-"a join or a report no other tool gives. Only the group Settings, and only "
-"those allowed in every company: a query knows no company rule. No change, no"
-" lock, no comment; the tables of Odoo they may read, never those of users, "
-"parameters or providers; 50 rows, 10 seconds. Every query is in What Nudge "
-"Did. Off by default."
-msgstr ""
-"يسمح للمديرين بقراءة قاعدة البيانات بجملة SELECT واحدة عبر الوكيل، لربط "
-"جداول أو تقرير لا تعطيه الأدوات الأخرى. لمجموعة Settings فقط، ولمن هم مسموح "
-"لهم في كل الشركات: الاستعلام لا يعرف قواعد الشركات. لا تغيير ولا قفل ولا "
-"تعليق؛ جداول Odoo التي يقرؤونها، ولا جداول المستخدمين والمعاملات والمزوّدين "
-"أبدًا؛ 50 صفًا، 10 ثوانٍ. كل استعلام مسجَّل في What Nudge Did. مطفأ "
-"افتراضيًا."
+msgid "Let administrators read the database with one SELECT through the agent, for a join or a report no other tool gives. Only the group Settings, and only those allowed in every company: a query knows no company rule. No change, no lock, no comment; the tables of Odoo they may read, never those of users, parameters or providers; 50 rows, 10 seconds. Every query is in Nudge, Activity. Off by default."
+msgstr "يسمح للمديرين بقراءة قاعدة البيانات بجملة SELECT واحدة عبر الوكيل، لربط جداول أو تقرير لا تعطيه الأدوات الأخرى. لمجموعة Settings فقط، ولمن هم مسموح لهم في كل الشركات: الاستعلام لا يعرف قواعد الشركات. لا تغيير ولا قفل ولا تعليق؛ جداول Odoo التي يقرؤونها، ولا جداول المستخدمين والمعاملات والمزوّدين أبدًا؛ 50 صفًا، 10 ثوانٍ. كل استعلام مسجَّل في Nudge، النشاط. مطفأ افتراضيًا."
 
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_ask_data
@@ -9348,17 +9313,8 @@ msgstr ""
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
-msgid ""
-"Let the agent compute with Python when counting and searching are not "
-"enough: a loop over records, a calculation per record. The code runs in the "
-"sandbox of Odoo, as the person, and reads only: what it writes is discarded,"
-" and changes still go through the yes of the person. Every run is in What "
-"Nudge Did. Off by default."
-msgstr ""
-"يسمح للوكيل بالحساب بـ Python عندما لا يكفي العدّ والبحث: حلقة على السجلات، "
-"حساب لكل سجل. يعمل الكود في صندوق Odoo الآمن بصلاحيات الشخص وللقراءة فقط: ما"
-" يكتبه يُهمَل، والتغييرات تبقى تمرّ بموافقة الشخص. كل تشغيل مسجَّل في What "
-"Nudge Did. مطفأ افتراضيًا."
+msgid "Let the agent compute with Python when counting and searching are not enough: a loop over records, a calculation per record. The code runs in the sandbox of Odoo, as the person, and reads only: what it writes is discarded, and changes still go through the yes of the person. Every run is in Nudge, Activity. Off by default."
+msgstr "يسمح للوكيل بالحساب بـ Python عندما لا يكفي العدّ والبحث: حلقة على السجلات، حساب لكل سجل. يعمل الكود في صندوق Odoo الآمن بصلاحيات الشخص وللقراءة فقط: ما يكتبه يُهمَل، والتغييرات تبقى تمرّ بموافقة الشخص. كل تشغيل مسجَّل في Nudge، النشاط. مطفأ افتراضيًا."
 
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_agent
@@ -18048,14 +18004,8 @@ msgstr "أفراد هذه المجموعات لا يُذكَّرون أبداً.
 
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_plan_one_yes_group_ids
-msgid ""
-"The people of these groups say one yes for a whole plan: its card shows "
-"every change in full, and each change is still written in What Nudge Did. "
-"Everybody else sees the card of each change."
-msgstr ""
-"أفراد هذه المجموعات يوافقون مرة واحدة على الخطة كلها: تعرض بطاقتها كل تغيير "
-"كاملاً، ويُسجَّل كل تغيير مع ذلك في «ما فعله Nudge». أما غيرهم فيرون بطاقة "
-"كل تغيير."
+msgid "The people of these groups say one yes for a whole plan: its card shows every change in full, and each change is still written in Nudge, Activity. Everybody else sees the card of each change."
+msgstr "أفراد هذه المجموعات يوافقون مرة واحدة على الخطة كلها: تعرض بطاقتها كل تغيير كاملاً، ويُسجَّل كل تغيير مع ذلك في «Nudge، النشاط». أما غيرهم فيرون بطاقة كل تغيير."
 
 #. module: nudge
 #. odoo-python
@@ -18196,23 +18146,16 @@ msgstr "الوصفة"
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/models/nudge_recipe_market.py:0
-msgid ""
-"The recipe %(recipe)s fits %(app)s, which was installed this month. Find it "
-"in Nudge / Configuration / Recipes / Marketplace."
-msgstr ""
-"الوصفة %(recipe)s تناسب %(app)s التي ثُبّتت هذا الشهر. تجدها في نَدج / "
-"الإعدادات / الوصفات / السوق."
+msgid "The recipe %(recipe)s fits %(app)s, which was installed this month. Find it in Nudge / Configuration / Advanced / Marketplace (with Show advanced menus on)."
+msgstr "الوصفة %(recipe)s تناسب %(app)s التي ثُبّتت هذا الشهر. تجدها في نَدج / الإعدادات / متقدم / السوق (مع تفعيل «إظهار القوائم المتقدمة»)."
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_export_view_form
 msgid ""
 "The recipe is one file with a version and a checksum. It holds the setup of Nudge in this\n"
 "                    company, never conversations, keys or the data of your records. Another database reads it\n"
-"                    from Nudge / Configuration / Recipes / Import."
-msgstr ""
-"الوصفة ملف واحد بإصدار ومجموع تحقق. تحمل إعداد Nudge في هذه الشركة، ولا تحمل"
-" أبدًا محادثات ولا مفاتيح ولا بيانات سجلاتك. تقرؤها قاعدة بيانات أخرى من "
-"Nudge / Configuration / Recipes / Import."
+"                    from Nudge / Configuration / Recipes, Import a recipe."
+msgstr "الوصفة ملف واحد بإصدار ومجموع تحقق. تحمل إعداد Nudge في هذه الشركة، ولا تحمل أبدًا محادثات ولا مفاتيح ولا بيانات سجلاتك. تقرؤها قاعدة بيانات أخرى من Nudge / Configuration / Recipes, Import a recipe."
 
 #. module: nudge
 #. odoo-javascript
@@ -18508,17 +18451,8 @@ msgstr "تم حفظ الجولة «%s»."
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
-msgid ""
-"The weekly health check of this company runs as this Nudge manager and looks"
-" at what they may read. Empty: no weekly check. The check, the compliance "
-"checklists (a checklist, not legal advice) and the check before an upgrade "
-"are run by a manager from Nudge, Health Check; none of them uses AI or "
-"changes anything."
-msgstr ""
-"يعمل الفحص الأسبوعي لصحة هذه الشركة بصفة مدير Nudge هذا ويطّلع على ما يحق له"
-" قراءته. فارغ: لا فحص أسبوعي. يشغّل المدير الفحص وقوائم الامتثال (قائمة فحص "
-"وليست استشارة قانونية) وفحص ما قبل الترقية من Nudge، Health Check؛ ولا شيء "
-"منها يستخدم ذكاءً اصطناعيًا أو يغيّر شيئًا."
+msgid "The weekly health check of this company runs as this Nudge manager and looks at what they may read. Empty: no weekly check. The check, the compliance checklists (a checklist, not legal advice) and the check before an upgrade are run by a manager from Nudge, Reports, Health & Compliance; none of them uses AI or changes anything."
+msgstr "يعمل الفحص الأسبوعي لصحة هذه الشركة بصفة مدير Nudge هذا ويطّلع على ما يحق له قراءته. فارغ: لا فحص أسبوعي. يشغّل المدير الفحص وقوائم الامتثال (قائمة فحص وليست استشارة قانونية) وفحص ما قبل الترقية من Nudge، التقارير، الفحص والامتثال؛ ولا شيء منها يستخدم ذكاءً اصطناعيًا أو يغيّر شيئًا."
 
 #. module: nudge
 #. odoo-python
@@ -24186,12 +24120,8 @@ msgstr "تستخدم هذه المهارة أدوات ليست في نودج ه�
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_export_view_form
-msgid ""
-"No signing key is set: the recipe is exported unsigned. A system "
-"administrator uploads one in Nudge / Configuration / Recipes / Signing Key."
-msgstr ""
-"لم يُضبط مفتاح توقيع: تُصدَّر الوصفة غير موقّعة. يرفع مدير النظام مفتاحا من "
-"نودج / الإعدادات / الوصفات / مفتاح التوقيع."
+msgid "No signing key is set: the recipe is exported unsigned. A system administrator uploads one in Nudge / Configuration / Advanced / Signing Key."
+msgstr "لم يُضبط مفتاح توقيع: تُصدَّر الوصفة غير موقّعة. يرفع مدير النظام مفتاحا من نودج / الإعدادات / متقدم / مفتاح التوقيع."
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_import_view_form
@@ -26681,8 +26611,8 @@ msgstr "يحتاج إلى تحذير"
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_export_view_form
 msgid ""
 "No signing key is set: the recipe is exported unsigned. A system administrator uploads one in\n"
-"                    Nudge / Configuration / Recipes / Signing Key."
-msgstr "لم يُعيَّن مفتاح توقيع: تُصدَّر الوصفة غير موقّعة. يرفع مدير النظام مفتاحًا من Nudge / الإعدادات / الوصفات / مفتاح التوقيع."
+"                    Nudge / Configuration / Advanced / Signing Key."
+msgstr "لم يُعيَّن مفتاح توقيع: تُصدَّر الوصفة غير موقّعة. يرفع مدير النظام مفتاحًا من Nudge / الإعدادات / متقدم / مفتاح التوقيع."
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_import_view_form
@@ -26764,7 +26694,7 @@ msgstr "حالة التوقيع"
 
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_recipe_export__sign
-msgid "Signed with the key an administrator uploaded (Configuration, Recipes, Signing Key). With no key, the recipe is exported unsigned."
+msgid "Signed with the key an administrator uploaded (Configuration, Advanced, Signing Key). With no key, the recipe is exported unsigned."
 msgstr "موقّعة بالمفتاح الذي رفعه المسؤول (الإعدادات، الوصفات، مفتاح التوقيع). وبدون مفتاح تُصدَّر الوصفة غير موقّعة."
 
 #. module: nudge
@@ -26962,3 +26892,73 @@ msgid ""
 msgstr ""
 "اختر «القائمة فقط» للبيئات الحساسة: مع قائمة فارغة لا يُتصل إلا بمزوّدي "
 "الذكاء الاصطناعي الذين أعددتهم."
+
+#. module: nudge
+#: model:ir.ui.menu,name:nudge.nudge_menu_knowledge
+msgid "Knowledge"
+msgstr "المعرفة"
+
+#. module: nudge
+#: model:ir.ui.menu,name:nudge.nudge_menu_approvals
+msgid "Approvals"
+msgstr "الموافقات"
+
+#. module: nudge
+#: model:ir.ui.menu,name:nudge.nudge_menu_health
+msgid "Health & Compliance"
+msgstr "الفحص والامتثال"
+
+#. module: nudge
+#: model:ir.ui.menu,name:nudge.nudge_menu_advanced
+msgid "Advanced"
+msgstr "متقدم"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_view_list_find
+msgid "Find recurring questions"
+msgstr "البحث عن الأسئلة المتكررة"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_view_list_search_try
+msgid "Try search by meaning"
+msgstr "تجربة البحث بالمعنى"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form_auditor
+msgid "Auditors"
+msgstr "المدقّقون"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form_auditor
+msgid "An auditor reads what Nudge did in their companies and nothing else, for a period you set. Add one here; revoke or extend from the Nudge Auditor tab of the user."
+msgstr "يقرأ المدقّق ما فعله Nudge في شركاته ولا شيء غيره، طوال مدة تحددها. أضِف مدقّقاً من هنا، وللإلغاء أو التمديد استعمل تبويب «Nudge Auditor» في المستخدم."
+
+#. module: nudge
+#: model:res.groups,name:nudge.group_nudge_advanced_menus
+msgid "Nudge: advanced menus"
+msgstr "Nudge: القوائم المتقدمة"
+
+#. module: nudge
+#: model:res.groups,comment:nudge.group_nudge_advanced_menus
+msgid "Shows the advanced menus of Nudge (prompts, training, usage, raw lists). Turned on in Nudge Settings."
+msgstr "تُظهر القوائم المتقدمة في Nudge (الموجّهات والتدريب والاستخدام والقوائم الخام). تُفعَّل من إعدادات Nudge."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__group_nudge_advanced_menus
+msgid "Show advanced menus"
+msgstr "إظهار القوائم المتقدمة"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__group_nudge_advanced_menus
+msgid "Show the advanced menus of Nudge (prompts, training, usage, raw lists) to its managers."
+msgstr "إظهار القوائم المتقدمة في Nudge (الموجّهات والتدريب والاستخدام والقوائم الخام) لمديريه."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid "Shows the menus a manager rarely needs: prompts, training, usage and cost, cached answers, recurring questions and requests, key screens, translations, recipe sources and the like. Nothing is removed when it is off; the menus are only hidden."
+msgstr "يُظهر القوائم التي لا يحتاجها المدير إلا نادراً: الموجّهات والتدريب والاستخدام والتكلفة والإجابات المخبّأة والأسئلة والطلبات المتكررة والشاشات الأساسية والترجمات ومصادر الوصفات وما شابه. لا يُحذف شيء عند إيقافه، تُخفى القوائم فقط."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_view_list_coverage
+msgid "Missed sentences"
+msgstr "الجمل الفائتة"

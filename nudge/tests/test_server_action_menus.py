@@ -19,6 +19,8 @@ class TestServerActionMenus(NudgeCase, TransactionCase):
             cls.env, login="nudge_sa_auditor", groups="nudge.group_nudge_auditor",
             nudge_auditor_until=fields.Date.context_today(cls.env["res.users"]) + timedelta(days=10))
         cls.system = new_test_user(cls.env, login="nudge_sa_system", groups="base.group_system")
+        field = "group_ids" if "group_ids" in cls.env["res.users"]._fields else "groups_id"
+        cls.manager.write({field: [(4, cls.env.ref("nudge.group_nudge_advanced_menus").id)]})
         cls.everyone = [cls.user_a, cls.agent, cls.manager, cls.auditor, cls.system, cls.outsider]
 
     def test_every_menu_server_action_runs_for_each_user_who_sees_the_menu(self):

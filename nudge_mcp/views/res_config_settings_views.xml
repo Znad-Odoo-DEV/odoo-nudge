@@ -17,7 +17,7 @@
                         connector in the assistant and sign in to Odoo (How to Connect an Assistant, below).
                         Then delete the old keys in each person's Account Security.
                     </div>
-                    <setting help="Claude Desktop, ChatGPT and other assistants that speak MCP can use the tools of Nudge, as the person who signed them in: with that person's rights, record rules and companies. Each person of the group External Assistant signs their assistant in. Everything they do is kept in What Nudge Did.">
+                    <setting help="Claude Desktop, ChatGPT and other assistants that speak MCP can use the tools of Nudge, as the person who signed them in: with that person's rights, record rules and companies. Each person of the group External Assistant signs their assistant in. Everything they do is kept in Nudge, Activity.">
                         <field name="nudge_mcp_enabled"/>
                         <div class="content-group mt8" invisible="not nudge_mcp_enabled">
                             <div class="row mt8">

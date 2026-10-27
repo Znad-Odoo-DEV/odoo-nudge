@@ -582,3 +582,10 @@ if os.path.exists(_docs) and os.path.isdir(ROOT + "nudge/data"):
     print("documentation of Odoo 18.0 put in nudge/data")
 else:
     print("WARNING: no documentation of Odoo 18.0 found at", _docs, "- the 19 pages stay")
+
+# QA RULE: the agents' security (60.0) names the group of 19 by its privilege, and a sequence 18 has not
+if os.path.exists(ROOT + "nudge/security/nudge_agent_security.xml"):
+    sub("nudge/security/nudge_agent_security.xml",
+        r'<field name="privilege_id" ref="res_groups_privilege_nudge"/>',
+        '<field name="category_id" ref="module_category_nudge"/>')
+    sub("nudge/security/nudge_agent_security.xml", r'        <field name="sequence">\d+</field>\n', "")

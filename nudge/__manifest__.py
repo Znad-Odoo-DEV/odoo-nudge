@@ -1,6 +1,6 @@
 {
     "name": "Nudge",
-    "version": "19.0.1.59.10",
+    "version": "19.0.1.59.11",
     "category": "Productivity",
     "summary": "An AI companion that lives in the Odoo web client",
     "description": """
@@ -88,7 +88,6 @@ Without them the rest works and the feature says what is missing.
         "views/nudge_latency_menu.xml",
         "security/nudge_token_dashboard_security.xml",
         "views/nudge_token_dashboard_views.xml",
-        "views/nudge_setup_wizard_menu.xml",
         "views/nudge_home_views.xml",
         "views/nudge_tour_views.xml",
         "views/nudge_health_views.xml",
