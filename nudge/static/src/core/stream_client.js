@@ -78,6 +78,8 @@ export function streamChat({
     report,
     fresh,
     slot,
+    agentId,
+    rehearsal,
     signal,
     onEvent,
 }) {
@@ -97,6 +99,9 @@ export function streamChat({
             // Ask the provider, not the memory of answers
             fresh: Boolean(fresh),
             slot: slot || null,
+            // Nudge Agents: the controller puts them in the context (nudge_agent_id, nudge_rehearsal)
+            nudge_agent_id: agentId || null,
+            nudge_rehearsal: Boolean(agentId && rehearsal),
         },
         { signal, onEvent }
     );

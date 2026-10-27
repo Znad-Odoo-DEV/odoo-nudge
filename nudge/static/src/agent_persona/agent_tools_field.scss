@@ -1,0 +1,70 @@
+.o_nudge_agent_tools {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+    max-height: 22rem;
+    overflow-y: auto;
+}
+
+.o_nudge_agent_tool {
+    display: flex;
+    align-items: baseline;
+    gap: .5rem;
+    padding: .25rem .5rem;
+    border-radius: .375rem;
+
+    &:hover {
+        background: var(--bs-secondary-bg, rgba(0, 0, 0, .04));
+    }
+
+    .o_nudge_agent_tool_name {
+        font-weight: 500;
+        min-width: 11rem;
+    }
+
+    .o_nudge_agent_tool_help {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+}
+
+// The header of the Nudge panel opened for an agent
+.o_nudge_agent {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    margin-inline: 6px;
+
+    .o_nudge_agent_avatar {
+        flex: 0 0 auto;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: rgba(255, 255, 255, .25);
+    }
+
+    .o_nudge_agent_name {
+        min-width: 0;
+        overflow: hidden;
+        font-weight: 600;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .o_nudge_agent_badge {
+        flex: 0 0 auto;
+        padding: 1px 8px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, .22);
+        font-size: .72rem;
+        font-weight: 600;
+        letter-spacing: .02em;
+    }
+
+    .o_nudge_agent_leave {
+        margin-inline-start: auto;
+    }
+}

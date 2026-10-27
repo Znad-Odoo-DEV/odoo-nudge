@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Nudge Agents: the Token Dashboard, the ledger, the conversations and the audit gain the agent -->
+    <record id="nudge_token_dashboard_view_list_agent" model="ir.ui.view">
+        <field name="name">nudge.token.dashboard.view.list.agent</field>
+        <field name="model">nudge.token.dashboard</field>
+        <field name="inherit_id" ref="nudge.nudge_token_dashboard_view_list"/>
+        <field name="arch" type="xml">
+            <field name="provider_id" position="after">
+                <field name="agent_id" optional="show"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="nudge_token_dashboard_view_search_agent" model="ir.ui.view">
+        <field name="name">nudge.token.dashboard.view.search.agent</field>
+        <field name="model">nudge.token.dashboard</field>
+        <field name="inherit_id" ref="nudge.nudge_token_dashboard_view_search"/>
+        <field name="arch" type="xml">
+            <field name="model_name" position="after">
+                <field name="agent_id"/>
+            </field>
+            <filter name="source_noai" position="after">
+                <separator/>
+                <filter name="by_agents" string="Agents" domain="[('agent_id', '!=', False)]"/>
+            </filter>
+            <filter name="group_provider" position="after">
+                <filter name="group_agent" string="Agent" context="{'group_by': 'agent_id'}"/>
+            </filter>
+        </field>
+    </record>
+
+    <record id="nudge_usage_view_list_agent" model="ir.ui.view">
+        <field name="name">nudge.usage.view.list.agent</field>
+        <field name="model">nudge.usage</field>
+        <field name="inherit_id" ref="nudge.nudge_usage_view_list"/>
+        <field name="arch" type="xml">
+            <field name="conversation_id" position="after">
+                <field name="agent_id" optional="show"/>
+                <field name="rehearsal" optional="hide"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="nudge_usage_view_search_agent" model="ir.ui.view">
+        <field name="name">nudge.usage.view.search.agent</field>
+        <field name="model">nudge.usage</field>
+        <field name="inherit_id" ref="nudge.nudge_usage_view_search"/>
+        <field name="arch" type="xml">
+            <field name="model_name" position="after">
+                <field name="agent_id"/>
+            </field>
+            <filter name="noai" position="after">
+                <separator/>
+                <filter name="rehearsals" string="Rehearsals" domain="[('rehearsal', '=', True)]"/>
+            </filter>
+        </field>
+    </record>
+
+    <record id="nudge_conversation_view_search_agent" model="ir.ui.view">
+        <field name="name">nudge.conversation.view.search.agent</field>
+        <field name="model">nudge.conversation</field>
+        <field name="inherit_id" ref="nudge.nudge_conversation_view_search"/>
+        <field name="arch" type="xml">
+            <field name="model_name" position="after">
+                <field name="agent_id"/>
+            </field>
+            <filter name="archived" position="after">
+                <filter name="rehearsals" string="Rehearsals" domain="[('agent_rehearsal', '=', True)]"/>
+            </filter>
+            <filter name="group_model" position="after">
+                <filter name="group_agent" string="Agent" context="{'group_by': 'agent_id'}"/>
+            </filter>
+        </field>
+    </record>
+
+    <record id="nudge_run_view_search_agent" model="ir.ui.view">
+        <field name="name">nudge.run.view.search.agent</field>
+        <field name="model">nudge.run</field>
+        <field name="inherit_id" ref="nudge.nudge_run_view_search"/>
+        <field name="arch" type="xml">
+            <field name="user_id" position="after">
+                <field name="agent_id"/>
+            </field>
+            <filter name="group_state" position="after">
+                <filter name="group_agent" string="Agent" context="{'group_by': 'agent_id'}"/>
+            </filter>
+        </field>
+    </record>
+
+    <record id="nudge_step_view_search_agent" model="ir.ui.view">
+        <field name="name">nudge.step.view.search.agent</field>
+        <field name="model">nudge.step</field>
+        <field name="inherit_id" ref="nudge.nudge_step_view_search"/>
+        <field name="arch" type="xml">
+            <field name="user_id" position="after">
+                <field name="agent_id"/>
+            </field>
+            <filter name="group_state" position="after">
+                <filter name="group_agent" string="Agent" context="{'group_by': 'agent_id'}"/>
+            </filter>
+        </field>
+    </record>
+</odoo>

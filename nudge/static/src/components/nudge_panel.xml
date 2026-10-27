@@ -7,7 +7,17 @@
             <header class="o_nudge_header" t-on-touchstart="onSwipeStart" t-on-touchend="onSwipeEnd">
                 <span t-if="state.isMobile" class="o_nudge_grabber" aria-hidden="true"/>
                 <NudgeFace isThinking="state.isStreaming"/>
-                <span t-if="state.view === 'history'" class="o_nudge_title">History</span>
+                <!-- Nudge Agents: the agent this panel is open for -->
+                <span t-if="state.agent" class="o_nudge_agent">
+                    <img class="o_nudge_agent_avatar" alt="" t-att-src="'/web/image/nudge.agent/' + state.agent.id + '/image_128'"/>
+                    <span class="o_nudge_agent_name" dir="auto" t-esc="state.agent.name"/>
+                    <span t-if="state.agent.rehearsal" class="o_nudge_agent_badge">Rehearsal</span>
+                    <button type="button" class="o_nudge_icon_button o_nudge_agent_leave" title="Back to Nudge"
+                            aria-label="Back to Nudge" t-on-click="() => this.nudge.leaveAgent()">
+                        <i class="fa fa-times-circle-o"/>
+                    </button>
+                </span>
+                <span t-elif="state.view === 'history'" class="o_nudge_title">History</span>
                 <span t-elif="state.view === 'settings'" class="o_nudge_title">Preferences</span>
                 <span t-elif="state.title" class="o_nudge_title" dir="auto" t-esc="state.title"/>
                 <span t-else="" class="o_nudge_title">Nudge</span>

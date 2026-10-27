@@ -283,6 +283,8 @@ export const nudgeService = {
             canUseAgent,
             // The company asks that nothing goes to an AI provider outside its own server
             isPrivate: Boolean(config?.is_private),
+            // Nudge Agents: the agent the panel is opened for ({id, name, rehearsal}), or null
+            agent: null,
             // Developer: Nudge builds, for an administrator the switch is on for
             canDevelop,
             // A database nobody has set up yet: the first thing offered is to do it together
@@ -450,6 +452,23 @@ function isReadable(file) {
                 // A provider may have been set up since the page was loaded
                 refreshStatus();
             }
+        }
+
+        /**
+         * Nudge Agents (Try it): open the panel for an agent. A new conversation is begun with it, and
+         * "New chat" keeps it until leaveAgent().
+         *
+         * @param {{id: number, name: string, rehearsal?: boolean}} agent
+         */
+        function openForAgent(agent) {
+            newConversation();
+            state.agent = { id: agent.id, name: agent.name || "", rehearsal: agent.rehearsal !== false };
+            open();
+        }
+
+        function leaveAgent() {
+            state.agent = null;
+            newConversation();
         }
 
         function close() {
@@ -2261,6 +2280,9 @@ function isReadable(file) {
                     file,
                     report,
                     fresh,
+                    // Nudge Agents: the agent (and Try it) travel with every question
+                    agentId: state.agent?.id,
+                    rehearsal: state.agent?.rehearsal,
                     ...params,
                 })
             );
@@ -2450,6 +2472,8 @@ function isReadable(file) {
         return {
             state,
             open,
+            openForAgent,
+            leaveAgent,
             close,
             toggle,
             setEnabled,
