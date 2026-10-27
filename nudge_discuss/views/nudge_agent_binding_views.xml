@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- The channels of Discuss an agent joins, on its binding of the channel Discuss -->
+    <record id="nudge_agent_view_form_discuss" model="ir.ui.view">
+        <field name="name">nudge.agent.form.discuss</field>
+        <field name="model">nudge.agent</field>
+        <field name="inherit_id" ref="nudge.nudge_agent_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='binding_ids']//form//group[@name='binding_extra']" position="inside">
+                <field name="channel_ids" widget="many2many_tags" invisible="channel != 'discuss'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

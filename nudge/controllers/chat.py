@@ -36,7 +36,7 @@ class NudgeChat(http.Controller):
     @http.route("/nudge/chat/stream", type="http", auth="user", methods=["POST"], max_content_length=UPLOAD_CAP)
     def chat_stream(self, message=None, conversation_id=None, snapshot=None, spoken=None,
                     read_aloud=None, mode=None, background=None, explain=None, file=None,
-                    report=None, fresh=None, slot=None, **kwargs):
+                    report=None, fresh=None, slot=None, nudge_agent_id=None, nudge_rehearsal=None, **kwargs):
         """Answer one message as a stream of JSON lines.
 
         :param snapshot: JSON description of the screen, when the user shares it
@@ -62,6 +62,12 @@ class NudgeChat(http.Controller):
         env = request.env
         if not env.user.has_group("nudge.group_nudge_user"):
             raise Forbidden()
+        agent_id = self._to_id(nudge_agent_id)
+        if agent_id:
+            # A panel opened for an agent (Try it): on the request, so every phase of it (the tools, the
+            # stream) carries it; the engine still takes the agent and the rehearsal from the conversation
+            request.update_context(nudge_agent_id=agent_id, nudge_rehearsal=nudge_rehearsal == "1")
+            env = request.env
         try:
             conversation = env["nudge.conversation"]._chat_open(self._to_id(conversation_id))
             job = conversation._chat_prepare(

@@ -91,3 +91,9 @@ access_nudge_request_size_line_manager,nudge.request.size.line manager,model_nud
 access_nudge_search_try_manager,nudge.search.try manager,model_nudge_search_try,group_nudge_manager,1,1,1,1
 access_nudge_search_try_line_manager,nudge.search.try.line manager,model_nudge_search_try_line,group_nudge_manager,1,1,1,1
 access_nudge_token_dashboard_manager,nudge.token.dashboard manager,model_nudge_token_dashboard,group_nudge_manager,1,0,0,0
+access_nudge_agent_user,nudge.agent user,model_nudge_agent,base.group_user,1,0,0,0
+access_nudge_agent_manager,nudge.agent manager,model_nudge_agent,group_nudge_manager,1,1,1,1
+access_nudge_agent_eval_manager,nudge.agent.eval manager,model_nudge_agent_eval,group_nudge_manager,1,1,1,1
+access_nudge_agent_binding_manager,nudge.agent.binding manager,model_nudge_agent_binding,group_nudge_manager,1,1,1,1
+access_nudge_agent_revision_manager,nudge.agent.revision manager,model_nudge_agent_revision,group_nudge_manager,1,0,0,0
+access_nudge_agent_preview_manager,nudge.agent.preview manager,model_nudge_agent_preview,group_nudge_manager,1,1,1,1

@@ -28,6 +28,8 @@ class NudgeTokenDashboard(models.Model):
     provider_id = fields.Many2one("nudge.provider", string="Provider", readonly=True)
     model_name = fields.Char(string="Model", readonly=True)
     company_id = fields.Many2one("res.company", readonly=True)
+    # Nudge Agents: who answered, an agent or Nudge itself (empty); the rehearsals of Try it are left out
+    agent_id = fields.Many2one("nudge.agent", string="Agent", readonly=True)
     answers = fields.Integer(readonly=True, help="Answers: calls to a provider and answers given without one.")
     ai_answers = fields.Integer(string="Answers by AI", readonly=True)
     no_ai_answers = fields.Integer(
@@ -61,6 +63,7 @@ class NudgeTokenDashboard(models.Model):
                     u.provider_id AS provider_id,
                     u.model_name AS model_name,
                     u.company_id AS company_id,
+                    u.agent_id AS agent_id,
                     COUNT(*) FILTER (WHERE u.kind IN ('chat', 'memory', 'cache', 'noai')) AS answers,
                     COUNT(*) FILTER (WHERE u.kind = 'chat') AS ai_answers,
                     COUNT(*) FILTER (WHERE u.kind IN ('memory', 'cache', 'noai')) AS no_ai_answers,
@@ -89,7 +92,9 @@ class NudgeTokenDashboard(models.Model):
                     FROM res_groups_users_rel x
                     JOIN ir_model_data d ON d.model = 'res.groups' AND d.res_id = x.gid
                     WHERE x.uid = u.user_id) g ON TRUE
-                GROUP BY u.date, 3, 4, 5, u.provider_id, u.model_name, u.company_id
+                -- Nudge Agents: Try it is never billed as real
+                WHERE NOT COALESCE(u.rehearsal, FALSE)
+                GROUP BY u.date, 3, 4, 5, u.provider_id, u.model_name, u.company_id, u.agent_id
             )""")
 
     @api.model

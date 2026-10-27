@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="nudge.AgentToolsField">
+        <div class="o_nudge_agent_tools">
+            <p t-if="!chosen.size" class="text-muted small mb-2">
+                Nothing ticked: the agent may use the reading tools only.
+            </p>
+            <label t-foreach="state.tools" t-as="tool" t-key="tool.name" class="o_nudge_agent_tool">
+                <input type="checkbox" t-att-checked="isChosen(tool.name)" t-att-disabled="props.readonly"
+                       t-on-change="() => this.toggle(tool.name)"/>
+                <span class="o_nudge_agent_tool_name" t-esc="tool.label"/>
+                <span t-if="tool.risk === 'write'" class="badge text-bg-warning"
+                      title="Changes data, only after the person says yes on a card">Writes on a card</span>
+                <span t-else="" class="badge text-bg-success" title="Reads data the person may already read">Read</span>
+                <span class="o_nudge_agent_tool_help text-muted small" t-esc="tool.help"/>
+            </label>
+        </div>
+    </t>
+
+</templates>

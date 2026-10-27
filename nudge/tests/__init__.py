@@ -1,5 +1,7 @@
 from . import test_adapters
 from . import test_agent
+from . import test_agent_model
+from . import test_agent_engine
 from . import test_analytics
 from . import test_background
 from . import test_budgets

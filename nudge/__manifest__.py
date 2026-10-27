@@ -1,6 +1,6 @@
 {
     "name": "Nudge",
-    "version": "19.0.1.59.11",
+    "version": "19.0.1.60.0",
     "category": "Productivity",
     "summary": "An AI companion that lives in the Odoo web client",
     "description": """
@@ -53,6 +53,7 @@ Without them the rest works and the feature says what is missing.
         "security/nudge_security.xml",
         "security/nudge_auditor_security.xml",
         "security/ir.model.access.csv",
+        "security/nudge_agent_security.xml",
         "security/nudge_tour_security.xml",
         "security/nudge_health_security.xml",
         "security/nudge_report_security.xml",
@@ -111,6 +112,10 @@ Without them the rest works and the feature says what is missing.
         "data/nudge_skill_data_np03.xml",
         "data/nudge_skill_data_accounting.xml",
         "data/nudge_skill_data_inventory.xml",
+        "data/nudge_agent_templates.xml",
+        "views/nudge_agent_views.xml",
+        "views/nudge_agent_engine_views.xml",
+        "views/nudge_agent_preview_views.xml",
         "views/nudge_skill_views.xml",
         "views/res_config_settings_plan_views.xml",
         "views/nudge_plugin_views.xml",
