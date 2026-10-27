@@ -253,6 +253,32 @@ export function markdownToHtml(text) {
 }
 
 /**
+ * A table does not fit a narrow place (the notice of a job done in the background): each row is a bullet of
+ * its own, cells joined by " · ", the header in bold; the rule row is dropped. What is not a table is left.
+ *
+ * @param {string} text
+ * @returns {string} markdown without tables
+ */
+export function tablesAsLines(text) {
+    const lines = String(text || "").split(/\r\n?|\n/);
+    const out = [];
+    for (let index = 0; index < lines.length; index++) {
+        if (isTableRow(lines[index]) && isTableRule(lines[index + 1] || "")) {
+            const header = splitRow(lines[index]).filter(Boolean);
+            out.push(header.length ? `**${header.join(" · ")}**` : "");
+            index++;
+            while (index + 1 < lines.length && isTableRow(lines[index + 1])) {
+                index++;
+                out.push(`- ${splitRow(lines[index]).join(" · ")}`);
+            }
+        } else {
+            out.push(lines[index]);
+        }
+    }
+    return out.join("\n");
+}
+
+/**
  * @param {string} text
  * @returns {ReturnType<markup>} value to render with t-out
  */

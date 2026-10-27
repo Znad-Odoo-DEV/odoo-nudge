@@ -58,6 +58,17 @@ class BackgroundCase(AgentCase):
 @tagged("post_install", "-at_install")
 class TestBackground(BackgroundCase, TransactionCase):
 
+    def test_the_excerpt_of_a_notice_never_ends_in_half_a_table_row(self):
+        # Live trial DEF-3: the 300 characters cut a row in two and the last row showed as raw pipes
+        rows = "\n".join("| S%05d | Gemini Furniture | 1,799.00 |" % number for number in range(30))
+        text = "Done.\n\n| Number | Customer | Total |\n|---|---|---|\n" + rows
+        excerpt = nudge_run._excerpt(text)
+        self.assertLessEqual(len(excerpt), nudge_run.EXCERPT_CHARS + 2)
+        body = excerpt.removesuffix(" …")
+        self.assertTrue(all(line.endswith("|") for line in body.splitlines() if line.startswith("|")), excerpt)
+        self.assertEqual(nudge_run._excerpt("Short."), "Short.")
+        self.assertEqual(nudge_run._excerpt(False), "")
+
     def test_left_to_the_background(self):
         adapter = self.use_adapter(script=[asking(CREATE)])
         conversation, events = self.leave(self.agent, "Create the contact Nudge Made")

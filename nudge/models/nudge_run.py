@@ -99,6 +99,18 @@ class NudgeLog(models.AbstractModel):
         raise AccessError(_("The log of Nudge cannot be deleted."))
 
 
+def _excerpt(text):
+    """:return: the first EXCERPT_CHARS of ``text`` for a notice, cut at the end of a line when it is cut: a
+    table row cut in the middle is not a row, it showed as raw pipes"""
+    text = text or ""
+    if len(text) <= EXCERPT_CHARS:
+        return text
+    cut = text[:EXCERPT_CHARS]
+    if "\n" in cut and text[EXCERPT_CHARS] != "\n":
+        cut = cut.rsplit("\n", 1)[0]
+    return cut.rstrip() + " …"
+
+
 class NudgeRun(models.Model):
     """One request made to Nudge in Agent mode, from the question to the
     last thing done for it."""
@@ -222,7 +234,7 @@ class NudgeRun(models.Model):
                 "state": run.state,
                 "request": run.name,
                 "progress": run.progress or "",
-                "text": (answer.content or "")[:EXCERPT_CHARS] if kind != "progress" else "",
+                "text": _excerpt(answer.content) if kind != "progress" else "",
                 "card": card,
                 "changed": changed,
                 "list": run._bulk_list() if kind == "done" else False,

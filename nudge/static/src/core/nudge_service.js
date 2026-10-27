@@ -12,7 +12,7 @@ import { writeInField } from "../context/form_writer";
 import { holdable } from "./hold";
 import { DEFAULT_DICTATION_HOTKEY, DEFAULT_HOTKEY, NO_HOTKEY } from "./hotkeys";
 import { DEFAULT_THEME, LOOK_SETTINGS, readCompanyColor, readPosition, THEMES } from "./looks";
-import { renderMarkdown } from "./markdown";
+import { renderMarkdown, tablesAsLines } from "./markdown";
 import { asksWithoutAi, isSpreadsheet } from "../import/import_service";
 import { streamBulk, streamChat, streamDecision } from "./stream_client";
 
@@ -138,6 +138,23 @@ const HOW_TO = new RegExp(
  */
 export function asksHowTo(text) {
     return HOW_TO.test(String(text || ""));
+}
+
+// Text dictated into a field of the form in front: "write Purchasing Manager in the Job Position field",
+// "اكتب مدير مشتريات بحقل المسمى الوظيفي". Talk types it (write_in_field): nothing to choose first
+const INTO_FIELD = new RegExp(
+    "(\\b(write|type|put|enter|fill|set)\\b.*\\b(field|box)\\b" +
+        "|(^|[^\\u0600-\\u06FF])(اكتب|أكتب|حط|ضع|عب[ّ]?ي|املأ|املا|دخ[ّ]?ل|أدخل|ادخل)(?=$|[^\\u0600-\\u06FF]).*(حقل|خانة|خانه))",
+    "i"
+);
+
+/**
+ * @param {string} text
+ * @returns {boolean} whether the message dictates a text into a field of the form
+ */
+export function writesInField(text) {
+    const said = String(text || "");
+    return INTO_FIELD.test(said) && !asksHowTo(said);
 }
 
 // A question of figures: "how many contacts", "كم عدد الموظفين", "قديش", "kam". It asks for a number, not for
@@ -892,8 +909,9 @@ function isReadable(file) {
                 return;
             }
             const sticky = payload.kind === "waiting";
-            // What Nudge answered reads as in the chat: bold, lists, links, not their marks
-            notification.add(payload.text ? renderMarkdown(payload.text) : payload.request, {
+            // What Nudge answered reads as in the chat: bold, lists, links, not their marks; a table is too
+            // wide for a notice, its rows are lines
+            notification.add(payload.text ? renderMarkdown(tablesAsLines(payload.text)) : payload.request, {
                 title: outcomeOf(payload),
                 type: payload.kind === "failed" ? "warning" : "info",
                 sticky,
@@ -2193,9 +2211,10 @@ function isReadable(file) {
                 explain = state.mode !== MODE_TALK ? null : EXPLAIN_TEXT;
             } else if (
                 explain === EXPLAIN_DO ||
-                (state.mode !== MODE_TALK && (asksToDoIt(text) || !asksHowTo(text)))
+                (state.mode !== MODE_TALK && (asksToDoIt(text) || !asksHowTo(text))) ||
+                writesInField(text)
             ) {
-                // An order is the work, not a question of how
+                // An order is the work, not a question of how; in Talk too, a text to type in a field
                 explain = null;
             } else if (!EXPLAIN_CHOICES.includes(explain)) {
                 // In Agent mode a preference does not turn an order into an
