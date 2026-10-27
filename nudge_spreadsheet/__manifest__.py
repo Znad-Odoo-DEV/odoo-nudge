@@ -10,7 +10,7 @@ Installed by itself when Nudge and the Spreadsheet module are both there.
     "version": "19.0.1.0.11",
     "author": "Ibrahim Elzenad",
     "website": "https://znad-odoo-dev.github.io",
-    "support": "https://github.com/Znad-Odoo-DEV/odoo-nudge/issues",
+    "support": "id7sp22@gmail.com",
     "license": "OPL-1",
     "images": ["static/description/banner.png"],
     "depends": ["nudge", "spreadsheet"],

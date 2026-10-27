@@ -1,6 +1,6 @@
 {
     "name": "Nudge",
-    "version": "19.0.1.59.9",
+    "version": "19.0.1.59.10",
     "category": "Productivity",
     "summary": "An AI companion that lives in the Odoo web client",
     "description": """
@@ -43,8 +43,10 @@ Without them the rest works and the feature says what is missing.
 """,
     "author": "Ibrahim Elzenad",
     "website": "https://znad-odoo-dev.github.io",
-    "support": "https://github.com/Znad-Odoo-DEV/odoo-nudge/issues",
+    "support": "id7sp22@gmail.com",
     "license": "OPL-1",
+    "price": 199.0,
+    "currency": "EUR",
     "images": ["static/description/banner.png"],
     "depends": ["web", "bus"],
     "data": [

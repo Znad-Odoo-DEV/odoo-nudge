@@ -27,10 +27,10 @@ found and shown, by rules alone. Installed from Apps by an administrator who
 wants it, with Nudge; never by itself.
 """,
     "category": "Website",
-    "version": "19.0.1.0.5",
+    "version": "19.0.1.0.6",
     "author": "Ibrahim Elzenad",
     "website": "https://znad-odoo-dev.github.io",
-    "support": "https://github.com/Znad-Odoo-DEV/odoo-nudge/issues",
+    "support": "id7sp22@gmail.com",
     "license": "OPL-1",
     "images": ["static/description/banner.png"],
     "depends": ["nudge", "website", "portal"],
