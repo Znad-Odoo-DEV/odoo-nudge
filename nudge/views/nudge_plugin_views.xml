@@ -8,7 +8,8 @@
             <list string="Plugins" create="0" delete="0" decoration-muted="state == 'blocked'"
                   decoration-warning="state == 'pending'">
                 <header>
-                    <button name="action_find_plugins" type="object" string="Look for Plugins" display="always"/>
+                    <button name="action_find_plugins" type="object" string="Rescan Installed Plugins" display="always"
+                            help="Looks again at the modules installed on this database; it searches nothing on the internet."/>
                 </header>
                 <field name="title"/>
                 <field name="name" optional="show"/>
@@ -53,6 +54,7 @@
                         <h1><field name="title"/></h1>
                         <div class="text-muted"><field name="summary"/></div>
                     </div>
+                    <div class="text-muted mb-2">Allow only decides what reaches the AI: the code of a module runs as soon as it is installed, and the signature is informative.</div>
                     <div class="alert alert-warning" role="alert" invisible="not problems">
                         <field name="problems"/>
                     </div>

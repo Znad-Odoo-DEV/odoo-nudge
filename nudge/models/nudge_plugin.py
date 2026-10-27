@@ -50,7 +50,9 @@ class NudgePlugin(models.Model):
     publisher = fields.Char(readonly=True)
     version = fields.Char(readonly=True)
     summary = fields.Char(readonly=True)
-    state = fields.Selection(STATES, string="Status", default="pending", required=True, readonly=True, index=True)
+    state = fields.Selection(
+        STATES, string="Status", default="pending", required=True, readonly=True, index=True,
+        help="Allow only decides what reaches the AI: the code of a module runs as soon as it is installed, and the signature is informative.")
     enabled = fields.Boolean(
         string="Switched On", default=True,
         help="Switch it off to take every tool, skill, prompt and command of this plugin away at once, "

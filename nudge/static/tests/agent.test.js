@@ -13,7 +13,7 @@ import {
     webModels,
 } from "@web/../tests/web_test_helpers";
 
-import { asksForFigures, asksForReport, asksHowTo, asksToDoIt } from "@nudge/core/nudge_service";
+import { asksForFigures, asksForReport, asksHowTo, asksToDoIt, writesInField } from "@nudge/core/nudge_service";
 
 import { answered, lines, setupNudge, streamed } from "./voice_helpers";
 
@@ -713,6 +713,18 @@ test("a question of how is told from an order", () => {
     for (const text of ["Confirm the quotation S00003", "Create a contact named Ebrahim",
         "أكّدلي عرض السعر S00002", "غيّرلي مدينة Raghad لحلب", ""]) {
         expect(asksHowTo(text)).toBe(false, { message: text });
+    }
+});
+
+test("a text to type in a field is never asked how", () => {
+    // Found in the live trial 2026-10-27: Talk asked "How would you like it?", then pointed at the field
+    for (const text of ["Write Purchasing Manager in the Job Position field", "type 0501234567 in the phone field",
+        "put Dubai in the City box", "اكتب مدير مشتريات بحقل المسمى الوظيفي", "حط دبي بخانة المدينة"]) {
+        expect(writesInField(text)).toBe(true, { message: text });
+    }
+    for (const text of ["How do I write in the Job Position field?", "where do I type the phone field",
+        "كيف بكتب بحقل المدينة؟", "Write a two-line poem about the sea", "Create a contact named Ebrahim", ""]) {
+        expect(writesInField(text)).toBe(false, { message: text });
     }
 });
 
