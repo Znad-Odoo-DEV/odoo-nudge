@@ -7,6 +7,14 @@
         <field name="arch" type="xml">
             <list string="Skill Catalogue" create="0" edit="0" delete="0"
                   decoration-muted="state == 'installed'" decoration-warning="tools_missing">
+                <header>
+                    <button name="%(nudge_recipe_export_action)d" type="action" string="Export a recipe" display="always"
+                            groups="nudge.group_nudge_manager"/>
+                    <button name="%(nudge_recipe_import_action)d" type="action" string="Import a recipe" display="always"
+                            groups="nudge.group_nudge_manager"/>
+                    <button name="%(nudge_recipe_publish_action)d" type="action" string="Publish our recipes" display="always"
+                            groups="nudge.group_nudge_manager"/>
+                </header>
                 <field name="title"/>
                 <field name="domain"/>
                 <field name="languages"/>
@@ -195,10 +203,10 @@
         <field name="target">new</field>
     </record>
 
-    <menuitem id="nudge_menu_skill_market" name="Skill Catalogue" sequence="4"
-              parent="nudge_menu_recipes" action="nudge_skill_market_open"/>
-    <menuitem id="nudge_menu_recipe_publishers" name="Trusted Publishers" sequence="8"
-              parent="nudge_menu_recipes" action="nudge_recipe_publisher_action" groups="base.group_system"/>
-    <menuitem id="nudge_menu_recipe_signing_key" name="Signing Key" sequence="9"
-              parent="nudge_menu_recipes" action="nudge_recipe_signing_key_action" groups="base.group_system"/>
+    <menuitem id="nudge_menu_skill_market" name="Recipes" sequence="40"
+              parent="nudge_menu_configuration" action="nudge_skill_market_open"/>
+    <menuitem id="nudge_menu_recipe_publishers" name="Trusted Publishers" sequence="80"
+              parent="nudge_menu_advanced" action="nudge_recipe_publisher_action" groups="base.group_system"/>
+    <menuitem id="nudge_menu_recipe_signing_key" name="Signing Key" sequence="90"
+              parent="nudge_menu_advanced" action="nudge_recipe_signing_key_action" groups="base.group_system"/>
 </odoo>

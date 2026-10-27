@@ -46,5 +46,17 @@
 
     <menuitem id="nudge_menu_coverage" name="Missed Sentences" sequence="22"
               parent="nudge_menu_knowledge" action="nudge_coverage_open_action"
-              groups="nudge.group_nudge_manager"/>
+              groups="-nudge.group_nudge_manager,-base.group_system,nudge.group_nudge_advanced_menus"/>
+
+    <record id="nudge_memory_view_list_coverage" model="ir.ui.view">
+        <field name="name">nudge.memory.view.list.coverage</field>
+        <field name="model">nudge.memory</field>
+        <field name="inherit_id" ref="nudge_memory_view_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="%(nudge_coverage_open_action)d" type="action" string="Missed sentences"
+                        display="always" groups="nudge.group_nudge_manager"/>
+            </xpath>
+        </field>
+    </record>
 </odoo>

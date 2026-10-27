@@ -8,6 +8,25 @@
         <field name="arch" type="xml">
             <xpath expr="//form" position="inside">
                 <app data-string="Nudge" string="Nudge" name="nudge" groups="base.group_system">
+                    <block title="First Setup" name="nudge_setup_container">
+                        <setting help="Choose how Nudge answers (rules only, a local model or a cloud provider), see what it would cost each month, set the budgets and switch it on. It works before any provider exists, and ends with rules only if you want no AI. A key typed there is kept on the provider, where only system administrators read it.">
+                            <div class="content-group">
+                                <button name="%(nudge.nudge_setup_wizard_action)d" type="action"
+                                        string="Choose a provider and see the cost" icon="oi-arrow-right" class="btn-link"/>
+                            </div>
+                        </setting>
+                        <setting invisible="not nudge_agent" help="Nudge asks for the company, its country, currency, languages, apps, warehouses and users, one step at a time, and shows a card with the exact changes before each one. Nothing is done before your yes; most steps can be undone. The fiscal localisation module is named on its card. The outgoing mail server is never configured by Nudge.">
+                            <div class="content-group">
+                                <button name="action_nudge_setup" type="object"
+                                        string="Set up this database with me" icon="oi-arrow-right" class="btn-link"/>
+                            </div>
+                        </setting>
+                    </block>
+                    <block title="Menus" name="nudge_menus_container">
+                        <setting help="Shows the menus a manager rarely needs: prompts, training, usage and cost, cached answers, recurring questions and requests, key screens, translations, recipe sources and the like. Nothing is removed when it is off; the menus are only hidden.">
+                            <field name="group_nudge_advanced_menus"/>
+                        </setting>
+                    </block>
                     <block title="AI Provider" name="nudge_provider_container">
                         <setting string="Default Provider"
                                  help="The AI service answering new conversations. Leave empty to use the first provider that is ready.">
@@ -91,20 +110,6 @@
                             </div>
                         </setting>
                     </block>
-                    <block title="First Setup" name="nudge_setup_container">
-                        <setting help="Choose how Nudge answers (rules only, a local model or a cloud provider), see what it would cost each month, set the budgets and switch it on. It works before any provider exists, and ends with rules only if you want no AI. A key typed there is kept on the provider, where only system administrators read it.">
-                            <div class="content-group">
-                                <button name="%(nudge.nudge_setup_wizard_action)d" type="action"
-                                        string="Choose a provider and see the cost" icon="oi-arrow-right" class="btn-link"/>
-                            </div>
-                        </setting>
-                        <setting invisible="not nudge_agent" help="Nudge asks for the company, its country, currency, languages, apps, warehouses and users, one step at a time, and shows a card with the exact changes before each one. Nothing is done before your yes; most steps can be undone. The fiscal localisation module is named on its card. The outgoing mail server is never configured by Nudge.">
-                            <div class="content-group">
-                                <button name="action_nudge_setup" type="object"
-                                        string="Set up this database with me" icon="oi-arrow-right" class="btn-link"/>
-                            </div>
-                        </setting>
-                    </block>
                     <block title="Unusual Figures" name="nudge_outliers_container">
                         <setting help="The health check and the tasks of the kind Outliers look for payslips, bills, invoices, stock moves, expenses, discounts, purchase prices and attendance far from the usual of their group. No AI is used; only what the person may read is looked at.">
                             <field name="nudge_outlier_sensitivity"/>
@@ -169,11 +174,11 @@
                             </div>
                         </setting>
                         <setting invisible="not nudge_agent"
-                                 help="Let the agent compute with Python when counting and searching are not enough: a loop over records, a calculation per record. The code runs in the sandbox of Odoo, as the person, and reads only: what it writes is discarded, and changes still go through the yes of the person. Every run is in What Nudge Did. Off by default.">
+                                 help="Let the agent compute with Python when counting and searching are not enough: a loop over records, a calculation per record. The code runs in the sandbox of Odoo, as the person, and reads only: what it writes is discarded, and changes still go through the yes of the person. Every run is in Nudge, Activity. Off by default.">
                             <field name="nudge_python"/>
                         </setting>
                         <setting invisible="not nudge_agent"
-                                 help="Let administrators read the database with one SELECT through the agent, for a join or a report no other tool gives. Only the group Settings, and only those allowed in every company: a query knows no company rule. No change, no lock, no comment; the tables of Odoo they may read, never those of users, parameters or providers; 50 rows, 10 seconds. Every query is in What Nudge Did. Off by default.">
+                                 help="Let administrators read the database with one SELECT through the agent, for a join or a report no other tool gives. Only the group Settings, and only those allowed in every company: a query knows no company rule. No change, no lock, no comment; the tables of Odoo they may read, never those of users, parameters or providers; 50 rows, 10 seconds. Every query is in Nudge, Activity. Off by default.">
                             <field name="nudge_sql"/>
                         </setting>
                         <setting invisible="not nudge_agent"
@@ -181,7 +186,7 @@
                             <field name="nudge_admin"/>
                         </setting>
                         <setting invisible="not nudge_agent"
-                                 help="Let administrators build through Nudge, in Developer mode: automation rules, server actions, emails sent on an event, buttons, fields and changes to the screens. Only the group Settings. Nudge explains first and shows everything on the card, the code included; nothing is made before a yes; deletion only when asked for by name. Every step is in What Nudge Did. Off by default.">
+                                 help="Let administrators build through Nudge, in Developer mode: automation rules, server actions, emails sent on an event, buttons, fields and changes to the screens. Only the group Settings. Nudge explains first and shows everything on the card, the code included; nothing is made before a yes; deletion only when asked for by name. Every step is in Nudge, Activity. Off by default.">
                             <field name="nudge_developer"/>
                         </setting>
                     </block>
@@ -323,7 +328,7 @@
                         </setting>
                     </block>
                     <block title="Health Check" name="nudge_health_container">
-                        <setting help="The weekly health check of this company runs as this Nudge manager and looks at what they may read. Empty: no weekly check. The check, the compliance checklists (a checklist, not legal advice) and the check before an upgrade are run by a manager from Nudge, Health Check; none of them uses AI or changes anything.">
+                        <setting help="The weekly health check of this company runs as this Nudge manager and looks at what they may read. Empty: no weekly check. The check, the compliance checklists (a checklist, not legal advice) and the check before an upgrade are run by a manager from Nudge, Reports, Health &amp; Compliance; none of them uses AI or changes anything.">
                             <field name="nudge_health_user_id" options="{'no_create': True, 'no_open': True}"/>
                         </setting>
                     </block>

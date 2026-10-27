@@ -145,5 +145,5 @@
 
     <menuitem id="nudge_menu_built" name="Made by Nudge" sequence="40"
               parent="nudge_menu_agent" action="nudge_built_server_action"
-              groups="nudge.group_nudge_manager,base.group_system"/>
+              groups="-nudge.group_nudge_manager,-base.group_system,nudge.group_nudge_advanced_menus"/>
 </odoo>

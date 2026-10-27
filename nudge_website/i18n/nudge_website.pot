@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 09:03+0000\n"
-"PO-Revision-Date: 2026-10-27 09:03+0000\n"
+"POT-Creation-Date: 2026-10-27 10:18+0000\n"
+"PO-Revision-Date: 2026-10-27 10:18+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -470,11 +470,6 @@ msgid "Unpaid invoices: %(count)s, %(total)s in all."
 msgstr ""
 
 #. module: nudge_website
-#: model:ir.ui.menu,name:nudge_website.nudge_menu_website_usage
-msgid "Usage"
-msgstr ""
-
-#. module: nudge_website
 #. odoo-python
 #: code:addons/nudge_website/controllers/main.py:0
 #: model:ir.model.fields,field_description:nudge_website.field_nudge_web_message__user_id
@@ -483,7 +478,6 @@ msgstr ""
 
 #. module: nudge_website
 #: model:ir.actions.act_window,name:nudge_website.nudge_web_message_action
-#: model:ir.ui.menu,name:nudge_website.nudge_menu_website_questions
 #: model_terms:ir.ui.view,arch_db:nudge_website.nudge_web_message_view_list
 msgid "Visitor Questions"
 msgstr ""
@@ -498,7 +492,6 @@ msgstr ""
 
 #. module: nudge_website
 #: model:ir.model.fields.selection,name:nudge_website.selection__nudge_usage__origin__website
-#: model:ir.ui.menu,name:nudge_website.nudge_menu_website
 #: model_terms:ir.ui.view,arch_db:nudge_website.res_config_settings_view_form_website
 msgid "Website Assistant"
 msgstr ""
@@ -512,6 +505,16 @@ msgstr ""
 #. module: nudge_website
 #: model:ir.actions.act_window,name:nudge_website.nudge_usage_website_action
 msgid "Website Assistant Usage"
+msgstr ""
+
+#. module: nudge_website
+#: model:ir.ui.menu,name:nudge_website.nudge_menu_website_questions
+msgid "Website Questions"
+msgstr ""
+
+#. module: nudge_website
+#: model:ir.ui.menu,name:nudge_website.nudge_menu_website_usage
+msgid "Website Usage"
 msgstr ""
 
 #. module: nudge_website

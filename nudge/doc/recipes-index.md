@@ -1,6 +1,6 @@
 # The recipe index
 
-The Marketplace (Nudge / Configuration / Recipes / Marketplace) lists the recipes of one or more
+The Marketplace (Nudge / Configuration / Advanced / Marketplace) lists the recipes of one or more
 indexes. An index is one JSON file, hosted by anyone on a static site (GitHub Pages, any web
 server). Nudge only reads it, over HTTPS, with a limit of 10 seconds and 2 MB per file.
 **Publish** (same menu) writes an index and its recipe files into a ZIP, ready to upload.

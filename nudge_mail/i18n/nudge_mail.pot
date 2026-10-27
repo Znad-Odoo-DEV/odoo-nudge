@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-26 12:20+0000\n"
-"PO-Revision-Date: 2026-10-26 12:20+0000\n"
+"POT-Creation-Date: 2026-10-27 10:18+0000\n"
+"PO-Revision-Date: 2026-10-27 10:18+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -350,9 +350,17 @@ msgid "Email with Review"
 msgstr ""
 
 #. module: nudge_mail
+#: model_terms:ir.ui.view,arch_db:nudge_mail.res_config_settings_view_form_email_flow
+msgid ""
+"Emails that a button built by Nudge opens for the person to read before they"
+" go."
+msgstr ""
+
+#. module: nudge_mail
 #: model:ir.actions.act_window,name:nudge_mail.nudge_email_flow_action
 #: model:ir.ui.menu,name:nudge_mail.nudge_email_flow_menu
 #: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_email_flow_view_list
+#: model_terms:ir.ui.view,arch_db:nudge_mail.res_config_settings_view_form_email_flow
 msgid "Emails with Review"
 msgstr ""
 
@@ -559,6 +567,7 @@ msgstr ""
 
 #. module: nudge_mail
 #: model:ir.ui.menu,name:nudge_mail.nudge_mail_menu_rules
+#: model_terms:ir.ui.view,arch_db:nudge_mail.res_config_settings_view_form_mail_agent
 msgid "Mail Agent Rules"
 msgstr ""
 

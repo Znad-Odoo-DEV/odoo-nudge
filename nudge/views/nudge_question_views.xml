@@ -64,4 +64,16 @@
         <field name="code">action = model.action_find()</field>
         <field name="groups_id" eval="[Command.link(ref('nudge.group_nudge_manager'))]"/>
     </record>
+
+    <record id="nudge_memory_view_list_find" model="ir.ui.view">
+        <field name="name">nudge.memory.view.list.find</field>
+        <field name="model">nudge.memory</field>
+        <field name="inherit_id" ref="nudge_memory_view_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="%(nudge_question_find_action)d" type="action" string="Find recurring questions"
+                        display="always" groups="nudge.group_nudge_manager"/>
+            </xpath>
+        </field>
+    </record>
 </odoo>

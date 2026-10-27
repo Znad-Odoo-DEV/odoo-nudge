@@ -172,16 +172,16 @@
         <field name="groups_id" eval="[Command.link(ref('nudge.group_nudge_manager'))]"/>
     </record>
 
-    <menuitem id="nudge_menu_health" name="Health Check" sequence="40" parent="nudge_menu_root"
+    <menuitem id="nudge_menu_health" name="Health &amp; Compliance" sequence="60" parent="nudge_menu_reports"
               groups="nudge.group_nudge_manager"/>
     <menuitem id="nudge_menu_health_run" name="Check the Database" sequence="10"
               parent="nudge_menu_health" action="nudge_health_run_action"/>
     <menuitem id="nudge_menu_health_compliance" name="Compliance" sequence="15"
               parent="nudge_menu_health" action="nudge_compliance_action"/>
     <menuitem id="nudge_menu_health_reports" name="Reports" sequence="20"
-              parent="nudge_menu_health" action="nudge_health_report_action"/>
+              parent="nudge_menu_advanced" action="nudge_health_report_action"/>
     <menuitem id="nudge_menu_upgrade_run" name="Before an Upgrade" sequence="30"
-              parent="nudge_menu_health" action="nudge_upgrade_wizard_action" groups="base.group_system"/>
+              parent="nudge_menu_advanced" action="nudge_upgrade_wizard_action" groups="base.group_system"/>
     <menuitem id="nudge_menu_upgrade_reports" name="Upgrade Reports" sequence="40"
-              parent="nudge_menu_health" action="nudge_upgrade_report_action" groups="base.group_system"/>
+              parent="nudge_menu_advanced" action="nudge_upgrade_report_action" groups="base.group_system"/>
 </odoo>

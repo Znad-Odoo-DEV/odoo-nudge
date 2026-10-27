@@ -107,7 +107,7 @@ confirmation at a time (an administrator, with the setup open to administrators)
 ## Nudge learns from your corrections
 
 Correct it ("no, our salaries are in our own payroll module", "we call quotations offers") and
-Nudge writes the lesson down. A manager of Nudge reads it under What Nudge Knows ‣ Business Notes,
+Nudge writes the lesson down. A manager of Nudge reads it under Knowledge ‣ Business Notes,
 approves or refuses it; once approved, every conversation starts with it. Nothing is learnt
 without that approval.
 
@@ -249,7 +249,7 @@ code, the recipients and the text of an email, the difference a change makes to 
 is made before you say yes. A rule can be tried first on a dummy record that is discarded
 afterwards; a scheduled action can be run once the same way. What Nudge made is switched off with
 a change, and deleted only when you ask for it by name; a view or a field of a module is never
-touched. Every step is in What Nudge Did. What Nudge builds is registered under the module name
+touched. Every step is in Activity. What Nudge builds is registered under the module name
 `nudge_custom` (Settings ‣ Technical ‣ External Identifiers), and stays when Nudge is uninstalled.
 
 ### Emails that look designed
@@ -371,4 +371,4 @@ undoes it.
 - The microphone is blocked: allow it in the address bar of your browser.
 - An answer is wrong or points at the wrong thing: Nudge is an assistant, not an authority.
   Check before you act, and tell your managers; they can correct what Nudge knows about the
-  database under **Nudge ‣ What Nudge Knows**.
+  database under **Nudge ‣ Knowledge**.

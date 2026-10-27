@@ -1289,3 +1289,8 @@ msgstr ""
 #: model:nudge.skill,name:nudge_mail.skill_designed_emails
 msgid "Designed emails"
 msgstr "رسائل بريد مصممة"
+
+#. module: nudge_mail
+#: model_terms:ir.ui.view,arch_db:nudge_mail.res_config_settings_view_form_email_flow
+msgid "Emails that a button built by Nudge opens for the person to read before they go."
+msgstr "رسائل بريد يفتحها زر بناه Nudge ليقرأها الشخص قبل إرسالها."

@@ -125,10 +125,10 @@
         </field>
     </record>
 
-    <menuitem id="nudge_mail_menu_proposals" name="Mail Proposals" parent="nudge.nudge_menu_root"
-              action="nudge_mail_proposal_action" sequence="120" groups="nudge.group_nudge_manager"/>
-    <menuitem id="nudge_mail_menu_rules" name="Mail Agent Rules" parent="nudge.nudge_menu_root"
-              action="nudge_mail_rule_action" sequence="121" groups="nudge.group_nudge_manager"/>
+    <menuitem id="nudge_mail_menu_proposals" name="Mail Proposals" parent="nudge.nudge_menu_approvals"
+              action="nudge_mail_proposal_action" sequence="30" groups="nudge.group_nudge_manager"/>
+    <menuitem id="nudge_mail_menu_rules" name="Mail Agent Rules" parent="nudge.nudge_menu_configuration"
+              action="nudge_mail_rule_action" sequence="80" groups="-nudge.group_nudge_manager,-base.group_system,nudge.group_nudge_advanced_menus"/>
 
     <record id="res_config_settings_view_form_mail_agent" model="ir.ui.view">
         <field name="name">res.config.settings.view.form.inherit.nudge.mail.agent</field>
@@ -152,6 +152,10 @@
                             <div class="row mt8">
                                 <label for="nudge_mail_agent_project" class="col-lg-4"/>
                                 <field name="nudge_mail_agent_project" class="col-lg-6"/>
+                            </div>
+                            <div class="mt8">
+                                <button name="%(nudge_mail_rule_action)d" type="action"
+                                        string="Mail Agent Rules" icon="oi-arrow-right" class="btn-link"/>
                             </div>
                         </div>
                     </setting>

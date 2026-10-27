@@ -27,6 +27,14 @@
         <field name="users" eval="[Command.link(ref('base.user_root')), Command.link(ref('base.user_admin'))]"/>
     </record>
 
+    <!-- Not implied by any group. Nudge Settings > Show advanced menus makes the Manager group imply it
+         (group="nudge.group_nudge_manager" on the setting), so only managers ever hold it, and the advanced
+         menus sit under parents that are Manager-only. -->
+    <record id="group_nudge_advanced_menus" model="res.groups">
+        <field name="name">Nudge: advanced menus</field>
+        <field name="comment">Shows the advanced menus of Nudge (prompts, training, usage, raw lists). Turned on in Nudge Settings.</field>
+    </record>
+
     <data noupdate="1">
         <record id="nudge_conversation_rule_own" model="ir.rule">
             <field name="name">Nudge Conversation: own</field>

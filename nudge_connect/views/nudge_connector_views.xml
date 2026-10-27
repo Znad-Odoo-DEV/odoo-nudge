@@ -330,6 +330,6 @@
     <menuitem id="nudge_connect_menu_connectors" name="Connectors" parent="nudge.nudge_menu_configuration"
               action="nudge_connector_action" sequence="40" groups="base.group_system"/>
     <menuitem id="nudge_connect_menu_calls" name="Connector Calls" parent="nudge.nudge_menu_agent"
-              action="nudge_connector_call_action" sequence="40"
-              groups="base.group_system,nudge.group_nudge_manager"/>
+              action="nudge_connector_call_action" sequence="70"
+              groups="-nudge.group_nudge_manager,-base.group_system,nudge.group_nudge_advanced_menus"/>
 </odoo>
