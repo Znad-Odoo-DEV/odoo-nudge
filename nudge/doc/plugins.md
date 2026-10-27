@@ -54,13 +54,13 @@ skills and prompts stay archived, its commands are not listed. The form shows wh
 description, whether it writes, the models it touches, the modules it needs, its input; the full text of each
 skill and prompt; each command; what the manifest asks for; the signature.
 
-- **Allow** publishes its skills, shows its prompts and commands, and offers its tools.
+- **Allow** publishes its skills, shows its prompts and commands, and offers its tools. It decides only what reaches the AI: the code of a module runs as soon as it is installed, and the signature is informative.
 - **On** (the switch of the plugin) and **Settings ‣ Nudge ‣ Plugins ‣ Every Plugin Off** take everything back
   at once, without losing the review.
 - **Do Not Allow** takes it back and archives its skills and prompts (never deleted).
 - A plugin whose manifest, tool descriptions, skills or prompts change after it was allowed is **Pending** again
   (a fingerprint of all of it is compared).
-- **Look for Plugins** records a plugin installed before this version of Nudge.
+- **Rescan Installed Plugins** looks again at the installed modules (nothing is searched on the internet) and records a plugin installed before this version of Nudge.
 - Removing the module removes its record; Odoo removes its skills and prompts with it.
 
 Every decision is written in the History tab and in the server log.

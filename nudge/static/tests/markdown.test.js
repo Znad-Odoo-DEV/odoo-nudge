@@ -1,6 +1,6 @@
 import { describe, expect, test } from "@odoo/hoot";
 
-import { isSafeUrl, markdownToHtml, renderMarkdown } from "@nudge/core/markdown";
+import { isSafeUrl, markdownToHtml, renderMarkdown, tablesAsLines } from "@nudge/core/markdown";
 
 describe.current.tags("headless");
 
@@ -57,6 +57,18 @@ test("code blocks", () => {
     );
     // An answer still being written has no closing fence yet
     expect(markdownToHtml("```\nhalf")).toBe("<pre><code>half</code></pre>");
+});
+
+test("a table in a notice is read as lines, the rest is left as it is", () => {
+    const text = "Done: **3** orders\n\n| Number | Customer |\n|---|---|\n| S001 | Gemini |\n| S002 | Azure |\n\nBye";
+    expect(tablesAsLines(text)).toBe(
+        "Done: **3** orders\n\n**Number · Customer**\n- S001 · Gemini\n- S002 · Azure\n\nBye"
+    );
+    const html = String(renderMarkdown(tablesAsLines(text)));
+    expect(html).not.toInclude("<table");
+    expect(html).not.toInclude("|");
+    expect(html).toInclude("<li>S002 · Azure</li>");
+    expect(tablesAsLines("| not a table |")).toBe("| not a table |");
 });
 
 test("tables", () => {

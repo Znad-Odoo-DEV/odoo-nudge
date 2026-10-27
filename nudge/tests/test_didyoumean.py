@@ -68,6 +68,17 @@ class TestDidYouMean(NudgeCase, TransactionCase):
         self.assertTrue(chips[0]["words"][0].endswith(" "), "Put in the message box, to be finished")
         self.assertIn("What is its name?", self.text_of(events))
 
+    def test_a_slip_of_a_name_comes_with_a_chip_that_is_kept_with_the_answer(self):
+        # Live trial NP-05: "sales ordrs" showed the words of the offer and no chip to accept it, once the
+        # conversation was read again from the server
+        conversation, _last = self.ask(self.raghad, "sales ordrs")
+        answer = conversation.message_ids.filtered(lambda message: message.role == "assistant")[-1]
+        self.assertIn("Did you mean", answer.content)
+        chips = [command for event in answer.screen_events or [] if event["type"] == "found"
+                 for command in event.get("commands") or []]
+        self.assertTrue(chips, answer.screen_events)
+        self.assertTrue(all(chip["kind"] == "did_you_mean" and chip["words"] for chip in chips), chips)
+
     def test_talk_does_not_offer_a_write(self):
         conversation, _last = self.ask(self.raghad, "creat contact Ebrahim Ali")
         shown = [event for message in conversation.message_ids for event in message.screen_events or []]
