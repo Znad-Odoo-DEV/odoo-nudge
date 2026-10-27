@@ -30,7 +30,7 @@ Installed from Apps by an administrator who wants it, with Nudge.
     "version": "17.0.1.0.4",
     "author": "Ibrahim Elzenad",
     "website": "https://znad-odoo-dev.github.io",
-    "support": "https://github.com/Znad-Odoo-DEV/odoo-nudge/issues",
+    "support": "id7sp22@gmail.com",
     "license": "OPL-1",
     "depends": ["nudge"],
     "data": [

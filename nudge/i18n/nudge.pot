@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-26 13:08+0000\n"
-"PO-Revision-Date: 2026-10-26 13:08+0000\n"
+"POT-Creation-Date: 2026-10-27 09:03+0000\n"
+"PO-Revision-Date: 2026-10-27 09:03+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -2720,6 +2720,14 @@ msgid "Allow Fetching Recipe Indexes"
 msgstr ""
 
 #. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_plugin__state
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_form
+msgid ""
+"Allow only decides what reaches the AI: the code of a module runs as soon as"
+" it is installed, and the signature is informative."
+msgstr ""
+
+#. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_plugin__state__allowed
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_search
 msgid "Allowed"
@@ -3120,6 +3128,11 @@ msgstr ""
 #. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_task__match__any
 msgid "Any"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__res_config_settings__nudge_egress_mode__any
+msgid "Any address"
 msgstr ""
 
 #. module: nudge
@@ -4632,6 +4645,13 @@ msgstr ""
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_recipe_import__state__choose
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_recipe_publish__state__choose
 msgid "Choose"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid ""
+"Choose \"Only the list\" for sensitive environments: with an empty list, "
+"only the AI providers you configured are reached."
 msgstr ""
 
 #. module: nudge
@@ -10418,11 +10438,6 @@ msgid "Look for"
 msgstr ""
 
 #. module: nudge
-#: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_list
-msgid "Look for Plugins"
-msgstr ""
-
-#. module: nudge
 #. odoo-python
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "Looked at an app"
@@ -10498,6 +10513,13 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "Looked up: %s"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_list
+msgid ""
+"Looks again at the modules installed on this database; it searches nothing "
+"on the internet."
 msgstr ""
 
 #. module: nudge
@@ -13698,6 +13720,11 @@ msgid "Only the group %s approves this step."
 msgstr ""
 
 #. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__res_config_settings__nudge_egress_mode__list
+msgid "Only the list"
+msgstr ""
+
+#. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_profile_slice__restricted
 msgid "Only the managers of Nudge are told about this piece."
 msgstr ""
@@ -14194,6 +14221,11 @@ msgstr ""
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_coach__is_manual
 msgid "Otherwise the coach only follows the first 14 days."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_egress_mode
+msgid "Outbound Destinations"
 msgstr ""
 
 #. module: nudge
@@ -16451,6 +16483,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:nudge.field_nudge_digest_link__res_model
 #: model:ir.model.fields,field_description:nudge.field_nudge_search_try_line__res_model
 msgid "Res Model"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_list
+msgid "Rescan Installed Plugins"
 msgstr ""
 
 #. module: nudge
