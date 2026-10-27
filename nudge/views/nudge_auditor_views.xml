@@ -97,13 +97,9 @@
         </field>
     </record>
 
-    <menuitem id="nudge_menu_auditor_questions" name="Questions of Auditors" sequence="40"
+    <menuitem id="nudge_menu_auditor_questions" name="Questions of Auditors" sequence="60"
               parent="nudge_menu_agent" action="nudge_auditor_question_action"
-              groups="nudge.group_nudge_manager"/>
-
-    <menuitem id="nudge_menu_auditor_add" name="Add an Auditor" sequence="40"
-              parent="nudge_menu_configuration" action="nudge_auditor_wizard_action"
-              groups="base.group_system"/>
+              groups="-nudge.group_nudge_manager,-base.group_system,nudge.group_nudge_advanced_menus"/>
 
     <!-- What the auditor sees: the log of what Nudge did, in their companies, to read -->
     <menuitem id="nudge_menu_audit" name="Audit Log" sequence="15"
@@ -112,6 +108,24 @@
               parent="nudge_menu_audit" action="nudge_run_action"/>
     <menuitem id="nudge_menu_audit_steps" name="Changes" sequence="20"
               parent="nudge_menu_audit" action="nudge_step_action"/>
+    <record id="res_config_settings_view_form_auditor" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.nudge.auditor</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='nudge_menus_container']" position="after">
+                <block title="Auditors" name="nudge_auditor_container">
+                    <setting help="An auditor reads what Nudge did in their companies and nothing else, for a period you set. Add one here; revoke or extend from the Nudge Auditor tab of the user.">
+                        <div class="content-group">
+                            <button name="%(nudge_auditor_wizard_action)d" type="action"
+                                    string="Add an Auditor" icon="oi-arrow-right" class="btn-link"/>
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+
     <menuitem id="nudge_menu_audit_built" name="Made by Nudge" sequence="30"
               parent="nudge_menu_audit" action="nudge_built_server_action"/>
 </odoo>

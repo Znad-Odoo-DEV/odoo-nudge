@@ -109,7 +109,7 @@
         </field>
     </record>
 
-    <menuitem id="nudge_menu_token_dashboard" name="Token Dashboard" sequence="36"
-              parent="nudge_menu_root" action="nudge_token_dashboard_action"
+    <menuitem id="nudge_menu_token_dashboard" name="Token Dashboard" sequence="10"
+              parent="nudge_menu_reports" action="nudge_token_dashboard_action"
               groups="nudge.group_nudge_manager"/>
 </odoo>

@@ -624,3 +624,13 @@ msgstr "يجب أن يبدأ رابط سياسة الخصوصية بـ http:// �
 #: model_terms:ir.ui.view,arch_db:nudge_website.res_config_settings_view_form_website
 msgid "https://example.com/privacy"
 msgstr "https://example.com/privacy"
+
+#. module: nudge_website
+#: model:ir.ui.menu,name:nudge_website.nudge_menu_website_questions
+msgid "Website Questions"
+msgstr "أسئلة الموقع"
+
+#. module: nudge_website
+#: model:ir.ui.menu,name:nudge_website.nudge_menu_website_usage
+msgid "Website Usage"
+msgstr "استخدام الموقع"

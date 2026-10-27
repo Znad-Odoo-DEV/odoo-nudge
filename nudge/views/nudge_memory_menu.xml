@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- S15: loaded after the menus, the settings and the skills it adds to; the menu is named in nudge_menus.xml -->
-    <menuitem id="nudge_menu_memory_suggested" name="Suggested References" sequence="23"
-              parent="nudge_menu_knowledge" action="nudge_memory_suggested_action"/>
-
     <record id="res_config_settings_view_form_memory" model="ir.ui.view">
         <field name="name">res.config.settings.view.form.nudge.memory</field>
         <field name="model">res.config.settings</field>

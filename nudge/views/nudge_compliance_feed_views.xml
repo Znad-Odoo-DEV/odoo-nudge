@@ -107,7 +107,7 @@
     <menuitem id="nudge_menu_health_compliance_deadlines" name="Compliance Deadlines" sequence="16"
               parent="nudge_menu_health" action="nudge_compliance_notice_action"/>
     <menuitem id="nudge_menu_health_compliance_updates" name="Compliance Pack Updates" sequence="17"
-              parent="nudge_menu_health" action="nudge_compliance_update_action" groups="base.group_system"/>
+              parent="nudge_menu_advanced" action="nudge_compliance_update_action" groups="base.group_system"/>
     <menuitem id="nudge_menu_health_credentials" name="Credential Expiry" sequence="18"
-              parent="nudge_menu_health" action="nudge_credential_action"/>
+              parent="nudge_menu_advanced" action="nudge_credential_action"/>
 </odoo>

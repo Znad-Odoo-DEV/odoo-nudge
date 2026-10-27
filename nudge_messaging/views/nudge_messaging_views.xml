@@ -64,8 +64,8 @@
         </field>
     </record>
 
-    <menuitem id="nudge_messaging_menu_approvals" name="Phone Approvals" parent="nudge.nudge_menu_root"
-              action="nudge_step_action_messaging_approvals" sequence="112"
+    <menuitem id="nudge_messaging_menu_approvals" name="Phone Approvals" parent="nudge.nudge_menu_approvals"
+              action="nudge_step_action_messaging_approvals" sequence="20"
               groups="nudge.group_nudge_manager,-nudge.group_nudge_agent"/>
 
     <!-- The linked phones, for the manager -->
@@ -94,7 +94,8 @@
         </field>
     </record>
 
-    <menuitem id="nudge_messaging_menu_links" name="Linked Phones" parent="nudge.nudge_menu_root"
-              action="nudge_messaging_link_action" sequence="113"
-              groups="nudge.group_nudge_manager"/>
+    <menuitem id="nudge_messaging_menu_links" name="Linked Phones" parent="nudge.nudge_menu_configuration"
+              action="nudge_messaging_link_action" sequence="50"
+              groups="-nudge.group_nudge_manager,-base.group_system,nudge.group_nudge_advanced_menus"/>
+
 </odoo>

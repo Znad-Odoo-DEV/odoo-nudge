@@ -146,10 +146,23 @@
         </field>
     </record>
 
-    <menuitem id="menu_nudge_builder_check_run" name="Site Check" parent="nudge_builder.menu_nudge_builder"
-              action="nudge_builder_check_run_action" sequence="40"
-              groups="website.group_website_designer"/>
+    <record id="nudge_builder_site_view_list_buttons" model="ir.ui.view">
+        <field name="name">nudge.builder.site.list.buttons</field>
+        <field name="model">nudge.builder.site</field>
+        <field name="inherit_id" ref="nudge_builder.nudge_builder_site_view_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="/*" position="inside">
+                <header>
+                    <button name="%(nudge_builder_action_new)d" type="action" string="New site" display="always"
+                            groups="website.group_website_designer"/>
+                    <button name="%(nudge_builder_check_run_action)d" type="action" string="Site Check" display="always"
+                            groups="website.group_website_designer"/>
+                </header>
+            </xpath>
+        </field>
+    </record>
+
     <menuitem id="menu_nudge_builder_check_reports" name="Site Check Reports"
-              parent="nudge_builder.menu_nudge_builder" action="nudge_builder_check_action" sequence="41"
+              parent="nudge.nudge_menu_advanced" action="nudge_builder_check_action" sequence="95"
               groups="website.group_website_designer"/>
 </odoo>

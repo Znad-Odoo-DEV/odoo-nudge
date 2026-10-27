@@ -32,7 +32,7 @@ class NudgeRecipeExport(models.TransientModel):
         help="Only the files that are public go in. The others come with their description only.")
     sign = fields.Boolean(
         string="Sign it", default=True,
-        help="Signed with the key an administrator uploaded (Configuration, Recipes, Signing Key). "
+        help="Signed with the key an administrator uploaded (Configuration, Advanced, Signing Key). "
              "With no key, the recipe is exported unsigned.")
     signing_available = fields.Boolean(compute="_compute_signing_available")
     signed = fields.Boolean(readonly=True)

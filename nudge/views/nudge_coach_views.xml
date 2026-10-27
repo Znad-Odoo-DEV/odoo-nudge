@@ -124,9 +124,9 @@
         <field name="view_mode">tree</field>
     </record>
 
-    <menuitem id="nudge_menu_coach" name="Training" sequence="40"
-              parent="nudge_menu_root" action="nudge_coach_action"
-              groups="nudge.group_nudge_manager"/>
-    <menuitem id="nudge_menu_coach_screens" name="Key Screens" sequence="35"
-              parent="nudge_menu_configuration" action="nudge_coach_screen_action"/>
+    <menuitem id="nudge_menu_coach" name="Training" sequence="150"
+              parent="nudge_menu_knowledge" action="nudge_coach_action"
+              groups="-nudge.group_nudge_manager,-base.group_system,nudge.group_nudge_advanced_menus"/>
+    <menuitem id="nudge_menu_coach_screens" name="Key Screens" sequence="20"
+              parent="nudge_menu_advanced" action="nudge_coach_screen_action"/>
 </odoo>

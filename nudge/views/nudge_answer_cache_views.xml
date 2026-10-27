@@ -93,9 +93,9 @@
         </field>
     </record>
 
-    <menuitem id="nudge_menu_answer_cache" name="Cached Answers" sequence="23"
+    <menuitem id="nudge_menu_answer_cache" name="Cached Answers" sequence="130"
               parent="nudge_menu_knowledge" action="nudge_answer_cache_action"
-              groups="nudge.group_nudge_manager"/>
+              groups="-nudge.group_nudge_manager,-base.group_system,nudge.group_nudge_advanced_menus"/>
 
     <record id="nudge_answer_cache_rule_company" model="ir.rule">
         <field name="name">Nudge Cached Answers: companies of the manager</field>

@@ -99,10 +99,19 @@
         <field name="code">action = model.action_open()</field>
     </record>
 
-    <menuitem id="nudge_menu_request_size" name="Request Size" sequence="36"
-              parent="nudge_menu_configuration" action="nudge_request_size_action"
-              groups="nudge.group_nudge_manager"/>
-    <menuitem id="nudge_menu_search_try" name="Try Search by Meaning" sequence="37"
-              parent="nudge_menu_configuration" action="nudge_search_try_action"
+    <record id="nudge_memory_view_list_search_try" model="ir.ui.view">
+        <field name="name">nudge.memory.view.list.search.try</field>
+        <field name="model">nudge.memory</field>
+        <field name="inherit_id" ref="nudge_memory_view_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="%(nudge_search_try_action)d" type="action" string="Try search by meaning"
+                        display="always" groups="nudge.group_nudge_manager"/>
+            </xpath>
+        </field>
+    </record>
+
+    <menuitem id="nudge_menu_request_size" name="Request Size" sequence="40"
+              parent="nudge_menu_advanced" action="nudge_request_size_action"
               groups="nudge.group_nudge_manager"/>
 </odoo>

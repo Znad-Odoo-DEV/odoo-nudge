@@ -519,7 +519,7 @@ class NudgeRecipeEntry(models.Model):
                 "company_id": False,
                 "body": _(
                     "The recipe %(recipe)s fits %(app)s, which was installed this month. "
-                    "Find it in Nudge / Configuration / Recipes / Marketplace.",
+                    "Find it in Nudge / Configuration / Advanced / Marketplace (with Show advanced menus on).",
                     recipe=entry.title, app=match[0]),
                 "reason": _("From the recipe marketplace."),
             })

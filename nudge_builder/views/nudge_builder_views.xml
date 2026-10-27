@@ -156,10 +156,7 @@
         </field>
     </record>
 
-    <menuitem id="menu_nudge_builder" name="Website Builder" parent="nudge.nudge_menu_root" sequence="10"
-              groups="nudge.group_nudge_manager,-website.group_website_designer"/>
-    <menuitem id="menu_nudge_builder_new" name="New site" parent="menu_nudge_builder" sequence="10"
-              action="nudge_builder_action_new" groups="website.group_website_designer"/>
-    <menuitem id="menu_nudge_builder_sites" name="Sites built" parent="menu_nudge_builder" sequence="20"
+    <!-- One entry, under Activity (managers only, through the parent): New site and Site Check are buttons of its list -->
+    <menuitem id="menu_nudge_builder_sites" name="Website Builder" parent="nudge.nudge_menu_agent" sequence="80"
               action="nudge_builder_action_sites" groups="website.group_website_designer"/>
 </odoo>

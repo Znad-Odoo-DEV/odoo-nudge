@@ -890,7 +890,7 @@ class ResConfigSettings(models.TransientModel):
     nudge_plan_one_yes_group_ids = fields.Many2many(
         "res.groups", "nudge_plan_one_yes_group_rel", "config_id", "group_id", string="One Yes for a Whole Plan",
         help="The people of these groups say one yes for a whole plan: its card shows every change in full, and "
-             "each change is still written in What Nudge Did. Everybody else sees the card of each change.")
+             "each change is still written in Nudge, Activity. Everybody else sees the card of each change.")
 
     def get_values(self):
         values = super().get_values()

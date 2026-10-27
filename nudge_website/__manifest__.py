@@ -27,7 +27,7 @@ found and shown, by rules alone. Installed from Apps by an administrator who
 wants it, with Nudge; never by itself.
 """,
     "category": "Website",
-    "version": "17.0.1.0.6",
+    "version": "17.0.1.0.7",
     "author": "Ibrahim Elzenad",
     "website": "https://znad-odoo-dev.github.io",
     "support": "id7sp22@gmail.com",

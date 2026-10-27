@@ -60,12 +60,12 @@
                 </group>
                 <div class="text-muted" invisible="state != 'choose' or signing_available">
                     No signing key is set: the recipe is exported unsigned. A system administrator uploads one in
-                    Nudge / Configuration / Recipes / Signing Key.
+                    Nudge / Configuration / Advanced / Signing Key.
                 </div>
                 <div class="text-muted" invisible="state != 'choose'">
                     The recipe is one file with a version and a checksum. It holds the setup of Nudge in this
                     company, never conversations, keys or the data of your records. Another database reads it
-                    from Nudge / Configuration / Recipes / Import.
+                    from Nudge / Configuration / Recipes, Import a recipe.
                 </div>
                 <group invisible="state != 'done'">
                     <field name="item_count"/>
@@ -158,12 +158,6 @@
         <field name="target">new</field>
     </record>
 
-    <menuitem id="nudge_menu_recipes" name="Recipes" sequence="40"
-              parent="nudge_menu_configuration" groups="nudge.group_nudge_manager"/>
-    <menuitem id="nudge_menu_recipe_export" name="Export" sequence="10"
-              parent="nudge_menu_recipes" action="nudge_recipe_export_action"/>
-    <menuitem id="nudge_menu_recipe_import" name="Import" sequence="20"
-              parent="nudge_menu_recipes" action="nudge_recipe_import_action"/>
-    <menuitem id="nudge_menu_lexicon" name="Command Words" sequence="30"
-              parent="nudge_menu_recipes" action="nudge_lexicon_entry_action"/>
+    <menuitem id="nudge_menu_lexicon" name="Command Words" sequence="100"
+              parent="nudge_menu_advanced" action="nudge_lexicon_entry_action"/>
 </odoo>

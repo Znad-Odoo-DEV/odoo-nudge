@@ -239,7 +239,7 @@ class NudgeQuestion(models.Model):
             "“%(question)s” was asked %(count)s times this month.", question=row.sample[:80], count=row.recent_count)
             for row in top]
         message = "\n".join(lines + [_(
-            "Keep an answer, record a tour or ignore it: Nudge, What Nudge Knows, Recurring Questions.")])
+            "Keep an answer, record a tour or ignore it: Nudge, Knowledge, Recurring Questions (with Show advanced menus on).")])
         managers = self.env["res.users"].sudo().search([
             ("share", "=", False), ("company_ids", "in", company.id)]).filtered(
             lambda user: user.has_group("nudge.group_nudge_manager"))

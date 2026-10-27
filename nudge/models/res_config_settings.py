@@ -31,6 +31,12 @@ class ResConfigSettings(models.TransientModel):
         string="Nudge for All Internal Users",
         implied_group="nudge.group_nudge_user",
     )
+    group_nudge_advanced_menus = fields.Boolean(
+        string="Show advanced menus",
+        group="nudge.group_nudge_manager",
+        implied_group="nudge.group_nudge_advanced_menus",
+        help="Show the advanced menus of Nudge (prompts, training, usage, raw lists) to its managers.",
+    )
     nudge_screen_sharing = fields.Boolean(
         string="Screen Sharing",
         help="Let people share the screen they are on with Nudge: the record, its fields "
@@ -172,7 +178,7 @@ class ResConfigSettings(models.TransientModel):
              "automation rules, server actions, emails sent on an event, buttons, fields and "
              "changes to the screens. Nudge explains first and shows everything on the card, "
              "the code included; nothing is made before a yes; deletion only when asked for by "
-             "name. Every step is in What Nudge Did. Off by default.",
+             "name. Every step is in Nudge, Activity. Off by default.",
     )
     # 0 is no limit
     nudge_plan_max_records = fields.Integer(

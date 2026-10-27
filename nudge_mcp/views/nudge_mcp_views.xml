@@ -107,9 +107,9 @@
         <field name="code">action = model.action_open()</field>
     </record>
 
-    <menuitem id="nudge_mcp_menu_help" name="External Assistants" parent="nudge.nudge_menu_root"
-              action="nudge_mcp_help_action" sequence="110"
-              groups="nudge.group_nudge_manager,-nudge_mcp.group_nudge_mcp"/>
+    <menuitem id="nudge_mcp_menu_help" name="External Assistants" parent="nudge.nudge_menu_configuration"
+              action="nudge_mcp_help_action" sequence="60"
+              groups="-nudge.group_nudge_manager,-base.group_system,nudge.group_nudge_advanced_menus"/>
 
     <record id="nudge_step_view_form_mcp" model="ir.ui.view">
         <field name="name">nudge.step.view.form.mcp</field>
@@ -137,8 +137,8 @@
         </field>
     </record>
 
-    <menuitem id="nudge_mcp_menu_approvals" name="Assistant Approvals" parent="nudge.nudge_menu_root"
-              action="nudge_step_action_mcp_approvals" sequence="111"
+    <menuitem id="nudge_mcp_menu_approvals" name="Assistant Approvals" parent="nudge.nudge_menu_approvals"
+              action="nudge_step_action_mcp_approvals" sequence="10"
               groups="nudge.group_nudge_manager,-nudge_mcp.group_nudge_mcp"/>
 
     <record id="nudge_run_view_list_mcp" model="ir.ui.view">

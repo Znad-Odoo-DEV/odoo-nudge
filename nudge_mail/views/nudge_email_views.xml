@@ -98,7 +98,25 @@
         </field>
     </record>
 
-    <menuitem id="nudge_email_flow_menu" name="Emails with Review" sequence="40"
-              parent="nudge.nudge_menu_configuration" action="nudge_email_flow_action"
+    <record id="res_config_settings_view_form_email_flow" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.nudge.email.flow</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="nudge.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='nudge_access_container']" position="after">
+                <block title="Emails with Review" name="nudge_email_flow_container">
+                    <setting help="Emails that a button built by Nudge opens for the person to read before they go.">
+                        <div class="content-group">
+                            <button name="%(nudge_email_flow_action)d" type="action"
+                                    string="Emails with Review" icon="oi-arrow-right" class="btn-link"/>
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+
+    <menuitem id="nudge_email_flow_menu" name="Emails with Review" sequence="70"
+              parent="nudge.nudge_menu_advanced" action="nudge_email_flow_action"
               groups="base.group_system"/>
 </odoo>
