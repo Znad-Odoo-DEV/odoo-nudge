@@ -59,6 +59,8 @@ class ProviderConfig:
     stt_model: str = ""
     # The address of the transcription service, when it is not base_url
     stt_url: str = ""
+    # The admin said it runs on our own server: its private address is allowed (S11)
+    runs_locally: bool = False
 
 
 def text_event(text):

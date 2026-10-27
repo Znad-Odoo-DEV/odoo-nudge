@@ -13,6 +13,7 @@ import requests
 from odoo import _, api, models
 from odoo.exceptions import UserError
 
+from odoo.addons.nudge.tools import pinned_http
 from odoo.addons.nudge.tools.deadline import cap
 
 _logger = logging.getLogger(__name__)
@@ -102,7 +103,7 @@ class NudgeMessagingApi(models.AbstractModel):
                 if not (phone_id and token):
                     return False
                 self._check_egress(channel, WHATSAPP_API)
-                reply = requests.post(
+                reply = pinned_http.post(
                     f"{WHATSAPP_API}/{phone_id}/messages", timeout=TIMEOUT,
                     headers={"Authorization": f"Bearer {token}"},
                     json={"messaging_product": "whatsapp", "to": str(to), "type": "text",
@@ -112,7 +113,7 @@ class NudgeMessagingApi(models.AbstractModel):
                 if not token:
                     return False
                 self._check_egress(channel, TELEGRAM_API)
-                reply = requests.post(
+                reply = pinned_http.post(
                     f"{TELEGRAM_API}/bot{token}/sendMessage", timeout=TIMEOUT,
                     json={"chat_id": to, "text": text, "disable_web_page_preview": True})
             if reply.status_code >= 400:
@@ -140,7 +141,7 @@ class NudgeMessagingApi(models.AbstractModel):
                 token = self._param("whatsapp.access_token")
                 headers = {"Authorization": f"Bearer {token}"}
                 self._check_egress(channel, WHATSAPP_API)
-                info = requests.get(f"{WHATSAPP_API}/{media['id']}", headers=headers, timeout=TIMEOUT)
+                info = pinned_http.get(f"{WHATSAPP_API}/{media['id']}", headers=headers, timeout=TIMEOUT)
                 info.raise_for_status()
                 described = info.json()
                 if not self._is_media_host(described["url"]):
@@ -148,16 +149,16 @@ class NudgeMessagingApi(models.AbstractModel):
                     _logger.info("Nudge messaging: a file of WhatsApp was not at a host of Meta, not downloaded")
                     raise MessagingError(_("The file could not be downloaded."))
                 self._check_egress(channel, described["url"])
-                data = requests.get(described["url"], headers=headers, timeout=TIMEOUT, stream=True)
+                data = pinned_http.get(described["url"], headers=headers, timeout=TIMEOUT, stream=True)
                 mime = described.get("mime_type") or media.get("mime") or ""
             else:
                 token = self._param("telegram.bot_token")
                 self._check_egress(channel, TELEGRAM_API)
-                info = requests.get(f"{TELEGRAM_API}/bot{token}/getFile", params={"file_id": media["id"]},
-                                    timeout=TIMEOUT)
+                info = pinned_http.get(f"{TELEGRAM_API}/bot{token}/getFile", params={"file_id": media["id"]},
+                                       timeout=TIMEOUT)
                 info.raise_for_status()
                 path = info.json()["result"]["file_path"]
-                data = requests.get(f"{TELEGRAM_API}/file/bot{token}/{path}", timeout=TIMEOUT, stream=True)
+                data = pinned_http.get(f"{TELEGRAM_API}/file/bot{token}/{path}", timeout=TIMEOUT, stream=True)
                 mime = media.get("mime") or ""
             data.raise_for_status()
             content = self._read_within(data)
@@ -200,7 +201,7 @@ class NudgeMessagingApi(models.AbstractModel):
             return False
         try:
             self._check_egress("telegram", TELEGRAM_API)
-            reply = requests.post(
+            reply = pinned_http.post(
                 f"{TELEGRAM_API}/bot{token}/setWebhook", timeout=TIMEOUT,
                 json={"url": url, "secret_token": secret, "allowed_updates": ["message"]})
             return reply.status_code < 400 and bool(reply.json().get("ok"))

@@ -43,7 +43,7 @@ class TestPrivateMode(NudgeCase, TransactionCase):
         for call in (self.provider.action_test_connection, self.provider._ollama_detect,
                      self.provider._can_see_pictures,
                      lambda: self.provider._read_picture("image/png", "AAAA", "what", model="x")):
-            with patch("requests.request") as sent, patch("requests.post") as posted, \
+            with patch("odoo.addons.nudge.tools.pinned_http.request") as sent, patch("requests.post") as posted, \
                     self.assertRaises(UserError):
                 call()
             sent.assert_not_called()

@@ -8,6 +8,7 @@ from odoo import fields
 from odoo.exceptions import UserError
 from odoo.tests import TransactionCase, new_test_user, tagged
 
+from odoo.addons.nudge.tools import pinned_http
 from odoo.addons.nudge_messaging.hooks import uninstall_hook
 
 from odoo.addons.nudge_messaging.models import nudge_messaging_api
@@ -76,13 +77,13 @@ class TestRelease2Security(MessagingCase, TransactionCase):
         def unreachable(url, **kwargs):
             called.append(url)
             raise requests.ConnectionError("Telegram is out of reach")
-        with patch.object(requests, "post", unreachable):
+        with patch.object(pinned_http, "post", unreachable):
             uninstall_hook(self.env)
         self.assertEqual(called, [f"https://api.telegram.org/bot{BOT_TOKEN}/deleteWebhook"])
         self.assertFalse(Parameter.search([("key", "=like", "nudge_messaging.%")]))
         self.assertEqual(Parameter.get_param("nudge.noai_first"), "1", "The parameters of Nudge stay")
         # No token: Telegram is not called
-        with patch.object(requests, "post", unreachable):
+        with patch.object(pinned_http, "post", unreachable):
             uninstall_hook(self.env)
         self.assertEqual(len(called), 1)
 
@@ -179,8 +180,8 @@ class TestRelease2Security(MessagingCase, TransactionCase):
             sent.append((url, (kwargs.get("headers") or {}).get("Authorization")))
             return Reply({"url": "https://files.example.com/m1", "mime_type": "image/png"})
 
-        self.patch(requests, "get", get)
-        self.patch(requests, "post", lambda url, **kwargs: sent.append((url, None)) or Reply({"ok": True}))
+        self.patch(pinned_http, "get", get)
+        self.patch(pinned_http, "post", lambda url, **kwargs: sent.append((url, None)) or Reply({"ok": True}))
         api = self.env["nudge.messaging.api"]
         with self.assertRaises(UserError):
             api._download("whatsapp", {"id": "m1"})
@@ -200,3 +201,35 @@ class TestRelease2Security(MessagingCase, TransactionCase):
         self.env.company.nudge_egress_hosts = "api.anthropic.com, api.telegram.org"
         self.assertTrue(api._send_text("telegram", "555", "hello"))
 
+
+    def test_the_whatsapp_file_is_fetched_through_the_pinned_helper(self):
+        """STU-05: the file address an answer named is resolved once and judged: a Meta host that answers
+        a link-local or loopback address is refused before any connection is opened"""
+        Api = type(self.env["nudge.messaging.api"])
+        self.patch(Api, "_download", nudge_messaging_api.NudgeMessagingApi.__dict__["_download"])
+        real_get = pinned_http.get
+        asked = []
+
+        class Info:
+            def raise_for_status(self):
+                return None
+
+            def json(self):
+                return {"url": "https://lookaside.fbsbx.com/whatsapp_business/attachments/?mid=1",
+                        "mime_type": "image/png"}
+
+        def get(url, **kwargs):
+            asked.append(url)
+            return Info() if "graph.facebook.com" in url else real_get(url, **kwargs)
+
+        def connected(*args, **kwargs):
+            raise AssertionError("A connection was opened to a refused address")
+
+        for address in ("169.254.169.254", "127.0.0.1"):
+            asked.clear()
+            with patch.object(pinned_http, "get", get), \
+                    patch.object(pinned_http, "resolve", lambda host, port, address=address: [address]), \
+                    patch.object(pinned_http, "create_connection", connected):
+                with self.assertRaises(UserError):
+                    self.env["nudge.messaging.api"]._download("whatsapp", {"id": "m1"})
+            self.assertEqual(len(asked), 2, "The file was asked for, through the helper, and refused")

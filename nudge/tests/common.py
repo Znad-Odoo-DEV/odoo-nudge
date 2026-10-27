@@ -69,7 +69,7 @@ class NudgeCase:
         adapter = FakeAdapter(**kwargs)
         self.patch(type(self.env["nudge.provider"]), "_get_adapter", lambda provider: adapter)
         # No Ollama answers behind a fake provider, unless a test plays one
-        self.patch(ollama.requests, "request", _no_server)
+        self.patch(ollama.outbound, "request", _no_server)
         return adapter
 
     def ask(self, user, text, conversation_id=None, snapshot=None):

@@ -13,6 +13,7 @@ from odoo.tests import HttpCase, TransactionCase, new_test_user, tagged
 
 from odoo.addons.nudge.llm import base as llm
 from odoo.addons.nudge.llm.fake_adapter import FakeAdapter
+from odoo.addons.nudge.tools import pinned_http
 from odoo.addons.nudge_messaging.models import nudge_messaging_api
 
 APP_SECRET = "wa-app-secret-XYZ"
@@ -355,7 +356,7 @@ class TestDoors(MessagingCase, HttpCase):
         def boom(url, **kwargs):
             raise requests.ConnectionError(f"cannot reach {url}")
 
-        self.patch(requests, "post", boom)
+        self.patch(pinned_http, "post", boom)
         api = type(self.env["nudge.messaging.api"])
         original = nudge_messaging_api.NudgeMessagingApi.__dict__["_send_text"]
         self.patch(api, "_send_text", original)
@@ -386,7 +387,7 @@ class TestDoors(MessagingCase, HttpCase):
         class Done:
             status_code = 200
 
-        self.patch(requests, "post", lambda url, **kwargs: calls.append((url, kwargs)) or Done())
+        self.patch(pinned_http, "post", lambda url, **kwargs: calls.append((url, kwargs)) or Done())
         self.patch(type(self.env["nudge.messaging.api"]), "_send_text",
                    nudge_messaging_api.NudgeMessagingApi.__dict__["_send_text"])
         self.assertTrue(self.env["nudge.messaging.api"]._send_text("whatsapp", RAGHAD_PHONE, "hello"))

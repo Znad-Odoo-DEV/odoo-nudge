@@ -48,7 +48,7 @@ class TestFallback(NudgeCase, TransactionCase):
             asked.append(provider.id)
             return made.get(provider.id) or FakeAdapter(reply="A provider nobody scripted.")
         self.patch(type(self.env["nudge.provider"]), "_get_adapter", get_adapter)
-        self.patch(ollama.requests, "request", _no_server)
+        self.patch(ollama.outbound, "request", _no_server)
         return {name: made.get(providers[name].id) for name in scripts}, asked
 
     def question(self, user, text, conversation_id=None, mode="talk"):

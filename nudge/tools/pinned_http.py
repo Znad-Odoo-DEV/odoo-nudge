@@ -32,9 +32,33 @@ class Refused(requests.exceptions.ConnectionError):
         self.code = code
 
 
+def is_own_network(url):
+    """:return: whether the host written in ``url`` is this machine or a private network by its look: localhost,
+    ``.local``/``.internal``/``.lan``, a private IP literal or a one-word name (a container). A provider the
+    admin configured there keeps working with ``allow_private``; any other name must resolve to public addresses."""
+    host = (urlsplit(url if "//" in (url or "") else f"//{url or ''}").hostname or "").lower()
+    if not host:
+        return False
+    if host == "localhost" or host.endswith((".local", ".internal", ".lan")) or "." not in host and ":" not in host:
+        return True
+    try:
+        ip = ipaddress.ip_address(host)
+    except ValueError:
+        return False
+    return ip.is_loopback or (ip.is_private and not ip.is_link_local)  # 169.254.169.254 is never ours
+
+
 def resolve(host, port):
     """:return: the addresses of ``host``, in the order the system prefers them"""
     return [info[4][0] for info in socket.getaddrinfo(host, port, proto=socket.IPPROTO_TCP)]
+
+
+def is_link_local(address):
+    """:return: whether ``address`` is link-local (169.254.0.0/16, fe80::/10), where the clouds answer their metadata"""
+    try:
+        return ipaddress.ip_address(str(address).split("%")[0]).is_link_local
+    except ValueError:
+        return False
 
 
 def is_public(address):
@@ -48,7 +72,7 @@ def is_public(address):
 
 
 def addresses(host, port, allow_private=False):
-    """:return: the addresses of ``host``, every one of them public unless ``allow_private``
+    """:return: the addresses of ``host``, every one of them public unless ``allow_private``; never link-local
     :raise Refused: ``network`` when the name has none, ``private`` when one of them is not public"""
     try:
         found = list(dict.fromkeys(resolve(host, port)))
@@ -57,6 +81,9 @@ def addresses(host, port, allow_private=False):
     if not found:
         raise Refused("network", "the address cannot be found")
     if not allow_private and not all(is_public(address) for address in found):
+        raise Refused("private")
+    if any(is_link_local(address) for address in found):
+        # Our own network is allowed to a provider set there, the metadata address of a cloud never
         raise Refused("private")
     return found
 

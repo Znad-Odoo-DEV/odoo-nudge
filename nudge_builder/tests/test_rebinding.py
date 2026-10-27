@@ -1,8 +1,6 @@
 """S11: the link check and the download of a drawn picture connect to the address that was checked."""
 from unittest.mock import patch
 
-import requests
-
 from odoo.tests import TransactionCase, tagged
 
 from odoo.addons.nudge.tests.rebind import NAME, PUBLIC, Listener, RebindCase, Rebinding
@@ -39,6 +37,6 @@ class TestBuilderRebinding(RebindCase, TransactionCase):
             provider.runs_locally = local
             with Listener() as listener, Rebinding(first="127.0.0.1"):
                 url = f"https://{NAME}:{listener.port}/picture.png"
-                with patch.object(requests, "post", lambda *args, **kwargs: Drawn(url)):
+                with patch.object(pictures.pinned_http, "post", lambda *args, **kwargs: Drawn(url)):
                     self.assertIsNone(pictures.draw_picture(provider, "image-1", "an oak chair", timeout=5))
             self.assertEqual(listener.connections, reached, f"runs locally: {local}")

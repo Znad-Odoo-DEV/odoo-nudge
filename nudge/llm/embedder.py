@@ -285,9 +285,10 @@ def sha256_of(path):
 def fetch(url, dest, offset=0, timeout=30):
     """Write the bytes of ``url`` to ``dest`` from ``offset``, yielding the
     size written so far after each block. Replaced in the tests."""
-    import requests  # noqa: PLC0415
+    from ..tools import pinned_http  # noqa: PLC0415
     headers = {"Range": f"bytes={offset}-"} if offset else {}
-    with requests.get(url, stream=True, timeout=timeout, headers=headers) as response:
+    with pinned_http.get(url, stream=True, timeout=timeout, headers=headers,
+                         allow_private=pinned_http.is_own_network(url)) as response:
         response.raise_for_status()
         if offset and response.status_code != 206:
             offset = 0

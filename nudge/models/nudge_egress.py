@@ -9,6 +9,11 @@ from ..tools.bus import notify_user
 _logger = logging.getLogger(__name__)
 
 ALERT_PARAM = "nudge.egress.alert"
+MODE_PARAM = "nudge.egress_mode"
+MODE_ANY = "any"
+MODE_LIST = "list"
+# The AI providers the admin configured: they stay reachable when the list is empty and only the list counts
+PROVIDER_PURPOSES = ("chat", "voice", "picture")
 
 
 class NudgeEgress(models.AbstractModel):
@@ -36,19 +41,28 @@ class NudgeEgress(models.AbstractModel):
         return egress.parse(self.env.company.sudo().nudge_egress_hosts)
 
     @api.model
+    def _only_the_list(self):
+        # sudo: a system setting every request must obey
+        return self.env["ir.config_parameter"].sudo().get_param(MODE_PARAM, MODE_ANY) == MODE_LIST
+
+    @api.model
     def is_allowed(self, url):
         return egress.is_allowed(self._entries(), url)
 
     @api.model
     def check(self, url, purpose="chat"):
-        """Refuse, before anything is sent, a host the company did not allow. Does nothing when the list
-        is empty.
+        """Refuse, before anything is sent, a host the company did not allow. An empty list allows everything
+        ("Any address", the default); with "Only the list" and an empty list only the configured AI providers
+        are reachable.
 
         :param str url: where the request goes
         :param str purpose: ``chat``, ``voice``, ``picture``, ``connector``, ``recipes``, ``model``, ``feed``
         :raise UserError: naming the host and where to allow it"""
         entries = self._entries()
-        if not entries or egress.is_allowed(entries, url):
+        if entries:
+            if egress.is_allowed(entries, url):
+                return
+        elif purpose in PROVIDER_PURPOSES or not self._only_the_list():
             return
         host, port = egress.target_of(url)
         target = f"{host}:{port}" if host else (url or "?")

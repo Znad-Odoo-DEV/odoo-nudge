@@ -17,7 +17,7 @@ class FakeHttp:
         self.answers = answers
         self.calls = []
 
-    def __call__(self, method, url, json=None, headers=None, timeout=None):
+    def __call__(self, method, url, json=None, headers=None, timeout=None, **_kw):
         path = "/" + url.split("/", 3)[3]
         self.calls.append((method, url, json, headers))
         answer = self.answers.get((method, path))
@@ -67,7 +67,7 @@ class TestOllamaApi(BaseCase):
 
     def test_describe(self):
         http = FakeHttp({("POST", "/api/show"): show(parameters="num_ctx                        32768\nstop <|im_end|>")})
-        self.patch(ollama.requests, "request", http)
+        self.patch(ollama.outbound, "request", http)
         facts = ollama.describe("http://box:11434/v1", "qwen3:8b", "key")
         self.assertEqual(facts, {"tools": True, "vision": False, "thinking": False, "context_max": 40960,
                                  "context_set": 32768, "size": "8.2B Q4_K_M"})
@@ -75,11 +75,11 @@ class TestOllamaApi(BaseCase):
         self.assertEqual(http.calls[0][3], {"Authorization": "Bearer key"}, "A proxy in front of it reads the key")
 
     def test_what_is_not_ollama(self):
-        self.patch(ollama.requests, "request", FakeHttp({}))
+        self.patch(ollama.outbound, "request", FakeHttp({}))
         self.assertEqual(ollama.version("https://llm.invalid/v1"), "")
 
     def test_loaded_context(self):
-        self.patch(ollama.requests, "request", FakeHttp({("GET", "/api/ps"): {"models": [
+        self.patch(ollama.outbound, "request", FakeHttp({("GET", "/api/ps"): {"models": [
             {"name": "llama3.1:latest", "model": "llama3.1:latest", "context_length": 8192},
             {"name": "qwen3:8b", "model": "qwen3:8b", "context_length": 4096},
         ]}}))
@@ -89,7 +89,7 @@ class TestOllamaApi(BaseCase):
 
     def test_prepare(self):
         http = FakeHttp({("POST", "/api/create"): {"status": "success"}})
-        self.patch(ollama.requests, "request", http)
+        self.patch(ollama.outbound, "request", http)
         self.assertEqual(ollama.prepare("http://box:11434/v1", "qwen3:8b", 24576), "qwen3:8b-nudge")
         self.assertEqual(http.calls[0][2], {"model": "qwen3:8b-nudge", "from": "qwen3:8b",
                                             "parameters": {"num_ctx": 24576, "temperature": ollama.TEMPERATURE,
@@ -115,7 +115,7 @@ class TestOllamaProvider(NudgeCase, TransactionCase):
         }
         defaults.update(answers or {})
         http = FakeHttp(defaults)
-        self.patch(ollama.requests, "request", http)
+        self.patch(ollama.outbound, "request", http)
         return http
 
     def test_found_when_its_models_are_fetched(self):
@@ -139,7 +139,7 @@ class TestOllamaProvider(NudgeCase, TransactionCase):
 
     def test_other_providers_are_left_alone(self):
         self.use_adapter()
-        self.patch(ollama.requests, "request", FakeHttp({}))
+        self.patch(ollama.outbound, "request", FakeHttp({}))
         self.provider.action_fetch_models()
         self.assertFalse(self.provider.is_ollama)
         self.assertEqual(self.provider.tool_set, "full")
