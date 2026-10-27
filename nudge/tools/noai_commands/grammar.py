@@ -33,6 +33,31 @@ CHART_TYPES = {"type_pie": "pie", "type_line": "line", "type_bar": "bar"}
 REPORT_TYPES = {**CHART_TYPES, "type_pivot": "pivot"}
 CREATABLE = ("contact", "product", "quotation", "sales_order", "purchase_order", "invoice", "bill",
              "task", "lead", "ticket", "timeoff")
+# Words for a tag or a category of records: the grammar has no kind for them, so a "create" that names one is the
+# AI's to answer, not a contact called "category X"
+TAG_WORDS = frozenset(("category", "categories", "tag", "tags", "تصنيف", "تصنيفات", "وسم", "وسوم"))
+# A sentence that ASKS whether the person themselves should or may do something: it is a question, not a command.
+# "can you ..." and "please ..." are addressed to Nudge and stay commands
+SELF_QUESTION = re.compile(
+    r"^\W*(?:(?:should|can|could|may|might|shall|must|do|does|did|am|would)\s+(?:i|we)\b"
+    r"|(?:is|would)\s+it\s+(?:ok|okay|fine|alright|all\s+right)\s+(?:to|if)\b"
+    r"|(?:لازم|لزم|هل\s+(?:لازم|يجب|ينفع|يصح))\s+[أا]"
+    r"|هل\s+(?:[أا]قدر|[أا]ستطيع|[أا]مكن|يمكنني|يجوز\s+لي|ينفع\s+[أا])"
+    r"|(?:ممكن|ينفع|يجوز)\s+[أا]أ)",
+    re.IGNORECASE)
+# The words of a change the lexicon has no verb for, and of a look: "can I cancel ..." is a question about a change,
+# "can I see ..." is a polite request to show
+CHANGE_WORDS = frozenset((
+    "cancel", "delete", "remove", "send", "refuse", "reject", "archive", "set", "write", "change", "edit", "close",
+    "submit", "approve", "validate", "post", "confirm", "register", "assign", "lock", "unlock",
+    "الغي", "الغاء", "احذف", "امسح", "ارسل", "ارفض", "ارشف", "عدل", "اغلق"))
+READ_WORDS = frozenset((
+    "see", "get", "view", "have", "check", "look", "list", "show", "display", "read", "شوف", "اشوف", "أشوف", "اعرض",
+    "أعرض", "افتح", "أفتح", "اطلع", "أطلع"))
+# The opener of such a question, dropped when the rest is a request to look
+SELF_OPENER = re.compile(
+    r"^\W*(?:(?:should|can|could|may|might|shall|must|do|does|did|am|would)\s+(?:i|we)\b|هل\s+[أا]قدر|ممكن)\s*",
+    re.IGNORECASE)
 THRESHOLD = 0.7
 
 NUMBER = re.compile(r"^\d+(?:[.,]\d+)?$")
@@ -378,6 +403,26 @@ def _interpret(text, spans, screen):
         if ("neg" in span.cats or span.raw.lower() in NEGATING) and any(
                 nxt.cats & set(VERBS) for nxt in spans[index + 1:index + 3]):
             return result
+
+    # A question about what the person themselves should or may do ("should I confirm this order?", "can I cancel
+    # S00049?") is not the command it contains: it goes to the reader who answers
+    if SELF_QUESTION.match(text):
+        # only when it asks about a change: a question to look at something is a polite request to show it
+        changes = bool(verbs & {"create", "update", *PRESS}) or any(span.raw.lower() in CHANGE_WORDS for span in spans)
+        looks = bool(verbs & {"open", "show", "find", "list", "count", "sum", "avg"}) or any(
+            span.raw.lower() in READ_WORDS for span in spans)
+        if changes or not looks:
+            return result
+        opener = SELF_OPENER.match(text)
+        count = len(opener.group().split()) if opener else 0
+        if count and len(spans) > count:
+            spans = spans[count:]
+            head = next((span for span in spans if span.cats & set(VERBS) and not span.cats <= GLUE), None)
+            names = _name_of(spans)
+            free_count = len([span for span in spans if not span.cats])
+    # "create a partner category X": a tag has no kind of its own here, so it is never a contact called "category X"
+    if "create" in verbs and any(span.raw.lower() in TAG_WORDS for span in spans[:-1]):
+        return result
 
     # 1. Press a button of the record on screen
     pressing = next((span for span in spans[:4] if span.cats & set(PRESS)), None)

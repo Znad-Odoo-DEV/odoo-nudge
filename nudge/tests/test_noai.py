@@ -398,6 +398,47 @@ class TestNoaiRun(NudgeCase, TransactionCase):
                 parsed = noai_commands.parse(text, {"model": "account.move", "record_id": 1})
                 self.assertFalse(parsed.intent, parsed)
 
+    def test_a_tag_or_category_is_never_created_as_a_contact(self):
+        # Found in the live trial 2026-10-27: "Create a partner category Trial Held Tag" made a card for a Contact
+        # named "category Trial Held Tag"; the grammar has no kind for a tag, so the AI answers
+        for text in (
+            "Create a partner category Trial Held Tag", "Create a contact tag X", "Create a customer tag X",
+            "أنشئ تصنيف جهة اتصال X",
+        ):
+            with self.subTest(text=text):
+                self.assertFalse(noai_commands.parse(text, None).intent, text)
+        parsed = noai_commands.parse("Create a contact Raghad", None)
+        self.assertEqual((parsed.intent, parsed.slots["name"]), ("create", "Raghad"), parsed)
+
+    def test_a_question_about_what_I_should_do_is_not_a_command(self):
+        # Found in the live trial 2026-10-27: "should I confirm this order?" pressed Confirm on a record named "should I"
+        screen = {"model": "sale.order", "record_id": 49}
+        for text in (
+            "should I confirm this order?", "Do I need to confirm this quotation?", "can I cancel S00049?",
+            "may I confirm this order", "could I create a contact Ali", "is it ok to confirm this order",
+            "لازم أأكد الطلب؟", "هل أقدر أأكد الطلب؟", "ممكن أأكد الطلب؟",
+        ):
+            with self.subTest(text=text):
+                self.assertFalse(noai_commands.parse(text, screen).intent, text)
+        # A question to look at something is a polite request to show it, without the opener in the name
+        for text, intent, name in (
+            ("can I see my invoices", "open", ""), ("can I get the list of quotations", "open", ""),
+            ("may I view S00049", "open", "S00049"), ("could I open Raghad", "open", "Raghad"),
+            ("do I have open invoices", "open", ""), ("ممكن أشوف الفواتير", "open", ""),
+        ):
+            with self.subTest(text=text):
+                parsed = noai_commands.parse(text, screen)
+                self.assertEqual(parsed.intent, intent, parsed)
+                self.assertEqual(parsed.slots.get("name") or "", name, parsed)
+        # Addressed to Nudge, so still a command
+        for text, intent in (
+            ("can you confirm this order", "press"), ("please confirm this order", "press"),
+            ("confirm this order", "press"), ("Could you create a contact Raghad", "create"),
+            ("ممكن تأكد الطلب؟", "press"),
+        ):
+            with self.subTest(text=text):
+                self.assertEqual(noai_commands.parse(text, screen).intent, intent, text)
+
     def test_pronoun_filler_never_becomes_part_of_a_name(self):
         # Found in the live trial 2026-10-27: "وين بلاقي ميزان المراجعة" searched a record named "بلاقي ميزان المراجعة"
         for text, name, kind in (
