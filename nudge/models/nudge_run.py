@@ -333,9 +333,12 @@ class NudgeRun(models.Model):
 
     @api.model
     def _job_conversation(self, user):
-        """:return: the archived conversation that holds the background work of ``user``"""
-        Conversation = self.env["nudge.conversation"].sudo().with_context(active_test=False)
-        return Conversation.search([("user_id", "=", user.id), ("name", "=", JOB_CONVERSATION)], limit=1) or             Conversation.create({"user_id": user.id, "name": JOB_CONVERSATION, "active": False})
+        """:return: the archived conversation that holds the background work of ``user``: plain Nudge, whatever
+        agent or rehearsal the request it is asked in names (Nudge Agents)"""
+        Conversation = self.env["nudge.conversation"].sudo().with_context(
+            active_test=False, nudge_agent_id=False, nudge_rehearsal=False, nudge_agent_knowledge_only=False)
+        return Conversation.search([("user_id", "=", user.id), ("name", "=", JOB_CONVERSATION)], limit=1) or \
+            Conversation.create({"user_id": user.id, "name": JOB_CONVERSATION, "active": False})
 
     def _say(self, text):
         """Write ``text`` in the conversation of the run, where the person looks for what became of it"""

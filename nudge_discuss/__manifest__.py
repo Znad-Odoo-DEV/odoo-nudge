@@ -17,7 +17,7 @@ Installed from Apps by an administrator who wants it, with Nudge and Discuss;
 never by itself.
 """,
     "category": "Productivity",
-    "version": "18.0.1.0.9",
+    "version": "18.0.1.0.10",
     "author": "Ibrahim Elzenad",
     "website": "https://znad-odoo-dev.github.io",
     "support": "id7sp22@gmail.com",
@@ -27,6 +27,7 @@ never by itself.
     "data": [
         "security/ir.model.access.csv",
         "data/nudge_discuss_data.xml",
+        "views/nudge_agent_binding_views.xml",
     ],
     "auto_install": False,
     "installable": True,

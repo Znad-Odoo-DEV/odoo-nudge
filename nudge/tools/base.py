@@ -307,7 +307,128 @@ def available(env, mode=MODE_TALK, tool_set="full", extra=(), background=False):
         names.discard("use_skill")
     if background:
         names -= SCREEN_TOOLS
+    # Nudge Agents: a conversation with an agent offers the agent's tools and no other (agent_allows)
+    names = {name for name in names if agent_allows(env, name)}
     return [tool for name, tool in sorted(here.items()) if name in names and tool.is_available(env, mode)]
+
+
+# Nudge Agents: what an agent is never given, whatever its list says: more_tools widens what is offered, and a
+# scheduled task runs later as plain Nudge, outside the agent (v1)
+AGENT_NEVER_TOOLS = frozenset({"more_tools", "prepare_task"})
+
+
+def agent_allows(env, name):
+    """Nudge Agents. :return: whether the agent of the conversation, when there is one, has the tool ``name``.
+    Its list (``nudge.agent._tools_for``: what the agent names, within what the person may use) is put in the
+    context by ``nudge.conversation._agent_scope`` from the agent stored on the conversation, at every turn:
+    it only narrows what the person has, and no list restricts nothing"""
+    allowed = env.context.get("nudge_agent_tools")
+    return allowed is None or (name in allowed and name not in AGENT_NEVER_TOOLS)
+
+
+def agent_unscoped(env):
+    """Nudge Agents. :return: whether ``env`` names a conversation with an agent (``nudge_conversation_id``) but
+    carries no list of its tools: a tool called there did not come through the scope of the turn
+    (``nudge.conversation._agent_scope``), and is refused rather than run with every tool of the person"""
+    if env.context.get("nudge_agent_tools") is not None:
+        return False
+    try:
+        conversation_id = int(env.context.get("nudge_conversation_id") or 0)
+    except (TypeError, ValueError):
+        return False
+    if not conversation_id:
+        return False
+    # sudo: whether the conversation has an agent, nothing more
+    conversation = env["nudge.conversation"].sudo().browse(conversation_id).exists()
+    return bool(conversation and "agent_id" in conversation._fields and conversation.agent_id)
+
+
+# Nudge Agents, a rehearsal (Try it): what the model reads of a change it asked for. Nothing is prepared for
+# a yes: the card is told in words, and nothing is done
+REHEARSED = (
+    "Rehearsal (Try it): nothing was done and nothing waits for a yes. Done for real, the person would be asked "
+    "to confirm this:\n{card}\nTell the person in a sentence what would be done.")
+# What a tool that is not one of reading or showing saved in a rehearsal: undone, and the model is told
+REHEARSAL_UNDONE = "(Rehearsal: whatever this tool saved was undone.)"
+REHEARSAL_CARD_LINES = 15
+
+
+class _Undone(Exception):
+    """Ends the savepoint of a call made in a rehearsal: whatever the call wrote is rolled back"""
+
+
+def card_text(pending):
+    """:param dict pending: what an Action prepared for its card (``ToolResult.pending``)
+    :return: the card in words: its title, the records it is about, and what it would write"""
+    title = str(pending.get("summary") or "")
+    if pending.get("record_names"):
+        title = f"{title} ({pending['record_names']})"
+    lines = [title]
+    for line in ((pending.get("preview") or {}).get("lines") or [])[:REHEARSAL_CARD_LINES]:
+        if isinstance(line, dict):
+            value = line.get("value")
+            if value is None and line.get("lines"):
+                value = "; ".join(map(str, line["lines"]))
+            lines.append(f"- {line.get('label') or line.get('field') or ''}: {value}")
+        else:
+            lines.append(f"- {line}")
+    return "\n".join(lines)
+
+
+def rehearse(env, name, arguments, screen=None, mode=MODE_TALK):
+    """Nudge Agents, a rehearsal (Try it): run one call, then undo whatever it wrote, always. A change
+    (an :class:`Action`) is told as its card in words, never left waiting for a yes; what a tool would type
+    in a field of the screen is not typed.
+
+    What the AI calls made by the tool cost (``nudge.usage``) is not undone: read before the rollback and
+    written again after it, as a rehearsal, it counts in the tokens of the person's day
+    (``nudge.agent.budget_user_day``). Effects outside the database (a webhook of an automation, a mail an
+    outside hook sends) cannot be held back by the rollback: see doc/agents.md.
+
+    :return: :class:`ToolResult`"""
+    kept, spent = [], []
+    Usage = env["nudge.usage"].sudo()
+    try:
+        with env.cr.savepoint():
+            # sudo: the ledger, which the person cannot read; the newest line before the call
+            last = Usage.search([], order="id desc", limit=1).id or 0
+            kept.append(call(env(context=dict(env.context, nudge_rehearsing=True)), name, arguments, screen, mode))
+            spent = _usage_lines(Usage.search([("id", ">", last)], order="id"))
+            raise _Undone
+    except _Undone:
+        pass
+    if spent:
+        Usage.create([_usage_kept(Usage, values) for values in spent])
+    result = kept[0]
+    if result.pending and not result.is_error:
+        return ToolResult(REHEARSED.format(card=card_text(result.pending)))
+    if result.event and result.event.get("type") == "write":
+        result.event = None
+    if not result.is_error and name not in (ASK_TOOLS | DATA_TOOLS | SCREEN_TOOLS) - {"write_in_field"}:
+        result.content = f"{result.content} {REHEARSAL_UNDONE}"
+    return result
+
+
+def _usage_lines(lines):
+    """:return: the stored values of ``lines`` of ``nudge.usage`` that are written, not computed, as plain data
+    that outlives a rollback"""
+    names = [name for name, field in lines._fields.items()
+             if field.store and not field.compute and not field.related and field.type not in ("one2many", "many2many")
+             and name not in ("id", "create_uid", "create_date", "write_uid", "write_date")]
+    return lines.read(names, load=None) if lines else []
+
+
+def _usage_kept(Usage, values):
+    """:return: ``values`` read by :func:`_usage_lines` to write a line again after the rollback: a rehearsal, and
+    without the links to what the rollback took away"""
+    values = {name: value for name, value in values.items() if name != "id"}
+    for name, value in list(values.items()):
+        field = Usage._fields[name]
+        if field.type == "many2one" and value and not Usage.env[field.comodel_name].browse(value).exists():
+            values[name] = False
+    if "rehearsal" in Usage._fields:
+        values["rehearsal"] = True
+    return values
 
 
 def error_text(error, what, uid):
@@ -341,10 +462,15 @@ def guarded(env, name, function):
 
 def call(env, name, arguments, screen=None, mode=MODE_TALK):
     """Run one call made by the model."""
+    if env.context.get("nudge_rehearsal") and not env.context.get("nudge_rehearsing"):
+        # Nudge Agents, a rehearsal (Try it): run, then undone (rehearse)
+        return rehearse(env, name, arguments, screen, mode)
     tool = TOOLS.get(name)
     if tool is not None and name in SCREEN_TOOLS and env.context.get("nudge_background"):
         return ToolResult(NO_SCREEN.format(name=name), is_error=True)
-    if tool is None or not tool.is_available(env, mode):
+    # Nudge Agents: a tool the agent does not have is not there, whatever the model asks (agent_allows); nor any
+    # tool in a conversation with an agent reached outside the scope of its turn (agent_unscoped): fails closed
+    if tool is None or not tool.is_available(env, mode) or not agent_allows(env, name) or agent_unscoped(env):
         return ToolResult(f"There is no tool named {name!r}.", is_error=True)
     if not isinstance(arguments, dict):
         return ToolResult("The arguments could not be read as JSON.", is_error=True)

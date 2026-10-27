@@ -70,3 +70,7 @@ from . import nudge_provider_cache  # S8
 from . import nudge_provider_tier  # S6: after the skills, the tier sees the skills of the question
 from . import nudge_request_size  # screen: the size of a request by mode
 from . import nudge_search_try  # screen: try the search by meaning
+from . import nudge_agent  # Agents: persona, audience, companies, tools (60.0)
+from . import nudge_agent_preview
+from . import nudge_agent_ui
+from . import nudge_agent_engine  # Agents: one turn with an agent, every hook narrows (60.0); last

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Nudge Agents: the technical user of a public channel (website, WhatsApp, Telegram). It holds this group
+         and no other: not even the Nudge User group. Implied by nothing. -->
+    <record id="group_agent_service" model="res.groups">
+        <field name="name">Agent Service User</field>
+        <field name="category_id" ref="module_category_nudge"/>
+        <field name="comment">Technical user of a public channel of an agent. Reads only what the channel allows.</field>
+    </record>
+
+    <!-- Not noupdate: a later fix of a rule reaches the databases that already have it -->
+    <data noupdate="0">
+        <!-- An agent is seen by a user when the user is in its audience (named, or by a group) and works in one of
+             its companies. An agent adds no right: this only hides it. -->
+        <record id="nudge_agent_rule_user" model="ir.rule">
+            <field name="name">Nudge Agent: my audience and companies</field>
+            <field name="model_id" ref="model_nudge_agent"/>
+            <field name="domain_force">[('company_ids', 'in', company_ids),
+                '|', ('user_ids', 'in', [user.id]), ('group_ids', 'in', user.groups_id.ids)]</field>
+            <field name="groups" eval="[Command.link(ref('base.group_user'))]"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Managers see every agent of their companies, in the audience or not -->
+        <record id="nudge_agent_rule_manager" model="ir.rule">
+            <field name="name">Nudge Agent: of my companies, for managers</field>
+            <field name="model_id" ref="model_nudge_agent"/>
+            <field name="domain_force">[('company_ids', 'in', company_ids)]</field>
+            <field name="groups" eval="[Command.link(ref('group_nudge_manager'))]"/>
+        </record>
+
+        <!-- What hangs on an agent follows the agent's companies. Seen by a manager of one of them; changed only
+             when all of them are theirs (nudge.agent._check_my_companies: the agent, its evaluations and channels,
+             its buttons). The difference of a change and the answer of an evaluation are shown by computed fields
+             (diff_shown, answer_shown); the stored ones are for system administrators. -->
+        <record id="nudge_agent_eval_rule_manager" model="ir.rule">
+            <field name="name">Nudge Agent Evaluation: of my companies, for managers</field>
+            <field name="model_id" ref="model_nudge_agent_eval"/>
+            <field name="domain_force">[('agent_id.company_ids', 'in', company_ids)]</field>
+            <field name="groups" eval="[Command.link(ref('group_nudge_manager'))]"/>
+        </record>
+        <record id="nudge_agent_binding_rule_manager" model="ir.rule">
+            <field name="name">Nudge Agent Channel: of my companies, for managers</field>
+            <field name="model_id" ref="model_nudge_agent_binding"/>
+            <field name="domain_force">[('agent_id.company_ids', 'in', company_ids)]</field>
+            <field name="groups" eval="[Command.link(ref('group_nudge_manager'))]"/>
+        </record>
+        <record id="nudge_agent_revision_rule_manager" model="ir.rule">
+            <field name="name">Nudge Agent Change: of my companies, for managers</field>
+            <field name="model_id" ref="model_nudge_agent_revision"/>
+            <field name="domain_force">[('agent_id.company_ids', 'in', company_ids)]</field>
+            <field name="groups" eval="[Command.link(ref('group_nudge_manager'))]"/>
+        </record>
+    </data>
+</odoo>

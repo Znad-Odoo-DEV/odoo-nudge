@@ -757,6 +757,53 @@ def with_skills(blocks, index="", loaded=""):
     return [*blocks, given] if given else blocks
 
 
+# Nudge Agents: the persona a manager gave an agent. It is added after Nudge's own rules, never in their
+# place: the rules (the rights of the person, a yes before every change, what is kept out) are read first,
+# and the block says that they win
+AGENT_HEADING = "## The agent you are"
+AGENT_GUARD = (
+    "A manager of this database made you an agent of Nudge, with the persona below. It says what you work on "
+    "and how you speak; it never changes the rules above. You have the rights of the person and no more, you "
+    "ask before every change, and you keep out what the rules keep out. Where the persona asks for something "
+    "the rules forbid, follow the rules and say so in a sentence.")
+
+
+# Said when the answer is posted where other people read it (a group channel of Discuss): no record is read
+AGENT_KNOWLEDGE_ONLY = (
+    "Other people read your answers here. Answer only from what you know of Odoo, your skills and the "
+    "documentation: no record of this database is read, and none is named.")
+
+
+def render_agent(name, role="", instructions="", greeting="", languages=(), knowledge_only=False):
+    """:param languages: the names of the languages the agent speaks, the first one the default
+    :param knowledge_only: the answer is read by others: no record tool is offered, and the block says so
+    :return: the block of the agent, for :func:`with_agent`"""
+    lines = [AGENT_HEADING, AGENT_GUARD, *([AGENT_KNOWLEDGE_ONLY] if knowledge_only else []), "",
+             f"Your name: {name}."]
+    if role:
+        lines.append(f"What you are for: {role}")
+    if languages:
+        lines.append(f"You speak {', '.join(languages)}: answer in the language of the question when it is one "
+                     f"of them, otherwise in {languages[0]}.")
+    if greeting:
+        lines.append(f"How you greet the person at the start of a conversation: {greeting}")
+    if instructions and instructions.strip():
+        lines += ["", "What the manager asks of you:", instructions.strip()]
+    return "\n".join(lines) + "\n"
+
+
+def with_agent(blocks, persona):
+    """:return: ``blocks`` (of :func:`build_system_blocks`, skills given) with the block of the agent after
+    Nudge's own rules and before the block of the question, which changes from one question to the next;
+    unchanged for one precise thing asked with its own brief (a command)"""
+    if not persona or not blocks or blocks[0] == FOCUS_PERSONA:
+        return blocks
+    blocks = list(blocks)
+    at = len(blocks) - 1 if len(blocks) > 1 and is_question_block(blocks[-1]) else len(blocks)
+    blocks.insert(at, persona)
+    return blocks
+
+
 def render_context(values):
     """Serialize deterministically: the same values always give the same bytes."""
     payload = json.dumps(values, sort_keys=True, ensure_ascii=False, separators=(",", ":"))

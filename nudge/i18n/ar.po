@@ -26962,3 +26962,998 @@ msgstr "يُظهر القوائم التي لا يحتاجها المدير إل
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_memory_view_list_coverage
 msgid "Missed sentences"
 msgstr "الجمل الفائتة"
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_agent
+msgid "Nudge Agent"
+msgstr "وكيل Nudge"
+
+#. module: nudge
+#: model:res.groups,name:nudge.group_agent_service
+msgid "Agent Service User"
+msgstr "مستخدم خدمة الوكيل"
+
+#. module: nudge
+#: model:res.groups,comment:nudge.group_agent_service
+msgid "Technical user of a public channel of an agent. Reads only what the channel allows."
+msgstr "مستخدم تقني لقناة عامة للوكيل. يقرأ فقط ما تسمح به القناة."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent__partner_id
+msgid "The face of the agent in Discuss: a contact, never a user."
+msgstr "وجه الوكيل في المحادثات: جهة اتصال وليس مستخدمًا."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent__image_128
+msgid "Picture"
+msgstr "الصورة"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent__role
+msgid "One line: what this agent is for."
+msgstr "سطر واحد: ما هو الغرض من هذا الوكيل."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent__instructions
+msgid "How the agent works, added to Nudge's own instructions, never in their place."
+msgstr "طريقة عمل الوكيل، تُضاف إلى تعليمات Nudge ولا تحل محلها."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent__greeting
+msgid "Greeting"
+msgstr "التحية"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent__company_ids
+msgid "The agent works only in these companies, and for a person only in those they work in too."
+msgstr "يعمل الوكيل في هذه الشركات فقط، ولكل شخص في الشركات التي يعمل فيها أيضًا."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent__group_ids
+msgid "Audience: Groups"
+msgstr "الجمهور: المجموعات"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent__user_ids
+msgid "Audience: People"
+msgstr "الجمهور: الأشخاص"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent__provider_id
+msgid "Empty: the provider of the company."
+msgstr "فارغ: مزود الشركة."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent__tool_keys
+msgid "Technical names of the tools it may use, separated by commas. Empty: only the tools that read. A tool is offered only when the person may use it anyway."
+msgstr "الأسماء التقنية للأدوات المسموح بها، مفصولة بفواصل. فارغ: أدوات القراءة فقط. لا تُعرض أداة إلا إذا كان للشخص الحق في استخدامها أصلًا."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent__skill_ids
+msgid "Empty: Nudge chooses among the published skills."
+msgstr "فارغ: يختار Nudge من المهارات المنشورة."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent__use_memory
+msgid "Use Memory"
+msgstr "استخدام الذاكرة"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent__use_memory
+msgid "Answer from the approved memory the person may read."
+msgstr "الإجابة من الذاكرة المعتمدة التي يحق للشخص قراءتها."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent__use_docs
+msgid "Use Company Files"
+msgstr "استخدام ملفات الشركة"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent__mask_personal_data
+msgid "Mask Personal Data"
+msgstr "إخفاء البيانات الشخصية"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent__budget_month
+msgid "Monthly Budget"
+msgstr "الميزانية الشهرية"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent__budget_month
+msgid "Cost of the agent in a month. 0: none."
+msgstr "تكلفة الوكيل في الشهر. 0: بلا حد."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent__budget_user_day
+msgid "Tokens per Person per Day"
+msgstr "الرموز لكل شخص في اليوم"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent__budget_user_day
+msgid "0: none."
+msgstr "0: بلا حد."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent__score
+msgid "Out of 100: the share of its evaluation it passes."
+msgstr "من 100: نسبة ما يجتازه من التقييم."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent__eval_ids
+msgid "Evaluation"
+msgstr "التقييم"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent__binding_ids
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent__channels_label
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_list
+msgid "Channels"
+msgstr "القنوات"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "An agent never has a developer tool: %s."
+msgstr "لا يملك الوكيل أي أداة مطوّر أبدًا: %s."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Only Nudge managers publish agents."
+msgstr "مديرو Nudge فقط ينشرون الوكلاء."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Write at least one evaluation question and run it before publishing."
+msgstr "اكتب سؤال تقييم واحدًا على الأقل وشغّله قبل النشر."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Every evaluation question must pass before the agent is published."
+msgstr "يجب أن ينجح كل سؤال تقييم قبل نشر الوكيل."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "The score of the agent is %(score)s; it needs %(needed)s to be published."
+msgstr "درجة الوكيل %(score)s؛ ويحتاج إلى %(needed)s ليُنشر."
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_agent_eval
+msgid "Nudge Agent Evaluation"
+msgstr "تقييم وكيل Nudge"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent_eval__lang
+msgid "Code of the language the question is asked in, for example ar_001."
+msgstr "رمز لغة السؤال، مثل ar_001."
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_agent_eval__expected__contains
+msgid "Answer contains"
+msgstr "الإجابة تحتوي"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_agent_eval__expected__no_ai
+msgid "Answered without AI"
+msgstr "أُجيب بدون ذكاء اصطناعي"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_agent_eval__expected__answered
+msgid "Answered"
+msgstr "تمت الإجابة"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent_eval__expected
+msgid "Expected"
+msgstr "المتوقع"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent_eval__expected_text
+msgid "Expected Text"
+msgstr "النص المتوقع"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent_eval__answer_shown
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent_eval__last_answer
+msgid "Last Answer"
+msgstr "آخر إجابة"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent_eval__last_source
+msgid "Last Source"
+msgstr "آخر مصدر"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent_eval__run_date
+msgid "Run Date"
+msgstr "تاريخ التشغيل"
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_agent_binding
+msgid "Nudge Agent Channel"
+msgstr "قناة وكيل Nudge"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent_binding__channel
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid "Channel"
+msgstr "القناة"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_agent_binding__channel__discuss
+msgid "Discuss"
+msgstr "المحادثات"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_agent_binding__channel__website
+msgid "Website"
+msgstr "الموقع"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_agent_binding__channel__whatsapp
+msgid "WhatsApp"
+msgstr "واتساب"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_agent_binding__channel__telegram
+msgid "Telegram"
+msgstr "تيليغرام"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_agent_binding__channel__mcp
+msgid "MCP"
+msgstr "MCP"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent_binding__acts_as
+msgid "Acts As"
+msgstr "يعمل بصفة"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_agent_binding__acts_as__person
+msgid "The person who asks"
+msgstr "الشخص الذي يسأل"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__nudge_agent_binding__acts_as__service
+msgid "A service user"
+msgstr "مستخدم خدمة"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent_binding__acts_as
+msgid "A service user answers people who have no user of their own (the website, WhatsApp, Telegram), and reads only the models allowed here."
+msgstr "يجيب مستخدم الخدمة أشخاصًا لا مستخدم لهم (الموقع، واتساب، تيليغرام)، ويقرأ النماذج المسموح بها هنا فقط."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent_binding__service_user_id
+msgid "Service User"
+msgstr "مستخدم الخدمة"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent_binding__service_user_id
+msgid "Must hold the group Nudge: agent service user and no other group of Nudge."
+msgstr "يجب أن يملك مجموعة مستخدم خدمة الوكيل في Nudge ولا مجموعة أخرى من Nudge."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent_binding__model_allowlist
+msgid "Readable Models"
+msgstr "النماذج المقروءة"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent_binding__model_allowlist
+msgid "Technical names of the models a service user may read, separated by commas."
+msgstr "الأسماء التقنية للنماذج التي يقرؤها مستخدم الخدمة، مفصولة بفواصل."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent_binding__escalation_user_id
+msgid "Escalate To"
+msgstr "التصعيد إلى"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent_binding__published
+msgid "On a service channel only a system administrator publishes it."
+msgstr "في قناة الخدمة لا ينشرها إلا مدير النظام."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "A service user answers only on the website, WhatsApp or Telegram."
+msgstr "يجيب مستخدم الخدمة في الموقع أو واتساب أو تيليغرام فقط."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "A service binding needs its service user."
+msgstr "ربط الخدمة يحتاج إلى مستخدم الخدمة الخاص به."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "%s does not hold the group Nudge: agent service user."
+msgstr "%s لا ينتمي إلى مجموعة Nudge: مستخدم خدمة الوكيل."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Only a system administrator publishes a service channel."
+msgstr "مدير النظام فقط ينشر قناة الخدمة."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Channel added"
+msgstr "أُضيفت قناة"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Channel changed"
+msgstr "تغيّرت قناة"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Channel removed"
+msgstr "حُذفت قناة"
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_agent_revision
+msgid "Nudge Agent Change"
+msgstr "تغيير وكيل Nudge"
+
+#. module: nudge
+#: model:ir.model,name:nudge.model_nudge_agent_preview
+msgid "Nudge Agent Access Preview"
+msgstr "معاينة صلاحيات وكيل Nudge"
+
+#. module: nudge
+#: model:ir.actions.act_window,name:nudge.nudge_agent_preview_action
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_preview_view_form
+msgid "Access Preview"
+msgstr "معاينة الصلاحيات"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent_preview__can_use
+msgid "May Use It"
+msgstr "يحق له الاستخدام"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_preview.py:0
+msgid "yes"
+msgstr "نعم"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_preview.py:0
+msgid "no (not in its audience, or no company in common)"
+msgstr "لا (ليس من جمهوره، أو لا شركة مشتركة)"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_preview.py:0
+msgid "May use it:"
+msgstr "يحق له الاستخدام:"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_preview.py:0
+msgid "Companies:"
+msgstr "الشركات:"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_preview.py:0
+msgid "none"
+msgstr "لا شيء"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_preview.py:0
+msgid "read"
+msgstr "قراءة"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_preview.py:0
+msgid "write, on a card"
+msgstr "كتابة، عبر بطاقة"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_preview.py:0
+msgid "Tools:"
+msgstr "الأدوات:"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_preview.py:0
+msgid "Skills:"
+msgstr "المهارات:"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_preview.py:0
+msgid "Nudge chooses among the published skills"
+msgstr "يختار Nudge من المهارات المنشورة"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_preview.py:0
+msgid "nothing visible"
+msgstr "لا شيء ظاهر"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_preview.py:0
+msgid "not readable by this person"
+msgstr "لا يستطيع هذا الشخص قراءته"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_preview.py:0
+msgid "What it would read for this person:"
+msgstr "ما سيقرؤه لهذا الشخص:"
+
+#. module: nudge
+#: model:nudge.agent,name:nudge.agent_template_sales
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid "Sales assistant"
+msgstr "مساعد المبيعات"
+
+#. module: nudge
+#: model:nudge.agent,name:nudge.agent_template_hr
+msgid "HR helper"
+msgstr "مساعد الموارد البشرية"
+
+#. module: nudge
+#: model:nudge.agent,name:nudge.agent_template_accounting
+msgid "Accounting expert"
+msgstr "خبير المحاسبة"
+
+#. module: nudge
+#: model:nudge.agent,name:nudge.agent_template_inventory
+msgid "Inventory expert"
+msgstr "خبير المخزون"
+
+#. module: nudge
+#: model:nudge.agent,role:nudge.agent_template_sales
+msgid "Helps the sales team with quotations, customers and follow-ups."
+msgstr "يساعد فريق المبيعات في عروض الأسعار والعملاء والمتابعات."
+
+#. module: nudge
+#: model:nudge.agent,role:nudge.agent_template_hr
+msgid "Answers staff questions about leave, attendance and the HR processes."
+msgstr "يجيب عن أسئلة الموظفين حول الإجازات والحضور وإجراءات الموارد البشرية."
+
+#. module: nudge
+#: model:nudge.agent,role:nudge.agent_template_accounting
+msgid "Guides the accountants through closing, reconciliation, invoices, taxes and reports."
+msgstr "يرشد المحاسبين في الإقفال والتسوية والفواتير والضرائب والتقارير."
+
+#. module: nudge
+#: model:nudge.agent,role:nudge.agent_template_inventory
+msgid "Guides the warehouse team through receipts, deliveries, counts, valuation and replenishment."
+msgstr "يرشد فريق المستودع في الاستلام والتسليم والجرد والتقييم والتغذية."
+
+#. module: nudge
+#: model:nudge.agent,greeting:nudge.agent_template_sales
+msgid "Hello, I can look up your customers, quotations and orders."
+msgstr "مرحبًا، أستطيع البحث في عملائك وعروض الأسعار والطلبات."
+
+#. module: nudge
+#: model:nudge.agent,greeting:nudge.agent_template_hr
+msgid "Hello, ask me about leave, attendance or HR steps."
+msgstr "مرحبًا، اسألني عن الإجازات أو الحضور أو خطوات الموارد البشرية."
+
+#. module: nudge
+#: model:nudge.agent,greeting:nudge.agent_template_accounting
+msgid "Hello, I can help with closing, reconciliation, invoices, taxes and reports."
+msgstr "مرحبًا، أستطيع المساعدة في الإقفال والتسوية والفواتير والضرائب والتقارير."
+
+#. module: nudge
+#: model:nudge.agent,greeting:nudge.agent_template_inventory
+msgid "Hello, I can help with receipts, deliveries, counts, valuation and replenishment."
+msgstr "مرحبًا، أستطيع المساعدة في الاستلام والتسليم والجرد والتقييم والتغذية."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent__answers_count
+msgid "Answers given by this agent: by AI, from memory or understood without AI. Rehearsals are not counted."
+msgstr "الإجابات التي قدّمها هذا الوكيل: بالذكاء الاصطناعي أو من الذاكرة أو بفهم الطلب دون ذكاء اصطناعي. التدريبات لا تُحتسب."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent__no_ai_share
+msgid "Without AI (%)"
+msgstr "دون ذكاء اصطناعي (%)"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent__no_ai_share
+msgid "The share of its answers given without any AI."
+msgstr "نسبة إجاباته التي قُدّمت دون أي ذكاء اصطناعي."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent__cost_month
+msgid "Cost This Month"
+msgstr "التكلفة هذا الشهر"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent__cost_month
+msgid "What its calls to AI providers cost this month. Rehearsals are not counted."
+msgstr "تكلفة طلباته من مزودي الذكاء الاصطناعي هذا الشهر. التدريبات لا تُحتسب."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_engine.py:0
+msgid "This agent is not open to you."
+msgstr "هذا الوكيل غير متاح لك."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_engine.py:0
+msgid "This conversation is not one of this agent."
+msgstr "هذه المحادثة ليست من محادثات هذا الوكيل."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_engine.py:0
+msgid "This conversation is not one of this agent. Start a new one."
+msgstr "هذه المحادثة ليست من محادثات هذا الوكيل. ابدأ محادثة جديدة."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_engine.py:0
+msgid "This conversation is not a rehearsal. Start a new one to try the agent."
+msgstr "هذه المحادثة ليست تدريبًا. ابدأ محادثة جديدة لتجربة الوكيل."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_conversation__agent_id
+#: model:ir.model.fields,help:nudge.field_nudge_run__agent_id
+#: model:ir.model.fields,help:nudge.field_nudge_step__agent_id
+msgid "The agent this conversation is with: set when it starts, never changed."
+msgstr "الوكيل الذي تجري معه هذه المحادثة: يُحدَّد عند بدئها ولا يتغير أبدًا."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__agent_rehearsal
+#: model:ir.model.fields,field_description:nudge.field_nudge_usage__rehearsal
+msgid "Rehearsal"
+msgstr "تدريب"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_conversation__agent_rehearsal
+msgid "Try it: tools that change data were told, never run, and the usage is not billed as real."
+msgstr "جرّبه: الأدوات التي تغيّر البيانات وُصفت ولم تُنفَّذ، والاستهلاك لا يُحتسب كاستهلاك حقيقي."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_engine.py:0
+msgid "The agent of a conversation is set when it starts and never changes."
+msgstr "وكيل المحادثة يُحدَّد عند بدئها ولا يتغير أبدًا."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_engine.py:0
+msgid "This agent works in other companies than the ones you selected. Select one of its companies."
+msgstr "يعمل هذا الوكيل في شركات غير التي اخترتها. اختر إحدى شركاته."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_engine.py:0
+msgid "Developer mode is not open in a conversation with an agent."
+msgstr "وضع المطوّر غير متاح في محادثة مع وكيل."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_engine.py:0
+msgid "This agent has used its budget."
+msgstr "استنفد هذا الوكيل ميزانيته."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_engine.py:0
+msgid "Nothing is done in a rehearsal."
+msgstr "لا يُنفَّذ شيء أثناء التدريب."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_engine.py:0
+msgid "This agent can no longer do this."
+msgstr "لم يعد هذا الوكيل قادرًا على تنفيذ هذا."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_engine.py:0
+msgid "This agent has used its budget for this month: until the next month it answers without AI, from approved answers and the requests it understands by itself."
+msgstr "استنفد هذا الوكيل ميزانيته لهذا الشهر: حتى الشهر القادم يجيب دون ذكاء اصطناعي، من الإجابات المعتمدة والطلبات التي يفهمها بنفسه."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_engine.py:0
+msgid "You have used what this agent may spend for you today: until tomorrow it answers without AI, from approved answers and the requests it understands by itself."
+msgstr "استنفدت ما يمكن أن ينفقه هذا الوكيل لك اليوم: حتى الغد يجيب دون ذكاء اصطناعي، من الإجابات المعتمدة والطلبات التي يفهمها بنفسه."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_engine.py:0
+msgid "This waits for a yes in the Nudge panel."
+msgstr "هذا ينتظر موافقتك في لوحة Nudge."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_usage__agent_id
+msgid "The agent that answered, when it was one."
+msgstr "الوكيل الذي أجاب، إن كان المجيب وكيلًا."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_usage__rehearsal
+msgid "A call made by Try it: left out of the Token Dashboard and of the agent's cost; it still counts in the tokens of the person's day."
+msgstr "طلب من «جرّبه»: لا يظهر في لوحة الرموز ولا في تكلفة الوكيل، لكنه يُحتسب ضمن رموز يوم الشخص."
+
+#. module: nudge
+#: model:ir.actions.act_window,name:nudge.nudge_agent_action
+#: model:ir.ui.menu,name:nudge.nudge_menu_agents
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_list
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_token_dashboard_view_search_agent
+msgid "Agents"
+msgstr "الوكلاء"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_conversation_view_search_agent
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_usage_view_search_agent
+msgid "Rehearsals"
+msgstr "التدريبات"
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_agent_action
+msgid "No agent yet"
+msgstr "لا يوجد وكيل بعد"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid "Run evaluation"
+msgstr "تشغيل التقييم"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid "Try it"
+msgstr "جرّبه"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_ui.py:0
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid "Access preview"
+msgstr "معاينة الصلاحيات"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid "Archive"
+msgstr "أرشفة"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid "Persona"
+msgstr "الشخصية"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid "Abilities"
+msgstr "القدرات"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid "Guardrails"
+msgstr "الضوابط"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid "Who may use it"
+msgstr "من يستطيع استخدامه"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid "What it may do"
+msgstr "ما يستطيع فعله"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid "Open conversations"
+msgstr "فتح المحادثات"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/agent_persona/agent_tools_field.xml:0
+msgid "Nothing ticked: the agent may use the reading tools only."
+msgstr "لم يُحدَّد شيء: يستخدم الوكيل أدوات القراءة فقط."
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/agent_persona/agent_tools_field.xml:0
+msgid "Writes on a card"
+msgstr "يكتب عبر بطاقة"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/agent_persona/agent_tools_field.xml:0
+msgid "Changes data, only after the person says yes on a card"
+msgstr "يغيّر البيانات، فقط بعد موافقة الشخص على بطاقة"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/agent_persona/agent_tools_field.xml:0
+msgid "Reads data the person may already read"
+msgstr "يقرأ بيانات يحق للشخص قراءتها أصلاً"
+
+#. module: nudge
+#. odoo-javascript
+#: code:addons/nudge/static/src/components/nudge_panel.xml:0
+msgid "Back to Nudge"
+msgstr "العودة إلى Nudge"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_ui.py:0
+msgid "Conversations of %s"
+msgstr "محادثات %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_ui.py:0
+msgid "Add at least one evaluation question first."
+msgstr "أضف سؤال تقييم واحداً على الأقل أولاً."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid "Answers questions about quotations and customers"
+msgstr "يجيب عن أسئلة عروض الأسعار والعملاء"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid "Hello, how can I help?"
+msgstr "مرحباً، كيف أساعدك؟"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid "How this agent speaks, what it focuses on, what it never does..."
+msgstr "كيف يتحدث هذا الوكيل، وما الذي يركز عليه، وما الذي لا يفعله أبداً..."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "The contact of an agent is made by the agent itself."
+msgstr "جهة اتصال الوكيل ينشئها الوكيل نفسه."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "The state and the score of an agent change only by its buttons."
+msgstr "حالة الوكيل ودرجته لا تتغيران إلا بأزراره."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "An agent of a company you do not work in cannot be changed."
+msgstr "لا يمكن تعديل وكيل تابع لشركة لا تعمل فيها."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "An agent can only be made for the companies you work in."
+msgstr "يمكن إنشاء الوكيل فقط للشركات التي تعمل فيها."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Channels unpublished"
+msgstr "أُلغي نشر القنوات"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Its instructions or limits changed"
+msgstr "تغيّرت تعليماته أو حدوده"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Archive an agent instead: its history is kept."
+msgstr "أرشِف الوكيل بدل حذفه: سجلّه محفوظ."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "The result of an evaluation is written by running it."
+msgstr "نتيجة التقييم تُكتب بتشغيله فقط."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "No model here is named %s."
+msgstr "لا يوجد نموذج باسم %s هنا."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "A service channel never reads the model %s."
+msgstr "قناة الخدمة لا تقرأ النموذج %s أبدًا."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "The service user %(user)s must hold only the agent service group of Nudge, no other group of Nudge and no administration group: %(groups)s."
+msgstr "يجب أن ينتمي مستخدم الخدمة %(user)s إلى مجموعة خدمة الوكيل في Nudge فقط، دون أي مجموعة أخرى ودون مجموعة إدارية: %(groups)s."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_preview.py:0
+msgid "Only Nudge managers preview the access of an agent."
+msgstr "مديرو Nudge فقط يعاينون صلاحيات الوكيل."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_preview.py:0
+msgid "This person cannot be previewed."
+msgstr "لا يمكن معاينة هذا الشخص."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_preview.py:0
+msgid "A system administrator is previewed only by a system administrator."
+msgstr "مدير النظام لا يعاينه إلا مدير نظام."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "An agent cannot be given %s."
+msgstr "لا يمكن إعطاء الوكيل %s."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Answered with the rights of %s: shown to them only."
+msgstr "أُجيب بصلاحيات %s: تظهر الإجابة له وحده."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Shown only to those who work in every company of the agent."
+msgstr "يظهر فقط لمن يعمل في كل شركات الوكيل."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__agent_knowledge_only
+msgid "Read by Others"
+msgstr "يقرؤها الآخرون"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_conversation__agent_knowledge_only
+msgid "The answers are posted where other people read them (a Discuss channel): no record is read, and only the remembered answers meant for everyone are given."
+msgstr "تُنشر الإجابات حيث يقرؤها أشخاص آخرون (قناة في المناقشة): لا يُقرأ أي سجل، ولا تُقدَّم إلا الإجابات المحفوظة المخصّصة للجميع."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_engine.py:0
+msgid "This conversation cannot go on here. Start a new one."
+msgstr "لا يمكن متابعة هذه المحادثة هنا. ابدأ محادثة جديدة."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_engine.py:0
+msgid "This was prepared in %s, a company this agent does not work in for you. Nothing was changed."
+msgstr "أُعدّ هذا في %s، وهي شركة لا يعمل فيها هذا الوكيل لك. لم يُغيَّر شيء."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_engine.py:0
+msgid "A skill it uses changed"
+msgstr "تغيّرت مهارة يستخدمها"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_kanban
+msgid "<span class=\"text-muted\">Answers</span>"
+msgstr "<span class=\"text-muted\">الإجابات</span>"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_kanban
+msgid "<span class=\"text-muted\">Score</span>"
+msgstr "<span class=\"text-muted\">النتيجة</span>"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid ""
+"A budget of 0 means no limit. Over a budget the agent still answers what needs no AI\n"
+"                                (rules, memory) and says why it cannot do more."
+msgstr ""
+"ميزانية 0 تعني بلا حد. بعد تجاوز الميزانية يظل الوكيل يجيب عمّا لا يحتاج إلى الذكاء الاصطناعي\n"
+"                                (القواعد، الذاكرة) ويقول لماذا لا يستطيع أكثر من ذلك."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid ""
+"A service binding lets the agent answer people who have no Odoo account, under a\n"
+"                                restricted service user. Only an administrator can publish it. Read the\n"
+"                                documentation (Nudge, Agents) before you do."
+msgstr ""
+"ربط الخدمة يتيح للوكيل الرد على أشخاص ليس لديهم حساب في Odoo، باسم\n"
+"                                مستخدم خدمة مقيّد. لا ينشره إلا مسؤول النظام. اقرأ\n"
+"                                التوثيق (Nudge، الوكلاء) قبل ذلك."
+
+#. module: nudge
+#: model_terms:ir.actions.act_window,help:nudge.nudge_agent_action
+msgid ""
+"An agent is a colleague with a role: its own instructions, skills, tools, companies and audience.\n"
+"                It works under the rights of the person who talks to it. Test it in rehearsal, then publish it."
+msgstr ""
+"الوكيل زميل له دور: تعليماته ومهاراته وأدواته وشركاته وجمهوره.\n"
+"                يعمل بصلاحيات الشخص الذي يحادثه. جرّبه في وضع التجربة، ثم انشره."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent__eval_count
+msgid "Evaluations"
+msgstr "التقييمات"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent__has_service_binding
+msgid "Has Service Binding"
+msgstr "له ربط خدمة"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid ""
+"Run evaluation asks each question in rehearsal: changes are only described, nothing is\n"
+"                                written, and the cost is not counted as real use. An agent is published only when every\n"
+"                                question passes and the score is at least 80. The answers are given with the rights of\n"
+"                                the one who runs the evaluation, and shown to them only."
+msgstr ""
+"تشغيل التقييم يطرح كل سؤال في وضع التجربة: التغييرات توصف فقط، ولا يُكتب\n"
+"                                شيء، ولا تُحسب التكلفة استخدامًا فعليًا. لا يُنشر الوكيل إلا عندما ينجح كل\n"
+"                                سؤال وتكون النتيجة 80 على الأقل. تُعطى الإجابات بصلاحيات\n"
+"                                من يشغّل التقييم، ولا تظهر إلا له."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid ""
+"The agent works under the rights of the person who talks to it: a tool is offered only\n"
+"                                if that person may already use it. Changes always wait for a yes on a card."
+msgstr ""
+"يعمل الوكيل بصلاحيات الشخص الذي يحادثه: لا تُعرض أداة إلا\n"
+"                                إذا كان ذلك الشخص يستطيع استخدامها أصلًا. التغييرات تنتظر دائمًا الموافقة على بطاقة."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid ""
+"This agent answers people who have no Odoo account, under the service user\n"
+"                                        below. It sees only the models listed here, and only an administrator can\n"
+"                                        publish it."
+msgstr ""
+"يرد هذا الوكيل على أشخاص ليس لديهم حساب في Odoo، باسم مستخدم الخدمة\n"
+"                                        أدناه. لا يرى إلا النماذج المذكورة هنا، ولا ينشره إلا\n"
+"                                        مسؤول النظام."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid ""
+"With no skill chosen, Nudge picks among the published skills as usual. Memory is only\n"
+"                                what an approver accepted and the person may already read."
+msgstr ""
+"إذا لم تُختر مهارة، يختار Nudge من المهارات المنشورة كالمعتاد. الذاكرة هي فقط\n"
+"                                ما قبله المعتمد ويستطيع الشخص قراءته أصلًا."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid ""
+"Written in English, for the model. It is added on top of the rules of Nudge and never\n"
+"                                replaces them: an agent cannot be told to ignore the safety rules, the rights of the\n"
+"                                person, or the confirmation of a change."
+msgstr ""
+"تُكتب بالإنجليزية للنموذج. تُضاف فوق قواعد Nudge ولا\n"
+"                                تحل محلها أبدًا: لا يمكن أن يُطلب من الوكيل تجاهل قواعد الأمان أو صلاحيات\n"
+"                                الشخص أو تأكيد التغيير."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid "product.template, sale.order"
+msgstr "product.template, sale.order"

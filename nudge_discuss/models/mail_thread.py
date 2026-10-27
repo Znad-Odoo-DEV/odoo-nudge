@@ -14,6 +14,10 @@ class MailThread(models.AbstractModel):
     def _message_post_after_hook(self, message, msg_values):
         result = super()._message_post_after_hook(message, msg_values)
         nudge = self.env.ref("nudge_discuss.partner_nudge", raise_if_not_found=False)
+        # An agent's answer saying "@nudge" must not wake Nudge: no message of an agent partner does
+        if message.author_id and self.env["nudge.agent"].sudo().with_context(active_test=False).search_count(
+                [("partner_id", "=", message.author_id.id)]):
+            return result
         if (nudge and len(self) == 1 and message.message_type == "comment" and message.author_id != nudge
                 and (nudge in message.partner_ids or NAMED.search(text_of(message.body)))):
             # The author is whatever the poster says: it is believed only from code that runs in
