@@ -13,6 +13,7 @@ import time
 import requests
 
 from . import base, resilience, transcription
+from . import outbound
 from .prompt import question_parts, render_user_text
 
 _logger = logging.getLogger(__name__)
@@ -123,9 +124,15 @@ class OpenAICompatAdapter(base.BaseAdapter):
             headers["Authorization"] = f"Bearer {self.config.api_key}"
         return headers
 
+    def _private_ok(self, url=None):
+        """The address was checked and is the one connected to (S11). An address on our own network is for a
+        provider the admin said runs there, or one that looks like it; any other name must resolve to a public one."""
+        return bool(self.config.runs_locally) or outbound.is_own_network(url or self.config.base_url)
+
     def _post(self, payload, stream, read_timeout, deadline=None):
-        return requests.post(
+        return outbound.post(
             self._url("/chat/completions"),
+            allow_private=self._private_ok(),
             json=payload,
             headers=self._headers(),
             stream=stream,
@@ -141,8 +148,9 @@ class OpenAICompatAdapter(base.BaseAdapter):
         return text
 
     def _get(self, path):
-        return requests.get(
+        return outbound.get(
             self._url(path),
+            allow_private=self._private_ok(),
             headers=self._headers(),
             timeout=(CONNECT_TIMEOUT, self.config.timeout),
         )
@@ -610,8 +618,9 @@ class OpenAICompatAdapter(base.BaseAdapter):
         headers = {} if elsewhere else self._headers(json_body=False)
 
         def send():
-            return requests.post(
+            return outbound.post(
                 url,
+                allow_private=self._private_ok(url),
                 data=data,
                 files={"file": (f"speech.{audio_format}", audio, "audio/" + ("mpeg" if audio_format == "mp3" else audio_format))},
                 headers=headers,

@@ -67,7 +67,7 @@ class TestEconomyTier(NudgeCase, TransactionCase):
         Provider = type(self.env["nudge.provider"])
         self.patch(Provider, "_get_adapter", lambda provider: adapter_of(provider, provider.model_name))
         self.patch(Provider, "_get_economy_adapter", lambda provider: adapter_of(provider, provider.economy_model_name))
-        self.patch(ollama.requests, "request", _no_server)
+        self.patch(ollama.outbound, "request", _no_server)
         return {model: adapter for (_id, model), adapter in made.items()}, asked
 
     def question(self, user, text, conversation_id=None, mode="talk"):

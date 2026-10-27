@@ -9,8 +9,6 @@ import colorsys
 import io
 import logging
 
-import requests
-
 from odoo.tools.misc import file_path
 
 from odoo.addons.nudge.tools import pinned_http
@@ -115,8 +113,9 @@ def draw_picture(provider, model, prompt, timeout=60):
     provider._check_private()
     try:
         provider.env["nudge.egress"].check(provider.base_url, "picture")  # NP-15
-        response = requests.post(
-            provider.base_url.rstrip("/") + "/images/generations",
+        local = bool(provider.runs_locally or provider.looks_local)
+        response = pinned_http.post(
+            provider.base_url.rstrip("/") + "/images/generations", allow_private=local,
             json={"model": model, "prompt": prompt[:900], "n": 1, "size": "1536x1024", "response_format": "b64_json"},
             headers={"Authorization": f"Bearer {provider.api_key or ''}"}, timeout=timeout)
         response.raise_for_status()
@@ -128,7 +127,7 @@ def draw_picture(provider, model, prompt, timeout=60):
             # Not followed: a redirect would go to a host the list was not asked about. A public address
             # only (S11), unless the provider is on our own network
             fetched = pinned_http.get(entry["url"], timeout=timeout, allow_redirects=False,
-                                      allow_private=bool(provider.runs_locally or provider.looks_local))
+                                      allow_private=local)
             fetched.raise_for_status()
             return fetched.content
     except Exception:  # noqa: BLE001 - the placeholder takes over

@@ -11,6 +11,7 @@ import re
 import requests
 
 from . import base, resilience
+from . import outbound
 
 CONNECT_TIMEOUT = 5
 READ_TIMEOUT = 20
@@ -61,8 +62,11 @@ def _call(method, base_url, path, api_key="", payload=None, timeout=READ_TIMEOUT
     if deadline is not None:
         timeout = base.remaining(deadline, timeout)
     try:
-        response = requests.request(
-            method, root_of(base_url) + path, json=payload, headers=_headers(api_key),
+        url = root_of(base_url) + path
+        # Resolved once and connected to. Ollama is a server of our own, at the address an administrator set:
+        # a private network is allowed whatever its name looks like (ollama.corp.example on 10.x), link-local never
+        response = outbound.request(
+            method, url, allow_private=True, json=payload, headers=_headers(api_key),
             timeout=(resilience.connect_timeout(deadline, CONNECT_TIMEOUT), timeout))
     except requests.exceptions.ReadTimeout as exc:
         raise base.AdapterError(base.ERROR_TIMEOUT, type(exc).__name__) from exc

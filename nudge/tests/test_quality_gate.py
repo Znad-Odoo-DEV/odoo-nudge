@@ -300,7 +300,7 @@ class TestQualityGate(NudgeCase, TransactionCase):
         # pinned_http.get/post/head all go through its request(): the outbound calls of Nudge's own tools
         patches = [patch("requests.request", spy), patch("requests.post", spy), patch("requests.get", spy),
                    patch("odoo.addons.nudge.tools.pinned_http.request", spy),
-                   patch.object(ollama.requests, "request", _no_server)]
+                   patch.object(ollama.outbound, "request", _no_server)]
         adapter = FakeAdapter(script=script)
         built = []
 

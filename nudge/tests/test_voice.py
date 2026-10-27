@@ -188,7 +188,7 @@ class TestSpeechAdapter(BaseCase):
             sent.append((url, kwargs))
             return FakeResponse(body={"text": "How do I confirm?"})
 
-        self.patch(openai_compat_adapter.requests, "post", post)
+        self.patch(openai_compat_adapter.outbound, "post", post)
         recording = wav()
         result = adapter.transcribe(recording, language="en", hints=["Confirm", "Send"])
 
@@ -214,7 +214,7 @@ class TestSpeechAdapter(BaseCase):
             sent.append((url, kwargs))
             return FakeResponse(body={"text": "كيف بأكّد العرض؟"})
 
-        self.patch(openai_compat_adapter.requests, "post", post)
+        self.patch(openai_compat_adapter.outbound, "post", post)
         result = adapter.transcribe(wav(), language="ar")
         self.assertEqual(result["text"], "كيف بأكّد العرض؟")
         url, request = sent[0]

@@ -953,7 +953,7 @@ class TestProviderDeadlines(BaseCase):
             prepared = requests.Request("POST", url, json=json, headers=headers).prepare()
             return requests.adapters.HTTPAdapter().send(prepared, stream=stream, timeout=timeout)
 
-        self.patch(openai_compat_adapter.requests, "post", post)
+        self.patch(openai_compat_adapter.outbound, "post", post)
         return server
 
     # -- OpenAI-compatible --------------------------------------------
@@ -964,7 +964,7 @@ class TestProviderDeadlines(BaseCase):
             seen.append(kwargs["timeout"])
             return FakeResponse(lines=sse(delta("ok", finish="stop")))
 
-        self.patch(openai_compat_adapter.requests, "post", post)
+        self.patch(openai_compat_adapter.outbound, "post", post)
         list(self.openai().stream_chat(SYSTEM, TURNS))
         list(self.openai().stream_chat(SYSTEM, TURNS, deadline=time.monotonic() + 3))
         self.assertEqual(seen[0][0], openai_compat_adapter.CONNECT_TIMEOUT)
@@ -1039,7 +1039,7 @@ class TestProviderDeadlines(BaseCase):
             seen.append(kwargs["timeout"])
             return FakeResponse(429, body={"error": {"message": "slow"}}, headers={"Retry-After": "90"})
 
-        self.patch(openai_compat_adapter.requests, "post", post)
+        self.patch(openai_compat_adapter.outbound, "post", post)
         with self.assertRaises(base.AdapterError) as capture:
             adapter.transcribe(b"RIFF", deadline=time.monotonic() + 5)
         self.assertEqual(capture.exception.code, base.ERROR_RATE_LIMIT)
@@ -1067,7 +1067,7 @@ class TestProviderDeadlines(BaseCase):
             seen.append(kwargs["timeout"])
             return FakeResponse(body={"message": {"content": "A red chair"}})
 
-        self.patch(ollama.requests, "request", request)
+        self.patch(ollama.outbound, "request", request)
         ollama.read_picture("http://localhost:11434/v1", "vision", "AAAA")
         ollama.read_picture("http://localhost:11434/v1", "vision", "AAAA", deadline=time.monotonic() + 4)
         self.assertEqual(seen[0], (ollama.CONNECT_TIMEOUT, ollama.PICTURE_TIMEOUT))
