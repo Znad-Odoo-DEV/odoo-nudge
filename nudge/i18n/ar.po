@@ -24352,8 +24352,27 @@ msgstr "الإضافة"
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_list
-msgid "Look for Plugins"
-msgstr "ابحث عن الإضافات"
+msgid "Rescan Installed Plugins"
+msgstr "أعد فحص الإضافات المثبّتة"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_list
+msgid ""
+"Looks again at the modules installed on this database; it searches nothing "
+"on the internet."
+msgstr ""
+"يعيد النظر في الوحدات المثبّتة على قاعدة البيانات هذه؛ ولا يبحث عن شيء على "
+"الإنترنت."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_plugin__state
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_form
+msgid ""
+"Allow only decides what reaches the AI: the code of a module runs as soon as "
+"it is installed, and the signature is informative."
+msgstr ""
+"السماح يحدّد فقط ما يصل إلى الذكاء الاصطناعي؛ أما شيفرة الوحدة فتعمل "
+"بمجرّد تثبيتها، والتوقيع للعلم فقط."
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_plugin_view_form
@@ -26919,3 +26938,27 @@ msgstr "عندما يسأل أحدهم كيف يفعل شيئًا ويشرحه �
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
 msgid "claude-haiku-5-5"
 msgstr "claude-haiku-5-5"
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_egress_mode
+msgid "Outbound Destinations"
+msgstr "الوجهات الخارجية"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__res_config_settings__nudge_egress_mode__any
+msgid "Any address"
+msgstr "أي عنوان"
+
+#. module: nudge
+#: model:ir.model.fields.selection,name:nudge.selection__res_config_settings__nudge_egress_mode__list
+msgid "Only the list"
+msgstr "القائمة فقط"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
+msgid ""
+"Choose \"Only the list\" for sensitive environments: with an empty list, "
+"only the AI providers you configured are reached."
+msgstr ""
+"اختر «القائمة فقط» للبيئات الحساسة: مع قائمة فارغة لا يُتصل إلا بمزوّدي "
+"الذكاء الاصطناعي الذين أعددتهم."
