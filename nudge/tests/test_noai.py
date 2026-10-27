@@ -398,6 +398,30 @@ class TestNoaiRun(NudgeCase, TransactionCase):
                 parsed = noai_commands.parse(text, {"model": "account.move", "record_id": 1})
                 self.assertFalse(parsed.intent, parsed)
 
+    def test_pronoun_filler_never_becomes_part_of_a_name(self):
+        # Found in the live trial 2026-10-27: "وين بلاقي ميزان المراجعة" searched a record named "بلاقي ميزان المراجعة"
+        for text, name, kind in (
+            ("وين بلاقي ميزان المراجعة؟", "ميزان المراجعة", None),
+            ("فين ألاقي ميزان المراجعة", "ميزان المراجعة", None),
+            ("وين بلاقي فاتورة S00049؟", "S00049", "invoice"),
+            ("find invoice S00049", "S00049", "invoice"),
+        ):
+            with self.subTest(text=text):
+                parsed = noai_commands.parse(text, None)
+                self.assertEqual(parsed.intent, "find", parsed)
+                self.assertEqual((parsed.slots["name"], parsed.kind), (name, kind), parsed)
+
+    def test_a_where_question_with_no_record_goes_to_the_ai(self):
+        # Found in the live trial 2026-10-27: "I found nothing called “بلاقي ميزان المراجعة”", no AI call
+        self.provider.active = True
+        self.use_adapter(reply="From the AI")
+        for text in ("وين بلاقي ميزان المراجعة؟", "وين ميزان المراجعة؟", "where do I find the trial balance?"):
+            with self.subTest(text=text):
+                conversation = self.env["nudge.conversation"].with_user(self.worker)._chat_open(None)
+                job = conversation._chat_prepare(text, mode="agent")
+                self.assertFalse(job.get("answered"), "Not answered by the rules: %s" % job)
+                conversation.sudo().stream_started_at = False
+
     def test_a_request_the_rules_do_not_read_whole_goes_to_the_ai(self):
         # Found in the live trial: several sentences became ONE card with the last price, "three contacts" a
         # task called "position of Buyer", other requests "I found nothing called" garbled words, no AI call
