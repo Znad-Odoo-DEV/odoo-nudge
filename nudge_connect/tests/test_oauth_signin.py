@@ -6,12 +6,13 @@ from unittest.mock import patch
 from urllib.parse import parse_qs, urlencode, urlsplit
 
 from odoo import fields
-from odoo.exceptions import AccessError, LockError, UserError
+from odoo.exceptions import AccessError, UserError
 from odoo.tests import HttpCase, TransactionCase, new_test_user, tagged
 
 from odoo.addons.nudge import tools as nudge_tools
 
 from ..models import nudge_connector_oauth as oauth
+from ..models.nudge_connector_oauth import LockError
 from ..tools import connectors
 from . import fake_mcp
 from .test_connect import READ, ConnectCase, asking, call, saying

@@ -111,7 +111,7 @@ class TestWorkshopBooking(WorkshopCase, HttpCase):
         return data
 
     def open_form(self, service=None):
-        page = self.url_open("/workshop-booking", params={"service": service} if service else None)
+        page = self.url_open("/workshop-booking" + ("?" + __import__("urllib.parse").parse.urlencode({"service": service}) if service else ""))
         self.assertEqual(page.status_code, 200)
         token = re.search(r'name="csrf_token" value="([^"]+)"', page.text)
         self.assertTrue(token)

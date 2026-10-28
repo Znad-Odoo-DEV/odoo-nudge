@@ -23,7 +23,9 @@ from urllib.parse import quote, urlencode, urlparse, urlsplit, urlunsplit
 import requests
 
 from odoo import api, fields, models
-from odoo.exceptions import AccessError, LockError, UserError
+from psycopg2 import errors as pg_errors
+
+from odoo.exceptions import AccessError, UserError
 
 from odoo.addons.nudge.tools import pinned_http
 from odoo.addons.nudge.tools.records import Refused
@@ -31,6 +33,10 @@ from odoo.addons.nudge.tools.records import Refused
 from .. import mcp_client
 
 _logger = logging.getLogger(__name__)
+
+
+class LockError(Exception):
+    """Odoo 19 has odoo.exceptions.LockError; Odoo 18 does not"""
 
 STATE_MINUTES = 10
 CALLBACK_PATH = "/nudge_connect/oauth/callback"
@@ -420,6 +426,14 @@ class NudgeConnectorToken(models.Model):
     refresh_token = fields.Char(groups="base.group_system", copy=False)
     expires = fields.Datetime(help="When the access token ends; empty when the provider did not say.")
     scope = fields.Char()
+
+    def lock_for_update(self, allow_referencing=True):
+        """Odoo 18 has no lock_for_update: a refused lock raises LockError, the transaction stays usable"""
+        try:
+            with self.env.cr.savepoint(flush=False):
+                self.env.cr.execute("SELECT id FROM nudge_connector_token WHERE id IN %s FOR UPDATE NOWAIT", (tuple(self.ids),))
+        except pg_errors.LockNotAvailable:
+            raise LockError("The row is locked by another transaction")
 
     @api.model
     def _keep(self, connector, user, answer):
