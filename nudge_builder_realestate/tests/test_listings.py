@@ -101,7 +101,7 @@ class TestListingsPage(ListingsCase, HttpCase):
         cls.make_site()
 
     def names(self, **query):
-        page = self.url_open("/listings", params=query)
+        page = self.url_open("/listings" + ("?" + __import__("urllib.parse").parse.urlencode(query) if query else ""))
         self.assertEqual(page.status_code, 200)
         return page.text, [name for name in ("Palm Villa", "Marina Flat", "Sold Tower", "Hidden Villa", "Finished Mall")
                            if name in page.text]

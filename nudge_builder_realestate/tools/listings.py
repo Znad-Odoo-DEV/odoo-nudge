@@ -14,7 +14,9 @@ FIELDS = ("offer", "type", "city", "bedrooms", "price_min", "price_max")
 
 def words(env):
     """:return: the words the bar writes itself, in the language of ``env``"""
-    _ = env._
+    from odoo import _  # noqa: PLC0415
+    context = env.context  # noqa: F841
+    cr = env.cr  # noqa: F841
     return {
         "filter_offer": _("For"), "filter_any": _("Any"), "filter_sale": _("Sale"), "filter_rent": _("Rent"),
         "filter_type": _("Property type"), "filter_city": _("City"), "filter_bedrooms": _("Bedrooms"),

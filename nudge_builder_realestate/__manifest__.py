@@ -18,7 +18,7 @@ website on the server: nothing is sent to anybody and no script runs.
 Installed from Apps by an administrator who wants it, with Website Builder.
 """,
     "category": "Website",
-    "version": "18.0.1.0.0",
+    "version": "17.0.1.0.0",
     "author": "Ibrahim Elzenad",
     "website": "https://znad-odoo-dev.github.io",
     "support": "id7sp22@gmail.com",
