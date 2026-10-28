@@ -52,7 +52,10 @@ class TestSamplesLeftInSnippets(TransactionCase):
             self.assertNotIn(word, text)
         for title in ("Fixed programme", "Clear costs", "Safe sites", "A weekly report.", "Daily toolbox talks."):
             self.assertIn(title, text)
-        self.assertEqual(len(section.xpath(".//div[@data-name='Card'][not(ancestor::div[@data-name='Card'])]")), 3)
+        # Odoo 19 nests a Card in a Card; Odoo 17 names no card, its cards are the class card
+        cards = (section.xpath(".//div[@data-name='Card'][not(ancestor::div[@data-name='Card'])]")
+                 or section.xpath(".//div[contains(concat(' ', normalize-space(@class), ' '), ' card ')]"))
+        self.assertEqual(len(cards), 3)
         self.assertNotIn("s_three_columns_default_image", "".join(section.xpath(".//img/@src")))
         self.assertEqual(section.xpath(".//h2")[0].text, "Why Raghad")  # the block's own title leads the cards
 

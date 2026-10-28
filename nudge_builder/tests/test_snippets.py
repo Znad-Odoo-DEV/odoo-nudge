@@ -49,7 +49,7 @@ class TestSnippets(TransactionCase):
     def test_features_drop_the_items_that_are_not_given(self):
         section = self.section("s_features")
         snippets.fill(section, "s_features", {"items": [{"title": "Only", "text": "One"}]})
-        self.assertEqual([h.text for h in section.xpath(".//h3")[1:]], ["Only"])
+        self.assertEqual([h.text for h in section.xpath(".//h3")], ["Only"])
 
     def test_numbers_and_team_and_faq(self):
         numbers = self.section("s_numbers")
