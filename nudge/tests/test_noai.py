@@ -464,6 +464,19 @@ class TestNoaiRun(NudgeCase, TransactionCase):
                 self.assertFalse(job.get("answered"), "Not answered by the rules: %s" % job)
                 conversation.sudo().stream_started_at = False
 
+    def test_an_order_for_a_contact_not_found_goes_to_the_ai(self):
+        # Found on dev_0 2026-10-28: a Studio approval rule asked for became an order for the contact
+        # "confirming above" ("I found no contact called"), no AI call
+        if not self.has_sales:
+            self.skipTest("Sales is not installed")
+        self.provider.active = True
+        self.use_adapter(reply="From the AI")
+        text = ("Add a Studio approval rule on sales orders: confirming an order above 20,000 needs the approval "
+                "of Sales / Administrator.")
+        conversation = self.env["nudge.conversation"].with_user(self.worker)._chat_open(None)
+        job = conversation._chat_prepare(text, mode="agent")
+        self.assertFalse(job.get("answered"), "Not answered by the rules: %s" % job)
+
     def test_a_request_the_rules_do_not_read_whole_goes_to_the_ai(self):
         # Found in the live trial: several sentences became ONE card with the last price, "three contacts" a
         # task called "position of Buyer", other requests "I found nothing called" garbled words, no AI call
