@@ -634,3 +634,37 @@ msgstr "أسئلة الموقع"
 #: model:ir.ui.menu,name:nudge_website.nudge_menu_website_usage
 msgid "Website Usage"
 msgstr "استخدام الموقع"
+
+#. module: nudge_website
+#. odoo-python
+#: code:addons/nudge_website/controllers/main.py:0
+msgid "This assistant is not open to you."
+msgstr "هذا المساعد غير متاح لك."
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_res_config_settings__nudge_website_agent_ids
+#: model_terms:ir.ui.view,arch_db:nudge_website.res_config_settings_view_form_website
+msgid "Agents on the Website"
+msgstr "الوكلاء على الموقع"
+
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.res_config_settings_view_form_website
+msgid "Open the agents"
+msgstr "افتح الوكلاء"
+
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.res_config_settings_view_form_website
+msgid "When agents are published on the website channel, they answer the bubble (a visitor with no login, or a customer logged in to the portal, only through the service user and the readable models of the channel). With none, the assistant above answers. The channels are set on each agent."
+msgstr "عندما يُنشر وكلاء على قناة الموقع فإنهم يجيبون في الفقاعة (الزائر بلا حساب، أو العميل المسجل في البوابة، عبر مستخدم الخدمة والنماذج المسموح قراءتها في القناة فقط). وبلا وكلاء يجيب المساعد أعلاه. القنوات تُضبط في كل وكيل."
+
+#. module: nudge_website
+#. odoo-python
+#: code:addons/nudge_website/tools/agent_door.py:0
+msgid "Many people are asking right now. Please try again in a minute: %s"
+msgstr "كثيرون يسألون الآن. حاول مرة أخرى بعد دقيقة: %s"
+
+#. module: nudge_website
+#. odoo-python
+#: code:addons/nudge_website/tools/agent_door.py:0
+msgid "I cannot answer this here. Please ask in other words, or ask to talk to a person."
+msgstr "لا أستطيع الإجابة عن هذا هنا. اسأل بكلمات أخرى، أو اطلب التحدث إلى شخص."

@@ -27963,3 +27963,259 @@ msgstr "product.template, sale.order"
 #: code:addons/nudge/models/nudge_noai.py:0
 msgid "You are welcome."
 msgstr "العفو، في خدمتك."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent__off_limits
+msgid "Off-limits Topics"
+msgstr "مواضيع ممنوعة"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent__off_limits
+msgid "One topic per line. A question about one of them is declined with a fixed sentence, without AI."
+msgstr "موضوع واحد في كل سطر. السؤال عن أي منها يُعتذر عنه بجملة ثابتة، دون ذكاء اصطناعي."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent__budget_noticed
+msgid "Budget Noticed"
+msgstr "شهر إشعار الميزانية"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent_binding__escalation_user_id
+msgid "The person a conversation is handed to when someone asks for a person: a To Do for them, on a lead when CRM is installed. A visitor without an account is handed over only once they agree."
+msgstr "الشخص الذي تُحال إليه المحادثة حين يطلب أحدهم التحدث إلى شخص: مهمة له، على عميل محتمل إن كان تطبيق CRM مثبتاً. ولا يُحال الزائر الذي لا حساب له إلا بعد موافقته."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent_binding__hours
+msgid "Office Hours"
+msgstr "ساعات العمل"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent_binding__hours
+msgid "When it answers, such as 08:00-18:00, or 08:00-12:00, 16:00-20:00. Empty: always. In the time zone of the company."
+msgstr "متى يجيب، مثل 08:00-18:00 أو 08:00-12:00, 16:00-20:00. فارغ: دائماً. بتوقيت الشركة."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent_binding__days
+msgid "Office Days"
+msgstr "أيام العمل"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent_binding__days
+msgid "The days it answers, such as sun-thu, mon-fri or mon,wed,fri. Empty: every day."
+msgstr "الأيام التي يجيب فيها، مثل sun-thu أو mon-fri أو mon,wed,fri. فارغ: كل يوم."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent_binding__front_desk_default
+msgid "Front Desk Default"
+msgstr "الوكيل الافتراضي للاستقبال"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent_binding__front_desk_default
+msgid "When a channel has several agents and none fits the question, this one answers."
+msgstr "حين يكون للقناة عدة وكلاء ولا يناسب أيٌّ منهم السؤال، يجيب هذا الوكيل."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_conversation__agent_binding_id
+msgid "The channel of the agent this conversation came through: set when it starts."
+msgstr "قناة الوكيل التي جاءت منها هذه المحادثة: تُحدَّد عند بدئها."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__agent_visitor_key
+msgid "Visitor"
+msgstr "الزائر"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_conversation__agent_visitor_key
+msgid "Who a conversation of a public channel is with: a key of their session or number, never a name."
+msgstr "مع من تجري محادثة القناة العامة: مفتاح لجلسته أو رقمه، وليس اسماً أبداً."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "This is a topic I do not answer here. Please ask a person of the company."
+msgstr "هذا موضوع لا أجيب عنه هنا. يُرجى سؤال أحد موظفي الشركة."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Nothing was handed over: this channel is not one of this agent."
+msgstr "لم تتم الإحالة: هذه القناة ليست من قنوات هذا الوكيل."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Nothing was handed over: no person is named to take over on this channel."
+msgstr "لم تتم الإحالة: لم يُحدَّد شخص يتولى المحادثة على هذه القناة."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Nothing was handed over: the visitor has not agreed to be contacted. Ask them first; on the website they agree with Talk to a person."
+msgstr "لم تتم الإحالة: الزائر لم يوافق على التواصل معه. اسأله أولاً؛ وعلى الموقع يوافق بزر تحدث إلى شخص."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Nothing was handed over: this database has no activities to give a person."
+msgstr "لم تتم الإحالة: لا توجد في قاعدة البيانات هذه أنشطة تُسند إلى شخص."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Asked by %s."
+msgstr "طلبها %s."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Name: %s"
+msgstr "الاسم: %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Contact: %s"
+msgstr "التواصل: %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Channel: %(channel)s, agent %(agent)s."
+msgstr "القناة: %(channel)s، الوكيل %(agent)s."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "%s: a person is asked for"
+msgstr "%s: طُلب التحدث إلى شخص"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "%(agent)s used its budget for %(month)s"
+msgstr "استهلك %(agent)s ميزانيته لشهر %(month)s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Until the next month the agent answers without AI: approved answers and the requests it understands by itself. Raise its monthly budget on the agent to give it more."
+msgstr "حتى الشهر القادم يجيب الوكيل دون ذكاء اصطناعي: من الإجابات المعتمدة والطلبات التي يفهمها وحده. ارفع ميزانيته الشهرية في الوكيل لتمنحه المزيد."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Write the office hours as 08:00-18:00, several separated by commas."
+msgstr "اكتب ساعات العمل بالشكل 08:00-18:00، وافصل بين الفترات بفواصل."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Office hours that start and end at the same time are empty."
+msgstr "ساعات عمل تبدأ وتنتهي في الوقت نفسه فارغة."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Write the office days as mon-fri, sun-thu or mon,wed,fri."
+msgstr "اكتب أيام العمل بالشكل mon-fri أو sun-thu أو mon,wed,fri."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "all day"
+msgstr "طوال اليوم"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "every day"
+msgstr "كل يوم"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "We answer here on %(days)s, %(hours)s (time of %(zone)s). Please write again then."
+msgstr "نجيب هنا في الأيام %(days)s، الساعات %(hours)s (بتوقيت %(zone)s). يُرجى الكتابة مجدداً حينها."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_engine.py:0
+msgid "This channel is not open."
+msgstr "هذه القناة غير متاحة."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_engine.py:0
+msgid "Only questions are answered on this channel."
+msgstr "على هذه القناة يُجاب عن الأسئلة فقط."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_engine.py:0
+msgid "An approved answer of the memory changed"
+msgstr "تغيّرت إجابة معتمدة في الذاكرة"
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid ""
+"salaries\n"
+"competitors"
+msgstr ""
+"الرواتب\n"
+"المنافسون"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_engine.py:0
+msgid "I cannot answer this here. Please ask in other words, or ask to talk to a person."
+msgstr "لا أستطيع الإجابة عن هذا هنا. اسأل بكلمات أخرى، أو اطلب التحدث إلى شخص."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Visitor of %s"
+msgstr "زائر %s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "An agent with a published service channel needs a monthly budget and tokens per person per day. Unpublish its service channels first."
+msgstr "الوكيل الذي له قناة خدمة منشورة يحتاج ميزانية شهرية ورموزًا لكل شخص في اليوم. ألغِ نشر قنوات الخدمة أولًا."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "A conversation is handed to an employee, not to a portal user."
+msgstr "تُسلَّم المحادثة إلى موظف، لا إلى مستخدم بوابة."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Give the agent a monthly budget and tokens per person per day before publishing a service channel: visitors are counted one by one."
+msgstr "أعطِ الوكيل ميزانية شهرية ورموزًا لكل شخص في اليوم قبل نشر قناة خدمة: يُحسب الزوار واحدًا واحدًا."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "The service user %s must be a portal user: an employee reads what visitors may not."
+msgstr "يجب أن يكون مستخدم الخدمة %s مستخدم بوابة: الموظف يقرأ ما لا يحق للزوار قراءته."
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent_binding__service_user_id
+msgid "A portal user holding the group Nudge: agent service user and no other group of Nudge: the record rules and field groups of the portal apply to what it reads."
+msgstr "مستخدم بوابة يحمل مجموعة Nudge: مستخدم خدمة الوكيل ولا مجموعة أخرى من Nudge: تنطبق قواعد السجلات ومجموعات الحقول الخاصة بالبوابة على ما يقرؤه."
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__agent_handed_at
+msgid "Handed to a Person"
+msgstr "سُلِّمت إلى شخص"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_conversation__agent_handed_at
+msgid "When the agent handed this conversation to a person: a visitor of a public channel once a day."
+msgstr "متى سلّم الوكيل هذه المحادثة إلى شخص: زائر القناة العامة مرة واحدة في اليوم."
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid "sun-thu"
+msgstr "sun-thu"

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 10:18+0000\n"
-"PO-Revision-Date: 2026-10-27 10:18+0000\n"
+"POT-Creation-Date: 2026-10-28 04:56+0000\n"
+"PO-Revision-Date: 2026-10-28 04:56+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -187,6 +187,12 @@ msgstr ""
 #. module: nudge_messaging
 #. odoo-python
 #: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "I cannot answer this here. Please ask in other words."
+msgstr ""
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
 msgid "I cannot listen to voice notes in private mode. Please send text."
 msgstr ""
 
@@ -309,6 +315,12 @@ msgid ""
 msgstr ""
 
 #. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "Many people are writing right now."
+msgstr ""
+
+#. module: nudge_messaging
 #: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_message__ext_id
 msgid "Message Id"
 msgstr ""
@@ -328,6 +340,12 @@ msgstr ""
 #. module: nudge_messaging
 #: model_terms:ir.ui.view,arch_db:nudge_messaging.nudge_step_view_form_messaging
 msgid "No"
+msgstr ""
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "No assistant on this channel is open to you."
 msgstr ""
 
 #. module: nudge_messaging
