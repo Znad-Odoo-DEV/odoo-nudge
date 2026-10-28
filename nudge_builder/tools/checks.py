@@ -748,6 +748,11 @@ CHECKS = (
 )
 
 
+def plugin_checks(env):
+    """:return: the checks the installed plugins add (see ``nudge.builder.plugin``); none without a plugin"""
+    return env["nudge.builder.plugin"].plugin_checks() if "nudge.builder.plugin" in env else []
+
+
 def check_site(env, website, external=False, groups=None, palette=None, fetch=None):
     """Check ``website`` as the user of ``env``. Nothing is changed.
 
@@ -758,7 +763,7 @@ def check_site(env, website, external=False, groups=None, palette=None, fetch=No
     check_designer(env)
     pages = pages_of(env, website)
     found, skipped = [], []
-    for group, function in CHECKS:
+    for group, function in CHECKS + tuple((check["group"], check["function"]) for check in plugin_checks(env)):
         if groups and group not in groups:
             continue
         try:
@@ -778,11 +783,13 @@ def check_site(env, website, external=False, groups=None, palette=None, fetch=No
 # What a finding says
 # ----------------------------------------------------------------------
 def group_labels(env):
-    return {
+    labels = {
         "seo": _("Search engines (SEO)"), "links": _("Links"), "translations": _("Translations"),
         "performance": _("Speed"), "accessibility": _("Accessibility"), "legal": _("Legal pages"),
         "shop": _("Shop"), "content": _("Site content"),
     }
+    labels.update({check["group"]: check.get("label") or check["group"] for check in plugin_checks(env)})
+    return labels
 
 
 def finding_text(env, key, count, extra=None):
@@ -827,6 +834,9 @@ def finding_text(env, key, count, extra=None):
         "content_rtl_classes": _("%s pages use left or right classes that do not flip in Arabic.", count),
         "content_quote_missing": _("The quote form is switched on but no page links to it."),
     }
+    for check in plugin_checks(env):
+        if check.get("texts"):
+            texts.update(check["texts"](env, count, extra) or {})
     return texts.get(key, key)
 
 

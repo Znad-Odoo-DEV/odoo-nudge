@@ -20,7 +20,7 @@ Installed from Apps by an administrator who wants it, with Nudge and Website;
 never by itself.
 """,
     "category": "Website",
-    "version": "17.0.1.1.0",
+    "version": "17.0.1.2.0",
     "author": "Ibrahim Elzenad",
     "website": "https://znad-odoo-dev.github.io",
     "support": "id7sp22@gmail.com",

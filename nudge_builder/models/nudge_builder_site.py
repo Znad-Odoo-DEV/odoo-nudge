@@ -134,8 +134,9 @@ class NudgeBuilderSite(models.Model):
     # ------------------------------------------------------------------ defaults
     @api.model
     def _template_selection(self):
-        names = {key: template["name"].get("en", key) for key, template in library.all_templates().items()}
-        return [(key, names.get(key, key)) for key in library.keys()]
+        extra = self.env["nudge.builder.plugin"].plugin_template_paths()
+        names = {key: template["name"].get("en", key) for key, template in library.all_templates(extra).items()}
+        return [(key, names.get(key, key)) for key in library.keys(extra)]
 
     @api.model
     def default_get(self, fields_list):
@@ -151,7 +152,7 @@ class NudgeBuilderSite(models.Model):
         industry = company.partner_id.industry_id.name if "industry_id" in company.partner_id._fields else False
         if industry and not values.get("kind"):
             values["kind"] = industry
-            values["template_key"] = library.pick(industry)
+            values["template_key"] = library.pick(industry, self.env["nudge.builder.plugin"].plugin_template_paths())
         logo = company.logo
         if logo:
             found = pictures.dominant_colors(base64.b64decode(logo))
@@ -165,7 +166,7 @@ class NudgeBuilderSite(models.Model):
     @api.onchange("kind")
     def _onchange_kind(self):
         if self.kind:
-            self.template_key = library.pick(self.kind)
+            self.template_key = library.pick(self.kind, self.env["nudge.builder.plugin"].plugin_template_paths())
 
     @api.depends("state")
     def _compute_shop_available(self):
@@ -239,7 +240,7 @@ class NudgeBuilderSite(models.Model):
             from ..tools.schema import validate_template
             return validate_template(self.template_json)
         try:
-            return library.load(self.template_key or library.FALLBACK)
+            return library.load(self.template_key or library.FALLBACK, self.env["nudge.builder.plugin"].plugin_template_paths())
         except ValueError:
             return library.load(library.FALLBACK)
 
@@ -265,12 +266,12 @@ class NudgeBuilderSite(models.Model):
         for site in self:
             kinds = site._template_kinds()
             site.kinds_used = kinds
-            site.listing_mode = site.template_key == "real_estate"
+            site.listing_mode = site.template_key == "real_estate" or site._template_flag("listing_mode")
             site.shop_mode = bool(site.shop and site._shop_installed() and "product" in kinds)
 
     def _template_kinds(self):
         """:return: the kinds of content (``project``, ``service``...) the template shows, in the order of
-        ALL_KINDS; every kind when the template does not say"""
+        ALL_KINDS (then those of the plugins); every core kind when the template does not say"""
         self.ensure_one()
         try:
             declared = (self._load_template() or {}).get("kinds")
@@ -278,13 +279,45 @@ class NudgeBuilderSite(models.Model):
             declared = None
         if not isinstance(declared, list) or not declared:
             return list(ALL_KINDS)
-        return [kind for kind in ALL_KINDS if kind in declared]
+        return [kind for kind in self._all_kinds() if kind in declared]
+
+    def _template_flag(self, name):
+        """:return: a true/false entry of the template (``listing_mode``); False when it does not load"""
+        self.ensure_one()
+        try:
+            return bool((self._load_template() or {}).get(name))
+        except Exception:  # noqa: BLE001
+            return False
+
+    def _plugin_kinds(self):
+        """:return: ``{key: spec}`` of the kinds the installed plugins add (see ``nudge.builder.plugin``)"""
+        return self.env["nudge.builder.plugin"].plugin_kinds()
+
+    def _plugin_ctx(self, kind, lang):
+        """:return: what the renderer of a plugin's kind needs in one language: the context of every section, with
+        the words and the snippet of the kind added"""
+        self.ensure_one()
+        plugin = self._plugin_kinds()[kind]
+        ctx = self._content_ctx(lang)
+        labels = plugin["labels"](self.with_context(lang=lang.code).env) if plugin["labels"] else {}
+        return {**ctx, "labels": {**ctx["labels"], **labels}, "snippet": plugin["snippet"]}
+
+    def _all_kinds(self):
+        """:return: the core's kinds, then the plugins' ones"""
+        return list(ALL_KINDS) + list(self._plugin_kinds())
+
+    def _is_record_kind(self, kind):
+        """:return: True when ``kind`` is a kind of content that shows the site's records (core or plugin)"""
+        return kind in content_sections.LAYOUTS or kind in self._plugin_kinds()
 
     def content_records(self, kind, published_only=True):
         """:return: the records of one kind (featured first), the published ones by default"""
         self.ensure_one()
         if kind not in ALL_KINDS:
-            return self.env["nudge.builder.project"].browse()
+            if kind not in self._plugin_kinds():
+                return self.env["nudge.builder.project"].browse()
+            records = self._kind_records(kind, published_only=published_only)
+            return records
         records = self[f"{kind}_ids"].sorted()
         return records.filtered("published") if published_only else records
 
@@ -470,7 +503,7 @@ class NudgeBuilderSite(models.Model):
         # the company's own records: the only projects, products, people and places the writer may name
         records = copywriter.records_text({
             kind: [{"name": record.name} for record in self._kind_records(kind)]
-            for kind in ALL_KINDS if self._kind_records(kind)})
+            for kind in self._all_kinds() if self._kind_records(kind)})
         prompt = copywriter.prompt_for(
             self._company_facts(), page_spec, lang.name or lang_code, self.tone, self.allow_projects,
             records=records or None)
@@ -657,14 +690,16 @@ class NudgeBuilderSite(models.Model):
         ctx = self._content_ctx(lang)
         return content_sections.whatsapp_float(self._site_value("whatsapp"), ctx["whatsapp_text"], ctx)
 
-    def _kind_records(self, kind):
+    def _kind_records(self, kind, published_only=True):
         """:return: the published records of a kind of this site, featured first; empty when the model is not
         there (a database without the content tabs)"""
         self.ensure_one()
-        model = f"nudge.builder.{kind}"
+        plugin = self._plugin_kinds().get(kind)
+        model = plugin["model"] if plugin else f"nudge.builder.{kind}"
         if model not in self.env:
             return self.browse()
-        return self.env[model].search([("site_id", "=", self.id), ("published", "=", True)])
+        domain = [("site_id", "=", self.id)] + ([("published", "=", True)] if published_only else [])
+        return self.env[model].search(domain + (plugin["domain"] if plugin else []))
 
     def _public_picture(self, picture, width=1280):
         """:return: the url of a public, resized copy of a picture record (the original stays private); '' when it
@@ -730,6 +765,10 @@ class NudgeBuilderSite(models.Model):
                         rating=get("rating"), summary=get("quote") or item["summary"])
         elif kind == "faq":
             item.update(question=record.name, answer=item["description"])
+        elif kind in self._plugin_kinds():
+            plugin = self._plugin_kinds()[kind]
+            if plugin["item"]:
+                item = plugin["item"](self, record, item, lang) or item
         elif kind == "location":
             item.update(address=record._address_line() if hasattr(record, "_address_line") else "",
                         maps_url=get("maps_url"), maps_embed_src=get("maps_embed_src"), phone=get("phone"),
@@ -751,8 +790,10 @@ class NudgeBuilderSite(models.Model):
         self.ensure_one()
         kind = block["kind"]
         copy = block.get("copy") or {}
-        records = self._kind_records(kind) if kind in content_sections.LAYOUTS else None
-        if kind in content_sections.LAYOUTS and not records:
+        plugin = self._plugin_kinds().get(kind)
+        is_records = kind in content_sections.LAYOUTS or bool(plugin)
+        records = self._kind_records(kind) if is_records else None
+        if is_records and not records:
             self._say(_("No %(kind)s records: the block %(block)s of the page %(page)s was left out.",
                                  kind=kind, block=index + 1, page=(spec.get("name") or {}).get("en") or spec["key"]))
             return None
@@ -763,7 +804,13 @@ class NudgeBuilderSite(models.Model):
             words = copy.get(short) or copy.get("en") or {}
             ctx = self._content_ctx(lang)
             site = self.with_context(lang=lang.code)
-            if kind in content_sections.LAYOUTS:
+            if plugin:
+                items = [self._record_item(kind, record, lang) for record in records]
+                render = plugin["render"] or (
+                    lambda *args: content_sections.render_kind(kind, plugin["layouts"], *args))
+                section = render(items, block.get("layout"), self.direction or "a", words.get("title", ""),
+                                 words.get("text", ""), self._plugin_ctx(kind, lang), uid)
+            elif kind in content_sections.LAYOUTS:
                 items = [self._record_item(kind, record, lang) for record in records]
                 section = content_sections.render(
                     kind, items, block.get("layout"), self.direction or "a", words.get("title", ""),
@@ -836,12 +883,13 @@ class NudgeBuilderSite(models.Model):
         record_blocks, record_placed = 0, 0
         for index, block in enumerate(spec.get("blocks") or []):
             if block.get("kind"):
-                record_blocks += block["kind"] in content_sections.LAYOUTS
+                record_blocks += self._is_record_kind(block["kind"])
                 sections = self._content_block(block, spec, index)
                 if not sections:
                     continue  # no records of this kind: the block is not placed
-                record_placed += block["kind"] in content_sections.LAYOUTS
-                placed.append(content_sections.SNIPPET_OF.get(block["kind"], "s_text_block"))
+                record_placed += self._is_record_kind(block["kind"])
+                placed.append(content_sections.SNIPPET_OF.get(block["kind"])
+                              or (self._plugin_kinds().get(block["kind"]) or {}).get("snippet") or "s_text_block")
                 for code, section in sections.items():
                     columns[code].append(section)
                 continue

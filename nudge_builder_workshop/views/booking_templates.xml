@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- The public booking page. Every value is printed with t-att-value / t-out: QWeb escapes them. -->
+    <template id="booking_form" name="Book a workshop service">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure">
+                <section class="container py-5" style="max-width: 640px;">
+                    <h1>Book a service</h1>
+                    <p class="text-muted">Tell us about your car and the day you would like, and we will confirm the time.</p>
+                    <div t-if="errors.get('limit')" class="alert alert-warning" role="alert" t-out="errors['limit']"/>
+                    <div t-if="errors.get('contact')" class="alert alert-danger" role="alert" t-out="errors['contact']"/>
+                    <form action="/workshop-booking/send" method="post" class="s_nudge_workshop_booking">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <!-- The field a person does not see: a robot fills it -->
+                        <div aria-hidden="true" style="position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden;">
+                            <label for="booking_homepage">Leave this field empty</label>
+                            <input type="text" id="booking_homepage" t-att-name="honeypot" tabindex="-1" autocomplete="off"/>
+                        </div>
+                        <div class="mb-3">
+                            <label for="booking_service" class="form-label">Service</label>
+                            <select id="booking_service" name="service" class="form-select" required="required">
+                                <option value="">Choose a service</option>
+                                <t t-foreach="services" t-as="service">
+                                    <option t-att-value="service" t-att-selected="service == values.get('service') and 'selected' or None"><t t-out="service"/></option>
+                                </t>
+                            </select>
+                            <div t-if="errors.get('service')" class="text-danger small" t-out="errors['service']"/>
+                        </div>
+                        <div class="mb-3">
+                            <label for="booking_car" class="form-label">Car (make, model, year)</label>
+                            <input type="text" id="booking_car" name="car" class="form-control" maxlength="100" required="required"
+                                   t-att-value="values.get('car')"/>
+                            <div t-if="errors.get('car')" class="text-danger small" t-out="errors['car']"/>
+                        </div>
+                        <div class="mb-3">
+                            <label for="booking_day" class="form-label">Day wanted</label>
+                            <input type="date" id="booking_day" name="day" class="form-control" required="required"
+                                   t-att-min="today" t-att-max="last_day" t-att-value="values.get('day')"/>
+                            <div t-if="errors.get('day')" class="text-danger small" t-out="errors['day']"/>
+                        </div>
+                        <div class="mb-3">
+                            <label for="booking_name" class="form-label">Your name</label>
+                            <input type="text" id="booking_name" name="name" class="form-control" maxlength="100" required="required"
+                                   t-att-value="values.get('name')"/>
+                            <div t-if="errors.get('name')" class="text-danger small" t-out="errors['name']"/>
+                        </div>
+                        <div class="mb-3">
+                            <label for="booking_phone" class="form-label">Phone or WhatsApp</label>
+                            <input type="tel" id="booking_phone" name="phone" class="form-control" maxlength="30"
+                                   t-att-value="values.get('phone')" dir="ltr"/>
+                            <div t-if="errors.get('phone')" class="text-danger small" t-out="errors['phone']"/>
+                        </div>
+                        <div class="mb-3">
+                            <label for="booking_email" class="form-label">Email</label>
+                            <input type="email" id="booking_email" name="email" class="form-control" maxlength="200"
+                                   t-att-value="values.get('email')" dir="ltr"/>
+                            <div t-if="errors.get('email')" class="text-danger small" t-out="errors['email']"/>
+                        </div>
+                        <div class="mb-3">
+                            <label for="booking_message" class="form-label">Anything we should know?</label>
+                            <textarea id="booking_message" name="message" class="form-control" rows="4" maxlength="1000"><t t-out="values.get('message')"/></textarea>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input type="checkbox" id="booking_consent" name="consent" class="form-check-input" required="required"/>
+                            <label for="booking_consent" class="form-check-label">I agree that you may contact me about this request.</label>
+                            <div t-if="errors.get('consent')" class="text-danger small" t-out="errors['consent']"/>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send the booking request</button>
+                    </form>
+                </section>
+            </div>
+        </t>
+    </template>
+
+    <template id="booking_thanks" name="Workshop booking: thanks">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure">
+                <section class="container py-5" style="max-width: 640px;">
+                    <h1>Thank you</h1>
+                    <p>We have your booking request and will confirm the time soon.</p>
+                    <a href="/" class="btn btn-secondary">Back to the home page</a>
+                </section>
+            </div>
+        </t>
+    </template>
+</odoo>

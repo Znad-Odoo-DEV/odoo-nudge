@@ -1,4 +1,5 @@
 from . import test_checks
+from . import test_plugin_points
 from . import test_content
 from . import test_content_sections
 from . import test_import

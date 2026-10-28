@@ -1,0 +1,749 @@
+{
+ "schema": 1,
+ "key": "real_estate_listings",
+ "sector": "real_estate",
+ "shop": false,
+ "name": {
+  "en": "Real estate with search filters",
+  "ar": "عقارات مع فلاتر بحث"
+ },
+ "brand": {
+  "en": "Maskan Real Estate",
+  "ar": "مسكن العقارية"
+ },
+ "suggest": [
+  "real estate listings",
+  "property listings",
+  "listings with filters",
+  "عقارات مع فلاتر"
+ ],
+ "palette": {
+  "primary": "#0f4c5c",
+  "secondary": "#e36414",
+  "accent": "#9a031e",
+  "light": "#fbf8f3",
+  "dark": "#1d2b2f"
+ },
+ "fonts": {
+  "heading": "Raleway",
+  "body": "Open Sans"
+ },
+ "fonts_ar": {
+  "heading": "Tajawal",
+  "body": "Tajawal"
+ },
+ "menu": [
+  "home",
+  "about",
+  "services",
+  "projects",
+  "team",
+  "contact",
+  "faq"
+ ],
+ "kinds": [
+  "project",
+  "listing",
+  "service",
+  "member",
+  "testimonial",
+  "faq",
+  "location"
+ ],
+ "pages": [
+  {
+   "key": "home",
+   "kind": "home",
+   "name": {
+    "en": "Home",
+    "ar": "الرئيسية"
+   },
+   "blocks": [
+    {
+     "snippet": "s_cover",
+     "copy": {
+      "en": {
+       "title": "Find the home that fits your life",
+       "text": "Apartments, villas and land for sale and rent, with an agent who answers the phone.",
+       "button": "Browse properties",
+       "button_url": "/contactus"
+      },
+      "ar": {
+       "title": "اعثر على البيت الذي يناسب حياتك",
+       "text": "شقق وفلل وأراضٍ للبيع والإيجار مع وسيط يردّ على هاتفك.",
+       "button": "تصفّح العقارات",
+       "button_url": "/contactus"
+      }
+     },
+     "image": "building",
+     "image_prompt": "wide photo of a bright modern apartment building with palm trees, blue sky, no text"
+    },
+    {
+     "snippet": "s_three_columns",
+     "copy": {
+      "en": {
+       "title": "Why Maskan Real Estate",
+       "items": [
+        {
+         "title": "Verified listings",
+         "text": "Every property is inspected and its title deed checked."
+        },
+        {
+         "title": "Honest advice",
+         "text": "We tell you when a property is not worth its price."
+        },
+        {
+         "title": "After-sale support",
+         "text": "We help with registration, utilities and tenants."
+        }
+       ]
+      },
+      "ar": {
+       "title": "لماذا مسكن العقارية",
+       "items": [
+        {
+         "title": "إعلانات موثّقة",
+         "text": "كل عقار يُعاين وتُراجع وثيقة ملكيته."
+        },
+        {
+         "title": "نصيحة صادقة",
+         "text": "نخبرك حين لا يستحق العقار سعره."
+        },
+        {
+         "title": "دعم بعد البيع",
+         "text": "نساعدك في التسجيل والخدمات والمستأجرين."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "service",
+     "copy": {
+      "en": {
+       "title": "What we do"
+      },
+      "ar": {
+       "title": "ما نقدّمه"
+      }
+     }
+    },
+    {
+     "snippet": "s_numbers",
+     "copy": {
+      "en": {
+       "title": "In numbers",
+       "items": [
+        {
+         "number": "1,200",
+         "label": "Properties sold"
+        },
+        {
+         "number": "850",
+         "label": "Active tenants"
+        },
+        {
+         "number": "15",
+         "label": "Years in the market"
+        },
+        {
+         "number": "4.8/5",
+         "label": "Client rating"
+        }
+       ]
+      },
+      "ar": {
+       "title": "بالأرقام",
+       "items": [
+        {
+         "number": "1,200",
+         "label": "عقاراً مباعاً"
+        },
+        {
+         "number": "850",
+         "label": "مستأجراً حالياً"
+        },
+        {
+         "number": "15",
+         "label": "سنة في السوق"
+        },
+        {
+         "number": "4.8/5",
+         "label": "تقييم العملاء"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "listing",
+     "copy": {
+      "en": {
+       "title": "Featured properties"
+      },
+      "ar": {
+       "title": "عقارات مميزة"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "An agency built on trust",
+       "text": "We list only properties we have visited. Each listing shows the real price, the real size and the real service charges, so you decide with the full picture.",
+       "button": "About us",
+       "button_url": "/about"
+      },
+      "ar": {
+       "title": "مكتب بُني على الثقة",
+       "text": "لا نعرض إلا عقارات زرناها بأنفسنا. يُظهر كل إعلان السعر الحقيقي والمساحة الفعلية ورسوم الخدمات، لتقرّر وأنت ترى الصورة كاملة.",
+       "button": "من نحن",
+       "button_url": "/about"
+      }
+     },
+     "image": "building"
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "testimonial",
+     "copy": {
+      "en": {
+       "title": "What our clients say"
+      },
+      "ar": {
+       "title": "ماذا يقول عملاؤنا"
+      }
+     }
+    },
+    {
+     "snippet": "s_call_to_action",
+     "copy": {
+      "en": {
+       "title": "Selling or renting out?",
+       "text": "Get a free valuation from an agent who knows your street.",
+       "button": "Free valuation",
+       "button_url": "/contactus"
+      },
+      "ar": {
+       "title": "تريد البيع أو التأجير؟",
+       "text": "احصل على تقييم مجاني من وسيط يعرف منطقتك.",
+       "button": "تقييم مجاني",
+       "button_url": "/contactus"
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Real estate agency | Buy, sell and rent",
+     "ar": "مكتب عقارات | شراء وبيع وإيجار"
+    },
+    "description": {
+     "en": "Verified apartments, villas and land for sale and rent, with property management.",
+     "ar": "شقق وفلل وأراضٍ موثّقة للبيع والإيجار مع خدمة إدارة الأملاك."
+    }
+   },
+   "url": "/"
+  },
+  {
+   "key": "about",
+   "kind": "about",
+   "name": {
+    "en": "About us",
+    "ar": "من نحن"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "About Maskan Real Estate"
+      },
+      "ar": {
+       "title": "عن مسكن العقارية"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_image",
+     "copy": {
+      "en": {
+       "title": "An agency built on trust",
+       "text": "We list only properties we have visited. Each listing shows the real price, the real size and the real service charges, so you decide with the full picture."
+      },
+      "ar": {
+       "title": "مكتب بُني على الثقة",
+       "text": "لا نعرض إلا عقارات زرناها بأنفسنا. يُظهر كل إعلان السعر الحقيقي والمساحة الفعلية ورسوم الخدمات، لتقرّر وأنت ترى الصورة كاملة."
+      }
+     },
+     "image": "building"
+    },
+    {
+     "snippet": "s_image_text",
+     "copy": {
+      "en": {
+       "title": "Verified listings",
+       "text": "Every property is inspected and its title deed checked."
+      },
+      "ar": {
+       "title": "إعلانات موثّقة",
+       "text": "كل عقار يُعاين وتُراجع وثيقة ملكيته."
+      }
+     },
+     "image": "building"
+    },
+    {
+     "snippet": "s_numbers",
+     "copy": {
+      "en": {
+       "items": [
+        {
+         "number": "1,200",
+         "label": "Properties sold"
+        },
+        {
+         "number": "850",
+         "label": "Active tenants"
+        },
+        {
+         "number": "15",
+         "label": "Years in the market"
+        },
+        {
+         "number": "4.8/5",
+         "label": "Client rating"
+        }
+       ]
+      },
+      "ar": {
+       "items": [
+        {
+         "number": "1,200",
+         "label": "عقاراً مباعاً"
+        },
+        {
+         "number": "850",
+         "label": "مستأجراً حالياً"
+        },
+        {
+         "number": "15",
+         "label": "سنة في السوق"
+        },
+        {
+         "number": "4.8/5",
+         "label": "تقييم العملاء"
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "About Maskan Real Estate",
+     "ar": "عن مسكن العقارية"
+    },
+    "description": {
+     "en": "We list only properties we have visited. Each listing shows the real price, the real size and the real service charges, so you decide with the full pi",
+     "ar": "لا نعرض إلا عقارات زرناها بأنفسنا. يُظهر كل إعلان السعر الحقيقي والمساحة الفعلية ورسوم الخدمات، لتقرّر وأنت ترى الصورة كاملة."
+    }
+   }
+  },
+  {
+   "key": "services",
+   "kind": "services",
+   "name": {
+    "en": "Services",
+    "ar": "الخدمات"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Our services",
+       "text": "Apartments, villas and land for sale and rent, with an agent who answers the phone."
+      },
+      "ar": {
+       "title": "خدماتنا",
+       "text": "شقق وفلل وأراضٍ للبيع والإيجار مع وسيط يردّ على هاتفك."
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "service",
+     "copy": {
+      "en": {},
+      "ar": {}
+     }
+    },
+    {
+     "snippet": "s_three_columns",
+     "copy": {
+      "en": {
+       "title": "How we work",
+       "items": [
+        {
+         "title": "Verified listings",
+         "text": "Every property is inspected and its title deed checked."
+        },
+        {
+         "title": "Honest advice",
+         "text": "We tell you when a property is not worth its price."
+        },
+        {
+         "title": "After-sale support",
+         "text": "We help with registration, utilities and tenants."
+        }
+       ]
+      },
+      "ar": {
+       "title": "كيف نعمل",
+       "items": [
+        {
+         "title": "إعلانات موثّقة",
+         "text": "كل عقار يُعاين وتُراجع وثيقة ملكيته."
+        },
+        {
+         "title": "نصيحة صادقة",
+         "text": "نخبرك حين لا يستحق العقار سعره."
+        },
+        {
+         "title": "دعم بعد البيع",
+         "text": "نساعدك في التسجيل والخدمات والمستأجرين."
+        }
+       ]
+      }
+     }
+    },
+    {
+     "snippet": "s_call_to_action",
+     "copy": {
+      "en": {
+       "title": "Selling or renting out?",
+       "text": "Get a free valuation from an agent who knows your street.",
+       "button": "Free valuation",
+       "button_url": "/contactus"
+      },
+      "ar": {
+       "title": "تريد البيع أو التأجير؟",
+       "text": "احصل على تقييم مجاني من وسيط يعرف منطقتك.",
+       "button": "تقييم مجاني",
+       "button_url": "/contactus"
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Real estate agency services",
+     "ar": "خدمات مكتب عقارات"
+    },
+    "description": {
+     "en": "Verified apartments, villas and land for sale and rent, with property management.",
+     "ar": "شقق وفلل وأراضٍ موثّقة للبيع والإيجار مع خدمة إدارة الأملاك."
+    }
+   }
+  },
+  {
+   "key": "projects",
+   "kind": "projects",
+   "name": {
+    "en": "Projects",
+    "ar": "المشاريع"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Our work"
+      },
+      "ar": {
+       "title": "أعمالنا"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "listing",
+     "copy": {
+      "en": {
+       "title": "Properties for sale and rent"
+      },
+      "ar": {
+       "title": "عقارات للبيع والإيجار"
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Real estate agency projects",
+     "ar": "أعمال مكتب عقارات"
+    },
+    "description": {
+     "en": "Verified apartments, villas and land for sale and rent, with property management.",
+     "ar": "شقق وفلل وأراضٍ موثّقة للبيع والإيجار مع خدمة إدارة الأملاك."
+    }
+   }
+  },
+  {
+   "key": "team",
+   "kind": "team",
+   "name": {
+    "en": "Our team",
+    "ar": "فريقنا"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Meet the team"
+      },
+      "ar": {
+       "title": "تعرّف على فريقنا"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "member",
+     "copy": {
+      "en": {},
+      "ar": {}
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Our team | Maskan Real Estate",
+     "ar": "فريقنا | مسكن العقارية"
+    },
+    "description": {
+     "en": "The people behind Maskan Real Estate.",
+     "ar": "الأشخاص الذين يقفون خلف مسكن العقارية."
+    }
+   }
+  },
+  {
+   "key": "contact",
+   "kind": "contact",
+   "name": {
+    "en": "Contact us",
+    "ar": "اتصل بنا"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Contact us",
+       "text": "We reply within one working day."
+      },
+      "ar": {
+       "title": "اتصل بنا",
+       "text": "نردّ خلال يوم عمل واحد."
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "contact",
+     "copy": {
+      "en": {},
+      "ar": {}
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "location",
+     "copy": {
+      "en": {},
+      "ar": {}
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "quote",
+     "copy": {
+      "en": {},
+      "ar": {}
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Contact Maskan Real Estate",
+     "ar": "تواصل مع مسكن العقارية"
+    },
+    "description": {
+     "en": "Call, write or visit us: Corniche Road, Abu Dhabi.",
+     "ar": "اتصل بنا أو راسلنا أو زرنا: طريق الكورنيش، أبوظبي."
+    }
+   },
+   "url": "/contactus"
+  },
+  {
+   "key": "faq",
+   "kind": "faq",
+   "name": {
+    "en": "FAQ",
+    "ar": "الأسئلة الشائعة"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Frequently asked questions"
+      },
+      "ar": {
+       "title": "الأسئلة الشائعة"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "faq",
+     "copy": {
+      "en": {},
+      "ar": {}
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "FAQ | Maskan Real Estate",
+     "ar": "الأسئلة الشائعة | مسكن العقارية"
+    },
+    "description": {
+     "en": "Answers to the questions we hear most.",
+     "ar": "إجابات عن الأسئلة التي نسمعها أكثر من غيرها."
+    }
+   }
+  },
+  {
+   "key": "legal_privacy",
+   "kind": "legal",
+   "name": {
+    "en": "Privacy policy",
+    "ar": "سياسة الخصوصية"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Privacy policy"
+      },
+      "ar": {
+       "title": "سياسة الخصوصية"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "What we collect",
+       "text": "Maskan Real Estate collects only the details you give us through forms, orders or calls: your name, phone, email and the content of your request. We use them to answer you and to deliver what you asked for."
+      },
+      "ar": {
+       "title": "ما الذي نجمعه",
+       "text": "تجمع مسكن العقارية فقط البيانات التي تقدّمها عبر النماذج أو الطلبات أو المكالمات: اسمك وهاتفك وبريدك ومضمون طلبك. نستخدمها للرد عليك وتنفيذ ما طلبته."
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Your rights",
+       "text": "We never sell your data. You may ask us to show, correct or delete it at any time by writing to the address on the contact page."
+      },
+      "ar": {
+       "title": "حقوقك",
+       "text": "لا نبيع بياناتك أبداً. ويمكنك أن تطلب منا الاطلاع عليها أو تصحيحها أو حذفها في أي وقت بمراسلتنا على العنوان المذكور في صفحة التواصل."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Privacy policy",
+     "ar": "سياسة الخصوصية"
+    },
+    "description": {
+     "en": "How we collect, use and protect your personal data.",
+     "ar": "كيف نجمع بياناتك الشخصية ونستخدمها ونحميها."
+    }
+   },
+   "url": "/privacy"
+  },
+  {
+   "key": "legal_terms",
+   "kind": "legal",
+   "name": {
+    "en": "Terms and conditions",
+    "ar": "الشروط والأحكام"
+   },
+   "blocks": [
+    {
+     "snippet": "s_title",
+     "copy": {
+      "en": {
+       "title": "Terms and conditions"
+      },
+      "ar": {
+       "title": "الشروط والأحكام"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Using this website",
+       "text": "The content of this website is provided for information. Prices, availability and timelines are confirmed in writing before any agreement starts."
+      },
+      "ar": {
+       "title": "استخدام الموقع",
+       "text": "المحتوى المنشور في هذا الموقع للاطلاع. وتُؤكَّد الأسعار والتوفر والمواعيد كتابةً قبل بدء أي اتفاق."
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "copy": {
+      "en": {
+       "title": "Responsibility",
+       "text": "We do our best to keep the website accurate. We are not liable for decisions taken only on the basis of the sample information shown here."
+      },
+      "ar": {
+       "title": "المسؤولية",
+       "text": "نحرص على دقة المعلومات في الموقع، ولا نتحمل مسؤولية قرارات بُنيت على المعلومات التوضيحية المعروضة هنا فقط."
+      }
+     }
+    }
+   ],
+   "seo": {
+    "title": {
+     "en": "Terms and conditions",
+     "ar": "الشروط والأحكام"
+    },
+    "description": {
+     "en": "The terms that apply when you use our website and services.",
+     "ar": "الشروط المطبقة عند استخدام موقعنا وخدماتنا."
+    }
+   },
+   "url": "/terms"
+  }
+ ],
+ "listing_mode": true
+}
