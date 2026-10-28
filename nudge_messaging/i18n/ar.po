@@ -882,3 +882,21 @@ msgstr "وضع الوكيل غير متاح لك. تواصل مع مسؤول ا�
 #: model_terms:ir.ui.view,arch_db:nudge_messaging.res_config_settings_view_form_messaging_links
 msgid "The phones people linked to their Odoo user to ask Nudge on WhatsApp or Telegram."
 msgstr "الهواتف التي ربطها الناس بمستخدميهم في Odoo ليسألوا Nudge عبر واتساب أو تيليغرام."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "No assistant on this channel is open to you."
+msgstr "لا يوجد مساعد على هذه القناة متاح لك."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "I cannot answer this here. Please ask in other words."
+msgstr "لا أستطيع الإجابة عن هذا هنا. اسأل بكلمات أخرى."
+
+#. module: nudge_messaging
+#. odoo-python
+#: code:addons/nudge_messaging/models/nudge_messaging.py:0
+msgid "Many people are writing right now."
+msgstr "كثيرون يكتبون الآن."

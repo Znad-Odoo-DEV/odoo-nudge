@@ -186,3 +186,80 @@ msgstr "قناة النقاش"
 #: model:ir.model.fields.selection,name:nudge_discuss.selection__nudge_mention__state__answering
 msgid "Answering"
 msgstr "جارٍ الرد"
+
+#. module: nudge_discuss
+#. odoo-python
+#: code:addons/nudge_discuss/models/nudge_agent_discuss.py:0
+msgid "This agent is not open to you."
+msgstr "هذا الوكيل غير متاح لك."
+
+#. module: nudge_discuss
+#. odoo-python
+#: code:addons/nudge_discuss/models/nudge_agent_discuss.py:0
+msgid "A channel belongs to a company the agent is not in."
+msgstr "هذه القناة تتبع شركة لا ينتمي إليها الوكيل."
+
+#. module: nudge_discuss
+#: model:ir.model.fields,field_description:nudge_discuss.field_nudge_mention__agent_id
+msgid "Agent"
+msgstr "الوكيل"
+
+#. module: nudge_discuss
+#: model:ir.model,name:nudge_discuss.model_res_partner
+msgid "Contact"
+msgstr "جهة الاتصال"
+
+#. module: nudge_discuss
+#: model:ir.model.fields,field_description:nudge_discuss.field_nudge_agent_binding__channel_ids
+msgid "Discuss Channels"
+msgstr "قنوات المناقشة"
+
+#. module: nudge_discuss
+#. odoo-python
+#: code:addons/nudge_discuss/models/nudge_agent_discuss.py:0
+msgid "Hello"
+msgstr "مرحباً"
+
+#. module: nudge_discuss
+#: model:ir.model,name:nudge_discuss.model_nudge_agent
+msgid "Nudge Agent"
+msgstr "وكيل Nudge"
+
+#. module: nudge_discuss
+#: model:ir.model,name:nudge_discuss.model_nudge_agent_binding
+msgid "Nudge Agent Channel"
+msgstr "قناة وكيل Nudge"
+
+#. module: nudge_discuss
+#. odoo-python
+#: code:addons/nudge_discuss/models/nudge_agent_discuss.py:0
+msgid "Only channels and groups can be listed, not chats."
+msgstr "يمكن إدراج القنوات والمجموعات فقط، لا المحادثات المباشرة."
+
+#. module: nudge_discuss
+#. odoo-python
+#: code:addons/nudge_discuss/models/nudge_agent_discuss.py:0
+msgid "The agent had no answer."
+msgstr "لم يكن لدى الوكيل جواب."
+
+#. module: nudge_discuss
+#: model:ir.model.fields,help:nudge_discuss.field_nudge_agent_binding__channel_ids
+msgid "The channels the agent joins while this binding is published. Mention it there to ask it."
+msgstr "القنوات التي ينضم إليها الوكيل ما دام هذا الربط منشوراً. اذكره فيها لتسأله."
+
+#. module: nudge_discuss
+#. odoo-python
+#: code:addons/nudge_discuss/models/nudge_agent_discuss.py:0
+msgid "This agent could not answer."
+msgstr "تعذّر على هذا الوكيل الإجابة."
+
+#. module: nudge_discuss
+#: model:ir.model,name:nudge_discuss.model_res_users
+msgid "User"
+msgstr "المستخدم"
+
+#. module: nudge_discuss
+#. odoo-python
+#: code:addons/nudge_discuss/models/nudge_agent_discuss.py:0
+msgid "You can only list the channels you are a member of."
+msgstr "يمكنك إدراج القنوات التي أنت عضو فيها فقط."

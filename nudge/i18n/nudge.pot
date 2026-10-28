@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 11:54+0000\n"
-"PO-Revision-Date: 2026-10-27 11:54+0000\n"
+"POT-Creation-Date: 2026-10-28 04:56+0000\n"
+"PO-Revision-Date: 2026-10-28 04:56+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -45,6 +45,12 @@ msgstr ""
 msgid ""
 "## Invoice follow-up\n"
 "- Read the overdue invoices of the customer first..."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "%(agent)s used its budget for %(month)s"
 msgstr ""
 
 #. module: nudge
@@ -1290,6 +1296,12 @@ msgstr ""
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "%s: a person is asked for"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/models/nudge_plugin.py:0
 msgid "%s: send it to Nudge from here."
 msgstr ""
@@ -1605,6 +1617,12 @@ msgid "A contact with almost the same name already exists: %(names)s."
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "A conversation is handed to an employee, not to a portal user."
+msgstr ""
+
+#. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_provider_view_form
 msgid ""
 "A copy of the model with the context Nudge needs, made on the Ollama server "
@@ -1766,6 +1784,14 @@ msgid ""
 "A plugin is an Odoo module named nudge_plugin_something that brings tools, skills, prompts and\n"
 "                commands to Nudge. Once installed it waits here: nothing of it reaches anyone before a system\n"
 "                administrator reads what it brings and allows it."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent_binding__service_user_id
+msgid ""
+"A portal user holding the group Nudge: agent service user and no other group"
+" of Nudge: the record rules and field groups of the portal apply to what it "
+"reads."
 msgstr ""
 
 #. module: nudge
@@ -3033,6 +3059,14 @@ msgid "An agent of a company you do not work in cannot be changed."
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid ""
+"An agent with a published service channel needs a monthly budget and tokens "
+"per person per day. Unpublish its service channels first."
+msgstr ""
+
+#. module: nudge
 #: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_memory_like_suggest
 msgid ""
 "An answer liked by enough different people becomes a Suggested reference, "
@@ -3045,6 +3079,12 @@ msgid ""
 "An answer liked by enough different people becomes a Suggested reference, "
 "for a manager to approve with one click. Nothing is served before that yes. "
 "Off: only a manager's thumbs-up and Save as reference keep answers."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_engine.py:0
+msgid "An approved answer of the memory changed"
 msgstr ""
 
 #. module: nudge
@@ -3888,6 +3928,12 @@ msgid "Asked by"
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Asked by %s."
+msgstr ""
+
+#. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_conversation__kept_for_audit
 msgid ""
 "Asked by an auditor: kept for the company, never deleted by the retention of"
@@ -4297,6 +4343,11 @@ msgstr ""
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.res_config_settings_view_form
 msgid "Browse the Pages"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent__budget_noticed
+msgid "Budget Noticed"
 msgstr ""
 
 #. module: nudge
@@ -4734,6 +4785,7 @@ msgstr ""
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_agent_binding__channel
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__agent_binding_id
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
 msgid "Channel"
 msgstr ""
@@ -4754,6 +4806,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/models/nudge_agent.py:0
 msgid "Channel removed"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Channel: %(channel)s, agent %(agent)s."
 msgstr ""
 
 #. module: nudge
@@ -5557,6 +5615,12 @@ msgstr ""
 #: model:ir.model,name:nudge.model_res_partner
 #: model:ir.model.fields,field_description:nudge.field_nudge_agent__partner_id
 msgid "Contact"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Contact: %s"
 msgstr ""
 
 #. module: nudge
@@ -8396,6 +8460,11 @@ msgid "From the recipe marketplace."
 msgstr ""
 
 #. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent_binding__front_desk_default
+msgid "Front Desk Default"
+msgstr ""
+
+#. module: nudge
 #: model:nudge.provider,notes:nudge.provider_gemini
 msgid ""
 "Get a key at https://aistudio.google.com/apikey\n"
@@ -8435,6 +8504,14 @@ msgid ""
 "invoiced revenue, cash in bank, receivables overdue, payables due in 7 days,"
 " new opportunities and their value, confirmed sales. Then three lines: what "
 "improved, what worsened, what needs a decision."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid ""
+"Give the agent a monthly budget and tokens per person per day before "
+"publishing a service channel: visitors are counted one by one."
 msgstr ""
 
 #. module: nudge
@@ -8584,6 +8661,11 @@ msgstr ""
 msgid ""
 "HTTPS address of a signed feed of country packs. Empty: the feed is off and "
 "Nudge calls nobody."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__agent_handed_at
+msgid "Handed to a Person"
 msgstr ""
 
 #. module: nudge
@@ -9063,6 +9145,14 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/nudge/static/src/guidance/nudge_guide.xml:0
 msgid "I can't find this on the screen."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_engine.py:0
+msgid ""
+"I cannot answer this here. Please ask in other words, or ask to talk to a "
+"person."
 msgstr ""
 
 #. module: nudge
@@ -11740,12 +11830,6 @@ msgid "Move this tile later"
 msgstr ""
 
 #. module: nudge
-#: model:ir.model.fields,help:nudge.field_nudge_agent_binding__service_user_id
-msgid ""
-"Must hold the group Nudge: agent service user and no other group of Nudge."
-msgstr ""
-
-#. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_conversation_view_search
 msgid "My Conversations"
 msgstr ""
@@ -11881,6 +11965,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/nudge/static/src/tours/tour_bar.xml:0
 msgid "Name of the tour"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Name: %s"
 msgstr ""
 
 #. module: nudge
@@ -12839,6 +12929,34 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "Nothing was changed. Tell me what should be different, or say “skip”."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid ""
+"Nothing was handed over: no person is named to take over on this channel."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid ""
+"Nothing was handed over: the visitor has not agreed to be contacted. Ask "
+"them first; on the website they agree with Talk to a person."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Nothing was handed over: this channel is not one of this agent."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid ""
+"Nothing was handed over: this database has no activities to give a person."
 msgstr ""
 
 #. module: nudge
@@ -13850,6 +13968,11 @@ msgid "Of the Field"
 msgstr ""
 
 #. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent__off_limits
+msgid "Off-limits Topics"
+msgstr ""
+
+#. module: nudge
 #. odoo-python
 #: code:addons/nudge/models/nudge_embedding.py:0
 msgid ""
@@ -13891,6 +14014,22 @@ msgstr ""
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_answer_cache__near_hits
 msgid "Offered as Close"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent_binding__days
+msgid "Office Days"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_agent_binding__hours
+msgid "Office Hours"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Office hours that start and end at the same time are empty."
 msgstr ""
 
 #. module: nudge
@@ -14094,6 +14233,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.js:0
 msgid "One request is worked on in the background."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent__off_limits
+msgid ""
+"One topic per line. A question about one of them is declined with a fixed "
+"sentence, without AI."
 msgstr ""
 
 #. module: nudge
@@ -14383,6 +14529,12 @@ msgstr ""
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_profile_slice__model_name
 msgid "Only people who can read this model are told about this piece."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_engine.py:0
+msgid "Only questions are answered on this channel."
 msgstr ""
 
 #. module: nudge
@@ -20076,6 +20228,12 @@ msgid "The button is not there in the state this record is in."
 msgstr ""
 
 #. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_conversation__agent_binding_id
+msgid ""
+"The channel of the agent this conversation came through: set when it starts."
+msgstr ""
+
+#. module: nudge
 #: model:ir.model.fields,help:nudge.field_res_users_settings__nudge_validator_muted
 msgid ""
 "The checks of the warnings at entry time this person asked not to see, by "
@@ -20299,6 +20457,13 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/tools/debugger.py:0
 msgid "The database refused a value: %s"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent_binding__days
+msgid ""
+"The days it answers, such as sun-thu, mon-fri or mon,wed,fri. Empty: every "
+"day."
 msgstr ""
 
 #. module: nudge
@@ -20914,6 +21079,14 @@ msgid ""
 msgstr ""
 
 #. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent_binding__escalation_user_id
+msgid ""
+"The person a conversation is handed to when someone asks for a person: a To "
+"Do for them, on a lead when CRM is installed. A visitor without an account "
+"is handed over only once they agree."
+msgstr ""
+
+#. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_agent_binding__acts_as__person
 msgid "The person who asks"
 msgstr ""
@@ -21262,6 +21435,14 @@ msgstr ""
 msgid ""
 "The service user %(user)s must hold only the agent service group of Nudge, "
 "no other group of Nudge and no administration group: %(groups)s."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid ""
+"The service user %s must be a portal user: an employee reads what visitors "
+"may not."
 msgstr ""
 
 #. module: nudge
@@ -21816,6 +21997,12 @@ msgstr ""
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/models/nudge_agent_engine.py:0
+msgid "This channel is not open."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/models/nudge_health.py:0
 msgid "This checklist could not be loaded."
 msgstr ""
@@ -21937,6 +22124,13 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/models/nudge_recipe_catalogue.py:0
 msgid "This filter cannot be used on the state of a skill."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid ""
+"This is a topic I do not answer here. Please ask a person of the company."
 msgstr ""
 
 #. module: nudge
@@ -23137,6 +23331,15 @@ msgid ""
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid ""
+"Until the next month the agent answers without AI: approved answers and the "
+"requests it understands by itself. Raise its monthly budget on the agent to "
+"give it more."
+msgstr ""
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 msgid "Untitled"
@@ -23508,6 +23711,17 @@ msgid "Violet"
 msgstr ""
 
 #. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_nudge_conversation__agent_visitor_key
+msgid "Visitor"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Visitor of %s"
+msgstr ""
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_panel.xml:0
 #: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_voice
@@ -23801,6 +24015,14 @@ msgstr ""
 #. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_question__status__watching
 msgid "Watching"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid ""
+"We answer here on %(days)s, %(hours)s (time of %(zone)s). Please write again"
+" then."
 msgstr ""
 
 #. module: nudge
@@ -24518,6 +24740,13 @@ msgid ""
 msgstr ""
 
 #. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent_binding__front_desk_default
+msgid ""
+"When a channel has several agents and none fits the question, this one "
+"answers."
+msgstr ""
+
+#. module: nudge
 #: model:nudge.prompt,body:nudge.prompt_dev_big_order_alert
 msgid ""
 "When a sales order above {{amount}} is confirmed, email {{recipient}} with "
@@ -24533,6 +24762,13 @@ msgid ""
 "When does the fiscal year end (for example 31 December)? You can add a lock "
 "date: no accounting entry up to that day can be changed any more (“lock "
 "until 2025-12-31”)."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_agent_binding__hours
+msgid ""
+"When it answers, such as 08:00-18:00, or 08:00-12:00, 16:00-20:00. Empty: "
+"always. In the time zone of the company."
 msgstr ""
 
 #. module: nudge
@@ -24564,6 +24800,13 @@ msgid ""
 "                company, on the same kind of screen, is then answered from here at once, without a call\n"
 "                to the provider and without cost. Nothing that touched a record, a person's data or a\n"
 "                secret is kept. Delete an answer you do not trust."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_conversation__agent_handed_at
+msgid ""
+"When the agent handed this conversation to a person: a visitor of a public "
+"channel once a day."
 msgstr ""
 
 #. module: nudge
@@ -24750,6 +24993,13 @@ msgstr ""
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_prompt_view_search
 msgid "Who Sees It"
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_nudge_conversation__agent_visitor_key
+msgid ""
+"Who a conversation of a public channel is with: a key of their session or "
+"number, never a name."
 msgstr ""
 
 #. module: nudge
@@ -25150,6 +25400,18 @@ msgstr ""
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Write the office days as mon-fri, sun-thu or mon,wed,fri."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "Write the office hours as 08:00-18:00, several separated by commas."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/models/nudge_coverage.py:0
 msgid "Write the word and choose what it means."
 msgstr ""
@@ -25322,6 +25584,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/tools/explainer.py:0
 msgid "You are on this screen"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_noai.py:0
+msgid "You are welcome."
 msgstr ""
 
 #. module: nudge
@@ -25701,6 +25969,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/tools/building.py:0
 msgid "after %s"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "all day"
 msgstr ""
 
 #. module: nudge
@@ -26109,6 +26383,12 @@ msgstr ""
 msgid ""
 "env.ref(%s) finds nothing here: that record does not exist (the module is "
 "not installed, or it was deleted)."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "every day"
 msgstr ""
 
 #. module: nudge
@@ -26745,6 +27025,13 @@ msgid "run by the person who presses it"
 msgstr ""
 
 #. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid ""
+"salaries\n"
+"competitors"
+msgstr ""
+
+#. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_tour_view_form
 msgid "sale"
 msgstr ""
@@ -26857,6 +27144,11 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/tools/document_record.py:0
 msgid "subject"
+msgstr ""
+
+#. module: nudge
+#: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
+msgid "sun-thu"
 msgstr ""
 
 #. module: nudge

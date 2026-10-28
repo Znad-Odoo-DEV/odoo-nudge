@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 10:18+0000\n"
-"PO-Revision-Date: 2026-10-27 10:18+0000\n"
+"POT-Creation-Date: 2026-10-28 04:56+0000\n"
+"PO-Revision-Date: 2026-10-28 04:56+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -68,6 +68,12 @@ msgstr ""
 #. module: nudge_website
 #: model:ir.model.fields,field_description:nudge_website.field_nudge_source__public_url
 msgid "Address"
+msgstr ""
+
+#. module: nudge_website
+#: model:ir.model.fields,field_description:nudge_website.field_res_config_settings__nudge_website_agent_ids
+#: model_terms:ir.ui.view,arch_db:nudge_website.res_config_settings_view_form_website
+msgid "Agents on the Website"
 msgstr ""
 
 #. module: nudge_website
@@ -204,6 +210,14 @@ msgid ""
 msgstr ""
 
 #. module: nudge_website
+#. odoo-python
+#: code:addons/nudge_website/tools/agent_door.py:0
+msgid ""
+"I cannot answer this here. Please ask in other words, or ask to talk to a "
+"person."
+msgstr ""
+
+#. module: nudge_website
 #: model:ir.model.fields,field_description:nudge_website.field_nudge_source__id
 #: model:ir.model.fields,field_description:nudge_website.field_nudge_usage__id
 #: model:ir.model.fields,field_description:nudge_website.field_nudge_web_message__id
@@ -257,6 +271,12 @@ msgid "Leave your details and someone will write to you."
 msgstr ""
 
 #. module: nudge_website
+#. odoo-python
+#: code:addons/nudge_website/tools/agent_door.py:0
+msgid "Many people are asking right now. Please try again in a minute: %s"
+msgstr ""
+
+#. module: nudge_website
 #: model:ir.model.fields,field_description:nudge_website.field_res_config_settings__nudge_rate_messages
 msgid "Messages per Visitor"
 msgstr ""
@@ -299,6 +319,11 @@ msgstr ""
 #. module: nudge_website
 #: model:ir.actions.server,name:nudge_website.cron_read_pages_ir_actions_server
 msgid "Nudge: read the published pages for the website assistant"
+msgstr ""
+
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.res_config_settings_view_form_website
+msgid "Open the agents"
 msgstr ""
 
 #. module: nudge_website
@@ -454,6 +479,12 @@ msgstr ""
 
 #. module: nudge_website
 #. odoo-python
+#: code:addons/nudge_website/controllers/main.py:0
+msgid "This assistant is not open to you."
+msgstr ""
+
+#. module: nudge_website
+#. odoo-python
 #: code:addons/nudge_website/tools/assistant.py:0
 msgid "Ticket %(name)s: %(state)s"
 msgstr ""
@@ -563,6 +594,15 @@ msgid ""
 "What visitors typed in the website assistant, and what it answered, stays "
 "this many days. After that the lines are archived (not deleted) by a daily "
 "job; archived lines are no more listed or counted. 0: they are kept."
+msgstr ""
+
+#. module: nudge_website
+#: model_terms:ir.ui.view,arch_db:nudge_website.res_config_settings_view_form_website
+msgid ""
+"When agents are published on the website channel, they answer the bubble (a "
+"visitor with no login, or a customer logged in to the portal, only through "
+"the service user and the readable models of the channel). With none, the "
+"assistant above answers. The channels are set on each agent."
 msgstr ""
 
 #. module: nudge_website
