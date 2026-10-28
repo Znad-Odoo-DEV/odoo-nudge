@@ -710,6 +710,10 @@ class NudgeConversation(models.Model):
         limit = AGENT_MAX_MESSAGES if self.sudo().run_ids else MAX_MESSAGES
         if self.message_count >= limit:
             raise UserError(self.env._("This conversation is getting long. Start a new one."))
+        # A thanks and nothing else is answered at once: no token, nothing read (an agent's conversation too)
+        thanked = self.env["nudge.noai"]._chat_thanks(self, text, mode, focus, found, explain, background, fresh)
+        if thanked:
+            return thanked
         # A common request is understood by rules: no token, same cards, same rights
         understood = self.env["nudge.noai"]._chat_serve(
             self, text, mode, focus, found, explain, background, snapshot, fresh=fresh)

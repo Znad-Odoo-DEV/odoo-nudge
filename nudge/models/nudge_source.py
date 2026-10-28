@@ -14,6 +14,7 @@ from odoo.exceptions import UserError
 from odoo.tools import sql
 
 from ..llm import attachments
+from ..tools import base
 
 _logger = logging.getLogger(__name__)
 
@@ -153,6 +154,10 @@ class NudgeSource(models.Model):
     def _get_text(self):
         """:return: the files this person may be answered from, in words, for
         the system prompt; empty when there are none"""
+        # The service user of an agent's public channel, or anybody who may read no file, is told of none: their
+        # names are the company's, and search_company_files is not offered there (no ACL is given for it either)
+        if base.public_tools(self.env) is not None or not self.env["nudge.source"].has_access("read"):
+            return ""
         lines = []
         for source in self._for_person():
             line = f"- {source.name}"

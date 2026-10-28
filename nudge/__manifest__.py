@@ -1,6 +1,6 @@
 {
     "name": "Nudge",
-    "version": "18.0.1.60.0",
+    "version": "18.0.1.60.1",
     "category": "Productivity",
     "summary": "An AI companion that lives in the Odoo web client",
     "description": """
@@ -52,8 +52,8 @@ Without them the rest works and the feature says what is missing.
     "data": [
         "security/nudge_security.xml",
         "security/nudge_auditor_security.xml",
-        "security/ir.model.access.csv",
         "security/nudge_agent_security.xml",
+        "security/ir.model.access.csv",
         "security/nudge_tour_security.xml",
         "security/nudge_health_security.xml",
         "security/nudge_report_security.xml",

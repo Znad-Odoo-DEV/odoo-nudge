@@ -42,7 +42,8 @@
     <t t-name="nudge.GuideContent">
         <div class="o_nudge_guide_head">
             <NudgeFace/>
-            <span class="o_nudge_guide_count">
+            <!-- A count reads left to right in every language: in Arabic "4 / 1" was read for the first of four -->
+            <span class="o_nudge_guide_count" dir="ltr">
                 <t t-esc="state.index + 1"/> / <t t-esc="state.steps.length"/>
             </span>
             <button type="button" class="o_nudge_guide_stop" title="Stop" aria-label="Stop"

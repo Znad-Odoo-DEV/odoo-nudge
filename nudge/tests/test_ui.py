@@ -20,7 +20,8 @@ class TestUi(NudgeCase, HttpCase):
             "How do I create a quotation?",
             "Open **Sales**, then press `New`.",
             "Thanks!",
-            "Open **Sales**, then press `New`.",
+            # A thanks alone is answered without AI (nudge.noai._chat_thanks)
+            "You are welcome.",
         ])
 
     def test_hidden_without_the_group(self):

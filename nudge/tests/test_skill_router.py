@@ -290,7 +290,8 @@ class TestSkillRouter(NudgeCase, TransactionCase):
         script = [[llm.tool_use_event("c1", "use_skill", {"key": "filler-03"}), llm.stop_event(llm.STOP_TOOL_USE)],
                   [llm.text_event("Noted."), llm.stop_event(llm.STOP_END)]]
         conversation, _calls = self.call_for(self.admin, "Hello", script=script)
-        _conversation, calls = self.call_for(self.admin, "Thanks", conversation_id=conversation.id)
+        # Not "Thanks": a thanks alone is answered without AI (nudge.noai._chat_thanks)
+        _conversation, calls = self.call_for(self.admin, "And then?", conversation_id=conversation.id)
         self.assertTrue(any(line.startswith("- filler-03: ") for line in self.indexed(calls)))
 
     def test_use_skill_by_the_work_described(self):

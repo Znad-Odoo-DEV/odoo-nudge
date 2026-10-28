@@ -249,7 +249,8 @@ class TestPromptBudget(NudgeCase, TransactionCase):
         conversation, calls = self.first_call(self.admin, PLAIN, script=script)
         self.assertNotIn("prepare_task", names(calls[0]))
         self.assertIn("prepare_task", names(calls[1]))
-        _conversation, calls = self.first_call(self.admin, "Thanks", conversation_id=conversation.id)
+        # Not "Thanks": a thanks alone is answered without AI (nudge.noai._chat_thanks)
+        _conversation, calls = self.first_call(self.admin, "And the next step?", conversation_id=conversation.id)
         self.assertIn("prepare_task", names(calls[0]), "Kept for the rest of the conversation")
 
     def test_every_tool_in_full_is_the_fallback(self):
