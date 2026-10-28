@@ -120,9 +120,11 @@ def label(cx, key, *args):
     return text % args if args and "%" in text else text
 
 
-def pick_layout(kind, layout=None, direction="a"):
-    """:return: the layout to use: the template's own when it names a known one, else the direction's choice"""
-    known = LAYOUTS.get(kind)
+def pick_layout(kind, layout=None, direction="a", known=None):
+    """:return: the layout to use: the template's own when it names a known one, else the direction's choice
+
+    :param known: the three layouts (Classic, Bold, Soft) of a kind a plugin registered; those of ``kind`` when None"""
+    known = known or LAYOUTS.get(kind)
     if not known:
         return layout or "grid"
     if layout in known:
@@ -185,7 +187,7 @@ def _pictures(item):
 def _section(kind, layout, cx, title="", text=""):
     rtl = bool(cx.get("rtl"))
     root = el("section", f"s_nb_{kind} nb-section nb-{kind} nb-layout-{layout} pt64 pb64" + (" nb-rtl" if rtl else ""),
-              attrs={"data-snippet": SNIPPET_OF.get(kind, "s_text_block"), "data-nb-kind": kind,
+              attrs={"data-snippet": cx.get("snippet") or SNIPPET_OF.get(kind, "s_text_block"), "data-nb-kind": kind,
                      "data-nb-layout": layout, "dir": "rtl" if rtl else None})
     container = el("div", "container", root)
     if title:
@@ -248,6 +250,7 @@ def _meta(kind, item, cx):
         parts += [item.get("role"), item.get("specialty")]
     elif kind == "testimonial":
         parts += [item.get("author_role"), item.get("company")]
+    parts += item.get("meta") or []  # the facts a plugin's kind adds (the core's items carry none)
     return [str(part) for part in parts if part]
 
 
@@ -261,6 +264,8 @@ def _extras(parent, kind, item, cx):
         _link(parent, item.get("linkedin"), label(cx, "linkedin"), "small", "fa fa-linkedin", external=True)
     elif kind == "location":
         _location_lines(parent, item, cx)
+    for action in item.get("actions") or []:  # the buttons a plugin's kind adds: {"url", "text"}
+        _link(parent, action.get("url"), action.get("text"), "btn btn-primary btn-sm mt-2")
 
 
 def _location_lines(parent, item, cx):
@@ -498,11 +503,22 @@ def render(kind, items, layout=None, direction="a", title="", text="", cx=None, 
     :param dict cx: ``rtl`` bool, ``labels`` {key: translated}, ``quote_url``, ``whatsapp_text``
     :param uid: makes the ids of a carousel or an accordion unique on the page
     :return: the lxml section, or None when there is nothing to show"""
+    if kind not in LAYOUTS:
+        return None
+    return render_kind(kind, LAYOUTS[kind], items, layout, direction, title, text, cx, uid)
+
+
+def render_kind(kind, layouts, items, layout=None, direction="a", title="", text="", cx=None, uid="0"):
+    """The section of one kind of record, whose three layouts are given: the core's kinds go through here (see
+    :func:`render`) and so can the kind of a plugin, which may call it for its own renderer.
+
+    :param tuple layouts: the layouts of Classic, Bold and Soft of the kind
+    :return: the lxml section, or None when there is nothing to show"""
     cx = cx or {}
     items = ordered(items)
-    if kind not in LAYOUTS or not items:
+    if not items:
         return None
-    layout = pick_layout(kind, layout, direction)
+    layout = pick_layout(kind, layout, direction, known=layouts)
     root, container = _section(kind, layout, cx, title, text)
     if kind == "faq":
         {"accordion": lambda: _accordion(container, items, cx, uid), "columns": lambda: _faq_columns(container, items, cx),

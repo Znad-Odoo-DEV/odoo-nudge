@@ -1,5 +1,9 @@
 # Changelog
 
+## 19.0.1.2.0
+
+- Website Builder 2.2: plugin points. Another module can add a kind of content (model, renderer, layouts), a check of Site Check and a template through the abstract model `nudge.builder.plugin`, without editing this module; with no plugin installed nothing changes. Two example plugins: `nudge_builder_realestate` (listings with filters) and `nudge_builder_workshop` (car workshop services with a booking request). Tests: `/nudge_builder:TestPluginPoints`.
+
 ## 19.0.1.59.5 (unreleased)
 
 - Review: the check of outside links connects to the address it checked (S11, DNS rebinding), and a picture the images endpoint gives as an address is fetched from a public address only, unless the provider runs on our own server. That download had no check at all: a provider could point it at 169.254.169.254 and the answer would have become a picture of the site. Tests: `/nudge_builder:TestBuilderRebinding`.

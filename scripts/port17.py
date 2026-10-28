@@ -79,7 +79,7 @@ sub("nudge/tools/report_explain.py", r"(?<![\w.])env\._\(", "_tr(env, ")
 # REVIEW RULE 2 (17): the task cron writes in the owner's language through a local `env` of that language
 # (the _tr helper is added by REVIEW RULE 1 below)
 sub("nudge/models/nudge_task.py", r"last_result=env\._\(", "last_result=_tr(env, ")
-for name in files("nudge/**/*.py", "nudge_mail/**/*.py", "nudge_discuss/**/*.py", "nudge_mcp/**/*.py", "nudge_website/**/*.py", "nudge_builder/**/*.py", "nudge_messaging/**/*.py", "nudge_connect/**/*.py"):  # R2 RULE
+for name in files("nudge/**/*.py", "nudge_mail/**/*.py", "nudge_discuss/**/*.py", "nudge_mcp/**/*.py", "nudge_website/**/*.py", "nudge_builder*/**/*.py", "nudge_messaging/**/*.py", "nudge_connect/**/*.py"):  # R2 RULE
     s = read(name)
     # self.env._( / env._( / record.env._( / self.env["x"].env._( → _(
     s2, n = re.subn(r"(?<![\w.\]])(?:[A-Za-z_]\w*(?:\[[^\[\]]*\])?\.)*env\._\(", "_(", s)
@@ -130,7 +130,7 @@ class Base(models.AbstractModel):
         self.check_access_rule(operation)
 ''')
 edit("nudge/models/__init__.py", [("from . import nudge_provider\n", "from . import compat17\nfrom . import nudge_provider\n")])
-for name in files("nudge/**/*.py", "nudge_mail/**/*.py", "nudge_mcp/**/*.py", "nudge_website/**/*.py", "nudge_builder/**/*.py", "nudge_messaging/**/*.py", "nudge_connect/**/*.py"):  # R2 RULE
+for name in files("nudge/**/*.py", "nudge_mail/**/*.py", "nudge_mcp/**/*.py", "nudge_website/**/*.py", "nudge_builder*/**/*.py", "nudge_messaging/**/*.py", "nudge_connect/**/*.py"):  # R2 RULE
     if name.endswith("compat17.py"):
         continue
     # `x.check_access("r") if hasattr(x, "check_access") else x.check_access_rights("r")` becomes the helper whole:
@@ -209,7 +209,7 @@ if os.path.exists(ROOT + "nudge/tests/test_building.py"):
     sub("nudge/tests/test_building.py", r'"view_type": "list"', '"view_type": "tree"')
     sub("nudge/tests/test_building.py", r'assertIn\("\(list\)"', 'assertIn("(tree)"')
 
-for name in files("nudge/**/*.xml", "nudge_mail/**/*.xml", "nudge_mcp/**/*.xml", "nudge_website/**/*.xml", "nudge_builder/**/*.xml", "nudge_messaging/**/*.xml", "nudge_connect/**/*.xml"):  # R2 RULE
+for name in files("nudge/**/*.xml", "nudge_mail/**/*.xml", "nudge_mcp/**/*.xml", "nudge_website/**/*.xml", "nudge_builder*/**/*.xml", "nudge_messaging/**/*.xml", "nudge_connect/**/*.xml"):  # R2 RULE
     n = sub(name, r"<list(?=[\s>])", "<tree")
     n += sub(name, r"</list>", "</tree>")
     n += sub(name, r'(<field name="view_mode">)list', r"\1tree")

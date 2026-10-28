@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- The page of /listings. The bar and the cards are built by the Python of the module from escaped values. -->
+    <template id="listings_page" name="Property listings">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure">
+                <section class="container py-5">
+                    <h1>Property listings</h1>
+                    <t t-out="form"/>
+                    <p class="text-muted" t-if="count" t-out="words['filter_count'] % count"/>
+                    <div t-if="not count" class="alert alert-info" role="status" t-out="words.get('filter_none')"/>
+                    <t t-out="cards"/>
+                </section>
+            </div>
+        </t>
+    </template>
+</odoo>

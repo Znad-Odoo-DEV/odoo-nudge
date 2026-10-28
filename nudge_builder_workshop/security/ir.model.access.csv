@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_nudge_builder_workshop_service_designer,nudge.builder.workshop.service designer,model_nudge_builder_workshop_service,website.group_website_designer,1,1,1,1
+access_nudge_builder_workshop_service_system,nudge.builder.workshop.service system,model_nudge_builder_workshop_service,base.group_system,1,1,1,1
