@@ -1,0 +1,150 @@
+# Arabic of nudge_builder_realestate
+msgid ""
+msgstr ""
+"Language: ar
+"
+"Content-Type: text/plain; charset=UTF-8
+"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5;
+"
+
+#. module: nudge_builder_realestate
+#. odoo-python
+#: code:addons/nudge_builder_realestate/tools/listings.py:0
+msgid "For"
+msgstr "للـ"
+
+#. module: nudge_builder_realestate
+#. odoo-python
+#: code:addons/nudge_builder_realestate/tools/listings.py:0
+msgid "Any"
+msgstr "الكل"
+
+#. module: nudge_builder_realestate
+#. odoo-python
+#: code:addons/nudge_builder_realestate/tools/listings.py:0
+msgid "Sale"
+msgstr "بيع"
+
+#. module: nudge_builder_realestate
+#. odoo-python
+#: code:addons/nudge_builder_realestate/tools/listings.py:0
+msgid "Rent"
+msgstr "إيجار"
+
+#. module: nudge_builder_realestate
+#. odoo-python
+#: code:addons/nudge_builder_realestate/tools/listings.py:0
+msgid "Property type"
+msgstr "نوع العقار"
+
+#. module: nudge_builder_realestate
+#. odoo-python
+#: code:addons/nudge_builder_realestate/tools/listings.py:0
+msgid "City"
+msgstr "المدينة"
+
+#. module: nudge_builder_realestate
+#. odoo-python
+#: code:addons/nudge_builder_realestate/tools/listings.py:0
+msgid "Bedrooms"
+msgstr "غرف النوم"
+
+#. module: nudge_builder_realestate
+#. odoo-python
+#: code:addons/nudge_builder_realestate/tools/listings.py:0
+msgid "Price from"
+msgstr "السعر من"
+
+#. module: nudge_builder_realestate
+#. odoo-python
+#: code:addons/nudge_builder_realestate/tools/listings.py:0
+msgid "Price up to"
+msgstr "السعر حتى"
+
+#. module: nudge_builder_realestate
+#. odoo-python
+#: code:addons/nudge_builder_realestate/tools/listings.py:0
+msgid "Search"
+msgstr "بحث"
+
+#. module: nudge_builder_realestate
+#. odoo-python
+#: code:addons/nudge_builder_realestate/tools/listings.py:0
+msgid "Clear"
+msgstr "مسح"
+
+#. module: nudge_builder_realestate
+#. odoo-python
+#: code:addons/nudge_builder_realestate/tools/listings.py:0
+msgid "No listing matches these filters."
+msgstr "لا يوجد عقار يطابق هذه الفلاتر."
+
+#. module: nudge_builder_realestate
+#. odoo-python
+#: code:addons/nudge_builder_realestate/tools/listings.py:0
+msgid "Search the listings"
+msgstr "ابحث في العقارات"
+
+#. module: nudge_builder_realestate
+#. odoo-python
+#: code:addons/nudge_builder_realestate/tools/listings.py:0
+msgid "%s listings"
+msgstr "%s عقار"
+
+#. module: nudge_builder_realestate
+#. odoo-python
+#: code:addons/nudge_builder_realestate/models/nudge_builder_plugin.py:0
+#: model:ir.model.fields.selection,name:nudge_builder_realestate.selection__nudge_builder_check_finding__check_group__listings
+msgid "Listings"
+msgstr "العقارات"
+
+#. module: nudge_builder_realestate
+#: model_terms:ir.ui.view,arch_db:nudge_builder_realestate.listings_page
+msgid "Property listings"
+msgstr "العقارات المعروضة"
+
+#. module: nudge_builder_realestate
+#. odoo-python
+#: code:addons/nudge_builder_realestate/tools/checks.py:0
+msgid "%s published listings have no price."
+msgstr "%s من العقارات المنشورة بلا سعر."
+
+#. module: nudge_builder_realestate
+#. odoo-python
+#: code:addons/nudge_builder_realestate/tools/checks.py:0
+msgid "%s published listings have no city, so the city filter cannot find them."
+msgstr "%s من العقارات المنشورة بلا مدينة، فلا يجدها فلتر المدينة."
+
+#. module: nudge_builder_realestate
+#. odoo-python
+#: code:addons/nudge_builder_realestate/tools/checks.py:0
+msgid "%s published listings have no picture."
+msgstr "%s من العقارات المنشورة بلا صورة."
+
+#. module: nudge_builder_realestate
+#: model:ir.model.fields,field_description:nudge_builder_realestate.field_nudge_builder_check_finding__check_group
+msgid "Check"
+msgstr "الفحص"
+
+#. module: nudge_builder_realestate
+#: model:ir.model.fields,field_description:nudge_builder_realestate.field_nudge_builder_check_finding__display_name
+#: model:ir.model.fields,field_description:nudge_builder_realestate.field_nudge_builder_plugin__display_name
+msgid "Display Name"
+msgstr "الاسم المعروض"
+
+#. module: nudge_builder_realestate
+#: model:ir.model.fields,field_description:nudge_builder_realestate.field_nudge_builder_check_finding__id
+#: model:ir.model.fields,field_description:nudge_builder_realestate.field_nudge_builder_plugin__id
+msgid "ID"
+msgstr "المعرّف"
+
+#. module: nudge_builder_realestate
+#: model:ir.model,name:nudge_builder_realestate.model_nudge_builder_plugin
+msgid "Nudge Builder plugin points"
+msgstr "نقاط إضافات منشئ مواقع Nudge"
+
+#. module: nudge_builder_realestate
+#: model:ir.model,name:nudge_builder_realestate.model_nudge_builder_check_finding
+msgid "Website Check Finding"
+msgstr "نتيجة فحص الموقع"
