@@ -11,3 +11,4 @@ from . import test_snippets
 from . import test_templates
 from . import test_site_edit
 from . import test_rebinding  # S11
+from . import test_show_records

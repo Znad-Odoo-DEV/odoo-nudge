@@ -509,7 +509,9 @@ class NudgeBuilderSiteContent(models.Model):
         return revision, record, self._rerender_kind(kind).get("pages", [])
 
     def _page_shows(self, page, kind):
-        words = KIND_PAGES.get(kind, ())
+        words = KIND_PAGES.get(kind)
+        if words is None:
+            return True  # a plugin's kind: the drawing itself finds the pages that show it
         return (page.key or "").lower() in words or (page.kind or "").lower() in words
 
     def _rerender_kind(self, kind):

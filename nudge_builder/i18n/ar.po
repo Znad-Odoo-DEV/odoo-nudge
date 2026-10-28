@@ -4216,3 +4216,22 @@ msgstr "نقاط إضافات منشئ مواقع Nudge"
 #: code:addons/nudge_builder/tests/test_plugin_points.py:0
 msgid "Try it"
 msgstr "جرّبه"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "Show the records on the site"
+msgstr "عرض السجلات على الموقع"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "The records are shown on: %s."
+msgstr "السجلات معروضة الآن في: %s."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "The pages already show the records."
+msgstr "الصفحات تعرض السجلات بالفعل."
