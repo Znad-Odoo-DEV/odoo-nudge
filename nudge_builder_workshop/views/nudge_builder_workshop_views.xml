@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_builder_workshop_service_view_list" model="ir.ui.view">
+        <field name="name">nudge.builder.workshop.service.list</field>
+        <field name="model">nudge.builder.workshop.service</field>
+        <field name="arch" type="xml">
+            <list string="Workshop service">
+                <field name="sequence" widget="handle"/>
+                <field name="cover_image" widget="image" options="{'size': [40, 40]}"/>
+                <field name="name"/>
+                <field name="category"/>
+                <field name="duration"/>
+                <field name="price_from"/>
+                <field name="bookable" optional="show"/>
+                <field name="featured" optional="show"/>
+                <field name="published" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="nudge_builder_workshop_service_view_form" model="ir.ui.view">
+        <field name="name">nudge.builder.workshop.service.form</field>
+        <field name="model">nudge.builder.workshop.service</field>
+        <field name="arch" type="xml">
+            <form string="Workshop service">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="summary"/>
+                            <field name="category"/>
+                            <field name="duration"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="price_from"/>
+                        </group>
+                        <group>
+                            <field name="bookable"/>
+                            <field name="featured"/>
+                            <field name="published"/>
+                            <field name="image" widget="image" options="{'size': [128, 128]}"/>
+                        </group>
+                    </group>
+                    <field name="description"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- The tab of the site form, next to those of the core's kinds -->
+    <record id="nudge_builder_site_view_form_workshop" model="ir.ui.view">
+        <field name="name">nudge.builder.site.form.workshop</field>
+        <field name="model">nudge.builder.site</field>
+        <field name="inherit_id" ref="nudge_builder.nudge_builder_site_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='content_contact']" position="before">
+                <page string="Workshop services" name="content_workshop_service"
+                      invisible="'workshop_service' not in kinds_used">
+                    <div class="text-muted mb-2">Services of the workshop. The booking page lists the ones you tick as bookable. Nothing is shown on the website that is not written here.</div>
+                    <field name="workshop_service_ids" nolabel="1"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

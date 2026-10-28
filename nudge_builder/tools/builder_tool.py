@@ -95,7 +95,7 @@ class StartWebsiteBuilder(base.Tool):
         business = (arguments.get("business") or "").strip()
         if business:
             context["default_kind"] = business
-            context["default_template_key"] = library.pick(business)
+            context["default_template_key"] = library.pick(business, env["nudge.builder.plugin"].plugin_template_paths())
         named = [code for code in (arguments.get("languages") or []) if code in ("ar", "en")]
         named = named or languages_named(business, arguments.get("text"))
         context.update(self._language_context(env, named))
