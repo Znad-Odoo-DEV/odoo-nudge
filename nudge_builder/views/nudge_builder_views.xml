@@ -15,6 +15,8 @@
                     <button name="action_continue" type="object" string="Continue the build" class="btn-primary"
                             invisible="not stopped or state == 'published'"/>
                     <button name="action_import_content" type="object" string="Import content"/>
+                    <button name="action_show_records" type="object" string="Show the records on the site"
+                            invisible="state not in ('built', 'published')" groups="website.group_website_designer"/>
                     <button name="action_open_editor" type="object" string="Open the home page in the editor"
                             invisible="state not in ('built', 'published')"/>
                     <button name="action_publish" type="object" string="Publish all pages"

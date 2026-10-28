@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-28 07:09+0000\n"
-"PO-Revision-Date: 2026-10-28 07:09+0000\n"
+"POT-Creation-Date: 2026-10-28 08:12+0000\n"
+"PO-Revision-Date: 2026-10-28 08:12+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -3094,6 +3094,13 @@ msgstr ""
 
 #. module: nudge_builder
 #. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+#: model_terms:ir.ui.view,arch_db:nudge_builder.nudge_builder_site_view_form
+msgid "Show the records on the site"
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
 #: code:addons/nudge_builder/tools/shop.py:0
 msgid "Shown as filters: %s"
 msgstr ""
@@ -3650,6 +3657,12 @@ msgstr ""
 
 #. module: nudge_builder
 #. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "The pages already show the records."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
 #: code:addons/nudge_builder/models/nudge_builder_content.py:0
 msgid "The price cannot be negative."
 msgstr ""
@@ -3731,6 +3744,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge_builder/models/nudge_builder_edit.py:0
 msgid "The record was already removed."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "The records are shown on: %s."
 msgstr ""
 
 #. module: nudge_builder

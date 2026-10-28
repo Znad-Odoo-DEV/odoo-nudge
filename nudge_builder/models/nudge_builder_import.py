@@ -357,6 +357,8 @@ class NudgeBuilderImport(models.TransientModel):
                 extra = self._arabic_values(Model, record)
                 if extra:
                     rec.with_context(lang=arabic).write(extra)
+        if done["create"] or done["update"]:
+            site._refresh_records([self.kind])
         return self._finish(done)
 
     def _finish(self, done):
