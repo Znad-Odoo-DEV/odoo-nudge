@@ -1,4 +1,5 @@
 from odoo import Command
+from odoo.release import version_info
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tests import TransactionCase, tagged
 
@@ -363,7 +364,8 @@ class TestAgentDiscuss(NudgeCase, TransactionCase):
     # ------------------------------------------------------------------
     def test_start_a_conversation_offers_the_agent_to_its_audience_only(self):
         Partner = self.env["res.partner"]
-        if Store is None or not hasattr(Partner, "_search_for_channel_invite"):
+        # The overrides of this module are there on every version: only Odoo 19 has the methods they extend
+        if version_info[0] < 19:
             self.skipTest("Odoo 19: Start a conversation searches with _search_for_channel_invite")
 
         def search(user, term="Tile", channel_id=None):
@@ -411,7 +413,7 @@ class TestAgentDiscuss(NudgeCase, TransactionCase):
         with self.assertRaises(UserError):
             Channel.with_user(self.user_b).create({"name": "B and Tile", "channel_type": "chat",
                                                    "channel_member_ids": members})
-        if not hasattr(Channel, "_get_or_create_chat"):
+        if version_info[0] < 19:
             return
         # Odoo 19: "Start a conversation", an avatar
         chat = Channel.with_user(self.user_a)._get_or_create_chat([self.partner.id])
