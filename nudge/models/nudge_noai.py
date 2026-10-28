@@ -81,11 +81,14 @@ class Plan:
     """What is to be done for a sentence: tool calls to hand to the pipeline,
     or a plain answer"""
 
-    def __init__(self, text, calls=None, events=None, parsed=None):
+    def __init__(self, text, calls=None, events=None, parsed=None, unsure=False):
         self.text = text
         self.calls = calls or []
         self.events = events or []
         self.parsed = parsed
+        # A name the rules read and found no record for: perhaps not a name at all, so the AI answers when there
+        # is one
+        self.unsure = unsure
 
 
 # A request of several sentences, lines or clauses is not one the rules read whole
@@ -230,7 +233,7 @@ class NudgeNoai(models.AbstractModel):
                 plan = self._plan(parsed, screen, mode)
             except (UserError, Refused) as error:
                 _logger.info("Nudge: a request understood without AI could not be planned: %s", error)
-        if plan is None:
+        if plan is None or (has_ai and plan.unsure):
             if has_ai:
                 return None
             plan = Plan(self._what_i_understood(parsed), parsed=parsed)
@@ -954,7 +957,7 @@ class NudgeNoai(models.AbstractModel):
         slots = parsed.slots
         status, candidates = self._pick(slots["partner"], "res.partner", None, screen)
         if status == "none":
-            return Plan(self.env._("I found no contact called “%s”.", slots["partner"]))
+            return Plan(self.env._("I found no contact called “%s”.", slots["partner"]), unsure=True)
         if status == "many":
             return self._choice(candidates, self.env._("Which contact is “%s”?", slots["partner"]))
         partner = candidates[0]
@@ -963,7 +966,7 @@ class NudgeNoai(models.AbstractModel):
         for line in slots["lines"]:
             product_status, products = self._pick(line["product"], "product.template", None, screen)
             if product_status == "none":
-                return Plan(self.env._("I found no product called “%s”.", line["product"]))
+                return Plan(self.env._("I found no product called “%s”.", line["product"]), unsure=True)
             if product_status == "many":
                 return self._choice(products, self.env._("Which product is “%s”?", line["product"]))
             template = self.env["product.template"].browse(products[0]["id"])

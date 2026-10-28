@@ -545,7 +545,8 @@ edit("nudge/tests/test_approval_flow.py", [
 T = "nudge_builder/tests/test_snippets.py"
 sub(T, r'headings = \[h\.text for h in section\.xpath\("\.//h3"\)\]', 'headings = [h.text for h in section.xpath(".//h3")[1:]]')
 sub(T, r'self\.assertEqual\(section\.xpath\("\.//h2"\)\[0\]\.text, "Why us"\)', 'self.assertEqual(section.xpath(".//h3")[0].text, "Why us")')
-sub(T, r'self\.assertEqual\(\[h\.text for h in section\.xpath\("\.//h3"\)\], \["Only"\]\)', 'self.assertEqual([h.text for h in section.xpath(".//h3")[1:]], ["Only"])')
+# (the features filled with one item and no title: since 2.0 an untitled section loses its title h3 on 18 too, so the
+# only h3 left is the item's, as on 19: no rule)
 sub(T, r'team\.xpath\("\.//h3"\)\[0\]\.text, "Raghad"', 'team.xpath(".//h4")[0].text, "Raghad"')
 sub(T, r'self\.assertIn\("<script>", section\.xpath\("\.//h2"\)\[0\]\.text\)', 'self.assertIn("<script>", section.xpath(".//h3")[0].text)')
 sub("nudge_builder/tests/test_core.py", r'self\.assertEqual\(section\.xpath\("\.//h2"\)\[0\]\.text, "Visit us"\)', 'self.assertEqual(section.xpath(".//h3")[0].text, "Visit us")')
