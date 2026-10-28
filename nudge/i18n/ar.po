@@ -28219,3 +28219,21 @@ msgstr "متى سلّم الوكيل هذه المحادثة إلى شخص: زا
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
 msgid "sun-thu"
 msgstr "sun-thu"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared a place for the website"
+msgstr "تم تجهيز موقع جغرافي للموقع الإلكتروني"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared an item for the website"
+msgstr "تم تجهيز عنصر للموقع الإلكتروني"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_conversation.py:0
+msgid "Prepared the contact details of the website"
+msgstr "تم تجهيز بيانات التواصل للموقع الإلكتروني"
