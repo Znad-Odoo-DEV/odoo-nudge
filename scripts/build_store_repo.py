@@ -34,7 +34,7 @@ SKIP = shutil.ignore_patterns("__pycache__", "*.pyc", "*.bak*", "*.log", "*.orig
 # translation (1.5 MB), the skills and the compliance packs (about 9.2 MB in 19.0.1.58.0)
 MAX_MODULE_BYTES = 12 * 1024 * 1024
 # The modules of the store: nothing else in the source folder ships, and none may be missing
-MODULES = ("nudge", "nudge_ai", "nudge_builder", "nudge_builder_connect", "nudge_builder_realestate", "nudge_builder_workshop",
+MODULES = ("nudge", "nudge_ai", "nudge_builder", "nudge_builder_realestate", "nudge_builder_workshop",
            "nudge_connect", "nudge_discuss", "nudge_documents", "nudge_mail", "nudge_mcp",
            "nudge_messaging", "nudge_spreadsheet", "nudge_studio", "nudge_website")
 MEDIA = (".mp3", ".wav", ".m4a", ".aac", ".ogg", ".flac", ".mp4", ".mov", ".webm", ".mkv", ".avi")
