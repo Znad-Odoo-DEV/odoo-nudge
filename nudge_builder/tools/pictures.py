@@ -161,7 +161,7 @@ def web_image(data, width=1280, quality=85):
     """:return: the base64 of a picture resized to fit ``width`` x ``width`` (ratio kept) and re-encoded, which
     also drops the metadata of the upload (location, camera); the original bytes when it cannot be read.
     :param data: base64 text/bytes as an Image field holds it"""
-    from odoo.tools import image_process
+    from odoo.tools.image import image_process
     raw = base64.b64decode(data)
     try:
         return base64.b64encode(image_process(raw, size=(width, width), quality=quality) or raw)

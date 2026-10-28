@@ -1,5 +1,9 @@
 # Changelog
 
+## 19.0.1.2.1
+
+- The records added after the build (content tabs, pictures pulled from Documents, rows imported from a file) reach the built pages without a new build and without AI: the button Show the records on the site, and the same after an import and after Pull from Documents. Tests: `/nudge_builder:TestShowRecords`.
+
 ## 19.0.1.2.0
 
 - Website Builder 2.2: plugin points. Another module can add a kind of content (model, renderer, layouts), a check of Site Check and a template through the abstract model `nudge.builder.plugin`, without editing this module; with no plugin installed nothing changes. Two example plugins: `nudge_builder_realestate` (listings with filters) and `nudge_builder_workshop` (car workshop services with a booking request). Tests: `/nudge_builder:TestPluginPoints`.

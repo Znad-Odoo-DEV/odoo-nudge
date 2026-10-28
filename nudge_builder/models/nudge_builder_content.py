@@ -200,12 +200,18 @@ class NudgeBuilderPicture(models.Model):
 
     def action_pull_document(self):
         """Take the picture from the linked document (what the person may read)"""
+        touched = {}
         for picture in self:
             document = picture.document_record()
             attachment = document.attachment_id if document and "attachment_id" in document._fields else False
             if attachment and (attachment.mimetype or "").startswith("image/"):
                 picture.image = attachment.datas
                 picture.name = picture.name or document.display_name
+                owner = next((name for name in self.OWNERS if picture[name]), None)
+                if owner and picture.site_id:
+                    touched.setdefault(picture.site_id, set()).add(owner[:-3])
+        for site, kinds in touched.items():
+            site._refresh_records(sorted(kinds))
         return True
 
 

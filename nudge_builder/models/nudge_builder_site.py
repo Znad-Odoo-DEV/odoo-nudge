@@ -20,6 +20,8 @@ from odoo.addons.nudge.tools import deadline as worker_time
 
 from urllib.parse import quote
 
+from lxml import etree
+
 from .nudge_builder_content import ALL_KINDS, EMAIL, normalise_whatsapp, safe_url, valid_whatsapp
 from ..tools import compat, content_sections, footer, library, neutral, pictures, preview, snippets
 from ..tools import copy as copywriter
@@ -782,7 +784,7 @@ class NudgeBuilderSite(models.Model):
                 "socials": [(social.network, social.url) for social in self.social_ids]
                 if "social_ids" in self._fields else []}
 
-    def _content_block(self, block, spec, index=0):
+    def _content_block(self, block, spec, index=0, uid=None):
         """The sections of a block that shows the site's records (``{"kind": "project", "layout": "grid"}``).
 
         :return: ``{lang code: lxml section}``, or None when the site has nothing for it: a kind with no records
@@ -798,7 +800,7 @@ class NudgeBuilderSite(models.Model):
                                  kind=kind, block=index + 1, page=(spec.get("name") or {}).get("en") or spec["key"]))
             return None
         result = {}
-        uid = compat.unique_id()
+        uid = uid or compat.unique_id()
         for lang in self._langs():
             short = compat.lang_code(lang.code)
             words = copy.get(short) or copy.get("en") or {}
@@ -829,6 +831,152 @@ class NudgeBuilderSite(models.Model):
                 return None
             result[lang.code] = section
         return result
+
+    # ------------------------------------------------------------------ records added after the build
+    def _template_page(self, page):
+        """:return: the page of the template that built ``page`` (without the sample project names when the site
+        does not show projects), or an empty dict"""
+        self.ensure_one()
+        try:
+            template = self._load_template()
+        except (ValueError, KeyError):
+            return {}
+        spec = next((one for one in template.get("pages") or [] if one.get("key") == page.key), None) or {}
+        if spec and not self.allow_projects:
+            spec = neutral.without_project_names(spec)
+        return spec
+
+    @staticmethod
+    def _section_words(node):
+        """:return: ``{"title", "text"}`` of a record section as it stands on the page"""
+        title = node.xpath('.//h2[contains(concat(" ", @class, " "), " nb-title ")]')
+        lead = node.xpath('.//p[contains(concat(" ", @class, " "), " nb-lead ")]')
+        return {"title": "".join(title[0].itertext()) if title else "",
+                "text": "".join(lead[0].itertext()) if lead else ""}
+
+    def _render_kind(self, page, kind):
+        """Draw again, from the records of now, the sections of ``kind`` of a built page, in each language.
+
+        A section of the kind is replaced by a fresh one (same layout; the title and the text of the template's
+        block, or the ones on the page when the template has no such block), removed when the kind has no
+        published record any more, and added where the template puts it when the page has none and the template
+        has one. The rest of the page is not touched, and nothing is published or unpublished.
+
+        :return: True when the page was written"""
+        self.ensure_one()
+        view = page.view_id
+        if not view or not self._is_record_kind(kind):
+            return False
+        codes = [lang.code for lang in self._langs()]
+        source = self._source_lang().code
+        has_records = bool(self._kind_records(kind))
+        trees, wraps, originals = {}, {}, {}
+        for code in codes:
+            arch = view.with_context(lang=code).arch_db
+            trees[code], wraps[code] = compat.wrap_body(arch)
+            originals[code] = compat.to_string_tree(trees[code])
+
+        def nodes_of(code):
+            return [node for node in wraps[code] if isinstance(node.tag, str) and node.get("data-nb-kind") == kind]
+
+        template_page = self._template_page(page)
+        blocks = template_page.get("blocks") or []
+        index = next((i for i, block in enumerate(blocks) if block.get("kind") == kind), None)
+        template_block = blocks[index] if index is not None else None
+        found = nodes_of(source)
+        if found:
+            renders = []
+            for position, node in enumerate(found):
+                if not has_records:
+                    break
+                if template_block:
+                    block = dict(template_block, layout=node.get("data-nb-layout") or template_block.get("layout"))
+                else:
+                    copy = {}
+                    for code in codes:
+                        peers = nodes_of(code)
+                        peer = peers[position] if position < len(peers) else node
+                        copy[compat.lang_code(code)] = self._section_words(peer)
+                    block = {"kind": kind, "layout": node.get("data-nb-layout"), "copy": copy}
+                renders.append(self._content_block(
+                    block, template_page or {"key": page.key}, index or 0, uid=f"r{position}"))
+            for code in codes:
+                for position, node in enumerate(nodes_of(code)):
+                    fresh = renders[min(position, len(renders) - 1)] if renders else None
+                    section = fresh.get(code) if fresh else None
+                    parent = node.getparent()
+                    if section is None:
+                        previous = node.getprevious()
+                        tail = node.tail
+                        parent.remove(node)
+                        if previous is not None:
+                            previous.tail = tail
+                        continue
+                    new = etree.fromstring(compat.to_string(section))
+                    new.tail = node.tail
+                    parent.replace(node, new)
+        elif template_block and has_records:
+            sections = self._content_block(template_block, template_page, index, uid="r0")
+            if not sections:
+                return False
+            for code in codes:
+                self._place_section(wraps[code], etree.fromstring(compat.to_string(sections[code])), blocks, index)
+        else:
+            return False
+        arch_by_lang = {code: compat.to_string_tree(trees[code]) for code in codes}
+        # a translation holds the terms only (the markup is the source's), so only the terms are compared there
+        terms = view._fields["arch_db"].get_trans_terms
+        if arch_by_lang[source] == originals[source] and all(
+                terms(arch_by_lang[code]) == terms(originals[code]) for code in codes if code != source):
+            return False
+        compat.write_arch(view, arch_by_lang, source)
+        return True
+
+    @staticmethod
+    def _place_section(wrap, section, blocks, index):
+        """Put ``section`` where the template puts block ``index``: after the nearest section before it that the
+        page still has, else first when it is the first block, else before the WhatsApp button or at the end."""
+        children = [node for node in wrap if isinstance(node.tag, str)]
+        for block in reversed(blocks[:index]):
+            snippet = (block.get("snippet") or "").split(".")[-1]
+            kind = block.get("kind")
+            match = [node for node in children if (kind and node.get("data-nb-kind") == kind)
+                     or (not kind and not node.get("data-nb-kind") and node.get("data-snippet") == snippet)]
+            if match:
+                wrap.insert(list(wrap).index(match[-1]) + 1, section)
+                return
+        if index == 0:
+            wrap.insert(0, section)
+            return
+        floats = [node for node in children if node.get("data-nb-kind") == "whatsapp"]
+        if floats:
+            wrap.insert(list(wrap).index(floats[0]), section)
+        else:
+            wrap.append(section)
+
+    def action_show_records(self):
+        """Draw the records of the site again on its built pages, for every kind of content, without a new build"""
+        self.ensure_one()
+        self._check_designer()
+        done = self._refresh_records(self._all_kinds())
+        if done:
+            message = self.env._("The records are shown on: %s.", ", ".join(done))
+        else:
+            message = self.env._("The pages already show the records.")
+        return {"type": "ir.actions.client", "tag": "display_notification",
+                "params": {"title": self.env._("Show the records on the site"), "message": message,
+                           "type": "success" if done else "info", "sticky": False}}
+
+    def _refresh_records(self, kinds):
+        """:return: the names of the pages drawn again for ``kinds``"""
+        self.ensure_one()
+        names = []
+        for kind in kinds:
+            for page_id in self._rerender_kind(kind).get("pages", []):
+                name = self.env["nudge.builder.page"].browse(page_id).name
+                if name not in names:
+                    names.append(name)
+        return names
 
     def _arch_by_lang(self, name, key, sections_by_lang):
         source = self._source_lang().code
