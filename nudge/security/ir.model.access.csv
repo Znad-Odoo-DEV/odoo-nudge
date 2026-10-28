@@ -97,3 +97,9 @@ access_nudge_agent_eval_manager,nudge.agent.eval manager,model_nudge_agent_eval,
 access_nudge_agent_binding_manager,nudge.agent.binding manager,model_nudge_agent_binding,group_nudge_manager,1,1,1,1
 access_nudge_agent_revision_manager,nudge.agent.revision manager,model_nudge_agent_revision,group_nudge_manager,1,0,0,0
 access_nudge_agent_preview_manager,nudge.agent.preview manager,model_nudge_agent_preview,group_nudge_manager,1,1,1,1
+access_nudge_conversation_agent_service,nudge.conversation agent service,model_nudge_conversation,group_agent_service,1,1,1,0
+access_nudge_message_agent_service,nudge.message agent service,model_nudge_message,group_agent_service,1,0,0,0
+access_nudge_skill_agent_service,nudge.skill agent service,model_nudge_skill,group_agent_service,1,0,0,0
+access_nudge_doc_page_agent_service,nudge.doc.page agent service,model_nudge_doc_page,group_agent_service,1,0,0,0
+access_nudge_doc_passage_agent_service,nudge.doc.passage agent service,model_nudge_doc_passage,group_agent_service,1,0,0,0
+access_nudge_lexicon_entry_agent_service,nudge.lexicon.entry agent service,model_nudge_lexicon_entry,group_agent_service,1,0,0,0

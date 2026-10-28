@@ -61,6 +61,20 @@ def find_users(env, names):
     return found
 
 
+def find_group(env, text):
+    """:return: the groups ``text`` names: by external id (sales_team.group_sale_manager), by full name
+    (Sales / Administrator), else by name; a short name a dozen apps share (Administrator) finds them all, and the
+    caller refuses it rather than guess"""
+    Groups = env["res.groups"]
+    if "." in text and " " not in text:
+        group = env.ref(text, raise_if_not_found=False)
+        if group and group._name == "res.groups":
+            return group
+    return (Groups.search([("full_name", "=ilike", text)], limit=2)
+            or Groups.search([("name", "=ilike", text)], limit=2)
+            or Groups.search([("full_name", "ilike", text)], limit=2))
+
+
 def button_of(rule):
     """:return: the button a rule is on, in words. What it points at may be
     gone: an action deleted since (rule #56 on purchase.order pointed at
@@ -200,9 +214,11 @@ class PrepareApprovalRule(Building):
         group = env["res.groups"]
         if (arguments.get("group") or "").strip():
             text = arguments["group"].strip()
-            group = env["res.groups"].search([("name", "=ilike", text)], limit=2) or env["res.groups"].search([("name", "ilike", text)], limit=2)
+            group = find_group(env, text)
             if len(group) != 1:
-                raise Refused(f"{'No group' if not group else 'More than one group'} is named {text!r}.")
+                named = "; ".join(env["res.groups"].search([("name", "=ilike", text)], limit=8).mapped("full_name"))
+                raise Refused(f"{'No group' if not group else 'More than one group'} is named {text!r}."
+                              + (f" Give the full name, one of: {named}." if len(group) > 1 else ""))
         if not approvers and not group:
             raise Refused("A rule names who approves: approvers, a group, or both.")
         notify = find_users(env, arguments.get("notify") or [])

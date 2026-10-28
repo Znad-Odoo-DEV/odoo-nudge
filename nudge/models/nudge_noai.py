@@ -165,6 +165,20 @@ class NudgeNoai(models.AbstractModel):
         return {"intent": parsed.intent, "label": self._describe(parsed), "text": parsed.text}
 
     @api.model
+    def _chat_thanks(self, conversation, text, mode, focus, found, explain, background, fresh=False):
+        """A thanks and nothing else ("thanks", "thank you", "شكرا") is answered in a fixed sentence, without AI,
+        for anyone who may ask Nudge, whatever the switch of the rules says: it reads no record and costs nothing.
+        An agent's conversation too, wherever it is read (a Discuss channel, a public channel).
+
+        :return: the job of the stream (the answer is already written), or None to go on"""
+        if (fresh or focus or found or background or explain == "screen" or mode not in (MODE_TALK, MODE_AGENT)
+                or not noai_commands.thanks.asks(text)):
+            return None
+        parsed = grammar.Parse(text)
+        parsed.intent, parsed.confidence = "thanks", 1.0
+        return self._deliver(conversation, text, mode, Plan(self.env._("You are welcome."), parsed=parsed), parsed, {})
+
+    @api.model
     def _chat_serve(self, conversation, text, mode, focus, found, explain, background, snapshot, fresh=False):
         """Answer ``text`` when it is a common request, before any provider is called.
 

@@ -13,7 +13,7 @@ from odoo import http, release
 from odoo.http import request
 from odoo.tools import plaintext2html
 
-from ..tools import assistant
+from ..tools import agent_door, assistant
 
 # The type of a route that speaks JSON changed its name in Odoo 19
 JSON = "jsonrpc" if release.version_info[0] >= 19 else "json"
@@ -95,7 +95,20 @@ class NudgeWebsite(http.Controller):
         if not line:
             return self._limited(website)
         env.cr.commit()
-        result = assistant.answer(env, website, user, text, self._is_logged_in())
+        logged_in = self._is_logged_in()
+        # With published website bindings the agents answer; without, the assistant as before
+        memory = dict(request.session.get(agent_door.CONV_KEY) or {}) if logged_in else None
+        result = agent_door.serve(
+            env, website, user, text, logged_in, session_hash,
+            lang=env.lang or (request.lang.code if request.lang else None), memory=memory,
+            refusal=env._("This assistant is not open to you."),
+            consent=agent_door.consented(request.session.get(agent_door.CONSENT_KEY)))
+        if result is None:
+            result = assistant.answer(env, website, user, text, logged_in)
+        else:
+            request.session[agent_door.BINDING_KEY] = result.pop("binding_id", 0)
+            if memory is not None:
+                request.session[agent_door.CONV_KEY] = memory
         line.sudo().write({
             "answered": result["answered"], "used_ai": result["used_ai"],
             "answer": " ".join((result["text"] or "").split())[:500]})
@@ -156,7 +169,18 @@ class NudgeWebsite(http.Controller):
             values["website_id"] = website.id
         # The company of the website, not the one of the public user
         values["company_id"] = website.company_id.id
-        env["crm.lead"].sudo().create(values)
+        lead = env["crm.lead"].sudo().create(values)
+        agreed = consent is True or consent == "true"
+        talked_to = request.session.get(agent_door.BINDING_KEY)
+        if agreed and isinstance(talked_to, int) and talked_to:
+            # A person, past the checks above: the agent they were talking to may hand them to a person from now
+            # on (hand_to_person), that agent only
+            request.session[agent_door.CONSENT_KEY] = sorted(
+                set(agent_door.consented(request.session.get(agent_door.CONSENT_KEY))) | {talked_to})
+        # The agent the visitor was talking to tells its escalation person too, on the lead just made; the
+        # transcript goes only with consent
+        agent_door.hand_over(
+            env, talked_to, website, body, name, email, agreed, self._is_logged_in(), lead=lead)
         return thanks
 
     @staticmethod

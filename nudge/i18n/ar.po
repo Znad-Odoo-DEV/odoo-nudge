@@ -27957,3 +27957,9 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_agent_view_form
 msgid "product.template, sale.order"
 msgstr "product.template, sale.order"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_noai.py:0
+msgid "You are welcome."
+msgstr "العفو، في خدمتك."

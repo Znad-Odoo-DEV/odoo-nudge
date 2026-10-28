@@ -1,6 +1,11 @@
 """Nudge Agents, the data model and its security: an agent never adds a right. Who may use it (audience and
 company), the companies and tools it works with (an intersection with the person's own, never a developer
-tool), the publish gate, the history of its changes and the limits of a service binding. No provider is reached."""
+tool), the publish gate, the history of its changes and the limits of a service binding. No provider is reached.
+
+60.1: the office hours of a channel, the off-limits topics, the front desk, the hand-over to a person, the notice of
+a budget used up, and what takes a public channel down (an approved answer of the memory, a published skill)."""
+import datetime
+
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tests import TransactionCase, new_test_user, tagged
 
@@ -8,6 +13,9 @@ from odoo.addons.nudge.models.nudge_agent import DEFAULT_READ_TOOLS, check_acces
 from odoo.addons.nudge.tools import base
 
 from .common import NudgeCase
+
+# What a public channel needs before it is published (H1)
+BUDGETS = {"budget_month": 100.0, "budget_user_day": 1000000}
 
 
 @tagged("post_install", "-at_install")
@@ -185,7 +193,8 @@ class TestAgentModel(NudgeCase, TransactionCase):
         values.setdefault("channel", "discuss")
         return self.env["nudge.agent.binding"].with_user(self.manager).create(dict(values, agent_id=agent.id))
 
-    def service_user(self, login="nudge_agent_service", groups="nudge.group_agent_service"):
+    def service_user(self, login="nudge_agent_service", groups="base.group_portal,nudge.group_agent_service"):
+        """:return: a service user: a portal user with the service group (H2)"""
         return new_test_user(self.env, login=login, groups=groups)
 
     def test_service_binding_constraints(self):
@@ -204,10 +213,11 @@ class TestAgentModel(NudgeCase, TransactionCase):
                           service_user_id=self.service_user("nudge_agent_service3").id)
         self.assertFalse(ok.published)
         self.assertEqual(len(agent.binding_ids), 2)
-        self.assertIn("channel", agent.revision_ids[0].diff_shown.lower())
+        # Among the changes: the channel added (and the memory a service channel turns off, L5)
+        self.assertTrue(any("channel" in (revision.diff_shown or "").lower() for revision in agent.revision_ids))
 
     def test_only_a_system_administrator_publishes_a_service_binding(self):
-        agent = self.made()
+        agent = self.made(**BUDGETS)
         service = self.binding(agent, channel="website", acts_as="service",
                                service_user_id=self.service_user("nudge_agent_service4").id)
         with self.assertRaises(AccessError):
@@ -318,9 +328,13 @@ class TestAgentModel(NudgeCase, TransactionCase):
             "nudge_agent_service6", "nudge.group_agent_service,base.group_erp_manager")
         with self.assertRaises(ValidationError):
             self.binding(agent, channel="website", acts_as="service", service_user_id=manager_group.id)
+        # H2: an employee is never a service user, whatever groups it holds
+        employee = self.service_user("nudge_agent_service6b", "base.group_user,nudge.group_agent_service")
+        with self.assertRaises(ValidationError):
+            self.binding(agent, channel="website", acts_as="service", service_user_id=employee.id)
         # An administrator gives the service user a group afterwards (a Nudge manager may not change users)
         service.service_user_id.sudo().write({"group_ids" if "group_ids" in service.service_user_id._fields
-                                              else "groups_id": [(4, self.env.ref("base.group_erp_manager").id)]})
+                                              else "groups_id": [(4, self.env.ref("base.group_allow_export").id)]})
         self.assertFalse(service._service_user_ok(), "Asked again at answer time")
 
     def test_agent_change_unpublishes_channels(self):
@@ -514,7 +528,10 @@ class TestAgentModel(NudgeCase, TransactionCase):
         agent = self.made()
         user = self.service_user("nudge_agent_service8")
         for bad in ("mail.message", "mail.mail", "discuss.channel", "res.partner", "res.users.apikeys",
-                    "nudge.conversation", "nudge.memory", "hr.payslip", "hr.leave"):
+                    "nudge.conversation", "nudge.memory", "hr.payslip", "hr.leave",
+                    # L3
+                    "res.company", "hr.department", "calendar.event", "website.visitor", "product.pricelist",
+                    "product.pricelist.item"):
             with self.assertRaises(ValidationError, msg=bad):
                 self.binding(agent, channel="website", acts_as="service", service_user_id=user.id,
                              model_allowlist=f"product.template,{bad}")
@@ -539,3 +556,234 @@ class TestAgentModel(NudgeCase, TransactionCase):
         mcp.sudo().published = True
         skill.with_user(self.env.ref("base.user_admin")).write({"instructions": "## Tiles\n- Say it plainly.\n"})
         self.assertTrue(mcp.published, "An administrator's change keeps it")
+
+    # ---------------------------------------------------------------- 60.1: a public channel
+    def test_a_service_user_is_in_the_audience_through_its_published_channel_only(self):
+        agent = self.live(self.made(**BUDGETS))
+        service = self.service_user("nudge_agent_audience")
+        self.assertFalse(agent._can_use(service))
+        binding = self.binding(agent, channel="website", acts_as="service", service_user_id=service.id)
+        self.assertFalse(agent._can_use(service), "Not published")
+        binding.sudo().published = True
+        self.assertTrue(agent._can_use(service))
+        self.assertTrue(binding._public_open_to(service))
+        self.assertFalse(binding._public_open_to(self.user_a), "Only its own service user")
+
+    def test_the_allowlist_read_at_answer_time_drops_what_is_never_read(self):
+        agent = self.made()
+        binding = self.binding(agent, channel="website", acts_as="service", model_allowlist="res.country",
+                               service_user_id=self.service_user("nudge_agent_allow").id)
+        self.assertEqual(binding._allowlist(), ("res.country",))
+        # Written past the constraint (an old record, a restore): still never read
+        self.env.cr.execute("UPDATE nudge_agent_binding SET model_allowlist = %s WHERE id = %s",
+                            ["res.country,res.partner,ir.config_parameter", binding.id])
+        binding.invalidate_recordset(["model_allowlist"])
+        self.assertEqual(binding._allowlist(), ("res.country",))
+
+    # ---------------------------------------------------------------- 60.1: guardrails
+    def test_office_hours_in_the_time_zone_of_the_company(self):
+        self.company.partner_id.tz = "Asia/Dubai"
+        agent = self.made()
+        binding = self.binding(agent, hours="08:00-18:00", days="sun-thu")
+        at = datetime.datetime
+        self.assertTrue(binding._open_now(at(2026, 10, 25, 5, 0)), "Sunday 09:00 in Dubai")
+        self.assertFalse(binding._open_now(at(2026, 10, 25, 15, 0)), "Sunday 19:00")
+        self.assertFalse(binding._open_now(at(2026, 10, 30, 6, 0)), "Friday")
+        self.assertIn("Dubai", binding._hours_text())
+        binding.write({"hours": "22:00-06:00", "days": "mon"})
+        self.assertTrue(binding._open_now(at(2026, 10, 26, 19, 0)), "Monday 23:00")
+        self.assertTrue(binding._open_now(at(2026, 10, 26, 23, 0)), "Tuesday 03:00 is the night of Monday")
+        self.assertFalse(binding._open_now(at(2026, 10, 27, 19, 0)), "Tuesday 23:00")
+        binding.write({"hours": "08:00-12:00, 16:00-20:00", "days": False})
+        self.assertTrue(binding._open_now(at(2026, 10, 30, 13, 0)), "Friday 17:00, the second range")
+        self.assertFalse(binding._open_now(at(2026, 10, 30, 10, 0)), "Friday 14:00, between them")
+        binding.write({"hours": False})
+        self.assertTrue(binding._open_now(at(2026, 10, 30, 10, 0)), "No hours: always")
+        for values in ({"hours": "8 to 6"}, {"hours": "25:00-26:00"}, {"hours": "09:00-09:00"},
+                       {"days": "monday-funday"}):
+            self.assertRefused(lambda values=values: binding.write(values))
+
+    def test_off_limits_topics_are_found_by_their_words(self):
+        agent = self.made(off_limits="salaries\nالرواتب\ncompetitor prices")
+        self.assertTrue(agent._off_limits_hit("What is the salary of Ahmad?"))
+        self.assertTrue(agent._off_limits_hit("كم راتب أحمد؟"), "Arabic, by its root")
+        self.assertTrue(agent._off_limits_hit("What are the prices of your competitor?"))
+        self.assertFalse(agent._off_limits_hit("What are your sales today?"))
+        self.assertFalse(agent._off_limits_hit("What are your prices?"), "Every word of the topic is asked")
+        self.assertFalse(self.made(name="Open")._off_limits_hit("salaries"))
+        # A change of the topics is a change of what its public channels say
+        mcp = self.binding(agent, channel="mcp")
+        mcp.sudo().published = True
+        agent.with_user(self.manager).write({"off_limits": "salaries"})
+        self.assertFalse(mcp.published)
+
+    # ---------------------------------------------------------------- 60.1: the security review
+    def test_a_service_channel_is_published_only_with_budgets(self):
+        # H1
+        agent = self.made()
+        service = self.binding(agent, channel="website", acts_as="service",
+                               service_user_id=self.service_user("nudge_agent_budget").id)
+        admin = self.env.ref("base.user_admin")
+        with self.assertRaises(ValidationError):
+            service.with_user(admin).write({"published": True})
+        agent.with_user(self.manager).write(BUDGETS)
+        service.with_user(admin).write({"published": True})
+        with self.assertRaises(ValidationError):
+            agent.with_user(admin).write({"budget_user_day": 0})
+        # A manager who changes a budget takes the channel down first (CHANNEL_STEERING)
+        agent.with_user(self.manager).write({"budget_month": 50.0})
+        self.assertFalse(service.published)
+
+    def test_what_a_channel_says_takes_it_down_when_a_manager_changes_it(self):
+        # M3: the role, the greeting, the name, the languages; a translation of them; the channel's own settings
+        agent = self.made(**BUDGETS)
+        service = self.binding(agent, channel="website", acts_as="service",
+                               service_user_id=self.service_user("nudge_agent_steer").id)
+        admin = self.env.ref("base.user_admin")
+        for values in ({"role": "Seller"}, {"greeting": "Hi"}, {"name": "Renamed"},
+                       {"lang_ids": [(6, 0, self.env.ref("base.lang_en").ids)]}):
+            service.with_user(admin).write({"published": True})
+            agent.with_user(self.manager).write(values)
+            self.assertFalse(service.published, values)
+        service.with_user(admin).write({"published": True})
+        agent.with_user(self.manager).update_field_translations("role", {"en_US": "Buyer"})
+        self.assertFalse(service.published, "A translation")
+        for values in ({"hours": "08:00-18:00"}, {"days": "mon-fri"}, {"front_desk_default": True},
+                       {"escalation_user_id": self.manager.id}):
+            service.with_user(admin).write({"published": True})
+            service.with_user(self.manager).write(values)
+            self.assertFalse(service.published, values)
+        with self.assertRaises(ValidationError):
+            service.with_user(admin).write({"escalation_user_id": self.service_user("nudge_agent_portal_esc").id})
+
+    def test_a_service_channel_turns_the_memory_off_and_reads_published_skills_only(self):
+        # L5, L2
+        agent = self.made(use_memory=True)
+        service_user = self.service_user("nudge_agent_skills")
+        self.binding(agent, channel="website", acts_as="service", service_user_id=service_user.id)
+        self.assertFalse(agent.use_memory)
+        Skill = self.env["nudge.skill"]
+        published = Skill.create({"name": "Open skill", "key": "agent-open-skill", "summary": "Open.",
+                                  "modes": "talk", "instructions": "## Open\n- Say hi.\n", "state": "published"})
+        draft = Skill.create({"name": "Draft skill", "key": "agent-draft-skill", "summary": "Draft.",
+                              "modes": "talk", "instructions": "## Draft\n- Say hi.\n", "state": "draft"})
+        seen = Skill.with_user(service_user).search([("id", "in", (published | draft).ids)])
+        self.assertEqual(seen, published)
+
+    # ---------------------------------------------------------------- 60.1: front desk
+    def test_front_desk_chooses_the_agent_of_the_question(self):
+        tiles = self.env["nudge.skill"].create({
+            "name": "Tiles desk", "key": "agent-desk-tiles", "summary": "About tiles.", "modes": "talk,agent",
+            "instructions": "## Tiles\n- Say how long they take.\n", "state": "published", "trigger_words": "tiles"})
+        sales = self.live(self.made(name="Tiles desk", role="Sales assistant for tiles and floors",
+                                    skill_ids=[(6, 0, [tiles.id])], **BUDGETS))
+        billing = self.live(self.made(name="Billing desk", role="Accounting assistant for invoices and payments",
+                                      **BUDGETS))
+        service = self.service_user("nudge_agent_desk")
+        first = self.binding(sales, channel="website", acts_as="service", service_user_id=service.id)
+        second = self.binding(billing, channel="website", acts_as="service", service_user_id=service.id)
+        both = first | second
+        both.sudo().write({"published": True})
+        Agent = self.Agent
+        self.assertEqual(Agent._front_desk("How long do tiles take to dry?", both), first)
+        self.assertEqual(Agent._front_desk("When is my invoice due?", both), second)
+        self.assertFalse(Agent._front_desk("Hello there", both), "Nothing fits and no default")
+        second.sudo().front_desk_default = True
+        self.assertEqual(Agent._front_desk("Hello there", both), second)
+        self.assertEqual(Agent._front_desk("I need an assistant", both), second, "A word of every role tells none")
+        first.sudo().published = False
+        self.assertEqual(Agent._front_desk("How long do tiles take to dry?", both), second, "Published only")
+        self.assertFalse(Agent._front_desk("Hello", self.env["nudge.agent.binding"]))
+
+    # ---------------------------------------------------------------- 60.1: hand to a person
+    def test_hand_to_person_needs_a_person_and_the_consent_of_a_visitor(self):
+        if "mail.activity" not in self.env:
+            self.skipTest("Activities come with Discuss (mail)")
+        agent = self.live(self.made(**BUDGETS))
+        binding = self.binding(agent, channel="website", acts_as="service",
+                               service_user_id=self.service_user("nudge_agent_hand").id)
+        self.assertFalse(agent._hand_to_person(binding, "Call me", consent=True, public=True), "Nobody named")
+        binding.escalation_user_id = self.manager
+        self.assertFalse(agent._hand_to_person(binding, "Call me", public=True), "A visitor who did not agree")
+        self.assertIn("agreed", agent._hand_over_problem(binding, public=True))
+        done = agent.sudo()._hand_to_person(binding, "Wants 40 m2 of tiles", consent=True, visitor_name="Raghad",
+                                            visitor_email="raghad@nudge.example", public=True)
+        self.assertTrue(done)
+        self.assertEqual(done.user_id, self.manager)
+        self.assertIn("40 m2", str(done.note))
+        self.assertIn("Raghad", str(done.note))
+        # A person with an account needs no consent: on their contact, or on a lead with their contact
+        mine = agent.with_user(self.user_a)._hand_to_person(binding, "Please call me back")
+        self.assertTrue(mine)
+        if "crm.lead" in self.env:
+            self.assertEqual(self.env[mine.res_model].browse(mine.res_id).partner_id, self.user_a.partner_id)
+        else:
+            self.assertEqual((mine.res_model, mine.res_id), ("res.partner", self.user_a.partner_id.id))
+        other = self.live(self.made(name="Other agent"))
+        self.assertFalse(other._hand_to_person(binding, "Call me", consent=True, public=True), "Not its channel")
+        if "crm.lead" in self.env:
+            # M1: on the lead the website's form just made, never a second one
+            lead = self.env["crm.lead"].sudo().create({"name": "Website assistant: Raghad"})
+            leads = self.env["crm.lead"].sudo().search_count([])
+            on_lead = agent.sudo()._hand_to_person(binding, "Call me", consent=True, public=True, lead=lead)
+            self.assertEqual((on_lead.res_model, on_lead.res_id), ("crm.lead", lead.id))
+            self.assertEqual(self.env["crm.lead"].sudo().search_count([]), leads)
+
+    def test_hand_to_person_is_given_by_a_channel_never_by_the_list(self):
+        agent = self.made(tool_keys="search_records,hand_to_person")
+        self.assertNotIn("hand_to_person", agent._tools_for(self.agent, base.MODE_AGENT))
+        self.assertNotIn("hand_to_person", [tool["name"] for tool in agent.tool_catalogue()])
+        plain = self.env(user=self.user_a.id, su=False)
+        self.assertFalse(base.TOOLS["hand_to_person"].is_available(plain, base.MODE_TALK), "Never in plain Nudge")
+
+    # ---------------------------------------------------------------- 60.1: budget notice
+    def test_the_budget_notice_is_given_once_a_month(self):
+        agent = self.made(budget_month=1.0)
+        self.assertTrue(agent._budget_notice())
+        self.assertFalse(agent._budget_notice(), "Once a month")
+        self.assertRegex(agent.budget_noticed or "", r"^\d{4}-\d{2}$")
+        if "mail.activity" in self.env:
+            told = self.env["mail.activity"].search([
+                ("res_model", "=", "res.partner"), ("res_id", "=", agent.partner_id.id)])
+            self.assertEqual(told.user_id, self.manager, "Its creator, a manager")
+
+    # ---------------------------------------------------------------- 60.1: what takes a public channel down
+    def test_a_changed_answer_of_the_memory_takes_the_public_channels_down(self):
+        Memory = self.env["nudge.memory"]
+        memory = Memory.create({"question": "Do you deliver on Fridays?", "answer": "Yes, until noon.",
+                                "state": "approved"})
+        grouped = Memory.create({
+            "question": "What is the margin on tiles?", "answer": "Forty percent.", "state": "approved",
+            "group_ids": [(6, 0, [self.env.ref("nudge.group_nudge_manager").id])]})
+        agent = self.made()
+        quiet = self.made(name="No memory", use_memory=False)
+        mcp, kept = self.binding(agent, channel="mcp"), self.binding(quiet, channel="mcp")
+        (mcp | kept).sudo().write({"published": True})
+        discuss = self.binding(agent)
+        discuss.published = True
+        grouped.with_user(self.manager).write({"answer": "Thirty percent."})
+        self.assertTrue(mcp.published, "An answer kept for some groups is never served on a public channel")
+        memory.with_user(self.manager).write({"answer": "No, never on Fridays."})
+        self.assertFalse(mcp.published)
+        self.assertTrue(discuss.published, "Discuss is published by a manager")
+        self.assertTrue(kept.published, "An agent that does not use the memory")
+        self.assertTrue(any("memory" in (revision.diff_shown or "").lower() for revision in agent.revision_ids))
+        mcp.sudo().published = True
+        memory.with_user(self.env.ref("base.user_admin")).write({"answer": "On Fridays until ten."})
+        self.assertTrue(mcp.published, "An administrator's change keeps it")
+
+    def test_a_published_skill_takes_down_the_channels_of_the_agents_that_name_none(self):
+        Skill = self.env["nudge.skill"]
+        values = {"summary": "About grout.", "modes": "talk,agent", "instructions": "## Grout\n- Say the colour.\n",
+                  "trigger_words": "grout"}
+        draft = Skill.create(dict(values, name="Grout", key="agent-grout", state="draft"))
+        other = Skill.create(dict(values, name="Glue", key="agent-glue", state="published"))
+        open_agent = self.made()
+        naming = self.made(name="Names one", skill_ids=[(6, 0, [other.id])])
+        mcp, kept = self.binding(open_agent, channel="mcp"), self.binding(naming, channel="mcp")
+        (mcp | kept).sudo().write({"published": True})
+        draft.with_user(self.manager).write({"instructions": "## Grout\n- Say the price.\n"})
+        self.assertTrue(mcp.published, "A draft is used by nobody")
+        draft.with_user(self.manager).write({"state": "published"})
+        self.assertFalse(mcp.published, "Now one Nudge may choose for an agent that names none")
+        self.assertTrue(kept.published, "An agent that names its skills works with those only")

@@ -1,8 +1,25 @@
 from odoo import Command
-from odoo.exceptions import AccessError, ValidationError
+from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tests import TransactionCase, tagged
 
+from odoo.addons.nudge.llm import base as llm
 from odoo.addons.nudge.tests.common import NudgeCase
+from odoo.addons.nudge_discuss.models import nudge_agent_discuss
+
+try:
+    from odoo.addons.mail.tools.discuss import Store
+except ImportError:  # Odoo 17
+    Store = None
+
+
+def saying(text):
+    """Events of one request to the model that ends with ``text``"""
+    return [llm.text_event(text), llm.stop_event(llm.STOP_END)]
+
+
+def sent(call):
+    """:return: the words of every turn one request sent to the model"""
+    return " ".join(turn.get("text") or "" for turn in call["turns"])
 
 
 @tagged("post_install", "-at_install")
@@ -81,13 +98,15 @@ class TestAgentDiscuss(NudgeCase, TransactionCase):
         self.assertEqual(len(answer), 1)
         self.assertIn("<b>5 days</b>", answer.body)
         self.assertEqual(len(adapter.calls), 1)
-        # One conversation per (channel, author): the second question goes on in it
         first = mention.conversation_id
         self.assertTrue(first)
         self.assertEqual(first.agent_id, self.agent)
+        # In a channel every mention is a question of its own: the next one starts its own conversation
         self.ask(self.user_a, "@Tile Expert and the grout?")
         self.Mention._cron_answer()
-        self.assertEqual(self.Mention.search([("state", "=", "done")], order="id desc", limit=1).conversation_id, first)
+        second = self.Mention.search([("state", "=", "done")], order="id desc", limit=1).conversation_id
+        self.assertTrue(second)
+        self.assertNotEqual(second, first)
         self.assertEqual(len(self.posts()), 2)
 
     def test_no_mention_no_answer(self):
@@ -139,9 +158,11 @@ class TestAgentDiscuss(NudgeCase, TransactionCase):
     def fake_answer(self, text="ok", error=None):
         """Replaces nudge.agent._answer; :return: the list of (knowledge_only, question) calls"""
         calls = []
+        self.bindings_passed = []
 
         def _answer(agent, question, conversation=None, **kw):
             calls.append((bool(agent.env.context.get("nudge_agent_knowledge_only")), question))
+            self.bindings_passed.append(kw.get("binding"))
             if error:
                 raise error
             # What the engine of an earlier draft could return: never acted on any more
@@ -192,6 +213,9 @@ class TestAgentDiscuss(NudgeCase, TransactionCase):
         self.ask(self.user_a, "my open orders?", channel=chat, mention=False)
         self.Mention._cron_answer()
         self.assertEqual([c[0] for c in calls], [True, True, False])
+        # The published discuss binding goes with every turn (its office hours, its hand-over): the channel's,
+        # and in a direct chat the agent's first one
+        self.assertEqual(self.bindings_passed, [self.binding] * 3)
 
     def test_a_channel_answer_is_never_sent_privately(self):
         # 2.1: the answer is posted where the question was, from knowledge only; nothing else is asked
@@ -263,3 +287,142 @@ class TestAgentDiscuss(NudgeCase, TransactionCase):
         self.assertEqual(self.Mention.search_count([("agent_id", "=", self.agent.id), ("user_id", "=", self.user_b.id)]), 1)
         self.Mention._cron_answer()
         self.assertEqual(len(self.posts()), 1)
+
+    # ------------------------------------------------------------------
+    # Trial 60.0: each question its own answer
+    # ------------------------------------------------------------------
+    def test_two_mentions_in_a_row_each_get_their_own_answer(self):
+        # The second question was answered with the answer to the first one, sent again with it
+        adapter = self.use_adapter(script=[saying("Tiles come in 5 days."), saying("Grout comes in grey and white.")])
+        first = self.ask(self.user_a, "@Tile Expert when do tiles come?")
+        second = self.ask(self.user_a, "@Tile Expert which colours of grout are there?")
+        self.Mention._cron_answer()
+        mentions = self.Mention.search([("message_id", "in", (first | second).ids)], order="id")
+        self.assertEqual(mentions.mapped("state"), ["done", "done"])
+        self.assertIn("5 days", mentions[0].answer_id.body)
+        self.assertNotIn("grey", mentions[0].answer_id.body)
+        self.assertIn("grey and white", mentions[1].answer_id.body)
+        self.assertNotIn("5 days", mentions[1].answer_id.body)
+        self.assertNotEqual(mentions[0].conversation_id, mentions[1].conversation_id)
+        # The second question went to the model alone: nothing of the first was sent with it
+        self.assertEqual(len(adapter.calls), 2)
+        self.assertIn("which colours of grout", sent(adapter.calls[1]))
+        self.assertNotIn("when do tiles come", sent(adapter.calls[1]))
+        self.assertNotIn("5 days", sent(adapter.calls[1]))
+
+    def test_a_reply_to_the_agent_goes_on_in_its_conversation(self):
+        adapter = self.use_adapter(script=[saying("Tiles come in 5 days."), saying("The grout comes with them.")])
+        question = self.ask(self.user_a, "@Tile Expert when do tiles come?")
+        self.Mention._cron_answer()
+        first = self.Mention.search([("message_id", "=", question.id)])
+        follow = self.channel.with_user(self.user_a).message_post(
+            body="@Tile Expert and the grout?", message_type="comment", subtype_xmlid="mail.mt_comment",
+            partner_ids=self.partner.ids, parent_id=first.answer_id.id)
+        self.Mention._cron_answer()
+        second = self.Mention.search([("message_id", "=", follow.id)])
+        self.assertEqual(second.state, "done")
+        self.assertEqual(second.conversation_id, first.conversation_id)
+        self.assertIn("when do tiles come", sent(adapter.calls[1]))
+        # Someone else replying to that answer starts their own
+        self.agent.sudo().write({"user_ids": [Command.link(self.user_b.id)]})
+        other = self.channel.with_user(self.user_b).message_post(
+            body="@Tile Expert and the tools?", message_type="comment", subtype_xmlid="mail.mt_comment",
+            partner_ids=self.partner.ids, parent_id=first.answer_id.id)
+        self.Mention._cron_answer()
+        third = self.Mention.search([("message_id", "=", other.id)])
+        self.assertEqual(third.state, "done")
+        self.assertNotEqual(third.conversation_id, first.conversation_id)
+
+    def test_a_direct_chat_goes_on_in_one_conversation(self):
+        adapter = self.use_adapter(script=[saying("Yes, we do."), saying("In grey and white.")])
+        chat = self.chat("Chat Tile Expert", self.partner)
+        self.ask(self.user_a, "do you sell tiles?", channel=chat, mention=False)
+        self.ask(self.user_a, "in which colours?", channel=chat, mention=False)
+        self.Mention._cron_answer()
+        mentions = self.Mention.search([("model", "=", "discuss.channel"), ("res_id", "=", chat.id)], order="id")
+        self.assertEqual(mentions.mapped("state"), ["done", "done"])
+        self.assertEqual(len(mentions.conversation_id), 1)
+        self.assertIn("do you sell tiles?", sent(adapter.calls[1]))
+        self.assertIn("In grey and white.", mentions[1].answer_id.body)
+
+    def test_a_long_direct_chat_starts_a_new_conversation(self):
+        # The engine refuses a question past its length ("Start a new one"), which a chat cannot do
+        self.patch(nudge_agent_discuss, "MAX_MESSAGES", 2)
+        self.use_adapter(script=[saying("Yes, we do."), saying("In grey and white.")])
+        chat = self.chat("Chat Tile Expert", self.partner)
+        self.ask(self.user_a, "do you sell tiles?", channel=chat, mention=False)
+        self.ask(self.user_a, "in which colours?", channel=chat, mention=False)
+        self.Mention._cron_answer()
+        mentions = self.Mention.search([("model", "=", "discuss.channel"), ("res_id", "=", chat.id)], order="id")
+        self.assertEqual(mentions.mapped("state"), ["done", "done"])
+        self.assertNotEqual(mentions[0].conversation_id, mentions[1].conversation_id)
+        self.assertIn("In grey and white.", mentions[1].answer_id.body)
+
+    # ------------------------------------------------------------------
+    # Trial 60.0: a direct chat with the agent, from Discuss
+    # ------------------------------------------------------------------
+    def test_start_a_conversation_offers_the_agent_to_its_audience_only(self):
+        Partner = self.env["res.partner"]
+        if Store is None or not hasattr(Partner, "_search_for_channel_invite"):
+            self.skipTest("Odoo 19: Start a conversation searches with _search_for_channel_invite")
+
+        def search(user, term="Tile", channel_id=None):
+            store = Store()
+            result = Partner.with_user(user)._search_for_channel_invite(store, term, channel_id=channel_id)
+            data = store.get_result()
+            found = [partner["id"] for partner in data.get("res.partner", [])]
+            return found, data.get("Store", {}).get("nudge_agent_chat_partner_ids"), result
+
+        found, chat_ids, result = search(self.user_a)
+        self.assertIn(self.partner.id, found)
+        self.assertEqual(chat_ids, self.partner.ids)
+        self.assertNotIn(self.partner.id, result["partner_ids"], "Never among the people of a new group")
+        found, chat_ids, _result = search(self.user_a, term="Grout")
+        self.assertNotIn(self.partner.id, found)
+        self.assertEqual(chat_ids, self.partner.ids, "Known, whatever is searched")
+        # Inviting to a channel: never (a channel gets an agent by its binding)
+        found, chat_ids, _result = search(self.user_a, channel_id=self.channel.id)
+        self.assertNotIn(self.partner.id, found)
+        self.assertIsNone(chat_ids)
+        # Outside the audience: never
+        found, chat_ids, _result = search(self.user_b)
+        self.assertNotIn(self.partner.id, found)
+        self.assertEqual(chat_ids, [])
+        # Unpublished in Discuss: not even its audience
+        self.binding.write({"published": False})
+        found, chat_ids, _result = search(self.user_a)
+        self.assertNotIn(self.partner.id, found)
+        self.assertEqual(chat_ids, [])
+
+    def test_the_web_client_knows_the_agents_open_to_the_person(self):
+        if Store is None or not hasattr(Store(), "add_global_values"):
+            self.skipTest("Odoo 19: the store of the web client")
+        Users = self.env["res.users"]
+        for user, wanted in ((self.user_a, self.partner.ids), (self.user_b, [])):
+            store = Store()
+            Users.with_user(user)._init_store_data(store)
+            self.assertEqual(store.get_result()["Store"]["nudge_agent_chat_partner_ids"], wanted)
+
+    def test_a_direct_chat_with_the_agent_is_opened_by_its_audience_only(self):
+        Channel = self.env["discuss.channel"]
+        members = [Command.create({"partner_id": self.user_b.partner_id.id}),
+                   Command.create({"partner_id": self.partner.id})]
+        # Every version: a chat made with the agent by someone it is not open to is refused
+        with self.assertRaises(UserError):
+            Channel.with_user(self.user_b).create({"name": "B and Tile", "channel_type": "chat",
+                                                   "channel_member_ids": members})
+        if not hasattr(Channel, "_get_or_create_chat"):
+            return
+        # Odoo 19: "Start a conversation", an avatar
+        chat = Channel.with_user(self.user_a)._get_or_create_chat([self.partner.id])
+        self.assertEqual(chat.channel_type, "chat")
+        self.assertEqual(chat.sudo().channel_member_ids.partner_id, self.user_a.partner_id | self.partner)
+        self.assertEqual(Channel.with_user(self.user_a)._get_or_create_chat([self.partner.id]), chat, "Found again")
+        with self.assertRaises(UserError):
+            Channel.with_user(self.user_b)._get_or_create_chat([self.partner.id])
+        # A chat of two people is untouched
+        self.assertTrue(Channel.with_user(self.user_b)._get_or_create_chat([self.user_a.partner_id.id]))
+        # Unpublished in Discuss: not even its audience
+        self.binding.write({"published": False})
+        with self.assertRaises(UserError):
+            Channel.with_user(self.user_a)._get_or_create_chat([self.partner.id])

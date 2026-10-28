@@ -580,7 +580,8 @@ class TestLoop(NudgeCase, TransactionCase):
             [base.text_event("You are welcome."), base.stop_event(base.STOP_END)],
         ])
         conversation, _events = self.converse(adapter)
-        self.converse(adapter, text="Thanks", conversation_id=conversation.id)
+        # Not "Thanks": a thanks alone is answered without AI (nudge.noai._chat_thanks)
+        self.converse(adapter, text="And then?", conversation_id=conversation.id)
 
         turns = adapter.calls[1]["turns"]
         self.assertEqual([turn["role"] for turn in turns], ["user", "assistant", "tool", "user"])

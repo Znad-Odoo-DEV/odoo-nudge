@@ -133,6 +133,22 @@ class TestApprovals(NudgeCase, TransactionCase):
             self.assertTrue(refused.is_error, bad)
             self.assertIn(said, refused.content)
 
+    def test_a_group_is_found_by_its_external_id_or_full_name(self):
+        # Found on dev_0 (2026-10-27): "Administrator" is the name of a dozen groups, and the flow gave only it
+        group = self.env.ref("base.group_system")
+        for named in ("base.group_system", group.full_name):
+            with self.subTest(named=named):
+                shown = self.run_tool("prepare_approval_rule", {
+                    "model": "res.partner", "method": "create_company", "group": named, "approvers": []})
+                self.assertFalse(shown.is_error, shown.content)
+        # A group name is unique within one app only: two apps of this database share "Administrator", or the
+        # refusal cannot be shown here
+        if self.env["res.groups"].search_count([("name", "=ilike", "Administrator")]) > 1:
+            refused = self.run_tool("prepare_approval_rule", {
+                "model": "res.partner", "method": "create_company", "group": "Administrator", "approvers": []})
+            self.assertTrue(refused.is_error)
+            self.assertIn("full name", refused.content)
+
     def test_studio_steps_are_given_to_the_pointer(self):
         result = tools.base.call(self.env(user=self.user_a), "show_in_studio", {"steps": [
             {"target_type": "studio_menu", "target_name": "automations", "text": "Open Automations."},

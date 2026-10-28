@@ -589,3 +589,12 @@ if os.path.exists(ROOT + "nudge/security/nudge_agent_security.xml"):
         r'<field name="privilege_id" ref="res_groups_privilege_nudge"/>',
         '<field name="category_id" ref="module_category_nudge"/>')
     sub("nudge/security/nudge_agent_security.xml", r'        <field name="sequence">\d+</field>\n', "")
+
+# QA RULE (60.1): the direct chat with an agent in Discuss (static/src/agent_chat.js) imports modules of Odoo 19 only;
+# 17 and 18 open the chat through the server guards alone, so the file and its assets entry are dropped
+_chat = ROOT + "nudge_discuss/static/src/agent_chat.js"
+if os.path.exists(_chat):
+    os.remove(_chat)
+    _m = io.open(ROOT + "nudge_discuss/__manifest__.py", encoding="utf-8").read()
+    _m = re.sub(r'\n\s*"assets": \{\s*"web\.assets_backend": \[[^\]]*\],?\s*\},?', "", _m)
+    io.open(ROOT + "nudge_discuss/__manifest__.py", "w", encoding="utf-8", newline="\n").write(_m)

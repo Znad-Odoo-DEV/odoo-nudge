@@ -6,14 +6,20 @@ offers and runs only the agent's tools, puts the agent's persona after Nudge's o
 when the agent says so, answers with the agent's provider, answers without AI once a budget is used up, refuses
 Developer mode, and in a rehearsal (Try it) writes nothing. What a turn may do is read from the conversation:
 the answers of the model are recorded here as the controller records them, on an environment that carries no
-agent at all. The provider is the scripted adapter of the tests: nothing leaves the machine."""
+agent at all. The provider is the scripted adapter of the tests: nothing leaves the machine.
+
+60.1, the channels: a public channel (``_answer_public``) runs as its service user, never in sudo, and reads only
+the models of its list, refused before any query; office hours and off-limits topics answer without AI; a
+hand-over needs a person named by the channel and, for a visitor, their consent; outside the Nudge panel the model
+is offered no switch of mode; an agent serves a remembered answer only for the same question."""
 import json
 
+from odoo import fields
 from odoo.exceptions import AccessError, UserError
 from odoo.tests import TransactionCase, new_test_user, tagged
 
 from odoo.addons.nudge.llm import base, loop, prompt
-from odoo.addons.nudge.models import nudge_agent_plan, nudge_run
+from odoo.addons.nudge.models import nudge_agent_engine, nudge_agent_plan, nudge_run
 from odoo.addons.nudge.tools import base as tools_base, documentation
 
 from .common import NudgeCase
@@ -24,6 +30,8 @@ REHEARSED = "Nudge Agents Rehearsed Partner"
 LESSON = "Quotations above ten thousand need the sales manager first."
 HOW = "How do I create a quotation in Sales?"
 SAME = "how can I create quotations in sales"
+# What a public channel needs before it is published (H1)
+BUDGETS = {"budget_month": 100.0, "budget_user_day": 1000000}
 STEPS = "Open Sales, press New, pick the customer and add the products."
 
 
@@ -154,8 +162,8 @@ class TestAgentEngine(NudgeCase, TransactionCase):
         self.assertEqual(agent.with_user(self.user_a)._answer("Hello")["source"], "refused")
 
     def test_a_service_user_needs_a_published_service_channel(self):
-        service = new_test_user(self.env, login="nudge_engine_service", groups="base.group_user,nudge.group_agent_service")
-        agent = self.made(user_ids=[(6, 0, [service.id])])
+        service = self.service("nudge_engine_service")
+        agent = self.made(user_ids=[(6, 0, [service.id])], **BUDGETS)
         self.assertFalse(agent._open_to(service), "No service channel names this user")
         binding = self.env["nudge.agent.binding"].create({
             "agent_id": agent.id, "channel": "website", "acts_as": "service", "service_user_id": service.id,
@@ -164,8 +172,9 @@ class TestAgentEngine(NudgeCase, TransactionCase):
         binding.published = False
         self.assertFalse(agent._open_to(service), "The channel was taken down")
         binding.published = True
-        # Given a group of Nudge since: no longer only the service group, checked again at every turn
-        group = self.env.ref("nudge.group_nudge_user")
+        # Given a group since: no longer only the service group, checked again at every turn (a group a portal
+        # user may hold: those of Nudge make an employee)
+        group = self.env.ref("base.group_allow_export")
         group.write({("user_ids" if "user_ids" in group._fields else "users"): [(4, service.id)]})
         self.env.invalidate_all()
         self.assertFalse(agent._open_to(service))
@@ -555,3 +564,337 @@ class TestAgentEngine(NudgeCase, TransactionCase):
         alone = tools_base.call(self.env(user=self.user_a, context={"nudge_conversation_id": plain.id}),
                                 "search_odoo_documentation", arguments)
         self.assertNotIn("There is no tool named", alone.content)
+
+    # ------------------------------------------------------------------ 60.1: a public channel
+    def service(self, login="nudge_engine_public"):
+        """:return: a service user: a portal user with the service group and nothing of Nudge"""
+        return new_test_user(self.env, login=login, groups="base.group_portal,nudge.group_agent_service")
+
+    def public_binding(self, agent, service, **values):
+        """:return: a published service channel of ``agent`` on the website (published by the system: the test),
+        its agent given the budgets a public channel needs"""
+        values.setdefault("model_allowlist", "res.country")
+        if agent.budget_month <= 0 or agent.budget_user_day <= 0:
+            agent.sudo().write(dict(BUDGETS))
+        return self.env["nudge.agent.binding"].create(dict({
+            "agent_id": agent.id, "channel": "website", "acts_as": "service", "service_user_id": service.id,
+            "published": True}, **values))
+
+    @staticmethod
+    def system_of(adapter, number=0):
+        return "\n".join(base.system_texts(adapter.calls[number]["system"]))
+
+    def test_a_service_user_reads_only_the_models_of_its_channel(self):
+        # The guard itself (tools.base.public_refusal), as a turn of a public channel puts it in the context
+        service = self.service()
+        names = ("search_records", "read_record", "find_record", "aggregate_records")
+        env = self.env(user=service.id, su=False, context={
+            tools_base.PUBLIC_SCOPE: names, tools_base.PUBLIC_MODELS: ("res.country",), "nudge_agent_tools": names})
+        found = tools_base.call(env, "search_records", {
+            "model": "res.country", "fields": ["name"],
+            "conditions": [{"field": "code", "operator": "=", "value": "BE"}]})
+        self.assertFalse(found.is_error, found.content)
+        self.assertIn("Belgium", found.content)
+        usual = tools_base.call(env, "search_records", {"model": "res.country", "limit": 1})
+        self.assertFalse(usual.is_error, usual.content)
+        self.assertNotIn("currency_id", usual.content, "No field that points off the list, unasked")
+        refused = {
+            "This channel cannot read": {"model": "res.partner", "fields": ["name"]},
+            "points to records": {"model": "res.country", "fields": ["currency_id"]},
+            "does not follow": {"model": "res.country", "conditions": [
+                {"field": "currency_id.name", "operator": "=", "value": "EUR"}]},
+        }
+        for said, arguments in refused.items():
+            result = tools_base.call(env, "search_records", arguments)
+            self.assertTrue(result.is_error, arguments)
+            self.assertIn(said, result.content)
+        self.assertIn("points to records", tools_base.call(env, "search_records", {
+            "model": "res.country", "order": "currency_id desc"}).content)
+        self.assertIn("Name the model", tools_base.call(env, "find_record", {"name": "Belgium"}).content)
+        # A tool that writes, or one the channel does not have, is not there at all
+        for name, arguments in (("prepare_write", {"model": "res.country", "ids": [1], "values": []}),
+                                ("describe_model", {"model": "res.country"})):
+            self.assertIn("There is no tool named", tools_base.call(env, name, arguments).content, name)
+        # The same user outside the scope of a public turn has nothing at all
+        bare = self.env(user=service.id, su=False)
+        self.assertEqual(tools_base.available(bare, "talk"), [])
+        self.assertIn("There is no tool named", tools_base.call(bare, "search_records", {"model": "res.country"}).content)
+        # Anybody else is not touched by such a context: the usual rules
+        person = self.env(user=self.user_a.id, su=False, context={tools_base.PUBLIC_SCOPE: ("search_records",)})
+        self.assertIsNone(tools_base.public_tools(person))
+
+    def test_a_public_turn_runs_as_the_service_user_within_its_models(self):
+        service = self.service()
+        agent = self.made(tool_keys="search_records,read_record,prepare_write")
+        binding = self.public_binding(agent, service)
+        self.env["res.partner"].create({"name": "Nudge Public Secret Partner"})
+        adapter = self.use_adapter(script=[
+            asking(call("search_records", {"model": "res.partner", "fields": ["name"]})),
+            asking(call("search_records", {"model": "res.country", "fields": ["name"], "conditions": [
+                {"field": "code", "operator": "=", "value": "BE"}]}, "call_2")),
+            saying("Belgium is there."),
+        ])
+        # The channel calls it in sudo: the turn never runs in sudo
+        result = agent.sudo()._answer_public("Which countries do you ship to?", binding, visitor_key="visitor-1")
+        self.assertEqual((result["source"], result["text"], result["error"]), ("ai", "Belgium is there.", False))
+        conversation = self.conversation_of(result)
+        self.assertEqual(conversation.user_id, service, "As the service user")
+        self.assertEqual((conversation.agent_binding_id, conversation.agent_visitor_key), (binding, "visitor-1"))
+        offered = {tool["name"] for tool in adapter.calls[0]["tools"]}
+        self.assertIn("search_records", offered)
+        self.assertLessEqual(offered, tools_base.PUBLIC_TOOLS)
+        self.assertNotIn("prepare_write", offered, "A tool that writes is never offered on a public channel")
+        found = self.tool_text(conversation)
+        self.assertIn("Belgium", found)
+        self.assertIn("This channel cannot read", found)
+        self.assertNotIn("Nudge Public Secret Partner", found)
+        system = self.system_of(adapter)
+        self.assertIn(nudge_agent_engine.AGENT_PUBLIC, system)
+        self.assertIn("res.country", system)
+        self.assertNotIn("switch you to Agent mode", system)
+        # The visitor goes on in their conversation; another visitor gets their own, even naming the first one
+        self.use_adapter(reply="Fine.")
+        again = agent._answer_public("And France?", binding, visitor_key="visitor-1")
+        self.assertEqual(again["conversation_id"], conversation.id)
+        other = agent._answer_public("Hello", binding, visitor_key="visitor-2")
+        self.assertNotEqual(other["conversation_id"], conversation.id)
+        taken = agent._answer_public("Hello", binding, conversation=conversation.id, visitor_key="visitor-2")
+        self.assertNotIn(taken["conversation_id"], (conversation.id, False))
+
+    def test_a_thanks_on_a_public_channel_needs_no_ai(self):
+        # The rules of Nudge read nothing there (_agent_restricted), but a thanks alone reads nothing either
+        agent = self.made()
+        binding = self.public_binding(agent, self.service())
+        adapter = self.use_adapter(reply="An answer by AI.")
+        result = agent.sudo()._answer_public("Thank you!", binding, visitor_key="visitor-thanks")
+        self.assertEqual((result["source"], result["text"], result["error"]), ("noai", "You are welcome.", False))
+        self.assertEqual(adapter.calls, [])
+
+    # ------------------------------------------------------------------ 60.1: the security review
+    def test_a_public_channel_never_answers_without_budgets(self):
+        # H1: refused before any call when its agent has no limit (one published before the rule, or by SQL)
+        agent = self.made()
+        binding = self.public_binding(agent, self.service())
+        adapter = self.use_adapter(reply="From the AI")
+        agent.flush_recordset()
+        self.env.cr.execute("UPDATE nudge_agent SET budget_user_day = 0 WHERE id = %s", [agent.id])
+        agent.invalidate_recordset(["budget_user_day"])
+        self.assertEqual(agent._answer_public("Hello", binding, visitor_key="v")["source"], "refused")
+        self.assertEqual(adapter.calls, [])
+
+    def test_the_day_of_a_public_channel_is_counted_per_visitor(self):
+        # H1: every visitor shares the service user: the day is theirs, by their key
+        agent = self.made()
+        binding = self.public_binding(agent, self.service())
+        agent.sudo().budget_user_day = 100
+        self.use_adapter(reply="Fine.")
+        first = agent._answer_public("Hello", binding, visitor_key="visitor-a")
+        self.Usage._add("chat", {"input_tokens": 500}, 0.0, binding.service_user_id, self.company,
+                        conversation_id=first["conversation_id"], agent_id=agent.id)
+        self.assertEqual(agent._answer_public("Tell me a story about the sea", binding,
+                                              visitor_key="visitor-a")["source"], "budget")
+        self.assertEqual(agent._answer_public("Tell me a story about the sea", binding,
+                                              visitor_key="visitor-b")["source"], "ai", "Another visitor")
+
+    def test_a_public_turn_reads_no_company_file_and_no_memory_and_never_shows_an_error(self):
+        # M4, L5
+        self.env["nudge.source"].sudo().create({"name": "Nudge Internal Price Plan", "state": "ready"})
+        self.env["ir.config_parameter"].sudo().set_param("nudge.answer_memory", "True")
+        self.env["nudge.memory"].create({
+            "question": "What are your opening hours?", "answer": "Internal: ask Raghad.", "state": "approved"})
+        agent = self.made(use_memory=True)
+        binding = self.public_binding(agent, self.service())
+        self.assertFalse(agent.use_memory, "A service channel turns the memory of the agent off")
+        agent.sudo().use_memory = True
+        adapter = self.use_adapter(reply="We open at nine.")
+        result = agent._answer_public("What are your opening hours?", binding, visitor_key="v")
+        self.assertEqual(result["source"], "ai", "No remembered answer for a visitor")
+        self.assertNotIn("Nudge Internal Price Plan", self.system_of(adapter))
+        too_long = agent._answer_public("x" * 9000, binding, visitor_key="v")
+        self.assertEqual(too_long["text"], nudge_agent_engine.public_failure(self.env))
+
+    def test_answer_is_never_run_in_sudo(self):
+        # L8
+        agent = self.made(user_ids=[(6, 0, [self.user_a.id])])
+        self.use_adapter(reply="Fine.")
+        self.assertEqual(agent.sudo()._answer("Hello")["source"], "refused")
+
+    def test_a_public_turn_reads_only_what_the_portal_may_and_what_is_published(self):
+        # H2: the fields its groups do not read, archived records, free-form fields; published records only
+        service = self.service()
+        context = {tools_base.PUBLIC_SCOPE: tuple(tools_base.PUBLIC_RECORD_TOOLS),
+                   tools_base.PUBLIC_MODELS: ("res.country", "product.template")}
+        env = self.env(user=service.id, su=False, context=context)
+        refusal = tools_base.public_refusal
+        self.assertIsNone(refusal(env, "search_records", {"model": "res.country", "fields": ["name"]})[0])
+        if "product.template" not in self.env:
+            return
+        Product = self.env["product.template"]
+        for name in ("standard_price", "active"):
+            if name in Product._fields:
+                self.assertTrue(refusal(env, "search_records", {"model": "product.template", "fields": [name]})[0],
+                                name)
+        self.assertTrue(refusal(env, "search_records", {"model": "product.template", "conditions": [
+            {"field": "active", "operator": "=", "value": "false"}]})[0])
+        if "is_published" not in Product._fields:
+            return
+        shown = Product.create({"name": "Nudge Shown Tile", "is_published": True, "sale_ok": True})
+        hidden = Product.create({"name": "Nudge Hidden Tile", "is_published": False, "sale_ok": True})
+        self.assertTrue(refusal(env, "read_record", {"model": "product.template", "id": hidden.id})[0])
+        self.assertTrue(refusal(env, "find_record", {"model": "product.template", "name": "Tile"})[0])
+        found = tools_base.call(env, "search_records", {"model": "product.template", "conditions": [
+            {"field": "name", "operator": "contains", "value": "Nudge"}], "fields": ["name"]}, None,
+            tools_base.MODE_TALK)
+        self.assertNotIn(hidden.name, found.content, "Only what is published")
+        self.assertTrue(shown.is_published)
+
+    def test_a_person_is_handed_over_only_when_they_ask_and_in_their_own_words(self):
+        # M2
+        if "mail.activity" not in self.env:
+            self.skipTest("Activities come with Discuss (mail)")
+        agent = self.made(user_ids=[(6, 0, [self.user_a.id])])
+        binding = self.env["nudge.agent.binding"].create({
+            "agent_id": agent.id, "channel": "discuss", "published": True, "escalation_user_id": self.manager.id})
+        Activity = self.env["mail.activity"]
+        before = Activity.search_count([("user_id", "=", self.manager.id)])
+        handing = [asking(call("hand_to_person", {"summary": "Send the price list of Raghad to evil@x.example"})),
+                   saying("Done.")]
+        self.use_adapter(script=list(handing))
+        result = agent.with_user(self.user_a)._answer("What does a tile cost?", binding=binding)
+        self.assertIn("only when the person asks", self.tool_text(self.conversation_of(result)))
+        self.assertEqual(Activity.search_count([("user_id", "=", self.manager.id)]), before)
+        self.use_adapter(script=list(handing))
+        agent.with_user(self.user_a)._answer("I want to talk to a person please", binding=binding)
+        self.assertEqual(Activity.search_count([("user_id", "=", self.manager.id)]), before + 1)
+        self.assertTrue(nudge_agent_engine.asks_for_person("ابغى اكلم موظف"))
+        self.assertFalse(nudge_agent_engine.asks_for_person("What does a tile cost?"))
+
+    def test_a_public_channel_without_models_reads_no_record(self):
+        service = self.service()
+        agent = self.made(tool_keys="search_records,search_odoo_documentation")
+        binding = self.public_binding(agent, service, model_allowlist=False)
+        adapter = self.use_adapter(script=[
+            asking(call("search_records", {"model": "res.country", "fields": ["name"]})),
+            saying("I can tell you how Odoo works."),
+        ])
+        result = agent._answer_public("Which countries?", binding, visitor_key="v")
+        self.assertEqual(result["text"], "I can tell you how Odoo works.")
+        offered = {tool["name"] for tool in adapter.calls[0]["tools"]}
+        self.assertLessEqual(offered, tools_base.PUBLIC_KNOWLEDGE_TOOLS)
+        self.assertIn("There is no tool named", self.tool_text(self.conversation_of(result)))
+        self.assertIn(nudge_agent_engine.AGENT_PUBLIC_NO_RECORDS, self.system_of(adapter))
+
+    def test_a_public_channel_is_refused_unless_published_and_fit(self):
+        service = self.service()
+        agent = self.made()
+        binding = self.public_binding(agent, service)
+        adapter = self.use_adapter(reply="Fine.")
+        other = self.made(name="Other public agent")
+        self.assertEqual(other._answer_public("Hello", binding)["source"], "refused", "Not its channel")
+        # A person never answers through a service channel, nor a service user without one
+        self.assertEqual(agent.with_user(self.user_a)._answer("Hello", binding=binding)["source"], "refused")
+        self.assertEqual(agent.with_user(service)._answer("Hello")["source"], "refused")
+        # One class: the assertRaises of Odoo's TransactionCase takes no tuple (the create of the engine refuses it)
+        with self.assertRaises(UserError):
+            self.env["nudge.conversation"].with_user(service).with_context(nudge_agent_id=agent.id)._chat_open()
+        binding.published = False
+        self.assertEqual(agent._answer_public("Hello", binding)["source"], "refused")
+        binding.published = True
+        # Given a group since: no longer fit, asked at every turn
+        group = self.env.ref("base.group_allow_export")
+        group.write({("user_ids" if "user_ids" in group._fields else "users"): [(4, service.id)]})
+        self.env.invalidate_all()
+        self.assertEqual(agent._answer_public("Hello", binding)["source"], "refused")
+        self.assertEqual(adapter.calls, [], "Refused before any call")
+
+    def test_office_hours_and_off_limits_answer_without_ai(self):
+        service = self.service()
+        agent = self.made(off_limits="salaries", user_ids=[(6, 0, [self.user_a.id])])
+        binding = self.public_binding(agent, service, hours="08:00-18:00")
+        adapter = self.use_adapter(reply="From the AI")
+        self.patch(type(binding), "_open_now", lambda binding, when=None: False)
+        closed = agent._answer_public("Do you have tiles?", binding, visitor_key="v")
+        self.assertEqual((closed["source"], closed["error"]), ("hours", False))
+        self.assertIn("08:00-18:00", closed["text"])
+        self.patch(type(binding), "_open_now", lambda binding, when=None: True)
+        declined = agent._answer_public("What are the salaries of your team?", binding, visitor_key="v")
+        self.assertEqual((declined["source"], declined["error"]), ("off_limits", False))
+        # In the panel too, and by the person's own path
+        conversation, events = self.talk(self.user_a, agent, "What are the salaries of your team?")
+        said = "".join(event.get("text", "") for event in events if event["type"] == "delta")
+        self.assertIn(agent._off_limits_text(), said)
+        self.assertEqual(agent.with_user(self.user_a)._answer("Tell me the salary of Ahmad")["source"], "off_limits")
+        self.assertEqual(adapter.calls, [], "No provider is called")
+
+    def test_hand_to_person_needs_a_named_person_and_the_consent_of_the_visitor(self):
+        if "mail.activity" not in self.env:
+            self.skipTest("Activities come with Discuss (mail)")
+        service = self.service()
+        agent = self.made()
+        quiet = self.public_binding(agent, service, model_allowlist=False)
+        adapter = self.use_adapter(reply="Fine.")
+        agent._answer_public("I want a person", quiet, visitor_key="v")
+        self.assertNotIn("hand_to_person", {tool["name"] for tool in adapter.calls[0]["tools"]}, "Nobody named")
+        quiet.escalation_user_id = self.manager
+        Activity = self.env["mail.activity"]
+        before = Activity.search_count([("user_id", "=", self.manager.id)])
+        handing = [asking(call("hand_to_person", {"summary": "Wants 40 m2 of tiles, call Raghad on 0501234567"})),
+                   saying("A person will contact you.")]
+        adapter = self.use_adapter(script=list(handing))
+        result = agent._answer_public("I want to talk to a person", quiet, visitor_key="v")
+        self.assertIn("hand_to_person", {tool["name"] for tool in adapter.calls[0]["tools"]})
+        self.assertIn("not agreed", self.tool_text(self.conversation_of(result)))
+        self.assertEqual(Activity.search_count([("user_id", "=", self.manager.id)]), before, "No consent: nothing")
+        self.use_adapter(script=list(handing))
+        agent._answer_public("I want to talk to a person", quiet, visitor_key="w", consent=True)
+        made = Activity.search([("user_id", "=", self.manager.id)], order="id desc", limit=1)
+        self.assertEqual(Activity.search_count([("user_id", "=", self.manager.id)]), before + 1)
+        self.assertIn("40 m2", str(made.note))
+        if "crm.lead" not in self.env:
+            # L7: a visitor's hand-over is never on the agent's face, which everyone who talks to it sees
+            self.assertNotEqual((made.res_model, made.res_id), ("res.partner", agent.partner_id.id))
+        # M1: once a day per visitor, even in a new conversation
+        self.use_adapter(script=list(handing))
+        again = agent._answer_public("I want to talk to a person", quiet, visitor_key="w", consent=True,
+                                     conversation=None)
+        self.assertEqual(Activity.search_count([("user_id", "=", self.manager.id)]), before + 1)
+        self.assertIn("Already handed over", self.tool_text(self.conversation_of(again)))
+
+    def test_concurrent_visitors_of_one_channel_are_answered_each_in_turn(self):
+        service = self.service()
+        Conversation = self.env["nudge.conversation"]
+        first = Conversation.create({"user_id": service.id})
+        second = Conversation.create({"user_id": service.id})
+        first.stream_started_at = fields.Datetime.now()
+        Slot = self.env["nudge.slot"]
+        self.assertTrue(Slot._is_answering(service), "Outside a public turn: one answer per user")
+        key = nudge_agent_engine.PUBLIC_CONVERSATION
+        self.assertFalse(Slot.with_context(**{key: second.id})._is_answering(service), "Another visitor")
+        self.assertTrue(Slot.with_context(**{key: first.id})._is_answering(service), "The same visitor")
+
+    # ------------------------------------------------------------------ 60.1: outside the panel
+    def test_outside_the_panel_no_mode_or_button_is_offered(self):
+        agent = self.made(user_ids=[(6, 0, [self.agent.id])])
+        adapter = self.use_adapter(reply="Fine.")
+        self.talk(self.agent, agent, "Hello")
+        panel = self.system_of(adapter)
+        self.assertIn("switch you to Agent mode", panel, "The panel has its buttons")
+        self.assertIn(nudge_agent_engine.AGENT_STATE_FIRST, panel)
+        adapter = self.use_adapter(reply="Fine.")
+        agent.with_user(self.agent)._answer("Hello")
+        outside = self.system_of(adapter)
+        for said in ("switch you to Agent mode", "the third button", "button under the message box", "eye button"):
+            self.assertNotIn(said, outside)
+        self.assertIn(nudge_agent_engine.AGENT_OUTSIDE_PANEL, outside)
+        self.assertIn(nudge_agent_engine.AGENT_STATE_FIRST, outside)
+
+    def test_an_agent_serves_a_remembered_answer_only_for_the_same_question(self):
+        self.env["ir.config_parameter"].sudo().set_param("nudge.answer_memory", "True")
+        self.env["nudge.memory"].create({
+            "question": "How do I confirm a quotation?", "answer": "Open it and press Confirm.", "state": "approved"})
+        agent = self.made(user_ids=[(6, 0, [self.user_a.id])])
+        adapter = self.use_adapter(reply="From the AI")
+        asked = agent.with_user(self.user_a)
+        self.assertEqual(asked._answer("how to confirm my quotation")["source"], "memory")
+        self.assertEqual(asked._answer("How do I send a quotation by email?")["source"], "ai")
+        self.assertEqual(len(adapter.calls), 1)
