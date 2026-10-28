@@ -473,3 +473,142 @@ class TestSiteEdit(TransactionCase):
         skill = self.env.ref("nudge_builder.skill_website_builder")
         names = set(skill.tool_names.split(","))
         self.assertLessEqual({"read_site_page", "edit_page_section", "change_page_seo", "undo_site_change"}, names)
+
+
+@tagged("post_install", "-at_install")
+class TestSiteContentEdit(TransactionCase):
+    """Chat edits of Website Builder 2.0: add_site_item, add_location and set_contact, with their cards and undo"""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.designer = new_test_user(
+            cls.env, login="content_designer", name="Raghad Designer", email="raghad@acme.example",
+            groups="website.group_website_designer,nudge.group_nudge_agent")
+        cls.plain = new_test_user(cls.env, login="content_plain", name="Ebrahim Plain", groups="nudge.group_nudge_agent")
+        cls.arabic = cls.env["res.lang"]._activate_lang("ar_001") or cls.env["res.lang"].search([("code", "=", "ar_001")])
+        cls.english = cls.env["res.lang"].search([("code", "=", "en_US")])
+        cls.website = cls.env["website"].search([], limit=1)
+
+    def setUp(self):
+        super().setUp()
+        self.patch(type(self.env["nudge.provider"]), "_get_default", lambda provider: provider.browse())
+        self.patch(type(self.env["nudge.provider"]), "_get_for_mode", lambda provider, mode: provider.browse())
+        self.env_d = self.env(user=self.designer)
+
+    make = TestSiteEdit.make
+    tool = TestSiteEdit.tool
+    confirm = TestSiteEdit.confirm
+    latest = TestSiteEdit.latest
+
+    def site(self):
+        if "nudge.builder.faq" not in self.env or "whatsapp" not in self.env["nudge.builder.site"]._fields:
+            self.skipTest("the content records are not installed")
+        return self.make()
+
+    def test_the_new_tools_are_registered_in_the_website_group(self):
+        from odoo.addons.nudge.tools import groups
+        names = set(groups.GROUPS["website"]["tools"])
+        self.assertLessEqual({"add_site_item", "set_contact", "add_location"}, names)
+
+    def test_a_faq_is_shown_then_added_then_taken_back(self):
+        site = self.site()
+        result = self.tool("add_site_item", {
+            "kind": "faq", "site_id": site.id,
+            "fields": {"question": "Do you work on weekends?", "answer": "<script>x</script>Yes, by appointment."}})
+        self.assertTrue(result.pending, result.content)
+        shown = " ".join(str(line["value"]) for line in result.pending["preview"]["lines"])
+        self.assertIn("Do you work on weekends?", shown)
+        self.assertNotIn("<script>", shown)
+        self.assertFalse(self.env["nudge.builder.faq"].search([("site_id", "=", site.id)]), "a card writes nothing")
+        self.confirm("add_site_item", result)
+        faq = self.env["nudge.builder.faq"].search([("site_id", "=", site.id)])
+        self.assertEqual(len(faq), 1)
+        self.assertNotIn("script", faq.answer)
+        self.assertEqual(self.latest(site).kind, "item")
+        self.confirm("undo_site_change", self.tool("undo_site_change", {"site_id": site.id}))
+        self.assertFalse(faq.exists())
+
+    def test_an_edited_record_is_not_removed_by_the_undo(self):
+        site = self.site()
+        self.confirm("add_site_item", self.tool("add_site_item", {
+            "kind": "faq", "site_id": site.id, "fields": {"question": "Q?", "answer": "A."}}))
+        faq = self.env["nudge.builder.faq"].search([("site_id", "=", site.id)])
+        faq.write({"question": "Changed by someone"})
+        faq.flush_recordset()
+        with self.assertRaises(UserError):
+            self.latest(site).with_user(self.designer).action_undo()
+        self.assertTrue(faq.exists())
+
+    def test_unknown_kinds_and_fields_are_refused(self):
+        site = self.site()
+        self.assertTrue(self.tool("add_site_item", {"kind": "spaceship", "site_id": site.id, "fields": {"name": "x"}}).is_error)
+        refused = self.tool("add_site_item", {"kind": "faq", "site_id": site.id, "fields": {"site_id": 99, "question": "x"}})
+        self.assertTrue(refused.is_error)
+        self.assertTrue(self.tool("add_site_item", {"kind": "faq", "site_id": site.id, "fields": {}}).is_error)
+
+    def test_a_person_without_the_designer_right_adds_nothing(self):
+        site = self.site()
+        self.assertTrue(self.tool("add_site_item", {
+            "kind": "faq", "site_id": site.id, "fields": {"question": "Q?", "answer": "A."}},
+            env=self.env(user=self.plain)).is_error)
+
+    def test_the_other_language_is_written_when_given(self):
+        site = self.site()
+        self.confirm("add_site_item", self.tool("add_site_item", {
+            "kind": "faq", "site_id": site.id,
+            "fields": {"question": "Where are you?", "answer": "Dubai."},
+            "translations": {"ar": {"question": "أين أنتم؟"}}}))
+        faq = self.env["nudge.builder.faq"].search([("site_id", "=", site.id)])
+        self.assertEqual(faq.with_context(lang=self.arabic.code).question, "أين أنتم؟")
+        self.assertEqual(faq.with_context(lang="en_US").question, "Where are you?")
+
+    def test_add_location_checks_whatsapp_and_the_map_link(self):
+        site = self.site()
+        bad = self.tool("add_location", {"site_id": site.id, "name": "Branch", "whatsapp": "call me"})
+        self.assertTrue(bad.is_error)
+        bad_link = self.tool("add_location", {"site_id": site.id, "name": "Branch", "maps_url": "javascript:alert(1)"})
+        self.assertTrue(bad_link.is_error)
+        good = self.tool("add_location", {
+            "site_id": site.id, "name": "Dubai branch", "city": "Dubai", "whatsapp": "00971 50 123 4567",
+            "maps_url": "https://maps.google.com/?q=Dubai"})
+        self.confirm("add_location", good)
+        location = self.env["nudge.builder.location"].search([("site_id", "=", site.id), ("name", "=", "Dubai branch")])
+        self.assertEqual(location.whatsapp, "+971501234567")
+
+    def test_set_contact_card_apply_and_undo(self):
+        site = self.site()
+        site.write({"phone": "+971 4 000 0000", "whatsapp": False})
+        result = self.tool("set_contact", {"site_id": site.id, "whatsapp": "+971 50 123 4567", "phone": "+971 4 111 1111"})
+        self.assertTrue(result.pending, result.content)
+        self.assertEqual(site.phone, "+971 4 000 0000", "a card writes nothing")
+        self.confirm("set_contact", result)
+        self.assertEqual(site.whatsapp, "+971501234567")
+        self.assertEqual(site.phone, "+971 4 111 1111")
+        self.assertEqual(self.latest(site).kind, "contact")
+        self.confirm("undo_site_change", self.tool("undo_site_change", {"site_id": site.id}))
+        self.assertEqual(site.phone, "+971 4 000 0000")
+        self.assertFalse(site.whatsapp)
+
+    def test_set_contact_refuses_what_is_not_valid(self):
+        site = self.site()
+        for arguments in ({"whatsapp": "12"}, {"email": "not an email"}, {"phone": "<b>x</b>"},
+                          {"booking_url": "http://insecure.example"}, {}):
+            self.assertTrue(self.tool("set_contact", dict(arguments, site_id=site.id)).is_error, arguments)
+
+    def test_set_contact_is_refused_when_the_details_moved_since_the_card(self):
+        site = self.site()
+        result = self.tool("set_contact", {"site_id": site.id, "phone": "+971 4 222 2222"})
+        site.phone = "+971 4 999 9999"
+        done = base.TOOLS["set_contact"].execute(self.env_d, SimpleNamespace(values=result.pending["values"]))
+        self.assertTrue(done.is_error)
+        self.assertEqual(site.phone, "+971 4 999 9999")
+
+    def test_social_links_are_https_only_and_merged(self):
+        site = self.site()
+        if "social_ids" not in site._fields:
+            self.skipTest("no social links on the site")
+        self.assertTrue(self.tool("set_contact", {
+            "site_id": site.id, "social": [{"network": "instagram", "url": "http://x.example"}]}).is_error)
+        self.assertTrue(self.tool("set_contact", {
+            "site_id": site.id, "social": [{"network": "instagram", "url": "javascript:alert(1)"}]}).is_error)

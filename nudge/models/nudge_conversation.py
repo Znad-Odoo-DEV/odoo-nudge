@@ -1227,6 +1227,9 @@ class NudgeConversation(models.Model):
             "edit_page_section": _("Prepared a change to a page section"),
             "change_page_seo": _("Prepared a change to the page's search settings"),
             "undo_site_change": _("Prepared taking back a website change"),
+            "add_site_item": _("Prepared an item for the website"),
+            "add_location": _("Prepared a place for the website"),
+            "set_contact": _("Prepared the contact details of the website"),
         }
         text = words.get(call["name"]) or (tool and tool.summary and _(tool.summary)) or call["name"]
         if "%s" in text:

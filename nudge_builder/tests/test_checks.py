@@ -15,7 +15,7 @@ class TestSiteChecks(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.website = cls.env["website"].search([], limit=1)
-        cls.designer = new_test_user(cls.env, login="raghad_designer", groups="base.group_user,website.group_website_designer,sales_team.group_sale_manager")
+        cls.designer = new_test_user(cls.env, login="raghad_designer", groups="base.group_user,website.group_website_designer" + (",sales_team.group_sale_manager" if cls.env.ref("sales_team.group_sale_manager", False) else ""))
         cls.plain = new_test_user(cls.env, login="ebrahim_plain", groups="base.group_user")
         big = cls.env["ir.attachment"].create({
             "name": "heavy-photo.jpg", "datas": base64.b64encode(b"x" * (600 * 1024)), "public": True})
@@ -269,3 +269,138 @@ class TestSiteChecks(TransactionCase):
         self.assertNotIn("https://unlisted.example/", asked, "Not on the list: not visited")
         self.assertNotIn("https://elsewhere.example/", asked, "Nor followed to when a listed page redirects there")
         self.assertIn("https://example.org/a", self.keys(found, "links_external_broken")[0]["extra"]["links"])
+
+
+@tagged("post_install", "-at_install")
+class TestSiteCheckBuilder2(TransactionCase):
+    """Site Check 2.0: the content group, the SEO of each language, structured data and their fixes"""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.website = cls.env["website"].search([], limit=1)
+        cls.designer = new_test_user(
+            cls.env, login="check2_designer", groups="base.group_user,website.group_website_designer")
+        cls.sample = checks.new_page(cls.env, cls.website, "Samples", "/t-sample", (
+            "<h1>Lorem ipsum dolor sit amet</h1><p>Some real words of the company.</p>"
+            '<iframe src=""></iframe><iframe src="https://www.google.com/maps?q=Dubai&amp;output=embed"></iframe>'))
+        cls.clean = checks.new_page(cls.env, cls.website, "Clean", "/t-clean-two", (
+            "<h1>Raghad builds</h1><p>Houses that last.</p>"
+            '<img src="/web/image/1/x.jpg" alt="x"/>'))
+        cls.env["ir.ui.view"].flush_model()
+
+    def run_check(self, **options):
+        env = self.env(user=self.designer)
+        return checks.check_site(env, self.website.with_env(env), **options)
+
+    def urls(self, found, key):
+        return {url for item in found if item["key"] == key for url in item["urls"]}
+
+    # ------------------------------------------------------------------ pure helpers
+    def test_whatsapp_numbers(self):
+        for good in ("+971501234567", "971501234567", "+971 50 123 4567", "(+971) 50-123-4567"):
+            self.assertTrue(checks.valid_whatsapp(good), good)
+        for bad in ("", "0501234567", "+12", "+97150123456789012345", "call me", "+971<script>"):
+            self.assertFalse(checks.valid_whatsapp(bad), bad)
+
+    def test_side_classes_are_what_does_not_flip(self):
+        self.assertTrue(checks.SIDE_CLASSES.search("card text-left"))
+        self.assertTrue(checks.SIDE_CLASSES.search("float-right"))
+        self.assertTrue(checks.SIDE_CLASSES.search("ml-3 x"))
+        self.assertFalse(checks.SIDE_CLASSES.search("text-start ms-3 text-center"))
+
+    def test_the_content_group_exists(self):
+        self.assertIn("content", checks.GROUPS)
+        self.assertIn("content", dict(checks.CHECKS))
+        self.assertIn("content", checks.group_labels(self.env))
+
+    # ------------------------------------------------------------------ the content group
+    def test_sample_text_is_flagged(self):
+        found, _skipped = self.run_check(groups=["content"])
+        self.assertIn("/t-sample", self.urls(found, "content_placeholder"))
+        self.assertNotIn("/t-clean-two", self.urls(found, "content_placeholder"))
+
+    def test_a_map_with_no_address_is_flagged(self):
+        found, _skipped = self.run_check(groups=["content"])
+        self.assertIn("/t-sample", self.urls(found, "content_map_src"))
+        self.assertNotIn("/t-clean-two", self.urls(found, "content_map_src"))
+
+    def test_a_content_check_changes_nothing(self):
+        views = self.env["ir.ui.view"].search_count([])
+        self.run_check(groups=["content"])
+        self.assertEqual(self.env["ir.ui.view"].search_count([]), views)
+
+    # ------------------------------------------------------------------ SEO
+    def test_share_picture_missing_and_its_fix(self):
+        found, _skipped = self.run_check(groups=["seo"])
+        item = next((one for one in found if one["key"] == "seo_og_missing"), None)
+        if not item:
+            self.skipTest("this version has no share picture field")
+        self.assertIn("/t-clean-two", item["urls"])
+        self.assertEqual(item["fix"], "og_image")
+        env = self.env(user=self.designer)
+        changes = checks.plan_fix(env, self.website.with_env(env), "og_image")
+        self.assertTrue([one for one in changes if one["value"] == "/web/image/1/x.jpg"])
+        self.assertTrue(checks.apply_plan(env, self.website.with_env(env), changes))
+        again = checks.plan_fix(env, self.website.with_env(env), "og_image")
+        self.assertFalse([one for one in again if one["view_id"] in {c["view_id"] for c in changes}],
+                         "a second run finds nothing left to fill")
+
+    def test_a_language_with_no_seo_text_is_flagged(self):
+        arabic = self.env["res.lang"]._activate_lang("ar_001") or self.env["res.lang"].search(
+            [("code", "=", "ar_001")])
+        self.website.sudo().language_ids = [(4, arabic.id)]
+        page = self.env["website.page"].search([("url", "=", "/t-clean-two")], limit=1)
+        view = page.view_id
+        if "website_meta_title" not in view._fields:
+            self.skipTest("this version has no meta title field")
+        view.write({"website_meta_title": "Raghad builds", "website_meta_description": "Houses that last."})
+        self.env["ir.ui.view"].flush_model()
+        found, _skipped = self.run_check(groups=["seo"])
+        lacking = [one for one in found if one["key"] == "seo_lang_missing" and one["extra"]["code"] == "ar_001"]
+        self.assertTrue(lacking)
+        self.assertIn("/t-clean-two", lacking[0]["urls"])
+        self.assertEqual(lacking[0]["fix"], "seo_languages")
+
+    def test_an_unknown_fix_changes_nothing(self):
+        env = self.env(user=self.designer)
+        self.assertEqual(checks.plan_fix(env, self.website.with_env(env), "no_such_fix"), [])
+
+    def test_only_designers_fix(self):
+        plain = new_test_user(self.env, login="check2_plain", groups="base.group_user")
+        env = self.env(user=plain)
+        with self.assertRaises(AccessError):
+            checks.check_designer(env)
+
+
+class TestStructuredData(TransactionCase):
+    """tools.seo: the JSON-LD text cannot break out of its script, and the head helpers keep the rest of the page"""
+
+    def test_json_cannot_close_a_script(self):
+        from ..tools import seo
+        text = seo.dump({"name": "</script><script>alert(1)</script> & <b>"})
+        self.assertNotIn("<", text)
+        self.assertNotIn(">", text)
+        self.assertNotIn("&", text)
+        import json
+        self.assertEqual(json.loads(text)["name"], "</script><script>alert(1)</script> & <b>")
+
+    def test_opening_hours_are_read_not_guessed(self):
+        from ..tools import seo
+        self.assertEqual(seo._opening_hours("Mon-Fri 08:00-17:00\nSat 9:00-13:00"), ["Mo-Fr 08:00-17:00", "Sa 09:00-13:00"])
+        self.assertEqual(seo._opening_hours("Open when we are open"), [])
+
+    def test_the_head_helpers(self):
+        from ..tools import seo
+        arch = '<t t-name="p"><t t-call="website.layout"><div id="wrap"><p>Hi</p></div></t></t>'
+        snippet = '<t t-set="head"><script id="nb-jsonld" type="application/ld+json">{"a":1}</script></t>'
+        self.assertFalse(seo.has_jsonld(arch))
+        with_head = seo.set_head(arch, snippet)
+        self.assertTrue(seo.has_jsonld(with_head))
+        self.assertIn('id="wrap"', with_head)
+        replaced = seo.set_head(with_head, snippet.replace('{"a":1}', '{"a":2}'))
+        self.assertEqual(replaced.count("nb-jsonld"), 1)
+        self.assertIn('{"a":2}', replaced)
+        removed = seo.set_head(replaced, "")
+        self.assertFalse(seo.has_jsonld(removed))
+        self.assertIn('id="wrap"', removed)

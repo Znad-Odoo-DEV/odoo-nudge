@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- The content of a site is seen by the website designers (and the system managers) of its company only -->
+        <record id="nudge_builder_project_rule_company" model="ir.rule">
+            <field name="name">Nudge Builder Project: companies of the user</field>
+            <field name="model_id" ref="model_nudge_builder_project"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="nudge_builder_product_rule_company" model="ir.rule">
+            <field name="name">Nudge Builder Product: companies of the user</field>
+            <field name="model_id" ref="model_nudge_builder_product"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="nudge_builder_service_rule_company" model="ir.rule">
+            <field name="name">Nudge Builder Service: companies of the user</field>
+            <field name="model_id" ref="model_nudge_builder_service"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="nudge_builder_member_rule_company" model="ir.rule">
+            <field name="name">Nudge Builder Team member: companies of the user</field>
+            <field name="model_id" ref="model_nudge_builder_member"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="nudge_builder_testimonial_rule_company" model="ir.rule">
+            <field name="name">Nudge Builder Testimonial: companies of the user</field>
+            <field name="model_id" ref="model_nudge_builder_testimonial"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="nudge_builder_faq_rule_company" model="ir.rule">
+            <field name="name">Nudge Builder Question: companies of the user</field>
+            <field name="model_id" ref="model_nudge_builder_faq"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="nudge_builder_location_rule_company" model="ir.rule">
+            <field name="name">Nudge Builder Location: companies of the user</field>
+            <field name="model_id" ref="model_nudge_builder_location"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="nudge_builder_picture_rule_company" model="ir.rule">
+            <field name="name">Nudge Builder Picture: companies of the user</field>
+            <field name="model_id" ref="model_nudge_builder_picture"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="nudge_builder_social_rule_company" model="ir.rule">
+            <field name="name">Nudge Builder Social link: companies of the user</field>
+            <field name="model_id" ref="model_nudge_builder_social"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+    </data>
+</odoo>

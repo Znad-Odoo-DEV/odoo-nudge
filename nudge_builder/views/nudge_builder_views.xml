@@ -14,6 +14,7 @@
                             invisible="state != 'previewed'"/>
                     <button name="action_continue" type="object" string="Continue the build" class="btn-primary"
                             invisible="not stopped or state == 'published'"/>
+                    <button name="action_import_content" type="object" string="Import content"/>
                     <button name="action_open_editor" type="object" string="Open the home page in the editor"
                             invisible="state not in ('built', 'published')"/>
                     <button name="action_publish" type="object" string="Publish all pages"
@@ -98,6 +99,68 @@
                             </tree>
                         </field>
                     </group>
+                    <notebook>
+                        <page string="Projects" name="content_project" invisible="'project' not in kinds_used">
+                            <div class="text-muted mb-2"><field name="project_count" class="oe_inline"/> records. Pictures, names and descriptions come from here: nothing else is shown on the website.</div>
+                            <field name="project_ids" nolabel="1"/>
+                        </page>
+                        <page string="Products" name="content_product" invisible="'product' not in kinds_used">
+                            <div class="text-muted mb-2" invisible="shop_mode"><field name="product_count" class="oe_inline"/> records. Prices are optional: leave one empty to show none.</div>
+                            <field name="product_ids" nolabel="1" invisible="shop_mode"/>
+                            <div invisible="not shop_mode">
+                                <p class="text-muted">The products of the online shop are Odoo products. Add the ones you already have, or make new ones there (they stay unpublished until you publish them).</p>
+                                <button name="action_shop_products" type="object" string="Open the shop products" class="btn btn-secondary me-2"/>
+                                <button name="action_add_sellable_products" type="object" string="Add the products on sale" class="btn btn-secondary"/>
+                            </div>
+                        </page>
+                        <page string="Services" name="content_service" invisible="'service' not in kinds_used">
+                            <div class="text-muted mb-2"><field name="service_count" class="oe_inline"/> records. Pictures, names and descriptions come from here: nothing else is shown on the website.</div>
+                            <field name="service_ids" nolabel="1"/>
+                        </page>
+                        <page string="Team" name="content_member" invisible="'member' not in kinds_used">
+                            <div class="text-muted mb-2"><field name="member_count" class="oe_inline"/> records. Pictures, names and descriptions come from here: nothing else is shown on the website.</div>
+                            <field name="member_ids" nolabel="1"/>
+                        </page>
+                        <page string="Testimonials" name="content_testimonial" invisible="'testimonial' not in kinds_used">
+                            <div class="text-muted mb-2"><field name="testimonial_count" class="oe_inline"/> records. Pictures, names and descriptions come from here: nothing else is shown on the website.</div>
+                            <field name="testimonial_ids" nolabel="1"/>
+                        </page>
+                        <page string="Questions" name="content_faq" invisible="'faq' not in kinds_used">
+                            <div class="text-muted mb-2"><field name="faq_count" class="oe_inline"/> records. Pictures, names and descriptions come from here: nothing else is shown on the website.</div>
+                            <field name="faq_ids" nolabel="1"/>
+                        </page>
+                        <page string="Locations" name="content_location" invisible="'location' not in kinds_used">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="text-muted flex-grow-1"><field name="location_count" class="oe_inline"/> records. One map is placed for each.</span>
+                                <button name="action_fill_from_company" type="object" string="Fill from the company" class="btn btn-secondary"/>
+                            </div>
+                            <field name="location_ids" nolabel="1"/>
+                        </page>
+                        <page string="Contact &amp; links" name="content_contact">
+                            <group>
+                                <group string="Contact">
+                                    <field name="whatsapp" placeholder="+971501234567"/>
+                                    <field name="whatsapp_text" placeholder="Hello, I would like to ask about..."/>
+                                    <field name="whatsapp_float"/>
+                                    <field name="phone" widget="phone"/>
+                                    <field name="email" widget="email"/>
+                                    <field name="booking_url" widget="url"/>
+                                </group>
+                                <group string="On the website">
+                                    <field name="quote_form"/>
+                                    <field name="show_client"/>
+                                </group>
+                                <group string="Working hours">
+                                    <field name="hours" nolabel="1" placeholder="Sun-Thu 08:00-17:00"/>
+                                </group>
+                            </group>
+                            <separator string="Social links"/>
+                            <field name="social_ids" nolabel="1"/>
+                        </page>
+                    </notebook>
+                    <field name="kinds_used" invisible="1"/>
+                    <field name="listing_mode" invisible="1"/>
+                    <field name="shop_mode" invisible="1"/>
                     <field name="last_publish_id" invisible="1"/>
                     <field name="log" readonly="1" invisible="not log"/>
                     <field name="private" invisible="1"/>

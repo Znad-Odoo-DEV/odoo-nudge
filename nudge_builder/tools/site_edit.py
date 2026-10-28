@@ -13,7 +13,8 @@ from odoo.addons.nudge.tools import base, groups
 from ..models.nudge_builder_template import SNIPPETS
 from . import compat, sections
 
-TOOLS = ("read_site_page", "edit_page_section", "change_page_seo", "undo_site_change")
+TOOLS = ("read_site_page", "edit_page_section", "change_page_seo", "undo_site_change", "add_site_item",
+         "set_contact", "add_location")
 
 
 def _extend_group():
@@ -324,3 +325,157 @@ class UndoSiteChange(base.Action):
         return base.ToolResult(
             "Undone: %s" % revision.name, records=("website.page", [], []),
             card_lines=[{"label": _("Undone"), "value": revision.name}])
+
+
+# ----------------------------------------------------------------------
+# Website Builder 2.0: records and contact details
+# ----------------------------------------------------------------------
+ITEM_KINDS = ("project", "product", "service", "member", "testimonial", "faq", "location")
+LOCATION_FIELDS = ("name", "street", "city", "zip", "maps_url", "latitude", "longitude", "phone",
+                   "whatsapp", "email", "hours", "is_main")
+
+
+def _item_pending(env, site, kind, fields_in, translations):
+    """:return: the pending step of an added record, with its card"""
+    preview = site._item_preview(kind, fields_in, translations)
+    return base.ToolResult(
+        "The person is being shown the new %s." % kind,
+        pending={"summary": preview["summary"], "res_model": "nudge.builder.%s" % kind, "res_ids": [],
+                 "record_names": site.name[:500], "is_sensitive": False,
+                 "values": {"site_id": site.id, "kind": kind, "item": preview["values"],
+                            "translations": preview["translations"]},
+                 "preview": {"records": [], "lines": [{"label": _("Site"), "value": site.name}] + preview["lines"]}})
+
+
+def _item_execute(env, step):
+    values = step.values or {}
+    site = env["nudge.builder.site"].browse(values.get("site_id")).exists()
+    if not site:
+        return base.ToolResult("The site was deleted since.", is_error=True)
+    try:
+        revision, record, pages = site._item_add(values["kind"], values.get("item") or {}, values.get("translations"))
+    except (AccessError, UserError) as error:
+        return _refuse(error)
+    shown = (_("The sections that show it were drawn again.") if pages
+             else _("It will show on the pages at the next build."))
+    return base.ToolResult(
+        "Done: %s. %s Change %s removes it again with undo_site_change." % (revision.name, shown, revision.id),
+        records=(record._name, [record.id], [record.display_name]),
+        card_lines=[{"label": _("Added"), "value": revision.name}])
+
+
+@base.register
+class AddSiteItem(base.Action):
+    name = "add_site_item"
+    kind = "write"
+    group = "nudge.group_nudge_agent"
+    description = (
+        "Add one record to a site made by the Website Builder (\"add a project\", \"add a team member\", \"add a "
+        "question to the FAQ\"), after the person has read it on a card. kind is project, product, service, member, "
+        "testimonial, faq or location; fields holds the facts the person gave, by field name (name, description, "
+        "summary, year, client, price, role, question, answer, author...). Write only what the person said: "
+        "never invent a project, client, price or picture. To write the text in another language of the site "
+        "give translations as {\"ar\": {\"name\": ...}}. The sections that show the kind are drawn again; every "
+        "record can be removed again with undo_site_change.")
+    input_schema = {"type": "object", "properties": {
+        "kind": {"type": "string", "enum": list(ITEM_KINDS)},
+        "fields": {"type": "object", "description": "The facts of the record by field name, in the site's main language."},
+        "translations": {"type": "object", "description": "Optional: {language code: {field: text}} for the other languages."},
+        "site_id": {"type": "integer"}, "website_id": {"type": "integer"}},
+        "required": ["kind", "fields"], "additionalProperties": False}
+
+    def run(self, env, arguments, screen):
+        try:
+            site = find_site(env, arguments)
+            site._check_designer()
+            return _item_pending(env, site, arguments.get("kind"), arguments.get("fields"), arguments.get("translations"))
+        except (AccessError, UserError) as error:
+            return _refuse(error)
+
+    def execute(self, env, step):
+        return _item_execute(env, step)
+
+
+@base.register
+class AddLocation(base.Action):
+    name = "add_location"
+    kind = "write"
+    group = "nudge.group_nudge_agent"
+    description = (
+        "Add a branch, office or shop address to a site made by the Website Builder, after the person has read it "
+        "on a card: name, street, city, zip, a Google Maps link (maps_url) or latitude and longitude, phone, "
+        "WhatsApp, email, opening hours and whether it is the main one. Only what the person said. The contact "
+        "page and its map are drawn again; undo_site_change removes it.")
+    input_schema = {"type": "object", "properties": {
+        "name": {"type": "string", "maxLength": 200}, "street": {"type": "string"}, "city": {"type": "string"},
+        "zip": {"type": "string"},
+        "maps_url": {"type": "string", "description": "An https:// Google Maps link."},
+        "latitude": {"type": "number"}, "longitude": {"type": "number"}, "phone": {"type": "string"},
+        "whatsapp": {"type": "string", "description": "International form: + and 8 to 15 digits."},
+        "email": {"type": "string"},
+        "hours": {"type": "string", "description": "One line per day range: Mon-Fri 08:00-17:00."},
+        "is_main": {"type": "boolean"}, "translations": {"type": "object"},
+        "site_id": {"type": "integer"}, "website_id": {"type": "integer"}},
+        "required": ["name"], "additionalProperties": False}
+
+    def run(self, env, arguments, screen):
+        try:
+            site = find_site(env, arguments)
+            site._check_designer()
+            fields_in = {name: arguments[name] for name in LOCATION_FIELDS if arguments.get(name) not in (None, "")}
+            return _item_pending(env, site, "location", fields_in, arguments.get("translations"))
+        except (AccessError, UserError) as error:
+            return _refuse(error)
+
+    def execute(self, env, step):
+        return _item_execute(env, step)
+
+
+@base.register
+class SetContact(base.Action):
+    name = "set_contact"
+    kind = "write"
+    group = "nudge.group_nudge_agent"
+    description = (
+        "Set the contact details of a site made by the Website Builder, after the person has read the before and "
+        "after on a card: whatsapp (international form, + and 8 to 15 digits), phone, email, hours (one line per "
+        "day range, Mon-Fri 08:00-17:00), booking_url and social links ([{network, url}], https only). Only what "
+        "the person said; an empty text clears the detail. undo_site_change puts the old ones back.")
+    input_schema = {"type": "object", "properties": {
+        "whatsapp": {"type": "string"},
+        "whatsapp_text": {"type": "string", "description": "The first message of the chat."},
+        "phone": {"type": "string"}, "email": {"type": "string"}, "hours": {"type": "string"},
+        "booking_url": {"type": "string"},
+        "social": {"type": "array", "items": {"type": "object", "properties": {
+            "network": {"type": "string"}, "url": {"type": "string"}}, "required": ["network", "url"]}},
+        "site_id": {"type": "integer"}, "website_id": {"type": "integer"}},
+        "additionalProperties": False}
+
+    def run(self, env, arguments, screen):
+        try:
+            site = find_site(env, arguments)
+            site._check_designer()
+            preview = site._contact_preview(arguments)
+        except (AccessError, UserError) as error:
+            return _refuse(error)
+        return base.ToolResult(
+            "The person is being shown the change.",
+            pending={"summary": preview["summary"], "res_model": "nudge.builder.site", "res_ids": [],
+                     "record_names": site.name[:500], "is_sensitive": False,
+                     "values": {"site_id": site.id, "contact": preview["values"], "hash": preview["hash"]},
+                     "preview": {"records": [], "lines": [{"label": _("Site"), "value": site.name}]
+                                 + preview["lines"]}})
+
+    def execute(self, env, step):
+        values = step.values or {}
+        site = env["nudge.builder.site"].browse(values.get("site_id")).exists()
+        if not site:
+            return base.ToolResult("The site was deleted since.", is_error=True)
+        try:
+            revision = site._contact_apply(values.get("contact") or {}, expect_hash=values.get("hash"))
+        except (AccessError, UserError) as error:
+            return _refuse(error)
+        return base.ToolResult(
+            "Done: %s. Change %s keeps what it was." % (revision.name, revision.id),
+            records=("nudge.builder.site", [site.id], [site.name]),
+            card_lines=[{"label": _("Changed"), "value": revision.name}])

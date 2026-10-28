@@ -12,7 +12,7 @@ from .safe import clean_content
 
 BUTTON = ".//a[contains(concat(' ', normalize-space(@class), ' '), ' btn ')]"
 MAX_ITEMS = 12
-HEADING = ".//h3|.//h4|.//h5"
+HEADING = ".//h3|.//h4|.//h5|.//h2[contains(concat(' ', normalize-space(@class), ' '), ' card-title ')]"
 
 
 def has_class(name):
@@ -48,7 +48,8 @@ def title_of(section):
     one is told apart from the rest (another level or class: Odoo 18's features and team blocks), or
     the only one; headings that all look alike are the items, and the block has no title of its own.
     Never ``a or b`` on elements: an empty element is false."""
-    found = first(section, ".//h1|.//h2")
+    # a card's own heading (Odoo 19's columns: h2.card-title) is an item's, never the block's
+    found = first(section, f".//h1|.//h2[not({has_class('card-title')}) and not(ancestor::*[{has_class('card')}])]")
     if found is not None:
         return found
     headings = section.xpath(".//h3|.//h4")
@@ -120,16 +121,33 @@ def _pair(item, *names):
     return ""
 
 
-def _fill_features(section, items):
+def _fill_features(section, items, fresh=True):
     containers = section.xpath(
         f".//div[({has_class('col-lg-4')} or {has_class('col-lg-3')} or {has_class('col-lg-6')}) "
-        f"and ./descendant::*[self::h3 or self::h4 or self::h5] "
+        f"and ./descendant::*[self::h3 or self::h4 or self::h5 or (self::h2 and {has_class('card-title')})] "
         f"and not(.//div[{has_class('row')}])]")
     for node, item in zip(_resize(containers, len(items)), items):
         set_text(first(node, HEADING), _pair(item, "title", "name", "question"))
         paragraph = first(node, ".//p")
         if paragraph is not None:
             set_text(paragraph, _pair(item, "text", "role", "answer"))
+        _card_picture(node, item, fresh)
+
+
+def _card_picture(node, item, fresh=True):
+    """The picture of a card: the item's own, else none. Odoo's sample pictures of a card (stock photographs of
+    another sector) never stay on a site that is not Odoo's demo. A section that was filled before (an edit)
+    keeps the picture it has."""
+    holders = node.xpath(f".//figure[{has_class('o_card_img_wrapper')}]") or node.xpath(f".//img[{has_class('card-img-top')}]")
+    for holder in holders:
+        image = holder if holder.tag == "img" else first(holder, ".//img")
+        if item.get("image") and image is not None:
+            image.set("src", item["image"])
+            image.set("alt", _pair(item, "title", "name"))
+            for attribute in ("data-original-id", "data-original-src", "data-mimetype", "data-resize-width"):
+                image.attrib.pop(attribute, None)
+        elif fresh:
+            holder.getparent().remove(holder)
 
 
 def _fill_team(section, items):
@@ -274,6 +292,48 @@ def set_picture(section, url, alt=""):
     return False
 
 
+SWEPT = "p|h1|h2|h3|h4|h5|h6|li"
+
+
+def _norm(text):
+    return " ".join((text or "").split())
+
+
+def sample_terms(section):
+    """:return: the words Odoo's sample section carries, taken before anything is filled in"""
+    return {_norm(node.text_content()) for node in section.xpath(f".//{SWEPT.replace('|', '|.//')}")
+            if _norm(node.text_content())}
+
+
+def sweep_samples(section, samples):
+    """Take out what is still Odoo's sample text after the filling: a second sample paragraph, the sample line
+    under a title nobody gave a text, a sample quote with its made-up customer. Odoo's own words are English in
+    an English render and Arabic in an Arabic one, so the sample is told by comparing with the section as it was
+    rendered, not by a list of sentences.
+
+    :return: how many elements were taken out"""
+    gone = 0
+    for node in section.xpath(f".//{SWEPT.replace('|', '|.//')}"):
+        if node.getparent() is None or node.xpath(BUTTON) or node.xpath(".//img"):
+            continue
+        if _norm(node.text_content()) not in samples:
+            continue
+        quote = first(node, f"ancestor::blockquote[{has_class('s_blockquote')}]")
+        target = node if quote is None else quote
+        parent = target.getparent()
+        if parent is not None:
+            parent.remove(target)
+            gone += 1
+    return gone
+
+
+def is_blank(section):
+    """:return: whether a section shows nothing: no words and no picture"""
+    if section.xpath(".//img|.//iframe|.//*[contains(@class, 's_parallax_bg')]"):
+        return False
+    return not _norm(section.text_content())
+
+
 ITEM_FILLERS = {
     "s_company_team": _fill_team,
     "s_numbers": _fill_numbers,
@@ -281,17 +341,20 @@ ITEM_FILLERS = {
 }
 
 
-def fill(section, snippet, content, picture_url=None, facts=None):
+def fill(section, snippet, content, picture_url=None, facts=None, fresh=True):
     """Fill the section of a snippet with the words of one language.
 
     :param str snippet: the snippet name, ``s_cover`` or ``module.xmlid``
     :param dict content: ``title``, ``text``, ``button``, ``button_url``, ``items`` ...
     :param picture_url: where its main picture comes from
     :param dict facts: the company's ``phone``, ``email``, ``address`` for contact blocks
+    :param bool fresh: the section is Odoo's sample, just rendered: what it still says of the sample after the
+        filling is taken out. False for a section filled before (an edit of its words), which is left as it is
     :return: the section"""
     content = clean_content(content or {})
     facts = facts or {}
     short = snippet.split(".")[-1]
+    samples = sample_terms(section)
     has_title_slot = title_of(section) is not None
     if content.get("title"):
         set_text(title_of(section), content["title"])
@@ -315,7 +378,10 @@ def fill(section, snippet, content, picture_url=None, facts=None):
         button.attrib.pop("t-att-href", None)
     items = [item for item in (content.get("items") or []) if isinstance(item, dict)]
     if items:
-        ITEM_FILLERS.get(short, _fill_features)(section, items)
+        if short in ITEM_FILLERS:
+            ITEM_FILLERS[short](section, items)
+        else:
+            _fill_features(section, items, fresh)
         if content.get("title") and not has_title_slot:
             add_title(section, content["title"])  # a grid of items whose version gives it no title
     if short == "s_contact_info":
@@ -324,4 +390,6 @@ def fill(section, snippet, content, picture_url=None, facts=None):
         _fill_map(section, content, facts)
     if picture_url:
         set_picture(section, picture_url, content.get("title") or "")
+    if fresh:
+        sweep_samples(section, samples)
     return section

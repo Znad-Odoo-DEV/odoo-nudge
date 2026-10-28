@@ -116,7 +116,7 @@
         <field name="arch" type="xml">
             <form>
                 <p>Checks the website for search engines, links, translations, speed, accessibility, legal
-                   pages and the shop. Nothing is changed by the check.</p>
+                   pages, the shop and the content of a built site (sample text, picture texts, WhatsApp, maps, right to left, structured data). Nothing is changed by the check.</p>
                 <group>
                     <field name="website_id" options="{'no_create': True}"/>
                     <field name="external"/>

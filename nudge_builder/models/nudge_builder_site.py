@@ -18,7 +18,10 @@ from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.addons.nudge.models.nudge_run import register_job
 from odoo.addons.nudge.tools import deadline as worker_time
 
-from ..tools import compat, library, pictures, preview, snippets
+from urllib.parse import quote
+
+from .nudge_builder_content import ALL_KINDS, EMAIL, normalise_whatsapp, safe_url, valid_whatsapp
+from ..tools import compat, content_sections, footer, library, neutral, pictures, preview, snippets
 from ..tools import copy as copywriter
 from ..tools.legal import legal_specs
 from ..tools.schema import KINDS
@@ -36,9 +39,11 @@ LOCK_CLASS = 7_102_017
 DESIGNER = "website.group_website_designer"
 COLOUR = re.compile(r"#[0-9a-fA-F]{6}")
 FONT = re.compile(r"[A-Za-z0-9 \-]{1,40}")
+HERO_SNIPPETS = ("s_cover", "s_banner")
 PICTURE_SNIPPETS = ("s_cover", "s_text_image", "s_image_text", "s_banner", "s_picture")
 HEADERS = {"a": ("default", "descriptive"), "b": ("stretch", "links"), "c": ("search", "centered")}
 MAX_PRODUCTS = 15
+MAX_SHOP_PRODUCTS = 50
 
 
 class NudgeBuilderSite(models.Model):
@@ -92,6 +97,39 @@ class NudgeBuilderSite(models.Model):
     progress_text = fields.Char(copy=False)
     stopped = fields.Boolean(copy=False)
     log = fields.Text(copy=False)
+
+    # Content records (the facts and the pictures of the company; the build writes from these only)
+    project_ids = fields.One2many("nudge.builder.project", "site_id", string="Projects")
+    product_ids = fields.One2many("nudge.builder.product", "site_id", string="Products")
+    service_ids = fields.One2many("nudge.builder.service", "site_id", string="Services")
+    member_ids = fields.One2many("nudge.builder.member", "site_id", string="Team")
+    testimonial_ids = fields.One2many("nudge.builder.testimonial", "site_id", string="Testimonials")
+    faq_ids = fields.One2many("nudge.builder.faq", "site_id", string="Questions")
+    location_ids = fields.One2many("nudge.builder.location", "site_id", string="Locations")
+    project_count = fields.Integer(compute="_compute_counts")
+    product_count = fields.Integer(compute="_compute_counts")
+    service_count = fields.Integer(compute="_compute_counts")
+    member_count = fields.Integer(compute="_compute_counts")
+    testimonial_count = fields.Integer(compute="_compute_counts")
+    faq_count = fields.Integer(compute="_compute_counts")
+    location_count = fields.Integer(compute="_compute_counts")
+    kinds_used = fields.Json(compute="_compute_kinds_used", help="The kinds of content the template shows.")
+    listing_mode = fields.Boolean(compute="_compute_kinds_used", help="The projects are real estate listings.")
+    shop_mode = fields.Boolean(compute="_compute_kinds_used", help="The products are those of the online shop.")
+    # Products of the shop: ids of product.template (Website Sale is optional, so no hard link)
+    shop_product_ids = fields.Json(copy=False, help="The products of the online shop this site shows (product.template ids).")
+    # Contact and links
+    whatsapp = fields.Char(string="WhatsApp", help="International format: +971501234567.")
+    whatsapp_text = fields.Char(string="WhatsApp first message", translate=True,
+                                help="The message a visitor starts the chat with.")
+    whatsapp_float = fields.Boolean(string="Floating WhatsApp button")
+    phone = fields.Char()
+    email = fields.Char()
+    social_ids = fields.One2many("nudge.builder.social", "site_id", string="Social links")
+    booking_url = fields.Char(string="Booking link")
+    hours = fields.Text(string="Working hours")
+    show_client = fields.Boolean(string="Show client names", help="Show the client of each project on the website.")
+    quote_form = fields.Boolean(string="Request a quote form", help="Add a 'Request a quote' form to the website.")
 
     # ------------------------------------------------------------------ defaults
     @api.model
@@ -215,6 +253,166 @@ class NudgeBuilderSite(models.Model):
         address = ", ".join(part for part in (partner.street, partner.city, partner.country_id.name) if part)
         return {"phone": company.phone, "email": company.email, "address": address}
 
+    # ------------------------------------------------------------------ content records
+    @api.depends("project_ids", "product_ids", "service_ids", "member_ids", "testimonial_ids", "faq_ids", "location_ids")
+    def _compute_counts(self):
+        for site in self:
+            for kind in ALL_KINDS:
+                site[f"{kind}_count"] = len(site[f"{kind}_ids"])
+
+    @api.depends("template_key", "template_json", "shop", "state")
+    def _compute_kinds_used(self):
+        for site in self:
+            kinds = site._template_kinds()
+            site.kinds_used = kinds
+            site.listing_mode = site.template_key == "real_estate"
+            site.shop_mode = bool(site.shop and site._shop_installed() and "product" in kinds)
+
+    def _template_kinds(self):
+        """:return: the kinds of content (``project``, ``service``...) the template shows, in the order of
+        ALL_KINDS; every kind when the template does not say"""
+        self.ensure_one()
+        try:
+            declared = (self._load_template() or {}).get("kinds")
+        except Exception:  # noqa: BLE001 - a template that does not load shows every kind
+            declared = None
+        if not isinstance(declared, list) or not declared:
+            return list(ALL_KINDS)
+        return [kind for kind in ALL_KINDS if kind in declared]
+
+    def content_records(self, kind, published_only=True):
+        """:return: the records of one kind (featured first), the published ones by default"""
+        self.ensure_one()
+        if kind not in ALL_KINDS:
+            return self.env["nudge.builder.project"].browse()
+        records = self[f"{kind}_ids"].sorted()
+        return records.filtered("published") if published_only else records
+
+    def whatsapp_link(self, lang_code=None, text=None):
+        """:return: the click-to-chat address of the site's WhatsApp number, with the first message in the
+        language asked (the site's text, translated); False when there is no valid number"""
+        self.ensure_one()
+        if not valid_whatsapp(self.whatsapp):
+            return False
+        message = text if text is not None else (self.with_context(lang=lang_code) if lang_code else self).whatsapp_text
+        link = "https://wa.me/" + self.whatsapp.lstrip("+")
+        return link + ("?text=" + quote(message, safe="") if message else "")
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for values in vals_list:
+            if values.get("whatsapp"):
+                values["whatsapp"] = normalise_whatsapp(values["whatsapp"])
+        return super().create(vals_list)
+
+    def write(self, values):
+        if values.get("whatsapp"):
+            values = dict(values, whatsapp=normalise_whatsapp(values["whatsapp"]))
+        return super().write(values)
+
+    @api.constrains("whatsapp", "email", "booking_url")
+    def _check_contact(self):
+        for site in self:
+            if site.whatsapp and not valid_whatsapp(site.whatsapp):
+                raise ValidationError(_("The WhatsApp number must be in international format, like +971501234567."))
+            if site.email and not EMAIL.fullmatch(site.email.strip()):
+                raise ValidationError(_("The email address is not valid."))
+            if not safe_url(site.booking_url):
+                raise ValidationError(_("The booking link must be a web address starting with https://."))
+
+    def action_import_content(self):
+        """Open the import wizard (Odoo records, Excel/CSV sheets, pictures) for this site"""
+        self.ensure_one()
+        self._check_designer()
+        return self.env["nudge.builder.import"]._open_for(self)
+
+    def action_fill_from_company(self):
+        """Fill the empty contact fields and the main location from the company; nothing typed is replaced"""
+        self._check_designer()
+        for site in self:
+            company = site.company_id
+            partner = company.partner_id
+            values = {}
+            if not site.phone and company.phone:
+                values["phone"] = company.phone
+            if not site.email and company.email:
+                values["email"] = company.email
+            if values:
+                site.write(values)
+            has_address = any((partner.street, partner.city, partner.country_id))
+            if has_address and not site.location_ids.filtered("is_main"):
+                site.env["nudge.builder.location"].create({
+                    "site_id": site.id,
+                    "name": company.name,
+                    "street": partner.street,
+                    "city": partner.city,
+                    "state_id": partner.state_id.id,
+                    "country_id": partner.country_id.id,
+                    "zip": partner.zip,
+                    "phone": company.phone,
+                    "email": company.email,
+                    "is_main": True,
+                })
+        return True
+
+    def shop_products(self):
+        """:return: the product.template records of the shop (the ones the person may read), or an empty set"""
+        self.ensure_one()
+        if "product.template" not in self.env:
+            return self.env["nudge.builder.project"].browse()
+        ids = [int(i) for i in (self.shop_product_ids or []) if str(i).isdigit()]
+        return self.env["product.template"].browse(ids).exists()
+
+    def add_shop_products(self, products):
+        """Add existing product.template records to the shop of the site"""
+        self.ensure_one()
+        self._check_designer()
+        if "product.template" not in self.env:
+            raise UserError(_("Install Website Sale to show shop products."))
+        products.mapped("name")  # raises AccessError when the person may not read them
+        self.shop_product_ids = list(dict.fromkeys(list(self.shop_product_ids or []) + products.ids))
+        return self.shop_products()
+
+    def create_shop_product(self, values):
+        """Create a product for the shop as the person (name, list_price, image_1920, description_sale), unpublished
+        unless ``is_published`` is given, and add it to the site"""
+        self.ensure_one()
+        self._check_designer()
+        if "product.template" not in self.env:
+            raise UserError(_("Install Website Sale to show shop products."))
+        allowed = {"name", "list_price", "image_1920", "description_sale", "is_published", "categ_id"}
+        allowed &= set(self.env["product.template"]._fields)
+        vals = {key: value for key, value in values.items() if key in allowed}
+        if not vals.get("name"):
+            raise UserError(_("A product needs a name."))
+        if "is_published" in allowed:
+            vals.setdefault("is_published", False)
+        product = self.env["product.template"].create(vals)
+        self.add_shop_products(product)
+        return product
+
+    def action_shop_products(self):
+        """Open the shop products of the site"""
+        self.ensure_one()
+        if "product.template" not in self.env:
+            raise UserError(_("Install Website Sale to show shop products."))
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Shop products"),
+            "res_model": "product.template",
+            "view_mode": "list,form",
+            "domain": [("id", "in", self.shop_products().ids)],
+        }
+
+    def action_add_sellable_products(self):
+        """Add the products on sale (up to MAX_SHOP_PRODUCTS) to the shop of the site"""
+        self.ensure_one()
+        if "product.template" not in self.env:
+            raise UserError(_("Install Website Sale to show shop products."))
+        products = self.env["product.template"].search([("sale_ok", "=", True)], limit=MAX_SHOP_PRODUCTS)
+        self.add_shop_products(products)
+        return True
+
     def _company_facts(self):
         """:return: the facts about the company that the writer may use, in a
         ``<data>`` frame, with only what the person allowed"""
@@ -269,8 +467,13 @@ class NudgeBuilderSite(models.Model):
         if not self._provider_usable() or self._short_of_time():
             return {}
         lang = self.env["res.lang"].search([("code", "=like", f"{lang_code}\\_%")], limit=1)
+        # the company's own records: the only projects, products, people and places the writer may name
+        records = copywriter.records_text({
+            kind: [{"name": record.name} for record in self._kind_records(kind)]
+            for kind in ALL_KINDS if self._kind_records(kind)})
         prompt = copywriter.prompt_for(
-            self._company_facts(), page_spec, lang.name or lang_code, self.tone)
+            self._company_facts(), page_spec, lang.name or lang_code, self.tone, self.allow_projects,
+            records=records or None)
         answer = self.env["nudge.provider"]._complete(
             copywriter.SYSTEM, prompt, self.env.user, self.env.company, timeout=120)
         return copywriter.parse(answer, len(page_spec.get("blocks") or []))
@@ -281,9 +484,10 @@ class NudgeBuilderSite(models.Model):
         left = worker_time.remaining()
         return left is not None and left < PROVIDER_MARGIN
 
-    def _picture_for(self, prompt, placeholder_key):
+    def _picture_for(self, prompt, placeholder_key, side=False):
         """:return: a public attachment: the picture model's drawing of ``prompt`` when one is
-        configured and answers, else the bundled placeholder ``placeholder_key``"""
+        configured and answers; else, for a picture beside a text (``side``), the company's logo on the
+        light colour of the site when the company has one; else the bundled placeholder ``placeholder_key``"""
         self.ensure_one()
         data, name = None, None
         provider = self._provider()
@@ -292,6 +496,14 @@ class NudgeBuilderSite(models.Model):
             data = pictures.draw_picture(provider, model, prompt, timeout=worker_time.cap(60))
             name = "nudge_builder_%s.png" % compat.unique_id()
         key = placeholder_key if placeholder_key in pictures.PLACEHOLDERS else "abstract"
+        if not data and side and self.company_id.logo:
+            data = pictures.brand_card(base64.b64decode(self.company_id.logo), self._palette())
+            name = "nudge_builder_logo.png"
+            if data:
+                existing = self.env["ir.attachment"].search([
+                    ("res_model", "=", self._name), ("res_id", "=", self.id), ("name", "=", name)], limit=1)
+                if existing:
+                    return existing
         if not data:
             name = f"nudge_builder_{key}.jpg"
             existing = self.env["ir.attachment"].search([
@@ -317,6 +529,76 @@ class NudgeBuilderSite(models.Model):
             _logger.info("Nudge Builder: the header and footer layout was not set", exc_info=True)
             self._say(_("The header and footer layout was left as it is."))
 
+    # ------------------------------------------------------------------ the footer
+    def _footer_facts(self, lang, template=None):
+        """:return: what the footer shows of the company, in one language: its name, address, phone and email
+        from the company record, the pages of the website's menu, the social accounts the website has"""
+        self.ensure_one()
+        short = compat.lang_code(lang.code)
+        company = self.company_id.with_context(lang=lang.code)
+        partner = company.partner_id.with_context(lang=lang.code)
+        place = " ".join(part for part in (partner.city, partner.state_id.code or "", partner.zip) if part)
+        website = self.website_id.with_context(lang=lang.code)
+        homes = {"/", website.homepage_url or "/"}
+        links = []
+        for menu in website.menu_id.child_id.sorted("sequence"):
+            if menu.url and menu.url not in ("#",) and menu.url not in homes:
+                links.append((menu.name, menu.url))
+        social = {}
+        for network in ("facebook", "twitter", "linkedin", "instagram", "youtube", "github", "tiktok"):
+            value = website[f"social_{network}"] if f"social_{network}" in website._fields else ""
+            # Odoo's own accounts are the sample of a new database, not the company's
+            social[network] = bool(value) and "odoo" not in value.lower()
+        about = ""
+        if template:
+            home = next((page for page in template["pages"] if page["kind"] == "home"), {})
+            description = (home.get("seo") or {}).get("description") or {}
+            about = description.get(short) or description.get("en") or ""
+        return {
+            "name": company.name or "", "address_lines": [partner.street, partner.street2, place, partner.country_id.name],
+            "phone": company.phone or "", "email": company.email or "", "about": about, "links": links,
+            "social": social, "whatsapp_url": content_sections.whatsapp_url(
+                self._site_value("whatsapp"), self.with_context(lang=lang.code)._site_value("whatsapp_text")),
+            "whatsapp_label": self.with_context(lang=lang.code).env._("WhatsApp"), "logo_url": f"/web/image/website/{self.website_id.id}/logo" if self.website_id.logo else "",
+        }
+
+    def _personalise_view(self, key, make):
+        """Rewrite the view ``key`` on this website's own copy of it (Odoo copies the generic view for the website
+        when it has none), the first language as the source and the others as translations of the same words.
+
+        :param make: ``make(arch, lang)`` is the arch written for one language
+        :return: whether anything was written"""
+        View = self.env["ir.ui.view"].with_context(active_test=False)
+        generic = self.env.ref(key, raise_if_not_found=False)
+        if not generic:
+            return False
+        website_id = self.website_id.id
+        view = View.search([("key", "=", key), ("website_id", "=", website_id)], limit=1) or View.browse(generic.id)
+        base = view.with_context(lang="en_US").arch_db
+        arch_by_lang = {lang.code: make(base, lang) for lang in self._langs()}
+        source = self._source_lang().code
+        if all(arch in (base, footer.canonical(base)) for arch in arch_by_lang.values()):
+            return False
+        view.with_context(website_id=website_id, lang="en_US").write({"arch_db": arch_by_lang[source]})
+        specific = View.search([("key", "=", key), ("website_id", "=", website_id)], limit=1)
+        compat.map_terms(specific.with_context(lang="en_US"), arch_by_lang[source], {
+            code: arch for code, arch in arch_by_lang.items() if code != source})
+        return True
+
+    def _set_footer(self, template=None):
+        """Make the footer of the website (and the contact strip of its header) show the company record, in every
+        language of the site: the layout views are written on the website's own copy, so no other website
+        changes, and the sample company of Odoo does not show on the built site."""
+        self.ensure_one()
+        self._check_designer()
+        header, footer_name = HEADERS.get(self.direction or "a", HEADERS["a"])
+        facts = {lang.code: self._footer_facts(lang, template) for lang in self._langs()}
+        for key in (f"website.template_footer_{footer_name}", f"website.template_header_{header}"):
+            self._personalise_view(key, lambda arch, lang: footer.personalise(arch, facts[lang.code]))
+        # the copyright line has its own view
+        self._personalise_view("website.footer_copyright_company_name", lambda arch, lang: footer.copyright_line(
+            arch, facts[lang.code]["name"], "حقوق النشر" if lang.code.startswith("ar") else "Copyright"))
+
     # ------------------------------------------------------------------ snippets and pages
     def _content_for(self, content, lang):
         """:return: the fields for one language out of a language map or a flat dict"""
@@ -339,6 +621,167 @@ class NudgeBuilderSite(models.Model):
             result[lang.code] = section
         return result
 
+    # ------------------------------------------------------------------ the sections of the records
+    def _site_value(self, name, default=""):
+        """:return: a field of the content tabs (phone, whatsapp ...), the default when this database lacks it"""
+        return self[name] if name in self._fields and self[name] else default
+
+    def _wants_whatsapp_float(self):
+        self.ensure_one()
+        return bool(self._site_value("whatsapp_float") and content_sections.whatsapp_number(self._site_value("whatsapp")))
+
+    def _content_labels(self):
+        """:return: the words the sections write themselves, in the language of the environment"""
+        from odoo import _  # noqa: PLC0415
+        return {
+            "request_quote": _("Request a quote"), "whatsapp": _("WhatsApp"), "call": _("Call"),
+            "email": _("Email"), "book": _("Book now"), "hours": _("Working hours"), "contact": _("Get in touch"),
+            "directions": _("Open in Google Maps"), "map_of": _("Map of %s"), "main_office": _("Main office"),
+            "before": _("Before"), "after": _("After"), "for_sale": _("For sale"), "for_rent": _("For rent"),
+            "sold": _("Sold"), "planned": _("Planned"), "ongoing": _("Ongoing"), "done": _("Completed"),
+            "bedrooms": _("%s bedrooms"), "area": _("%s m²"), "previous": _("Previous"), "next": _("Next"),
+            "chat_on_whatsapp": _("Chat with us on WhatsApp"), "stars": _("%s out of 5"), "linkedin": _("LinkedIn"),
+        }
+
+    def _content_ctx(self, lang):
+        """:return: what every section of a language needs: direction of writing, the words the sections add
+        themselves (translated), the WhatsApp text and the quote form address"""
+        self.ensure_one()
+        site = self.with_context(lang=lang.code)
+        return {"rtl": content_sections.is_rtl(lang.code), "labels": site._content_labels(),
+                "whatsapp_text": site._site_value("whatsapp_text"),
+                "quote_url": "/request-a-quote" if site._site_value("quote_form") else ""}
+
+    def _whatsapp_float(self, lang):
+        ctx = self._content_ctx(lang)
+        return content_sections.whatsapp_float(self._site_value("whatsapp"), ctx["whatsapp_text"], ctx)
+
+    def _kind_records(self, kind):
+        """:return: the published records of a kind of this site, featured first; empty when the model is not
+        there (a database without the content tabs)"""
+        self.ensure_one()
+        model = f"nudge.builder.{kind}"
+        if model not in self.env:
+            return self.browse()
+        return self.env[model].search([("site_id", "=", self.id), ("published", "=", True)])
+
+    def _public_picture(self, picture, width=1280):
+        """:return: the url of a public, resized copy of a picture record (the original stays private); '' when it
+        has no image"""
+        if not picture.image:
+            return ""
+        stamp = re.sub(r"\D", "", str(picture.write_date or ""))
+        name = f"nb_pic_{picture._name}_{picture.id}_{width}_{stamp}"
+        Attachment = self.env["ir.attachment"]
+        found = Attachment.search(
+            [("res_model", "=", picture._name), ("res_id", "=", picture.id), ("name", "=", name)], limit=1)
+        if not found:
+            found = Attachment.create({
+                "name": name, "datas": pictures.web_image(picture.image, width), "public": True,
+                "res_model": picture._name, "res_id": picture.id})
+        return f"/web/image/{found.id}"
+
+    def _record_pictures(self, record, lang):
+        """:return: ``[{url, alt}]`` of a record, in order, with an alt text in the language"""
+        result = []
+        for picture in (record._pictures() if hasattr(record, "_pictures") else []):
+            url = self._public_picture(picture)
+            if url:
+                result.append({"url": url, "alt": picture.alt or picture.name or record.name or ""})
+        if not result and "image" in record._fields and record.image:
+            url = self._public_picture(record, 512)
+            if url:
+                result.append({"url": url, "alt": record.author if "author" in record._fields else record.name or ""})
+        return result
+
+    def _record_item(self, kind, record, lang):
+        """:return: one record as the plain dict the section renderers read, in one language"""
+        record = record.with_context(lang=lang.code)
+        item = {"name": record.name or "", "summary": record.summary or "", "description": record.description or "",
+                "featured": record.featured, "pictures": self._record_pictures(record, lang)}
+        known = record._fields
+
+        def get(name):
+            return record[name] if name in known else False
+
+        symbol = record.currency_id.symbol if "currency_id" in known and record.currency_id else ""
+        if kind == "project":
+            item.update(location=get("location"), year=get("year"), category=get("category"), status=get("status"),
+                        client=get("client") if self._site_value("show_client") else "",
+                        area=get("area"), bedrooms=get("bedrooms"), listing_status=get("listing_status"))
+            if get("price"):
+                item["price_text"] = content_sections.format_price(record.price, symbol)
+            for side in ("before", "after"):
+                picture = get(f"{side}_picture_id")
+                item[f"{side}_url"] = self._public_picture(picture) if picture else ""
+        elif kind == "product":
+            item.update(category=get("category"))
+            if get("price"):
+                item["price_text"] = content_sections.format_price(record.price, symbol)
+        elif kind == "service":
+            icon = (get("icon") or "").replace("fa ", "").strip()
+            item.update(icon=("fa " + icon) if icon else "", quote=get("quote"))
+        elif kind == "member":
+            item.update(role=get("role"), specialty=get("specialty"), linkedin=get("linkedin"), hours=get("hours"),
+                        description=item["description"] or content_sections.plain(get("bio") or ""))
+        elif kind == "testimonial":
+            item.update(author=get("author"), author_role=get("author_role"), company=get("company_name"),
+                        rating=get("rating"), summary=get("quote") or item["summary"])
+        elif kind == "faq":
+            item.update(question=record.name, answer=item["description"])
+        elif kind == "location":
+            item.update(address=record._address_line() if hasattr(record, "_address_line") else "",
+                        maps_url=get("maps_url"), maps_embed_src=get("maps_embed_src"), phone=get("phone"),
+                        whatsapp=get("whatsapp"), email=get("email"), hours=get("hours"), is_main=get("is_main"))
+        return item
+
+    def _contact_data(self):
+        return {"whatsapp": self._site_value("whatsapp"), "phone": self._site_value("phone") or self.company_id.phone,
+                "email": self._site_value("email") or self.company_id.email,
+                "booking_url": self._site_value("booking_url"), "hours": self._site_value("hours"),
+                "socials": [(social.network, social.url) for social in self.social_ids]
+                if "social_ids" in self._fields else []}
+
+    def _content_block(self, block, spec, index=0):
+        """The sections of a block that shows the site's records (``{"kind": "project", "layout": "grid"}``).
+
+        :return: ``{lang code: lxml section}``, or None when the site has nothing for it: a kind with no records
+            is not placed, and the log says so"""
+        self.ensure_one()
+        kind = block["kind"]
+        copy = block.get("copy") or {}
+        records = self._kind_records(kind) if kind in content_sections.LAYOUTS else None
+        if kind in content_sections.LAYOUTS and not records:
+            self._say(_("No %(kind)s records: the block %(block)s of the page %(page)s was left out.",
+                                 kind=kind, block=index + 1, page=(spec.get("name") or {}).get("en") or spec["key"]))
+            return None
+        result = {}
+        uid = compat.unique_id()
+        for lang in self._langs():
+            short = compat.lang_code(lang.code)
+            words = copy.get(short) or copy.get("en") or {}
+            ctx = self._content_ctx(lang)
+            site = self.with_context(lang=lang.code)
+            if kind in content_sections.LAYOUTS:
+                items = [self._record_item(kind, record, lang) for record in records]
+                section = content_sections.render(
+                    kind, items, block.get("layout"), self.direction or "a", words.get("title", ""),
+                    words.get("text", ""), ctx, uid)
+            elif kind == "contact":
+                section = content_sections.render_contact(
+                    site._contact_data(), words.get("title", ""), words.get("text", ""), ctx)
+            elif kind == "hours":
+                section = content_sections.render_hours(site._site_value("hours"), words.get("title", ""), ctx)
+            elif kind == "quote":
+                section = content_sections.render_quote(
+                    ctx["quote_url"], words.get("title", ""), words.get("text", ""), ctx)
+            else:
+                section = None
+            if section is None:
+                return None
+            result[lang.code] = section
+        return result
+
     def _arch_by_lang(self, name, key, sections_by_lang):
         source = self._source_lang().code
         arch = {}
@@ -358,12 +801,17 @@ class NudgeBuilderSite(models.Model):
 
     def _spec_picture(self, spec, block):
         """:return: the url of the picture of a block, or None when the snippet keeps its own"""
+        if block.get("kind"):
+            return None  # a block of records shows the records' pictures
         snippet = block["snippet"].split(".")[-1]
         if not (block.get("image") or block.get("image_prompt")) and snippet not in PICTURE_SNIPPETS:
             return None
         if snippet == "s_picture" and not block.get("image"):
             return None
-        attachment = self._picture_for(block.get("image_prompt"), block.get("image") or "abstract")
+        # the cover and the banners keep the sector's drawing (a text lies over them); a picture beside a text is
+        # the company's own logo card when it has a logo
+        attachment = self._picture_for(
+            block.get("image_prompt"), block.get("image") or "abstract", side=snippet not in HERO_SNIPPETS)
         return f"/web/image/{attachment.id}"
 
     def _build_page(self, spec):
@@ -374,6 +822,8 @@ class NudgeBuilderSite(models.Model):
         self.ensure_one()
         self._check_designer()
         langs = self._langs()
+        if not self.allow_projects:
+            spec = neutral.without_project_names(spec)  # the template's sample projects are not the company's
         key_short = spec["key"]
         names = spec.get("name") or {}
         generated = {}
@@ -381,7 +831,19 @@ class NudgeBuilderSite(models.Model):
             for lang in langs:
                 generated[compat.lang_code(lang.code)] = self._write_copy(spec, compat.lang_code(lang.code))
         columns = {lang.code: [] for lang in langs}
+        placed = []
+        record_blocks, record_placed = 0, 0
         for index, block in enumerate(spec.get("blocks") or []):
+            if block.get("kind"):
+                record_blocks += block["kind"] in content_sections.LAYOUTS
+                sections = self._content_block(block, spec, index)
+                if not sections:
+                    continue  # no records of this kind: the block is not placed
+                record_placed += block["kind"] in content_sections.LAYOUTS
+                placed.append(content_sections.SNIPPET_OF.get(block["kind"], "s_text_block"))
+                for code, section in sections.items():
+                    columns[code].append(section)
+                continue
             picture = self._spec_picture(spec, block)
             sample = block.get("copy") or {}
             per_lang_content = {}
@@ -391,8 +853,23 @@ class NudgeBuilderSite(models.Model):
                 base = sample.get(short) or sample.get("en") or {}
                 per_lang_content[short] = {**base, **(written or {})} if written else base
             sections = self._sections(block["snippet"], per_lang_content, picture)
+            if all(snippets.is_blank(section) for section in sections.values()):
+                self._say(_("A block of the page %(page)s had no text to show and was left out.", page=names.get("en") or key_short))
+                continue
+            placed.append(block["snippet"].split(".")[-1])
             for code, section in sections.items():
                 columns[code].append(section)
+        others = [item for item in placed if item not in ("s_title", "s_text_block", "s_call_to_action")]
+        if record_blocks and not record_placed and not others:
+            # a page made to show records, and there are none: no page of titles
+            self._say(_("The page %(page)s has no records to show and was not built.",
+                                 page=names.get("en") or key_short))
+            return self.env["nudge.builder.page"]
+        if self._wants_whatsapp_float() and not spec.get("legal"):
+            for lang in langs:
+                button = self._whatsapp_float(lang)
+                if button is not None:
+                    columns[lang.code].append(button)
         name_en = names.get("en") or key_short
         view_key = f"website.nb{self.id}_{compat.slug(self.env, key_short)}_{compat.unique_id()}"
         arch_by_lang, source = self._arch_by_lang(name_en, view_key, columns)
@@ -409,7 +886,7 @@ class NudgeBuilderSite(models.Model):
         record = self.env["nudge.builder.page"].create({
             "site_id": self.id, "page_id": page.id, "view_id": view.id, "key": key_short,
             "kind": spec.get("kind"), "name": name_en, "url": url,
-            "snippet_keys": ",".join(block["snippet"].split(".")[-1] for block in spec.get("blocks") or []),
+            "snippet_keys": ",".join(placed),
             "is_legal": bool(spec.get("legal")), "sequence": 10 * (len(self.page_ids) + 1),
         })
         self._write_seo(page, spec.get("seo") or self._derived_seo(spec, names), self._seo_image(spec))
@@ -588,11 +1065,24 @@ class NudgeBuilderSite(models.Model):
         facts = {"company": self.company_id.name, "address": contact["address"] or "-", "email": contact["email"] or "-"}
         return next(spec for spec in legal_specs(facts) if spec["key"] == key)
 
+    def _add_languages(self):
+        """Every language chosen is a language of the website too, or its translated pages answer 404: the
+        language is activated when it is not, and added; a language the website already has is never taken away"""
+        self.ensure_one()
+        self._check_designer()
+        website = self.website_id.sudo()
+        for lang in self._langs():
+            if not lang.active:
+                lang = self.env["res.lang"].sudo()._activate_lang(lang.code) or lang.sudo()
+            if lang not in website.language_ids:
+                website.write({"language_ids": [(4, lang.id)]})
+
     def _run_step(self, template, step):
         """Do one step of the plan"""
         self.ensure_one()
         kind = step["kind"]
         if kind == "theme":
+            self._add_languages()
             chosen = self._chosen()
             self._set_theme(chosen["palette"], chosen["fonts"])
         elif kind == "page":
@@ -602,10 +1092,20 @@ class NudgeBuilderSite(models.Model):
             self._build_page(self._legal_spec(step["key"]))
         elif kind == "menu":
             self._build_menu(template)
+            self._set_footer_safely(template)
         elif kind == "shop":
             self._build_shop(self.shop_plan)
         elif kind == "checks":
             self._run_checks()
+
+    def _set_footer_safely(self, template):
+        """The footer is a nicety of the build, as the layout is: its failure is told in the log, the pages stay"""
+        try:
+            with self.env.cr.savepoint():
+                self._set_footer(template)
+        except Exception:  # noqa: BLE001
+            _logger.info("Nudge Builder: the footer was not personalised", exc_info=True)
+            self._say(_("The footer was left as Odoo made it."))
 
     def _build_menu(self, template):
         """Add the menu entries of the template's order for the pages built"""

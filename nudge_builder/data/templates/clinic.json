@@ -42,6 +42,7 @@
   "contact",
   "faq"
  ],
+ "kinds": ["service", "member", "testimonial", "faq", "location"],
  "pages": [
   {
    "key": "home",
@@ -110,49 +111,14 @@
      }
     },
     {
-     "snippet": "s_features",
+     "snippet": "s_text_block",
+     "kind": "service",
      "copy": {
       "en": {
-       "title": "What we do",
-       "items": [
-        {
-         "title": "Family medicine",
-         "text": "Check-ups, chronic disease follow-up and vaccinations."
-        },
-        {
-         "title": "Dentistry",
-         "text": "Cleaning, fillings, whitening and orthodontics."
-        },
-        {
-         "title": "Paediatrics",
-         "text": "Growth follow-up and a calm room for little patients."
-        },
-        {
-         "title": "Laboratory",
-         "text": "Blood tests with results the same day."
-        }
-       ]
+       "title": "What we do"
       },
       "ar": {
-       "title": "ما نقدّمه",
-       "items": [
-        {
-         "title": "طب الأسرة",
-         "text": "فحوص دورية ومتابعة الأمراض المزمنة والتطعيمات."
-        },
-        {
-         "title": "طب الأسنان",
-         "text": "تنظيف وحشوات وتبييض وتقويم."
-        },
-        {
-         "title": "طب الأطفال",
-         "text": "متابعة النمو وغرفة هادئة للمرضى الصغار."
-        },
-        {
-         "title": "المختبر",
-         "text": "تحاليل دم بنتائج في اليوم نفسه."
-        }
-       ]
+       "title": "ما نقدّمه"
       }
      }
     },
@@ -220,6 +186,18 @@
       }
      },
      "image": "clinic"
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "testimonial",
+     "copy": {
+      "en": {
+       "title": "What our clients say"
+      },
+      "ar": {
+       "title": "ماذا يقول عملاؤنا"
+      }
+     }
     },
     {
      "snippet": "s_call_to_action",
@@ -377,48 +355,11 @@
      }
     },
     {
-     "snippet": "s_features",
+     "snippet": "s_text_block",
+     "kind": "service",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "title": "Family medicine",
-         "text": "Check-ups, chronic disease follow-up and vaccinations."
-        },
-        {
-         "title": "Dentistry",
-         "text": "Cleaning, fillings, whitening and orthodontics."
-        },
-        {
-         "title": "Paediatrics",
-         "text": "Growth follow-up and a calm room for little patients."
-        },
-        {
-         "title": "Laboratory",
-         "text": "Blood tests with results the same day."
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "title": "طب الأسرة",
-         "text": "فحوص دورية ومتابعة الأمراض المزمنة والتطعيمات."
-        },
-        {
-         "title": "طب الأسنان",
-         "text": "تنظيف وحشوات وتبييض وتقويم."
-        },
-        {
-         "title": "طب الأطفال",
-         "text": "متابعة النمو وغرفة هادئة للمرضى الصغار."
-        },
-        {
-         "title": "المختبر",
-         "text": "تحاليل دم بنتائج في اليوم نفسه."
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     },
     {
@@ -596,32 +537,11 @@
      }
     },
     {
-     "snippet": "s_company_team",
+     "snippet": "s_text_block",
+     "kind": "member",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "name": "Raghad",
-         "role": "Medical director"
-        },
-        {
-         "name": "Ebrahim",
-         "role": "Family physician"
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "name": "رغد",
-         "role": "المدير الطبي"
-        },
-        {
-         "name": "إبراهيم",
-         "role": "طبيبة أسرة"
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     }
    ],
@@ -658,63 +578,27 @@
      }
     },
     {
-     "snippet": "s_contact_info",
+     "snippet": "s_text_block",
+     "kind": "contact",
      "copy": {
-      "en": {
-       "title": "Find us",
-       "items": [
-        {
-         "title": "Address",
-         "text": "Al Wasl Road, Dubai"
-        },
-        {
-         "title": "Opening hours",
-         "text": "Daily 8:00-22:00"
-        },
-        {
-         "title": "Phone",
-         "text": "+971 4 000 0000"
-        },
-        {
-         "title": "Email",
-         "text": "hello@example.com"
-        }
-       ]
-      },
-      "ar": {
-       "title": "تجدنا هنا",
-       "items": [
-        {
-         "title": "العنوان",
-         "text": "شارع الوصل، دبي"
-        },
-        {
-         "title": "ساعات العمل",
-         "text": "يومياً 8:00 - 22:00"
-        },
-        {
-         "title": "الهاتف",
-         "text": "+971 4 000 0000"
-        },
-        {
-         "title": "البريد الإلكتروني",
-         "text": "hello@example.com"
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     },
     {
      "snippet": "s_text_block",
+     "kind": "location",
      "copy": {
-      "en": {
-       "title": "Your health cannot wait",
-       "text": "Book online in under a minute and choose your doctor."
-      },
-      "ar": {
-       "title": "صحتك لا تحتمل التأجيل",
-       "text": "احجز عبر الموقع في أقل من دقيقة واختر طبيبك."
-      }
+      "en": {},
+      "ar": {}
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "quote",
+     "copy": {
+      "en": {},
+      "ar": {}
      }
     }
    ],
@@ -750,48 +634,11 @@
      }
     },
     {
-     "snippet": "s_faq_collapse",
+     "snippet": "s_text_block",
+     "kind": "faq",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "title": "Do I need an appointment?",
-         "text": "Appointments are preferred, but walk-ins are seen when a doctor is free."
-        },
-        {
-         "title": "Which insurance do you accept?",
-         "text": "Most major insurers; call us with your card number to confirm."
-        },
-        {
-         "title": "How do I get my results?",
-         "text": "By message and in the clinic file; we can print them at the desk."
-        },
-        {
-         "title": "Do you treat emergencies?",
-         "text": "We handle minor emergencies and refer serious cases to the nearest hospital."
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "title": "هل أحتاج إلى موعد؟",
-         "text": "نفضّل الحجز المسبق لكن نستقبل الحالات دون موعد عند توفر الطبيب."
-        },
-        {
-         "title": "ما التأمينات المقبولة؟",
-         "text": "معظم شركات التأمين الكبرى؛ اتصل بنا برقم بطاقتك للتأكد."
-        },
-        {
-         "title": "كيف أحصل على نتائجي؟",
-         "text": "برسالة وفي ملفك بالعيادة، ويمكننا طباعتها في الاستقبال."
-        },
-        {
-         "title": "هل تستقبلون الحالات الطارئة؟",
-         "text": "نعالج الحالات الطارئة البسيطة ونحيل الحالات الخطيرة إلى أقرب مستشفى."
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     }
    ],

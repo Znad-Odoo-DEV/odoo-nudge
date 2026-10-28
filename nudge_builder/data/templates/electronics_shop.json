@@ -367,6 +367,7 @@
   "contact",
   "faq"
  ],
+ "kinds": ["product", "testimonial", "faq", "location"],
  "pages": [
   {
    "key": "home",
@@ -505,6 +506,18 @@
        "text": "خصم حتى 30% على الكاميرات والإضاءة.",
        "button": "تسوّق الآن",
        "button_url": "/shop"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "testimonial",
+     "copy": {
+      "en": {
+       "title": "What our clients say"
+      },
+      "ar": {
+       "title": "ماذا يقول عملاؤنا"
       }
      }
     },
@@ -664,50 +677,11 @@
      }
     },
     {
-     "snippet": "s_product_catalog",
+     "snippet": "s_text_block",
+     "kind": "product",
      "copy": {
-      "en": {
-       "title": "Popular products",
-       "items": [
-        {
-         "title": "Smartphone 256 GB",
-         "text": "6.5-inch display, 50 MP camera, 2-year warranty. - AED 1,899"
-        },
-        {
-         "title": "Ultrabook 14-inch",
-         "text": "16 GB memory, all-day battery. - AED 3,450"
-        },
-        {
-         "title": "Wireless earbuds",
-         "text": "Noise cancelling with a charging case. - AED 349"
-        },
-        {
-         "title": "Wi-Fi security camera",
-         "text": "Night vision and phone alerts. - AED 279"
-        }
-       ]
-      },
-      "ar": {
-       "title": "منتجات رائجة",
-       "items": [
-        {
-         "title": "هاتف ذكي 256 جيجا",
-         "text": "شاشة 6.5 بوصة وكاميرا 50 ميجا وضمان سنتين. - 1,899 د.إ"
-        },
-        {
-         "title": "لابتوب نحيف 14 بوصة",
-         "text": "ذاكرة 16 جيجا وبطارية تدوم طوال اليوم. - 3,450 د.إ"
-        },
-        {
-         "title": "سماعات لاسلكية",
-         "text": "عزل ضوضاء مع علبة شحن. - 349 د.إ"
-        },
-        {
-         "title": "كاميرا مراقبة واي فاي",
-         "text": "رؤية ليلية وتنبيهات على الجوال. - 279 د.إ"
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     },
     {
@@ -910,63 +884,27 @@
      }
     },
     {
-     "snippet": "s_contact_info",
+     "snippet": "s_text_block",
+     "kind": "contact",
      "copy": {
-      "en": {
-       "title": "Find us",
-       "items": [
-        {
-         "title": "Address",
-         "text": "Al Fahidi Street, Dubai"
-        },
-        {
-         "title": "Opening hours",
-         "text": "Daily 10:00-23:00"
-        },
-        {
-         "title": "Phone",
-         "text": "+971 4 000 0000"
-        },
-        {
-         "title": "Email",
-         "text": "hello@example.com"
-        }
-       ]
-      },
-      "ar": {
-       "title": "تجدنا هنا",
-       "items": [
-        {
-         "title": "العنوان",
-         "text": "شارع الفهيدي، دبي"
-        },
-        {
-         "title": "ساعات العمل",
-         "text": "يومياً 10:00 - 23:00"
-        },
-        {
-         "title": "الهاتف",
-         "text": "+971 4 000 0000"
-        },
-        {
-         "title": "البريد الإلكتروني",
-         "text": "hello@example.com"
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     },
     {
      "snippet": "s_text_block",
+     "kind": "location",
      "copy": {
-      "en": {
-       "title": "Not sure which one to pick?",
-       "text": "Tell us your budget and what you do, and we will suggest three options."
-      },
-      "ar": {
-       "title": "لست متأكداً أيها تختار؟",
-       "text": "أخبرنا بميزانيتك واستخدامك وسنقترح عليك ثلاثة خيارات."
-      }
+      "en": {},
+      "ar": {}
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "quote",
+     "copy": {
+      "en": {},
+      "ar": {}
      }
     }
    ],
@@ -1002,56 +940,11 @@
      }
     },
     {
-     "snippet": "s_faq_collapse",
+     "snippet": "s_text_block",
+     "kind": "faq",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "title": "Are the devices original?",
-         "text": "Yes, sealed and sold with the official local warranty."
-        },
-        {
-         "title": "Can I return a device?",
-         "text": "Within seven days if it is unopened or faulty."
-        },
-        {
-         "title": "Do you offer installments?",
-         "text": "Yes, up to twelve months on selected bank cards."
-        },
-        {
-         "title": "How is delivery handled?",
-         "text": "Same day inside the city for orders before 2 pm, otherwise next day."
-        },
-        {
-         "title": "Do you repair devices?",
-         "text": "We handle warranty claims and paid repairs for most brands."
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "title": "هل الأجهزة أصلية؟",
-         "text": "نعم، مغلقة وتُباع بالضمان المحلي الرسمي."
-        },
-        {
-         "title": "هل يمكن إرجاع جهاز؟",
-         "text": "خلال سبعة أيام إذا كان غير مفتوح أو معيباً."
-        },
-        {
-         "title": "هل تقدمون التقسيط؟",
-         "text": "نعم، حتى اثني عشر شهراً على بطاقات بنكية مختارة."
-        },
-        {
-         "title": "كيف يتم التوصيل؟",
-         "text": "في اليوم نفسه داخل المدينة للطلبات قبل الثانية ظهراً وإلا فاليوم التالي."
-        },
-        {
-         "title": "هل تصلحون الأجهزة؟",
-         "text": "نتولى مطالبات الضمان والإصلاح المدفوع لمعظم الماركات."
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     }
    ],

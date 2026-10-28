@@ -20,7 +20,7 @@ Installed from Apps by an administrator who wants it, with Nudge and Website;
 never by itself.
 """,
     "category": "Website",
-    "version": "17.0.1.0.10",
+    "version": "17.0.1.1.0",
     "author": "Ibrahim Elzenad",
     "website": "https://znad-odoo-dev.github.io",
     "support": "id7sp22@gmail.com",
@@ -30,13 +30,21 @@ never by itself.
     "data": [
         "security/ir.model.access.csv",
         "security/nudge_builder_security.xml",
+        "security/nudge_builder_content_security.xml",
         "data/templates/load.xml",
         "data/nudge_builder_data.xml",
         "data/nudge_skill_data.xml",
+        "data/nudge_skill_data_sectors.xml",
         "views/nudge_builder_views.xml",
+        "views/nudge_builder_content_views.xml",
+        "views/nudge_builder_import_views.xml",
+        "views/quote_templates.xml",
         "views/nudge_builder_check_views.xml",
     ],
     "assets": {
+        "web.assets_frontend": [
+            "nudge_builder/static/src/scss/nudge_builder_content.scss",
+        ],
         "web.assets_backend": [
             "nudge_builder/static/src/js/run.js",
             "nudge_builder/static/src/xml/run.xml",

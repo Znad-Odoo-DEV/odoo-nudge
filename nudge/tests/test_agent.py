@@ -339,7 +339,8 @@ class TestReading(AgentCase, TransactionCase):
             "open_record", "prepare_create", "prepare_plan", "prepare_revert", "prepare_task", "prepare_write", "read_record", "save_report", "search_records", "show_chart"]
         # Other modules add their own agent tools
         expected += [name for name in ("make_spreadsheet", "build_shop", "check_site", "fix_site",
-                                               "read_site_page", "edit_page_section", "change_page_seo", "undo_site_change") if name in tools.base.TOOLS]
+                                               "read_site_page", "edit_page_section", "change_page_seo", "undo_site_change",
+                                               "add_site_item", "add_location", "set_contact") if name in tools.base.TOOLS]
         expected = [name for name in expected if name not in tools.base.ASK_TOOLS]
         self.assertEqual(sorted(set(agent) - set(talk)), sorted(expected))
         self.assertEqual(set(talk) - set(agent), set())
@@ -836,7 +837,7 @@ class TestAgent(AgentCase, TransactionCase):
         # The rules of the mode end the prompt when the index of skills is whole (a small catalogue); a cut index
         # comes after them, with the question (S1), so the skills of the apps are put aside here
         self.env["nudge.skill"].sudo().search(
-            ["|", ("key", "=like", "accounting-%"), ("key", "=like", "inventory-%")]).active = False
+            ["|", "|", ("key", "=like", "accounting-%"), ("key", "=like", "inventory-%"), ("key", "=like", "site-%")]).active = False
         adapter = self.use_adapter()
         self.order(self.agent, "Do it")
         self.assertIn("## Mode: Agent", adapter.calls[0]["system"][-1])
