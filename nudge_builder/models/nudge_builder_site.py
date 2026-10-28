@@ -554,12 +554,13 @@ class NudgeBuilderSite(models.Model):
             home = next((page for page in template["pages"] if page["kind"] == "home"), {})
             description = (home.get("seo") or {}).get("description") or {}
             about = description.get(short) or description.get("en") or ""
+        in_lang = self.with_context(lang=lang.code)
         return {
             "name": company.name or "", "address_lines": [partner.street, partner.street2, place, partner.country_id.name],
             "phone": company.phone or "", "email": company.email or "", "about": about, "links": links,
             "social": social, "whatsapp_url": content_sections.whatsapp_url(
-                self._site_value("whatsapp"), self.with_context(lang=lang.code)._site_value("whatsapp_text")),
-            "whatsapp_label": self.with_context(lang=lang.code).env._("WhatsApp"), "logo_url": f"/web/image/website/{self.website_id.id}/logo" if self.website_id.logo else "",
+                self._site_value("whatsapp"), in_lang._site_value("whatsapp_text")),
+            "whatsapp_label": _("WhatsApp"), "logo_url": f"/web/image/website/{self.website_id.id}/logo" if self.website_id.logo else "",
         }
 
     def _personalise_view(self, key, make):

@@ -360,6 +360,11 @@ class TestContent(TransactionCase):
                 site.create_shop_product({"name": "Raghad Shirt"})
             self.assertFalse(site.shop_products())
             return
+        Product = site.env["product.template"]
+        if not (Product._nudge_has_access("create") if hasattr(Product, "has_access")
+                else Product.check_access_rights("create", raise_exception=False)):
+            # Odoo 17 has no product manager group: only Settings and the managers of other apps create products
+            self.skipTest("The designer may not create products on this version")
         product = site.create_shop_product({"name": "Raghad Shirt", "list_price": 35.0, "bogus": "dropped"})
         self.assertFalse(product.is_published if "is_published" in product._fields else False)
         self.assertEqual(site.shop_products(), product)
