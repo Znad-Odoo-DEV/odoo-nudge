@@ -42,6 +42,7 @@
   "contact",
   "faq"
  ],
+ "kinds": ["project", "service", "member", "testimonial", "faq", "location"],
  "pages": [
   {
    "key": "home",
@@ -110,49 +111,14 @@
      }
     },
     {
-     "snippet": "s_features",
+     "snippet": "s_text_block",
+     "kind": "service",
      "copy": {
       "en": {
-       "title": "What we do",
-       "items": [
-        {
-         "title": "Bookkeeping and VAT",
-         "text": "Monthly books, VAT returns and management reports."
-        },
-        {
-         "title": "Company licensing",
-         "text": "Formation, renewals and amendments."
-        },
-        {
-         "title": "Payroll and HR",
-         "text": "Contracts, visas and wage protection files."
-        },
-        {
-         "title": "Business consulting",
-         "text": "Budgeting, pricing and growth planning."
-        }
-       ]
+       "title": "What we do"
       },
       "ar": {
-       "title": "ما نقدّمه",
-       "items": [
-        {
-         "title": "مسك الدفاتر وضريبة القيمة المضافة",
-         "text": "دفاتر شهرية وإقرارات ضريبية وتقارير إدارية."
-        },
-        {
-         "title": "تراخيص الشركات",
-         "text": "التأسيس والتجديد والتعديلات."
-        },
-        {
-         "title": "الرواتب والموارد البشرية",
-         "text": "العقود والتأشيرات وملفات حماية الأجور."
-        },
-        {
-         "title": "استشارات الأعمال",
-         "text": "إعداد الموازنات والتسعير وخطط النمو."
-        }
-       ]
+       "title": "ما نقدّمه"
       }
      }
     },
@@ -204,6 +170,19 @@
      }
     },
     {
+     "snippet": "s_text_block",
+     "kind": "project",
+     "layout": "grid",
+     "copy": {
+      "en": {
+       "title": "Our projects"
+      },
+      "ar": {
+       "title": "مشاريعنا"
+      }
+     }
+    },
+    {
      "snippet": "s_text_image",
      "copy": {
       "en": {
@@ -220,6 +199,18 @@
       }
      },
      "image": "office"
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "testimonial",
+     "copy": {
+      "en": {
+       "title": "What our clients say"
+      },
+      "ar": {
+       "title": "ماذا يقول عملاؤنا"
+      }
+     }
     },
     {
      "snippet": "s_call_to_action",
@@ -377,48 +368,11 @@
      }
     },
     {
-     "snippet": "s_features",
+     "snippet": "s_text_block",
+     "kind": "service",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "title": "Bookkeeping and VAT",
-         "text": "Monthly books, VAT returns and management reports."
-        },
-        {
-         "title": "Company licensing",
-         "text": "Formation, renewals and amendments."
-        },
-        {
-         "title": "Payroll and HR",
-         "text": "Contracts, visas and wage protection files."
-        },
-        {
-         "title": "Business consulting",
-         "text": "Budgeting, pricing and growth planning."
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "title": "مسك الدفاتر وضريبة القيمة المضافة",
-         "text": "دفاتر شهرية وإقرارات ضريبية وتقارير إدارية."
-        },
-        {
-         "title": "تراخيص الشركات",
-         "text": "التأسيس والتجديد والتعديلات."
-        },
-        {
-         "title": "الرواتب والموارد البشرية",
-         "text": "العقود والتأشيرات وملفات حماية الأجور."
-        },
-        {
-         "title": "استشارات الأعمال",
-         "text": "إعداد الموازنات والتسعير وخطط النمو."
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     },
     {
@@ -509,60 +463,12 @@
      }
     },
     {
-     "snippet": "s_text_image",
+     "snippet": "s_text_block",
+     "kind": "project",
      "copy": {
-      "en": {
-       "title": "Retail chain bookkeeping",
-       "text": "Eight branches consolidated into one monthly report."
-      },
-      "ar": {
-       "title": "محاسبة سلسلة متاجر",
-       "text": "توحيد ثمانية فروع في تقرير شهري واحد."
-      }
-     },
-     "image": "office"
-    },
-    {
-     "snippet": "s_image_text",
-     "copy": {
-      "en": {
-       "title": "Start-up licensing",
-       "text": "Licence, bank account and visas in ten days."
-      },
-      "ar": {
-       "title": "ترخيص شركة ناشئة",
-       "text": "رخصة وحساب بنكي وتأشيرات في عشرة أيام."
-      }
-     },
-     "image": "office"
-    },
-    {
-     "snippet": "s_text_image",
-     "copy": {
-      "en": {
-       "title": "Payroll migration",
-       "text": "200 employees moved to a clean payroll process."
-      },
-      "ar": {
-       "title": "نقل نظام الرواتب",
-       "text": "نقل مئتي موظف إلى عملية رواتب منظمة."
-      }
-     },
-     "image": "office"
-    },
-    {
-     "snippet": "s_image_text",
-     "copy": {
-      "en": {
-       "title": "VAT clean-up",
-       "text": "Two years of returns reviewed and corrected."
-      },
-      "ar": {
-       "title": "تسوية ضريبية",
-       "text": "مراجعة وتصحيح إقرارات عامين."
-      }
-     },
-     "image": "office"
+      "en": {},
+      "ar": {}
+     }
     }
    ],
    "seo": {
@@ -596,32 +502,11 @@
      }
     },
     {
-     "snippet": "s_company_team",
+     "snippet": "s_text_block",
+     "kind": "member",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "name": "Raghad",
-         "role": "General manager"
-        },
-        {
-         "name": "Ebrahim",
-         "role": "Chief accountant"
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "name": "رغد",
-         "role": "المدير العام"
-        },
-        {
-         "name": "إبراهيم",
-         "role": "كبيرة المحاسبين"
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     }
    ],
@@ -658,63 +543,27 @@
      }
     },
     {
-     "snippet": "s_contact_info",
+     "snippet": "s_text_block",
+     "kind": "contact",
      "copy": {
-      "en": {
-       "title": "Find us",
-       "items": [
-        {
-         "title": "Address",
-         "text": "Deira, Dubai"
-        },
-        {
-         "title": "Opening hours",
-         "text": "Sun-Thu 8:30-17:30"
-        },
-        {
-         "title": "Phone",
-         "text": "+971 4 000 0000"
-        },
-        {
-         "title": "Email",
-         "text": "hello@example.com"
-        }
-       ]
-      },
-      "ar": {
-       "title": "تجدنا هنا",
-       "items": [
-        {
-         "title": "العنوان",
-         "text": "ديرة، دبي"
-        },
-        {
-         "title": "ساعات العمل",
-         "text": "الأحد - الخميس 8:30 - 17:30"
-        },
-        {
-         "title": "الهاتف",
-         "text": "+971 4 000 0000"
-        },
-        {
-         "title": "البريد الإلكتروني",
-         "text": "hello@example.com"
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     },
     {
      "snippet": "s_text_block",
+     "kind": "location",
      "copy": {
-      "en": {
-       "title": "Ready to hand over the paperwork?",
-       "text": "Tell us about your company and get a proposal within one day."
-      },
-      "ar": {
-       "title": "جاهز لتسليمنا الأوراق؟",
-       "text": "حدثنا عن شركتك ويصلك عرض خلال يوم."
-      }
+      "en": {},
+      "ar": {}
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "quote",
+     "copy": {
+      "en": {},
+      "ar": {}
      }
     }
    ],
@@ -750,48 +599,11 @@
      }
     },
     {
-     "snippet": "s_faq_collapse",
+     "snippet": "s_text_block",
+     "kind": "faq",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "title": "What does the monthly fee include?",
-         "text": "A fixed scope agreed in writing, with extra work quoted separately."
-        },
-        {
-         "title": "Can you take over my books mid-year?",
-         "text": "Yes, we review the opening balances and carry on from there."
-        },
-        {
-         "title": "Do you keep my documents safe?",
-         "text": "Documents are scanned and stored encrypted."
-        },
-        {
-         "title": "How fast can you start?",
-         "text": "Usually within three working days of signing."
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "title": "ماذا يشمل الرسم الشهري؟",
-         "text": "نطاق ثابت متفق عليه كتابةً وأي عمل إضافي يُسعّر على حدة."
-        },
-        {
-         "title": "هل تستلمون دفاتري في منتصف السنة؟",
-         "text": "نعم، نراجع الأرصدة الافتتاحية ونكمل من حيث توقفتم."
-        },
-        {
-         "title": "هل تحفظون مستنداتي بأمان؟",
-         "text": "تُمسح المستندات ضوئياً وتُخزّن مشفّرة."
-        },
-        {
-         "title": "متى تبدؤون العمل؟",
-         "text": "عادةً خلال ثلاثة أيام عمل من التوقيع."
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     }
    ],

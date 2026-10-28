@@ -116,7 +116,7 @@ class TestTemplateLibrary(TransactionCase):
             "unknown snippet": lambda d: d["pages"][0]["blocks"][0].__setitem__("snippet", "s_nope"),
             "shop snippet on a non-shop": lambda d: d["pages"][0]["blocks"][1].__setitem__("snippet", "s_product_list"),
             "font not bundled": lambda d: d["fonts"].__setitem__("heading", "Cairo"),
-            "item count differs": lambda d: d["pages"][0]["blocks"][2]["copy"]["ar"]["items"].pop(),
+            "item count differs": lambda d: next(b for p in d["pages"] for b in p["blocks"] if (b["copy"].get("ar") or {}).get("items"))["copy"]["ar"]["items"].pop(),
             "bad colour": lambda d: d["palette"].__setitem__("primary", "red"),
             "menu page missing": lambda d: d["menu"].append("nowhere"),
             "empty arabic text": lambda d: d["pages"][1]["seo"]["title"].__setitem__("ar", " "),
@@ -240,6 +240,8 @@ class TestTemplateLibrary(TransactionCase):
             for page in data["pages"]:
                 if use_core:
                     built = site._build_page(dict(page))
+                    if not built and any(block.get("kind") for block in page["blocks"]):
+                        continue  # a page of records with no records is not built (the 60.1 rule)
                     self.assertTrue(built.view_id.arch_db, "%s/%s" % (key, page["key"]))
                     continue
                 for lang in ("en", "ar"):

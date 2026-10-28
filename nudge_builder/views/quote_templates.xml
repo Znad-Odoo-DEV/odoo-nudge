@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- The public "Request a quote" page. Every value is printed with t-att-value / t-out: QWeb escapes them. -->
+    <template id="quote_form" name="Request a quote">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure">
+                <section class="container py-5" style="max-width: 640px;">
+                    <h1>Request a quote</h1>
+                    <p class="text-muted">Tell us what you need and we will get back to you.</p>
+                    <div t-if="errors.get('limit')" class="alert alert-warning" role="alert" t-out="errors['limit']"/>
+                    <div t-if="errors.get('contact')" class="alert alert-danger" role="alert" t-out="errors['contact']"/>
+                    <form action="/request-a-quote/send" method="post" class="s_nudge_quote_form">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="service" t-att-value="values.get('service')"/>
+                        <!-- The field a person does not see: a robot fills it -->
+                        <div aria-hidden="true" style="position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden;">
+                            <label for="quote_homepage">Leave this field empty</label>
+                            <input type="text" id="quote_homepage" t-att-name="honeypot" tabindex="-1" autocomplete="off"/>
+                        </div>
+                        <p t-if="values.get('service')" class="fw-bold">
+                            <span t-out="values.get('service')"/>
+                        </p>
+                        <div class="mb-3">
+                            <label for="quote_name" class="form-label">Your name</label>
+                            <input type="text" id="quote_name" name="name" class="form-control" maxlength="100" required="required"
+                                   t-att-value="values.get('name')"/>
+                            <div t-if="errors.get('name')" class="text-danger small" t-out="errors['name']"/>
+                        </div>
+                        <div class="mb-3">
+                            <label for="quote_phone" class="form-label">Phone or WhatsApp</label>
+                            <input type="tel" id="quote_phone" name="phone" class="form-control" maxlength="30"
+                                   t-att-value="values.get('phone')" dir="ltr"/>
+                            <div t-if="errors.get('phone')" class="text-danger small" t-out="errors['phone']"/>
+                        </div>
+                        <div class="mb-3">
+                            <label for="quote_email" class="form-label">Email</label>
+                            <input type="email" id="quote_email" name="email" class="form-control" maxlength="200"
+                                   t-att-value="values.get('email')" dir="ltr"/>
+                            <div t-if="errors.get('email')" class="text-danger small" t-out="errors['email']"/>
+                        </div>
+                        <div class="mb-3">
+                            <label for="quote_message" class="form-label">What do you need?</label>
+                            <textarea id="quote_message" name="message" class="form-control" rows="5" maxlength="1000"
+                                      required="required"><t t-out="values.get('message')"/></textarea>
+                            <div t-if="errors.get('message')" class="text-danger small" t-out="errors['message']"/>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input type="checkbox" id="quote_consent" name="consent" class="form-check-input" required="required"/>
+                            <label for="quote_consent" class="form-check-label">I agree that you may contact me about this request.</label>
+                            <div t-if="errors.get('consent')" class="text-danger small" t-out="errors['consent']"/>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send the request</button>
+                    </form>
+                </section>
+            </div>
+        </t>
+    </template>
+
+    <template id="quote_thanks" name="Quote request: thanks">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure">
+                <section class="container py-5" style="max-width: 640px;">
+                    <h1>Thank you</h1>
+                    <p>We have your request and will contact you soon.</p>
+                    <a href="/" class="btn btn-secondary">Back to the home page</a>
+                </section>
+            </div>
+        </t>
+    </template>
+</odoo>

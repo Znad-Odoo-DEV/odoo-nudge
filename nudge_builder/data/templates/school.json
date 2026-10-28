@@ -42,6 +42,7 @@
   "contact",
   "faq"
  ],
+ "kinds": ["service", "member", "testimonial", "faq", "location"],
  "pages": [
   {
    "key": "home",
@@ -110,49 +111,14 @@
      }
     },
     {
-     "snippet": "s_features",
+     "snippet": "s_text_block",
+     "kind": "service",
      "copy": {
       "en": {
-       "title": "What we do",
-       "items": [
-        {
-         "title": "Kindergarten",
-         "text": "Learning through play for ages three to five."
-        },
-        {
-         "title": "Primary",
-         "text": "Reading, mathematics and science with hands-on projects."
-        },
-        {
-         "title": "Middle and secondary",
-         "text": "Exam preparation and university guidance."
-        },
-        {
-         "title": "Activities",
-         "text": "Sports, robotics, art and Quran memorisation clubs."
-        }
-       ]
+       "title": "What we do"
       },
       "ar": {
-       "title": "ما نقدّمه",
-       "items": [
-        {
-         "title": "رياض الأطفال",
-         "text": "تعلّم باللعب للأعمار من ثلاث إلى خمس سنوات."
-        },
-        {
-         "title": "المرحلة الابتدائية",
-         "text": "قراءة ورياضيات وعلوم بمشاريع عملية."
-        },
-        {
-         "title": "المتوسطة والثانوية",
-         "text": "التحضير للامتحانات والإرشاد الجامعي."
-        },
-        {
-         "title": "الأنشطة",
-         "text": "أندية الرياضة والروبوت والفن وتحفيظ القرآن."
-        }
-       ]
+       "title": "ما نقدّمه"
       }
      }
     },
@@ -220,6 +186,18 @@
       }
      },
      "image": "school"
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "testimonial",
+     "copy": {
+      "en": {
+       "title": "What our clients say"
+      },
+      "ar": {
+       "title": "ماذا يقول عملاؤنا"
+      }
+     }
     },
     {
      "snippet": "s_call_to_action",
@@ -377,48 +355,11 @@
      }
     },
     {
-     "snippet": "s_features",
+     "snippet": "s_text_block",
+     "kind": "service",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "title": "Kindergarten",
-         "text": "Learning through play for ages three to five."
-        },
-        {
-         "title": "Primary",
-         "text": "Reading, mathematics and science with hands-on projects."
-        },
-        {
-         "title": "Middle and secondary",
-         "text": "Exam preparation and university guidance."
-        },
-        {
-         "title": "Activities",
-         "text": "Sports, robotics, art and Quran memorisation clubs."
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "title": "رياض الأطفال",
-         "text": "تعلّم باللعب للأعمار من ثلاث إلى خمس سنوات."
-        },
-        {
-         "title": "المرحلة الابتدائية",
-         "text": "قراءة ورياضيات وعلوم بمشاريع عملية."
-        },
-        {
-         "title": "المتوسطة والثانوية",
-         "text": "التحضير للامتحانات والإرشاد الجامعي."
-        },
-        {
-         "title": "الأنشطة",
-         "text": "أندية الرياضة والروبوت والفن وتحفيظ القرآن."
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     },
     {
@@ -596,32 +537,11 @@
      }
     },
     {
-     "snippet": "s_company_team",
+     "snippet": "s_text_block",
+     "kind": "member",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "name": "Raghad",
-         "role": "Principal"
-        },
-        {
-         "name": "Ebrahim",
-         "role": "Head of primary"
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "name": "رغد",
-         "role": "مديرة المدرسة"
-        },
-        {
-         "name": "إبراهيم",
-         "role": "رئيس المرحلة الابتدائية"
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     }
    ],
@@ -658,63 +578,27 @@
      }
     },
     {
-     "snippet": "s_contact_info",
+     "snippet": "s_text_block",
+     "kind": "contact",
      "copy": {
-      "en": {
-       "title": "Find us",
-       "items": [
-        {
-         "title": "Address",
-         "text": "Al Nahda, Ajman"
-        },
-        {
-         "title": "Opening hours",
-         "text": "Sun-Thu 7:00-15:00"
-        },
-        {
-         "title": "Phone",
-         "text": "+971 4 000 0000"
-        },
-        {
-         "title": "Email",
-         "text": "hello@example.com"
-        }
-       ]
-      },
-      "ar": {
-       "title": "تجدنا هنا",
-       "items": [
-        {
-         "title": "العنوان",
-         "text": "النهدة، عجمان"
-        },
-        {
-         "title": "ساعات العمل",
-         "text": "الأحد - الخميس 7:00 - 15:00"
-        },
-        {
-         "title": "الهاتف",
-         "text": "+971 4 000 0000"
-        },
-        {
-         "title": "البريد الإلكتروني",
-         "text": "hello@example.com"
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     },
     {
      "snippet": "s_text_block",
+     "kind": "location",
      "copy": {
-      "en": {
-       "title": "Visit us before you decide",
-       "text": "Join a campus tour every Tuesday and meet the teachers."
-      },
-      "ar": {
-       "title": "زرنا قبل أن تقرّر",
-       "text": "انضم إلى جولة في الحرم كل ثلاثاء والتقِ بالمعلمين."
-      }
+      "en": {},
+      "ar": {}
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "quote",
+     "copy": {
+      "en": {},
+      "ar": {}
      }
     }
    ],
@@ -750,48 +634,11 @@
      }
     },
     {
-     "snippet": "s_faq_collapse",
+     "snippet": "s_text_block",
+     "kind": "faq",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "title": "When does admission open?",
-         "text": "Applications open in January for the next academic year."
-        },
-        {
-         "title": "Is there a placement test?",
-         "text": "Yes, a friendly assessment and a short meeting with the parents."
-        },
-        {
-         "title": "Do you offer transport?",
-         "text": "Buses cover most neighbourhoods; fees depend on distance."
-        },
-        {
-         "title": "Are there sibling discounts?",
-         "text": "Yes, ten percent for the second child and fifteen for the third."
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "title": "متى يبدأ التسجيل؟",
-         "text": "يفتح باب التسجيل في يناير للعام الدراسي القادم."
-        },
-        {
-         "title": "هل هناك اختبار قبول؟",
-         "text": "نعم، تقييم ودّي ولقاء قصير مع ولي الأمر."
-        },
-        {
-         "title": "هل يتوفر نقل مدرسي؟",
-         "text": "تغطي الحافلات معظم الأحياء وتختلف الرسوم حسب المسافة."
-        },
-        {
-         "title": "هل توجد خصومات للأشقاء؟",
-         "text": "نعم، عشرة بالمئة للطفل الثاني وخمسة عشر للثالث."
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     }
    ],

@@ -104,6 +104,28 @@ def placeholder_bytes(key):
         return handle.read()
 
 
+def brand_card(logo, palette, size=(1600, 900)):
+    """A neutral picture made of the company's own logo, centred on the light colour of its palette: for the
+    places of a page where a picture is wanted and none of a fitting sector is at hand (no photograph of
+    another sector, no drawing of a city).
+
+    :param logo: the logo's bytes
+    :param dict palette: the five colours of the site
+    :return: PNG bytes, or None when the logo cannot be read"""
+    try:
+        from PIL import Image
+        base = Image.new("RGB", size, palette.get("light") or DEFAULT_PALETTE["light"])
+        image = Image.open(io.BytesIO(logo)).convert("RGBA")
+        image.thumbnail((int(size[0] * 0.5), int(size[1] * 0.5)))
+        base.paste(image, ((size[0] - image.width) // 2, (size[1] - image.height) // 2), image)
+        out = io.BytesIO()
+        base.save(out, "PNG")
+        return out.getvalue()
+    except Exception:  # noqa: BLE001 - a logo that cannot be read is not an error: the placeholder stands in
+        _logger.info("Nudge Builder: the logo card could not be made", exc_info=True)
+        return None
+
+
 def draw_picture(provider, model, prompt, timeout=60):
     """One picture from the images endpoint of an OpenAI-compatible provider.
 
@@ -133,3 +155,16 @@ def draw_picture(provider, model, prompt, timeout=60):
     except Exception:  # noqa: BLE001 - the placeholder takes over
         _logger.info("Nudge Builder: the picture model gave no picture", exc_info=True)
     return None
+
+
+def web_image(data, width=1280, quality=85):
+    """:return: the base64 of a picture resized to fit ``width`` x ``width`` (ratio kept) and re-encoded, which
+    also drops the metadata of the upload (location, camera); the original bytes when it cannot be read.
+    :param data: base64 text/bytes as an Image field holds it"""
+    from odoo.tools import image_process
+    raw = base64.b64decode(data)
+    try:
+        return base64.b64encode(image_process(raw, size=(width, width), quality=quality) or raw)
+    except Exception:  # noqa: BLE001 - the upload as it is
+        _logger.info("Nudge Builder: a picture could not be resized", exc_info=True)
+        return base64.b64encode(raw)

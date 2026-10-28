@@ -361,6 +361,7 @@
   "contact",
   "faq"
  ],
+ "kinds": ["product", "testimonial", "faq", "location"],
  "pages": [
   {
    "key": "home",
@@ -499,6 +500,18 @@
        "text": "علبة مؤونة تصلك كل شهر.",
        "button": "اشترك",
        "button_url": "/shop"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "testimonial",
+     "copy": {
+      "en": {
+       "title": "What our clients say"
+      },
+      "ar": {
+       "title": "ماذا يقول عملاؤنا"
       }
      }
     },
@@ -658,50 +671,11 @@
      }
     },
     {
-     "snippet": "s_product_catalog",
+     "snippet": "s_text_block",
+     "kind": "product",
      "copy": {
-      "en": {
-       "title": "Popular products",
-       "items": [
-        {
-         "title": "Khalas dates, 1 kg",
-         "text": "Soft and caramel-sweet, from Al Ahsa. - AED 48"
-        },
-        {
-         "title": "Sidr honey, 500 g",
-         "text": "Raw and unheated, from mountain hives. - AED 165"
-        },
-        {
-         "title": "Cold-pressed olive oil, 1 L",
-         "text": "Single estate, harvested this autumn. - AED 72"
-        },
-        {
-         "title": "Seven-spice blend",
-         "text": "Ground weekly in small batches. - AED 22"
-        }
-       ]
-      },
-      "ar": {
-       "title": "منتجات رائجة",
-       "items": [
-        {
-         "title": "تمر خلاص، 1 كجم",
-         "text": "طري بحلاوة الكراميل من الأحساء. - 48 د.إ"
-        },
-        {
-         "title": "عسل سدر، 500 غرام",
-         "text": "خام غير مسخّن من خلايا جبلية. - 165 د.إ"
-        },
-        {
-         "title": "زيت زيتون بكر، 1 لتر",
-         "text": "من مزرعة واحدة وحصاد هذا الخريف. - 72 د.إ"
-        },
-        {
-         "title": "بهارات سبعة",
-         "text": "تُطحن أسبوعياً بدفعات صغيرة. - 22 د.إ"
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     },
     {
@@ -904,63 +878,27 @@
      }
     },
     {
-     "snippet": "s_contact_info",
+     "snippet": "s_text_block",
+     "kind": "contact",
      "copy": {
-      "en": {
-       "title": "Find us",
-       "items": [
-        {
-         "title": "Address",
-         "text": "Al Qusais, Dubai"
-        },
-        {
-         "title": "Opening hours",
-         "text": "Daily 9:00-21:00"
-        },
-        {
-         "title": "Phone",
-         "text": "+971 4 000 0000"
-        },
-        {
-         "title": "Email",
-         "text": "hello@example.com"
-        }
-       ]
-      },
-      "ar": {
-       "title": "تجدنا هنا",
-       "items": [
-        {
-         "title": "العنوان",
-         "text": "القصيص، دبي"
-        },
-        {
-         "title": "ساعات العمل",
-         "text": "يومياً 9:00 - 21:00"
-        },
-        {
-         "title": "الهاتف",
-         "text": "+971 4 000 0000"
-        },
-        {
-         "title": "البريد الإلكتروني",
-         "text": "hello@example.com"
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     },
     {
      "snippet": "s_text_block",
+     "kind": "location",
      "copy": {
-      "en": {
-       "title": "Taste before you commit",
-       "text": "Try the sampler box with six of our best sellers."
-      },
-      "ar": {
-       "title": "تذوّق قبل أن تلتزم",
-       "text": "جرّب علبة التذوق بستة من أكثر منتجاتنا مبيعاً."
-      }
+      "en": {},
+      "ar": {}
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "quote",
+     "copy": {
+      "en": {},
+      "ar": {}
      }
     }
    ],
@@ -996,56 +934,11 @@
      }
     },
     {
-     "snippet": "s_faq_collapse",
+     "snippet": "s_text_block",
+     "kind": "faq",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "title": "How fresh are the products?",
-         "text": "Packed to order and shipped within one working day; the harvest date is on each pack."
-        },
-        {
-         "title": "Is the honey pure?",
-         "text": "Yes, raw and unheated, with a lab report on request."
-        },
-        {
-         "title": "Do you ship abroad?",
-         "text": "To all Gulf countries; dairy and fresh items are local only."
-        },
-        {
-         "title": "What if something arrives damaged?",
-         "text": "Send us a photo and we replace or refund it the same day."
-        },
-        {
-         "title": "Do you make custom gift boxes?",
-         "text": "Yes, for companies and weddings from twenty boxes."
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "title": "ما مدى طزاجة المنتجات؟",
-         "text": "تُعبّأ عند الطلب وتُشحن خلال يوم عمل وتاريخ الحصاد على كل عبوة."
-        },
-        {
-         "title": "هل العسل طبيعي؟",
-         "text": "نعم، خام وغير مسخّن ويتوفر تقرير مخبري عند الطلب."
-        },
-        {
-         "title": "هل تشحنون إلى الخارج؟",
-         "text": "إلى دول الخليج كلها؛ الألبان والأصناف الطازجة للتوصيل المحلي فقط."
-        },
-        {
-         "title": "ماذا لو وصل منتج تالفاً؟",
-         "text": "أرسل لنا صورة ونبدّله أو نعيد المبلغ في اليوم نفسه."
-        },
-        {
-         "title": "هل تجهزون علب هدايا مخصصة؟",
-         "text": "نعم، للشركات والأفراح ابتداءً من عشرين علبة."
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     }
    ],
