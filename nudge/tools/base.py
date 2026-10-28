@@ -431,7 +431,13 @@ def _public_field_problem(model, name, allowed):
         return "This channel reads only the records in use: it never looks at archived ones."
     if field.type in PUBLIC_DENIED_TYPES:
         return f"This channel does not read the field {name}."
-    if not model._has_field_access(field, "read"):
+    if hasattr(model, "_has_field_access"):
+        readable = model._has_field_access(field, "read")
+    else:
+        # Odoo 17 and 18
+        has_groups = getattr(model.env.user, "has_groups", None) or model.user_has_groups
+        readable = not field.groups or has_groups(field.groups)
+    if not readable:
         # The groups of the field, as the service user (a portal user) holds them: a cost price, a note
         return f"This channel does not read the field {name}."
     if field.type in ANY_MODEL_FIELDS or (field.relational and field.comodel_name not in allowed):
