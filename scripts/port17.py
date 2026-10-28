@@ -61,7 +61,7 @@ for module in ("nudge_spreadsheet", "nudge_documents", "nudge_studio"):
     if os.path.isdir(ROOT + module):
         shutil.rmtree(ROOT + module)
         print("dropped", module)
-for module in ("nudge", "nudge_mail", "nudge_discuss", "nudge_mcp", "nudge_website", "nudge_builder", "nudge_messaging", "nudge_connect", "nudge_plugin_example"):  # R2 RULE: release-2 modules
+for module in sorted(d for d in os.listdir(ROOT) if os.path.isfile(ROOT + d + "/__manifest__.py")):  # R3 RULE: every module, as port18 does (was a fixed list that missed nudge_builder_*)
     sub(f"{module}/__manifest__.py", r'"version": "18\.0\.', '"version": "17.0.')
 
 # ---------------------------------------------------------------- Hoot does not exist in 17
@@ -398,6 +398,11 @@ sub("nudge/models/nudge_embedding.py", r"^(\s*)_ = self\.env\._\n", r"\1from odo
 # FIX-17 RULE 1: `_ = self.env._` is an alias on any model, not only nudge_embedding: 17 has no env._
 for _name in files("nudge*/models/*.py", "nudge*/tools/*.py"):
     sub(_name, r"^(\s*)_ = self\.env\._\n", r"\1from odoo import _  # noqa: PLC0415\n", flags=re.M)
+# R3 RULE (17): `_ = env._` on a plain env (a function, not a model): 17's _() reads the locals `context` and `cr`
+# of the frame that calls it, so the function gets them
+sub("nudge_builder_realestate/tools/listings.py", r"^(\s*)_ = env\._\n",
+    r"\1from odoo import _  # noqa: PLC0415\n\1context = env.context  # noqa: F841\n\1cr = env.cr  # noqa: F841\n", flags=re.M)
+
 # FIX-17 RULE 2: Ask the data links its list; 17 names the list view "tree" and the action mode too
 sub("nudge/tools/analytics.py", r'model\.get_view\(view_type="list"\)', 'model.get_view(view_type="tree")')
 sub("nudge/tools/analytics.py", r'"views": \[\[False, "list"\], \[False, "form"\]\], "view_mode": "list,form"',

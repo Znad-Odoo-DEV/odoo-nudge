@@ -504,6 +504,40 @@ edit("nudge_messaging/models/nudge_step.py", [
      "        except pg_errors.LockNotAvailable:\n"),
 ])
 
+# R3 RULE 1: nudge_connect token renewal uses LockError / lock_for_update (19): the 18 copy gets its own LockError
+# and a lock_for_update method on the token model (NOWAIT in a savepoint), so the code and its tests stay as they are
+edit("nudge_connect/models/nudge_connector_oauth.py", [
+    ("from odoo.exceptions import AccessError, LockError, UserError\n",
+     "from psycopg2 import errors as pg_errors\n\nfrom odoo.exceptions import AccessError, UserError\n"),
+    ("_logger = logging.getLogger(__name__)\n",
+     "_logger = logging.getLogger(__name__)\n\n\nclass LockError(Exception):\n    \"\"\"Odoo 19 has odoo.exceptions.LockError; Odoo 18 does not\"\"\"\n"),
+    ("    scope = fields.Char()\n\n    @api.model\n    def _keep(",
+     "    scope = fields.Char()\n\n"
+     "    def lock_for_update(self, allow_referencing=True):\n"
+     "        \"\"\"Odoo 18 has no lock_for_update: a refused lock raises LockError, the transaction stays usable\"\"\"\n"
+     "        try:\n"
+     "            with self.env.cr.savepoint(flush=False):\n"
+     "                self.env.cr.execute(\"SELECT id FROM nudge_connector_token WHERE id IN %s FOR UPDATE NOWAIT\", (tuple(self.ids),))\n"
+     "        except pg_errors.LockNotAvailable:\n"
+     "            raise LockError(\"The row is locked by another transaction\")\n\n"
+     "    @api.model\n    def _keep("),
+])
+edit("nudge_connect/tests/test_oauth_signin.py", [
+    ("from odoo.exceptions import AccessError, LockError, UserError\n", "from odoo.exceptions import AccessError, UserError\n"),
+    ("from ..models import nudge_connector_oauth as oauth\n",
+     "from ..models import nudge_connector_oauth as oauth\nfrom ..models.nudge_connector_oauth import LockError\n"),
+])
+
+# R3 RULE 2: HttpCase.url_open(params=...) is 19; 18 and 17 take the query in the address
+edit("nudge_builder_realestate/tests/test_listings.py", [
+    ('self.url_open("/listings", params=query)',
+     'self.url_open("/listings" + ("?" + __import__("urllib.parse").parse.urlencode(query) if query else ""))'),
+])
+edit("nudge_builder_workshop/tests/test_workshop.py", [
+    ('self.url_open("/workshop-booking", params={"service": service} if service else None)',
+     'self.url_open("/workshop-booking" + ("?" + __import__("urllib.parse").parse.urlencode({"service": service}) if service else ""))'),
+])
+
 # R2 RULE 3: the Preferences form of 19 has page "page_security"; 18 and 17 call it "page_account_security"
 sub("nudge_messaging/views/nudge_messaging_views.xml", r"page\[@name='page_security'\]", "page[@name='page_account_security']")
 
