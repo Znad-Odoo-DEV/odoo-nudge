@@ -42,6 +42,7 @@
   "contact",
   "faq"
  ],
+ "kinds": ["project", "service", "member", "testimonial", "faq", "location"],
  "pages": [
   {
    "key": "home",
@@ -110,49 +111,14 @@
      }
     },
     {
-     "snippet": "s_features",
+     "snippet": "s_text_block",
+     "kind": "service",
      "copy": {
       "en": {
-       "title": "What we do",
-       "items": [
-        {
-         "title": "Residential buildings",
-         "text": "Villas, compounds and mid-rise apartment blocks."
-        },
-        {
-         "title": "Commercial and industrial",
-         "text": "Offices, warehouses and factory shells."
-        },
-        {
-         "title": "Fit-out and finishing",
-         "text": "Interior fit-out, joinery and MEP finishing."
-        },
-        {
-         "title": "Maintenance contracts",
-         "text": "Annual maintenance with a guaranteed response time."
-        }
-       ]
+       "title": "What we do"
       },
       "ar": {
-       "title": "ما نقدّمه",
-       "items": [
-        {
-         "title": "المباني السكنية",
-         "text": "فلل ومجمعات سكنية وعمارات متوسطة الارتفاع."
-        },
-        {
-         "title": "المشاريع التجارية والصناعية",
-         "text": "مكاتب ومستودعات وهياكل مصانع."
-        },
-        {
-         "title": "التشطيبات والديكور",
-         "text": "تشطيب داخلي ونجارة وتمديدات كهروميكانيكية."
-        },
-        {
-         "title": "عقود الصيانة",
-         "text": "صيانة سنوية مع التزام بزمن الاستجابة."
-        }
-       ]
+       "title": "ما نقدّمه"
       }
      }
     },
@@ -204,6 +170,19 @@
      }
     },
     {
+     "snippet": "s_text_block",
+     "kind": "project",
+     "layout": "grid",
+     "copy": {
+      "en": {
+       "title": "Our projects"
+      },
+      "ar": {
+       "title": "مشاريعنا"
+      }
+     }
+    },
+    {
      "snippet": "s_text_image",
      "copy": {
       "en": {
@@ -220,6 +199,18 @@
       }
      },
      "image": "building"
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "testimonial",
+     "copy": {
+      "en": {
+       "title": "What our clients say"
+      },
+      "ar": {
+       "title": "ماذا يقول عملاؤنا"
+      }
+     }
     },
     {
      "snippet": "s_call_to_action",
@@ -377,48 +368,11 @@
      }
     },
     {
-     "snippet": "s_features",
+     "snippet": "s_text_block",
+     "kind": "service",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "title": "Residential buildings",
-         "text": "Villas, compounds and mid-rise apartment blocks."
-        },
-        {
-         "title": "Commercial and industrial",
-         "text": "Offices, warehouses and factory shells."
-        },
-        {
-         "title": "Fit-out and finishing",
-         "text": "Interior fit-out, joinery and MEP finishing."
-        },
-        {
-         "title": "Maintenance contracts",
-         "text": "Annual maintenance with a guaranteed response time."
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "title": "المباني السكنية",
-         "text": "فلل ومجمعات سكنية وعمارات متوسطة الارتفاع."
-        },
-        {
-         "title": "المشاريع التجارية والصناعية",
-         "text": "مكاتب ومستودعات وهياكل مصانع."
-        },
-        {
-         "title": "التشطيبات والديكور",
-         "text": "تشطيب داخلي ونجارة وتمديدات كهروميكانيكية."
-        },
-        {
-         "title": "عقود الصيانة",
-         "text": "صيانة سنوية مع التزام بزمن الاستجابة."
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     },
     {
@@ -509,60 +463,12 @@
      }
     },
     {
-     "snippet": "s_text_image",
+     "snippet": "s_text_block",
+     "kind": "project",
      "copy": {
-      "en": {
-       "title": "Family villa, Al Barsha",
-       "text": "Three floors, 6 bedrooms, completed in 11 months."
-      },
-      "ar": {
-       "title": "فيلا عائلية في البرشاء",
-       "text": "ثلاثة طوابق وست غرف نوم، اكتملت في 11 شهراً."
-      }
-     },
-     "image": "building"
-    },
-    {
-     "snippet": "s_image_text",
-     "copy": {
-      "en": {
-       "title": "Logistics warehouse",
-       "text": "12,000 square metres of steel-frame storage."
-      },
-      "ar": {
-       "title": "مستودع لوجستي",
-       "text": "اثنا عشر ألف متر مربع من التخزين بهيكل معدني."
-      }
-     },
-     "image": "building"
-    },
-    {
-     "snippet": "s_text_image",
-     "copy": {
-      "en": {
-       "title": "Office tower fit-out",
-       "text": "Eight floors fitted out while the tenants stayed in."
-      },
-      "ar": {
-       "title": "تشطيب برج مكاتب",
-       "text": "تشطيب ثمانية طوابق مع بقاء المستأجرين فيها."
-      }
-     },
-     "image": "building"
-    },
-    {
-     "snippet": "s_image_text",
-     "copy": {
-      "en": {
-       "title": "Retail centre",
-       "text": "A neighbourhood centre with 24 units and parking."
-      },
-      "ar": {
-       "title": "مركز تجاري",
-       "text": "مركز حيّ يضم 24 وحدة ومواقف سيارات."
-      }
-     },
-     "image": "building"
+      "en": {},
+      "ar": {}
+     }
     }
    ],
    "seo": {
@@ -596,32 +502,11 @@
      }
     },
     {
-     "snippet": "s_company_team",
+     "snippet": "s_text_block",
+     "kind": "member",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "name": "Raghad",
-         "role": "Managing director"
-        },
-        {
-         "name": "Ebrahim",
-         "role": "Project manager"
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "name": "رغد",
-         "role": "المدير العام"
-        },
-        {
-         "name": "إبراهيم",
-         "role": "مدير المشاريع"
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     }
    ],
@@ -658,63 +543,27 @@
      }
     },
     {
-     "snippet": "s_contact_info",
+     "snippet": "s_text_block",
+     "kind": "contact",
      "copy": {
-      "en": {
-       "title": "Find us",
-       "items": [
-        {
-         "title": "Address",
-         "text": "Industrial Area 4, Sharjah"
-        },
-        {
-         "title": "Opening hours",
-         "text": "Sun-Thu 8:00-17:00"
-        },
-        {
-         "title": "Phone",
-         "text": "+971 4 000 0000"
-        },
-        {
-         "title": "Email",
-         "text": "hello@example.com"
-        }
-       ]
-      },
-      "ar": {
-       "title": "تجدنا هنا",
-       "items": [
-        {
-         "title": "العنوان",
-         "text": "المنطقة الصناعية 4، الشارقة"
-        },
-        {
-         "title": "ساعات العمل",
-         "text": "الأحد - الخميس 8:00 - 17:00"
-        },
-        {
-         "title": "الهاتف",
-         "text": "+971 4 000 0000"
-        },
-        {
-         "title": "البريد الإلكتروني",
-         "text": "hello@example.com"
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     },
     {
      "snippet": "s_text_block",
+     "kind": "location",
      "copy": {
-      "en": {
-       "title": "Have a plan on paper?",
-       "text": "Send us the drawings and receive a priced proposal in five working days."
-      },
-      "ar": {
-       "title": "هل لديك مخطط على الورق؟",
-       "text": "أرسل لنا المخططات ويصلك عرض مسعّر خلال خمسة أيام عمل."
-      }
+      "en": {},
+      "ar": {}
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "quote",
+     "copy": {
+      "en": {},
+      "ar": {}
      }
     }
    ],
@@ -750,48 +599,11 @@
      }
     },
     {
-     "snippet": "s_faq_collapse",
+     "snippet": "s_text_block",
+     "kind": "faq",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "title": "Do you give a fixed price?",
-         "text": "Yes, after a site visit and agreed drawings we give a lump-sum or a measured price."
-        },
-        {
-         "title": "Who handles the permits?",
-         "text": "We prepare and follow up the municipality and civil defence approvals."
-        },
-        {
-         "title": "What warranty do I get?",
-         "text": "A ten-year structural warranty and one year on finishing works."
-        },
-        {
-         "title": "Can you work with my consultant?",
-         "text": "Of course, we follow the consultant's drawings and inspection requests."
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "title": "هل تقدّمون سعراً ثابتاً؟",
-         "text": "نعم، بعد زيارة الموقع واعتماد المخططات نقدّم سعراً مقطوعاً أو سعراً بالمقايسة."
-        },
-        {
-         "title": "من يتولى التراخيص؟",
-         "text": "نعدّ ونتابع موافقات البلدية والدفاع المدني."
-        },
-        {
-         "title": "ما الضمان الذي أحصل عليه؟",
-         "text": "ضمان عشر سنوات على الهيكل الإنشائي وسنة على أعمال التشطيب."
-        },
-        {
-         "title": "هل تعملون مع الاستشاري الخاص بي؟",
-         "text": "بالتأكيد، نلتزم بمخططات الاستشاري وطلبات الفحص."
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     }
    ],

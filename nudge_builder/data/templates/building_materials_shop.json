@@ -375,6 +375,7 @@
   "contact",
   "faq"
  ],
+ "kinds": ["product", "testimonial", "faq", "location"],
  "pages": [
   {
    "key": "home",
@@ -513,6 +514,18 @@
        "text": "للمقاولين أصحاب الرخصة السارية.",
        "button": "قدّم طلباً",
        "button_url": "/shop"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "testimonial",
+     "copy": {
+      "en": {
+       "title": "What our clients say"
+      },
+      "ar": {
+       "title": "ماذا يقول عملاؤنا"
       }
      }
     },
@@ -672,50 +685,11 @@
      }
     },
     {
-     "snippet": "s_product_catalog",
+     "snippet": "s_text_block",
+     "kind": "product",
      "copy": {
-      "en": {
-       "title": "Popular products",
-       "items": [
-        {
-         "title": "Portland cement, 50 kg bag",
-         "text": "Sold by the bag or by the pallet of 40. - AED 14"
-        },
-        {
-         "title": "Rebar 12 mm, 12 m",
-         "text": "Certified grade 60, priced per tonne. - AED 2,650"
-        },
-        {
-         "title": "Porcelain floor tile 60x60",
-         "text": "Matt finish, box of 1.44 square metres. - AED 62"
-        },
-        {
-         "title": "Interior emulsion paint, 18 L",
-         "text": "Washable, low odour, 20 colours. - AED 185"
-        }
-       ]
-      },
-      "ar": {
-       "title": "منتجات رائجة",
-       "items": [
-        {
-         "title": "أسمنت بورتلاندي، كيس 50 كجم",
-         "text": "يُباع بالكيس أو بالمشتاح من 40 كيساً. - 14 د.إ"
-        },
-        {
-         "title": "حديد تسليح 12 ملم، طول 12 م",
-         "text": "درجة 60 معتمدة والسعر للطن. - 2,650 د.إ"
-        },
-        {
-         "title": "بلاط بورسلان للأرضيات 60×60",
-         "text": "تشطيب مطفي والصندوق 1.44 متر مربع. - 62 د.إ"
-        },
-        {
-         "title": "دهان داخلي مائي، 18 لتراً",
-         "text": "قابل للغسل وقليل الرائحة و20 لوناً. - 185 د.إ"
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     },
     {
@@ -918,63 +892,27 @@
      }
     },
     {
-     "snippet": "s_contact_info",
+     "snippet": "s_text_block",
+     "kind": "contact",
      "copy": {
-      "en": {
-       "title": "Find us",
-       "items": [
-        {
-         "title": "Address",
-         "text": "Industrial Area 2, Ajman"
-        },
-        {
-         "title": "Opening hours",
-         "text": "Sat-Thu 7:00-18:00"
-        },
-        {
-         "title": "Phone",
-         "text": "+971 4 000 0000"
-        },
-        {
-         "title": "Email",
-         "text": "hello@example.com"
-        }
-       ]
-      },
-      "ar": {
-       "title": "تجدنا هنا",
-       "items": [
-        {
-         "title": "العنوان",
-         "text": "المنطقة الصناعية 2، عجمان"
-        },
-        {
-         "title": "ساعات العمل",
-         "text": "السبت - الخميس 7:00 - 18:00"
-        },
-        {
-         "title": "الهاتف",
-         "text": "+971 4 000 0000"
-        },
-        {
-         "title": "البريد الإلكتروني",
-         "text": "hello@example.com"
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     },
     {
      "snippet": "s_text_block",
+     "kind": "location",
      "copy": {
-      "en": {
-       "title": "Planning a big job?",
-       "text": "Send your quantities and get one price for materials and delivery."
-      },
-      "ar": {
-       "title": "تخطط لمشروع كبير؟",
-       "text": "أرسل كمياتك ويصلك سعر واحد للمواد والتوصيل."
-      }
+      "en": {},
+      "ar": {}
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "quote",
+     "copy": {
+      "en": {},
+      "ar": {}
      }
     }
    ],
@@ -1010,56 +948,11 @@
      }
     },
     {
-     "snippet": "s_faq_collapse",
+     "snippet": "s_text_block",
+     "kind": "faq",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "title": "Do you deliver to the site?",
-         "text": "Yes, with flatbed and crane trucks; the fee depends on distance and load."
-        },
-        {
-         "title": "Can I get a quotation?",
-         "text": "Send your bill of quantities and we reply within four hours."
-        },
-        {
-         "title": "Do you offer credit?",
-         "text": "For licensed companies, after a short credit review."
-        },
-        {
-         "title": "What if I order too much?",
-         "text": "Unopened full pallets can be returned within fourteen days."
-        },
-        {
-         "title": "Do you cut or mix to order?",
-         "text": "Yes, we cut steel and mix paint colours in store."
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "title": "هل توصلون إلى الموقع؟",
-         "text": "نعم، بسطحات وشاحنات بونش، والأجرة حسب المسافة والحمولة."
-        },
-        {
-         "title": "هل أستطيع الحصول على عرض سعر؟",
-         "text": "أرسل جدول الكميات ونردّ خلال أربع ساعات."
-        },
-        {
-         "title": "هل تقدمون بيعاً آجلاً؟",
-         "text": "للشركات المرخصة بعد مراجعة ائتمانية قصيرة."
-        },
-        {
-         "title": "ماذا لو طلبت كمية زائدة؟",
-         "text": "يمكن إرجاع المشاتيح الكاملة غير المفتوحة خلال أربعة عشر يوماً."
-        },
-        {
-         "title": "هل تقصّون أو تخلطون حسب الطلب؟",
-         "text": "نعم، نقص الحديد ونخلط ألوان الدهان في المتجر."
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     }
    ],

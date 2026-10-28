@@ -19,6 +19,23 @@ GROUP = {
 }
 
 
+ARABIC = ("عربي", "العربي", "بالعربي", "عربى", "العربى", "بالعربى", "العربية", "بالعربية", "arabic", "arab")
+ENGLISH = ("إنجليزي", "انجليزي", "الانجليزي", "الإنجليزي", "بالانجليزي", "بالإنجليزي", "انجليزى", "إنجليزى",
+           "الانجليزية", "الإنجليزية", "بالانجليزية", "بالإنجليزية", "انكليزي", "الانكليزي", "english")
+
+
+def languages_named(*texts):
+    """:return: the language codes (``ar``, ``en``) the person names in their words, in the order named"""
+    import re
+    text = " ".join(t or "" for t in texts).lower()
+    found = []
+    for code, words in (("ar", ARABIC), ("en", ENGLISH)):
+        positions = [m.start() for word in words for m in re.finditer(re.escape(word), text)]
+        if positions:
+            found.append((min(positions), code))
+    return [code for _pos, code in sorted(found)]
+
+
 def _register_group():
     """The tool comes with the words 'website' and 'موقع' in the question"""
     if "website_builder" in groups.GROUPS:
@@ -53,10 +70,23 @@ class StartWebsiteBuilder(base.Tool):
             "business": {"type": "string", "maxLength": 200,
                          "description": "What the business is, in the person's words, if they said."},
             "shop": {"type": "boolean", "description": "True if they want to sell online."},
+            "languages": {"type": "array", "items": {"type": "string", "enum": ["ar", "en"]},
+                          "description": "The languages of the site the person named (Arabic, English)."},
             "text": {"type": "string", "minLength": 1, "maxLength": 300,
                      "description": "One sentence in the language the person wrote in."},
         },
     }
+
+    @staticmethod
+    def _language_context(env, named):
+        """The languages to pre-select: those named; else the person's own and English"""
+        shorts = named or [(env.user.lang or "en_US").split("_")[0], "en"]
+        langs = env["res.lang"]
+        for short in shorts:
+            candidates = env["res.lang"].search([("active", "=", True)]).filtered(
+                lambda lang: lang.code.split("_")[0] == short)
+            langs |= candidates.sorted(lambda lang: lang.code not in ("en_US", "ar_001"))[:1]
+        return {"default_lang_ids": [(6, 0, langs.ids)]} if langs else {}
 
     def run(self, env, arguments, screen):
         if "nudge.builder.site" not in env:
@@ -66,6 +96,9 @@ class StartWebsiteBuilder(base.Tool):
         if business:
             context["default_kind"] = business
             context["default_template_key"] = library.pick(business)
+        named = [code for code in (arguments.get("languages") or []) if code in ("ar", "en")]
+        named = named or languages_named(business, arguments.get("text"))
+        context.update(self._language_context(env, named))
         if "shop" in arguments:
             context["default_shop"] = bool(arguments["shop"])
         action = {

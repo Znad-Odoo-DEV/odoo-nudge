@@ -42,6 +42,7 @@
   "contact",
   "faq"
  ],
+ "kinds": ["project", "service", "member", "testimonial", "faq", "location"],
  "pages": [
   {
    "key": "home",
@@ -110,49 +111,14 @@
      }
     },
     {
-     "snippet": "s_features",
+     "snippet": "s_text_block",
+     "kind": "service",
      "copy": {
       "en": {
-       "title": "What we do",
-       "items": [
-        {
-         "title": "Periodic service",
-         "text": "Oil, filters, brakes and a 40-point check."
-        },
-        {
-         "title": "Engine and gearbox",
-         "text": "Diagnosis with a computer and repair by specialists."
-        },
-        {
-         "title": "Air conditioning",
-         "text": "Gas refill, leak repair and compressor replacement."
-        },
-        {
-         "title": "Body and paint",
-         "text": "Dent repair and colour-matched paint."
-        }
-       ]
+       "title": "What we do"
       },
       "ar": {
-       "title": "ما نقدّمه",
-       "items": [
-        {
-         "title": "الصيانة الدورية",
-         "text": "زيت وفلاتر وفرامل وفحص من أربعين نقطة."
-        },
-        {
-         "title": "المحرك وناقل الحركة",
-         "text": "تشخيص بالحاسب وإصلاح على يد مختصين."
-        },
-        {
-         "title": "التكييف",
-         "text": "تعبئة غاز وإصلاح التسريب وتبديل الضاغط."
-        },
-        {
-         "title": "السمكرة والدهان",
-         "text": "إصلاح الطعجات ودهان بلون مطابق."
-        }
-       ]
+       "title": "ما نقدّمه"
       }
      }
     },
@@ -204,6 +170,19 @@
      }
     },
     {
+     "snippet": "s_text_block",
+     "kind": "project",
+     "layout": "grid",
+     "copy": {
+      "en": {
+       "title": "Our projects"
+      },
+      "ar": {
+       "title": "مشاريعنا"
+      }
+     }
+    },
+    {
      "snippet": "s_text_image",
      "copy": {
       "en": {
@@ -220,6 +199,18 @@
       }
      },
      "image": "workshop"
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "testimonial",
+     "copy": {
+      "en": {
+       "title": "What our clients say"
+      },
+      "ar": {
+       "title": "ماذا يقول عملاؤنا"
+      }
+     }
     },
     {
      "snippet": "s_call_to_action",
@@ -377,48 +368,11 @@
      }
     },
     {
-     "snippet": "s_features",
+     "snippet": "s_text_block",
+     "kind": "service",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "title": "Periodic service",
-         "text": "Oil, filters, brakes and a 40-point check."
-        },
-        {
-         "title": "Engine and gearbox",
-         "text": "Diagnosis with a computer and repair by specialists."
-        },
-        {
-         "title": "Air conditioning",
-         "text": "Gas refill, leak repair and compressor replacement."
-        },
-        {
-         "title": "Body and paint",
-         "text": "Dent repair and colour-matched paint."
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "title": "الصيانة الدورية",
-         "text": "زيت وفلاتر وفرامل وفحص من أربعين نقطة."
-        },
-        {
-         "title": "المحرك وناقل الحركة",
-         "text": "تشخيص بالحاسب وإصلاح على يد مختصين."
-        },
-        {
-         "title": "التكييف",
-         "text": "تعبئة غاز وإصلاح التسريب وتبديل الضاغط."
-        },
-        {
-         "title": "السمكرة والدهان",
-         "text": "إصلاح الطعجات ودهان بلون مطابق."
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     },
     {
@@ -509,60 +463,12 @@
      }
     },
     {
-     "snippet": "s_text_image",
+     "snippet": "s_text_block",
+     "kind": "project",
      "copy": {
-      "en": {
-       "title": "Engine overhaul",
-       "text": "A full rebuild completed in four days."
-      },
-      "ar": {
-       "title": "إعادة تأهيل محرك",
-       "text": "إعادة بناء كاملة أنجزت في أربعة أيام."
-      }
-     },
-     "image": "workshop"
-    },
-    {
-     "snippet": "s_image_text",
-     "copy": {
-      "en": {
-       "title": "Accident repair",
-       "text": "Front end restored and repainted."
-      },
-      "ar": {
-       "title": "إصلاح حادث",
-       "text": "ترميم الواجهة الأمامية وإعادة الدهان."
-      }
-     },
-     "image": "workshop"
-    },
-    {
-     "snippet": "s_text_image",
-     "copy": {
-      "en": {
-       "title": "Fleet contract",
-       "text": "Monthly service for forty delivery vans."
-      },
-      "ar": {
-       "title": "عقد أسطول",
-       "text": "صيانة شهرية لأربعين شاحنة توصيل."
-      }
-     },
-     "image": "workshop"
-    },
-    {
-     "snippet": "s_image_text",
-     "copy": {
-      "en": {
-       "title": "Classic restoration",
-       "text": "An old saloon returned to its original colour."
-      },
-      "ar": {
-       "title": "ترميم سيارة كلاسيكية",
-       "text": "سيارة قديمة أعيدت إلى لونها الأصلي."
-      }
-     },
-     "image": "workshop"
+      "en": {},
+      "ar": {}
+     }
     }
    ],
    "seo": {
@@ -596,32 +502,11 @@
      }
     },
     {
-     "snippet": "s_company_team",
+     "snippet": "s_text_block",
+     "kind": "member",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "name": "Raghad",
-         "role": "Workshop manager"
-        },
-        {
-         "name": "Ebrahim",
-         "role": "Chief mechanic"
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "name": "رغد",
-         "role": "مدير الورشة"
-        },
-        {
-         "name": "إبراهيم",
-         "role": "كبير الميكانيكيين"
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     }
    ],
@@ -658,63 +543,27 @@
      }
     },
     {
-     "snippet": "s_contact_info",
+     "snippet": "s_text_block",
+     "kind": "contact",
      "copy": {
-      "en": {
-       "title": "Find us",
-       "items": [
-        {
-         "title": "Address",
-         "text": "Industrial Area 11, Sharjah"
-        },
-        {
-         "title": "Opening hours",
-         "text": "Sat-Thu 8:00-20:00"
-        },
-        {
-         "title": "Phone",
-         "text": "+971 4 000 0000"
-        },
-        {
-         "title": "Email",
-         "text": "hello@example.com"
-        }
-       ]
-      },
-      "ar": {
-       "title": "تجدنا هنا",
-       "items": [
-        {
-         "title": "العنوان",
-         "text": "المنطقة الصناعية 11، الشارقة"
-        },
-        {
-         "title": "ساعات العمل",
-         "text": "السبت - الخميس 8:00 - 20:00"
-        },
-        {
-         "title": "الهاتف",
-         "text": "+971 4 000 0000"
-        },
-        {
-         "title": "البريد الإلكتروني",
-         "text": "hello@example.com"
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     },
     {
      "snippet": "s_text_block",
+     "kind": "location",
      "copy": {
-      "en": {
-       "title": "Warning light on?",
-       "text": "Bring the car in for a free computer scan."
-      },
-      "ar": {
-       "title": "هل اشتعل مصباح التحذير؟",
-       "text": "أحضر سيارتك لفحص مجاني بالحاسب."
-      }
+      "en": {},
+      "ar": {}
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "quote",
+     "copy": {
+      "en": {},
+      "ar": {}
      }
     }
    ],
@@ -750,48 +599,11 @@
      }
     },
     {
-     "snippet": "s_faq_collapse",
+     "snippet": "s_text_block",
+     "kind": "faq",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "title": "How long does a service take?",
-         "text": "A periodic service takes about two hours."
-        },
-        {
-         "title": "Do you collect the car?",
-         "text": "Yes, free pickup and return within ten kilometres."
-        },
-        {
-         "title": "Can I bring my own parts?",
-         "text": "You can, but the warranty then covers labour only."
-        },
-        {
-         "title": "Do you work on all brands?",
-         "text": "Japanese, Korean, European and American cars."
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "title": "كم تستغرق الصيانة؟",
-         "text": "الصيانة الدورية تستغرق نحو ساعتين."
-        },
-        {
-         "title": "هل تستلمون السيارة من عندي؟",
-         "text": "نعم، استلام وتسليم مجانيان ضمن عشرة كيلومترات."
-        },
-        {
-         "title": "هل أستطيع إحضار قطعي؟",
-         "text": "يمكنك ذلك لكن الضمان يشمل الأجرة فقط."
-        },
-        {
-         "title": "هل تصلحون جميع الماركات؟",
-         "text": "السيارات اليابانية والكورية والأوروبية والأمريكية."
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     }
    ],

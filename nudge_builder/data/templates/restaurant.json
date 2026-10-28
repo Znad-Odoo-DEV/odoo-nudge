@@ -42,6 +42,7 @@
   "contact",
   "faq"
  ],
+ "kinds": ["product", "testimonial", "faq", "location"],
  "pages": [
   {
    "key": "home",
@@ -110,49 +111,14 @@
      }
     },
     {
-     "snippet": "s_features",
+     "snippet": "s_text_block",
+     "kind": "product",
      "copy": {
       "en": {
-       "title": "What we do",
-       "items": [
-        {
-         "title": "Grills",
-         "text": "Lamb, chicken and kofta over charcoal."
-        },
-        {
-         "title": "Mezze and salads",
-         "text": "Hummus, moutabal, tabbouleh and warm bread."
-        },
-        {
-         "title": "Rice and stews",
-         "text": "Mandi, kabsa and slow-cooked stews."
-        },
-        {
-         "title": "Sweets",
-         "text": "Kunafa, luqaimat and Arabic coffee."
-        }
-       ]
+       "title": "Our menu"
       },
       "ar": {
-       "title": "ما نقدّمه",
-       "items": [
-        {
-         "title": "المشويات",
-         "text": "لحم ودجاج وكفتة على الفحم."
-        },
-        {
-         "title": "المقبلات والسلطات",
-         "text": "حمص ومتبل وتبولة وخبز ساخن."
-        },
-        {
-         "title": "الأرز والطواجن",
-         "text": "مندي وكبسة وطواجن بطيئة الطهي."
-        },
-        {
-         "title": "الحلويات",
-         "text": "كنافة ولقيمات وقهوة عربية."
-        }
-       ]
+       "title": "قائمتنا"
       }
      }
     },
@@ -220,6 +186,18 @@
       }
      },
      "image": "food"
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "testimonial",
+     "copy": {
+      "en": {
+       "title": "What our clients say"
+      },
+      "ar": {
+       "title": "ماذا يقول عملاؤنا"
+      }
+     }
     },
     {
      "snippet": "s_call_to_action",
@@ -377,48 +355,11 @@
      }
     },
     {
-     "snippet": "s_features",
+     "snippet": "s_text_block",
+     "kind": "product",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "title": "Grills",
-         "text": "Lamb, chicken and kofta over charcoal."
-        },
-        {
-         "title": "Mezze and salads",
-         "text": "Hummus, moutabal, tabbouleh and warm bread."
-        },
-        {
-         "title": "Rice and stews",
-         "text": "Mandi, kabsa and slow-cooked stews."
-        },
-        {
-         "title": "Sweets",
-         "text": "Kunafa, luqaimat and Arabic coffee."
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "title": "المشويات",
-         "text": "لحم ودجاج وكفتة على الفحم."
-        },
-        {
-         "title": "المقبلات والسلطات",
-         "text": "حمص ومتبل وتبولة وخبز ساخن."
-        },
-        {
-         "title": "الأرز والطواجن",
-         "text": "مندي وكبسة وطواجن بطيئة الطهي."
-        },
-        {
-         "title": "الحلويات",
-         "text": "كنافة ولقيمات وقهوة عربية."
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     },
     {
@@ -658,63 +599,27 @@
      }
     },
     {
-     "snippet": "s_contact_info",
+     "snippet": "s_text_block",
+     "kind": "contact",
      "copy": {
-      "en": {
-       "title": "Find us",
-       "items": [
-        {
-         "title": "Address",
-         "text": "Souq Street, Sharjah"
-        },
-        {
-         "title": "Opening hours",
-         "text": "Daily 11:00-24:00"
-        },
-        {
-         "title": "Phone",
-         "text": "+971 4 000 0000"
-        },
-        {
-         "title": "Email",
-         "text": "hello@example.com"
-        }
-       ]
-      },
-      "ar": {
-       "title": "تجدنا هنا",
-       "items": [
-        {
-         "title": "العنوان",
-         "text": "شارع السوق، الشارقة"
-        },
-        {
-         "title": "ساعات العمل",
-         "text": "يومياً 11:00 - 24:00"
-        },
-        {
-         "title": "الهاتف",
-         "text": "+971 4 000 0000"
-        },
-        {
-         "title": "البريد الإلكتروني",
-         "text": "hello@example.com"
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     },
     {
      "snippet": "s_text_block",
+     "kind": "location",
      "copy": {
-      "en": {
-       "title": "Hungry already?",
-       "text": "Order online and we will have it ready or at your door."
-      },
-      "ar": {
-       "title": "هل جعت؟",
-       "text": "اطلب عبر الموقع ونجهّزه لك أو نوصله إلى بابك."
-      }
+      "en": {},
+      "ar": {}
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "quote",
+     "copy": {
+      "en": {},
+      "ar": {}
      }
     }
    ],
@@ -750,48 +655,11 @@
      }
     },
     {
-     "snippet": "s_faq_collapse",
+     "snippet": "s_text_block",
+     "kind": "faq",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "title": "Do I need to reserve?",
-         "text": "Only on weekends and for groups above eight."
-        },
-        {
-         "title": "Is the meat halal?",
-         "text": "Yes, all meat is halal and certified."
-        },
-        {
-         "title": "Do you have vegetarian dishes?",
-         "text": "Many of our mezze and rice dishes are vegetarian."
-        },
-        {
-         "title": "Can you cater an event?",
-         "text": "Yes, from ten to five hundred guests, with notice of two days."
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "title": "هل يلزم الحجز؟",
-         "text": "فقط في عطلة نهاية الأسبوع وللمجموعات فوق ثمانية أشخاص."
-        },
-        {
-         "title": "هل اللحوم حلال؟",
-         "text": "نعم، جميع اللحوم حلال ومعتمدة."
-        },
-        {
-         "title": "هل لديكم أطباق نباتية؟",
-         "text": "كثير من المقبلات وأطباق الأرز نباتية."
-        },
-        {
-         "title": "هل تغطّون المناسبات؟",
-         "text": "نعم، من عشرة إلى خمسمئة ضيف بإشعار مسبق قبل يومين."
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     }
    ],

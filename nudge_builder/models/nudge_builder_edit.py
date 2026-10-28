@@ -6,13 +6,16 @@ cleaning as the words of the AI writer (``tools.safe``) before they reach a sect
 changes is that section; the other sections of the page are not read back or rewritten by hand.
 """
 import copy as copymod
+import hashlib
+import re
 
 from lxml import etree
 
-from odoo import models
+from odoo import fields, models
 from odoo.exceptions import AccessError, UserError
+from odoo.tools import html_escape
 
-from ..tools import compat, pictures, sections, snippets
+from ..tools import checks, compat, pictures, sections, snippets
 from .nudge_builder_template import SNIPPETS
 from ..tools.safe import safe_text, safe_url
 
@@ -133,7 +136,7 @@ class NudgeBuilderSiteEdit(models.Model):
                 button = snippets.first(section, snippets.BUTTON)
                 if button is not None and not words.get("button_url") and button.get("href"):
                     words["button_url"] = button.get("href")  # an edit of the words keeps where the button goes
-                snippets.fill(section, sections.snippet_of(target), words, picture, facts)
+                snippets.fill(section, sections.snippet_of(target), words, picture, facts, fresh=False)
                 wrap.replace(target, etree.fromstring(compat.to_string(section)))
         return transform
 
@@ -287,4 +290,336 @@ class NudgeBuilderSiteEdit(models.Model):
             "site_id": self.id, "kind": "seo", "page_id": page.id, "before": before, "after": after,
             "name": self.env._("Change the %(what)s of the page %(page)s",
                                what=", ".join(self._seo_label(name) for name in values), page=page.name),
+        })
+
+
+# ----------------------------------------------------------------------
+# Website Builder 2.0: the records of a site and its contact details, changed from the chat
+# ----------------------------------------------------------------------
+ITEM_KINDS = ("project", "product", "service", "member", "testimonial", "faq", "location")
+# the pages that show each kind of record (page key or kind)
+KIND_PAGES = {
+    "project": ("projects", "portfolio", "work", "listings", "home"),
+    "product": ("shop", "products", "menu", "catalog", "catalogue", "home"),
+    "service": ("services", "programmes", "home"),
+    "member": ("team", "about", "doctors"),
+    "testimonial": ("home", "testimonials", "about"),
+    "faq": ("faq", "faqs"),
+    "location": ("contact", "contact_us", "contactus", "locations", "home"),
+}
+# never written from the chat: links, owners and pictures have their own tools
+PROTECTED_FIELDS = frozenset({
+    "id", "site_id", "company_id", "picture_ids", "before_picture_id", "after_picture_id", "document_id",
+    "product_tmpl_id", "currency_id", "state_id", "create_uid", "write_uid", "create_date", "write_date",
+    "display_name", "maps_embed_src"})
+URL_FIELDS = frozenset({"maps_url", "linkedin", "booking_url", "url"})
+SIMPLE_TYPES = ("char", "text", "html", "integer", "float", "boolean", "selection")
+TEXT_LIMIT = 2000
+PHONE_CHARS = re.compile(r"^[+\d\s().-]{5,30}$")
+EMAIL = re.compile(r"^[^@\s<>\"']+@[^@\s<>\"']+\.[^@\s<>\"']+$")
+CONTACT_FIELDS = ("whatsapp", "whatsapp_text", "phone", "email", "hours", "booking_url")
+CONTACT_LIMITS = {"whatsapp_text": 300, "hours": 600}
+
+
+def _item_fingerprint(record):
+    """:return: a short hash of what a person can type in a record: a change inside the same second is seen too"""
+    values = {name: str(record[name]) for name, field in record._fields.items()
+              if field.type in ("char", "text", "html", "integer", "float", "boolean", "selection")
+              and not field.compute and not field.related and name not in ("id", "create_date", "write_date")}
+    return hashlib.sha1(repr(sorted(values.items())).encode()).hexdigest()
+
+
+class NudgeBuilderRevisionContent(models.Model):
+    """Two more kinds of change that can be undone: a record added to the site and a change of its contact details"""
+    _inherit = "nudge.builder.revision"
+
+    kind = fields.Selection(selection_add=[("item", "Content record"), ("contact", "Contact details")],
+                            ondelete={"item": "cascade", "contact": "cascade"})
+
+    def _undo_item(self):
+        after = self.after or {}
+        model = after.get("model")
+        record = self.env[model].browse(after.get("id")).exists() if model in self.env else None
+        if not record:
+            return [self.env._("The record was already removed.")]
+        if (str(record.write_date) != after.get("write_date")
+                or (after.get("fingerprint") and _item_fingerprint(record) != after["fingerprint"])):
+            raise UserError(self.env._(
+                "The record %s was changed after it was added; undo is refused so that nothing newer is lost.",
+                record.display_name))
+        record.unlink()
+
+    def _undo_contact(self):
+        site = self.site_id
+        if site._contact_read(list(self.after or {})) != self.after:
+            raise UserError(self.env._(
+                "The contact details were changed after this edit; undo is refused so that nothing newer is lost."))
+        site._contact_write(self.before or {})
+
+
+class NudgeBuilderSiteContent(models.Model):
+    """Adding records and setting the contact details of a site, with a before/after card and an undo"""
+    _inherit = "nudge.builder.site"
+
+    # ------------------------------------------------------------------ one record
+    def _item_model(self, kind):
+        self.ensure_one()
+        if kind not in ITEM_KINDS:
+            raise UserError(self.env._("Unknown kind %(kind)s; it is one of: %(known)s.",
+                                       kind=kind, known=", ".join(ITEM_KINDS)))
+        name = "nudge.builder.%s" % kind
+        if name not in self.env:
+            raise UserError(self.env._("This site cannot hold %s records.", kind))
+        return self.env[name]
+
+    def _item_fields(self, Model):
+        """:return: the names of the fields a person may give for a record of ``Model``"""
+        return sorted(name for name, field in Model._fields.items()
+                      if name not in PROTECTED_FIELDS and not field.readonly and not field.compute
+                      and not getattr(field, "automatic", False) and field.type in SIMPLE_TYPES)
+
+    @staticmethod
+    def _item_aliased(Model, fields_in):
+        """:return: ``fields_in`` with the other names of a field (question, answer of a faq) put to the real ones"""
+        aliases = {"question": "name", "answer": "description"} if Model._name == "nudge.builder.faq" else {}
+        return {aliases.get(name, name): value for name, value in (fields_in or {}).items()}
+
+    def _item_clean(self, Model, name, value):
+        """:return: ``value`` ready to be written in the field ``name`` of ``Model``"""
+        field = Model._fields[name]
+        label = field.string or name
+        if field.type == "boolean":
+            return bool(value)
+        if field.type in ("integer", "float", "monetary"):
+            try:
+                return int(value) if field.type == "integer" else float(value)
+            except (TypeError, ValueError):
+                raise UserError(self.env._("%s must be a number.", label)) from None
+        if field.type == "selection":
+            choices = dict(field.selection) if isinstance(field.selection, list) else {}
+            if choices and value not in choices:
+                raise UserError(self.env._("%(label)s is one of: %(choices)s.", label=label, choices=", ".join(choices)))
+            return value
+        if field.type not in ("char", "text", "html"):
+            raise UserError(self.env._("%s cannot be set from the chat.", label))
+        if name in URL_FIELDS:
+            url = safe_url(value)
+            if not url or not url.startswith("https://"):
+                raise UserError(self.env._("%s must be an https:// address.", label))
+            return url
+        text = safe_text(value).strip() if field.type == "text" else " ".join(safe_text(value).split())
+        text = text[:TEXT_LIMIT]
+        if name == "whatsapp":
+            return self._whatsapp(text)
+        if name == "phone" and text and not PHONE_CHARS.match(text):
+            raise UserError(self.env._("%s is not a phone number.", label))
+        if name == "email" and text and not EMAIL.match(text):
+            raise UserError(self.env._("%s is not an e-mail address.", label))
+        if field.type == "html":
+            return "<p>%s</p>" % html_escape(text) if text else False
+        return text
+
+    def _whatsapp(self, text):
+        """:return: the WhatsApp number in the international form (+ and digits), or a UserError"""
+        number = re.sub(r"[\s().-]", "", text or "")
+        if number.startswith("00"):
+            number = "+" + number[2:]
+        if number and not number.startswith("+"):
+            number = "+" + number
+        if number and not checks.valid_whatsapp(number):
+            raise UserError(self.env._("The WhatsApp number must be in the international form: + and 8 to 15 digits."))
+        return number
+
+    def _item_values(self, kind, fields_in):
+        """:return: ``{field: cleaned value}`` of the fields the person gave for a new record of ``kind``"""
+        Model = self._item_model(kind)
+        allowed = self._item_fields(Model)
+        values = {}
+        for name, value in self._item_aliased(Model, fields_in).items():
+            if name not in allowed:
+                raise UserError(self.env._("%(name)s is not a field of a %(kind)s. Fields: %(allowed)s.",
+                                           name=name, kind=kind, allowed=", ".join(allowed)))
+            if value is None or value == "":
+                continue
+            values[name] = self._item_clean(Model, name, value)
+        if not values:
+            raise UserError(self.env._("Say the fields of the new %s.", kind))
+        for name, field in Model._fields.items():
+            if (field.required and name not in values and name not in PROTECTED_FIELDS and not field.automatic
+                    and name not in Model.default_get([name])):
+                raise UserError(self.env._("Say the %(field)s of the new %(kind)s.",
+                                           field=field.string or name, kind=kind))
+        return values
+
+    def _item_translations(self, kind, translations):
+        """:return: ``{lang code: {field: value}}`` for the other languages of the site"""
+        Model = self._item_model(kind)
+        allowed = self._item_fields(Model)
+        out = {}
+        for lang, fields_in in (translations or {}).items():
+            code = self._seo_lang(lang)
+            values = {name: self._item_clean(Model, name, value) for name, value in self._item_aliased(Model, fields_in).items()
+                      if name in allowed and Model._fields[name].translate and value}
+            if values:
+                out[code] = values
+        return out
+
+    def _item_preview(self, kind, fields_in, translations=None):
+        """What the card of an added record shows; nothing is written.
+
+        :return: ``{"lines", "summary", "values", "translations"}``"""
+        self.ensure_one()
+        self._check_designer()
+        values = self._item_values(kind, fields_in)
+        other = self._item_translations(kind, translations)
+        Model = self._item_model(kind)
+        count = Model.search_count([("site_id", "=", self.id)])
+        lines = [{"label": self.env._("Before"),
+                  "value": self.env._("%(count)s %(kind)s records", count=count, kind=kind)}]
+        for name, value in values.items():
+            shown = (self.env._("Yes") if value else self.env._("No")) if isinstance(value, bool) else str(value)[:300]
+            lines.append({"label": Model._fields[name].string or name, "value": shown})
+        for code, per in other.items():
+            lines.append({"label": code, "value": "; ".join("%s: %s" % (key, str(text)[:100])
+                                                            for key, text in per.items())})
+        return {"lines": lines, "values": values, "translations": other,
+                "summary": self.env._("Add a %(kind)s to the site %(site)s", kind=kind, site=self.name)}
+
+    def _item_add(self, kind, values, translations=None):
+        """Add the record as the person and keep a revision that removes it. The pages that show this kind are
+        drawn again when the builder knows how.
+
+        :return: ``(revision, record, ids of the pages drawn again)``"""
+        self.ensure_one()
+        self._check_designer()
+        Model = self._item_model(kind)
+        values = self._item_values(kind, values)  # cleaned again: the card's values came through a stored step
+        record = Model.create(dict(values, site_id=self.id))
+        if translations:
+            record.flush_recordset()  # a translated html field reads the stored terms: flush first
+        for code, per in (translations or {}).items():
+            record.with_context(lang=code).write(per)
+        revision = self.env["nudge.builder.revision"].create({
+            "site_id": self.id, "kind": "item",
+            "name": self.env._("Add a %(kind)s: %(name)s", kind=kind, name=record.display_name),
+            "before": {"model": Model._name, "id": False},
+            "after": {"model": Model._name, "id": record.id, "write_date": str(record.write_date),
+                      "fingerprint": _item_fingerprint(record)},
+        })
+        return revision, record, self._rerender_kind(kind).get("pages", [])
+
+    def _page_shows(self, page, kind):
+        words = KIND_PAGES.get(kind, ())
+        return (page.key or "").lower() in words or (page.kind or "").lower() in words
+
+    def _rerender_kind(self, kind):
+        """Draw again the sections of the pages that show ``kind`` from the records. The drawing itself is the
+        hook ``_render_kind(page, kind)`` of the site (written with the sections that read records); without it
+        the records are saved and the sections show them at the next build.
+
+        :return: ``{"pages": [ids of the pages drawn again]}``"""
+        self.ensure_one()
+        hook = getattr(self, "_render_kind", None)
+        done = []
+        if hook:
+            for page in self.page_ids.filtered(lambda one: self._page_shows(one, kind)):
+                if page.view_id and hook(page, kind):
+                    done.append(page.id)
+        return {"pages": done}
+
+    # ------------------------------------------------------------------ contact details
+    def _contact_read(self, names):
+        """:return: ``{name: value}`` of contact fields; ``social`` is a sorted list of ``[network, url]``"""
+        self.ensure_one()
+        out = {}
+        for name in names:
+            if name == "social":
+                if "social_ids" in self._fields:
+                    out[name] = sorted([line.network, line.url] for line in self.social_ids)
+            elif name in self._fields:
+                out[name] = self[name] or False
+        return out
+
+    def _contact_write(self, values):
+        self.ensure_one()
+        plain = {name: value for name, value in values.items() if name != "social" and name in self._fields}
+        if plain:
+            self.write(plain)
+        if "social" in values and "social_ids" in self._fields:
+            self.social_ids.unlink()
+            self.write({"social_ids": [(0, 0, {"network": network, "url": url}) for network, url in values["social"]]})
+
+    def _contact_values(self, arguments):
+        """:return: the cleaned contact changes ``{name: value}`` (``social`` as the full new list)"""
+        self.ensure_one()
+        values = {}
+        for name in CONTACT_FIELDS:
+            if arguments.get(name) is None or name not in self._fields:
+                continue
+            text = arguments[name]
+            if name == "whatsapp":
+                values[name] = self._whatsapp(safe_text(text).strip()) or False
+            elif name == "booking_url":
+                url = safe_url(text) if text else ""
+                if text and not url.startswith("https://"):
+                    raise UserError(self.env._("The booking address must be an https:// address."))
+                values[name] = url or False
+            else:
+                clean = safe_text(text).strip() if name == "hours" else " ".join(safe_text(text).split())
+                clean = clean[:CONTACT_LIMITS.get(name, 200)]
+                if name == "phone" and clean and not PHONE_CHARS.match(clean):
+                    raise UserError(self.env._("That is not a phone number."))
+                if name == "email" and clean and not EMAIL.match(clean):
+                    raise UserError(self.env._("That is not an e-mail address."))
+                values[name] = clean or False
+        social = arguments.get("social")
+        if social and "social_ids" in self._fields:
+            if isinstance(social, dict):
+                social = [{"network": key, "url": url} for key, url in social.items()]
+            Social = self.env[self._fields["social_ids"].comodel_name]
+            networks = {}
+            if "network" in Social._fields and isinstance(Social._fields["network"].selection, list):
+                networks = dict(Social._fields["network"].selection)
+            current = dict(self._contact_read(["social"])["social"])
+            for item in social:
+                network, url = str(item.get("network", "")).strip().lower(), safe_url(item.get("url"))
+                if networks and network not in networks:
+                    raise UserError(self.env._("The network is one of: %s.", ", ".join(networks)))
+                if not url.startswith("https://"):
+                    raise UserError(self.env._("The %s address must be an https:// address.", network))
+                current[network] = url
+            values["social"] = sorted([network, url] for network, url in current.items())
+        if not values:
+            raise UserError(self.env._("Say the contact details to set: whatsapp, phone, email, hours, social."))
+        return values
+
+    def _contact_preview(self, arguments):
+        """:return: ``{"lines", "summary", "values", "hash"}`` for a card; nothing is written"""
+        self.ensure_one()
+        self._check_designer()
+        values = self._contact_values(arguments)
+        before = self._contact_read(list(values))
+        empty = self.env._("(empty)")
+        lines = []
+        for name, value in values.items():
+            lines.append({"label": self.env._("%s: before", name), "value": str(before.get(name) or empty)[:300]})
+            lines.append({"label": self.env._("%s: after", name), "value": str(value or empty)[:300]})
+        return {"lines": lines, "values": values, "hash": sections.digest(repr(sorted(before.items()))),
+                "summary": self.env._("Change the contact details of the site %s", self.name)}
+
+    def _contact_apply(self, values, expect_hash=None):
+        """:return: the revision"""
+        self.ensure_one()
+        self._check_designer()
+        args = dict(values)
+        if "social" in args:
+            args["social"] = [{"network": network, "url": url} for network, url in args["social"]]
+        values = self._contact_values(args)
+        before = self._contact_read(list(values))
+        if expect_hash and sections.digest(repr(sorted(before.items()))) != expect_hash:
+            raise UserError(self.env._("The contact details changed since you were shown this card; ask again."))
+        self._contact_write(values)
+        return self.env["nudge.builder.revision"].create({
+            "site_id": self.id, "kind": "contact", "before": before, "after": self._contact_read(list(values)),
+            "name": self.env._("Change the contact details: %s", ", ".join(values)),
         })

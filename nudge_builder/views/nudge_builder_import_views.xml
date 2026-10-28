@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="nudge_builder_import_view_form" model="ir.ui.view">
+        <field name="name">nudge.builder.import.form</field>
+        <field name="model">nudge.builder.import</field>
+        <field name="arch" type="xml">
+            <form string="Import content">
+                <field name="state" invisible="1"/>
+                <field name="site_id" invisible="1"/>
+                <field name="documents_available" invisible="1"/>
+                <group invisible="state != 'setup'">
+                    <group>
+                        <field name="source" widget="radio"/>
+                        <field name="kind"/>
+                    </group>
+                    <group>
+                        <field name="file" filename="filename" invisible="source != 'file'"/>
+                        <field name="filename" invisible="1"/>
+                        <field name="picture_attachment_ids" widget="many2many_binary"/>
+                        <field name="documents_folder" invisible="not documents_available"/>
+                    </group>
+                </group>
+                <div class="text-muted" invisible="state != 'setup'">
+                    Pictures are matched to the rows by file name: the name of the record, or the file name written in the row.
+                    Everything is created with your own rights.
+                </div>
+                <group invisible="state != 'preview'">
+                    <field name="notes" nolabel="1" colspan="2" invisible="not notes"/>
+                </group>
+                <field name="line_ids" invisible="state != 'preview'" nolabel="1">
+                    <list editable="bottom" create="0" delete="0">
+                        <field name="action"/>
+                        <field name="name" readonly="1"/>
+                        <field name="info" readonly="1"/>
+                        <field name="has_picture" readonly="1" string="Picture"/>
+                    </list>
+                </field>
+                <footer>
+                    <button string="Preview" name="action_preview" type="object" class="btn-primary"
+                            invisible="state != 'setup'"/>
+                    <button string="Download the template" name="action_download_template" type="object"
+                            invisible="state != 'setup' or source != 'file'"/>
+                    <button string="Import" name="action_import" type="object" class="btn-primary"
+                            invisible="state != 'preview'"/>
+                    <button string="Back" name="action_back" type="object" invisible="state != 'preview'"/>
+                    <button string="Cancel" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

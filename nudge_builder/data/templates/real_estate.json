@@ -42,6 +42,7 @@
   "contact",
   "faq"
  ],
+ "kinds": ["project", "service", "member", "testimonial", "faq", "location"],
  "pages": [
   {
    "key": "home",
@@ -110,49 +111,14 @@
      }
     },
     {
-     "snippet": "s_features",
+     "snippet": "s_text_block",
+     "kind": "service",
      "copy": {
       "en": {
-       "title": "What we do",
-       "items": [
-        {
-         "title": "Buy",
-         "text": "Shortlists matched to your budget, area and timeline."
-        },
-        {
-         "title": "Sell",
-         "text": "Photography, pricing advice and qualified viewings only."
-        },
-        {
-         "title": "Rent",
-         "text": "Tenant screening and contracts registered the same day."
-        },
-        {
-         "title": "Property management",
-         "text": "Rent collection, maintenance and a monthly statement."
-        }
-       ]
+       "title": "What we do"
       },
       "ar": {
-       "title": "ما نقدّمه",
-       "items": [
-        {
-         "title": "الشراء",
-         "text": "قوائم مختصرة تناسب ميزانيتك ومنطقتك وموعدك."
-        },
-        {
-         "title": "البيع",
-         "text": "تصوير ومشورة تسعير ومعاينات للجادّين فقط."
-        },
-        {
-         "title": "الإيجار",
-         "text": "فحص المستأجرين وتوثيق العقود في اليوم نفسه."
-        },
-        {
-         "title": "إدارة الأملاك",
-         "text": "تحصيل الإيجار والصيانة وكشف شهري."
-        }
-       ]
+       "title": "ما نقدّمه"
       }
      }
     },
@@ -204,6 +170,19 @@
      }
     },
     {
+     "snippet": "s_text_block",
+     "kind": "project",
+     "layout": "grid",
+     "copy": {
+      "en": {
+       "title": "Featured properties"
+      },
+      "ar": {
+       "title": "عقارات مميزة"
+      }
+     }
+    },
+    {
      "snippet": "s_text_image",
      "copy": {
       "en": {
@@ -220,6 +199,18 @@
       }
      },
      "image": "building"
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "testimonial",
+     "copy": {
+      "en": {
+       "title": "What our clients say"
+      },
+      "ar": {
+       "title": "ماذا يقول عملاؤنا"
+      }
+     }
     },
     {
      "snippet": "s_call_to_action",
@@ -377,48 +368,11 @@
      }
     },
     {
-     "snippet": "s_features",
+     "snippet": "s_text_block",
+     "kind": "service",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "title": "Buy",
-         "text": "Shortlists matched to your budget, area and timeline."
-        },
-        {
-         "title": "Sell",
-         "text": "Photography, pricing advice and qualified viewings only."
-        },
-        {
-         "title": "Rent",
-         "text": "Tenant screening and contracts registered the same day."
-        },
-        {
-         "title": "Property management",
-         "text": "Rent collection, maintenance and a monthly statement."
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "title": "الشراء",
-         "text": "قوائم مختصرة تناسب ميزانيتك ومنطقتك وموعدك."
-        },
-        {
-         "title": "البيع",
-         "text": "تصوير ومشورة تسعير ومعاينات للجادّين فقط."
-        },
-        {
-         "title": "الإيجار",
-         "text": "فحص المستأجرين وتوثيق العقود في اليوم نفسه."
-        },
-        {
-         "title": "إدارة الأملاك",
-         "text": "تحصيل الإيجار والصيانة وكشف شهري."
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     },
     {
@@ -509,60 +463,12 @@
      }
     },
     {
-     "snippet": "s_text_image",
+     "snippet": "s_text_block",
+     "kind": "project",
      "copy": {
-      "en": {
-       "title": "Marina apartment, 2 bedrooms",
-       "text": "Sea view, parking and a gym in the building."
-      },
-      "ar": {
-       "title": "شقة في المرسى، غرفتا نوم",
-       "text": "إطلالة بحرية ومواقف وناد رياضي في المبنى."
-      }
-     },
-     "image": "building"
-    },
-    {
-     "snippet": "s_image_text",
-     "copy": {
-      "en": {
-       "title": "Garden villa, 5 bedrooms",
-       "text": "A quiet cul-de-sac close to two schools."
-      },
-      "ar": {
-       "title": "فيلا بحديقة، خمس غرف نوم",
-       "text": "شارع هادئ مغلق قرب مدرستين."
-      }
-     },
-     "image": "building"
-    },
-    {
-     "snippet": "s_text_image",
-     "copy": {
-      "en": {
-       "title": "Corner plot, 800 sq m",
-       "text": "Residential zoning, all utilities at the boundary."
-      },
-      "ar": {
-       "title": "أرض زاوية، 800 متر",
-       "text": "تصنيف سكني والخدمات عند حدود الأرض."
-      }
-     },
-     "image": "building"
-    },
-    {
-     "snippet": "s_image_text",
-     "copy": {
-      "en": {
-       "title": "Office floor for lease",
-       "text": "Open plan, 240 sq m, ready to move in."
-      },
-      "ar": {
-       "title": "طابق مكاتب للإيجار",
-       "text": "مساحة مفتوحة 240 متراً جاهزة للاستلام."
-      }
-     },
-     "image": "building"
+      "en": {},
+      "ar": {}
+     }
     }
    ],
    "seo": {
@@ -596,32 +502,11 @@
      }
     },
     {
-     "snippet": "s_company_team",
+     "snippet": "s_text_block",
+     "kind": "member",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "name": "Raghad",
-         "role": "Broker in charge"
-        },
-        {
-         "name": "Ebrahim",
-         "role": "Sales agent"
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "name": "رغد",
-         "role": "الوسيط المسؤول"
-        },
-        {
-         "name": "إبراهيم",
-         "role": "وسيط مبيعات"
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     }
    ],
@@ -658,63 +543,27 @@
      }
     },
     {
-     "snippet": "s_contact_info",
+     "snippet": "s_text_block",
+     "kind": "contact",
      "copy": {
-      "en": {
-       "title": "Find us",
-       "items": [
-        {
-         "title": "Address",
-         "text": "Corniche Road, Abu Dhabi"
-        },
-        {
-         "title": "Opening hours",
-         "text": "Daily 9:00-20:00"
-        },
-        {
-         "title": "Phone",
-         "text": "+971 4 000 0000"
-        },
-        {
-         "title": "Email",
-         "text": "hello@example.com"
-        }
-       ]
-      },
-      "ar": {
-       "title": "تجدنا هنا",
-       "items": [
-        {
-         "title": "العنوان",
-         "text": "طريق الكورنيش، أبوظبي"
-        },
-        {
-         "title": "ساعات العمل",
-         "text": "يومياً 9:00 - 20:00"
-        },
-        {
-         "title": "الهاتف",
-         "text": "+971 4 000 0000"
-        },
-        {
-         "title": "البريد الإلكتروني",
-         "text": "hello@example.com"
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     },
     {
      "snippet": "s_text_block",
+     "kind": "location",
      "copy": {
-      "en": {
-       "title": "Selling or renting out?",
-       "text": "Get a free valuation from an agent who knows your street."
-      },
-      "ar": {
-       "title": "تريد البيع أو التأجير؟",
-       "text": "احصل على تقييم مجاني من وسيط يعرف منطقتك."
-      }
+      "en": {},
+      "ar": {}
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "quote",
+     "copy": {
+      "en": {},
+      "ar": {}
      }
     }
    ],
@@ -750,48 +599,11 @@
      }
     },
     {
-     "snippet": "s_faq_collapse",
+     "snippet": "s_text_block",
+     "kind": "faq",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "title": "What are your fees?",
-         "text": "Two percent of the sale price, or five percent of the annual rent, paid on completion."
-        },
-        {
-         "title": "Can I view a property today?",
-         "text": "Yes, call or send a message and we will arrange a viewing within hours."
-        },
-        {
-         "title": "Do you help foreign buyers?",
-         "text": "We explain where foreigners may own and guide you through the paperwork."
-        },
-        {
-         "title": "How do I list my property?",
-         "text": "Send the location and photos; an agent visits you within two days."
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "title": "ما هي عمولتكم؟",
-         "text": "اثنان بالمئة من سعر البيع أو خمسة بالمئة من الإيجار السنوي، تُدفع عند إتمام الصفقة."
-        },
-        {
-         "title": "هل أستطيع معاينة عقار اليوم؟",
-         "text": "نعم، اتصل أو راسلنا وسنرتّب المعاينة خلال ساعات."
-        },
-        {
-         "title": "هل تساعدون المشترين الأجانب؟",
-         "text": "نوضّح المناطق المسموح بالتملك فيها ونرافقك في الإجراءات."
-        },
-        {
-         "title": "كيف أعرض عقاري؟",
-         "text": "أرسل الموقع والصور وسيزورك وسيط خلال يومين."
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     }
    ],

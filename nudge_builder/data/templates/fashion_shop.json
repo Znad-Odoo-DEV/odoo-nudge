@@ -353,6 +353,7 @@
   "contact",
   "faq"
  ],
+ "kinds": ["product", "testimonial", "faq", "location"],
  "pages": [
   {
    "key": "home",
@@ -491,6 +492,18 @@
        "text": "اختاري أي وشاحين بالمطابقة.",
        "button": "شاهدي العرض",
        "button_url": "/shop"
+      }
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "testimonial",
+     "copy": {
+      "en": {
+       "title": "What our clients say"
+      },
+      "ar": {
+       "title": "ماذا يقول عملاؤنا"
       }
      }
     },
@@ -650,50 +663,11 @@
      }
     },
     {
-     "snippet": "s_product_catalog",
+     "snippet": "s_text_block",
+     "kind": "product",
      "copy": {
-      "en": {
-       "title": "Popular products",
-       "items": [
-        {
-         "title": "Crepe open abaya",
-         "text": "Light crepe with embroidered cuffs. - AED 340"
-        },
-        {
-         "title": "Linen midi dress",
-         "text": "Breathable linen for warm days. - AED 210"
-        },
-        {
-         "title": "Silk scarf",
-         "text": "Hand-rolled edges, six colours. - AED 85"
-        },
-        {
-         "title": "Cotton thobe",
-         "text": "Soft cotton with a hidden placket. - AED 260"
-        }
-       ]
-      },
-      "ar": {
-       "title": "منتجات رائجة",
-       "items": [
-        {
-         "title": "عباية كريب مفتوحة",
-         "text": "كريب خفيف بأكمام مطرزة. - 340 د.إ"
-        },
-        {
-         "title": "فستان كتان متوسط الطول",
-         "text": "كتان يسمح بالتهوية للأيام الحارة. - 210 د.إ"
-        },
-        {
-         "title": "وشاح حرير",
-         "text": "حواف يدوية وستة ألوان. - 85 د.إ"
-        },
-        {
-         "title": "ثوب قطني",
-         "text": "قطن ناعم بأزرار مخفية. - 260 د.إ"
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     },
     {
@@ -896,63 +870,27 @@
      }
     },
     {
-     "snippet": "s_contact_info",
+     "snippet": "s_text_block",
+     "kind": "contact",
      "copy": {
-      "en": {
-       "title": "Find us",
-       "items": [
-        {
-         "title": "Address",
-         "text": "Mall of the Emirates, Dubai"
-        },
-        {
-         "title": "Opening hours",
-         "text": "Daily 10:00-22:00"
-        },
-        {
-         "title": "Phone",
-         "text": "+971 4 000 0000"
-        },
-        {
-         "title": "Email",
-         "text": "hello@example.com"
-        }
-       ]
-      },
-      "ar": {
-       "title": "تجدنا هنا",
-       "items": [
-        {
-         "title": "العنوان",
-         "text": "مول الإمارات، دبي"
-        },
-        {
-         "title": "ساعات العمل",
-         "text": "يومياً 10:00 - 22:00"
-        },
-        {
-         "title": "الهاتف",
-         "text": "+971 4 000 0000"
-        },
-        {
-         "title": "البريد الإلكتروني",
-         "text": "hello@example.com"
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     },
     {
      "snippet": "s_text_block",
+     "kind": "location",
      "copy": {
-      "en": {
-       "title": "Join the list for first access",
-       "text": "New drops and private sales, once a week at most."
-      },
-      "ar": {
-       "title": "انضمي للقائمة لتصلك أولاً",
-       "text": "إصدارات جديدة وتخفيضات خاصة، مرة أسبوعياً على الأكثر."
-      }
+      "en": {},
+      "ar": {}
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "quote",
+     "copy": {
+      "en": {},
+      "ar": {}
      }
     }
    ],
@@ -988,56 +926,11 @@
      }
     },
     {
-     "snippet": "s_faq_collapse",
+     "snippet": "s_text_block",
+     "kind": "faq",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "title": "How do I choose my size?",
-         "text": "Each product page has a size guide in centimetres; message us if you are between sizes."
-        },
-        {
-         "title": "How long does delivery take?",
-         "text": "One to two working days inside the UAE and three to five across the Gulf."
-        },
-        {
-         "title": "Can I return an item?",
-         "text": "Unworn items with tags can be exchanged or refunded within fourteen days."
-        },
-        {
-         "title": "How should I wash my abaya?",
-         "text": "Gentle cycle at thirty degrees, hang dry, iron on low heat."
-        },
-        {
-         "title": "Which payment methods do you accept?",
-         "text": "Cards, Apple Pay and cash on delivery."
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "title": "كيف أختار مقاسي؟",
-         "text": "في كل صفحة منتج دليل مقاسات بالسنتيمتر، وراسلينا إن كنتِ بين مقاسين."
-        },
-        {
-         "title": "كم يستغرق التوصيل؟",
-         "text": "من يوم إلى يومي عمل داخل الإمارات ومن ثلاثة إلى خمسة أيام في الخليج."
-        },
-        {
-         "title": "هل يمكنني إرجاع قطعة؟",
-         "text": "يمكن استبدال أو استرجاع القطع غير المستعملة وعليها بطاقاتها خلال أربعة عشر يوماً."
-        },
-        {
-         "title": "كيف أغسل عبايتي؟",
-         "text": "دورة لطيفة بدرجة ثلاثين وتجفيف معلّق وكي على حرارة منخفضة."
-        },
-        {
-         "title": "ما طرق الدفع المقبولة؟",
-         "text": "البطاقات وآبل باي والدفع نقداً عند الاستلام."
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     }
    ],

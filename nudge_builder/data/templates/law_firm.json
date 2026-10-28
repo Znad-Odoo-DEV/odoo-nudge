@@ -42,6 +42,7 @@
   "contact",
   "faq"
  ],
+ "kinds": ["project", "service", "member", "testimonial", "faq", "location"],
  "pages": [
   {
    "key": "home",
@@ -110,49 +111,14 @@
      }
     },
     {
-     "snippet": "s_features",
+     "snippet": "s_text_block",
+     "kind": "service",
      "copy": {
       "en": {
-       "title": "What we do",
-       "items": [
-        {
-         "title": "Commercial law",
-         "text": "Contracts, company formation and disputes."
-        },
-        {
-         "title": "Labour law",
-         "text": "Employment contracts, end of service and claims."
-        },
-        {
-         "title": "Family law",
-         "text": "Marriage, custody, inheritance and wills."
-        },
-        {
-         "title": "Real estate law",
-         "text": "Sale agreements, leases and title disputes."
-        }
-       ]
+       "title": "What we do"
       },
       "ar": {
-       "title": "ما نقدّمه",
-       "items": [
-        {
-         "title": "القانون التجاري",
-         "text": "العقود وتأسيس الشركات والمنازعات."
-        },
-        {
-         "title": "قانون العمل",
-         "text": "عقود العمل ومكافأة نهاية الخدمة والمطالبات."
-        },
-        {
-         "title": "الأحوال الشخصية",
-         "text": "الزواج والحضانة والميراث والوصايا."
-        },
-        {
-         "title": "القانون العقاري",
-         "text": "عقود البيع والإيجار ونزاعات الملكية."
-        }
-       ]
+       "title": "ما نقدّمه"
       }
      }
     },
@@ -204,6 +170,19 @@
      }
     },
     {
+     "snippet": "s_text_block",
+     "kind": "project",
+     "layout": "grid",
+     "copy": {
+      "en": {
+       "title": "Our projects"
+      },
+      "ar": {
+       "title": "مشاريعنا"
+      }
+     }
+    },
+    {
      "snippet": "s_text_image",
      "copy": {
       "en": {
@@ -220,6 +199,18 @@
       }
      },
      "image": "office"
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "testimonial",
+     "copy": {
+      "en": {
+       "title": "What our clients say"
+      },
+      "ar": {
+       "title": "ماذا يقول عملاؤنا"
+      }
+     }
     },
     {
      "snippet": "s_call_to_action",
@@ -377,48 +368,11 @@
      }
     },
     {
-     "snippet": "s_features",
+     "snippet": "s_text_block",
+     "kind": "service",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "title": "Commercial law",
-         "text": "Contracts, company formation and disputes."
-        },
-        {
-         "title": "Labour law",
-         "text": "Employment contracts, end of service and claims."
-        },
-        {
-         "title": "Family law",
-         "text": "Marriage, custody, inheritance and wills."
-        },
-        {
-         "title": "Real estate law",
-         "text": "Sale agreements, leases and title disputes."
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "title": "القانون التجاري",
-         "text": "العقود وتأسيس الشركات والمنازعات."
-        },
-        {
-         "title": "قانون العمل",
-         "text": "عقود العمل ومكافأة نهاية الخدمة والمطالبات."
-        },
-        {
-         "title": "الأحوال الشخصية",
-         "text": "الزواج والحضانة والميراث والوصايا."
-        },
-        {
-         "title": "القانون العقاري",
-         "text": "عقود البيع والإيجار ونزاعات الملكية."
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     },
     {
@@ -509,60 +463,12 @@
      }
     },
     {
-     "snippet": "s_text_image",
+     "snippet": "s_text_block",
+     "kind": "project",
      "copy": {
-      "en": {
-       "title": "Supplier contract dispute",
-       "text": "Settled out of court within three months."
-      },
-      "ar": {
-       "title": "نزاع عقد توريد",
-       "text": "سُوّي خارج المحكمة خلال ثلاثة أشهر."
-      }
-     },
-     "image": "office"
-    },
-    {
-     "snippet": "s_image_text",
-     "copy": {
-      "en": {
-       "title": "Company formation",
-       "text": "A mainland company licensed in two weeks."
-      },
-      "ar": {
-       "title": "تأسيس شركة",
-       "text": "شركة في البر الرئيسي رُخّصت في أسبوعين."
-      }
-     },
-     "image": "office"
-    },
-    {
-     "snippet": "s_text_image",
-     "copy": {
-      "en": {
-       "title": "Labour claim",
-       "text": "End-of-service and unpaid wages recovered for twelve workers."
-      },
-      "ar": {
-       "title": "مطالبة عمالية",
-       "text": "استُرد مستحق نهاية الخدمة والأجور المتأخرة لاثني عشر عاملاً."
-      }
-     },
-     "image": "office"
-    },
-    {
-     "snippet": "s_image_text",
-     "copy": {
-      "en": {
-       "title": "Inheritance settlement",
-       "text": "A family estate divided by agreement."
-      },
-      "ar": {
-       "title": "تسوية تركة",
-       "text": "تقسيم تركة عائلية بالتراضي."
-      }
-     },
-     "image": "office"
+      "en": {},
+      "ar": {}
+     }
     }
    ],
    "seo": {
@@ -596,32 +502,11 @@
      }
     },
     {
-     "snippet": "s_company_team",
+     "snippet": "s_text_block",
+     "kind": "member",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "name": "Raghad",
-         "role": "Managing partner"
-        },
-        {
-         "name": "Ebrahim",
-         "role": "Senior lawyer"
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "name": "رغد",
-         "role": "الشريك المدير"
-        },
-        {
-         "name": "إبراهيم",
-         "role": "محامي أول"
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     }
    ],
@@ -658,63 +543,27 @@
      }
     },
     {
-     "snippet": "s_contact_info",
+     "snippet": "s_text_block",
+     "kind": "contact",
      "copy": {
-      "en": {
-       "title": "Find us",
-       "items": [
-        {
-         "title": "Address",
-         "text": "Business Bay, Dubai"
-        },
-        {
-         "title": "Opening hours",
-         "text": "Sun-Thu 9:00-18:00"
-        },
-        {
-         "title": "Phone",
-         "text": "+971 4 000 0000"
-        },
-        {
-         "title": "Email",
-         "text": "hello@example.com"
-        }
-       ]
-      },
-      "ar": {
-       "title": "تجدنا هنا",
-       "items": [
-        {
-         "title": "العنوان",
-         "text": "الخليج التجاري، دبي"
-        },
-        {
-         "title": "ساعات العمل",
-         "text": "الأحد - الخميس 9:00 - 18:00"
-        },
-        {
-         "title": "الهاتف",
-         "text": "+971 4 000 0000"
-        },
-        {
-         "title": "البريد الإلكتروني",
-         "text": "hello@example.com"
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     },
     {
      "snippet": "s_text_block",
+     "kind": "location",
      "copy": {
-      "en": {
-       "title": "Facing a legal problem?",
-       "text": "Tell us the facts in confidence and we will tell you your options."
-      },
-      "ar": {
-       "title": "تواجه مشكلة قانونية؟",
-       "text": "اعرض علينا الوقائع بسرية وسنوضح لك خياراتك."
-      }
+      "en": {},
+      "ar": {}
+     }
+    },
+    {
+     "snippet": "s_text_block",
+     "kind": "quote",
+     "copy": {
+      "en": {},
+      "ar": {}
      }
     }
    ],
@@ -750,48 +599,11 @@
      }
     },
     {
-     "snippet": "s_faq_collapse",
+     "snippet": "s_text_block",
+     "kind": "faq",
      "copy": {
-      "en": {
-       "items": [
-        {
-         "title": "How much is a first consultation?",
-         "text": "The first thirty minutes are free; after that we quote before we start."
-        },
-        {
-         "title": "Is what I tell you confidential?",
-         "text": "Always. Lawyer-client confidentiality applies from the first call."
-        },
-        {
-         "title": "Do you appear in court?",
-         "text": "Yes, before all first-instance, appeal and labour courts."
-        },
-        {
-         "title": "Can you work with foreign clients?",
-         "text": "Yes, we advise in English and translate documents officially."
-        }
-       ]
-      },
-      "ar": {
-       "items": [
-        {
-         "title": "كم تكلفة الاستشارة الأولى؟",
-         "text": "النصف ساعة الأولى مجانية وبعدها نقدّم عرضاً قبل البدء."
-        },
-        {
-         "title": "هل ما أقوله لكم سري؟",
-         "text": "دائماً، فسرية المحامي مع موكله تسري من أول اتصال."
-        },
-        {
-         "title": "هل تترافعون أمام المحاكم؟",
-         "text": "نعم، أمام محاكم أول درجة والاستئناف والمحاكم العمالية."
-        },
-        {
-         "title": "هل تتعاملون مع موكلين أجانب؟",
-         "text": "نعم، نقدّم المشورة بالإنجليزية ونترجم المستندات ترجمة معتمدة."
-        }
-       ]
-      }
+      "en": {},
+      "ar": {}
      }
     }
    ],
