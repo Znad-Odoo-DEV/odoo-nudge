@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-26 12:20+0000\n"
-"PO-Revision-Date: 2026-10-26 12:20+0000\n"
+"POT-Creation-Date: 2026-10-28 04:56+0000\n"
+"PO-Revision-Date: 2026-10-28 04:56+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -19,6 +19,17 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge_discuss/models/nudge_mention.py:0
 msgid "**Draft of a reply, not sent**"
+msgstr ""
+
+#. module: nudge_discuss
+#. odoo-python
+#: code:addons/nudge_discuss/models/nudge_agent_discuss.py:0
+msgid "A channel belongs to a company the agent is not in."
+msgstr ""
+
+#. module: nudge_discuss
+#: model:ir.model.fields,field_description:nudge_discuss.field_nudge_mention__agent_id
+msgid "Agent"
 msgstr ""
 
 #. module: nudge_discuss
@@ -39,6 +50,11 @@ msgstr ""
 #. module: nudge_discuss
 #: model:ir.model.fields,field_description:nudge_discuss.field_nudge_mention__user_id
 msgid "Asked By"
+msgstr ""
+
+#. module: nudge_discuss
+#: model:ir.model,name:nudge_discuss.model_res_partner
+msgid "Contact"
 msgstr ""
 
 #. module: nudge_discuss
@@ -63,6 +79,11 @@ msgid "Created on"
 msgstr ""
 
 #. module: nudge_discuss
+#: model:ir.model.fields,field_description:nudge_discuss.field_nudge_agent_binding__channel_ids
+msgid "Discuss Channels"
+msgstr ""
+
+#. module: nudge_discuss
 #: model:ir.model,name:nudge_discuss.model_discuss_channel
 msgid "Discussion Channel"
 msgstr ""
@@ -70,7 +91,11 @@ msgstr ""
 #. module: nudge_discuss
 #: model:ir.model.fields,field_description:nudge_discuss.field_discuss_channel__display_name
 #: model:ir.model.fields,field_description:nudge_discuss.field_mail_thread__display_name
+#: model:ir.model.fields,field_description:nudge_discuss.field_nudge_agent__display_name
+#: model:ir.model.fields,field_description:nudge_discuss.field_nudge_agent_binding__display_name
 #: model:ir.model.fields,field_description:nudge_discuss.field_nudge_mention__display_name
+#: model:ir.model.fields,field_description:nudge_discuss.field_res_partner__display_name
+#: model:ir.model.fields,field_description:nudge_discuss.field_res_users__display_name
 msgid "Display Name"
 msgstr ""
 
@@ -90,9 +115,19 @@ msgid "Failed"
 msgstr ""
 
 #. module: nudge_discuss
+#. odoo-python
+#: code:addons/nudge_discuss/models/nudge_agent_discuss.py:0
+msgid "Hello"
+msgstr ""
+
+#. module: nudge_discuss
 #: model:ir.model.fields,field_description:nudge_discuss.field_discuss_channel__id
 #: model:ir.model.fields,field_description:nudge_discuss.field_mail_thread__id
+#: model:ir.model.fields,field_description:nudge_discuss.field_nudge_agent__id
+#: model:ir.model.fields,field_description:nudge_discuss.field_nudge_agent_binding__id
 #: model:ir.model.fields,field_description:nudge_discuss.field_nudge_mention__id
+#: model:ir.model.fields,field_description:nudge_discuss.field_res_partner__id
+#: model:ir.model.fields,field_description:nudge_discuss.field_res_users__id
 msgid "ID"
 msgstr ""
 
@@ -114,6 +149,16 @@ msgstr ""
 #. module: nudge_discuss
 #: model:ir.model.fields.selection,name:nudge_discuss.selection__nudge_mention__state__refused
 msgid "Not for Them"
+msgstr ""
+
+#. module: nudge_discuss
+#: model:ir.model,name:nudge_discuss.model_nudge_agent
+msgid "Nudge Agent"
+msgstr ""
+
+#. module: nudge_discuss
+#: model:ir.model,name:nudge_discuss.model_nudge_agent_binding
+msgid "Nudge Agent Channel"
 msgstr ""
 
 #. module: nudge_discuss
@@ -145,6 +190,12 @@ msgid "Nudge: answer @Nudge"
 msgstr ""
 
 #. module: nudge_discuss
+#. odoo-python
+#: code:addons/nudge_discuss/models/nudge_agent_discuss.py:0
+msgid "Only channels and groups can be listed, not chats."
+msgstr ""
+
+#. module: nudge_discuss
 #: model:ir.model.fields,field_description:nudge_discuss.field_nudge_mention__message_id
 msgid "Question"
 msgstr ""
@@ -173,6 +224,31 @@ msgstr ""
 
 #. module: nudge_discuss
 #. odoo-python
+#: code:addons/nudge_discuss/models/nudge_agent_discuss.py:0
+msgid "The agent had no answer."
+msgstr ""
+
+#. module: nudge_discuss
+#: model:ir.model.fields,help:nudge_discuss.field_nudge_agent_binding__channel_ids
+msgid ""
+"The channels the agent joins while this binding is published. Mention it "
+"there to ask it."
+msgstr ""
+
+#. module: nudge_discuss
+#. odoo-python
+#: code:addons/nudge_discuss/models/nudge_agent_discuss.py:0
+msgid "This agent could not answer."
+msgstr ""
+
+#. module: nudge_discuss
+#. odoo-python
+#: code:addons/nudge_discuss/models/nudge_agent_discuss.py:0
+msgid "This agent is not open to you."
+msgstr ""
+
+#. module: nudge_discuss
+#. odoo-python
 #: code:addons/nudge_discuss/models/nudge_mention.py:0
 msgid "This channel no longer exists."
 msgstr ""
@@ -192,6 +268,17 @@ msgid "To: %(to)s"
 msgstr ""
 
 #. module: nudge_discuss
+#: model:ir.model,name:nudge_discuss.model_res_users
+msgid "User"
+msgstr ""
+
+#. module: nudge_discuss
 #: model:ir.model.fields.selection,name:nudge_discuss.selection__nudge_mention__state__queued
 msgid "Waiting"
+msgstr ""
+
+#. module: nudge_discuss
+#. odoo-python
+#: code:addons/nudge_discuss/models/nudge_agent_discuss.py:0
+msgid "You can only list the channels you are a member of."
 msgstr ""
