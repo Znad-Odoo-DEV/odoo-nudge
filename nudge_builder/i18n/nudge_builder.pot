@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-28 05:58+0000\n"
-"PO-Revision-Date: 2026-10-28 05:58+0000\n"
+"POT-Creation-Date: 2026-10-28 07:09+0000\n"
+"PO-Revision-Date: 2026-10-28 07:09+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -1325,6 +1325,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__display_name
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page_kind__display_name
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_picture__display_name
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_plugin__display_name
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_product__display_name
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_project__display_name
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_quote_log__display_name
@@ -1647,6 +1648,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__id
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page_kind__id
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_picture__id
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_plugin__id
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_product__id
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_project__id
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_quote_log__id
@@ -2232,6 +2234,11 @@ msgstr ""
 #. module: nudge_builder
 #: model:ir.model,name:nudge_builder.model_nudge_builder_picture
 msgid "Nudge Builder picture"
+msgstr ""
+
+#. module: nudge_builder
+#: model:ir.model,name:nudge_builder.model_nudge_builder_plugin
+msgid "Nudge Builder plugin points"
 msgstr ""
 
 #. module: nudge_builder
@@ -3936,6 +3943,12 @@ msgstr ""
 #: code:addons/nudge_builder/tools/checks.py:0
 #: model:ir.model.fields.selection,name:nudge_builder.selection__nudge_builder_check_finding__check_group__translations
 msgid "Translations"
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tests/test_plugin_points.py:0
+msgid "Try it"
 msgstr ""
 
 #. module: nudge_builder

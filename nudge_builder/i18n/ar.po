@@ -4205,3 +4205,14 @@ msgstr "https://maps.app.goo.gl/..."
 #: code:addons/nudge_builder/models/nudge_builder_site.py:0
 msgid "id"
 msgstr "id"
+
+#. module: nudge_builder
+#: model:ir.model,name:nudge_builder.model_nudge_builder_plugin
+msgid "Nudge Builder plugin points"
+msgstr "نقاط إضافات منشئ مواقع Nudge"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/tests/test_plugin_points.py:0
+msgid "Try it"
+msgstr "جرّبه"

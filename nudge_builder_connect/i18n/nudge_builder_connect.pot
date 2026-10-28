@@ -1,0 +1,652 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* nudge_builder_connect
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-28 07:09+0000\n"
+"PO-Revision-Date: 2026-10-28 07:09+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/tools/rest.py:0
+msgid "%(name)s answered in a way that cannot be read."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/tools/rest.py:0
+msgid "%(name)s answered in a way that cannot be used (code %(status)s)."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/tools/rest.py:0
+msgid "%(name)s asks to wait: try again in a few minutes."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/tools/rest.py:0
+msgid "%(name)s cannot be reached from this server."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/tools/rest.py:0
+msgid ""
+"%(name)s did not allow this: your account may lack the right, or the service"
+" is not switched on in the project of the administrator."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/tools/rest.py:0
+msgid "%(name)s did not answer in time."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/tools/rest.py:0
+msgid ""
+"%(name)s found nothing at that place: check the link and your access to it."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/tools/rest.py:0
+msgid "%(name)s had a problem of its own: try again later."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/tools/rest.py:0
+msgid ""
+"%(name)s refused your sign-in (it ended or you withdrew it). Connect it "
+"again."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "%s files were left out: only JPEG, PNG and WebP pictures are taken."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "%s pictures were left out: a picture may not be larger than 12 MB."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "%s posts were left out: only pictures are taken, not videos."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "%s reviews without a comment were left out."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid ""
+"Added: %(pictures)s pictures, %(places)s places, %(reviews)s reviews. Left "
+"out: %(skipped)s."
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull_line__existing
+msgid "Already there"
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/tools/rest.py:0
+msgid "An answer was bigger than the limit and was refused."
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model_terms:ir.ui.view,arch_db:nudge_builder_connect.nudge_builder_connect_pull_view_form
+msgid "Back"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model_terms:ir.ui.view,arch_db:nudge_builder_connect.nudge_builder_connect_pull_view_form
+msgid "Cancel"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull_line__caption
+msgid "Caption"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model_terms:ir.ui.view,arch_db:nudge_builder_connect.nudge_builder_connect_pull_view_form
+msgid "Check the connection"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields.selection,name:nudge_builder_connect.selection__nudge_builder_connect_pull__state__setup
+msgid "Choose"
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "Choose the record the pictures go to."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "Closed"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model_terms:ir.ui.view,arch_db:nudge_builder_connect.nudge_builder_connect_pull_view_form
+msgid "Connect"
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/tools/rest.py:0
+msgid ""
+"Connect your %(name)s account first (the Connect button), then try again."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "Connect your account first (the Connect button)."
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull__create_uid
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull_line__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull__create_date
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull_line__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "Customer"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model_terms:ir.ui.view,arch_db:nudge_builder_connect.nudge_builder_connect_pull_view_form
+msgid "Disconnect"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull__display_name
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull_line__display_name
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_site__display_name
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_connector__display_name
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_connector_oauth_state__display_name
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_connector_token__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull__drive_link
+msgid "Folder link"
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "Friday"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields.selection,name:nudge_builder_connect.selection__nudge_builder_connect_pull__source__business
+msgid "Google Business Profile"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields.selection,name:nudge_builder_connect.selection__nudge_builder_connect_pull__source__drive
+msgid "Google Drive"
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid ""
+"Google was asked as often as allowed in one pull: what is shown is the first"
+" part."
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull__id
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull_line__id
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_site__id
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_connector__id
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_connector_oauth_state__id
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_connector_token__id
+msgid "ID"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull_line__info
+msgid "Info"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields.selection,name:nudge_builder_connect.selection__nudge_builder_connect_pull__source__instagram
+msgid "Instagram"
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid ""
+"Instagram was asked as often as allowed in one pull: what is shown is the "
+"first part."
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,help:nudge_builder_connect.field_nudge_builder_connect_pull_line__with_caption
+msgid "Keep the Instagram caption as the text of the picture."
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull_line__with_caption
+msgid "Keep the caption"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull_line__kind
+msgid "Kind"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull__write_uid
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull_line__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull__write_date
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull_line__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull__line_ids
+msgid "Line"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull__location_id
+#: model:ir.model.fields.selection,name:nudge_builder_connect.selection__nudge_builder_connect_pull__owner_kind__location
+msgid "Location"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull__member_id
+msgid "Member"
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "Monday"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull_line__name
+msgid "Name"
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "No Business Profile was found for this Google account."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "No picture was found in that folder."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "No picture was found on the account."
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull__notes
+msgid "Notes"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model_terms:ir.ui.view,arch_db:nudge_builder_connect.nudge_builder_connect_pull_view_form
+msgid "Nothing is written before you have seen what was found and ticked it."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "Nothing was found."
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model,name:nudge_builder_connect.model_nudge_connector
+msgid "Nudge Connector"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model,name:nudge_builder_connect.model_nudge_connector_token
+msgid "Nudge Connector Sign-In"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model,name:nudge_builder_connect.model_nudge_connector_oauth_state
+msgid "Nudge Connector Sign-In Started"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model,name:nudge_builder_connect.model_nudge_builder_site
+msgid "Nudge Website Builder"
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "Only the first %s pictures are shown."
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull_line__payload
+msgid "Payload"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields.selection,name:nudge_builder_connect.selection__nudge_builder_connect_pull_line__kind__picture
+msgid "Picture"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull__owner_kind
+msgid "Pictures go to"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields.selection,name:nudge_builder_connect.selection__nudge_builder_connect_pull_line__kind__location
+msgid "Place"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull__take_places
+msgid "Places"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields.selection,name:nudge_builder_connect.selection__nudge_builder_connect_pull__state__preview
+#: model_terms:ir.ui.view,arch_db:nudge_builder_connect.nudge_builder_connect_pull_view_form
+msgid "Preview"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull__product_id
+#: model:ir.model.fields.selection,name:nudge_builder_connect.selection__nudge_builder_connect_pull__owner_kind__product
+msgid "Product"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull__project_id
+#: model:ir.model.fields.selection,name:nudge_builder_connect.selection__nudge_builder_connect_pull__owner_kind__project
+msgid "Project"
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+#: model_terms:ir.ui.view,arch_db:nudge_builder_connect.nudge_builder_site_view_form_connect
+msgid "Pull from Google Business Profile"
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+#: model_terms:ir.ui.view,arch_db:nudge_builder_connect.nudge_builder_site_view_form_connect
+msgid "Pull from Google Drive"
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+#: model_terms:ir.ui.view,arch_db:nudge_builder_connect.nudge_builder_site_view_form_connect
+msgid "Pull from Instagram"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model_terms:ir.ui.view,arch_db:nudge_builder_connect.nudge_builder_connect_pull_view_form
+msgid "Pull from a connected account"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields.selection,name:nudge_builder_connect.selection__nudge_builder_connect_pull_line__kind__review
+msgid "Review"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull__take_reviews
+msgid "Reviews"
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid ""
+"Reviews are copied word for word and none is ticked: tick the ones to show."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "Saturday"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull__service_id
+#: model:ir.model.fields.selection,name:nudge_builder_connect.selection__nudge_builder_connect_pull__owner_kind__service
+msgid "Service"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull__signed_in
+msgid "Signed In"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull__site_id
+msgid "Site"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull__source
+msgid "Source"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull__state
+msgid "State"
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "Sunday"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull_line__selected
+msgid "Take"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model_terms:ir.ui.view,arch_db:nudge_builder_connect.nudge_builder_connect_pull_view_form
+msgid "Take the ticked"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields.selection,name:nudge_builder_connect.selection__nudge_builder_connect_pull__owner_kind__member
+msgid "Team member"
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "That is not the link of a Google Drive folder."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/tools/rest.py:0
+msgid "The address must start with https://."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid ""
+"The administrator has not finished setting up %s (Settings, Nudge, "
+"Connectors)."
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,help:nudge_builder_connect.field_nudge_builder_connect_pull__drive_link
+msgid "The link of a Google Drive folder you can open."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "The record the pictures go to belongs to another site."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "This connection is not set up. Ask your administrator to install it."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "This website belongs to another company."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "Thursday"
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "Tick places, reviews or both."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "Tick what to take first."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid ""
+"Too many are ticked at once: at most %(pictures)s pictures and %(texts)s "
+"places and reviews."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "Tuesday"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model,name:nudge_builder_connect.model_nudge_builder_connect_pull_line
+msgid "Website Builder: one thing found by a pull"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model,name:nudge_builder_connect.model_nudge_builder_connect_pull
+msgid "Website Builder: pull from a connected account"
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "Wednesday"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model:ir.model.fields,field_description:nudge_builder_connect.field_nudge_builder_connect_pull_line__wizard_id
+msgid "Wizard"
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model_terms:ir.ui.view,arch_db:nudge_builder_connect.nudge_builder_connect_pull_view_form
+msgid ""
+"You are connected with your own account. Only you can use this connection."
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model_terms:ir.ui.view,arch_db:nudge_builder_connect.nudge_builder_connect_pull_view_form
+msgid ""
+"You are not connected. Connect your own account: the provider asks you to agree on its own page,\n"
+"                    then come back here and press Check the connection."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/tools/rest.py:0
+msgid ""
+"You did not allow everything that is needed at the %(name)s consent screen. "
+"Disconnect, connect again and tick every box."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/tools/rest.py:0
+msgid ""
+"Your sign-in to %(name)s ended or was withdrawn. Connect it again (the "
+"Connect button)."
+msgstr ""
+
+#. module: nudge_builder_connect
+#: model_terms:ir.ui.view,arch_db:nudge_builder_connect.nudge_builder_connect_pull_view_form
+msgid "https://drive.google.com/drive/folders/..."
+msgstr ""
+
+#. module: nudge_builder_connect
+#. odoo-python
+#: code:addons/nudge_builder_connect/models/nudge_builder_connect_pull.py:0
+msgid "with hours"
+msgstr ""

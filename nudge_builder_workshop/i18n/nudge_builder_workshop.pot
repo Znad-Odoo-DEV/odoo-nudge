@@ -1,0 +1,449 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* nudge_builder_workshop
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-28 07:09+0000\n"
+"PO-Revision-Date: 2026-10-28 07:09+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/tools/checks.py:0
+msgid "%s published services have no picture."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/tools/checks.py:0
+msgid "%s published services show no duration."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/tools/checks.py:0
+msgid "%s published services show no price."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_form
+msgid "<option value=\"\">Choose a service</option>"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_form
+msgid "Anything we should know?"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_thanks
+msgid "Back to the home page"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_form
+msgid "Book a service"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/tools/services.py:0
+msgid "Book this service"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__bookable
+msgid "Bookable"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_form
+msgid "Car (make, model, year)"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Car: %s"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__category
+msgid "Category"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_check_finding__check_group
+msgid "Check"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__company_id
+msgid "Company"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__cover_image
+msgid "Cover Image"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__currency_id
+msgid "Currency"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_form
+msgid "Day wanted"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Day wanted: %s"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__description
+msgid "Description"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_check_finding__display_name
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_plugin__display_name
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_site__display_name
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__duration
+msgid "Duration"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_form
+msgid "Email"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Email: %s"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__featured
+msgid "Featured"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/tools/services.py:0
+msgid "From %s"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_form
+msgid "I agree that you may contact me about this request."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_check_finding__id
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_plugin__id
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_site__id
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__id
+msgid "ID"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__image
+msgid "Image"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,help:nudge_builder_workshop.field_nudge_builder_workshop_service__price_from
+msgid "Leave empty to show no price."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_form
+msgid "Leave this field empty"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,help:nudge_builder_workshop.field_nudge_builder_workshop_service__duration
+msgid "Like About 1 hour."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,help:nudge_builder_workshop.field_nudge_builder_workshop_service__category
+msgid "Like Oil and filters, Brakes, Tyres."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__listing_mode
+msgid "Listing Mode"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__name
+msgid "Name"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model,name:nudge_builder_workshop.model_nudge_builder_plugin
+msgid "Nudge Builder plugin points"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model,name:nudge_builder_workshop.model_nudge_builder_workshop_service
+msgid "Nudge Builder workshop service"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model,name:nudge_builder_workshop.model_nudge_builder_site
+msgid "Nudge Website Builder"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_form
+msgid "Phone or WhatsApp"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Phone: %s"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Please agree that we may contact you about this request."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Please choose a day from today to six months ahead."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Please choose one of the services."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Please give a phone number or an email address."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Please tell us the make and model of the car."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Please write a valid email address."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Please write a valid phone number."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Please write your name."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__price_from
+msgid "Price From"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__published
+msgid "Published"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_form
+msgid "Send the booking request"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__sequence
+msgid "Sequence"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_form
+msgid "Service"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Service: %s"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/tools/checks.py:0
+msgid "Services can be booked but no page links to the booking page."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.nudge_builder_site_view_form_workshop
+msgid ""
+"Services of the workshop. The booking page lists the ones you tick as "
+"bookable. Nothing is shown on the website that is not written here."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,help:nudge_builder_workshop.field_nudge_builder_workshop_service__bookable
+msgid "Show a 'Book this service' button on this service."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__show_client
+msgid "Show client names"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,help:nudge_builder_workshop.field_nudge_builder_workshop_service__show_client
+msgid "Show the client of each project on the website."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,help:nudge_builder_workshop.field_nudge_builder_workshop_service__featured
+msgid "Shown first."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__site_id
+msgid "Site"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__summary
+msgid "Summary"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_form
+msgid ""
+"Tell us about your car and the day you would like, and we will confirm the "
+"time."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_thanks
+msgid "Thank you"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/models/nudge_builder_workshop.py:0
+msgid "The price cannot be negative."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,help:nudge_builder_workshop.field_nudge_builder_workshop_service__listing_mode
+msgid "The projects are real estate listings."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "The visitor agreed to be contacted about this request."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,help:nudge_builder_workshop.field_nudge_builder_workshop_service__published
+msgid "Untick to keep the record without showing it on the website."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_thanks
+msgid "We have your booking request and will confirm the time soon."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model,name:nudge_builder_workshop.model_nudge_builder_check_finding
+msgid "Website Check Finding"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/models/nudge_builder_plugin.py:0
+#: model:ir.model.fields.selection,name:nudge_builder_workshop.selection__nudge_builder_check_finding__check_group__workshop
+msgid "Workshop"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Workshop booking: %s"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.nudge_builder_workshop_service_view_form
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.nudge_builder_workshop_service_view_list
+msgid "Workshop service"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_site__workshop_service_ids
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.nudge_builder_site_view_form_workshop
+msgid "Workshop services"
+msgstr ""
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid ""
+"You have sent a lot of requests in a short time. Please try again later."
+msgstr ""
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_form
+msgid "Your name"
+msgstr ""
