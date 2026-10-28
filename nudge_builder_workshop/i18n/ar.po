@@ -1,0 +1,437 @@
+# Arabic of nudge_builder_workshop
+msgid ""
+msgstr ""
+"Language: ar
+"
+"Content-Type: text/plain; charset=UTF-8
+"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5;
+"
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/models/nudge_builder_plugin.py:0
+#: model:ir.model.fields.selection,name:nudge_builder_workshop.selection__nudge_builder_check_finding__check_group__workshop
+msgid "Workshop"
+msgstr "الورشة"
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.nudge_builder_workshop_service_view_form
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.nudge_builder_workshop_service_view_list
+msgid "Workshop service"
+msgstr "خدمة الورشة"
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_site__workshop_service_ids
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.nudge_builder_site_view_form_workshop
+msgid "Workshop services"
+msgstr "خدمات الورشة"
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__category
+msgid "Category"
+msgstr "الفئة"
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,help:nudge_builder_workshop.field_nudge_builder_workshop_service__category
+msgid "Like Oil and filters, Brakes, Tyres."
+msgstr "مثل الزيت والفلاتر أو الفرامل أو الإطارات."
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__duration
+msgid "Duration"
+msgstr "المدة"
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,help:nudge_builder_workshop.field_nudge_builder_workshop_service__duration
+msgid "Like About 1 hour."
+msgstr "مثل: نحو ساعة."
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__price_from
+msgid "Price From"
+msgstr "السعر ابتداءً من"
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,help:nudge_builder_workshop.field_nudge_builder_workshop_service__price_from
+msgid "Leave empty to show no price."
+msgstr "اتركه فارغاً كي لا يظهر سعر."
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__bookable
+msgid "Bookable"
+msgstr "قابلة للحجز"
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,help:nudge_builder_workshop.field_nudge_builder_workshop_service__bookable
+msgid "Show a 'Book this service' button on this service."
+msgstr "أظهر زر «احجز هذه الخدمة» على هذه الخدمة."
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__image
+msgid "Image"
+msgstr "الصورة"
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/models/nudge_builder_workshop.py:0
+msgid "The price cannot be negative."
+msgstr "لا يمكن أن يكون السعر سالباً."
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/tools/services.py:0
+msgid "From %s"
+msgstr "ابتداءً من %s"
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/tools/services.py:0
+msgid "Book this service"
+msgstr "احجز هذه الخدمة"
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/tools/checks.py:0
+msgid "%s published services show no price."
+msgstr "%s من الخدمات المنشورة بلا سعر."
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/tools/checks.py:0
+msgid "%s published services show no duration."
+msgstr "%s من الخدمات المنشورة بلا مدة."
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/tools/checks.py:0
+msgid "%s published services have no picture."
+msgstr "%s من الخدمات المنشورة بلا صورة."
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/tools/checks.py:0
+msgid "Services can be booked but no page links to the booking page."
+msgstr "يمكن حجز الخدمات لكن لا توجد صفحة تربط بصفحة الحجز."
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.nudge_builder_site_view_form_workshop
+msgid "Services of the workshop. The booking page lists the ones you tick as bookable. Nothing is shown on the website that is not written here."
+msgstr "خدمات الورشة. تعرض صفحة الحجز الخدمات التي تحددها قابلة للحجز. لا يظهر على الموقع شيء غير مكتوب هنا."
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Please write your name."
+msgstr "من فضلك اكتب اسمك."
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Please write a valid phone number."
+msgstr "من فضلك اكتب رقم هاتف صحيحاً."
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Please write a valid email address."
+msgstr "من فضلك اكتب بريداً إلكترونياً صحيحاً."
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Please give a phone number or an email address."
+msgstr "من فضلك اكتب رقم هاتف أو بريداً إلكترونياً."
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Please tell us the make and model of the car."
+msgstr "من فضلك اذكر ماركة السيارة وطرازها."
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Please choose one of the services."
+msgstr "من فضلك اختر إحدى الخدمات."
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Please choose a day from today to six months ahead."
+msgstr "من فضلك اختر يوماً من اليوم حتى ستة أشهر قادمة."
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Please agree that we may contact you about this request."
+msgstr "من فضلك وافق على أن نتواصل معك بشأن هذا الطلب."
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "You have sent a lot of requests in a short time. Please try again later."
+msgstr "أرسلت طلبات كثيرة في وقت قصير. من فضلك حاول لاحقاً."
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Car: %s"
+msgstr "السيارة: %s"
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Service: %s"
+msgstr "الخدمة: %s"
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Day wanted: %s"
+msgstr "اليوم المطلوب: %s"
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Phone: %s"
+msgstr "الهاتف: %s"
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Email: %s"
+msgstr "البريد الإلكتروني: %s"
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "The visitor agreed to be contacted about this request."
+msgstr "وافق الزائر على التواصل معه بشأن هذا الطلب."
+
+#. module: nudge_builder_workshop
+#. odoo-python
+#: code:addons/nudge_builder_workshop/controllers/booking.py:0
+msgid "Workshop booking: %s"
+msgstr "حجز في الورشة: %s"
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_form
+msgid "Book a service"
+msgstr "احجز خدمة"
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_form
+msgid "Tell us about your car and the day you would like, and we will confirm the time."
+msgstr "أخبرنا عن سيارتك واليوم الذي يناسبك وسنؤكد لك الموعد."
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_form
+msgid "Leave this field empty"
+msgstr "اترك هذا الحقل فارغاً"
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_form
+msgid "Service"
+msgstr "الخدمة"
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_form
+msgid "Car (make, model, year)"
+msgstr "السيارة (الماركة، الطراز، السنة)"
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_form
+msgid "Day wanted"
+msgstr "اليوم المطلوب"
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_form
+msgid "Your name"
+msgstr "اسمك"
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_form
+msgid "Phone or WhatsApp"
+msgstr "الهاتف أو واتساب"
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_form
+msgid "Email"
+msgstr "البريد الإلكتروني"
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_form
+msgid "Anything we should know?"
+msgstr "هل هناك ما يجب أن نعرفه؟"
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_form
+msgid "I agree that you may contact me about this request."
+msgstr "أوافق على أن تتواصلوا معي بشأن هذا الطلب."
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_form
+msgid "Send the booking request"
+msgstr "أرسل طلب الحجز"
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_thanks
+msgid "Thank you"
+msgstr "شكراً لك"
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_thanks
+msgid "We have your booking request and will confirm the time soon."
+msgstr "وصلنا طلب الحجز وسنؤكد الموعد قريباً."
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_thanks
+msgid "Back to the home page"
+msgstr "العودة إلى الصفحة الرئيسية"
+
+#. module: nudge_builder_workshop
+#: model_terms:ir.ui.view,arch_db:nudge_builder_workshop.booking_form
+msgid "<option value=\"\">Choose a service</option>"
+msgstr "<option value=\"\">اختر خدمة</option>"
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_check_finding__check_group
+msgid "Check"
+msgstr "الفحص"
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__company_id
+msgid "Company"
+msgstr "الشركة"
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__cover_image
+msgid "Cover Image"
+msgstr "صورة الغلاف"
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__create_uid
+msgid "Created by"
+msgstr "أنشئ بواسطة"
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__create_date
+msgid "Created on"
+msgstr "أنشئ في"
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__currency_id
+msgid "Currency"
+msgstr "العملة"
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__description
+msgid "Description"
+msgstr "الوصف"
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_check_finding__display_name
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_plugin__display_name
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_site__display_name
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__display_name
+msgid "Display Name"
+msgstr "الاسم المعروض"
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__featured
+msgid "Featured"
+msgstr "مميّز"
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_check_finding__id
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_plugin__id
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_site__id
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__id
+msgid "ID"
+msgstr "المعرّف"
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__write_uid
+msgid "Last Updated by"
+msgstr "آخر تحديث بواسطة"
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__write_date
+msgid "Last Updated on"
+msgstr "آخر تحديث في"
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__listing_mode
+msgid "Listing Mode"
+msgstr "وضع العقارات"
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__name
+msgid "Name"
+msgstr "الاسم"
+
+#. module: nudge_builder_workshop
+#: model:ir.model,name:nudge_builder_workshop.model_nudge_builder_plugin
+msgid "Nudge Builder plugin points"
+msgstr "نقاط إضافات منشئ مواقع Nudge"
+
+#. module: nudge_builder_workshop
+#: model:ir.model,name:nudge_builder_workshop.model_nudge_builder_workshop_service
+msgid "Nudge Builder workshop service"
+msgstr "خدمة ورشة في منشئ مواقع Nudge"
+
+#. module: nudge_builder_workshop
+#: model:ir.model,name:nudge_builder_workshop.model_nudge_builder_site
+msgid "Nudge Website Builder"
+msgstr "منشئ مواقع Nudge"
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__published
+msgid "Published"
+msgstr "منشور"
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__sequence
+msgid "Sequence"
+msgstr "التسلسل"
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__show_client
+msgid "Show client names"
+msgstr "إظهار أسماء العملاء"
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,help:nudge_builder_workshop.field_nudge_builder_workshop_service__show_client
+msgid "Show the client of each project on the website."
+msgstr "إظهار عميل كل مشروع على الموقع."
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,help:nudge_builder_workshop.field_nudge_builder_workshop_service__featured
+msgid "Shown first."
+msgstr "يظهر أولاً."
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__site_id
+msgid "Site"
+msgstr "الموقع"
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,field_description:nudge_builder_workshop.field_nudge_builder_workshop_service__summary
+msgid "Summary"
+msgstr "الملخّص"
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,help:nudge_builder_workshop.field_nudge_builder_workshop_service__listing_mode
+msgid "The projects are real estate listings."
+msgstr "المشاريع عروض عقارية."
+
+#. module: nudge_builder_workshop
+#: model:ir.model.fields,help:nudge_builder_workshop.field_nudge_builder_workshop_service__published
+msgid "Untick to keep the record without showing it on the website."
+msgstr "أزل العلامة لإبقاء السجل دون إظهاره على الموقع."
+
+#. module: nudge_builder_workshop
+#: model:ir.model,name:nudge_builder_workshop.model_nudge_builder_check_finding
+msgid "Website Check Finding"
+msgstr "نتيجة فحص الموقع"
