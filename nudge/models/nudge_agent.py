@@ -6,14 +6,24 @@ companies that person works in and the agent is made for, with the tools the per
 audience and its companies. What it says and how it is limited is written here; the engine that runs a turn
 is ``nudge_agent_engine.py``, the screens ``nudge_agent_ui.py``.
 """
+import datetime
+import logging
+import re
+
+import pytz
+
 from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, UserError, ValidationError
+from odoo.tools import plaintext2html
 
-from ..tools import base, skills as skill_rules
+from ..tools import base, skill_router, skills as skill_rules
+
+_logger = logging.getLogger(__name__)
 
 # What a change of the agent is kept for, with its difference
 TRACKED = ("name", "instructions", "tool_keys", "skill_ids", "company_ids", "group_ids", "user_ids", "provider_id",
-           "state", "active", "mask_personal_data", "use_memory", "use_docs", "budget_month", "budget_user_day")
+           "state", "active", "mask_personal_data", "use_memory", "use_docs", "budget_month", "budget_user_day",
+           "off_limits")
 # The score a published agent needs, out of 100
 PUBLISH_SCORE = 80.0
 CHANNELS = [("discuss", "Discuss"), ("website", "Website"), ("whatsapp", "WhatsApp"), ("telegram", "Telegram"),
@@ -28,13 +38,14 @@ DEFAULT_READ_TOOLS = base.ASK_TOOLS | frozenset({
     "describe_model", "locate_data", "search_company_files", "search_products"})
 # Models a service channel never reads, whatever is written in its allow-list: the configuration, payments and
 # accounting, the messages and channels of people, Nudge's own records, the users, pay and leave
-DENIED_MODEL_PREFIXES = ("ir.", "payment.", "account.", "mail.", "discuss.", "nudge.", "res.users.", "hr.payslip",
-                         "hr.leave")
+DENIED_MODEL_PREFIXES = ("ir.", "payment.", "account.", "mail.", "discuss.", "nudge.", "res.users.", "hr.",
+                         "calendar.", "website.visitor", "product.pricelist")
 DENIED_MODELS = frozenset({"res.users", "res.groups", "res.partner", "res.partner.bank", "res.users.apikeys",
-                           "hr.employee", "hr.version", "hr.contract", "hr.payslip", "hr.leave"})
+                           "res.company", "hr.employee", "hr.version", "hr.contract", "hr.payslip", "hr.leave"})
 # What a change of these takes the non-Discuss channels of an agent back to unpublished
 CHANNEL_STEERING = ("instructions", "tool_keys", "skill_ids", "company_ids", "use_docs", "use_memory", "provider_id",
-                    "mask_personal_data")
+                    "mask_personal_data", "off_limits", "budget_month", "budget_user_day", "role", "greeting", "name",
+                    "lang_ids")
 # Tools that are for the one who builds Odoo, whatever else their group says
 DEVELOPER_ONLY = base.DEV_TOOLS - base.AGENT_TOOLS - base.TALK_TOOLS
 # Tools that widen what is offered (an agent works with the list it was given), and a scheduled task, which runs
@@ -42,6 +53,14 @@ DEVELOPER_ONLY = base.DEV_TOOLS - base.AGENT_TOOLS - base.TALK_TOOLS
 NEVER_OFFERED = base.AGENT_NEVER_TOOLS
 # The state and the score of an agent: set by its buttons and its evaluation only
 GATE_FIELDS = ("state", "score")
+# Nudge Agents 60.1: the tools a channel gives (hand_to_person, when it names a person): never named by the agent
+CHANNEL_TOOLS = frozenset({base.HAND_OVER_TOOL})
+# The days of a channel's hours, as written in its "days" (mon-fri, sun-thu, mon,wed,fri)
+DAYS = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
+HOURS_RANGE = re.compile(r"^([01]?\d|2[0-3]):([0-5]\d)\s*-\s*([01]?\d|2[0-4]):([0-5]\d)$")
+# What a hand-over carries at most: the summary, the name and the address of the visitor
+HAND_OVER_CHARS = 4000
+VISITOR_CHARS = 120
 
 
 def developer_tool(tool):
@@ -104,6 +123,11 @@ class NudgeAgent(models.Model):
     mask_personal_data = fields.Boolean(string="Mask Personal Data")
     budget_month = fields.Float(string="Monthly Budget", help="Cost of the agent in a month. 0: none.")
     budget_user_day = fields.Integer(string="Tokens per Person per Day", help="0: none.")
+    # Nudge Agents 60.1: the month (YYYY-MM) its managers were last told the budget was used up: once a month
+    budget_noticed = fields.Char(readonly=True, copy=False)
+    off_limits = fields.Text(
+        string="Off-limits Topics",
+        help="One topic per line. A question about one of them is declined with a fixed sentence, without AI.")
     state = fields.Selection(
         [("draft", "Draft"), ("tested", "Tested"), ("published", "Published"), ("archived", "Archived")],
         default="draft", required=True, index=True, copy=False)
@@ -152,7 +176,10 @@ class NudgeAgent(models.Model):
         # An archived or unpublished agent is for the managers of its companies, to rehearse
         if not ignore_state and not (agent.active and agent.state == "published") and not manager:
             return False
-        if not manager and user not in agent.user_ids and not (user_groups(user) & agent.group_ids):
+        # Nudge Agents 60.1: the service user a published service channel of the agent names is its audience there
+        # (and only through that channel: nudge.conversation._agent_scope)
+        if not manager and user not in agent.user_ids and not (user_groups(user) & agent.group_ids) and not (
+                agent.binding_ids.filtered(lambda binding: binding._public_open_to(user))):
             return False
         return bool(agent._companies_for(user))
 
@@ -181,9 +208,203 @@ class NudgeAgent(models.Model):
         else:
             allowed = {name for name, tool in offered.items()
                        if name in DEFAULT_READ_TOOLS and getattr(tool, "kind", None) in READ_KINDS}
+        # A channel tool (hand_to_person) is given by the channel, never by the agent's list (_agent_scope)
         return sorted(
             name for name in allowed & set(offered)
-            if name not in NEVER_OFFERED and not developer_tool(offered[name]))
+            if name not in NEVER_OFFERED and name not in CHANNEL_TOOLS and not developer_tool(offered[name]))
+
+    # ----------------------------------------------------------- guardrails (60.1)
+    def _off_limits_hit(self, text):
+        """:return: whether ``text`` asks about one of the agent's off-limits topics: every word of a line of
+        ``off_limits`` is among the words of the question, folded and stemmed as the skill router reads them
+        (Arabic particles and endings, English plurals). Asked before any query and any AI"""
+        self.ensure_one()
+        # sudo: reads the agent's own configuration
+        lines = [line for line in (self.sudo().off_limits or "").splitlines() if line.strip()]
+        if not lines or not (text or "").strip():
+            return False
+        asked = set(skill_router.tokens_of(text))
+        for line in lines:
+            words = set(skill_router.tokens_of(line))
+            if words and words <= asked:
+                return True
+        return False
+
+    def _off_limits_text(self):
+        return _("This is a topic I do not answer here. Please ask a person of the company.")
+
+    # ----------------------------------------------------------- front desk (60.1)
+    @api.model
+    def _front_desk(self, text, bindings):
+        """Nudge Agents 60.1, for the channels (website, WhatsApp, Telegram) that have several published bindings:
+        the one whose agent fits the question best, chosen without AI by the skill router over each agent's name,
+        role, instructions and the trigger words of its skills; when none scores, the binding flagged
+        ``front_desk_default``.
+
+        Choosing never opens anything: the caller still answers through ``_answer`` (a person, refused unless
+        ``_can_use``) or ``_answer_public`` (a visitor), which check everything again.
+
+        :param text: the question
+        :param bindings: ``nudge.agent.binding`` records of one channel (the caller's environment, sudo or not)
+        :return: one binding, in the caller's environment, or an empty recordset"""
+        Binding = self.env["nudge.agent.binding"]
+        # sudo: the configuration of the channels and of their agents, nothing of the data
+        candidates = bindings.sudo().filtered(
+            lambda binding: binding.published and binding.agent_id.active and binding.agent_id.state == "published")
+        if len(candidates) <= 1:
+            return Binding.browse(candidates.ids)
+        # The words of each role are trigger words of its agent, but those every role has ("assistant") tell none
+        # apart
+        roles = {binding.id: set(skill_router.words_of(binding.agent_id.role or "")) for binding in candidates}
+        shared = set.intersection(*roles.values())
+        rows = []
+        for binding in candidates:
+            agent = binding.agent_id
+            skills = agent.skill_ids.filtered(lambda skill: skill.state == "published")
+            rows.append({
+                "key": f"nudge-front-desk-{binding.id}", "name": agent.name or "", "summary": agent.role or "",
+                "instructions": agent.instructions or "", "model_names": "",
+                "trigger_words": "\n".join([*(skill.trigger_words or "" for skill in skills),
+                                            *sorted(roles[binding.id] - shared)])})
+        index = skill_router.Index(rows)
+        choice = skill_router.route(index, text or "", limit=1, layers=("rules", "lexical"))
+        ranked = choice.ranked
+        best, second = (ranked[0] if ranked else (None, 0.0)), (ranked[1][1] if len(ranked) > 1 else 0.0)
+        # The best one, when it leads clearly: above the threshold of the router, or at least above the floor of
+        # its index; two agents that score the same leave it to the default
+        if best[0] and best[1] > second and (choice.keys or best[1] >= skill_router.INDEX_FLOOR):
+            return Binding.browse(int(best[0].rsplit("-", 1)[1]))
+        return Binding.browse(candidates.filtered("front_desk_default")[:1].ids)
+
+    # ----------------------------------------------------------- hand to a person (60.1)
+    def _hand_over_problem(self, binding, consent=False, public=False):
+        """:return: why the conversation cannot be handed to a person on ``binding`` (a text the model or the
+        person reads), or None: the channel must name an active escalation user, a visitor without an account must
+        have agreed to be contacted (``consent``), and the activities of Odoo must be there"""
+        # sudo: the configuration of the channel
+        binding = binding.sudo()
+        if len(binding) != 1 or (self and binding.agent_id.id not in self.ids):
+            return _("Nothing was handed over: this channel is not one of this agent.")
+        escalation = binding.escalation_user_id
+        if not escalation or not escalation.active:
+            return _("Nothing was handed over: no person is named to take over on this channel.")
+        if public and not consent:
+            return _(
+                "Nothing was handed over: the visitor has not agreed to be contacted. Ask them first; on the website "
+                "they agree with Talk to a person.")
+        if "mail.activity" not in self.env:
+            return _("Nothing was handed over: this database has no activities to give a person.")
+        return None
+
+    def _hand_to_person(self, binding, summary, consent=False, visitor_name=None, visitor_email=None, public=False,
+                        lead=None):
+        """Nudge Agents 60.1: hand a conversation to the escalation user of ``binding``: a To Do activity for them,
+        on a new lead when CRM is installed, else on the contact of the person (or, for a visitor without an
+        account, on the agent's own contact), with the summary and how to reach the visitor. Used by the tool
+        ``hand_to_person`` and by the "Talk to a person" form of the website.
+
+        Nothing is read for the visitor: the activity and its lead are written in sudo (the visitor and the service
+        user may write nothing), with only what the visitor and the agent said, for the escalation user to read.
+
+        :param binding: the ``nudge.agent.binding`` the conversation came through; it must belong to this agent
+            (when ``self`` is not empty) and name an escalation user
+        :param summary: what the person needs, in words (cut at 4000 characters)
+        :param consent: a visitor without an account agreed to be contacted: required when ``public``
+        :param visitor_name: their name, when they gave it
+        :param visitor_email: their address (or number), when they gave it
+        :param public: the one asking has no account (a website visitor, an unknown number); else the current
+            user is the person (their contact is used). A public or service user is always taken as public
+        :param lead: the ``crm.lead`` the channel made for the same request (the contact form of the website): the
+            activity goes on it, and no second lead is made
+        :return: the ``mail.activity`` made (truthy), or False when nothing was handed over
+            (``_hand_over_problem`` says why)"""
+        # sudo: the configuration of the channel
+        binding = binding.sudo().exists() if binding else self.env["nudge.agent.binding"].sudo()
+        user = self.env.user
+        public = bool(public) or user._is_public() or user.has_group(base.SERVICE_GROUP)
+        problem = self._hand_over_problem(binding, consent=consent, public=public)
+        if problem:
+            _logger.info("Nudge Agents: no hand-over on channel %s: %s", binding.ids, problem)
+            return False
+        agent = binding.agent_id
+        escalation = binding.escalation_user_id
+        person = self.env["res.users"] if public else user
+        name = " ".join(str(visitor_name or "").split())[:VISITOR_CHARS]
+        email = " ".join(str(visitor_email or "").split())[:VISITOR_CHARS]
+        text = str(summary or "").strip()[:HAND_OVER_CHARS]
+        lines = [text]
+        if person:
+            lines.append(_("Asked by %s.", person.name))
+        if name:
+            lines.append(_("Name: %s", name))
+        if email:
+            lines.append(_("Contact: %s", email))
+        channel = dict(binding._fields["channel"]._description_selection(self.env)).get(binding.channel)
+        lines.append(_("Channel: %(channel)s, agent %(agent)s.", channel=channel or binding.channel,
+                                agent=agent.name))
+        title = _("%s: a person is asked for", agent.name)
+        note = plaintext2html("\n".join(lines))
+        company = escalation.company_id if escalation.company_id in agent.company_ids else agent.company_ids[:1]
+        if lead is not None and "crm.lead" in self.env and lead._name == "crm.lead" and lead.exists():
+            # sudo: the lead the website made for this request a moment ago, for the escalation user
+            target = lead.sudo()
+        elif "crm.lead" in self.env:
+            # sudo: written for the escalation user with what was said; nothing is read back for the visitor
+            target = self.env["crm.lead"].sudo().with_company(company).create({
+                "name": title, "contact_name": name or False, "email_from": email if "@" in email else False,
+                "partner_id": person.partner_id.id if person else False, "user_id": escalation.id,
+                "description": note, "company_id": company.id})
+        elif person:
+            # sudo: the activity is the hand-over itself, for the escalation user
+            target = person.partner_id.sudo()
+        else:
+            # A visitor: a contact of their own, archived (out of the lists of contacts), in the company, never the
+            # agent's face, whose activities everyone who talks to the agent sees
+            target = self.env["res.partner"].sudo().create({
+                "name": name or _("Visitor of %s", agent.name), "email": email if "@" in email else False,
+                "company_id": company.id, "active": False})
+        return target.activity_schedule(
+            "mail.mail_activity_data_todo", summary=title, note=note, user_id=escalation.id) or False
+
+    # ----------------------------------------------------------- budget notice (60.1)
+    def _budget_notice(self):
+        """Tell the creator of the agent (or else the Nudge managers of its companies), once a month, that it used
+        its budget of the month: a To Do activity on the agent's contact, its face (nudge.agent has no chatter:
+        Nudge does not depend on mail). Never raises.
+        :return: whether the notice was given now"""
+        self.ensure_one()
+        month = fields.Date.context_today(self).strftime("%Y-%m")
+        try:
+            with self.env.cr.savepoint():
+                # Once a month, whoever passes the budget first: one atomic update says who
+                self.flush_recordset(["budget_noticed"])
+                self.env.cr.execute(
+                    "UPDATE nudge_agent SET budget_noticed = %s WHERE id = %s AND "
+                    "(budget_noticed IS NULL OR budget_noticed != %s) RETURNING id", [month, self.id, month])
+                if not self.env.cr.fetchone():
+                    return False
+                self.invalidate_recordset(["budget_noticed"])
+                if "mail.activity" not in self.env:
+                    return True
+                # sudo: the agent's own configuration and the managers of its companies
+                agent = self.sudo()
+                manager = self.env.ref("nudge.group_nudge_manager").sudo()
+                members = manager[("user_ids" if "user_ids" in manager._fields else "users")]
+                users = agent.create_uid.filtered(lambda user: user.active and user in members)
+                if not users:
+                    users = members.filtered(
+                        lambda user: user.active and not user.share and user.company_ids & agent.company_ids)[:10]
+                title = _("%(agent)s used its budget for %(month)s", agent=agent.name, month=month)
+                note = plaintext2html(_(
+                    "Until the next month the agent answers without AI: approved answers and the requests it "
+                    "understands by itself. Raise its monthly budget on the agent to give it more."))
+                for user in users:
+                    agent.partner_id.activity_schedule(
+                        "mail.mail_activity_data_todo", summary=title, note=note, user_id=user.id)
+        except Exception:  # noqa: BLE001 - a notice never stops an answer
+            _logger.warning("Nudge Agents: the budget notice of agent %s failed", self.id, exc_info=True)
+            return False
+        return True
 
     # ----------------------------------------------------------- the face
     @api.model_create_multi
@@ -249,6 +470,24 @@ class NudgeAgent(models.Model):
         if names:
             self._keep_revision(before, names)
         return result
+
+    def update_field_translations(self, field_name, translations, *args, **kwargs):
+        # The name, role and greeting are translated fields: a translation is a change of what the channels say
+        if not self.env.su and field_name in CHANNEL_STEERING:
+            self._check_my_companies()
+            if not self.env.user.has_group("base.group_system"):
+                self._unpublish_channels(_("Its instructions or limits changed"))
+        return super().update_field_translations(field_name, translations, *args, **kwargs)
+
+    @api.constrains("budget_month", "budget_user_day")
+    def _check_public_budgets(self):
+        # H1: a public channel answers people without an account: never without a limit to what it spends
+        for agent in self:
+            if (agent.budget_month <= 0 or agent.budget_user_day <= 0) and agent.binding_ids.filtered(
+                    lambda binding: binding.published and binding.acts_as == "service"):
+                raise ValidationError(_(
+                    "An agent with a published service channel needs a monthly budget and tokens per person per "
+                    "day. Unpublish its service channels first."))
 
     def _unpublish_channels(self, reason):
         """Takes the published channels other than Discuss back to unpublished, with a revision that says why"""
@@ -415,16 +654,129 @@ class NudgeAgentBinding(models.Model):
         help="A service user answers people who have no user of their own (the website, WhatsApp, Telegram), "
              "and reads only the models allowed here.")
     service_user_id = fields.Many2one(
-        "res.users", string="Service User", domain="[('share', '=', False)]",
-        help="Must hold the group Nudge: agent service user and no other group of Nudge.")
+        "res.users", string="Service User", domain="[('share', '=', True)]",
+        help="A portal user holding the group Nudge: agent service user and no other group of Nudge: the record "
+             "rules and field groups of the portal apply to what it reads.")
     model_allowlist = fields.Char(
         string="Readable Models", help="Technical names of the models a service user may read, separated by commas.")
-    escalation_user_id = fields.Many2one("res.users", string="Escalate To")
+    escalation_user_id = fields.Many2one(
+        "res.users", string="Escalate To", domain="[('share', '=', False)]",
+        help="The person a conversation is handed to when someone asks for a person: a To Do for them, on a lead "
+             "when CRM is installed. A visitor without an account is handed over only once they agree.")
     published = fields.Boolean(
         help="On a service channel only a system administrator publishes it.")
+    # Nudge Agents 60.1: when the channel answers, in the time zone of the company; outside, a fixed sentence
+    hours = fields.Char(
+        string="Office Hours", help="When it answers, such as 08:00-18:00, or 08:00-12:00, 16:00-20:00. Empty: always. "
+                                    "In the time zone of the company.")
+    days = fields.Char(
+        string="Office Days", help="The days it answers, such as sun-thu, mon-fri or mon,wed,fri. Empty: every day.")
+    front_desk_default = fields.Boolean(
+        string="Front Desk Default",
+        help="When a channel has several agents and none fits the question, this one answers.")
 
     # Fields that decide what a published service binding may do: changing one takes it back to unpublished
-    SERVICE_STEERING = ("channel", "acts_as", "service_user_id", "model_allowlist")
+    SERVICE_STEERING = ("channel", "acts_as", "service_user_id", "model_allowlist", "agent_id", "escalation_user_id",
+                        "front_desk_default", "hours", "days")
+    # Fields whose change is kept in the agent's history with the others
+    KEPT = SERVICE_STEERING + ("published",)
+
+    # ------------------------------------------------------------------ office hours (60.1)
+    @api.constrains("hours", "days")
+    def _check_hours(self):
+        for binding in self:
+            binding._ranges()
+            binding._day_numbers()
+
+    def _ranges(self):
+        """:return: the office hours as ``[(start, end)]`` in minutes of the day; an end before its start runs
+        past midnight. :raise ValidationError: when they cannot be read"""
+        ranges = []
+        for part in (self.hours or "").split(","):
+            if not part.strip():
+                continue
+            match = HOURS_RANGE.match(part.strip())
+            if not match or int(match.group(3)) * 60 + int(match.group(4)) > 24 * 60:
+                raise ValidationError(_("Write the office hours as 08:00-18:00, several separated by commas."))
+            start = int(match.group(1)) * 60 + int(match.group(2))
+            end = int(match.group(3)) * 60 + int(match.group(4))
+            if start == end:
+                raise ValidationError(_("Office hours that start and end at the same time are empty."))
+            ranges.append((start, end))
+        return ranges
+
+    def _day_numbers(self):
+        """:return: the days it answers, Monday 0 to Sunday 6. :raise ValidationError: when they cannot be read"""
+        days = set()
+        for part in (self.days or "").lower().replace(" ", "").split(","):
+            if not part:
+                continue
+            ends = part.split("-")
+            if len(ends) > 2 or any(end[:3] not in DAYS for end in ends):
+                raise ValidationError(_("Write the office days as mon-fri, sun-thu or mon,wed,fri."))
+            first, last = DAYS.index(ends[0][:3]), DAYS.index(ends[-1][:3])
+            day = first
+            days.add(day)
+            while day != last:
+                day = (day + 1) % 7
+                days.add(day)
+        return days or set(range(7))
+
+    def _timezone(self):
+        """:return: the time zone of the company of the channel: its service user's company, else the agent's"""
+        company = self.service_user_id.company_id if self.acts_as == "service" else self.env["res.company"]
+        company = company or self.agent_id.company_ids[:1]
+        name = company.partner_id.tz or self.service_user_id.tz or "UTC"
+        try:
+            return pytz.timezone(name)
+        except pytz.UnknownTimeZoneError:
+            return pytz.utc
+
+    def _open_now(self, when=None):
+        """:param when: a UTC datetime, now by default
+        :return: whether the channel answers at ``when``: on one of its days, within its hours (a range past
+            midnight belongs to the day it started)"""
+        self.ensure_one()
+        binding = self.sudo()
+        ranges, days = binding._ranges(), binding._day_numbers()
+        local = pytz.utc.localize(when or fields.Datetime.now()).astimezone(binding._timezone())
+        if not ranges:
+            return local.weekday() in days
+        minute = local.hour * 60 + local.minute
+        yesterday = (local - datetime.timedelta(days=1)).weekday()
+        for start, end in ranges:
+            if start < end and start <= minute < end and local.weekday() in days:
+                return True
+            if start > end and ((minute >= start and local.weekday() in days) or (minute < end and yesterday in days)):
+                return True
+        return False
+
+    def _hours_text(self):
+        """:return: the fixed sentence of a channel asked outside its hours, without AI"""
+        binding = self.sudo()
+        when = binding.hours or _("all day")
+        days = binding.days or _("every day")
+        return _(
+            "We answer here on %(days)s, %(hours)s (time of %(zone)s). Please write again then.",
+            days=days, hours=when, zone=binding._timezone().zone)
+
+    # ------------------------------------------------------------------ a public channel (60.1)
+    def _public_open_to(self, user):
+        """:return: whether this is a published service channel that answers as ``user``, its service user, who
+        still holds only the service group. Asked at every turn"""
+        self.ensure_one()
+        binding = self.sudo()
+        return bool(binding.published and binding.acts_as == "service" and binding.channel in SERVICE_CHANNELS
+                    and user and binding.service_user_id.id == user.id and binding.service_user_id.active
+                    and binding._service_user_ok())
+
+    def _allowlist(self):
+        """:return: the models a public channel reads, a tuple; never one of those a service channel never reads,
+        whatever was stored (a list checked again at every turn)"""
+        names = skill_rules.split_names(self.sudo().model_allowlist)
+        return tuple(sorted({
+            name for name in names
+            if name in self.env and name not in DENIED_MODELS and not name.startswith(DENIED_MODEL_PREFIXES)}))
 
     @api.constrains("model_allowlist")
     def _check_allowlist(self):
@@ -446,10 +798,12 @@ class NudgeAgentBinding(models.Model):
         groups = user_groups(user)
         if service_group not in groups:
             return _("%s does not hold the group Nudge: agent service user.", user.name)
-        if user.sudo().share:
-            basic = self.env.ref("base.group_portal") | self.env.ref("base.group_public")
-        else:
-            basic = self.env.ref("base.group_user")
+        if not user.sudo().share:
+            # H2: the record rules and field groups of the portal (unpublished products, cost prices, stock) apply
+            # to a portal user, not to an employee
+            return _(
+                "The service user %s must be a portal user: an employee reads what visitors may not.", user.name)
+        basic = self.env.ref("base.group_portal") | self.env.ref("base.group_public")
         implied = basic.all_implied_ids if "all_implied_ids" in basic._fields else basic.trans_implied_ids
         extra = groups - (service_group | basic | implied)
         if extra:
@@ -463,6 +817,23 @@ class NudgeAgentBinding(models.Model):
         """:return: whether the service user is still fit: also asked at the time of an answer"""
         self.ensure_one()
         return self.acts_as != "service" or self._service_user_problem() is None
+
+    @api.constrains("escalation_user_id")
+    def _check_escalation(self):
+        for binding in self:
+            if binding.escalation_user_id.sudo().share:
+                raise ValidationError(_("A conversation is handed to an employee, not to a portal user."))
+
+    @api.constrains("published", "acts_as", "agent_id")
+    def _check_public_budget(self):
+        # H1: never a public channel without a limit to what it spends
+        for binding in self:
+            agent = binding.agent_id.sudo()
+            if binding.published and binding.acts_as == "service" and (
+                    agent.budget_month <= 0 or agent.budget_user_day <= 0):
+                raise ValidationError(_(
+                    "Give the agent a monthly budget and tokens per person per day before publishing a service "
+                    "channel: visitors are counted one by one."))
 
     @api.constrains("channel", "acts_as", "service_user_id")
     def _check_service(self):
@@ -488,7 +859,17 @@ class NudgeAgentBinding(models.Model):
             {vals["agent_id"] for vals in vals_list if vals.get("agent_id")})._check_my_companies()
         bindings = super().create(vals_list)
         bindings._keep_revision(_("Channel added"), added=True)
+        bindings._memory_off_for_service()
         return bindings
+
+    def _memory_off_for_service(self):
+        """L5: the approved answers were written for the people of the company: an agent given a service channel
+        stops using them (a system administrator may turn them on again, which takes its channels down for a
+        manager)"""
+        # sudo: a setting of the agent the channel belongs to
+        agents = self.filtered(lambda binding: binding.acts_as == "service").agent_id.sudo().filtered("use_memory")
+        if agents:
+            agents.write({"use_memory": False})
 
     def write(self, vals):
         (self.agent_id | self.env["nudge.agent"].browse(vals.get("agent_id") or []))._check_my_companies()
@@ -508,7 +889,9 @@ class NudgeAgentBinding(models.Model):
                     steering.sudo().write({"published": False})
         before = {binding.id: binding._summary() for binding in self}
         result = super().write(vals)
-        if any(name in vals for name in self.SERVICE_STEERING + ("published", "escalation_user_id")):
+        if vals.get("acts_as") == "service":
+            self._memory_off_for_service()
+        if any(name in vals for name in self.KEPT):
             for binding in self:
                 if before[binding.id] != binding._summary():
                     binding._keep_revision(_("Channel changed"), before=before[binding.id])
@@ -522,8 +905,11 @@ class NudgeAgentBinding(models.Model):
 
     def _summary(self):
         self.ensure_one()
-        return (f"channel: {self.channel}, acts as: {self.acts_as}, service user: {self.service_user_id.login or ''}, "
-                f"models: {self.model_allowlist or ''}, published: {self.published}")
+        summary = (f"channel: {self.channel}, acts as: {self.acts_as}, service user: {self.service_user_id.login or ''}, "
+                   f"models: {self.model_allowlist or ''}, published: {self.published}")
+        # Nudge Agents 60.1: who takes over, and when it answers
+        return (f"{summary}, escalate to: {self.escalation_user_id.login or ''}, hours: {self.hours or ''}, "
+                f"days: {self.days or ''}, front desk default: {self.front_desk_default}")
 
     def _keep_revision(self, what, added=False, before=None, removed=False):
         """The agent keeps what changed on its channels with its other changes"""

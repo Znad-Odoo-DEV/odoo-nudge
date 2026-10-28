@@ -60,6 +60,12 @@ MAX_TRIES = 3
 STATES = ("received", "limited", "unknown", "linked", "answered", "failed", "wrong_code")
 APPROVAL_HOURS = 24
 MAX_LINKS = 3
+AGENT_NAME = "%s (agent)"
+# H1: how many numbers nobody linked an agent answers at once (a lock of the transaction per place, as the website
+# does); the others wait in the queue
+PUBLIC_LOCK = "nudge_messaging_public_agent"
+MAX_PUBLIC_PARAM = "nudge_messaging.max_public_agents"
+MAX_PUBLIC_DEFAULT = 2
 STALE_SECONDS = 24 * 3600
 MAX_VOICE_SECONDS = 120
 MAX_WAV_BYTES = 10 * 1024 * 1024
@@ -270,6 +276,11 @@ class NudgeMessaging(models.AbstractModel):
                         "Linked to %(name)s. Ask me about your invoices, orders or contacts. A change I prepare "
                         "waits for your yes in Odoo.", name=user.name))
                     return "linked"
+        if not code and text.strip():
+            reply = self._public_reply(channel, sender, text, lang)
+            if reply is not None:
+                Api._send_text(channel, sender, reply)
+                return "answered"
         # One polite line per hour to a phone nobody linked: a flood of messages earns no flood of replies
         told = self.env["nudge.messaging.message"].search_count([
             ("sender_hash", "=", line.sender_hash), ("state", "in", ("unknown", "wrong_code", "limited")),
@@ -444,7 +455,8 @@ class NudgeMessaging(models.AbstractModel):
             "conversation_id": conversation.id, "role": "user", "mode": "agent",
             "content": event.get("text") or name, "attachment_id": attachment.id, "attachment_name": name})
         env["nudge.usage"]._check_budget()
-        step, result = self._prepare(run, "document_to_record", {"target": "guess"})
+        scoped = self._agent_file_scope(channel, event)
+        step, result = scoped._prepare(run, "document_to_record", {"target": "guess"})
         if step:
             return self._waiting(step, links)
         if result.is_error:
@@ -455,6 +467,10 @@ class NudgeMessaging(models.AbstractModel):
     # --- text ---------------------------------------------------------
     def _from_text(self, run, channel, text, links):
         env = self.env
+        # Nudge Agents: a channel with published agents is answered by one of them, as this person
+        by_agent = self._by_agent(channel, text)
+        if by_agent is not None:
+            return by_agent
         has_ai = env["nudge.noai"]._has_ai(None, MODE_AGENT)
         remembered = self._remembered(text, has_ai)
         if remembered:
@@ -613,8 +629,7 @@ class NudgeMessaging(models.AbstractModel):
                         is_error=result.is_error)
         started = time.monotonic()
         mode = self._mode()
-        context_env = env(context=dict(env.context, nudge_conversation_id=run.conversation_id.id,
-                                       nudge_mode=mode, nudge_messaging=True))
+        context_env = self._tool_env(run, mode)
         result = tool_base.call(context_env, call["name"], call["input"], None, mode)
         env["nudge.mcp"]._log_step(run, call["name"], tool.kind, "failed" if result.is_error else "done",
                                    call["input"], result, started)
@@ -625,6 +640,144 @@ class NudgeMessaging(models.AbstractModel):
                 links.append((_("Open in Odoo"), url))
         return dict(entry, content=tool_base.as_data(call["name"], result.content, result.is_error),
                     is_error=result.is_error)
+
+    # --- agents ----------------------------------------------------------
+    def _tool_env(self, run, mode):
+        """:return: the environment a tool messaging calls itself runs in. When an agent answers (the context
+        names its conversation) it is the scope of that conversation: the person, in the companies they share
+        with the agent, with only the tools the agent allows; the same environment otherwise."""
+        env = self.env
+        extra = dict(nudge_conversation_id=run.conversation_id.id, nudge_mode=mode, nudge_messaging=True)
+        wanted = env.context.get("nudge_messaging_agent_conversation")
+        if wanted:
+            conversation = env["nudge.conversation"].browse(wanted).exists()
+            if conversation:
+                # A conversation of a public channel (an unknown number, as the service user) only talks
+                scoped = conversation._agent_scope(MODE_TALK if conversation._agent_public() else mode).env
+                return scoped(context=dict(scoped.context, **extra))
+        return env(context=dict(env.context, **extra))
+
+    @api.model
+    def _agent_bindings(self, channel, service):
+        """:return: the published bindings of ``channel`` whose agent is published (read in sudo: the agents'
+        own configuration): for a linked person (``service`` False) or for a number nobody linked"""
+        if "nudge.agent.binding" not in self.env:
+            return self.env["res.users"].browse()
+        bindings = self.env["nudge.agent.binding"].sudo().search([
+            ("channel", "=", channel), ("published", "=", True),
+            ("agent_id.active", "=", True), ("agent_id.state", "=", "published")])
+        if service:
+            return bindings.filtered(lambda b: b.acts_as == "service" and b.service_user_id)
+        return bindings.filtered(lambda b: b.acts_as == "person")
+
+    @api.model
+    def _pick_binding(self, bindings, text):
+        """:return: the one binding that answers: the only one, or the front desk's choice (no AI)"""
+        if len(bindings) <= 1:
+            return bindings
+        return self.env["nudge.agent"].sudo()._front_desk(text, bindings) or bindings.browse()
+
+    def _by_agent(self, channel, text):
+        """A linked person's question when the channel has published agents.
+        :return: the answer, or None when no agent is bound here (the channel then works as it always did)"""
+        env = self.env
+        bindings = self._agent_bindings(channel, service=False)
+        if not bindings:
+            return None
+        # An agent is served only to a person it is open to (published, audience, companies: _can_use)
+        open_to = bindings.filtered(lambda b: b.agent_id._open_to(env.user))
+        binding = self._pick_binding(open_to, text)
+        if not binding:
+            return _("No assistant on this channel is open to you.")
+        agent = env["nudge.agent"].browse(binding.agent_id.id)
+        conversation = self._agent_conversation(channel, agent)
+        # The channel goes with the turn: its office hours and its person to hand over to
+        result = agent._answer(text, lang=env.context.get("lang"), conversation=conversation, binding=binding)
+        # A new conversation (none yet, or the engine did not go on in the one found: of another channel) is
+        # marked as this channel's, so that the next message goes on in it
+        if result.get("conversation_id") and result["conversation_id"] != conversation.id:
+            self._agent_conversation_name(channel, result["conversation_id"])
+        return result.get("text") or _("I have nothing to answer to this.")
+
+    def _public_reply(self, channel, sender, text, lang):
+        """A number nobody linked, on a channel with a published service binding: the agent answers it as
+        its service user, reading the models of the binding only.
+        :return: the answer, or None when no service binding is published for the channel"""
+        env = self.env
+        bindings = self._agent_bindings(channel, service=True)
+        if not bindings:
+            return None
+        if env["nudge.provider"]._is_private_mode() and not self._private_allowed():
+            # As for a linked phone (_converse): private mode keeps the company's words off this channel
+            return self._in(lang)._("Private mode is on: this channel carries no company data.")
+        text = text.strip()[:MAX_QUESTION]
+        binding = self._pick_binding(bindings, text)
+        if not binding:
+            return None
+        visitor = "%s:%s" % (channel, env["nudge.messaging.message"]._hash_sender(channel, sender))
+        try:
+            with self._public_place():
+                result = env["nudge.agent"].sudo().browse(binding.agent_id.id)._answer_public(
+                    text, binding, lang=lang or None, visitor_key=visitor)
+        except NudgeBusy:
+            raise
+        except (UserError, AccessError):
+            # A stranger is never shown what went wrong inside
+            _logger.info("Nudge messaging: an agent could not answer a number nobody linked", exc_info=True)
+            return self._in(lang)._("I cannot answer this here. Please ask in other words.")
+        return result.get("text") or self._in(lang)._("I have nothing to answer to this.")
+
+    @contextlib.contextmanager
+    def _public_place(self):
+        """Hold one of the places for the numbers nobody linked, or raise ``NudgeBusy`` (the message stays in the
+        queue). A place is a lock of the transaction: the database lets it go when the answer ends, whatever ends
+        it"""
+        try:
+            places = int(float(self.env["ir.config_parameter"].sudo().get_param(MAX_PUBLIC_PARAM) or 0))
+        except ValueError:
+            places = 0
+        cr = self.env.cr
+        for place in range(places if places > 0 else MAX_PUBLIC_DEFAULT):
+            cr.execute("SELECT pg_try_advisory_xact_lock(hashtext(%s), %s)", (PUBLIC_LOCK, place))
+            if cr.fetchone()[0]:
+                yield place
+                return
+        raise NudgeBusy(_("Many people are writing right now."), retry_after=BUSY_MAX_SECONDS)
+
+    @api.model
+    def _agent_conversation(self, channel, agent):
+        """:return: the conversation of this person with ``agent`` on this channel when one is recent (the last
+        hour), else an empty recordset: the agent then starts a new one"""
+        since = fields.Datetime.now() - timedelta(minutes=HISTORY_MINUTES)
+        return self.env["nudge.conversation"].sudo().with_context(active_test=False).search([
+            ("user_id", "=", self.env.uid), ("agent_id", "=", agent.id), ("agent_rehearsal", "=", False),
+            ("name", "=", AGENT_NAME % ORIGINS[channel]), ("write_date", ">=", since)], order="id desc", limit=1)
+
+    @api.model
+    def _agent_conversation_name(self, channel, conversation_id):
+        """Mark a conversation an agent began as this channel's, so that the next message goes on in it"""
+        self.env["nudge.conversation"].sudo().browse(conversation_id).write({"name": AGENT_NAME % ORIGINS[channel]})
+
+    def _agent_file_scope(self, channel, event):
+        """:return: ``self``, or ``self`` with the context that puts the tools messaging calls itself (reading
+        a document) inside the scope of the agent that answers this channel"""
+        env = self.env
+        bindings = self._agent_bindings(channel, service=False)
+        if not bindings:
+            return self
+        open_to = bindings.filtered(lambda b: b.agent_id._open_to(env.user))
+        binding = self._pick_binding(open_to, event.get("text") or "")
+        if not binding:
+            raise UserError(_("No assistant on this channel is open to you."))
+        agent = env["nudge.agent"].browse(binding.agent_id.id)
+        conversation = self._agent_conversation(channel, agent)
+        if not conversation:
+            from odoo.addons.nudge.models.nudge_agent_engine import OPENING
+            opened = env["nudge.conversation"].with_context(
+                nudge_agent_id=agent.id, nudge_agent_opening=OPENING)._chat_open()
+            conversation = opened.sudo()
+            self._agent_conversation_name(channel, conversation.id)
+        return self.with_context(nudge_messaging_agent_conversation=conversation.id)
 
     # --- preparing -----------------------------------------------------
     def _prepare(self, run, name, arguments):
@@ -637,8 +790,7 @@ class NudgeMessaging(models.AbstractModel):
                 _("Agent mode is not open to you. Ask your administrator."), is_error=True)
         tool = tool_base.TOOLS.get(name)
         started = time.monotonic()
-        context_env = env(context=dict(env.context, nudge_conversation_id=run.conversation_id.id,
-                                       nudge_mode=MODE_AGENT, nudge_messaging=True))
+        context_env = self._tool_env(run, MODE_AGENT)
         result = tool_base.call(context_env, name, arguments, None, MODE_AGENT)
         if result.pending and not result.is_error:
             step = env["nudge.mcp"]._log_step(run, name, tool.kind, "pending", arguments, result, started)

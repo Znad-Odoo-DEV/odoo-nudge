@@ -118,7 +118,8 @@ class TestSkills(NudgeCase, TransactionCase):
         # The next questions of the conversation get it too; asked again, it is not given twice
         script = [[llm.tool_use_event("call_2", "use_skill", {"key": "import-files"}), llm.stop_event(llm.STOP_TOOL_USE)],
                   [llm.text_event("Noted."), llm.stop_event(llm.STOP_END)]]
-        _conversation, calls = self.call_for(self.user_a, "Thanks", conversation_id=conversation.id, script=script)
+        # Not "Thanks": a thanks alone is answered without AI (nudge.noai._chat_thanks)
+        _conversation, calls = self.call_for(self.user_a, "And then?", conversation_id=conversation.id, script=script)
         self.assertIn("## Importing files", calls[0]["system"][-1])
         self.assertEqual(calls[1]["system"][-1].count("## Importing files"), 1)
         self.assertIn("already in your instructions", json.dumps(calls[1]["turns"], default=str))

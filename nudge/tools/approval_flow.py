@@ -489,7 +489,10 @@ class PrepareApprovalFlow(Building):
                 builds.append({
                     "tool": "prepare_approval_rule",
                     "arguments": {
-                        "model": model._name, "method": profile["button"], "group": level["group"].name, "step": step,
+                        # By its external id: a short name such as Administrator is shared by a dozen apps
+                        "model": model._name, "method": profile["button"],
+                        "group": level["group"].get_external_id().get(level["group"].id) or level["group"].full_name,
+                        "step": step,
                         "conditions": profile["conditions"] + [
                             {"field": profile["amount"], "operator": ">", "value": str(level["amount"])}],
                         "match": "all",

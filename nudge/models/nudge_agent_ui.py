@@ -3,10 +3,11 @@ from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 from ..tools import base, registry
-from .nudge_agent import DEFAULT_READ_TOOLS, NEVER_OFFERED, READ_KINDS, developer_tool
+from .nudge_agent import CHANNEL_TOOLS, DEFAULT_READ_TOOLS, NEVER_OFFERED, READ_KINDS, developer_tool
 
-# Tools the allow-list never shows: they work inside a tool, not for a person, or an agent is never given them
-INTERNAL_TOOLS = frozenset({"more_tools", "use_skill"}) | NEVER_OFFERED
+# Tools the allow-list never shows: they work inside a tool, not for a person, an agent is never given them, or a
+# channel gives them (hand_to_person, when it names a person to escalate to: 60.1)
+INTERNAL_TOOLS = frozenset({"more_tools", "use_skill"}) | NEVER_OFFERED | CHANNEL_TOOLS
 CHANNELS = {"discuss": "Discuss", "website": "Website", "whatsapp": "WhatsApp", "telegram": "Telegram", "mcp": "MCP"}
 
 

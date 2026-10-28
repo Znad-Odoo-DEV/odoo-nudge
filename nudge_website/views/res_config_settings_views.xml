@@ -28,6 +28,12 @@
                             </div>
                         </div>
                     </setting>
+                    <setting string="Agents on the Website" help="When agents are published on the website channel, they answer the bubble (a visitor with no login, or a customer logged in to the portal, only through the service user and the readable models of the channel). With none, the assistant above answers. The channels are set on each agent.">
+                        <div class="mt8"><field name="nudge_website_agent_ids" widget="many2many_tags" readonly="1" options="{'no_open': True}"/></div>
+                        <div class="mt8">
+                            <button name="%(nudge.nudge_agent_action)d" type="action" class="btn btn-link" string="Open the agents"/>
+                        </div>
+                    </setting>
                     <setting help="What the AI may spend each day on visitors, in tokens, and how many messages one visitor may send. Past the budget, visitors are still answered, from the products and files alone, with no AI. 0 tokens: never the AI.">
                         <div class="row">
                             <label for="nudge_public_budget" class="col-lg-6 o_light_label"/>

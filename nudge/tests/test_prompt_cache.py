@@ -164,7 +164,8 @@ class TestOverviewOnce(NudgeCase, TransactionCase):
         _conversation, calls = self.ask_in(conversation, "And now?")
         self.assertIn("Orders above 10,000 wait.", calls[0]["system"][1])
         self.assertIn("<nudge_overview>", self.context(calls[0]))
-        _conversation, calls = self.ask_in(conversation, "Thanks")
+        # Not "Thanks": a thanks alone is answered without AI (nudge.noai._chat_thanks)
+        _conversation, calls = self.ask_in(conversation, "And the next step?")
         self.assertNotIn("<nudge_overview>", self.context(calls[0]))
         # Another conversation starts with it, under the same system prompt
         _other, other = self.ask_in()

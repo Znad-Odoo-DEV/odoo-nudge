@@ -143,6 +143,8 @@
                                     <field name="acts_as"/>
                                     <field name="service_user_id" optional="show"/>
                                     <field name="escalation_user_id" optional="show"/>
+                                    <field name="hours" optional="hide"/>
+                                    <field name="front_desk_default" optional="hide"/>
                                     <field name="published"/>
                                 </tree>
                                 <form string="Channel">
@@ -164,6 +166,16 @@
                                             <field name="escalation_user_id"/>
                                         </group>
                                     </group>
+                                    <!-- Nudge Agents 60.1: when it answers, and the agent that answers when none fits -->
+                                    <group name="binding_hours">
+                                        <group>
+                                            <field name="hours" placeholder="08:00-18:00"/>
+                                            <field name="days" placeholder="sun-thu"/>
+                                        </group>
+                                        <group>
+                                            <field name="front_desk_default"/>
+                                        </group>
+                                    </group>
                                     <!-- Other modules add their fields here (nudge_discuss: the channels) -->
                                     <group name="binding_extra"/>
                                 </form>
@@ -178,6 +190,9 @@
                                     <field name="budget_month"/>
                                     <field name="budget_user_day"/>
                                 </group>
+                            </group>
+                            <group name="off_limits">
+                                <field name="off_limits" placeholder="salaries&#10;competitors"/>
                             </group>
                             <div class="text-muted">
                                 A budget of 0 means no limit. Over a budget the agent still answers what needs no AI

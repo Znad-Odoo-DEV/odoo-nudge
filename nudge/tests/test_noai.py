@@ -2,6 +2,7 @@ import datetime
 
 from odoo.tests import TransactionCase, new_test_user, tagged
 
+from odoo.addons.nudge.llm import loop
 from odoo.addons.nudge.tools import noai_commands
 from odoo.addons.nudge.tools.noai_commands import grammar, lexicon, normalise
 
@@ -524,3 +525,41 @@ class TestNoaiRun(NudgeCase, TransactionCase):
         conversation, events = self.order(self.worker, "find Ebrahim")
         conversation, events = self.order(self.worker, "find Raghad", conversation_id=conversation.id)
         self.assertEqual(len(conversation.sudo().message_ids.filtered(lambda m: m.role == "user")), 2)
+
+
+@tagged("post_install", "-at_install")
+class TestNoai(NudgeCase, TransactionCase):
+    """A thanks and nothing else is answered without AI, for anyone who may ask Nudge."""
+
+    def text_of(self, events):
+        return "".join(event.get("text", "") for event in events if event["type"] == "delta")
+
+    def test_only_a_thanks_is_a_thanks(self):
+        for text in ("thanks", "Thank you very much.", "ok thanks", "thx", "Thanks Nudge", "thank you for your help",
+                     "شكرا", "شكراً جزيلاً", "مشكور", "يعطيك العافية", "تمام شكرا"):
+            self.assertTrue(noai_commands.thanks.asks(text), text)
+        for text in ("no thanks", "thanks, now create a contact", "say thanks to Raghad", "شكرا ابغى فاتورة",
+                     "how many invoices", ""):
+            self.assertFalse(noai_commands.thanks.asks(text), text)
+
+    def test_a_thanks_costs_no_call_to_the_ai(self):
+        adapter = self.use_adapter(reply="An answer by AI.")
+        # A Nudge User of the plain tier, the rules switched off: the thanks is still answered without AI
+        self.env["ir.config_parameter"].sudo().set_param("nudge.noai_first", "0")
+        for text in ("Thank you!", "شكرا"):
+            Conversation = self.env["nudge.conversation"].with_user(self.user_a)
+            conversation = Conversation._chat_open()
+            job = conversation._chat_prepare(text)
+            events = list(loop.run(job, conversation._chat_record))
+            self.assertEqual(self.text_of(events), "You are welcome.", events)
+            answer = conversation.message_ids.filtered(lambda message: message.role == "assistant")
+            self.assertEqual(answer.noai_intent, "thanks")
+        self.assertEqual(adapter.calls, [], "The provider was never called")
+        usage = self.env["nudge.usage"].sudo().search([("user_id", "=", self.user_a.id)])
+        self.assertEqual(set(usage.mapped("kind")), {"noai"})
+
+    def test_a_request_after_thanks_goes_on_to_the_ai(self):
+        adapter = self.use_adapter(reply="An answer by AI.")
+        _conversation, last = self.ask(self.user_a, "thanks, and what is a quotation?")
+        self.assertEqual(len(adapter.calls), 1)
+        self.assertNotEqual(last.get("text"), "You are welcome.")

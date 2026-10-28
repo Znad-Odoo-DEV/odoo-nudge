@@ -104,6 +104,11 @@ class Tool:
         # EXT-01: a tool of a module this database does not have, or of a plugin not allowed here, is not there
         if not offered_here(env, self):
             return False
+        # Nudge Agents, a public channel: the service user has the tools of its channel's scope, in Talk, and
+        # nothing else; outside that scope, nothing at all (public_tools)
+        public = public_tools(env)
+        if public is not None:
+            return mode == MODE_TALK and self.name in public
         # What the agent may do, the developer may do too
         offered = mode in self.modes or (mode == MODE_DEV and MODE_AGENT in self.modes)
         if offered and env.user.has_group(self.group):
@@ -287,7 +292,8 @@ def available(env, mode=MODE_TALK, tool_set="full", extra=(), background=False):
     here = registry.tools_here(env)
     if tool_set == "essential":
         names = ESSENTIAL_BY_MODE.get(mode, TALK_TOOLS) | set(extra) | {"more_tools"}
-        if mode == MODE_TALK and ask_tier_applies(env):
+        # Nudge Agents: a public channel reads with the tools of the Ask tier too, within its scope (is_available)
+        if mode == MODE_TALK and (ask_tier_applies(env) or public_tools(env)):
             names |= ASK_TOOLS
     else:
         names = {name for name, tool in here.items() if not getattr(tool, "small_models_only", False)}
@@ -341,6 +347,171 @@ def agent_unscoped(env):
     # sudo: whether the conversation has an agent, nothing more
     conversation = env["nudge.conversation"].sudo().browse(conversation_id).exists()
     return bool(conversation and "agent_id" in conversation._fields and conversation.agent_id)
+
+
+# Nudge Agents 60.1, a public channel (website visitors, unknown phone numbers). Its turns run as the service user
+# of the channel, never in sudo, with these tools only: knowledge, reading records of the models the channel lists
+# (its allow-list), and handing over to a person. Every model and every field a call names is checked against the
+# list before the tool runs (public_refusal), and what it answers is checked again (public_checked)
+SERVICE_GROUP = "nudge.group_agent_service"
+PUBLIC_KNOWLEDGE_TOOLS = frozenset({"search_odoo_documentation", "use_skill"})
+PUBLIC_RECORD_TOOLS = frozenset({"search_records", "read_record", "find_record", "aggregate_records"})
+HAND_OVER_TOOL = "hand_to_person"
+PUBLIC_TOOLS = PUBLIC_KNOWLEDGE_TOOLS | PUBLIC_RECORD_TOOLS | {HAND_OVER_TOOL}
+# The context keys of the scope of a public turn, put by nudge.conversation._agent_scope from the binding stored on
+# the conversation: the tools (a tuple) and the models (a tuple) of the channel
+PUBLIC_SCOPE = "nudge_agent_public"
+PUBLIC_MODELS = "nudge_agent_models"
+# The arguments that name a model, and those that name fields of it, in any tool, at any depth
+MODEL_ARGUMENTS = frozenset({"model", "models", "res_model", "model_name", "relation", "comodel", "comodel_name"})
+FIELD_ARGUMENTS = frozenset({"field", "fields", "group_by", "measures", "order"})
+# Fields that point to a record of any model: never followed on a public channel
+ANY_MODEL_FIELDS = ("reference", "many2one_reference")
+PUBLIC_REFUSED = "This channel cannot read that: it reads only {models}. Answer from what you know, or say so."
+# H2: what says a record is on the website; a public turn reads only those that are (public_published_field)
+PUBLISHED_FIELDS = ("is_published", "website_published")
+# Fields a public turn never names: archived records stay hidden, and free-form values (properties, json) hold
+# whatever the company put there
+PUBLIC_DENIED_TYPES = ("properties", "properties_definition", "json")
+PUBLIC_NO_RECORDS = "This channel reads no record of the database. Answer from what you know, or say so."
+
+
+def public_tools(env):
+    """Nudge Agents. :return: the tools of the public channel ``env`` answers on, a tuple, when its user is the
+    service user of a channel; an empty tuple when such a user is outside the scope of a public turn (nothing is
+    offered or run); None for anybody else (the usual rules)"""
+    if env.su or not env.user.has_group(SERVICE_GROUP):
+        return None
+    tools = env.context.get(PUBLIC_SCOPE)
+    return tuple(tools) if isinstance(tools, (tuple, list, frozenset)) else ()
+
+
+def _public_models(env):
+    models = env.context.get(PUBLIC_MODELS)
+    return frozenset(models) if isinstance(models, (tuple, list, frozenset)) else frozenset()
+
+
+def _named(value, keys):
+    """:return: every value of ``value`` (arguments of a tool) held under one of ``keys``, at any depth, a list
+    flattened into its items"""
+    if isinstance(value, dict):
+        for key, item in value.items():
+            if key in keys:
+                yield from (item if isinstance(item, (list, tuple)) else [item])
+            if isinstance(item, (dict, list, tuple)):
+                yield from _named(item, keys)
+    elif isinstance(value, (list, tuple)):
+        for item in value:
+            yield from _named(item, keys)
+
+
+def _field_names(value):
+    """:return: the names of the fields ``value`` names: "date_order desc, name", "date:month", "amount:sum" """
+    if not isinstance(value, str):
+        return [value]
+    names = []
+    for part in value.split(","):
+        words = part.split()
+        if words:
+            names.append(words[0].split(":")[0])
+    return names
+
+
+def _public_field_problem(model, name, allowed):
+    """:return: why the field ``name`` of ``model`` cannot be read on a public channel, or None"""
+    if not isinstance(name, str):
+        return "A field is named by its technical name."
+    if "." in name:
+        return "This channel does not follow a field to another record."
+    field = model._fields.get(name)
+    if field is None:
+        # Not a field (count, or a mistake the tool itself refuses)
+        return None
+    if name == "active":
+        return "This channel reads only the records in use: it never looks at archived ones."
+    if field.type in PUBLIC_DENIED_TYPES:
+        return f"This channel does not read the field {name}."
+    if not model._has_field_access(field, "read"):
+        # The groups of the field, as the service user (a portal user) holds them: a cost price, a note
+        return f"This channel does not read the field {name}."
+    if field.type in ANY_MODEL_FIELDS or (field.relational and field.comodel_name not in allowed):
+        return f"The field {name} points to records this channel does not read."
+    return None
+
+
+def public_published_field(model):
+    """H2. :return: the field that says a record of ``model`` is published on the website, when a public turn
+    reads it (only those records are read: a search adds it, a record named by its id is refused unless it is
+    published); None for anybody else, or a model without one"""
+    if public_tools(model.env) is None:
+        return None
+    return next((name for name in PUBLISHED_FIELDS if name in model._fields), None)
+
+
+def public_fields(model, allowed):
+    """:return: the usual fields of ``model`` a public channel reads: none that points to a model off its list"""
+    from .records import usual_fields  # noqa: PLC0415 - records imports this module
+    names = [name for name in usual_fields(model) if not _public_field_problem(model, name, allowed)]
+    return names or ["display_name"]
+
+
+def public_refusal(env, name, arguments):
+    """Nudge Agents, a public channel: check a call before it runs, before any query.
+
+    :return: (why it is refused, or None; the arguments to run it with: the fields a public channel reads are
+        named when the call names none). Anybody but a service user: (None, ``arguments``)"""
+    public = public_tools(env)
+    if public is None:
+        return None, arguments
+    allowed = _public_models(env)
+    listed = ", ".join(sorted(allowed)) or "nothing"
+    tool = TOOLS.get(name)
+    if name not in public or name not in PUBLIC_TOOLS or isinstance(tool, Action):
+        return f"There is no tool named {name!r}.", arguments
+    models = list(_named(arguments, MODEL_ARGUMENTS))
+    if name in PUBLIC_RECORD_TOOLS:
+        if not allowed:
+            return PUBLIC_NO_RECORDS, arguments
+        if not models:
+            return f"Name the model, one of: {listed}.", arguments
+    for model_name in models:
+        if not isinstance(model_name, str) or model_name not in allowed or model_name not in env:
+            return PUBLIC_REFUSED.format(models=listed), arguments
+    if not models:
+        return None, arguments
+    model = env[models[0]]
+    for value in _named(arguments, FIELD_ARGUMENTS):
+        for field_name in _field_names(value):
+            problem = _public_field_problem(model, field_name, allowed)
+            if problem:
+                return problem, arguments
+    published = public_published_field(model)
+    if published and name == "find_record":
+        # A search by name reads no condition: the records of a published kind are looked for with search_records,
+        # which reads only the published ones
+        return f"Look for {model._name} with search_records on this channel.", arguments
+    if published and name == "read_record":
+        record_id = arguments.get("id")
+        if not isinstance(record_id, int) or not model.search_count(
+                [("id", "=", record_id), (published, "=", True)], limit=1):
+            return "This channel reads only what is published on the website.", arguments
+    if name in ("search_records", "read_record") and not arguments.get("fields"):
+        arguments = dict(arguments, fields=public_fields(model, allowed))
+    return None, arguments
+
+
+def public_checked(env, name, result):
+    """Nudge Agents, a public channel: what a tool of the records answered names only models of the channel's list;
+    anything else is replaced by a refusal (a second guard after :func:`public_refusal`). :return: ``result``"""
+    if public_tools(env) is None or result.is_error or name not in PUBLIC_RECORD_TOOLS:
+        return result
+    allowed = _public_models(env)
+    named = set(RECORD_MODEL.findall(result.content if isinstance(result.content, str) else str(result.content)))
+    if result.records:
+        named.add(result.records[0])
+    if named - allowed:
+        return ToolResult(PUBLIC_REFUSED.format(models=", ".join(sorted(allowed)) or "nothing"), is_error=True)
+    return result
 
 
 # Nudge Agents, a rehearsal (Try it): what the model reads of a change it asked for. Nothing is prepared for
@@ -480,7 +651,13 @@ def call(env, name, arguments, screen=None, mode=MODE_TALK):
     except schema.SchemaError as error:
         result = ToolResult(f"Invalid arguments. {error}", is_error=True)
     else:
-        result = guarded(env, name, lambda: tool.run(env, arguments, screen))
+        # Nudge Agents, a public channel: a model or a field off the channel's list is refused here, before any
+        # query; what the tool answers is checked again
+        refused, arguments = public_refusal(env, name, arguments)
+        if refused:
+            result = ToolResult(refused, is_error=True)
+        else:
+            result = public_checked(env, name, guarded(env, name, lambda: tool.run(env, arguments, screen)))
     if result.is_error and isinstance(tool, Action):
         result.content = f"{result.content} {NOTHING_MADE}"
     return result

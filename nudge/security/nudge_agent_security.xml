@@ -53,5 +53,33 @@
             <field name="domain_force">[('agent_id.company_ids', 'in', company_ids)]</field>
             <field name="groups" eval="[Command.link(ref('group_nudge_manager'))]"/>
         </record>
+
+        <!-- Nudge Agents 60.1: the service user of a public channel reads its own conversations only (the
+             conversations of all the visitors of its channels; nudge.conversation._answer_public keeps each
+             visitor to theirs by agent_visitor_key) -->
+        <record id="nudge_conversation_rule_agent_service" model="ir.rule">
+            <field name="name">Nudge Conversation: own, for the agent service user</field>
+            <field name="model_id" ref="model_nudge_conversation"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[Command.link(ref('group_agent_service'))]"/>
+        </record>
+        <record id="nudge_message_rule_agent_service" model="ir.rule">
+            <field name="name">Nudge Message: own, for the agent service user</field>
+            <field name="model_id" ref="model_nudge_message"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[Command.link(ref('group_agent_service'))]"/>
+        </record>
+        <!-- The skills the service user reads as a Nudge user does (nudge_skill_rule_user): published, of its
+             companies; never a draft -->
+        <record id="nudge_skill_rule_agent_service" model="ir.rule">
+            <field name="name">Nudge Skill: published, of my companies, for the agent service user</field>
+            <field name="model_id" ref="model_nudge_skill"/>
+            <field name="domain_force">[('state', '=', 'published'),
+                '|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[Command.link(ref('group_agent_service'))]"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
     </data>
 </odoo>

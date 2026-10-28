@@ -452,6 +452,10 @@ def build_domain(model, conditions, match="all"):
         domain = expression.OR([[part] for part in parts])
     else:
         domain = expression.AND([[part] for part in parts])
+    published = base.public_published_field(model)
+    if published:
+        # Nudge Agents, a public channel: only what is published on the website, whatever the conditions say
+        domain = Domain.AND([domain, Domain(published, "=", True)])
     try:
         # Fields kept for some groups are refused here, as in a search
         expression.expression(domain, model)

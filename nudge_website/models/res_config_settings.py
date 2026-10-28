@@ -1,4 +1,4 @@
-from odoo import _, fields, models
+from odoo import _, api, fields, models
 
 from .nudge_web_message import RATE_MESSAGES_PARAM, RATE_MINUTES_PARAM
 
@@ -23,6 +23,17 @@ class ResConfigSettings(models.TransientModel):
         help="How many messages one address may send in the time below.")
     nudge_rate_minutes = fields.Integer(
         string="Minutes", config_parameter=RATE_MINUTES_PARAM, default=10)
+
+    nudge_website_agent_ids = fields.Many2many(
+        "nudge.agent", compute="_compute_nudge_website_agent_ids", string="Agents on the Website")
+
+    @api.depends("website_id")
+    def _compute_nudge_website_agent_ids(self):
+        # sudo: the list of the agents bound to the website is configuration, read-only here
+        bindings = self.env["nudge.agent.binding"].sudo().search([("channel", "=", "website"), ("published", "=", True)])
+        agents = bindings.agent_id
+        for setting in self:
+            setting.nudge_website_agent_ids = agents
 
     def action_nudge_read_pages(self):
         """Read the published pages of the websites with the assistant now."""

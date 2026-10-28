@@ -3,8 +3,13 @@
 A published binding of channel "discuss" puts the agent's partner into the channels it lists and lets
 people write to it in a direct chat. A message that mentions it in such a channel, or any message in a
 direct chat with it, is answered by ``agent._answer`` as the person who wrote it (never sudo for data),
-in the background like @Nudge, and posted as the agent's partner. One conversation is kept per
-(channel, author). A person the agent is not open to is told so once a day per channel.
+in the background like @Nudge, and posted as the agent's partner. A direct chat is one conversation per
+author; in a channel every mention is a question of its own, and only a reply to one of the agent's answers
+goes on in that answer's conversation. A person the agent is not open to is told so once a day per channel.
+
+Discuss offers a direct chat only with people who have a user, and an agent's partner has none: "Start a
+conversation" (Odoo 19) is given the live agents the person may use, and a direct chat with an agent is
+opened only by them.
 
 What is posted in a channel or a group is read by its members, and by guests, who have no user: it is answered
 from knowledge only, whoever the members are (no record is read, only the remembered answers meant for
@@ -18,6 +23,7 @@ from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, UserError, ValidationError
 
 from odoo.addons.nudge.models.nudge_agent import check_access
+from odoo.addons.nudge.models.nudge_conversation import MAX_MESSAGES
 from odoo.addons.nudge.tools.records import cut
 
 from .nudge_mention import CHANNEL, MAX_QUESTION_CHARS, text_of, to_html
@@ -160,9 +166,62 @@ class NudgeAgent(models.Model):
         self.ensure_one()
         return self._discuss_live() and bool(self._discuss_bindings())
 
+    @api.model
+    def _discuss_chat_partners(self):
+        """:return: the partners of the live agents the current user may write to in a direct chat, as that user
+            reads them: none for anybody else"""
+        Partner = self.env["res.partner"]
+        user = self.env.user
+        Mention = self.env["nudge.mention"].sudo()
+        # sudo: the agents' own configuration; each is then checked for this user
+        agents = self.sudo().search([("state", "=", "published"), ("partner_id", "!=", False)]).filtered(
+            lambda agent: agent._discuss_can_chat() and Mention._agent_usable(agent, user))
+        if not agents:
+            return Partner
+        # Never a partner that has a user: Discuss offers those itself
+        return Partner.search([("id", "in", agents.partner_id.ids), ("user_ids", "=", False)])
+
 
 class DiscussChannel(models.Model):
     _inherit = "discuss.channel"
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        # Every way a direct chat is made (Odoo 17 and 18 make it in channel_get) names its members
+        if not self.env.su:
+            for vals in vals_list:
+                if vals.get("channel_type") == CHAT:
+                    self._nudge_agent_chat_check([
+                        command[2].get("partner_id") for command in vals.get("channel_member_ids") or ()
+                        if isinstance(command, (list, tuple)) and len(command) == 3 and isinstance(command[2], dict)])
+        return super().create(vals_list)
+
+    @api.model
+    def _get_or_create_chat(self, partners_to, pin=True):
+        """Odoo 19: a direct chat, found or made, from "Start a conversation" or an avatar. Never called on 17
+        and 18, whose chats are made in ``create`` above."""
+        self._nudge_agent_chat_check(partners_to)
+        return super()._get_or_create_chat(partners_to, pin=pin)
+
+    @api.model
+    def _nudge_agent_chat_check(self, partner_ids):
+        """A direct chat with an agent is for the people it is open to, while it answers in Discuss.
+        :raise UserError: when one of ``partner_ids`` is the partner of an agent the current user may not write to"""
+        if self.env.su:
+            return
+        ids = []
+        for partner_id in partner_ids or ():
+            try:
+                ids.append(int(partner_id))
+            except (TypeError, ValueError):
+                continue
+        if not ids:
+            return
+        user = self.env.user
+        Mention = self.env["nudge.mention"].sudo()
+        agents = self.env["nudge.agent"].sudo().with_context(active_test=False).search([("partner_id", "in", ids)])
+        if any(not (agent._discuss_can_chat() and Mention._agent_usable(agent, user)) for agent in agents):
+            raise UserError(_("This agent is not open to you."))
 
     def _nudge_agents_for(self, message):
         """:return: the live agents this message of the channel is addressed to: those mentioned in a
@@ -187,6 +246,40 @@ class DiscussChannel(models.Model):
         agents = self.env["nudge.agent"].sudo().search([("partner_id", "in", list(partner_ids))])
         bound = agents.filtered(lambda agent: self.sudo() in agent._discuss_channels()).partner_id
         return list(allowed) + [pid for pid in bound.ids if pid not in allowed]
+
+
+class ResPartner(models.Model):
+    _inherit = "res.partner"
+
+    @api.model
+    def _search_for_channel_invite(self, store, search_term, channel_id=None, limit=30):
+        """Odoo 19, "Start a conversation" (/discuss/search) and the people a channel or a group can be given:
+        only partners with a user. Without a channel, the live agents the person may write to are added to what
+        the screen is given, with their ids (``nudge_agent_chat_partner_ids``, read by
+        static/src/agent_chat.js), never to the people listed for a new group: an agent answers in a direct chat
+        and in the channels of its bindings only. Never called on Odoo 17 and 18."""
+        result = super()._search_for_channel_invite(store, search_term, channel_id=channel_id, limit=limit)
+        if not channel_id and hasattr(store, "add_global_values"):
+            partners = self.env["nudge.agent"]._discuss_chat_partners()
+            found = partners.filtered_domain([("name", "ilike", search_term)]) if search_term else partners
+            if found:
+                store.add(found[:limit])
+            store.add_global_values(nudge_agent_chat_partner_ids=partners.ids)
+        return result
+
+
+class ResUsers(models.Model):
+    _inherit = "res.users"
+
+    @api.model
+    def _init_store_data(self, store):
+        """The agents the person may write to, known when the web client starts: their messages and their place
+        among the members of a channel open a direct chat with them (static/src/agent_chat.js). Odoo 18 calls
+        this too, with a store that has no ``add_global_values``: nothing is added there"""
+        super()._init_store_data(store)
+        if hasattr(store, "add_global_values"):
+            store.add_global_values(
+                nudge_agent_chat_partner_ids=self.env["nudge.agent"]._discuss_chat_partners().ids)
 
 
 class MailThread(models.AbstractModel):
@@ -257,14 +350,31 @@ class NudgeMention(models.Model):
             ("user_id", "=", user.id), ("state", "in", ("queued", "answering", "refused")),
             ("create_date", ">=", since)])
 
-    def _agent_conversation(self, env):
-        """:return: the conversation kept for this (channel, author) with this agent, as the author reads
-        it; None for the first question"""
-        previous = self.search([
+    def _agent_conversation(self, env, thread):
+        """:return: the conversation this question goes on in, as the author reads it; None to start one.
+
+        A direct chat of the author and the agent is one conversation. In a channel or a group, others write in
+        between and each mention is a question of its own: kept in one conversation, the questions before were
+        sent with it, and a question the agent could not do there was answered with the answer to the one before
+        (trial 60.0). Only a reply to one of the agent's answers to the author (or to their question) goes on in
+        that answer's conversation. A conversation as long as the engine takes is not gone on in: its next
+        question would be refused, with nowhere to start a new one."""
+        domain = [
             ("agent_id", "=", self.agent_id.id), ("model", "=", self.model), ("res_id", "=", self.res_id),
             ("user_id", "=", self.user_id.id), ("conversation_id", "!=", False), ("id", "!=", self.id),
-        ], order="id desc", limit=1).conversation_id
-        return env["nudge.conversation"].search([("id", "=", previous.id)]) or None if previous else None
+        ]
+        if not self._agent_private(thread):
+            parent = self.message_id.parent_id
+            if not parent:
+                return None
+            domain += ["|", ("answer_id", "=", parent.id), ("message_id", "=", parent.id)]
+        previous = self.search(domain, order="id desc", limit=1).conversation_id
+        if not previous:
+            return None
+        conversation = env["nudge.conversation"].search([("id", "=", previous.id)])
+        if not conversation or conversation.message_count >= MAX_MESSAGES:
+            return None
+        return conversation
 
     def _agent_question(self):
         """:return: what the author wrote, without the mention of the agent"""
@@ -299,14 +409,16 @@ class NudgeMention(models.Model):
         try:
             with self.env.cr.savepoint():
                 thread = self.env[CHANNEL].sudo().browse(self.res_id).exists()
-                conversation = self._agent_conversation(env)
+                conversation = self._agent_conversation(env, thread)
                 question = self._agent_question() or _("Hello")
                 # As the author: the audience, companies and tools are theirs, nothing here is sudo.
                 # Anywhere but a direct chat of the author and the agent: knowledge only, no record read
                 agent = env["nudge.agent"].browse(self.agent_id.id)
                 if not self._agent_private(thread):
                     agent = agent.with_context(**{KNOWLEDGE_ONLY: True})
-                reply = agent._answer(question, conversation=conversation)
+                # The published discuss binding of the agent for this channel (a direct chat: its first one):
+                # its office hours apply and its person to hand over to is offered
+                reply = agent._answer(question, conversation=conversation, binding=self._agent_binding(thread))
                 self.write({"conversation_id": reply.get("conversation_id") or False})
                 if not reply.get("text"):
                     raise UserError(_("The agent had no answer."))
@@ -318,6 +430,12 @@ class NudgeMention(models.Model):
             _logger.warning("Nudge: agent mention %s failed: %s", self.id, error, exc_info=True)
             self.write({"state": "failed", "error": type(error).__name__})
             self._agent_post(_("This agent could not answer."))
+
+    def _agent_binding(self, thread):
+        """:return: the published discuss binding of the agent the question came through (in sudo, the agent's
+        configuration): the one that lists ``thread``, else, for a direct chat, the first of its published ones"""
+        bindings = self.agent_id._discuss_bindings()
+        return bindings.filtered(lambda binding: thread in binding.channel_ids)[:1] or bindings[:1]
 
     def _agent_post(self, text):
         """Post where the question was, as the agent's partner: the only sudo, to speak like the bot does.

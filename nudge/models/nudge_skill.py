@@ -261,7 +261,9 @@ class NudgeSkill(models.Model):
         groups = self.env["nudge.note"]._user_groups(self.env.user)
         chosen = {}
         for skill in found:
-            if not skill._in_mode(mode) or (skill.group_ids and not skill.group_ids & groups):
+            # sudo: which groups may use the skill, its configuration (a portal user, the service user of an agent's
+            # public channel, reads no group)
+            if not skill._in_mode(mode) or (skill.sudo().group_ids and not skill.sudo().group_ids & groups):
                 continue
             current = chosen.get(skill.key)
             if current is None or (skill.company_id and not current.company_id) or (
