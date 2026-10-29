@@ -1,6 +1,7 @@
 """Release 3 filming defects: the sample footer, logo and phone after a real build; the legal pages in Arabic;
 the second press of "Show the records on the site"."""
 import base64
+from unittest import SkipTest
 
 from odoo.tests import TransactionCase, new_test_user, tagged
 
@@ -119,3 +120,54 @@ class TestR3Fixes(NudgeCase, TransactionCase):
         self.assertEqual(third["params"]["type"], "success")
         self.assertEqual(site.action_show_records()["params"]["type"], "info")
         self.assertTrue(first)
+
+    def bare_site(self, **values):
+        website = self.env["website"].create({"name": "R3 page site", "company_id": self.env.company.id})
+        return self.env["nudge.builder.site"].with_user(self.designer).create({
+            "website_id": website.id, "kind": "company", "direction": "a",
+            "lang_ids": [(6, 0, (self.english | self.arabic).ids)], **values})
+
+    def test_the_sample_brand_of_a_template_becomes_the_company_name(self):
+        site = self.bare_site(template_key="fashion_shop")
+        template = library.load("fashion_shop")
+        about = next(page for page in template["pages"] if "About Zahra Fashion" in str((page.get("seo") or {}).get("title")))
+        spec = site._with_company_brand(about)
+        self.assertNotIn("Zahra Fashion", str(spec))
+        self.assertNotIn("أزياء زهرة", str(spec))
+        self.assertIn("About Raghad Contracting", str(spec["seo"]["title"]["en"]))
+        self.assertIn("عن Raghad Contracting", spec["seo"]["title"]["ar"])
+        self.assertIn("Zahra Fashion", str(about), "the template itself is not changed")
+
+    def test_a_page_keeps_its_arabic_block_by_block_when_one_block_differs(self):
+        site = self.bare_site()
+        items = lambda n, word: [{"title": f"{word} {i}", "text": f"Text {word} {i}"} for i in range(n)]
+        spec = {"key": "t2", "legal": True, "url": "/r3-blocks", "name": {"en": "Blocks", "ar": "كتل"}, "blocks": [
+            {"snippet": "s_title", "copy": {"en": {"title": "Hello there"}, "ar": {"title": "مرحبا بكم"}}},
+            {"snippet": "s_features", "copy": {
+                "en": {"title": "Beliefs", "items": items(3, "Item")}, "ar": {"title": "قيمنا", "items": items(2, "بند")}}}]}
+        record = site._build_page(spec)
+        arabic = record.view_id.with_context(lang="ar_001").arch_db
+        self.assertIn("مرحبا بكم", arabic, "the block whose terms match is translated")
+        self.assertNotIn("Hello there", arabic)
+        self.assertIn("The block 2 (s_features) of the page Blocks stays untranslated in ar_001", site.log or "")
+
+    def test_the_home_product_lists_of_a_shop_show_the_chosen_products(self):
+        if "product.template" not in self.env or "product.public.category" not in self.env:
+            raise SkipTest("Website Sale is not installed")
+        shop_designer = new_test_user(
+            self.env, login="builder_r3_shop", name="Raghad Shop",
+            groups="website.group_website_designer,nudge.group_nudge_user,product.group_product_manager")
+        site = self.bare_site(template_key="fashion_shop", shop=True).with_user(shop_designer)
+        if not site.shop_mode:
+            raise SkipTest("Website Sale is not installed")
+        products = self.env["product.template"].create([
+            {"name": "Raghad Silk Scarf", "list_price": 45}, {"name": "Ebrahim Linen Abaya", "list_price": 120}])
+        site.shop_product_ids = products.ids
+        spec = {"key": "t3", "legal": True, "url": "/r3-shop", "name": {"en": "Shop home", "ar": "الرئيسية"}, "blocks": [
+            {"snippet": "s_product_list", "copy": {"en": {"title": "New arrivals"}, "ar": {"title": "وصل حديثاً"}}}]}
+        record = site._build_page(spec)
+        arch = record.view_id.with_context(lang="en_US").arch_db
+        self.assertIn("Raghad Silk Scarf", arch)
+        self.assertIn("Ebrahim Linen Abaya", arch)
+        self.assertIn("New arrivals", arch)
+        self.assertIn("وصل حديثاً", record.view_id.with_context(lang="ar_001").arch_db)

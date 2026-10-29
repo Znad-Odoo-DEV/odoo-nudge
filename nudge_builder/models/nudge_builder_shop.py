@@ -30,12 +30,26 @@ class NudgeBuilderSite(models.Model):
         self.ensure_one()
         return shop.plan_shop(self.env, self.website_id, self._shop_template())
 
+    def _chosen_products_first(self):
+        """Give the products the person chose the lowest website_sequence, so /shop lists them first.
+        Their order is kept; the other products keep theirs. Only the chosen products are written."""
+        self.ensure_one()
+        chosen = self.shop_products()
+        if not chosen or "website_sequence" not in chosen._fields:
+            return chosen.browse()
+        others = self.env["product.template"].sudo().search([("id", "not in", chosen.ids)], order="website_sequence", limit=1)
+        start = (others.website_sequence if others else 0) - len(chosen) - 1
+        for index, product in enumerate(chosen):
+            product.sudo().website_sequence = start + index
+        return chosen
+
     def _build_shop(self, plan=None):
         """Arrange the shop of the site: categories, descriptions, filters, layout, banners, menu.
         Called by the plan after the pages; ``plan`` is the one the person confirmed.
 
         :return: the log lines"""
         self.ensure_one()
+        self._chosen_products_first()
         result = shop.build_shop(self.env, self.website_id, self._shop_template(), plan=plan)
         lines = ["%s: %s" % (line["label"], line["value"]) for line in result["made"]] + result["notes"]
         lines += ["%s %s" % ("[x]" if item["ok"] else "[ ]", item["label"]) for item in result["readiness"]]

@@ -4246,3 +4246,9 @@ msgstr "تُرك شعار الترويسة كما صنعه أودو."
 #: model:nudge.skill,name:nudge_builder.skill_site_restaurant_menu
 msgid "Restaurant menu"
 msgstr "قائمة المطعم"
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "The block %(block)s (%(snippet)s) of the page %(page)s stays untranslated in %(lang)s: its text does not match the source."
+msgstr "يبقى القسم %(block)s (%(snippet)s) من الصفحة %(page)s بلا ترجمة إلى %(lang)s: نصّه لا يطابق المصدر."

@@ -1155,9 +1155,29 @@ def show_action(env, website, item):
 from odoo.addons.nudge.tools import base  # noqa: E402
 
 
-def _website(env, arguments):
+def website_for(env, arguments, screen=None):
+    """The website a tool works on: the one given, else the one of the builder site on the screen, else the first.
+    The id the person sees on a builder site's screen is the site's own, not the website's, so an id that is no
+    website but is a builder site (or a screen showing one) gives that site's website.
+
+    :return: a website record, empty when there is none"""
     Website = env["website"]
-    website = Website.browse(arguments["website_id"]).exists() if arguments.get("website_id") else Website.search([], limit=1)
+    given = arguments.get("website_id")
+    if "nudge.builder.site" in env:
+        Site = env["nudge.builder.site"]
+        shown = screen.get("record") if screen and isinstance(screen.get("record"), dict) else {}
+        site = Site.browse()
+        if screen and screen.get("model") == "nudge.builder.site" and shown.get("id"):
+            site = Site.browse(shown["id"]).exists()
+        elif given and not Website.browse(given).exists():
+            site = Site.browse(given).exists()
+        if site:
+            return site.website_id
+    return Website.browse(given).exists() if given else Website.search([], limit=1)
+
+
+def _website(env, arguments, screen=None):
+    website = website_for(env, arguments, screen)
     if not website:
         raise AccessError(env._("There is no website."))
     return website
@@ -1181,7 +1201,7 @@ class CheckSite(base.Tool):
 
     def run(self, env, arguments, screen):
         try:
-            website = _website(env, arguments)
+            website = _website(env, arguments, screen)
             report = env["nudge.builder.check"].run_check(website, external=bool(arguments.get("external_links")))
         except AccessError as error:
             return base.ToolResult(str(error), is_error=True)
@@ -1209,7 +1229,7 @@ class FixSite(base.Action):
         "required": ["fix"], "additionalProperties": False}
 
     def run(self, env, arguments, screen):
-        website = _website(env, arguments)
+        website = _website(env, arguments, screen)
         fix = arguments["fix"]
         changes = plan_fix(env, website, fix)
         if not changes:
