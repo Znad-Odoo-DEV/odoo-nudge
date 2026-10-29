@@ -2,6 +2,17 @@
 
 Current version: nudge 19.0.1.59.8, nudge_mcp 19.0.1.1.2, nudge_connect 19.0.1.0.4, nudge_messaging 19.0.1.0.6, nudge_ai 19.0.1.0.11, nudge_studio 19.0.1.0.12, nudge_documents 19.0.1.0.8, nudge_spreadsheet 19.0.1.0.11, nudge_builder 19.0.1.0.9, nudge_mail 19.0.1.0.15, nudge_discuss 19.0.1.0.9, nudge_website 19.0.1.0.5.
 
+## 19.0.1.60.3
+
+- Choosing the chip of a held change ("Press “Confirm”: Sales Order (S00109)") gives its card: the chip carries the change itself, no longer words the rules read again ("I found nothing called Press S00109").
+- "ما حالة آخر أمر؟" no longer gets a garbled Did you mean ("أمر" was corrected to the "آخر" beside it).
+- Talk and Agent requests are back well under their limits (13.4k of 16.3k in English and in Arabic): the skill router reads the skills in English whatever the language of the person, and a skill must stand above the median of all skills to be brought.
+- The Odoo documentation is found from Arabic questions: the Arabic of Odoo's own terms (the ar.po of the installed modules) brings their English words to the search by keyword and by meaning ("شروط الدفع" finds Using payment terms).
+- Check the feed now: the list that opens is titled with the signature check and the countries covered.
+- "فلترلي العروض تبع Raghad Demo Co بس" filters the list on that customer instead of looking for a quotation of that name.
+- "/سجل S00004" and other numbers find quotations, orders and invoices first: numbered documents are searched before the other kinds.
+- Approval flows: deleting the server action of a Nudge approval button archives its button; building a flow again on the same model replaces the old buttons instead of adding a second set ("Old buttons replaced" on the card).
+
 ## 19.0.1.60.2
 
 - Questions are not orders, even when the AI asks for a change: "should I confirm this order?", "هل أؤكد هذا الأمر؟" get an explanation and the change only as a chip; "can you confirm it?", "ممكن تأكده" still get the card (`tools/noai_commands/question.py`).

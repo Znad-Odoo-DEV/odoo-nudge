@@ -424,6 +424,57 @@ class TestApprovalFlow(NudgeCase, TransactionCase):
         self.assertNotIn("prepare_undo", again.content)
         self.assertNotIn("purchase.order", again.content)
 
+    # ------------------------------------------------------------ orphan buttons
+    def _buttons(self, active=True):
+        return self.env["ir.ui.view"].sudo().with_context(active_test=False).search([
+            ("model", "=", "purchase.order"), ("name", "like", "Button "), ("active", "=", active),
+            ("name", "in", ["Button Request approval on Purchase Order", "Button Approve on Purchase Order",
+                            "Button Refuse on Purchase Order"])])
+
+    def test_deleting_the_actions_of_a_flow_switches_its_buttons_off(self):
+        self.make()
+        self.assertEqual(len(self._buttons()), 3)
+        actions = self.env["ir.actions.server"].sudo().search([
+            ("model_name", "=", "purchase.order"), ("name", "=like", "Nudge approval:%")])
+        self.env["base.automation"].sudo().search([("name", "=like", "Nudge approval:%")]).unlink()
+        actions.exists().unlink()
+        self.assertFalse(self._buttons())
+        self.assertEqual(len(self._buttons(False)), 3)
+        self.env["purchase.order"].with_user(self.admin).get_view(False, "form")
+
+    def test_a_button_of_another_action_is_left_alone(self):
+        self.make()
+        other = self.env["ir.actions.server"].sudo().create({
+            "name": "Something else", "model_id": self.env["ir.model"]._get_id("purchase.order"),
+            "state": "code", "code": "pass"})
+        self.env["ir.actions.server"].sudo().search([
+            ("model_name", "=", "purchase.order"), ("name", "=like", "Nudge approval: approve%")]).unlink()
+        other.unlink()
+        self.assertEqual(len(self._buttons()), 2)
+
+    def test_a_new_flow_after_an_orphan_has_one_set_of_buttons(self):
+        self.make()
+        # the rules and the actions are deleted by hand, the buttons were left (as before the fix)
+        self.env["base.automation"].sudo().search([("name", "=like", "Nudge approval:%")]).unlink()
+        self.env["ir.actions.server"].sudo().search([
+            ("model_name", "=", "purchase.order"), ("name", "=like", "Nudge approval:%")]).unlink()
+        # Odoo refuses to switch such a view on again: written to the table, as an old database has it
+        self.env.cr.execute("UPDATE ir_ui_view SET active = true WHERE id IN %s", [tuple(self._buttons(False).ids)])
+        self.env["ir.ui.view"].invalidate_model(["active"])
+        self.assertEqual(len(self._buttons()), 3)
+        asked, done = self.make()
+        self.assertEqual(len(self._buttons()), 3)
+        self.assertIn("Old buttons replaced", str(done.card_lines))
+        arch = self.env["purchase.order"].with_user(self.admin).get_view(False, "form")["arch"]
+        self.assertEqual(arch.count('string="Approve"'), 1)
+        # and the flow works
+        self.assertTrue(self.action("request", self.order(900000), self.buyer) is not None)
+
+    def test_a_second_build_over_a_live_flow_is_still_refused_and_keeps_its_buttons(self):
+        self.make()
+        self.assertTrue(self.ask({"sentence": SENTENCES[1][0]}).is_error)
+        self.assertEqual(len(self._buttons()), 3)
+
     # ------------------------------------------------------------ the way in: a sentence, no AI
     def test_a_sentence_in_developer_mode_gets_a_card_without_any_ai_and_a_yes_builds_it(self):
         from odoo.addons.nudge.llm import loop

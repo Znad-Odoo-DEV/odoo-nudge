@@ -135,11 +135,13 @@ class NudgeEmbedding(models.Model):
     # Searching
     # ------------------------------------------------------------------
     @api.model
-    def _semantic(self, res_model, query, ids=None, subquery=None, params=()):
+    def _semantic(self, res_model, query, ids=None, subquery=None, params=(), also=()):
         """The meaning of ``query`` against the vectors of ``res_model``.
 
         :param ids: the records to compare with
         :param subquery: or SQL selecting their ids, with its ``params``
+        :param also: the same question said otherwise (the English words of an Arabic one): a
+            record is as near as it is to the nearest of them
         :return: ``{id: score}`` from 0 to 1, only the ones above the floor of the model;
             None when the feature is off. Who may see what is the caller's to decide
             in ``ids`` or ``subquery``: this reads the vectors only.
@@ -150,8 +152,9 @@ class NudgeEmbedding(models.Model):
         query = " ".join((query or "").split())[:500]
         if not query or (ids is not None and not ids):
             return {}
+        texts = [query] + [text for text in (" ".join((other or "").split())[:500] for other in also) if text]
         try:
-            vector = engine.embed([query], kind="query")[0]
+            vectors = engine.embed(texts, kind="query")
         except Exception:  # noqa: BLE001 - a search must never fail because of the model
             _logger.exception("Nudge: the local search model failed on a question")
             return None
@@ -159,7 +162,7 @@ class NudgeEmbedding(models.Model):
             cached = self._cached(res_model)
             if cached is not None:
                 wanted = self._wanted_ids(ids, subquery, params)
-                return self._scores_from(engine, vector, cached, wanted)
+                return self._nearest([self._scores_from(engine, vector, cached, wanted) for vector in vectors])
         where, values = "", [self._model_name(), res_model]
         if ids is not None:
             where, values = "AND e.res_id IN %s", values + [tuple(ids)]
@@ -170,12 +173,26 @@ class NudgeEmbedding(models.Model):
             WHERE e.model_name = %s AND e.res_model = %s AND e.chunk = 0 {where}
             LIMIT {MAX_SCANNED}
         """, values)
-        scores = {}
-        for res_id, cosine in embedder.cosines(vector, self.env.cr.fetchall()):
-            score = embedder.scale(cosine, engine.floor, engine.ceiling)
-            if score > 0:
-                scores[res_id] = score
-        return scores
+        rows = self.env.cr.fetchall()
+        found = []
+        for vector in vectors:
+            scores = {}
+            for res_id, cosine in embedder.cosines(vector, rows):
+                score = embedder.scale(cosine, engine.floor, engine.ceiling)
+                if score > 0:
+                    scores[res_id] = score
+            found.append(scores)
+        return self._nearest(found)
+
+    @api.model
+    def _nearest(self, found):
+        """:return: ``{id: score}``, each record with the best of its scores in ``found``"""
+        best = {}
+        for scores in found:
+            for key, score in scores.items():
+                if score > best.get(key, 0.0):
+                    best[key] = score
+        return best
 
     @api.model
     def _wanted_ids(self, ids, subquery, params):
@@ -242,20 +259,21 @@ class NudgeEmbedding(models.Model):
         return held[res_model] or None
 
     @api.model
-    def _blend(self, res_model, query, keyword, scan=None, ids=None):
+    def _blend(self, res_model, query, keyword, scan=None, ids=None, also=()):
         """Re-rank the hits of a keyword search by meaning.
 
         :param keyword: ``{id: score from 0 to 1}`` of the keyword hits
         :param scan: ``(sql, params)`` selecting the ids that may be found by
             meaning alone, when the keywords found too little
+        :param also: the question said otherwise, as in :meth:`_semantic`
         :return: ``{id: score}`` blended, or None when the feature is off
         """
         pool = set(keyword) | set(ids or ())
-        meaning = self._semantic(res_model, query, ids=sorted(pool)) if pool else {}
+        meaning = self._semantic(res_model, query, ids=sorted(pool), also=also) if pool else {}
         if meaning is None:
             return None
         if scan:
-            wider = self._semantic(res_model, query, subquery=scan[0], params=scan[1]) or {}
+            wider = self._semantic(res_model, query, subquery=scan[0], params=scan[1], also=also) or {}
             wider.update(meaning)
             meaning = wider
         blended = {}

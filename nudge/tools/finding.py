@@ -6,6 +6,8 @@ this database are looked at, the most used first, by their names and
 references, as the person; each candidate comes with the buttons of its form
 they can press now, so that the next step is the button itself.
 """
+import re
+
 from odoo.exceptions import AccessError, UserError
 
 from odoo.fields import Domain
@@ -21,6 +23,18 @@ PER_MODEL = 5
 MAX_CANDIDATES = 8
 # Fields that hold what people call a record, besides its name
 REFERENCE_FIELDS = ("name", "ref", "code", "number", "reference", "sequence_number", "default_code", "barcode")
+# The documents people call by their number ("S00004", "INV/2026/0042", "WH/OUT/00005"): looked in first for a
+# number or a reference said without its kind. Ranked by use, they came after countries, accounts and taxes (on a
+# real database a quotation was the 43rd kind, past the 40 looked in) and "/find S00004" found nothing
+NUMBERED_MODELS = ("sale.order", "purchase.order", "account.move", "stock.picking", "mrp.production", "pos.order",
+                   "repair.order", "hr.expense.sheet")
+# A number or a reference: letters and digits in one word, as a sequence writes them
+REFERENCE = re.compile(r"^(?=[^\s]*\d)(?=[^\s]*[A-Za-z])[A-Za-z0-9][A-Za-z0-9/._-]*$")
+
+
+def is_reference(name):
+    """:return: whether ``name`` is written like the number of a document ("S00004", "INV/2026/0042")"""
+    return bool(REFERENCE.match((name or "").strip()))
 
 
 # Kinds of records that are plumbing, never what a person calls by name
@@ -63,11 +77,17 @@ def candidate_models(env, topic, name):
         used.sort(key=lambda piece: (-activity.activity(piece.data), piece.key))
         names = [piece.model_name for piece in used if retrieval.can_read(env, piece)]
     models = _readable_models(env, names[:MAX_MODELS * 3])
+    limit = MAX_MODELS
     if not (topic or "").strip():
-        # With no kind said, a person is the likeliest
-        contacts = _readable_models(env, ["res.partner"])
-        models = contacts + [model for model in models if model._name != "res.partner"]
-    return models[:MAX_MODELS]
+        # With no kind said, a person is the likeliest; a number, a numbered document first
+        first = _readable_models(env, ["res.partner"])
+        if is_reference(name):
+            numbered = _readable_models(env, [model_name for model_name in NUMBERED_MODELS if model_name in env])
+            first = numbered + first
+            limit += len(numbered)
+        taken = {model._name for model in first}
+        models = first + [model for model in models if model._name not in taken]
+    return models[:limit]
 
 
 def _reference_domain(model, text):
