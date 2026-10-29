@@ -663,7 +663,9 @@ class NudgeBuilderSite(models.Model):
         self._check_designer()
         header, footer_name = HEADERS.get(self.direction or "a", HEADERS["a"])
         facts = {lang.code: self._footer_facts(lang, template) for lang in self._langs()}
-        for key in (f"website.template_footer_{footer_name}", f"website.template_header_{header}"):
+        # the phone and e-mail of a header's contact strip live in a view of their own, called by every header
+        for key in (f"website.template_footer_{footer_name}", f"website.template_header_{header}",
+                    "website.header_text_element"):
             self._personalise_view(key, lambda arch, lang: footer.personalise(arch, facts[lang.code]))
         # the copyright line has its own view
         self._personalise_view("website.footer_copyright_company_name", lambda arch, lang: footer.copyright_line(

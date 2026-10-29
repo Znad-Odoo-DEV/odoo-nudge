@@ -4,6 +4,7 @@
 
 - A database from before 1.1.0 gets the tools add_site_item, add_location and set_contact in the skill Building a website or shop (the skill is kept from updates; the update loads it again where nobody changed it). The seven sector skills have narrower trigger words: small talk brings none.
 - The header written with the company keeps the search box, sign in, language selector, social links and call to action: an `<ul>` whose items come from a t-call is no longer taken for an empty list. With website_sale installed the header and the footer were not written at all (its cart hangs on the search box). Tests: `/nudge_builder:TestFooterOfTheCompany`.
+- The contact strip of the header (the view `website.header_text_element`, called by every header) shows the company's phone and e-mail, no longer +1 555-555-5556 and info@yourcompany.example.com.
 - Odoo 17: the sections of records are built again (a parameter named `uid` was read by `_()` as the id of the user).
 
 ## 19.0.1.2.1
