@@ -244,13 +244,14 @@ class TestAskData(NudgeCase, TransactionCase):
         return tools.analytics.describe_filter(env, env["res.partner"], conditions, match)
 
     def test_the_filter_reads_as_words_in_english(self):
+        # the labels of the address types differ between versions ("Invoice" on 19, "Invoice Address" on 18)
+        types = dict(self.env["res.partner"]._fields["type"]._description_selection(self.env))
         said = self.describe([{"field": "type", "operator": "in", "value": "contact,invoice"}])
-        self.assertEqual(said, "Contact: Address Type is Contact or Invoice")
+        self.assertEqual(said, f"Contact: Address Type is {types['contact']} or {types['invoice']}")
         said = self.describe([
             {"field": "name", "operator": "contains", "value": "Nudge"},
             {"field": "type", "operator": "!=", "value": "delivery"}])
-        delivery = dict(self.env["res.partner"]._fields["type"]._description_selection(self.env))["delivery"]
-        self.assertEqual(said, "Contact: Name contains Nudge, Address Type is not " + delivery)
+        self.assertEqual(said, "Contact: Name contains Nudge, Address Type is not " + types["delivery"])
         said = self.describe([{"field": "email", "operator": "is set", "value": ""}], "any")
         self.assertEqual(said, "Contact: Email is set")
         self.assertEqual(self.describe([]), "Contact: all records")

@@ -159,8 +159,10 @@ def _social(root, facts):
 
 
 def _tidy(root):
-    """A list left with no item goes with its title, and a column left with nothing in it goes too"""
-    for ul in root.xpath(".//ul[not(.//li)]"):
+    """A list left with no item goes with its title, and a column left with nothing in it goes too. A list whose
+    items are drawn by a t-call (the search box, sign in and language of a header) stays: other modules hang their
+    own items on those nodes (website_sale's cart), and their views break without them."""
+    for ul in root.xpath(".//ul[not(.//li)][not(.//*[@*[starts-with(name(), 't-')]])]"):
         heading = ul.getprevious()
         _remove(ul)
         if heading is not None and heading.tag in ("h4", "h5", "h6"):
