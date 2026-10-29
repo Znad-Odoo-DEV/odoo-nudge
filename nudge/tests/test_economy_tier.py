@@ -169,6 +169,33 @@ class TestEconomyTier(NudgeCase, TransactionCase):
         self.assertEqual(asked, ["test-mini", "test-model"])
         self.assertEqual(events[-1]["type"], "error")
 
+    def test_a_failed_economy_call_says_so_on_its_ledger_line(self):
+        # R3-39: a model that no longer exists answers with an error and no tokens; the line says it failed
+        self.answer_with(
+            economy={"events": [base.error_event(base.ERROR_MODEL_NOT_FOUND, "no such model")]},
+            main={"reply": "From the main model."})
+        conversation, _events = self.question(self.user_a, LIGHT)
+        lines = {line.tier: line for line in self.ledger(conversation)}
+        self.assertEqual(lines["economy"].intent, "failed: %s" % base.ERROR_MODEL_NOT_FOUND)
+        self.assertEqual(lines["economy"].tokens, 0)
+        self.assertFalse(lines["main"].intent, "The answer that came is not marked")
+
+    def test_the_migration_moves_the_retired_gemini_model(self):
+        import glob, importlib.util, os
+        [path] = glob.glob(os.path.join(
+            os.path.dirname(__file__), "..", "migrations", "[0-9][0-9].0.1.60.2", "post-gemini-retired-model.py"))
+        spec = importlib.util.spec_from_file_location("post_gemini_retired", path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        self.provider.write({"economy_model_name": "gemini-2.5-flash-lite"})
+        self.local.write({"model_name": "gemini-2.5-flash-lite"})
+        self.env.flush_all()
+        module.migrate(self.env.cr, "19.0.1.60.1")
+        (self.provider | self.local).invalidate_recordset()
+        self.assertEqual(self.provider.economy_model_name, "gemini-3.1-flash-lite")
+        self.assertEqual(self.local.model_name, "gemini-3.1-flash-lite")
+        self.assertEqual(self.other.model_name, "other-small")
+
     def test_an_empty_answer_or_a_tool_error_is_escalated(self):
         empty = [base.stop_event(base.STOP_END, usage={"input_tokens": 9})]
         _made, asked = self.answer_with(economy={"script": [empty, empty]}, main={"reply": "Here."})

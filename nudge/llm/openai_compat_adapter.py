@@ -438,8 +438,10 @@ class OpenAICompatAdapter(base.BaseAdapter):
                 yield base.error_event(_chunk_error_code(error), detail)
                 return
             model = chunk.get("model") or model
-            if chunk.get("usage"):
-                usage = self._normalize_usage(chunk["usage"])
+            counted = self._normalize_usage(self._usage_of(chunk))
+            # A later chunk of zeros (Gemini repeats the field on every chunk) never wipes the count
+            if any(counted.values()) or not usage:
+                usage = counted
             for choice in chunk.get("choices") or []:
                 delta = choice.get("delta") or {}
                 text = delta.get("content")
@@ -467,6 +469,16 @@ class OpenAICompatAdapter(base.BaseAdapter):
         yield base.stop_event(reason, usage=usage, model=model)
 
     @staticmethod
+    def _usage_of(body):
+        """:return: the usage a chunk or a body carries: ``usage``, or, as the Gemini models answer it
+        (``usageMetadata`` and its camelCase words, also in the lite and economy models), that one"""
+        for key in ("usage", "usageMetadata", "usage_metadata"):
+            value = body.get(key)
+            if isinstance(value, dict) and value:
+                return value
+        return {}
+
+    @staticmethod
     def _normalize_usage(usage):
         """S8: the prompt of these servers is cached by its prefix, with nothing to ask (OpenAI,
         Gemini, Groq, DeepSeek, OpenRouter): the stable part of a request comes first (the system
@@ -475,6 +487,16 @@ class OpenAICompatAdapter(base.BaseAdapter):
         details = usage.get("prompt_tokens_details") or {}
         if not isinstance(details, dict):
             details = {}
+        # The words of Gemini's own usageMetadata, when they come in place of the OpenAI ones
+        usage = dict(usage)
+        for own, alias in (("prompt_tokens", "promptTokenCount"), ("prompt_tokens", "prompt_token_count"),
+                           ("completion_tokens", "candidatesTokenCount"),
+                           ("completion_tokens", "candidates_token_count"),
+                           ("total_tokens", "totalTokenCount"), ("total_tokens", "total_token_count"),
+                           ("cached_content_token_count", "cachedContentTokenCount"),
+                           ("thoughts_token_count", "thoughtsTokenCount")):
+            if not usage.get(own) and usage.get(alias):
+                usage[own] = usage[alias]
 
         def first(*values):
             return next((int(value) for value in values if isinstance(value, (int, float)) and value > 0), 0)
@@ -488,10 +510,21 @@ class OpenAICompatAdapter(base.BaseAdapter):
         # OpenRouter in front of a model that charges the writing (Claude); OpenAI does not
         written = first(details.get("cache_write_tokens"), usage.get("cache_creation_input_tokens"))
         prompt = int(usage.get("prompt_tokens") or 0)
+        output = int(usage.get("completion_tokens") or 0)
+        # Gemini counts its thinking apart from the answer and paid as output: the total holds it, and is
+        # prompt + answer on every other server, so it never adds to those
+        out_details = usage.get("completion_tokens_details")
+        reasoning = usage.get("thoughts_token_count") or (
+            out_details.get("reasoning_tokens") if isinstance(out_details, dict) else 0)
+        total = int(usage.get("total_tokens") or 0)
+        if isinstance(reasoning, (int, float)) and reasoning > 0 and total and prompt + output < total:
+            output = min(output + int(reasoning), total - prompt)
+        elif total > prompt + output:
+            output = total - prompt
         return {
             # Same convention as Anthropic: input_tokens is the part neither read from nor written to the cache
             "input_tokens": max(prompt - cached - written, 0),
-            "output_tokens": int(usage.get("completion_tokens") or 0),
+            "output_tokens": output,
             "cache_read_tokens": cached,
             "cache_write_tokens": written,
         }
@@ -598,7 +631,7 @@ class OpenAICompatAdapter(base.BaseAdapter):
             raise base.AdapterError(base.ERROR_BAD_REQUEST, "Unexpected response") from exc
         return {
             "text": text if isinstance(text, str) else "",
-            "usage": self._normalize_usage(body.get("usage") or {}),
+            "usage": self._normalize_usage(self._usage_of(body)),
             "model": body.get("model") or model,
         }
 

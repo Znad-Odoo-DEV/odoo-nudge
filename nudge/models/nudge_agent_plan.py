@@ -11,7 +11,7 @@ from odoo import Command, api, fields, models
 from odoo.exceptions import AccessError, UserError
 
 from .. import tools
-from ..tools import agent_plan
+from ..tools import agent_plan, noai_commands
 from ..tools.records import Refused
 from .nudge_conversation import (
     AGENT_MAX_ROUNDS,
@@ -48,6 +48,14 @@ REMOVED = "removed"
 # What the person may correct on the card: a value of its own, never a record it points at
 EDITABLE_TYPES = ("char", "text", "integer", "float", "monetary", "boolean", "date", "datetime", "selection")
 MAX_VALUE_CHARS = 4000
+# R3-50: a change the model asked for while the person asked a question ("should I confirm this order?", "هل أؤكد
+# هذا الأمر؟") is not prepared: what the model reads instead, and the most suggestions shown under the answer
+QUESTION_HELD = (
+    "Not prepared, and no card is shown: the person asked a question about this, not for it to be done. Answer "
+    "the question in their language: explain what it would do and what to check first. A suggestion to do it is "
+    "shown under your answer: tell them they can choose it, or say yes, to have it prepared for their yes. Call no "
+    "tool that changes data in this answer.")
+MAX_HELD_SUGGESTIONS = 3
 
 
 def _now():
@@ -252,6 +260,9 @@ class NudgeConversation(models.Model):
 
     def _chat_run_tools(self, calls):
         self.ensure_one()
+        held = self._chat_held_changes(calls)
+        if held:
+            return self._chat_hold(calls, held)
         mode = self._chat_mode()
         run = self.sudo().run_id
         planned = []
@@ -280,6 +291,71 @@ class NudgeConversation(models.Model):
             } for call in planned]
         by_id = {entry["id"]: entry for entry in results + entries}
         return [by_id[call["id"]] for call in calls if call["id"] in by_id], events, must_read, waiting
+
+    # ------------------------------------------------------------------
+    # R3-50: a question is answered, not made into a card
+    # ------------------------------------------------------------------
+    def _chat_held_changes(self, calls):
+        """:return: the ids of the calls that would change data while the message being answered asks a question
+        ("should I confirm this order?", "هل أؤكد هذا الأمر؟"), not for the change ("can you confirm this order?",
+        "ممكن تأكده"): whatever the model decided, the turn explains and offers. Not in the background, where nobody
+        is there to choose"""
+        changes = {call["id"] for call in calls if not call.get("invalid")
+                   and isinstance(tools.base.TOOLS.get(call["name"]), tools.base.Action)}
+        if not changes or self.sudo().run_id.is_background:
+            return set()
+        asked = self.env["nudge.message"].sudo().search([
+            ("conversation_id", "=", self.id), ("role", "=", "user")], order="id desc", limit=1)
+        return changes if noai_commands.question.asks_whether(asked.content) else set()
+
+    def _chat_hold(self, calls, held):
+        """Run the calls that do not change data; each of ``held`` is checked as its card would be, and offered as a
+        suggestion under the answer (sent as an order when chosen, which prepares the card), never a card: the
+        model reads that it explains.
+
+        :return: what :meth:`_chat_run_tools` returns"""
+        others = [call for call in calls if call["id"] not in held]
+        results, events, waiting = [], [], self.env["nudge.step"].sudo()
+        if others:
+            results, events, _read, waiting = super()._chat_run_tools(others)
+        env = self._plan_env()
+        snapshot = self._chat_screen_of_question()
+        mode = self._chat_mode()
+        offered = []
+        for call in calls:
+            if call["id"] not in held:
+                continue
+            result = tools.base.call(env, call["name"], call["input"], snapshot, mode)
+            entry = {"id": call["id"], "name": call["name"]}
+            if result.is_error:
+                # What stands in the way is part of the explanation
+                content = tools.base.as_data(call["name"], result.content, True)
+                results.append(dict(entry, content=content, is_error=True))
+                continue
+            results.append(dict(entry, content=QUESTION_HELD, is_error=False))
+            title = self._chat_held_title(result.pending or {})
+            if title and len(offered) < MAX_HELD_SUGGESTIONS and title not in {chip["words"][0] for chip in offered}:
+                offered.append({
+                    "name": f"held_{call['id']}", "words": [title], "at_once": True, "example": "",
+                    "hint": self.env._("Prepared on a card: nothing is done before your yes"),
+                    "kind": "suggested_change"})
+        if offered:
+            events = [*events, {"type": "found", "commands": offered}]
+        by_id = {entry["id"]: entry for entry in results}
+        return [by_id[call["id"]] for call in calls if call["id"] in by_id], events, True, waiting
+
+    @staticmethod
+    def _chat_held_title(pending):
+        """:return: the words of the suggestion of a held change: the title of its card, with the records it is
+        about, or else the name it would write ("Press “Confirm”: Sales Order (S00012)", "Create: Contact
+        (Raghad)"), sent as they are when it is chosen"""
+        title = tools.base.card_text(pending).split("\n")[0].strip()
+        if not pending.get("record_names"):
+            named = next((line.get("value") for line in (pending.get("preview") or {}).get("lines") or []
+                          if isinstance(line, dict) and line.get("field") == "name" and line.get("value")), None)
+            if named:
+                title = f"{title} ({str(named)[:tools.base.SHORT_LABEL]})"
+        return title
 
     def _plan_probe(self, env, entry, makers, snapshot, mode):
         """Check one step as its card would be, before anything is done.

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 05:43+0000\n"
-"PO-Revision-Date: 2026-10-29 05:43+0000\n"
+"POT-Creation-Date: 2026-10-29 09:27+0000\n"
+"PO-Revision-Date: 2026-10-29 09:27+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -5930,6 +5930,7 @@ msgstr ""
 msgid "Create Payment"
 msgstr ""
 
+
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/document_catalogue.py:0
@@ -10322,6 +10323,7 @@ msgstr ""
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_task__last_check
+#: model:ir.model.fields,field_description:nudge.field_res_config_settings__nudge_compliance_feed_status
 msgid "Last Check"
 msgstr ""
 
@@ -15839,6 +15841,12 @@ msgstr ""
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/models/nudge_agent_plan.py:0
+msgid "Prepared on a card: nothing is done before your yes"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "Prepared putting a value back"
 msgstr ""
@@ -18658,6 +18666,14 @@ msgstr ""
 #. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_plugin__signature_state__invalid
 msgid "Signature not valid"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_compliance_feed.py:0
+msgid ""
+"Signature verified: %(countries)s countries, %(changed)s packs would change "
+"(%(at)s)"
 msgstr ""
 
 #. module: nudge
@@ -24524,6 +24540,13 @@ msgstr ""
 msgid ""
 "What the economy tier saved: its tokens at the prices of the model of the "
 "provider, less what they cost. An estimate."
+msgstr ""
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_compliance_feed_status
+msgid ""
+"What the last read of the feed found: whether its signature was verified and"
+" how many countries it covers."
 msgstr ""
 
 #. module: nudge

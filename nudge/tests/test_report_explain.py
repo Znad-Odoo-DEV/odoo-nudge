@@ -132,7 +132,11 @@ class TestExplainReport(NudgeCase, TransactionCase):
         foreign.active = True
         pricelist = self.env["product.pricelist"].create({"name": "Nudge explain foreign", "currency_id": foreign.id})
         ref = "nudge-explain-currencies"
-        self.order(self.raghad_user, 0, 100.0, ref)
+        # With website_sale installed a new pricelist can become the default of every new order: the
+        # order that stays in the company's currency is given its own pricelist
+        home = self.env["product.pricelist"].create({
+            "name": "Nudge explain home", "currency_id": company.currency_id.id})
+        self.order(self.raghad_user, 0, 100.0, ref).pricelist_id = home
         other = self.order(self.raghad_user, 0, 100.0, ref)
         other.pricelist_id = pricelist
         self.assertEqual(other.currency_id, foreign)

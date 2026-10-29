@@ -270,6 +270,24 @@ class TestSignedFeed(TransactionCase):
         self.assertFalse(Parameter.get_param("nudge.compliance_feed_url"))
         self.assertFalse(Parameter.get_param("nudge.compliance_feed_key"))
 
+    def test_the_check_says_the_signature_was_verified_and_how_many_countries_the_feed_covers(self):
+        self.assertEqual(self.Update._status_text(), "")
+        extra = {"id": "xx", "countries": ["EG", "SA"], "checks": [{
+            "key": "one", "check": "note", "severity": "info", "title": "T", "explanation": "E"}]}
+        with self.feed(self.signed(packs=[self.new_ae, extra])):
+            action = self.Update.with_user(self.admin).action_check_now()
+        self.assertIn("Signature verified", action["name"])
+        self.assertIn("3 countries", action["name"])  # AE from the first pack, EG and SA from the second: read, not fixed
+        self.assertIn("2 packs would change", action["name"])
+        settings = self.env["res.config.settings"].new({})
+        self.assertEqual(settings.nudge_compliance_feed_status, self.Update._status_text())
+
+    def test_a_refused_feed_leaves_no_verified_status(self):
+        with self.feed(self.signed(key=Ed25519PrivateKey.generate())):
+            with self.assertRaises(UserError):
+                self.Update._fetch()
+        self.assertEqual(self.Update._status_text(), "")
+
     def test_a_bad_signature_changes_nothing(self):
         with self.feed(self.signed(key=Ed25519PrivateKey.generate())):
             with self.assertRaises(UserError):

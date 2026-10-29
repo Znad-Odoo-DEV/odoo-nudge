@@ -17,10 +17,11 @@ KINDS = (
     ("purchase.order", "purchase_order", (
         "purchase order", "purchase orders", "purchase request", "purchase requests", "purchase", "po",
         "طلب شراء", "طلبات شراء", "امر شراء", "اوامر شراء", "طلبيه شراء", "طلبيات شراء", "طلب مشتريات",
-        "طلبات مشتريات", "امر مشتريات", "طلب الشراء", "طلبات الشراء", "امر الشراء")),
+        "طلبات مشتريات", "امر مشتريات", "اوامر مشتريات", "طلب الشراء", "طلبات الشراء", "امر الشراء")),
     ("sale.order", "sales_order", (
         "sales order", "sales orders", "sale order", "sale orders", "quotation", "quotations", "quote", "quotes",
         "امر بيع", "اوامر بيع", "طلب بيع", "طلبات بيع", "طلبيه بيع", "طلب مبيعات", "طلبات مبيعات", "امر مبيعات",
+        "اوامر مبيعات", "طلبيات مبيعات", "طلبيات بيع",
         "عرض سعر", "عروض اسعار", "عرض اسعار", "طلبيه مبيعات", "امر البيع", "طلب البيع")),
     ("account.move", "vendor_bill", (
         "vendor bill", "vendor bills", "supplier bill", "supplier bills", "bill", "bills",
@@ -77,6 +78,8 @@ APPROVAL_WORDS = (
 THEN_WORDS = ("then", "after that", "and then", "followed by", "above that", "بعدين", "بعدها", "بعد ذلك", "ثم",
               "وبعدين", "وبعدها", "وبعد ذلك", "وبعد")
 NUMBER = re.compile(r"(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?)\s*([^\s\d,.;:!?()]*)")
+# The Arabic article, written onto a word or left out: the phrases above match either way
+ARTICLE = "ال"
 
 
 def _fold(text):
@@ -85,9 +88,24 @@ def _fold(text):
     return arabic.fold(text)
 
 
+def _pattern(phrase):
+    """:return: the regular expression of the whole word or phrase: a particle may be written onto its first word,
+    and the Arabic article may be written or left out on each word ("أوامر الشراء" is "اوامر شراء", "مدير
+    المشتريات" is "مدير مشتريات")"""
+    words = []
+    for word in arabic.fold(phrase).split():
+        if word.isascii():
+            words.append(re.escape(word))
+            continue
+        if word.startswith(ARTICLE) and len(word) > len(ARTICLE) + 1:
+            word = word[len(ARTICLE):]
+        words.append(f"(?:{ARTICLE})?" + re.escape(word))
+    return r"(?<![\w])(?:و|ب|ل|ال|وال|بال|لل)?" + r"\s+".join(words) + r"(?![\w])"
+
+
 def _phrase(text, phrase):
     """:return: the position of the whole word or phrase in the text, or -1"""
-    match = re.search(r"(?<![\w])(?:و|ب|ل|ال|وال|بال|لل)?" + re.escape(arabic.fold(phrase)) + r"(?![\w])", text)
+    match = re.search(_pattern(phrase), text)
     return match.start() if match else -1
 
 
@@ -129,7 +147,7 @@ def _roles(text):
     found = []
     for key, xmlid, phrases in ROLES:
         for phrase in phrases:
-            for match in re.finditer(r"(?<![\w])(?:و|ب|ل|ال|وال|بال|لل)?" + re.escape(arabic.fold(phrase)) + r"(?![\w])", text):
+            for match in re.finditer(_pattern(phrase), text):
                 found.append((match.start(), match.end(), key, xmlid, len(phrase)))
     found.sort(key=lambda item: (item[0], -item[4]))
     out = []

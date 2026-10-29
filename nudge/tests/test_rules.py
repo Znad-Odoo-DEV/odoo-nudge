@@ -154,11 +154,26 @@ class TestRecurringRequests(NudgeCase, TransactionCase):
         self.env["ir.config_parameter"].sudo().set_param("nudge.recurring_min_count", "4")
         self.assertEqual(len(self.observe()), 1, "The threshold is the setting of the recurring questions")
 
-    def test_a_request_of_another_tool_is_another_group(self):
+    def test_a_request_the_ai_wrote_another_way_is_still_the_same_request(self):
+        # the live trial: Gemini counted four times and listed once; the sentence is the same five times
         self.asked(times=4)
         self.turn(self.user_a, ENGLISH % "Omar", "search_records", {
             "model": "res.partner", "conditions": [{"field": "name", "operator": "contains", "value": "Omar"}]})
-        self.assertFalse(self.observe(), "four of one tool and one of another are not five of either")
+        rule = self.observe()
+        self.assertEqual((len(rule), rule.tool_name, rule.times), (1, "aggregate_records", 5),
+                         "the tool used most often is the one proposed")
+        self.assertEqual(self.observe(), rule)
+
+    def test_the_variants_of_one_sentence_make_one_proposal_in_the_shape_used_most(self):
+        users = (self.user_a, self.user_b, self.raghad)
+        for index, name in enumerate(NAMES):
+            operator = "=" if index == 1 else "contains"  # one night the AI wrote "equals" for a name
+            arguments = {"model": "res.partner", "conditions": [{"field": "name", "operator": operator, "value": name}]}
+            self.turn(users[index % 3], ENGLISH % name + "?", "search_records", arguments)
+        rule = self.observe()
+        self.assertEqual((len(rule), rule.times), (1, 5))
+        self.assertEqual(rule.template["conditions"][0]["operator"], "contains")
+        self.assertEqual(rule.patterns, ["How many contacts are named {name} please"])
 
     def test_a_turn_with_two_tools_or_already_answered_by_rules_is_not_counted(self):
         for index, name in enumerate(NAMES):

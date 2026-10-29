@@ -171,3 +171,29 @@ class TestR3Fixes(NudgeCase, TransactionCase):
         self.assertIn("Ebrahim Linen Abaya", arch)
         self.assertIn("New arrivals", arch)
         self.assertIn("وصل حديثاً", record.view_id.with_context(lang="ar_001").arch_db)
+
+    def test_the_home_product_list_prices_in_the_currency_of_the_website_pricelist(self):
+        if "product.pricelist" not in self.env or "pricelist_ids" not in self.env["website"]._fields:
+            raise SkipTest("Website Sale is not installed")
+        shop_designer = new_test_user(
+            self.env, login="builder_r3_price", name="Raghad Price",
+            groups="website.group_website_designer,nudge.group_nudge_user,product.group_product_manager")
+        site = self.bare_site(template_key="fashion_shop", shop=True).with_user(shop_designer)
+        if not site.shop_mode:
+            raise SkipTest("Website Sale is not installed")
+        aed = self.env.ref("base.AED")
+        aed.active = True
+        usd = self.env.ref("base.USD")
+        usd.active = True
+        pricelist = self.env["product.pricelist"].create({
+            "name": "Raghad AED", "currency_id": aed.id, "sequence": -100, "website_id": site.website_id.id,
+            "item_ids": [(0, 0, {"compute_price": "formula", "base": "list_price", "price_surcharge": 5})]})
+        self.assertEqual(site.website_id.pricelist_ids[:1], pricelist)
+        product = self.env["product.template"].create(
+            {"name": "Raghad Price Scarf", "list_price": 45, "currency_id": usd.id})
+        price, currency = site._shop_price(product)
+        self.assertEqual(currency, aed, "the currency is the one the website shows")
+        self.assertGreater(price, 0)
+        item = site._shop_item(product, site._langs()[:1])
+        self.assertNotIn("$", item["price_text"])
+        self.assertIn(aed.symbol, item["price_text"])

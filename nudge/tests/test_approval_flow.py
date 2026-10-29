@@ -58,8 +58,35 @@ class TestApprovalSentence(TransactionCase):
 
     def test_what_is_not_an_approval_rule_is_left_alone(self):
         for sentence in ("Create a purchase order for Raghad", "كم عدد طلبات الشراء؟", "hello", "",
-                         "Any purchase order above 50k"):
+                         "Any purchase order above 50k", "كم عدد أوامر الشراء؟", "أوامر الشراء فوق 50,000"):
             self.assertIsNone(approval_sentence.parse(sentence), sentence)
+
+    def test_the_article_on_any_word_of_an_arabic_phrase(self):
+        # R3-23: "أوامر الشراء ... مدير المشتريات" (the shot list) was not read: only "اوامر شراء" was known, so the
+        # AI answered in place of the switch to Developer mode
+        for sentence, model, levels in (
+            ("أوامر الشراء فوق 50,000 تحتاج موافقة مدير المشتريات",
+             "purchase.order", [(50000, "purchase.group_purchase_manager")]),
+            ("أوامر المبيعات فوق 50,000 تحتاج موافقة مدير المبيعات",
+             "sale.order", [(50000, "sales_team.group_sale_manager")]),
+            ("أوامر البيع فوق 50 ألف تحتاج موافقة مدير المبيعات",
+             "sale.order", [(50000, "sales_team.group_sale_manager")]),
+            ("أوامر الشراء فوق ٥٠٬٠٠٠ تحتاج موافقة مدير مشتريات",
+             "purchase.order", [(50000, "purchase.group_purchase_manager")]),
+            ("طلبات الشراء التي تزيد عن 50000 تتطلب موافقة مدير المشتريات",
+             "purchase.order", [(50000, "purchase.group_purchase_manager")]),
+            ("فواتير الموردين فوق 10,000 تحتاج اعتماد المدير المالي",
+             "account.move", [(10000, "account.group_account_manager")]),
+            ("عروض الأسعار فوق 20 ألف لازم يوافق عليها مدير المبيعات",
+             "sale.order", [(20000, "sales_team.group_sale_manager")]),
+        ):
+            with self.subTest(sentence=sentence):
+                parsed = approval_sentence.parse(sentence)
+                self.assertTrue(parsed, sentence)
+                self.assertEqual(parsed["model"], model, sentence)
+                self.assertEqual([(level["amount"], level["group"]) for level in parsed["levels"]], levels, sentence)
+        self.assertEqual(approval_sentence.parse("فواتير الموردين فوق 10,000 تحتاج اعتماد المدير المالي")["kind"],
+                         "vendor_bill")
 
 
 @tagged("post_install", "-at_install")
@@ -508,3 +535,23 @@ class TestApprovalInAgentMode(NudgeCase, TransactionCase):
         list(loop.run(conversation._chat_prepare("hello", mode="agent"),
                       conversation._chat_record))
         self.assertTrue(adapter.calls)
+
+    def test_the_arabic_sentence_gets_the_same_switch(self):
+        # R3-23: the Arabic sentence of the shot list was answered by the AI (Gemini) or met with questions
+        # (Claude), with no switch to Developer mode
+        from odoo.addons.nudge.llm import loop
+        self.env["ir.config_parameter"].sudo().set_param(DEVELOPER_PARAM, "yes")
+        self.env["ir.config_parameter"].sudo().set_param("nudge.noai_first", "1")
+        admin = new_test_user(self.env, login="nudge_r323_admin",
+                              groups="nudge.group_nudge_agent,base.group_system,base.group_partner_manager")
+        for sentence in ("أوامر الشراء فوق 50,000 تحتاج موافقة مدير المشتريات",
+                         "أوامر المبيعات فوق 50,000 تحتاج موافقة مدير المبيعات"):
+            with self.subTest(sentence=sentence):
+                adapter = self.use_adapter()
+                conversation = self.env["nudge.conversation"].with_user(admin)._chat_open()
+                events = list(loop.run(conversation._chat_prepare(sentence, mode="agent"), conversation._chat_record))
+                self.assertFalse(adapter.calls, "No provider is called")
+                chips = [command for event in events if event["type"] == "found"
+                         for command in event.get("commands") or []]
+                self.assertEqual([(chip["kind"], chip["mode"], chip["text"]) for chip in chips],
+                                 [("switch_mode", "dev", sentence)])

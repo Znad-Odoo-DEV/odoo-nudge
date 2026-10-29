@@ -100,6 +100,21 @@ class ResConfigSettings(models.TransientModel):
         """:return: the client action that opens Nudge and starts the first-setup assistant"""
         return {"type": "ir.actions.client", "tag": "nudge_setup_start"}
 
+    def _nudge_open_in_app(self, action_xmlid):
+        """:return: the action opened inside the Nudge app. Its own menu is an advanced one, hidden by
+        default, so the web client would keep the app it was in (Discuss) in the title"""
+        return {
+            "type": "ir.actions.client", "tag": "reload",
+            "params": {
+                "menu_id": self.env.ref("nudge.nudge_menu_root").id,
+                "action_id": self.env.ref(action_xmlid).id}}
+
+    def action_nudge_open_latency(self):
+        return self._nudge_open_in_app("nudge.nudge_latency_action")
+
+    def action_nudge_open_usage(self):
+        return self._nudge_open_in_app("nudge.nudge_usage_action")
+
     def action_nudge_reload_docs(self):
         return self.env["nudge.doc.page"].action_reload()
 
@@ -340,6 +355,15 @@ class ResConfigSettings(models.TransientModel):
         string="Compliance Feed Public Key", config_parameter="nudge.compliance_feed_key",
         help="The Ed25519 public key of the publisher (PEM, or the 32 bytes in base64). A feed signed by "
              "another key is refused.")
+
+    nudge_compliance_feed_status = fields.Char(
+        string="Last Check", compute="_compute_nudge_compliance_feed_status",
+        help="What the last read of the feed found: whether its signature was verified and how many countries it covers.")
+
+    def _compute_nudge_compliance_feed_status(self):
+        text = self.env["nudge.compliance.update"]._status_text()
+        for settings in self:
+            settings.nudge_compliance_feed_status = text
 
     def action_nudge_compliance_feed_check(self):
         """Read the feed now (a system administrator, with the address and key as saved)

@@ -28273,3 +28273,20 @@ msgstr "معبأ"
 #: code:addons/nudge/tools/analytics.py:0
 msgid "is not set"
 msgstr "فارغ"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_compliance_feed.py:0
+msgid "Signature verified: %(countries)s countries, %(changed)s packs would change (%(at)s)"
+msgstr "تم التحقق من التوقيع: %(countries)s دولة، %(changed)s حزمة ستتغير (%(at)s)"
+
+#. module: nudge
+#: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_compliance_feed_status
+msgid "What the last read of the feed found: whether its signature was verified and how many countries it covers."
+msgstr "نتيجة آخر قراءة للتغذية: هل تم التحقق من توقيعها وكم دولة تغطي."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent_plan.py:0
+msgid "Prepared on a card: nothing is done before your yes"
+msgstr "تُجهَّز على بطاقة: لا يُنفَّذ شيء قبل موافقتك"

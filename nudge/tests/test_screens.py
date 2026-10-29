@@ -46,6 +46,29 @@ class TestRequestSize(NudgeCase, TransactionCase):
         after = {name: self.env[name].sudo().search_count([]) for name in before}
         self.assertEqual(after, before, "Nothing is kept of the conversation built to measure")
 
+    def test_the_arabic_talk_request_is_within_the_limit_too(self):
+        """R3-38: the sample question in Arabic costs about what the English one does, never over the limit: a
+        question about sales orders in Arabic brought the stock skills, as the generic words of Arabic were few."""
+        self.use_adapter()
+        sizes = {}
+        for lang, question in (("en_US", "Show me my open sales orders."), ("ar_001", "أرني أوامر البيع المفتوحة الخاصة بي.")):
+            self.env["res.lang"]._activate_lang(lang)
+            self.boss.lang = lang
+            wizard = self.env["nudge.request.size"].with_user(self.boss).create({"question": question})
+            wizard.action_measure()
+            line = {line.mode: line for line in wizard.line_ids}["talk"]
+            sizes[lang] = line.total
+            self.assertEqual(line.state, "ok", f"{lang}: {line.total} tokens, limit {line.limit} ({line.system_tokens}"
+                             f" instructions, {line.tools_tokens} tools, {line.turns_tokens} conversation)")
+        self.assertEqual(set(sizes), {"en_US", "ar_001"})
+        self.assertLess(sizes["ar_001"], sizes["en_US"] * 1.1, sizes)
+
+    def test_the_screens_have_a_title_of_their_own(self):
+        for name in ("nudge.request.size", "nudge.search.try"):
+            record = self.env[name].with_user(self.boss).create({})
+            self.assertTrue(record.display_name.startswith(("Request Size", "Try Search")), record.display_name)
+            self.assertNotIn(name, record.display_name)
+
     def test_a_mode_closed_to_the_user_is_said_not_measured(self):
         Conversation = type(self.env["nudge.conversation"])
         with mock.patch.object(Conversation, "_can_use_agent", lambda self: False):

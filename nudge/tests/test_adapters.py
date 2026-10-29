@@ -88,6 +88,37 @@ class TestOpenAICompatAdapter(BaseCase):
     def run_stream(self, **kwargs):
         return list(self.adapter.stream_chat(SYSTEM, TURNS, **kwargs))
 
+    def test_gemini_usage_metadata_is_counted(self):
+        # R3-39: the economy (lite) models of Gemini put their count in usageMetadata, in their own words, with the
+        # thinking apart from the answer, and repeat the field as zeros on the chunks after
+        response = FakeResponse(lines=sse(
+            delta("Hel"),
+            {"usageMetadata": {"promptTokenCount": 120, "candidatesTokenCount": 5, "thoughtsTokenCount": 30,
+                               "totalTokenCount": 155, "cachedContentTokenCount": 20}},
+            delta(finish="stop"),
+            {"choices": [], "usage": {"prompt_tokens": 0, "completion_tokens": 0}},
+        ))
+        self.respond(response)
+        stop = self.run_stream()[-1]
+        self.assertEqual(stop["usage"], {
+            "input_tokens": 100, "output_tokens": 35, "cache_read_tokens": 20, "cache_write_tokens": 0})
+
+    def test_gemini_compat_usage_with_thinking_apart(self):
+        # the OpenAI words, but completion_tokens leaves the thinking out: it is told by the total
+        response = FakeResponse(lines=sse(
+            delta("Hi"), delta(finish="stop"),
+            {"choices": [], "usage": {"prompt_tokens": 50, "completion_tokens": 4, "total_tokens": 80}},
+        ))
+        self.respond(response)
+        usage = self.run_stream()[-1]["usage"]
+        self.assertEqual((usage["input_tokens"], usage["output_tokens"]), (50, 30))
+
+    def test_usage_that_already_counts_the_thinking_is_not_added_twice(self):
+        usage = OpenAICompatAdapter._normalize_usage({
+            "prompt_tokens": 50, "completion_tokens": 30, "total_tokens": 80,
+            "completion_tokens_details": {"reasoning_tokens": 26}})
+        self.assertEqual(usage["output_tokens"], 30)
+
     def test_stream(self):
         response = FakeResponse(lines=sse(
             delta(""),

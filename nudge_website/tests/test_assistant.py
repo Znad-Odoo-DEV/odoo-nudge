@@ -68,7 +68,11 @@ class TestAssistant(WebsiteCase, TransactionCase):
         self.assertFalse(self.env["nudge.source"]._for_person().filtered("website_page_id"))
         page.write({"website_published": False})
         self.env["nudge.source"]._sync_website_pages()
-        self.assertFalse(self.ask("warranty of five years")["answered"])
+        # With the shop installed a product called "Warranty" may answer the same words: what must be gone
+        # is the page itself, its link and its text
+        gone = self.ask("warranty of five years")
+        self.assertNotIn("/nudge-raghad-warranty", str(gone))
+        self.assertNotIn("five years", str(gone))
         self.assertTrue(self.env["nudge.source"].with_context(active_test=False).search(
             [("website_page_id", "=", page.id)]), "Put away, never deleted")
 

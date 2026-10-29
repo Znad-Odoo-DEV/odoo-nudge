@@ -1125,7 +1125,7 @@ class NudgeMemory(models.Model):
                 "conversation_id": conversation.id, "role": "user", "content": text, "mode": mode})
         answer = Message.create({
             "conversation_id": conversation.id, "role": "assistant", "content": content,
-            "state": "complete", "is_remembered": True, "memory_id": memory.id,
+            "state": "complete", "is_remembered": True, "memory_id": memory.id, "mode": mode,
             "screen_events": events or False})
         self._count_use(memory, conversation=conversation, message=answer)
         return {
@@ -1163,7 +1163,7 @@ class NudgeMemory(models.Model):
         Message = self.env["nudge.message"].sudo()
         question = Message.create({"conversation_id": conversation.id, "role": "user", "content": text, "mode": mode})
         answer = Message.create({
-            "conversation_id": conversation.id, "role": "assistant", "content": content, "state": "complete",
+            "conversation_id": conversation.id, "role": "assistant", "content": content, "state": "complete", "mode": mode,
             "is_remembered": True, "screen_events": [{"type": "memory_choices", "items": items}]})
         return {
             "conversation_id": conversation.id,

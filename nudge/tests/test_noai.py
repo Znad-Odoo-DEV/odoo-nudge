@@ -484,6 +484,28 @@ class TestNoaiRun(NudgeCase, TransactionCase):
                 self.assertFalse(job.get("answered"), "Not answered by the rules: %s" % job)
                 conversation.sudo().stream_started_at = False
 
+    def test_a_question_the_rules_read_as_a_press_goes_to_the_ai(self):
+        # R3-50: "تأكيد الطلب؟" (confirm the order?) was a press by the rules, with a card and no AI: the AI explains
+        if not self.has_sales:
+            self.skipTest("Sales is not installed")
+        self.provider.active = True
+        self.use_adapter(reply="From the AI")
+        order = self.env["sale.order"].create({"partner_id": self.raghad.id, "user_id": self.worker.id})
+        snapshot = {"v": 1, "model": "sale.order", "view_type": "form", "record": {"id": order.id},
+                    "buttons": [{"name": "action_confirm", "label": "Confirm", "kind": "object"}]}
+        for text in ("تأكيد الطلب؟", "الطلب جاهز للتأكيد؟", "confirm this order, should I?",
+                     "Confirm the order now or wait?"):
+            with self.subTest(text=text):
+                self.assertEqual(noai_commands.parse(text, {"model": "sale.order", "record_id": order.id}).intent,
+                                 "press", "The rules read it as a press")
+                conversation = self.env["nudge.conversation"].with_user(self.worker)._chat_open(None)
+                job = conversation._chat_prepare(text, snapshot=snapshot, mode="agent")
+                self.assertFalse(job.get("answered"), "Not answered by the rules: %s" % job)
+                conversation.sudo().stream_started_at = False
+        # Asked for, it is still the card of the rules
+        _conversation, events = self.order(self.worker, "confirm", snapshot=snapshot)
+        self.assertEqual(len(self.cards(events)), 1, events)
+
     def test_an_order_for_a_contact_not_found_goes_to_the_ai(self):
         # Found on dev_0 2026-10-28: a Studio approval rule asked for became an order for the contact
         # "confirming above" ("I found no contact called"), no AI call
