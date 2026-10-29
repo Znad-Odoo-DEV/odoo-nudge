@@ -48,7 +48,6 @@ MONTHS = (
     ("january", "يناير"), ("february", "فبراير"), ("march", "مارس"), ("april", "ابريل"), ("may", "مايو"),
     ("june", "يونيو"), ("july", "يوليو"), ("august", "اغسطس"), ("september", "سبتمبر"), ("october", "اكتوبر"),
     ("november", "نوفمبر"), ("december", "ديسمبر"))
-FOLDED = str.maketrans("٠١٢٣٤٥٦٧٨٩أإآ", "0123456789ااا")
 
 
 def _digest(*parts):
@@ -336,8 +335,8 @@ class NudgeAnswerCache(models.Model):
     def _personal(self, answer, user):
         """:return: whether ``answer`` repeats what the model was told of the asker alone, their name or
         today's date: another person would be served someone else's name, or a day gone by"""
-        folded = answer.casefold().translate(FOLDED)
-        for part in (user.name or "").casefold().translate(FOLDED).split():
+        folded = memory_match.fold(answer)
+        for part in memory_match.fold(user.name or "").split():
             if len(part) >= 3 and re.search(rf"(?<!\w){re.escape(part)}(?!\w)", folded):
                 return True
         today = fields.Date.context_today(self.with_user(user))

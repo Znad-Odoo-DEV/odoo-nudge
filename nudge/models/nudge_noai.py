@@ -409,8 +409,17 @@ class NudgeNoai(models.AbstractModel):
             return False
         with self._company_words():
             parsed = noai_commands.parse(str(text or "")[:400], {})
+        has_ai = bool(self.env["nudge.provider"].sudo()._get_default())
         return (not (parsed.intent and parsed.confidence >= noai_commands.THRESHOLD)
-                and any(candidate.get("corrections") for candidate in parsed.candidates or []))
+                and bool(self._slips_of(parsed.candidates, has_ai)))
+
+    @staticmethod
+    def _slips_of(candidates, has_ai):
+        """:return: the candidates that correct a slip. With an AI configured only a sentence the rules own is
+        stopped for it: every word is the lexicon's (or a slip of it). A question with other words in it
+        (“كيف أقفل السنة المالية؟”) is the AI's, even if one of its words looks like a slip of a command."""
+        return [candidate for candidate in candidates or [] if candidate.get("corrections")
+                and not (has_ai and candidate.get("free"))]
 
     def _missing_slot(self, candidate, screen):
         """:return: the question that asks for what a sentence lacks, or "" when it has all it needs"""
@@ -450,9 +459,11 @@ class NudgeNoai(models.AbstractModel):
         candidates = list(parsed.candidates or [])
         if not candidates:
             return None
-        if has_ai and not any(candidate.get("corrections") for candidate in candidates):
-            # Only a slip or Arabic in Latin letters is worth stopping the AI for
-            return None
+        if has_ai:
+            # Only a slip or Arabic in Latin letters, in a sentence the rules own, is worth stopping the AI for
+            candidates = self._slips_of(candidates, True)
+            if not candidates:
+                return None
         acts = self.env.user.has_group("nudge.group_nudge_agent") and mode != MODE_TALK
         candidates = [c for c in candidates if acts or c.get("intent") in READ_INTENTS][:2]
         if not candidates:

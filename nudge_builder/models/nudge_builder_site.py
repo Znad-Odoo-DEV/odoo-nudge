@@ -573,6 +573,9 @@ class NudgeBuilderSite(models.Model):
         company = self.company_id.with_context(lang=lang.code)
         partner = company.partner_id.with_context(lang=lang.code)
         place = " ".join(part for part in (partner.city, partner.state_id.code or "", partner.zip) if part)
+        street = [partner.street, partner.street2]
+        if any(footer.is_sample(value) for value in street):  # Odoo's sample address is not the company's
+            street, place = [], ""
         website = self.website_id.with_context(lang=lang.code)
         homes = {"/", website.homepage_url or "/"}
         links = []
@@ -591,11 +594,12 @@ class NudgeBuilderSite(models.Model):
             about = description.get(short) or description.get("en") or ""
         in_lang = self.with_context(lang=lang.code)
         return {
-            "name": company.name or "", "address_lines": [partner.street, partner.street2, place, partner.country_id.name],
-            "phone": company.phone or "", "email": company.email or "", "about": about, "links": links,
+            "name": company.name or "", "address_lines": [*street, place, partner.country_id.name if street or place else ""],
+            "phone": "" if footer.is_sample(company.phone) else company.phone or "",
+            "email": "" if footer.is_sample(company.email) else company.email or "", "about": about, "links": links,
             "social": social, "whatsapp_url": content_sections.whatsapp_url(
                 self._site_value("whatsapp"), in_lang._site_value("whatsapp_text")),
-            "whatsapp_label": in_lang.env._("WhatsApp"), "logo_url": f"/web/image/website/{self.website_id.id}/logo" if self.website_id.logo else "",
+            "whatsapp_label": in_lang.env._("WhatsApp"), "logo_url": f"/web/image/website/{self.website_id.id}/logo" if self._has_own_logo() else "",
         }
 
     def _personalise_view(self, key, make):
@@ -619,6 +623,36 @@ class NudgeBuilderSite(models.Model):
         specific = View.search([("key", "=", key), ("website_id", "=", website_id)], limit=1)
         compat.map_terms(specific.with_context(lang="en_US"), arch_by_lang[source], {
             code: arch for code, arch in arch_by_lang.items() if code != source})
+        return True
+
+    def _has_own_logo(self):
+        """:return: whether the website shows a logo that is not Odoo's sample one (the "Your Logo" picture)"""
+        self.ensure_one()
+        logo = self.website_id.logo
+        return bool(logo) and base64.b64decode(logo) != base64.b64decode(self.website_id._default_logo())
+
+    def _set_brand(self):
+        """The header shows the company's logo, or its name when it has none: never Odoo's "Your Logo".
+        :return: whether anything was changed"""
+        self.ensure_one()
+        self._check_designer()
+        website, company = self.website_id, self.company_id
+        if self._has_own_logo():
+            return False
+        if company.logo and not company.uses_default_logo:
+            website.logo = company.logo
+            return True
+        View = self.env["ir.ui.view"].with_context(website_id=website.id, active_test=False)
+        brand = self.env.ref("website.option_header_brand_name", raise_if_not_found=False)
+        logo_option = self.env.ref("website.option_header_brand_logo", raise_if_not_found=False)
+        if not brand or not logo_option:
+            return False
+        for view, want in ((logo_option, False), (brand, True)):
+            specific = View.search([("key", "=", view.key), ("website_id", "=", website.id)], limit=1)
+            if (specific or view).active != want:
+                View.browse(view.id).write({"active": want})
+        self._personalise_view("website.option_header_brand_name", lambda arch, lang: arch.replace(
+            "My Website", footer.escape(self._footer_facts(lang)["name"] or website.name)))
         return True
 
     def _set_footer(self, template=None):
@@ -929,7 +963,20 @@ class NudgeBuilderSite(models.Model):
         if arch_by_lang[source] == originals[source] and all(
                 terms(arch_by_lang[code]) == terms(originals[code]) for code in codes if code != source):
             return False
-        compat.write_arch(view, arch_by_lang, source)
+        # The terms of a language are stored once per source term, so what is read back can differ from what was
+        # drawn (two places with one English word and two Arabic ones). The only exact test is to write and read
+        # again: when every language reads as it did before, nothing changed and the write is taken back.
+        savepoint = self.env.cr.savepoint()
+        with savepoint:
+            compat.write_arch(view, arch_by_lang, source)
+            self.env.flush_all()
+            view.invalidate_recordset(["arch_db"])
+            stored = {code: compat.to_string_tree(compat.wrap_body(view.with_context(lang=code).arch_db)[0])
+                      for code in codes}
+            if stored == originals:
+                savepoint.rollback()
+                self.env.invalidate_all()
+                return False
         return True
 
     @staticmethod
@@ -1029,10 +1076,13 @@ class NudgeBuilderSite(models.Model):
         columns = {lang.code: [] for lang in langs}
         placed = []
         record_blocks, record_placed = 0, 0
+        kinds_seen = {}
         for index, block in enumerate(spec.get("blocks") or []):
             if block.get("kind"):
                 record_blocks += self._is_record_kind(block["kind"])
-                sections = self._content_block(block, spec, index)
+                # the ids of a carousel or accordion are the ones "Show the records" draws again (r0, r1 ...)
+                seen = kinds_seen[block["kind"]] = kinds_seen.get(block["kind"], -1) + 1
+                sections = self._content_block(block, spec, index, uid=f"r{seen}")
                 if not sections:
                     continue  # no records of this kind: the block is not placed
                 record_placed += self._is_record_kind(block["kind"])
@@ -1299,6 +1349,12 @@ class NudgeBuilderSite(models.Model):
         """The footer is a nicety of the build, as the layout is: its failure is told in the log, the pages stay"""
         try:
             with self.env.cr.savepoint():
+                self._set_brand()  # first: the footer takes the logo the header shows
+        except Exception:  # noqa: BLE001
+            _logger.info("Nudge Builder: the header logo was not set", exc_info=True)
+            self._say(self.env._("The header logo was left as Odoo made it."))
+        try:
+            with self.env.cr.savepoint():
                 self._set_footer(template)
         except Exception:  # noqa: BLE001
             _logger.info("Nudge Builder: the footer was not personalised", exc_info=True)
@@ -1322,7 +1378,8 @@ class NudgeBuilderSite(models.Model):
                 self._add_menu(record, names.get(key, {}))
         for record in self.page_ids.filtered("is_legal"):
             if not record.menu_id:
-                self._add_menu(record, {"en": record.name})
+                self._add_menu(record, self._legal_spec(record.key)["name"] if record.key.startswith("legal_")
+                               else {"en": record.name})
                 record.menu_id.sequence = 900
 
     def _apply_template(self, template, kinds=None):

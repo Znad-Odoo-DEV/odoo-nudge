@@ -344,6 +344,52 @@ class TestAssistant(WebsiteCase, TransactionCase):
         company.nudge_public_budget = 0
         self.assertFalse(self.ask("shipping to Dubai")["used_ai"], "0 is never the AI")
 
+    def test_the_plain_assistant_stops_at_the_budget_shared_with_the_agents(self):
+        adapter = self.use_adapter()
+        company = self.website.company_id
+        company.nudge_public_budget = 10
+        today = fields.Date.context_today(self.env["res.users"])
+        # Spent by an agent of the website channel (not origin website) and by a rehearsal (not counted)
+        binding = self.env["nudge.agent.binding"].create({
+            "agent_id": self.env["nudge.agent"].create({"name": "Raghad Desk", "state": "published"}).id,
+            "channel": "website", "acts_as": "person"})
+        conversation = self.env["nudge.conversation"].sudo().create({
+            "user_id": self.public_user.id, "agent_binding_id": binding.id, "agent_id": binding.agent_id.id})
+        self.env["nudge.usage"].sudo().create({
+            "kind": "chat", "user_id": self.public_user.id, "company_id": company.id, "date": today,
+            "input_tokens": 50, "conversation_id": conversation.id, "rehearsal": True})
+        self.assertEqual(assistant.spent_today(self.env, company), 0)
+        self.env["nudge.usage"].sudo().create({
+            "kind": "chat", "user_id": self.public_user.id, "company_id": company.id, "date": today,
+            "input_tokens": 50, "conversation_id": conversation.id})
+        result = self.ask("shipping to Dubai")
+        self.assertEqual((adapter.calls, result["used_ai"]), ([], False))
+
+    def test_pages_of_other_apps_are_not_pointed_to(self):
+        Source = self.env["nudge.source"]
+        page = self.env["website.page"].create({
+            "url": "/nudge-raghad-thank-you", "name": "Thanks", "type": "qweb", "website_published": True,
+            "website_id": self.website.id,
+            "arch": "<t t-name='website.nudge_raghad_ty'><t t-call='website.layout'><div id='wrap'><p>Thank you "
+                    "for your message, we will answer within two days.</p></div></t></t>"})
+        good = self.env["website.page"].create({
+            "url": "/nudge-raghad-care", "name": "Care", "type": "qweb", "website_published": True,
+            "website_id": self.website.id,
+            "arch": "<t t-name='website.nudge_raghad_care'><t t-call='website.layout'><div id='wrap'><p>Oil the "
+                    "oak every spring to keep the wood supple.</p></div></t></t>"})
+        self.assertFalse(Source._page_is_content(page))
+        self.assertTrue(Source._page_is_content(good))
+        # The contact page: only when the visitor asks how to reach the company, in English or Arabic
+        contact = self.env["website.page"].new({"url": "/contactus-2", "website_published": True})
+        self.assertFalse(Source._page_is_content(contact))
+        if Source._page_is_public(contact) and contact.website_indexed:
+            self.assertTrue(Source._page_is_content(contact, about_contact=True))
+        from odoo.addons.nudge_website.models.nudge_source import CONTACT_QUESTION_RE
+        for asked in ("How can I contact you?", "what is your phone number", "كيف أتواصل معكم؟", "شو رقم التلفون؟"):
+            self.assertTrue(CONTACT_QUESTION_RE.search(asked), asked)
+        for asked in ("Do you sell steel doors?", "هل تبيعون أبواب حديد؟"):
+            self.assertFalse(CONTACT_QUESTION_RE.search(asked), asked)
+
     # ------------------------------------------------------------------
     # Logged in: their own account, with their own rights
     # ------------------------------------------------------------------

@@ -312,6 +312,41 @@ def check_screen(screen, model, records):
 # Tools
 # ----------------------------------------------------------------------
 
+# A contact is a person unless the sentence says company: what says it, and what takes it back ("not companies")
+COMPANY_WORDS = re.compile(
+    r"\b(?:compan(?:y|ies)|organi[sz]ations?|firms?|corporations?|enterprises?|llc|ltd|inc|gmbh)\b"
+    r"|شرك[ةات]|شركه|مؤسس[ةات]|مؤسسه|منشأ[ةات]|منشآت|منشاه|منشاة|مصنع|مصانع",
+    re.IGNORECASE)
+NOT_COMPANY = re.compile(
+    r"(?:\bnot|\bno|\bnever|\binstead of|\brather than|\bwithout|ليس[تا]?|وليس[تا]?|لا|مو|مش|بدون|وبدون)\s+"
+    r"(?:(?:a|an|the|any)\s+)?(?:compan|organi|firm|corporation|enterprise|شرك|مؤسس|منشأ|منشآ|منشا)\w*",
+    re.IGNORECASE)
+
+
+def person_unless_company(env, model, entries):
+    """:return: ``entries`` of a contact to create, without the mark that makes it a company when the person
+    did not say company (“Create contacts Raghad A, B and C” made companies): Odoo's default is a person. Left
+    alone outside a conversation, where nothing was said."""
+    if model._name != "res.partner":
+        return entries
+    marks = [entry for entry in entries
+             if (entry["field"] == "is_company" and str(entry["value"]).strip().lower() in ("true", "yes", "1"))
+             or (entry["field"] == "company_type" and str(entry["value"]).strip().lower() == "company")]
+    try:
+        conversation_id = int(env.context.get("nudge_conversation_id") or 0)
+    except (TypeError, ValueError):
+        conversation_id = 0
+    if not marks or not conversation_id:
+        return entries
+    # sudo: what the person said in their own conversation, read to know whether it says company
+    asked = env["nudge.message"].sudo().search([
+        ("conversation_id", "=", conversation_id), ("role", "=", "user")], order="id desc", limit=20)
+    said = NOT_COMPANY.sub(" ", " ".join(asked.mapped("content")))
+    if COMPANY_WORDS.search(said):
+        return entries
+    return [entry for entry in entries if entry not in marks]
+
+
 @base.register
 class PrepareCreate(base.Action):
     name = "prepare_create"
@@ -322,7 +357,8 @@ class PrepareCreate(base.Action):
         "you are about to create, and says yes or no. You read their answer as the result. "
         "Find the records you point to with search_records first, and look at describe_model "
         "for the fields that are required. Give only what you know: Odoo fills the rest the "
-        "way it does when someone presses New."
+        "way it does when someone presses New. A contact is a person unless the person said "
+        "company: never set is_company (or company_type) for a name that is not clearly one."
     )
     input_schema = {
         "type": "object",
@@ -338,7 +374,7 @@ class PrepareCreate(base.Action):
     @refusing
     def run(self, env, arguments, screen):
         model = get_model(env, arguments["model"], "create", to_change=True)
-        values, shown = read_values(model, arguments["values"])
+        values, shown = read_values(model, person_unless_company(env, model, arguments["values"]))
         lines, shown_lines = read_lines(model, arguments.get("lines") or [])
         title = env._("Create: %s", model_label(model))
         return base.ToolResult(

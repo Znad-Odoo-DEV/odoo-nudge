@@ -33,7 +33,7 @@ from .skill_words import CUES, SYNONYMS
 _logger = logging.getLogger(__name__)
 
 # Thresholds were set on CASES of tests/skill_router_cases.py, never on FRESH2
-THRESHOLD = 3.0
+THRESHOLD = 3.3
 # The second skill must be this share of the first (and above the threshold) to join it
 SECOND_SHARE = 0.55
 # What a word read through a typo, an Arabizi spelling or a synonym is worth against a word as typed

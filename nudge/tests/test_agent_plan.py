@@ -22,7 +22,7 @@ def write(model, ids, call_id, **given):
 
 class PlanCase(AgentCase):
 
-    def asked(self, *calls, user=None, text="Do it all", then="It is all done."):
+    def asked(self, *calls, user=None, text="Create the companies and their buyer: do it all", then="It is all done."):
         """The model asks for several changes in one answer; the conversation waits for the person.
 
         :return: (conversation, events, adapter)"""

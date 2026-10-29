@@ -28237,3 +28237,39 @@ msgstr "تم تجهيز عنصر للموقع الإلكتروني"
 #: code:addons/nudge/models/nudge_conversation.py:0
 msgid "Prepared the contact details of the website"
 msgstr "تم تجهيز بيانات التواصل للموقع الإلكتروني"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/analytics.py:0
+msgid "is"
+msgstr "هو"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/analytics.py:0
+msgid "is not"
+msgstr "ليس"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/analytics.py:0
+msgid "contains"
+msgstr "يحتوي على"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/analytics.py:0
+msgid "does not contain"
+msgstr "لا يحتوي على"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/analytics.py:0
+msgid "is set"
+msgstr "معبأ"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/analytics.py:0
+msgid "is not set"
+msgstr "فارغ"

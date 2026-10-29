@@ -32,10 +32,13 @@ _AR_SUFFIXES = ("ات", "ون", "ين", "ها", "هم", "ان")
 _EN_SUFFIXES = ("ing", "ed", "es", "ly", "s")
 
 
+_DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹", "01234567890123456789")
+
+
 def fold(text):
     """:return: ``text`` lower-cased, without Arabic marks, with the letters
-    that are written in more than one way unified"""
-    return arabic.fold(text)
+    that are written in more than one way unified (alef, ya, ta marbuta), the digits Latin"""
+    return arabic.fold(text).translate(_DIGITS)
 
 
 def _stem(word):
@@ -47,6 +50,9 @@ def _stem(word):
         for suffix in _AR_SUFFIXES:
             if word.endswith(suffix) and len(word) - len(suffix) >= 3:
                 return word[:-len(suffix)]
+        # the ta marbuta (folded to ha): "دورة" and "دورات" are one word
+        if word.endswith("ه") and len(word) >= 4:
+            return word[:-1]
         return word
     for suffix in _EN_SUFFIXES:
         if word.endswith(suffix) and len(word) - len(suffix) >= 3:

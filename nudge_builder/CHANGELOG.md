@@ -1,5 +1,9 @@
 # Changelog
 
+## 19.0.1.2.2
+
+- A database from before 1.1.0 gets the tools add_site_item, add_location and set_contact in the skill Building a website or shop (the skill is kept from updates; the update loads it again where nobody changed it). The seven sector skills have narrower trigger words: small talk brings none.
+
 ## 19.0.1.2.1
 
 - The records added after the build (content tabs, pictures pulled from Documents, rows imported from a file) reach the built pages without a new build and without AI: the button Show the records on the site, and the same after an import and after Pull from Documents. Tests: `/nudge_builder:TestShowRecords`.

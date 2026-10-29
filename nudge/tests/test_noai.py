@@ -393,6 +393,26 @@ class TestNoaiRun(NudgeCase, TransactionCase):
         self.assertEqual(self.last_text(events), "From the AI")
         self.assertFalse(self.cards(events))
 
+    def test_an_arabic_question_is_never_an_action(self):
+        # Found filming Release 3: "هل أؤكد هذا الأمر؟" on a draft order was read as "Confirm" with no AI call
+        screen = {"model": "sale.order", "record_id": 49}
+        for text in (
+            "هل أؤكد هذا الأمر؟", "هل أؤكد هذا الطلب", "أؤكد هذا الطلب؟", "أأكد الطلب ولا لا؟",
+            "هل يجب تأكيد هذا الطلب؟", "هل يجب أن أؤكد الطلب", "هل يصح أؤكد هذا الطلب", "هل نلغي الطلب",
+            "ممكن أؤكد الطلب", "لازم أؤكد الطلب؟", "ينفع أأكد الطلب", "هل أنشئ جهة اتصال علي؟",
+            # The English ones were already questions
+            "should I confirm this order?", "do I have to confirm this order?",
+        ):
+            with self.subTest(text=text):
+                self.assertFalse(noai_commands.parse(text, screen).intent, text)
+        # Addressed to Nudge, so still commands; and a question to look is a polite request to show
+        for text, intent in (
+            ("هل تستطيع تأكيد هذا الطلب", "press"), ("ممكن تأكد الطلب؟", "press"), ("أكد هذا الطلب", "press"),
+            ("هل أشوف الفواتير", "open"), ("اعرض الفواتير؟", "open"),
+        ):
+            with self.subTest(text=text):
+                self.assertEqual(noai_commands.parse(text, screen).intent, intent, text)
+
     def test_a_negated_verb_is_never_read_as_the_verb(self):
         for text in ("Do not publish", "don't confirm this invoice", "never validate it"):
             with self.subTest(text=text):

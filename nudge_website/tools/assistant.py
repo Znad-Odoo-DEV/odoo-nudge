@@ -18,6 +18,7 @@ from odoo.exceptions import AccessError, UserError
 from odoo.tools import config
 
 from odoo.addons.nudge.tools import product_search
+from odoo.addons.nudge_website.models.nudge_source import CONTACT_QUESTION_RE
 
 _logger = logging.getLogger(__name__)
 
@@ -130,10 +131,15 @@ def passages(env, website, text):
     found = found.filtered(
         lambda passage: not passage.source_id.website_page_id
         or Source._page_is_public(passage.source_id.website_page_id.sudo()))
+    about_contact = bool(CONTACT_QUESTION_RE.search(text or ""))
     return [{
         "source": passage.source_id.name,
         "text": " ".join(passage.body.split())[:MAX_PASSAGE_CHARS],
-        "url": passage.source_id.public_url or "",
+        # A page is pointed to only when it is a content page of the website (no thank-you or system page);
+        # the contact page only when the visitor asks how to reach the company
+        "url": ("" if passage.source_id.website_page_id
+                and not Source._page_is_content(passage.source_id.website_page_id.sudo(), about_contact)
+                else passage.source_id.public_url or ""),
     } for passage in found]
 
 
@@ -287,6 +293,18 @@ def ai_slot(env):
     raise Busy()
 
 
+def spent_today(env, company):
+    """:return: the tokens the AI spent today on the visitors of the websites of ``company``: the plain assistant
+    and the agents of the website channel together, under one budget (``nudge_public_budget``). A rehearsal
+    (Try it, an evaluation) is not a visitor and is never counted."""
+    # sudo: a total of tokens, nothing of anyone
+    tokens, _cost = env["nudge.usage"].sudo()._spent([
+        ("company_id", "=", company.id), ("date", "=", fields.Date.context_today(env["res.users"])),
+        ("rehearsal", "=", False),
+        "|", ("origin", "=", "website"), ("conversation_id.agent_binding_id.channel", "=", "website")])
+    return tokens
+
+
 def narrate(env, website, user, text, facts):
     """:return: the words of the provider around ``facts``, or "" when it may not or
     cannot (none, private mode, the budget of the day, a failure)"""
@@ -294,11 +312,7 @@ def narrate(env, website, user, text, facts):
     budget = company.sudo().nudge_public_budget
     if not budget:
         return ""
-    # sudo: a total of tokens, nothing of anyone
-    spent, _cost = env["nudge.usage"].sudo()._spent([
-        ("origin", "=", "website"), ("company_id", "=", company.id),
-        ("date", "=", fields.Date.context_today(env["res.users"]))])
-    if spent >= budget:
+    if spent_today(env, company) >= budget:
         return ""
     lang = env["res.lang"]._lang_get(env.lang)
     language = lang.name if lang else (env.lang or "English")
