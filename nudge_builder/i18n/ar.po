@@ -4235,3 +4235,14 @@ msgstr "السجلات معروضة الآن في: %s."
 #: code:addons/nudge_builder/models/nudge_builder_site.py:0
 msgid "The pages already show the records."
 msgstr "الصفحات تعرض السجلات بالفعل."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "The header logo was left as Odoo made it."
+msgstr "تُرك شعار الترويسة كما صنعه أودو."
+
+#. module: nudge_builder
+#: model:nudge.skill,name:nudge_builder.skill_site_restaurant_menu
+msgid "Restaurant menu"
+msgstr "قائمة المطعم"

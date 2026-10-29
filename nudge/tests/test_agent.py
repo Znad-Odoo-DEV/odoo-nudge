@@ -1273,3 +1273,42 @@ class TestAgentOverHttp(AgentCase, HttpCase):
             "/nudge/chat/stream", "nudge_a", message="Create the contact", mode="agent"))
         self.assertEqual(rejected[0]["state"], "rejected")
         self.assertIn("Agent mode is not open to you", rejected[0]["message"])
+
+
+@tagged("post_install", "-at_install")
+class TestContactsArePeople(NudgeCase, TransactionCase):
+    """Filming Release 3: "Create contacts Raghad ..." made companies. A name is a person unless the sentence
+    says company."""
+
+    def entries(self, **values):
+        return [{"field": name, "value": value} for name, value in values.items()]
+
+    def plan(self, said, **values):
+        conversation = self.env["nudge.conversation"].with_user(self.agent)._chat_open()
+        self.env["nudge.message"].sudo().create({"conversation_id": conversation.id, "role": "user", "content": said})
+        env = self.env(user=self.agent, context=dict(self.env.context, nudge_conversation_id=conversation.id))
+        return [entry["field"] for entry in actions.person_unless_company(
+            env, env["res.partner"], self.entries(name="Raghad Test A", function="Buyer", **values))]
+
+    def test_a_company_mark_the_person_did_not_ask_for_is_dropped(self):
+        for said in (
+            "Create three contacts: Raghad Test A, B and C, job position Buyer",
+            "Create three contacts that are people, not companies: Raghad Test A, B and C",
+            "Create contacts that are not a company: Raghad Test A",
+            "أنشئ ثلاث جهات اتصال: راغد أ وب وج، المسمى الوظيفي مشتري",
+            "أنشئ جهات اتصال أشخاص وليس شركات: راغد أ",
+        ):
+            with self.subTest(said=said):
+                self.assertEqual(self.plan(said, is_company="true"), ["name", "function"])
+                self.assertEqual(self.plan(said, company_type="company"), ["name", "function"])
+
+    def test_a_company_the_person_asked_for_stays_one(self):
+        for said in ("Create a company Acme Trading", "Create the company Raghad Test A", "Create an LLC: Raghad A",
+                     "أنشئ شركة اسمها راغد للتجارة", "أنشئ مؤسسة راغد"):
+            with self.subTest(said=said):
+                self.assertEqual(self.plan(said, is_company="true"), ["name", "function", "is_company"])
+
+    def test_outside_a_conversation_nothing_is_taken_out(self):
+        env = self.env(user=self.agent)
+        entries = self.entries(name="Acme", is_company="true")
+        self.assertEqual(actions.person_unless_company(env, env["res.partner"], entries), entries)

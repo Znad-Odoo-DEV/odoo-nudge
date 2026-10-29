@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-28 05:58+0000\n"
-"PO-Revision-Date: 2026-10-28 05:58+0000\n"
+"POT-Creation-Date: 2026-10-29 05:43+0000\n"
+"PO-Revision-Date: 2026-10-29 05:43+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -26248,6 +26248,12 @@ msgstr ""
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/tools/analytics.py:0
+msgid "contains"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/tools/document_catalogue.py:0
 msgid "cost %s"
 msgstr ""
@@ -26326,6 +26332,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/tools/document_catalogue.py:0
 msgid "differs"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/analytics.py:0
+msgid "does not contain"
 msgstr ""
 
 #. module: nudge
@@ -26507,6 +26519,12 @@ msgid "invoices, bills, payments, taxes and the accounting reports"
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/analytics.py:0
+msgid "is"
+msgstr ""
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/prompts/prompt_forms.xml:0
 msgid "is a variable"
@@ -26527,9 +26545,27 @@ msgid ""
 msgstr ""
 
 #. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/analytics.py:0
+msgid "is not"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/analytics.py:0
+msgid "is not set"
+msgstr ""
+
+#. module: nudge
 #. odoo-javascript
 #: code:addons/nudge/static/src/components/nudge_plan_card.xml:0
 msgid "is now"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/analytics.py:0
+msgid "is set"
 msgstr ""
 
 #. module: nudge

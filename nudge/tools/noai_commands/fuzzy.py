@@ -29,6 +29,7 @@ MAX_PENALTY = 0.18
 MIN_SKELETON = 2
 SHORT_SKELETON = 3
 MAX_OPTIONS = 4
+SHORT_ARABIC = 3
 QUOTES = re.compile("\"([^\"]+)\"|(?<!\\w)'([^']+)'(?!\\w)|“([^”]+)”|«([^»]+)»|"
                     "‘([^’]+)’")
 LATIN_PREFIXES = ("el", "al", "il")
@@ -132,10 +133,11 @@ def distance(a, b, limit=2):
     return min(previous[-1], limit + 1)
 
 
-def budget(length):
-    """:return: how many letters a word of ``length`` letters may be away from the word it meant"""
+def budget(length, arabic_word=False):
+    """:return: how many letters a word of ``length`` letters may be away from the word it meant. Arabic words
+    are short ("بيع", "امر"): one of three letters may be a slip, as in the phrase "اوامر البيغ" """
     if length < MIN_LENGTH:
-        return 0
+        return 1 if arabic_word and length == SHORT_ARABIC else 0
     return 2 if length >= LONG_LENGTH else 1
 
 
@@ -172,7 +174,7 @@ class Index:
 
     def add(self, word, tags, alone=True):
         self.tags[word] = self.tags.get(word, frozenset()) | frozenset(tags)
-        if len(word) >= MIN_LENGTH:
+        if len(word) >= MIN_LENGTH or (len(word) == SHORT_ARABIC and normalise.ARABIC.search(word)):
             for variant in _variants(word, 2 if len(word) >= LONG_LENGTH else 1):
                 self.deletes.setdefault(variant, set()).add(word)
         if alone and normalise.ARABIC.search(word):
@@ -182,16 +184,17 @@ class Index:
 
     def near(self, word):
         """:return: the :class:`Option` of the words within the budget of ``word``, nearest first"""
-        if budget(len(word)) == 0:
+        allowed = budget(len(word), bool(normalise.ARABIC.search(word)))
+        if allowed == 0:
             return []
         found = {}
         for variant in _variants(word, 2 if len(word) >= LONG_LENGTH else 1):
             for other in self.deletes.get(variant, ()):
                 if other != word and other not in found:
-                    found[other] = distance(word, other, budget(len(word)))
+                    found[other] = distance(word, other, allowed)
         # Two words with the same letters in another order are the likelier slip
         return sorted((Option(other, self.tags[other], d, "typo", d - 0.5 * (sorted(other) == sorted(word)))
-                       for other, d in found.items() if d <= budget(len(word))),
+                       for other, d in found.items() if d <= allowed),
                       key=lambda option: (option.rank, option.word))
 
     def read(self, word):

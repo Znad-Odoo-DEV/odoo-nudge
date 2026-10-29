@@ -139,6 +139,37 @@ class TestAgentDoor(AgentCase, TransactionCase):
         self.assertTrue(busy["busy"])
         self.assertFalse(busy["answered"])
 
+    def test_rehearsals_do_not_count_against_the_public_budget(self):
+        self.bind(self.agent)
+        company = self.website.company_id
+        company.sudo().nudge_public_budget = 100
+        today = fields.Date.context_today(self.env["res.users"])
+        self.env["nudge.usage"].sudo().create({
+            "kind": "chat", "user_id": self.service.id, "company_id": company.id, "date": today,
+            "input_tokens": 500, "origin": "website", "rehearsal": True})
+        self.assertEqual(agent_door.spent_today(self.env, company), 0)
+        with patch.object(self.Agent, "_answer_public", lambda *a, **k: dict(PUBLIC_ANSWER), create=True):
+            self.assertEqual(self.serve(self.public_user, False)["text"], PUBLIC_ANSWER["text"])
+
+    def test_the_limit_of_one_visitor_is_counted_and_its_notice_is_shown(self):
+        binding = self.bind(self.agent)
+        self.agent.sudo().budget_user_day = 50
+        conversation = self.env["nudge.conversation"].sudo().create({
+            "user_id": self.service.id, "agent_id": self.agent.id, "agent_binding_id": binding.id,
+            "agent_visitor_key": "website:raghad"})
+        other = self.env["nudge.conversation"].sudo().create({
+            "user_id": self.service.id, "agent_id": self.agent.id, "agent_binding_id": binding.id,
+            "agent_visitor_key": "website:ebrahim"})
+        today = fields.Date.context_today(self.env["res.users"])
+        Usage = self.env["nudge.usage"].sudo()
+        Usage.create({"kind": "chat", "user_id": self.service.id, "company_id": self.website.company_id.id,
+                      "date": today, "input_tokens": 80, "agent_id": self.agent.id,
+                      "conversation_id": conversation.id})
+        agent = self.agent.sudo()
+        self.assertEqual(agent._over_budget(self.service, conversation=conversation), "day")
+        self.assertFalse(agent._over_budget(self.service, conversation=other), "another visitor is not limited")
+        self.assertIn("used what this agent may spend", conversation._agent_budget_text("day"))
+
     def test_a_visitor_never_reads_an_error_of_the_engine(self):
         # M4
         self.bind(self.agent)

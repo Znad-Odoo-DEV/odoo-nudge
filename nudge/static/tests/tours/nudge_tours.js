@@ -139,7 +139,11 @@ registry.category("web_tour.tours").add("nudge_screen", {
         {
             content: "Type in the form without saving",
             trigger: ".o_form_view .o_field_widget[name=email] input",
-            run: "edit changed@nudge.example",
+            run: "edit changed@nudge.example && press Tab",
+        },
+        {
+            content: "The form holds the typed address before the question is sent",
+            trigger: ".o_form_view .o_field_widget[name=email] input:value(changed@nudge.example)",
         },
         {
             trigger: ".o_nudge_input",

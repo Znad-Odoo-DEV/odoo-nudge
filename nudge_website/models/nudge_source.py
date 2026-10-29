@@ -1,4 +1,5 @@
 import hashlib
+import re
 import logging
 
 from lxml import etree, html
@@ -10,6 +11,14 @@ from odoo.addons.nudge.models.nudge_source import split_passages
 _logger = logging.getLogger(__name__)
 
 MIN_PAGE_CHARS = 40
+SYSTEM_URLS = ("/thanks", "/thank-you")
+# The contact page (and the builder's /contactus-2): pointed to only when the visitor asks how to reach the company
+CONTACT_URL_RE = re.compile(r"^/contact(us|-us)?(-\d+)?$")
+# A question about reaching the company, in English and Arabic
+CONTACT_QUESTION_RE = re.compile(
+    r"\b(contact|reach|call|phone|e-?mail|address|where are you|location|visit you)\b"
+    r"|تواصل|اتصل|اتصال|هاتف|تلفون|تليفون|موبايل|ايميل|إيميل|بريد|عنوان|موقعكم|مكانكم", re.I)
+SYSTEM_URL_RE = re.compile(r"thank|submitted|confirmation|success|-done$|/web/|/my/|/shop/(cart|payment|confirm)")
 SKIPPED_TAGS = ("script", "style", "noscript", "svg", "template")
 
 
@@ -85,6 +94,19 @@ class NudgeSource(models.Model):
         return bool(
             page.website_published and page.is_visible
             and not page.visibility and not page.groups_id)
+
+    @api.model
+    def _page_is_content(self, page, about_contact=False):
+        """:return: whether this page is a content page of the website worth pointing a visitor to: public,
+        indexed, and not a thank-you or confirmation page. The system pages other apps add (Thanks, Task
+        Submitted) are not; the contact page is, only when the question is about reaching the company
+        (``about_contact``)."""
+        if not (self._page_is_public(page) and page.website_indexed):
+            return False
+        url = (page.url or "").lower().rstrip("/")
+        if CONTACT_URL_RE.match(url):
+            return about_contact
+        return not (not url or url in SYSTEM_URLS or SYSTEM_URL_RE.search(url))
 
     @api.model
     def _purge_page_sources(self, sources):
