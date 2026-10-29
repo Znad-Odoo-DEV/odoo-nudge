@@ -276,7 +276,10 @@ class NudgeSkill(models.Model):
         (``tools/skill_router.py``: the trigger words and the screen, then the words of the skills, then
         the local search model if it is already on). :return: the ``Choice``, with the skills in
         ``keys`` and every skill the question scored for in ``ranked``"""
-        index = skill_router.index_of(self.env, self)
+        # The skills are read in English, as their summary and instructions are written and as the router was
+        # measured: their titles in the person's language made the same question bring other skills to an Arabic
+        # screen than to an English one (R3-38: three more lines in the index of the sample question)
+        index = skill_router.index_of(self.env, self.with_context(lang="en_US"))
         return skill_router.route(index, text, model, screen, engine_of=self._search_engine)
 
     def _search_engine(self):

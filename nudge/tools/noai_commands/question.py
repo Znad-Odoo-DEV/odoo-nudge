@@ -23,6 +23,9 @@ from ...llm import arabic
 MAX_CHARS = 600
 # Below this, a sentence that only ends in a question mark answers what Nudge asked ("AED?")
 MIN_QUESTION_WORDS = 2
+# The kind of the suggestion that holds a change asked about (``nudge.conversation._chat_hold``): chosen, the change
+# is prepared on its card as it is (``nudge.noai._serve_held``)
+HELD_KIND = "suggested_change"
 
 # The verbs of a change or a look, said as an order: "confirm it", "أكده", "please send the quotation"
 _EN_VERBS = (

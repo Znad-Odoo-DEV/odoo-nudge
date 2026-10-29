@@ -335,10 +335,12 @@ class NudgeConversation(models.Model):
             results.append(dict(entry, content=QUESTION_HELD, is_error=False))
             title = self._chat_held_title(result.pending or {})
             if title and len(offered) < MAX_HELD_SUGGESTIONS and title not in {chip["words"][0] for chip in offered}:
+                # The change itself goes with the suggestion: chosen, it is prepared as it was checked here, never
+                # read again from its words (nudge.noai._serve_held)
                 offered.append({
                     "name": f"held_{call['id']}", "words": [title], "at_once": True, "example": "",
                     "hint": _("Prepared on a card: nothing is done before your yes"),
-                    "kind": "suggested_change"})
+                    "kind": noai_commands.question.HELD_KIND, "tool": call["name"], "arguments": call["input"]})
         if offered:
             events = [*events, {"type": "found", "commands": offered}]
         by_id = {entry["id"]: entry for entry in results}

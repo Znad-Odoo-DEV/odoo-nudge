@@ -191,6 +191,19 @@ class TestSkillRouter(NudgeCase, TransactionCase):
         broken.embed.side_effect = RuntimeError("boom")
         self.assertNotIn(skill.key, skill_router.route(index, question, engine=broken).keys)
 
+    def test_a_reading_that_finds_every_skill_as_near_says_nothing(self):
+        """R3-38: the search model read a question about sales orders as near vendor bills and reordering rules as
+        any other skill, and brought them: a skill counts for how far it stands above the usual nearness"""
+        index = skill_router.Index([{
+            "key": skill.key, "name": skill.name, "summary": skill.summary, "instructions": skill.instructions,
+            "trigger_words": skill.trigger_words, "model_names": skill.model_names, "tool_names": skill.tool_names,
+        } for skill in self.visible()])
+        alike = mock.Mock(floor=0.5, ceiling=0.9)
+        alike.embed.side_effect = lambda texts, kind="passage": [[0.6, 0.8] for _text in texts]
+        for question in ("Show me my open sales orders.", "أرني أوامر البيع المفتوحة الخاصة بي."):
+            self.assertEqual(skill_router.route(index, question, engine=alike).ranked,
+                             skill_router.route(index, question).ranked, question)
+
     # ------------------------------------------------------------------- who may be given what
     def test_an_archived_or_draft_skill_is_never_chosen(self):
         skill = self.made()

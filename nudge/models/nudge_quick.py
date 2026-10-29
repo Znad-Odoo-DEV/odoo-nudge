@@ -20,7 +20,7 @@ from odoo.exceptions import AccessError
 from ..tools import base, commands, groups, product_search
 from ..tools.configuration import current_values, find_app, settings_layout, settings_steps
 from ..tools.developer import built_on
-from ..tools.finding import REFERENCE_FIELDS, _score, candidate_models, look_in
+from ..tools.finding import NUMBERED_MODELS, REFERENCE_FIELDS, _score, candidate_models, look_in
 from ..tools.navigation import _visible_menus, menu_path, menu_steps
 from ..tools.records import MODEL_PATTERN, Refused, cut, get_model
 
@@ -623,15 +623,18 @@ class NudgeQuick(models.AbstractModel):
 
     def _find_reference(self, text):
         """:return: the records whose name or reference is ``text`` exactly,
-        among the kinds of records of this database, the most filled first"""
+        among the kinds of records of this database: the numbered documents
+        first, then the most filled"""
         profile = self.env["nudge.profile"]._ensure_current()
         pieces = [piece for piece in profile.sudo().slice_ids
                   if piece.kind == "activity" and piece.model_name and (piece.data or {}).get("records")]
         pieces.sort(key=lambda piece: -(piece.data or {}).get("records", 0))
+        kinds = [model_name for model_name in NUMBERED_MODELS if model_name in self.env]
+        kinds += [piece.model_name for piece in pieces[:MAX_REFERENCE_MODELS] if piece.model_name not in kinds]
         found = []
-        for rank, piece in enumerate(pieces[:MAX_REFERENCE_MODELS]):
+        for rank, model_name in enumerate(kinds):
             try:
-                model = get_model(self.env, piece.model_name)
+                model = get_model(self.env, model_name)
             except Refused:
                 continue
             names = [name for name in REFERENCE_FIELDS

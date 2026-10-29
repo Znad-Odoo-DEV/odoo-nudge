@@ -279,6 +279,9 @@ class TestSignedFeed(TransactionCase):
         self.assertIn("Signature verified", action["name"])
         self.assertIn("3 countries", action["name"])  # AE from the first pack, EG and SA from the second: read, not fixed
         self.assertIn("2 packs would change", action["name"])
+        # The title the list opens with: the web client reads display_name before name (bug 22: it said "Compliance
+        # Pack Updates" while the name said what the check found)
+        self.assertEqual(action.get("display_name") or action["name"], action["name"])
         settings = self.env["res.config.settings"].new({})
         self.assertEqual(settings.nudge_compliance_feed_status, self.Update._status_text())
 

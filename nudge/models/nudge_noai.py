@@ -188,6 +188,10 @@ class NudgeNoai(models.AbstractModel):
         :return: the job of the stream (the answer is already written), or None to go on"""
         if focus == "count" and not (fresh or found or background or explain == "screen"):
             return self._serve_count(conversation, text, mode, snapshot)
+        if mode in (MODE_AGENT, MODE_DEV) and not (fresh or focus or found or background):
+            served = self._serve_held(conversation, text, mode, snapshot)
+            if served:
+                return served
         if mode == MODE_AGENT:
             served = self._serve_setup(conversation, text, mode, (fresh, focus, found, background, explain), snapshot)
             served = served or self._serve_approval_hint(
@@ -316,6 +320,42 @@ class NudgeNoai(models.AbstractModel):
         parsed = grammar.Parse(text)
         parsed.intent, parsed.confidence = "setup", 0.98
         plan = Plan(reply, calls=[call] if call else [], parsed=parsed)
+        return self._deliver(conversation, text, mode, plan, parsed, values)
+
+    @api.model
+    def _serve_held(self, conversation, text, mode, snapshot):
+        """R3-50: the suggestion offered under the explanation of a question ("should I confirm this order?",
+        ``nudge.conversation._chat_hold``), chosen: its words come back as they were offered, and the change it holds
+        is prepared on its card at once, whatever the switch of the rules or the provider. Its words are never read
+        again: the rules took "Press “Confirm”: Sales Order (S00109)" for a record named "Press S00109". Only a
+        suggestion of the last answer, and the tool checks the change again as the person, as any card.
+
+        :return: the job of the stream, or None to go on"""
+        words = (text or "").strip()
+        if not words:
+            return None
+        Message = self.env["nudge.message"].sudo()
+        asked = Message.search([("conversation_id", "=", conversation.id), ("role", "=", "user")],
+                               order="id desc", limit=1)
+        if not asked:
+            return None
+        answers = Message.search([
+            ("conversation_id", "=", conversation.id), ("role", "=", "assistant"), ("id", ">", asked.id)])
+        held = next((
+            chip for message in answers for event in (message.screen_events or [])
+            if isinstance(event, dict) and event.get("type") == "found"
+            for chip in event.get("commands") or []
+            if isinstance(chip, dict) and chip.get("kind") == noai_commands.question.HELD_KIND
+            and str((chip.get("words") or [""])[0]).strip() == words), None)
+        if not held or not isinstance(held.get("arguments"), dict):
+            return None
+        tool = base.TOOLS.get(held.get("tool"))
+        if not isinstance(tool, base.Action) or not tool.is_available(self.env, mode):
+            return None
+        values, _text = conversation._chat_screen(snapshot)
+        parsed = grammar.Parse(text)
+        parsed.intent, parsed.confidence = "held_change", 1.0
+        plan = Plan("", calls=[(held["tool"], dict(held["arguments"]))], parsed=parsed)
         return self._deliver(conversation, text, mode, plan, parsed, values)
 
     @api.model
@@ -734,12 +774,34 @@ class NudgeNoai(models.AbstractModel):
         if status == "none":
             if not kind:
                 return None  # "where do I find the trial balance": a place or a report, not a record: the AI answers
-            return Plan(_("I found nothing called “%s”.", name))
+            # "فلترلي العروض تبع Raghad Demo Co بس", "show only the orders of Gemini Furniture": no quotation is called
+            # so, its customer is: the list is filtered on the customer (C07 answered "I found nothing called")
+            return self._plan_of_party(parsed, name, kind, model_name, screen) or Plan(
+                _("I found nothing called “%s”.", name), parsed=parsed, unsure=True)
         if status == "many":
             return self._choice(candidates, _("Which one is “%s”?", name))
         record = candidates[0]
         text = _("Opening %s.", record["name"])
         return Plan(text, [("open_record", {"model": record["model"], "id": record["id"], "text": text})])
+
+    def _plan_of_party(self, parsed, name, kind, model_name, screen):
+        """:return: the records of the kind of the customer or vendor ``name``, filtered on the screen, or None when
+        nobody is called so"""
+        field = KINDS.get(kind or "", {}).get("party")
+        if not field or field not in self.env[model_name]._fields:
+            return None
+        status, candidates = self._pick(name, "res.partner", None, screen)
+        if status == "none":
+            return None
+        if status == "many":
+            return self._choice(candidates, _("Which one is “%s”?", name))
+        conditions = self._conditions(parsed, kind, model_name)
+        if conditions is None:
+            return None
+        conditions.append({"field": field, "operator": "=", "value": str(candidates[0]["id"])})
+        text = _("Showing %(what)s: %(said)s.", what=self._plural_of(kind, model_name),
+                          said=candidates[0]["name"])
+        return Plan(text, [("filter_screen", {"model": model_name, "conditions": conditions, "text": text})])
 
     def _plan_latest(self, parsed, name, kind, model_name, screen):
         """The most recent record of a kind, of someone when a name is said"""

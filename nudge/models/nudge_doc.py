@@ -29,11 +29,24 @@ MAX_CHARS = 6000
 MAX_QUERY_CHARS = 200
 PAGES_PER_BATCH = 40
 HINT_PAGES = 6
+# Kept by each worker: ``{ar.po files of the installed modules: {phrase key: english words}}``,
+# for the last few sets of modules it served (a server of several databases)
+_screen_terms_cache = {}
+ARABIC_TERM_SETS = 4
 
 
 def _module_marks(modules):
     """Technical names kept as ' sale sale_management ': found with ilike ' sale '."""
     return f" {' '.join(modules)} " if modules else ""
+
+
+def _po_lines(path):
+    """:return: the lines of the .po file at ``path``; none when it cannot be read"""
+    try:
+        with open(path, encoding="utf-8") as po:
+            yield from po
+    except (OSError, UnicodeDecodeError):
+        _logger.info("Nudge: the Arabic terms of %s could not be read", path)
 
 
 class NudgeDocPage(models.Model):
@@ -228,6 +241,30 @@ class NudgeDocPassage(models.Model):
             ["search_vector"], method="gin")
 
     @api.model
+    def _arabic_terms(self):
+        """:return: ``{phrase key: english words}``: the terms of the screens of the installed modules by
+        their Arabic, from the ar.po file each module ships; read once by each worker for a set of modules"""
+        # sudo: which modules are installed is no secret
+        files = self.env["ir.module.module"].sudo()._nudge_arabic_po_files()
+        terms = _screen_terms_cache.get(files)
+        if terms is None:
+            terms = noai_commands.bridge.screen_terms(_po_lines(path) for path in files)
+            if len(_screen_terms_cache) >= ARABIC_TERM_SETS:
+                _screen_terms_cache.clear()
+            _screen_terms_cache[files] = terms
+        return terms
+
+    @api.model
+    def _english_words(self, query):
+        """:return: the English words of what an Arabic ``query`` names (NP-12), from the lexicon, the
+        glossary and the terms of the installed modules; ``[]`` when it is not Arabic or names nothing known"""
+        if not noai_commands.bridge.has_arabic(query):
+            return []
+        # sudo: the words the companies of the person added are Nudge's own configuration
+        pairs = self.env["nudge.lexicon.entry"].sudo()._pairs()
+        return noai_commands.bridge.terms(query, pairs, known=self._arabic_terms())
+
+    @api.model
     def _search_text(self, query, app=None, modules=None, limit=MAX_RESULTS):
         """:param query: words, as in the documentation, in English
         :param app: folder of the documentation to look in, such as "sales"
@@ -238,13 +275,22 @@ class NudgeDocPassage(models.Model):
         query = " ".join((query or "").split())[:MAX_QUERY_CHARS]
         if not query:
             return self.browse()
-        # An Arabic question looks for the English pages by the English words of what it names (NP-12)
+        # An Arabic question looks for the English pages by the English words of what it names (NP-12),
+        # by keyword and by meaning: the small model is weak from one language to the other
         keywords = query
+        english = self._english_words(query)
+        rank = "ts_rank_cd(p.search_vector, q)"
+        params = []
         if noai_commands.bridge.has_arabic(query):
-            # sudo: the words the companies of the person added are Nudge's own configuration
-            words = noai_commands.bridge.terms(query, self.env["nudge.lexicon.entry"].sudo()._pairs())
-            keywords = " or ".join(words)
-        params = [keywords]
+            keywords = " or ".join(english)
+            # Any of the words finds a passage, and the more of them it holds the higher it ranks: one word
+            # alone is seldom the topic ("payment" of "شروط الدفع" is on a hundred pages)
+            words = [word for word in dict.fromkeys(english) if word.lower() not in noai_commands.bridge.STOP_WORDS]
+            if len(words) > 1:
+                held = " + ".join(["(p.search_vector @@ plainto_tsquery('english', %s))::int"] * len(words))
+                rank = f"ts_rank_cd(p.search_vector, q) * (1 + {held}) / {1 + len(words)}"
+                params += words
+        params.append(keywords)
         app_filter = ""
         if app:
             # The pages of an app folder carry its name as their category;
@@ -254,7 +300,7 @@ class NudgeDocPassage(models.Model):
         # A wide pool, so that a passage about the app on the screen can come forward
         params.append(limit * 10)
         self.env.cr.execute(f"""
-            SELECT p.id, ts_rank_cd(p.search_vector, q) AS rank, p.modules
+            SELECT p.id, {rank} AS rank, p.modules
             FROM nudge_doc_passage p
             JOIN nudge_doc_page g ON g.id = p.page_id, websearch_to_tsquery('english', %s) q
             WHERE p.search_vector @@ q {app_filter}
@@ -272,7 +318,8 @@ class NudgeDocPassage(models.Model):
             scan = ("SELECT p.id FROM nudge_doc_passage p JOIN nudge_doc_page g ON g.id = p.page_id "
                     f"WHERE TRUE {app_filter}", [app, app] if app else [])
         blended = self.env["nudge.embedding"]._blend(
-            self._name, query, {row[0]: row[1] / top for row in rows}, scan=scan)
+            self._name, query, {row[0]: row[1] / top for row in rows}, scan=scan,
+            also=[" ".join(english)] if english else ())
         if blended is not None:
             known = {row[0]: row[2] for row in rows}
             for passage in self.sudo().browse([key for key in blended if key not in known]).exists():

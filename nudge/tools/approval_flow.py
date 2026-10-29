@@ -420,6 +420,40 @@ def read_request(env, arguments):
     return kind, profile, levels, notes
 
 
+def approval_buttons(env, model_name, action_ids=None, only_ours=False):
+    """The button views Nudge made on the form of ``model_name``: tagged ``nudge_custom``, active, an
+    extension view whose buttons run server actions.
+
+    :param action_ids: only the views that run one of these actions
+    :param only_ours: only the views of an approval flow: every action they run is an approval action of
+        Nudge, or is gone
+    :return: ``ir.ui.view``"""
+    View = env["ir.ui.view"].sudo()
+    tagged = set(env["ir.model.data"].sudo().search([
+        ("module", "=", "nudge_custom"), ("model", "=", "ir.ui.view")]).mapped("res_id"))
+    found = View.browse()
+    for view in View.search([("model", "=", model_name), ("inherit_id", "!=", False)]):
+        ids = {int(number) for number in re.findall(r'name="(\d+)"\s+type="action"', view.arch_db or "")}
+        if view.id not in tagged or not ids or (action_ids is not None and not ids & set(action_ids)):
+            continue
+        if only_ours:
+            alive = env["ir.actions.server"].sudo().browse(sorted(ids)).exists()
+            if any(not action.name.startswith(NAME_PREFIX) for action in alive):
+                continue
+        found |= view
+    return found
+
+
+def switch_off_buttons(env, model_name, action_ids=None):
+    """Switch off the approval buttons of ``model_name`` (those that run ``action_ids`` when given).
+
+    :return: their names"""
+    views = approval_buttons(env, model_name, action_ids, only_ours=True)
+    names = views.mapped("name")
+    views.write({"active": False})
+    return names
+
+
 def studio_here(env):
     return "studio.approval.rule" in env and "prepare_approval_rule" in base.TOOLS
 
@@ -661,6 +695,8 @@ class PrepareApprovalFlow(Building):
             raise Refused("A group of the flow was deleted since: ask for the flow again.")
         levels = [{"amount": level["amount"], "group": env["res.groups"].browse(level["group"])}
                   for level in values["levels"]]
+        # Buttons an earlier flow left behind (its actions or rules deleted by hand): replaced, never shown twice
+        replaced = [] if studio_here(env) else switch_off_buttons(env, model._name)
         builds = self._plan(env, model, kind, profile, levels, values.get("token") or secrets.token_hex(12))
         run = getattr(step, "run_id", None)
         made = {}
@@ -690,6 +726,8 @@ class PrepareApprovalFlow(Building):
                     if getattr(step, "call_id", None) else f"flow_{number}"})
         told = [f"Made the approval flow for {model._name}: " + "; ".join(build["what"] for build in builds) + "."]
         lines = [{"label": _("Made"), "value": ", ".join(build["what"] for build in builds)}]
+        if replaced:
+            lines.append({"label": _("Old buttons replaced"), "value": ", ".join(replaced)})
         if main:
             tried = self._try(env, profile, main[1][0], levels, model)
             told.append(tried)
