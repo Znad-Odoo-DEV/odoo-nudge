@@ -27,6 +27,7 @@ from ..tools import compat, content_sections, footer, library, neutral, pictures
 from ..tools import copy as copywriter
 from ..tools.legal import legal_specs
 from ..tools.schema import KINDS
+from .nudge_builder_template import SHOP_SNIPPETS
 
 _logger = logging.getLogger(__name__)
 
@@ -1060,6 +1061,63 @@ class NudgeBuilderSite(models.Model):
             block.get("image_prompt"), block.get("image") or "abstract", side=snippet not in HERO_SNIPPETS)
         return f"/web/image/{attachment.id}"
 
+    def _with_company_brand(self, spec):
+        """:return: ``spec`` with the sample brand of the template (``brand`` of each language, "Zahra") replaced by
+        the company's name in every text of that language: the page names, the copy and the SEO"""
+        self.ensure_one()
+        company = self.company_id.name
+        try:
+            brand = (self._load_template() or {}).get("brand") or {}
+        except Exception:  # noqa: BLE001 - a template that does not load has no brand to replace
+            brand = {}
+        if not company or not brand:
+            return spec
+
+        def walk(node, short):
+            if isinstance(node, dict):
+                return {key: walk(value, key if key in brand else short) for key, value in node.items()}
+            if isinstance(node, list):
+                return [walk(value, short) for value in node]
+            if isinstance(node, str) and short:
+                # the English brand is also written inside the other languages' sentences
+                for sample in dict.fromkeys((brand.get(short), brand.get("en"))):
+                    if sample:
+                        node = node.replace(sample, company)
+            return node
+        return walk(spec, None)
+
+    def _shop_item(self, product, lang):
+        """:return: one product.template of the shop as the plain dict the section renderers read, in one language"""
+        product = product.with_context(lang=lang.code)
+        symbol = product.currency_id.symbol if product.currency_id else ""
+        item = {"name": product.name or "", "summary": product.description_sale or "", "description": "",
+                "featured": False, "category": "",
+                "pictures": [{"url": f"/web/image/product.template/{product.id}/image_512", "alt": product.name or ""}]
+                if product.image_1920 else []}
+        if product.list_price:
+            item["price_text"] = content_sections.format_price(product.list_price, symbol)
+        return item
+
+    def _shop_block(self, block, spec, index, section_id):
+        """The sections of a product list of a shop page, drawn from the products the person chose.
+
+        :return: ``{lang code: lxml section}``, or None when no product was chosen (Odoo's sample cards stay)"""
+        self.ensure_one()
+        products = self.shop_products()
+        if not products:
+            return None
+        copy = block.get("copy") or {}
+        layout = block.get("layout")
+        result = {}
+        for lang in self._langs():
+            short = compat.lang_code(lang.code)
+            words = copy.get(short) or copy.get("en") or {}
+            items = [self._shop_item(product, lang) for product in products]
+            result[lang.code] = content_sections.render(
+                "product", items, layout, self.direction or "a", words.get("title", ""), words.get("text", ""),
+                self._content_ctx(lang), section_id)
+        return result
+
     def _build_page(self, spec):
         """Build one page, unpublished, as a new view and a new website.page.
 
@@ -1070,6 +1128,7 @@ class NudgeBuilderSite(models.Model):
         langs = self._langs()
         if not self.allow_projects:
             spec = neutral.without_project_names(spec)  # the template's sample projects are not the company's
+        spec = self._with_company_brand(spec)  # the template's sample brand is not the company's name
         key_short = spec["key"]
         names = spec.get("name") or {}
         generated = {}
@@ -1094,6 +1153,14 @@ class NudgeBuilderSite(models.Model):
                 for code, section in sections.items():
                     columns[code].append(section)
                 continue
+            if self.shop_mode and block["snippet"].split(".")[-1] in SHOP_SNIPPETS:
+                # a product list of a shop shows the products the person chose, not Odoo's sample cards
+                shop_sections = self._shop_block(block, spec, index, section_id=compat.unique_id())
+                if shop_sections:
+                    placed.append("s_three_columns")
+                    for code, section in shop_sections.items():
+                        columns[code].append(section)
+                    continue
             picture = self._spec_picture(spec, block)
             sample = block.get("copy") or {}
             per_lang_content = {}
@@ -1127,7 +1194,17 @@ class NudgeBuilderSite(models.Model):
             "name": name_en, "type": "qweb", "key": view_key, "website_id": self.website_id.id,
             "arch_db": arch_by_lang[source],
         })
-        compat.write_arch(view, arch_by_lang, source)
+        skipped = compat.write_arch(view, arch_by_lang, source)
+        for code in skipped:
+            # a language whose page has another number of terms is mapped block by block: a block whose terms match
+            # gets its translation, the others stay in the source language
+            for position, (mine, theirs) in enumerate(zip(columns[source], columns[code])):
+                if compat.map_terms(view.with_context(lang="en_US"), compat.to_string(mine),
+                                    {code: compat.to_string(theirs)}):
+                    self._say(_(
+                        "The block %(block)s (%(snippet)s) of the page %(page)s stays untranslated in %(lang)s: its "
+                        "text does not match the source.", block=position + 1,
+                        snippet=placed[position] if position < len(placed) else "whatsapp", page=name_en, lang=code))
         url = self._unique_url(spec.get("url") or f"/{compat.slug(self.env, name_en)}")
         page = self.env["website.page"].create({
             "url": url, "view_id": view.id, "website_id": self.website_id.id,
@@ -1369,6 +1446,9 @@ class NudgeBuilderSite(models.Model):
         built = {page.key: page for page in self.page_ids}
         names = {page["key"]: page["name"] for page in template["pages"]}
         order = [key for key in (template.get("menu") or []) if key in built or key == "blog"]
+        # The website's own Home entry ("/") opens the home of the website, which the home built becomes on
+        # publish: the home takes that entry instead of a second "Home" (the entry itself is not changed)
+        home_entry = website.menu_id.child_id.filtered(lambda menu: menu.url == "/")[:1]
         for index, key in enumerate(order):
             if key == "blog" and "blog" not in built and self._module_installed("website_blog"):
                 self.env["website.menu"].create({
@@ -1378,7 +1458,10 @@ class NudgeBuilderSite(models.Model):
             record = built[key]
             if not record.menu_id:
                 record.sequence = 10 * (index + 1)
-                self._add_menu(record, names.get(key, {}))
+                if key == "home" and home_entry:
+                    record.menu_id = home_entry
+                else:
+                    self._add_menu(record, names.get(key, {}))
         for record in self.page_ids.filtered("is_legal"):
             if not record.menu_id:
                 self._add_menu(record, self._legal_spec(record.key)["name"] if record.key.startswith("legal_")

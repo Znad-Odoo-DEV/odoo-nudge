@@ -76,7 +76,7 @@ class TestSiteEdit(TransactionCase):
         template = {page["key"]: page for page in library.load("contracting")["pages"]}
         checked = 0
         for record in site.page_ids.filtered(lambda p: p.key in template and not p.key.startswith("legal")):
-            seo = template[record.key]["seo"]
+            seo = site._with_company_brand(template[record.key])["seo"]  # the sample brand is the company's name
             checked += 1
             view = record.view_id
             self.assertEqual(view.with_context(lang="en_US").website_meta_title, seo["title"]["en"], record.key)

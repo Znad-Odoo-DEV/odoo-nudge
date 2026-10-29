@@ -2,9 +2,15 @@
 
 ## 19.0.1.2.2
 
+- The shop build uses the products the person chose: they get the lowest website_sequence (first on /shop), and the shop plan (categories, descriptions, filters) works on them when the site has any, else on every product on sale. Tests: `/nudge_builder:TestShop`.
+- The chat tools build_shop, check_site and fix_site, called from the screen of a builder site (or with its id), use that site's website instead of answering "There is no website".
 - A database from before 1.1.0 gets the tools add_site_item, add_location and set_contact in the skill Building a website or shop (the skill is kept from updates; the update loads it again where nobody changed it). The seven sector skills have narrower trigger words: small talk brings none.
 - The header written with the company keeps the search box, sign in, language selector, social links and call to action: an `<ul>` whose items come from a t-call is no longer taken for an empty list. With website_sale installed the header and the footer were not written at all (its cart hangs on the search box). Tests: `/nudge_builder:TestFooterOfTheCompany`.
 - The contact strip of the header (the view `website.header_text_element`, called by every header) shows the company's phone and e-mail, no longer +1 555-555-5556 and info@yourcompany.example.com.
+- A template's sample brand ("Zahra Fashion", "Your Company") is replaced by the company's name in the page names, the copy and the SEO.
+- A page whose Arabic copy has another number of terms keeps its Arabic block by block (it lost all of it); the log names each block left untranslated. Tests: `/nudge_builder:TestR3Fixes`.
+- In shop mode the home product lists show the products the person chose, not Odoo's sample cards.
+- The menu has one Home: the home built takes the website's own Home entry ("/", which opens the home built once it is published) instead of adding a second one beside it.
 - Odoo 17: the sections of records are built again (a parameter named `uid` was read by `_()` as the id of the user).
 
 ## 19.0.1.2.1

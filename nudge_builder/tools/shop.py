@@ -173,9 +173,30 @@ def _flat(tree, lang, path=()):
     return out
 
 
-def _from_product_categories(env, website, lang):
+def chosen_products(env, website):
+    """:return: the products the person chose for the builder sites of ``website`` (``shop_product_ids``),
+    those still on sale for the website; empty when none was chosen"""
+    if "nudge.builder.site" not in env:
+        return env["product.template"].browse()
+    ids = []
+    for site in env["nudge.builder.site"].search([("website_id", "=", website.id)]):
+        ids += [int(i) for i in (site.shop_product_ids or []) if str(i).isdigit()]
+    return env["product.template"].browse(ids).exists().filtered(
+        lambda p: p.sale_ok and p.website_id.id in (False, website.id))
+
+
+def _scope(env, website, domain=()):
+    """The products the shop tools work on: the chosen ones when the site has any, else every product on sale"""
     Product = env["product.template"]
-    products = Product.search([("sale_ok", "=", True), ("website_id", "in", [False, website.id])], limit=MAX_PRODUCTS)
+    chosen = chosen_products(env, website)
+    if chosen:
+        return Product.search([("id", "in", chosen.ids), *domain], limit=MAX_PRODUCTS)
+    return Product.search([("sale_ok", "=", True), ("website_id", "in", [False, website.id]), *domain],
+                          limit=MAX_PRODUCTS)
+
+
+def _from_product_categories(env, website, lang):
+    products = _scope(env, website)
     out, seen = [], set()
     for category in products.mapped("categ_id").sorted("complete_name"):
         parts = [part.strip() for part in (category.complete_name or category.name).split(" / ")]
@@ -246,9 +267,7 @@ def plan_shop(env, website, template=None, ask_available=None):
     plan["categories"] = [node for node in wanted
                           if tuple(part.lower() for part in node["path"]) not in existing]
     # --- products into categories
-    Product = env["product.template"]
-    products = Product.search([("sale_ok", "=", True), ("website_id", "in", [False, website.id]),
-                               ("public_categ_ids", "=", False)], limit=MAX_PRODUCTS)
+    products = _scope(env, website, [("public_categ_ids", "=", False)])
     plan["assign"] = []
     for product in products:
         path = _match_category(product, wanted, wanted)
@@ -256,7 +275,7 @@ def plan_shop(env, website, template=None, ask_available=None):
             plan["assign"].append([product.id, path])
     # --- descriptions
     field = description_field(env)
-    todo = Product.search([("sale_ok", "=", True), ("website_id", "in", [False, website.id])], limit=MAX_PRODUCTS)
+    todo = _scope(env, website)
     todo = todo.filtered(lambda p: _empty(p, field))
     plan["descriptions"] = todo.ids[:MAX_DESCRIPTIONS]
     plan["descriptions_more"] = max(0, len(todo) - MAX_DESCRIPTIONS)
@@ -264,8 +283,7 @@ def plan_shop(env, website, template=None, ask_available=None):
     plan["attributes"] = []
     Attribute = env["product.attribute"] if "product.attribute" in env else None
     if Attribute is not None and "visibility" in Attribute._fields:
-        used = Product.search([("sale_ok", "=", True), ("website_id", "in", [False, website.id])],
-                              limit=MAX_PRODUCTS).mapped("attribute_line_ids")
+        used = _scope(env, website).mapped("attribute_line_ids")
         for attribute in used.mapped("attribute_id"):
             values = used.filtered(lambda line: line.attribute_id == attribute).mapped("value_ids")
             if attribute.visibility != "visible" and len(values) >= 2:
@@ -515,9 +533,8 @@ def build_shop(env, website, template=None, plan=None, apply=True, ask=None):
 # ----------------------------------------------------------------------
 # The tools Nudge offers in the chat
 # ----------------------------------------------------------------------
-def website_of(env, arguments):
-    Website = env["website"]
-    website = Website.browse(arguments["website_id"]).exists() if arguments.get("website_id") else Website.search([], limit=1)
+def website_of(env, arguments, screen=None):
+    website = checks.website_for(env, arguments, screen)
     if not website:
         raise ShopRefused(_("There is no website."))
     return website
@@ -539,7 +556,7 @@ class BuildShop(base.Action):
         "additionalProperties": False}
 
     def run(self, env, arguments, screen):
-        website = website_of(env, arguments)
+        website = website_of(env, arguments, screen)
         plan = plan_shop(env, website, None)
         return base.ToolResult(
             "The person is being shown the plan for the shop.",

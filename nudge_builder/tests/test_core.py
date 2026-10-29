@@ -201,8 +201,17 @@ class TestBuilder(NudgeCase, TransactionCase):
         site, pages = self.build()
         menus = pages.mapped("menu_id")
         self.assertTrue(menus)
-        names = [menu.name for menu in menus.sorted("sequence") if not menu.page_id.is_published and "privacy" not in menu.url]
-        self.assertEqual(names[:3], ["Home", "About us", "Contact"])  # no service records: no services page
+        home = pages.filtered(lambda page: page.key == "home")
+        if self.website.menu_id.child_id.filtered(lambda menu: menu.url == "/"):
+            # the website's own Home entry leads to the home built once it is published: no second Home
+            self.assertEqual(home.menu_id.url, "/")
+            self.assertEqual(len(self.website.menu_id.child_id.filtered(lambda menu: menu.name == "Home")), 1)
+            expected = ["About us", "Contact"]
+        else:
+            expected = ["Home", "About us", "Contact"]
+        names = [menu.name for menu in (menus - home.menu_id | home.menu_id.filtered(lambda menu: menu.url != "/"))
+                 .sorted("sequence") if not menu.page_id.is_published and "privacy" not in menu.url]
+        self.assertEqual(names[:len(expected)], expected)  # no service records: no services page
 
     def test_existing_pages_are_never_edited_and_the_new_url_is_next_free(self):
         self.no_provider()
