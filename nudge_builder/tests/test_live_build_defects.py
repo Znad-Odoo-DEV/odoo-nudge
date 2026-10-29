@@ -265,6 +265,14 @@ class TestFooterOfTheCompany(NudgeCase, TransactionCase):
         self.assertNotIn("info@saud.example", self.env.ref(key).arch_db, "the generic footer is untouched")
         other = self.env["website"].create({"name": "Other", "company_id": self.env.company.id})
         self.assertFalse(View.search([("key", "=", key), ("website_id", "=", other.id)]))
+        strip = View.search([("key", "=", "website.header_text_element"), ("website_id", "=", self.website.id)])
+        if self.env.ref("website.header_text_element", raise_if_not_found=False):
+            self.assertEqual(len(strip), 1, "the contact strip of the header is the website's own copy")
+            for lang in ("en_US", "ar_001"):
+                arch = strip.with_context(lang=lang).arch_db
+                self.assertNotIn("555-555-5556", arch, lang)
+                self.assertNotIn("yourcompany", arch, lang)
+                self.assertIn("info@saud.example", arch, lang)
         copyright_view = View.search([("key", "=", "website.footer_copyright_company_name"),
                                       ("website_id", "=", self.website.id)])
         if copyright_view:
