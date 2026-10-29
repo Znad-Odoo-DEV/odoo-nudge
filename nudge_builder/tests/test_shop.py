@@ -178,3 +178,38 @@ class TestShop(TransactionCase):
         self.assertTrue(any(line.startswith("Shop categories") for line in log))
         checked = site._run_checks()
         self.assertTrue(all({"level", "page_key", "message"} <= set(item) for item in checked))
+
+    def _chosen_site(self):
+        if "nudge.builder.site" not in self.env:
+            self.skipTest("the site model of the builder is not loaded")
+        if "website_sequence" not in self.env["product.template"]._fields:
+            self.skipTest("website_sale is not installed")
+        return self.env_d["nudge.builder.site"].create({
+            "name": "Raghad Chosen Site", "website_id": self.website.id, "shop": True,
+            "shop_product_ids": [self.paint.id]})
+
+    def test_chosen_products_come_first_and_the_tools_use_them(self):
+        site = self._chosen_site()
+        low = self.env["product.template"].search([("id", "!=", self.paint.id)], order="website_sequence", limit=1)
+        with patch("odoo.addons.nudge.tools.bulk.get_provider", side_effect=Refused("private")):
+            site._build_shop()
+        self.assertLess(self.paint.website_sequence, low.website_sequence)
+        self.assertEqual(shop.chosen_products(self.env_d, self.site), self.paint)
+        plan = shop.plan_shop(self.env_d, self.site, None)
+        self.assertEqual(plan["descriptions"], [])  # the chosen paint has its description
+        self.assertTrue(all(pid == self.paint.id for pid, _path in plan["assign"]))
+        site.shop_product_ids = []
+        self.assertIn(self.tile.id, shop.plan_shop(self.env_d, self.site, None)["descriptions"])
+
+    def test_build_shop_from_a_builder_site_screen_finds_its_website(self):
+        site = self._chosen_site()
+        tool = base.TOOLS["build_shop"]
+        screen = {"model": "nudge.builder.site", "record": {"id": site.id}}
+        result = tool.run(self.env_d, {"website_id": site.id + 100000}, screen)
+        self.assertTrue(result.pending)
+        self.assertEqual(result.pending["values"]["plan"]["website_id"], self.website.id)
+        if not self.env["website"].browse(site.id).exists():  # the id of the site, given with no screen
+            result = tool.run(self.env_d, {"website_id": site.id}, None)
+            self.assertEqual(result.pending["values"]["plan"]["website_id"], self.website.id)
+        with self.assertRaises(shop.ShopRefused):
+            tool.run(self.env_d, {"website_id": site.id + 100000}, None)
