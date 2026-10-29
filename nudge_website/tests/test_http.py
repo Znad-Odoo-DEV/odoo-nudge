@@ -40,10 +40,24 @@ class TestDoors(WebsiteCase, HttpCase):
     def test_a_product_comes_with_the_price_the_website_shows(self):
         if not hasattr(self, "chair"):
             self.skipTest("the shop is not installed")
+        template = type(self.chair)
+        asked_for = template._get_combination_info
+        shown = []
+
+        def spy(record, *args, **kwargs):
+            info = asked_for(record, *args, **kwargs)
+            if record == self.chair:
+                shown.append(info["price"])
+            return info
+
+        self.patch(template, "_get_combination_info", spy)
         self.authenticate(None, None)
         result = self.post("/nudge_website/ask", message="oak chair")
         product = next(row for row in result["products"] if row["name"] == "Raghad Oak Chair")
-        self.assertIn("120", product["price"])
+        self.assertTrue(shown, "The shop was asked for the price")
+        # The website's pricelist may discount the list price of 120 (website_sale's demo data does): what
+        # is shown is what the shop itself computes for the visitor
+        self.assertIn(f"{shown[-1]:,.2f}", product["price"])
         self.assertTrue(product["url"].startswith("/shop/"))
         self.assertNotIn("Ebrahim Secret Chair", str(result))
 

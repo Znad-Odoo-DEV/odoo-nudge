@@ -1089,14 +1089,29 @@ class NudgeBuilderSite(models.Model):
     def _shop_item(self, product, lang):
         """:return: one product.template of the shop as the plain dict the section renderers read, in one language"""
         product = product.with_context(lang=lang.code)
-        symbol = product.currency_id.symbol if product.currency_id else ""
+        price, currency = self._shop_price(product)
+        symbol = currency.symbol if currency else ""
         item = {"name": product.name or "", "summary": product.description_sale or "", "description": "",
                 "featured": False, "category": "",
                 "pictures": [{"url": f"/web/image/product.template/{product.id}/image_512", "alt": product.name or ""}]
                 if product.image_1920 else []}
-        if product.list_price:
-            item["price_text"] = content_sections.format_price(product.list_price, symbol)
+        if price:
+            item["price_text"] = content_sections.format_price(price, symbol)
         return item
+
+    def _shop_price(self, product):
+        """:return: ``(price, currency)`` of a product as the website shows it: the price of the first pricelist
+        the website offers (the one /shop opens with), in that pricelist's currency. The product's own price and
+        currency when Website Sale is not installed or no pricelist serves the website."""
+        fallback = (product.list_price, product.currency_id)
+        pricelist = self.website_id.pricelist_ids[:1] if "pricelist_ids" in self.website_id._fields else None
+        if not pricelist:
+            return fallback
+        try:
+            price = pricelist._get_product_price(product, 1.0)
+        except Exception:  # noqa: BLE001 - a price must never stop the page being built
+            return fallback
+        return (price, pricelist.currency_id) if price else fallback
 
     def _shop_block(self, block, spec, index, section_id):
         """The sections of a product list of a shop page, drawn from the products the person chose.

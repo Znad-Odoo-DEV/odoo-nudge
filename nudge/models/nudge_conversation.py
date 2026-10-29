@@ -1556,6 +1556,7 @@ class NudgeConversation(models.Model):
             "conversation_id": self.id,
             "role": "assistant",
             "content": text,
+            "mode": self._chat_mode(),
             # Only a complete turn can be replayed block for block
             "content_blocks": stop.get("blocks") if state in ("complete", "waiting") else False,
             "tool_calls": [
@@ -1586,7 +1587,9 @@ class NudgeConversation(models.Model):
             self.env["nudge.usage"]._add(
                 "chat", usage, message.cost, conversation.user_id, conversation.company_id,
                 conversation_id=self.id, message_id=message.id, provider_id=provider.id,
-                model_name=message.model_name)
+                model_name=message.model_name,
+                # A call that failed has no tokens: said on its line, not left to read as a call of nothing
+                intent=("failed: %s" % error["code"]) if error else False)
         if waiting:
             # The results are written once the person has decided: a call
             # goes to the model with its result, or does not go

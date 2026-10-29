@@ -184,7 +184,33 @@ class NudgeRule(models.Model):
             group["times"] += 1
             day = question.create_date.date()
             group["last"] = max(group["last"], day) if group["last"] else day
-        return groups
+        return self._merge_readers(groups)
+
+    @api.model
+    def _merge_readers(self, groups):
+        """One sentence the AI answered with a reading tool is one request, however it wrote the call each
+        time (a count one time, a search the next, "=" or "contains" on a name): the variants of a
+        sentence are counted together and the one used most often is the one that is proposed.
+        :return: ``groups`` with the variants of each sentence merged into the most used one"""
+        merged, variants = {}, {}
+        for name, group in groups.items():
+            if group["kind"] == "rule":
+                variants.setdefault(name[0], []).append((name, group))
+            else:
+                merged[name] = group
+        for found in variants.values():
+            found.sort(key=lambda item: (item[1]["times"], item[1]["last"]), reverse=True)
+            (name, best), others = found[0], found[1:]
+            best = dict(best, patterns=Counter(best["patterns"]), users=set(best["users"]))
+            for _other_name, other in others:
+                # a variant that fills other slots would say a sentence the template cannot take
+                if [slot["name"] for slot in other["slots"]] == [slot["name"] for slot in best["slots"]]:
+                    best["patterns"].update(other["patterns"])
+                best["users"] |= other["users"]
+                best["times"] += other["times"]
+                best["last"] = max(best["last"], other["last"])
+            merged[name] = best
+        return merged
 
     @api.model
     def _describe(self, tool_name, template):
@@ -247,6 +273,10 @@ class NudgeRule(models.Model):
                 "patterns": patterns, "times": group["times"], "user_count": len(group["users"]), "last_seen": group["last"],
                 "name": patterns[0][:200]}
             rule = Rule.search([("company_id", "=", company.id), ("key", "=", rule_key)], limit=1)
+            if not rule and group["kind"] == "rule":
+                # the AI wrote the call another way this time: still the request proposed (or decided) before
+                rule = Rule.search([("company_id", "=", company.id), ("fingerprint", "=", key), ("kind", "=", "rule")],
+                                   limit=1)
             if rule:
                 if rule.state == "proposed":
                     rule.write(values)

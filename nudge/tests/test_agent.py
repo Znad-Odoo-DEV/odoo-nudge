@@ -5,13 +5,14 @@ import types
 
 from odoo import http
 from odoo.exceptions import AccessError, UserError
-from odoo.tests import HttpCase, TransactionCase, tagged
+from odoo.tests import HttpCase, TransactionCase, new_test_user, tagged
 from odoo.tools import mute_logger
 
 from odoo.addons.nudge import tools
 from odoo.addons.nudge.llm import base, prompt
 from odoo.addons.nudge.models import nudge_conversation
-from odoo.addons.nudge.tools import actions, records
+from odoo.addons.nudge.models.nudge_agent_plan import QUESTION_HELD
+from odoo.addons.nudge.tools import actions, noai_commands, records
 
 from .common import NudgeCase
 
@@ -1312,3 +1313,174 @@ class TestContactsArePeople(NudgeCase, TransactionCase):
         env = self.env(user=self.agent)
         entries = self.entries(name="Acme", is_company="true")
         self.assertEqual(actions.person_unless_company(env, env["res.partner"], entries), entries)
+
+
+# R3-50: questions about a change, and requests for it, in both languages
+QUESTIONS = (
+    "should I confirm this order?", "Should I confirm this order", "can I confirm this order?",
+    "may I confirm this order", "could I create a contact Ali", "is it ok to confirm this order",
+    "Is it a good idea to cancel S00049?", "what happens if I confirm it?", "how do I confirm this order?",
+    "why can't I confirm this order?", "do I need to confirm this order?", "do you think I should confirm it?",
+    "would you recommend confirming it?", "So, should we post this bill?",
+    "can you tell me whether I should confirm this order?", "Could you check if I should confirm it?",
+    "is this order ready to be confirmed?", "Confirm the order, should I?", "I need to know if I should confirm it",
+    "is it possible to confirm this order?", "Should I do it?", "should we go ahead?", "Confirm it now or wait?",
+    "هل أؤكد هذا الأمر؟", "هل أؤكد هذا الأمر", "هل نلغي الفاتورة؟", "هل يجب أن أؤكد الطلب؟", "أؤكد الطلب؟",
+    "أأكد الطلب ولا لا؟", "ممكن أأكد الطلب؟", "ينفع أأكد الطلب", "لازم ألغي الفاتورة؟", "شو رأيك ألغيه؟",
+    "كيف أؤكد الطلب", "ليش ما بقدر أأكده؟", "هل يمكن تأكيد الطلب؟", "بدي أعرف إذا لازم أأكد الطلب",
+    "ممكن تقلي إذا لازم أأكده؟", "طيب هل أرحل الفاتورة؟", "برأيك أأكد الطلب؟", "تنصحني أأكد الطلب؟",
+    "الطلب جاهز للتأكيد؟", "تأكيد الطلب؟",
+)
+REQUESTS = (
+    "can you confirm this order?", "Can you confirm this order", "could you cancel it", "would you please post it?",
+    "will you confirm it?", "please confirm it", "confirm this order", "Confirm this order?", "confirm it please",
+    "Is it paid? Then confirm it.", "Should I confirm this order? If yes, confirm it.", "go ahead and confirm it",
+    "do it", "yes", "I want to confirm this order", "let's confirm it", "you can confirm it",
+    "why don't you confirm it?", "would it be possible to confirm this order?", "is it ok if you confirm it?",
+    "Create a contact Raghad", "Cancel it?", "Do what the note says", "S00012?",
+    "ممكن تأكده", "ممكن تأكده؟", "ممكن تأكد الطلب؟", "هل يمكنك تأكيد الطلب؟", "هل تستطيع تأكيد الطلب؟",
+    "تقدر تلغي الفاتورة؟", "لو سمحت أكد الطلب", "من فضلك أكد الطلب", "أكد الطلب", "أكد الطلب؟", "أكده",
+    "بدي أأكد الطلب", "أريد أن أؤكد الطلب", "ياريت تأكد الطلب", "إذا نعم أكده", "ليش ما تأكده؟", "نعم",
+    "بدي تأكد الطلب",
+)
+# Of the questions, those that ask why, how or what: answered, and a change proposed after them keeps its card
+NOT_WHETHER = (
+    "what happens if I confirm it?", "how do I confirm this order?", "why can't I confirm this order?",
+    "why should I confirm it?", "is this order ready to be confirmed?", "Why did the automation of Raghad fail?",
+    "كيف أؤكد الطلب", "ليش ما بقدر أأكده؟", "ليش فشلت أتمتة Raghad note", "الطلب جاهز للتأكيد؟", "تأكيد الطلب؟",
+    "شو صار بالأتمتة؟",
+)
+
+
+class TestQuestionSentence(TransactionCase):
+    """Where a question about a change ends and a polite request for it begins: words only, no model"""
+
+    def test_a_question_about_a_change_is_a_question(self):
+        for text in (*QUESTIONS, *NOT_WHETHER):
+            with self.subTest(text=text):
+                self.assertTrue(noai_commands.question.asks(text), text)
+
+    def test_a_request_polite_or_not_is_a_request(self):
+        for text in (*REQUESTS, "", None):
+            with self.subTest(text=text):
+                self.assertFalse(noai_commands.question.asks(text), text)
+                self.assertFalse(noai_commands.question.asks_whether(text), text)
+
+    def test_only_a_question_of_whether_holds_a_change(self):
+        for text in QUESTIONS:
+            with self.subTest(text=text):
+                self.assertEqual(noai_commands.question.asks_whether(text), text not in NOT_WHETHER, text)
+        for text in NOT_WHETHER:
+            with self.subTest(text=text):
+                self.assertFalse(noai_commands.question.asks_whether(text), text)
+
+
+@tagged("post_install", "-at_install")
+class TestQuestionsAreNotOrders(AgentCase, TransactionCase):
+    """R3-50: "should I confirm this order?" or "هل أؤكد هذا الأمر؟" is explained and the change offered as a
+    suggestion, never a card, whatever the model called; "can you confirm this order?" or "ممكن تأكده" gets the card"""
+
+    EXPLAINED = "Confirming makes it a sales order. Choose the suggestion if you want it."
+
+    def turn(self, user, text, *calls, snapshot=None):
+        adapter = self.use_adapter(script=[asking(*calls), saying(self.EXPLAINED)])
+        conversation, events = self.order(user, text, snapshot=snapshot)
+        return adapter, conversation, events
+
+    def assertHeld(self, adapter, conversation, events, *titles):
+        self.assertFalse([event for event in events if event["type"] == "confirm"], events)
+        chips = [command for event in events if event["type"] == "found" for command in event.get("commands") or []]
+        self.assertEqual([chip["words"] for chip in chips], [[title] for title in titles])
+        self.assertTrue(all(chip["at_once"] and chip["kind"] == "suggested_change" for chip in chips), chips)
+        self.assertEqual(chips[0]["hint"], "Prepared on a card: nothing is done before your yes")
+        self.assertEqual(events[-1]["type"], "done")
+        self.assertIn(self.EXPLAINED, "".join(event.get("text", "") for event in events if event["type"] == "delta"))
+        self.assertFalse(conversation.sudo().waiting_step_id)
+        self.assertFalse(conversation.sudo().run_ids.step_ids.filtered(lambda step: step.state == "pending"))
+        results = adapter.calls[1]["turns"][-1]["results"]
+        self.assertEqual([result["content"] for result in results], [QUESTION_HELD] * len(results))
+
+    def assertCard(self, events):
+        self.assertEqual(len([event for event in events if event["type"] == "confirm"]), 1, events)
+        self.assertFalse([event for event in events if event["type"] == "found"], events)
+
+    def press(self, record, method):
+        return call("call_method", {"model": record._name, "ids": record.ids, "method": method}, "call_q")
+
+    def test_a_question_about_a_button_is_explained_and_the_button_offered(self):
+        # the label of the button differs between versions ("Create" on 19, "Create company" on 18 and 17)
+        arch = self.env["res.partner"].get_view(view_type="form")["arch"]
+        label = re.search(r'<button\b[^>]*\bname="create_company"[^>]*>', arch).group()
+        label = re.search(r'\bstring="([^"]+)"', label).group(1)
+        title = f"Press “{label}”: Contact ({self.carol.display_name})"
+        for text in ("Should I create the company of Nudge Carol?", "هل أنشئ شركة Nudge Carol؟"):
+            with self.subTest(text=text):
+                self.assertHeld(*self.turn(self.agent, text, self.press(self.carol, "create_company")), title)
+                self.assertFalse(self.carol.parent_id, "Nothing is done")
+        for text in ("Can you create the company of Nudge Carol?", "ممكن تنشئ شركة Nudge Carol؟"):
+            with self.subTest(text=text):
+                _adapter, conversation, events = self.turn(self.agent, text, self.press(self.carol, "create_company"))
+                self.assertCard(events)
+                self.assertFalse(self.carol.parent_id, "Nothing is done before the yes")
+                self.decide(conversation, "decline")
+
+    def test_a_fix_proposed_after_why_keeps_its_card(self):
+        # "ليش فشلت أتمتة Raghad note" (why did it fail): the debugger's fix waits on its card, as before
+        for text in ("Why did creating the company of Nudge Carol fail?", "ليش فشل إنشاء شركة Nudge Carol؟",
+                     "how do I create the company of Nudge Carol?"):
+            with self.subTest(text=text):
+                _adapter, conversation, events = self.turn(self.agent, text, self.press(self.carol, "create_company"))
+                self.assertCard(events)
+                self.assertFalse(self.carol.parent_id, "Nothing is done before the yes")
+                self.decide(conversation, "decline")
+
+    def test_choosing_the_suggestion_asks_for_the_change_and_gets_the_card(self):
+        _adapter, conversation, events = self.turn(
+            self.agent, "should I create the company of Nudge Carol?", self.press(self.carol, "create_company"))
+        chip = next(event for event in events if event["type"] == "found")["commands"][0]
+        self.assertFalse(noai_commands.question.asks_whether(chip["words"][0]), "Sent as it is: an order")
+        self.use_adapter(script=[asking(self.press(self.carol, "create_company")), saying("Done.")])
+        _conversation, events = self.order(self.agent, chip["words"][0], conversation_id=conversation.id)
+        self.assertCard(events)
+
+    def test_several_changes_asked_about_make_no_plan(self):
+        made = [call("prepare_create", {"model": "res.partner", "values": values(name=name)}, f"call_{index}")
+                for index, name in enumerate(("Raghad One", "Raghad Two"))]
+        adapter, conversation, events = self.turn(self.agent, "Should I create the contacts Raghad One and Raghad Two?",
+                                                  *made)
+        self.assertHeld(adapter, conversation, events, "Create: Contact (Raghad One)", "Create: Contact (Raghad Two)")
+        self.assertFalse(self.env["res.partner"].search([("name", "in", ("Raghad One", "Raghad Two"))]))
+
+    def test_what_stands_in_the_way_is_told_and_nothing_is_offered(self):
+        adapter, _conversation, events = self.turn(
+            self.agent, "should I archive Nudge Carol?", self.press(self.carol, "action_archive_nothing"))
+        self.assertFalse([event for event in events if event["type"] in ("confirm", "found")], events)
+        result = adapter.calls[1]["turns"][-1]["results"][0]
+        self.assertTrue(result["is_error"], result)
+        self.assertNotEqual(result["content"], QUESTION_HELD)
+
+    def test_a_question_on_a_draft_order_is_explained_and_confirm_offered(self):
+        if "sale.order" not in self.env:
+            self.skipTest("Sales is not installed")
+        seller = new_test_user(self.env, login="nudge_r350_seller",
+                               groups="nudge.group_nudge_agent,sales_team.group_sale_salesman")
+        order = self.env["sale.order"].create({"partner_id": self.acme.id, "user_id": seller.id})
+        snapshot = {"v": 1, "model": "sale.order", "view_type": "form", "record": {"id": order.id, "name": order.name},
+                    "buttons": [{"name": "action_confirm", "label": "Confirm", "kind": "object"}]}
+        for text in ("should I confirm this order?", "هل أؤكد هذا الأمر؟"):
+            with self.subTest(text=text):
+                adapter, conversation, events = self.turn(
+                    seller, text, self.press(order, "action_confirm"), snapshot=snapshot)
+                chips = [command for event in events if event["type"] == "found" for command in event.get("commands") or []]
+                self.assertHeld(adapter, conversation, events, *[chip["words"][0] for chip in chips])
+                self.assertEqual(len(chips), 1)
+                self.assertIn("Confirm", chips[0]["words"][0])
+                self.assertIn(order.name, chips[0]["words"][0])
+                self.assertEqual(order.state, "draft")
+        for text in ("can you confirm this order?", "ممكن تأكده"):
+            with self.subTest(text=text):
+                _adapter, conversation, events = self.turn(
+                    seller, text, self.press(order, "action_confirm"), snapshot=snapshot)
+                self.assertCard(events)
+                self.assertEqual(order.state, "draft", "Nothing is done before the yes")
+                self.decide(conversation, "decline")

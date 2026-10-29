@@ -43,6 +43,11 @@ class NudgeRequestSize(models.TransientModel):
     _name = "nudge.request.size"
     _description = "Nudge Request Size"
 
+    @api.depends()
+    def _compute_display_name(self):
+        for record in self:
+            record.display_name = record.env._("Request Size")
+
     user_id = fields.Many2one("res.users", string="User", default=lambda self: self.env.user, readonly=True)
     company_id = fields.Many2one("res.company", string="Company", default=lambda self: self.env.company,
                                  readonly=True)

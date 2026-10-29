@@ -253,6 +253,9 @@ class TestOllamaProvider(NudgeCase, TransactionCase):
 
         if "product.product" not in self.env:
             self.skipTest("No products in this database")
+        # Other cabinets in the database (the demo data of website_sale has some) are as like the picture:
+        # the test is about the one it makes
+        self.env["product.product"].search([("name", "ilike", "cabinet")]).write({"active": False})
         self.env["product.product"].create({"name": "Nudge Oak Cabinet", "list_price": 320})
         self.use_adapter()
         self.server()
@@ -272,6 +275,9 @@ class TestOllamaProvider(NudgeCase, TransactionCase):
 
         if "product.product" not in self.env:
             self.skipTest("No products in this database")
+        # Other cabinets in the database (the demo data of website_sale has some) are as like the picture:
+        # the test is about the one it makes
+        self.env["product.product"].search([("name", "ilike", "cabinet")]).write({"active": False})
         self.env["product.product"].create({"name": "Nudge Oak Cabinet", "list_price": 320})
         self.env["product.product"].create({"name": "Nudge Product Cost Sheet", "list_price": 5})
         self.use_adapter()

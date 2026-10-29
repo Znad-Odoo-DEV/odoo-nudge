@@ -277,7 +277,6 @@ class TestAnswerCache(NudgeCase, TransactionCase):
         today = fields.Date.context_today(self.env["nudge.answer.cache"].with_user(self.user_a))
         self.user_a.name = "Raghad Ebrahim"
         for question, reply in (
-                ("What is my name in this database?", "Your name is Raghad Ebrahim."),
                 ("What is the date of today please?", f"Today is {today.isoformat()}."),
                 ("Which day of the month is it today?", f"It is {today.strftime('%B')} {today.day}.")):
             self.use_adapter(reply=reply)
@@ -383,9 +382,51 @@ class TestAnswerCache(NudgeCase, TransactionCase):
                 self.assertEqual((len(adapter.calls), last["type"], answer.content), (1, "done", steps), variant)
         self.assertTrue(entry.hits)
 
-    def test_an_answer_with_the_name_of_the_asker_is_not_kept_in_any_spelling(self):
+    def test_an_answer_with_the_name_of_the_asker_is_kept_with_a_place_for_the_name(self):
         asker = new_test_user(self.env, login="nudge_ar_name", groups="nudge.group_nudge_user", name="رَغْد")
+        other = new_test_user(self.env, login="nudge_ar_other", groups="nudge.group_nudge_user", name="سارة")
+        question = "كيف أنشئ عرض سعر في المبيعات؟"
         adapter = self.use_adapter(reply="أهلاً رغد، افتح المبيعات ثم اضغط جديد.")
-        self.ask_as(asker, "كيف أنشئ عرض سعر في المبيعات؟")
+        self.ask_as(asker, question)
+        entry = self.Cache.search([])
+        self.assertEqual(len(entry), 1, "The greeting no longer keeps the answer out of the cache")
+        self.assertNotIn("رغد", entry.answer)
+        _c, last, answer = self.ask_as(other, question)
+        self.assertEqual((len(adapter.calls), last["type"]), (1, "done"), "Served at zero tokens")
+        self.assertEqual(answer.content, "أهلاً سارة، افتح المبيعات ثم اضغط جديد.")
+        self.assertNotIn("رغد", answer.content)
+
+    def test_an_english_name_is_never_shown_to_another_asker(self):
+        self.user_a.name = "Raghad Ebrahim"
+        self.user_b.name = "Sara"
+        adapter = self.use_adapter(reply="Hello Raghad Ebrahim. " + STEPS)
+        self.ask_as(self.user_a, HOW)
+        _c, _last, answer = self.ask_as(self.user_b, HOW)
         self.assertEqual(len(adapter.calls), 1)
-        self.assertFalse(self.Cache.search([]), "The greeting is another person's name for the next asker")
+        self.assertEqual(answer.content, "Hello Sara. " + STEPS)
+        self.assertNotIn("Raghad", answer.content)
+        self.assertNotIn("Ebrahim", answer.content)
+
+    def test_a_name_part_in_the_body_is_not_a_greeting(self):
+        self.user_a.name = "Mitchell Admin"
+        self.user_b.name = "Sara Ahmed"
+        adapter = self.use_adapter(reply="Hi Mitchell, open Settings > Users > admin. " + STEPS)
+        self.ask_as(self.user_a, HOW)
+        self.assertFalse(self.Cache.search([]), "A name part in the body makes the answer personal: not kept")
+        self.ask_as(self.user_b, HOW)
+        self.assertEqual(len(adapter.calls), 2, "Never served to another from the cache")
+
+    def test_a_greeting_is_served_with_the_name_of_the_next_asker(self):
+        ebrahim = new_test_user(self.env, login="nudge_greet_e", groups="nudge.group_nudge_user", name="Ebrahim")
+        self.user_a.name = "Raghad"
+        adapter = self.use_adapter(reply="Hi Raghad, " + STEPS)
+        self.ask_as(self.user_a, HOW)
+        _c, _last, answer = self.ask_as(ebrahim, HOW)
+        self.assertEqual((len(adapter.calls), answer.content), (1, "Hi Ebrahim, " + STEPS))
+        arabic = new_test_user(self.env, login="nudge_greet_ar", groups="nudge.group_nudge_user", name="رَغْد")
+        question = "كيف أنشئ عرض سعر في المبيعات؟"
+        self.use_adapter(reply="مرحباً رغد، افتح المبيعات ثم اضغط جديد.")
+        self.ask_as(arabic, question)
+        ebrahim.name = "إبراهيم"
+        _c, _last, answer = self.ask_as(ebrahim, question)
+        self.assertEqual(answer.content, "مرحباً إبراهيم، افتح المبيعات ثم اضغط جديد.")
