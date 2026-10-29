@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 12:06+0000\n"
-"PO-Revision-Date: 2026-10-29 12:06+0000\n"
+"POT-Creation-Date: 2026-10-29 12:44+0000\n"
+"PO-Revision-Date: 2026-10-29 12:44+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -725,6 +725,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/models/nudge_search_try.py:0
 msgid "%(file)s, page %(page)s"
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "%(first)s to %(last)s"
 msgstr ""
 
 #. module: nudge
@@ -5929,8 +5935,6 @@ msgstr ""
 #: model:nudge.tour.step,label:nudge.tour_register_payment_3
 msgid "Create Payment"
 msgstr ""
-
-
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/document_catalogue.py:0
@@ -6745,6 +6749,7 @@ msgid "Discuss"
 msgstr ""
 
 #. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_ir_actions_server__display_name
 #: model:ir.model.fields,field_description:nudge.field_ir_http__display_name
 #: model:ir.model.fields,field_description:nudge.field_ir_model__display_name
 #: model:ir.model.fields,field_description:nudge.field_ir_model_fields__display_name
@@ -9322,6 +9327,7 @@ msgid ""
 msgstr ""
 
 #. module: nudge
+#: model:ir.model.fields,field_description:nudge.field_ir_actions_server__id
 #: model:ir.model.fields,field_description:nudge.field_ir_http__id
 #: model:ir.model.fields,field_description:nudge.field_ir_model__id
 #: model:ir.model.fields,field_description:nudge.field_ir_model_fields__id
@@ -18205,6 +18211,7 @@ msgid "Server"
 msgstr ""
 
 #. module: nudge
+#: model:ir.model,name:nudge.model_ir_actions_server
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_built__kind__server_action
 msgid "Server Action"
 msgstr ""

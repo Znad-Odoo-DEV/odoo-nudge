@@ -362,7 +362,11 @@ class NudgeAgent(models.Model):
             return refused
         # Nudge Agents 60.1, the guardrails: before any query and any AI
         if binding and not binding._open_now():
-            return dict(result, text=binding._hours_text(), source="hours", error=False)
+            # in the language of the answer: the sentence and the names of the days
+            asked = self.env["res.lang"].sudo().with_context(active_test=False).search(
+                [("code", "=", lang), ("active", "=", True)], limit=1) if lang else None
+            hours_binding = binding.with_context(lang=asked.code) if asked else binding
+            return dict(result, text=hours_binding._hours_text(), source="hours", error=False)
         if self._off_limits_hit(text):
             return dict(result, text=self._off_limits_text(), source="off_limits", error=False)
         if conversation and conversation.sudo().agent_id.id != self.id:

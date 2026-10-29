@@ -28296,3 +28296,9 @@ msgstr "تُجهَّز على بطاقة: لا يُنفَّذ شيء قبل مو
 #: code:addons/nudge/tools/approval_flow.py:0
 msgid "Old buttons replaced"
 msgstr "تم استبدال الأزرار القديمة"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_agent.py:0
+msgid "%(first)s to %(last)s"
+msgstr "من %(first)s إلى %(last)s"

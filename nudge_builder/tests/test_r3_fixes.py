@@ -197,3 +197,70 @@ class TestR3Fixes(NudgeCase, TransactionCase):
         item = site._shop_item(product, site._langs()[:1])
         self.assertNotIn("$", item["price_text"])
         self.assertIn(aed.symbol, item["price_text"])
+
+    def shop_site(self):
+        if "product.template" not in self.env or "product.public.category" not in self.env:
+            raise SkipTest("Website Sale is not installed")
+        shop_designer = new_test_user(
+            self.env, login="builder_r3_shop2", name="Raghad Shop Two",
+            groups="website.group_website_designer,nudge.group_nudge_user,product.group_product_manager")
+        site = self.bare_site(template_key="fashion_shop", shop=True).with_user(shop_designer)
+        if not site.shop_mode:
+            raise SkipTest("Website Sale is not installed")
+        return site
+
+    def test_show_the_records_keeps_the_home_product_list_of_a_shop(self):
+        site = self.shop_site()
+        products = self.env["product.template"].create([
+            {"name": "Raghad Silk Scarf", "list_price": 45}, {"name": "Ebrahim Linen Abaya", "list_price": 120}])
+        site.shop_product_ids = products.ids
+        spec = {"key": "home", "legal": True, "url": "/r3-shop-home", "name": {"en": "Home", "ar": "الرئيسية"}, "blocks": [
+            {"snippet": "s_product_list", "copy": {"en": {"title": "New arrivals"}, "ar": {"title": "وصل حديثاً"}}}]}
+        page = site._build_page(spec)
+        site.action_show_records()
+        for code, title in (("en_US", "New arrivals"), ("ar_001", "وصل حديثاً")):
+            arch = page.view_id.with_context(lang=code).arch_db
+            self.assertIn("Raghad Silk Scarf", arch, code)
+            self.assertIn(title, arch, code)
+        # a product added later is drawn by the next refresh
+        site.shop_product_ids = (products | self.env["product.template"].create(
+            {"name": "Raghad Cotton Shawl", "list_price": 30})).ids
+        self.assertIn("Show the records", site.action_show_records()["params"]["title"])
+        self.assertIn("Raghad Cotton Shawl", page.view_id.with_context(lang="en_US").arch_db)
+        self.assertIn("وصل حديثاً", page.view_id.with_context(lang="ar_001").arch_db)
+
+    def test_the_home_list_prices_in_the_website_currency_when_it_has_no_pricelist(self):
+        site = self.shop_site()
+        website = site.website_id
+        if "pricelist_ids" not in website._fields or "currency_id" not in website._fields:
+            raise SkipTest("Website Sale is not installed")
+        self.env["product.pricelist"].search([]).write({"active": False})
+        self.assertFalse(website.pricelist_ids)
+        other = self.env.ref("base.AED") if website.currency_id.name != "AED" else self.env.ref("base.USD")
+        other.active = True
+        product = self.env["product.template"].create({"name": "Raghad Price Shawl", "list_price": 45})
+        product.currency_id = other
+        if product.currency_id == website.currency_id:
+            raise SkipTest("the product currency cannot differ from the website's")
+        price, currency = site._shop_price(product)
+        self.assertEqual(currency, website.currency_id, "the currency /shop shows")
+        self.assertNotEqual(price, 0)
+        item = site._shop_item(product, site._langs()[:1])
+        self.assertIn(website.currency_id.symbol, item["price_text"])
+
+    def test_an_arabic_seo_change_is_written_in_arabic_and_english_stays(self):
+        site = self.built()
+        page = site.page_ids.filtered(lambda p: p.view_id and "website_meta_title" in p.view_id._fields)[:1]
+        if not page:
+            raise SkipTest("this Odoo has no SEO fields on views")
+        view = page.view_id
+        view.with_context(lang="en_US").write({"website_meta_title": "English title", "website_meta_description": "English text"})
+        site._seo_apply(page, {"website_meta_title": "عنوان جديد", "website_meta_description": "وصف جديد للصفحة"})
+        self.assertEqual(view.with_context(lang="ar_001").website_meta_title, "عنوان جديد")
+        self.assertEqual(view.with_context(lang="ar_001").website_meta_description, "وصف جديد للصفحة")
+        self.assertEqual(view.with_context(lang="en_US").website_meta_title, "English title")
+        self.assertEqual(view.with_context(lang="en_US").website_meta_description, "English text")
+        # English words without a language stay in the source language, even for a person viewing Arabic
+        site.with_context(lang="ar_001")._seo_apply(page, {"website_meta_title": "Fresh English title"})
+        self.assertEqual(view.with_context(lang="en_US").website_meta_title, "Fresh English title")
+        self.assertEqual(view.with_context(lang="ar_001").website_meta_title, "عنوان جديد")

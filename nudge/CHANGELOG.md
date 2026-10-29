@@ -2,6 +2,10 @@
 
 Current version: nudge 17.0.1.59.8, nudge_mcp 17.0.1.1.2, nudge_connect 17.0.1.0.4, nudge_messaging 17.0.1.0.6, nudge_ai 17.0.1.0.11, nudge_studio 17.0.1.0.12, nudge_documents 17.0.1.0.8, nudge_spreadsheet 17.0.1.0.11, nudge_builder 17.0.1.0.9, nudge_mail 17.0.1.0.15, nudge_discuss 17.0.1.0.9, nudge_website 17.0.1.0.5.
 
+## 19.0.1.60.4
+
+- The website agent's "closed now" sentence names the days in the language of the answer ("من الأحد إلى الخميس"), no longer "sun-thu".
+
 ## 19.0.1.60.3
 
 - Choosing the chip of a held change ("Press “Confirm”: Sales Order (S00109)") gives its card: the chip carries the change itself, no longer words the rules read again ("I found nothing called Press S00109").
