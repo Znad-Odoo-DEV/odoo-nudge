@@ -751,11 +751,35 @@ class NudgeAgentBinding(models.Model):
                 return True
         return False
 
+    def _days_text(self):
+        """:return: the office days written in the language of the environment (``sun-thu`` as the Arabic names
+        of Sunday and Thursday), '' when the channel has no days. The text as written when the day names of the
+        language cannot be had."""
+        self.ensure_one()
+        raw = (self.sudo().days or "").strip()
+        if not raw:
+            return ""
+        try:
+            from odoo.tools.misc import babel_locale_parse
+            names = babel_locale_parse(self.env.lang or "en_US").days["format"]["wide"]
+        except Exception:  # noqa: BLE001 - day names are a courtesy; the days as written still say it
+            return raw
+        shown = []
+        for part in raw.lower().replace(" ", "").split(","):
+            ends = [DAYS.index(end[:3]) for end in part.split("-") if end[:3] in DAYS]
+            if not ends or len(ends) != len(part.split("-")):
+                return raw
+            if len(ends) == 1:
+                shown.append(names[ends[0]])
+            else:
+                shown.append(self.env._("%(first)s to %(last)s", first=names[ends[0]], last=names[ends[-1]]))
+        return self.env._(", ").join(shown)
+
     def _hours_text(self):
         """:return: the fixed sentence of a channel asked outside its hours, without AI"""
         binding = self.sudo()
         when = binding.hours or self.env._("all day")
-        days = binding.days or self.env._("every day")
+        days = binding._days_text() or self.env._("every day")
         return self.env._(
             "We answer here on %(days)s, %(hours)s (time of %(zone)s). Please write again then.",
             days=days, hours=when, zone=binding._timezone().zone)

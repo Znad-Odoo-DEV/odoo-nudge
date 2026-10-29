@@ -20,6 +20,7 @@ from .nudge_builder_template import SNIPPETS
 from ..tools.safe import safe_text, safe_url
 
 OPS = ("add", "replace", "move_up", "move_down", "remove", "edit")
+ARABIC_LETTERS = re.compile(r"[؀-ۿ]")
 SEO_LIMITS = {"website_meta_title": 70, "website_meta_description": 170, "website_meta_keywords": 200}
 
 
@@ -236,10 +237,20 @@ class NudgeBuilderSiteEdit(models.Model):
             values[name] = text
         return values
 
-    def _seo_lang(self, lang):
-        """:return: the code of the site's language for a 2 letter code, the source language by default"""
+    def _seo_lang(self, lang, texts=None):
+        """:return: the code of the site's language for a 2 letter code. Without one: the language the texts are
+        written in (Arabic letters mean the site's Arabic), else the language the person is viewing when the site
+        has it and it is not Arabic, else the source language"""
         self.ensure_one()
         if not lang:
+            codes = self._langs().mapped("code")
+            if any(ARABIC_LETTERS.search(text or "") for text in (texts or [])):
+                arabic = [code for code in codes if compat.lang_code(code) == "ar"]
+                if arabic:
+                    return arabic[0]
+            viewing = self.env.lang
+            if texts and viewing in codes and compat.lang_code(viewing) != "ar":
+                return viewing
             return self._source_lang().code
         for code in self._langs().mapped("code"):
             if compat.lang_code(code) == lang.lower():
@@ -252,11 +263,11 @@ class NudgeBuilderSiteEdit(models.Model):
         values = self._seo_values(changes)
         if not values:
             raise UserError(self.env._("Say the new SEO title, description or keywords."))
-        code = self._seo_lang(lang)
         view = page.view_id
         values = {name: text for name, text in values.items() if name in view._fields}
         if not values:
             raise UserError(self.env._("This version of Odoo has no such SEO field."))
+        code = self._seo_lang(lang, list(values.values()))
         current = self._seo_read(view, list(values))
         lines = []
         for name, text in values.items():
@@ -274,7 +285,7 @@ class NudgeBuilderSiteEdit(models.Model):
         values = {name: text for name, text in self._seo_values(changes).items() if name in page.view_id._fields}
         if not values:
             raise UserError(self.env._("Say the new SEO title, description or keywords."))
-        code = self._seo_lang(lang)
+        code = self._seo_lang(lang, list(values.values()))
         view = page.view_id
         before = self._seo_read(view, list(values))
         if expect_hash and sections.digest(repr(sorted(before.items()))) != expect_hash:

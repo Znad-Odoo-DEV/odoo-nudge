@@ -907,7 +907,9 @@ class NudgeBuilderSite(models.Model):
             return False
         codes = [lang.code for lang in self._langs()]
         source = self._source_lang().code
-        has_records = bool(self._kind_records(kind))
+        # the home product lists of a shop are drawn from the products the person chose, not from records
+        from_shop = kind == "product" and self.shop_mode and bool(self.shop_products())
+        has_records = from_shop or bool(self._kind_records(kind))
         trees, wraps, originals = {}, {}, {}
         for code in codes:
             arch = view.with_context(lang=code).arch_db
@@ -936,6 +938,10 @@ class NudgeBuilderSite(models.Model):
                         peer = peers[position] if position < len(peers) else node
                         copy[compat.lang_code(code)] = self._section_words(peer)
                     block = {"kind": kind, "layout": node.get("data-nb-layout"), "copy": copy}
+                if from_shop:
+                    renders.append(self._shop_block(block, template_page or {"key": page.key}, index or 0,
+                                                    section_id=f"r{position}"))
+                    continue
                 renders.append(self._content_block(
                     block, template_page or {"key": page.key}, index or 0, section_id=f"r{position}"))
             for code in codes:
@@ -1104,9 +1110,19 @@ class NudgeBuilderSite(models.Model):
         the website offers (the one /shop opens with), in that pricelist's currency. The product's own price and
         currency when Website Sale is not installed or no pricelist serves the website."""
         fallback = (product.list_price, product.currency_id)
-        pricelist = self.website_id.pricelist_ids[:1] if "pricelist_ids" in self.website_id._fields else None
+        website = self.website_id
+        pricelist = website.pricelist_ids[:1] if "pricelist_ids" in website._fields else None
         if not pricelist:
-            return fallback
+            # no pricelist of its own: /shop shows the website's default currency (the company's), so does the list
+            currency = website.currency_id if "currency_id" in website._fields else None
+            if not currency or not product.currency_id or currency == product.currency_id:
+                return fallback
+            try:
+                price = product.currency_id._convert(
+                    product.list_price, currency, website.company_id or self.company_id, fields.Date.today())
+            except Exception:  # noqa: BLE001 - a price must never stop the page being built
+                return fallback
+            return price, currency
         try:
             price = pricelist._get_product_price(product, 1.0)
         except Exception:  # noqa: BLE001 - a price must never stop the page being built
