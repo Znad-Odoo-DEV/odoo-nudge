@@ -30,13 +30,8 @@ def consented(session_value):
 
 
 def spent_today(env, company):
-    """:return: the tokens the AI spent today on the visitors of the websites of ``company``: the plain assistant
-    and the agents of the website channel together, under one budget (``nudge_public_budget``)"""
-    # sudo: a total of tokens, nothing of anyone
-    tokens, _cost = env["nudge.usage"].sudo()._spent([
-        ("company_id", "=", company.id), ("date", "=", fields.Date.context_today(env["res.users"])),
-        "|", ("origin", "=", "website"), ("conversation_id.agent_binding_id.channel", "=", "website")])
-    return tokens
+    """:return: the tokens spent today on the visitors of the websites of ``company`` (``assistant.spent_today``)"""
+    return assistant.spent_today(env, company)
 
 
 def website_bindings(env, website):

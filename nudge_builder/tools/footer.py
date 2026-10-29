@@ -22,6 +22,13 @@ MAX_LINKS = 4  # links a footer column of sample links is given
 COPYRIGHT = "Copyright &amp;copy; Company name"
 
 
+def is_sample(value):
+    """:return: whether ``value`` is Odoo's sample company data (phone, email, street) and not a company's own"""
+    value = value or ""
+    return bool(SAMPLE_EMAIL.search(value) or "555-555-5556" in value
+                or "Marina Blvd" in value)
+
+
 def _text(node):
     return " ".join(node.xpath("string()").split())
 
@@ -198,9 +205,11 @@ def _words(root, facts):
             for child in list(node):
                 node.remove(child)
             node.text = name
-    if facts.get("logo_url"):
-        for node in root.xpath(".//img[contains(@src, 'website_logo.svg')]"):
+    for node in root.xpath(".//img[contains(@src, 'website_logo.svg')]"):
+        if facts.get("logo_url"):
             node.set("src", facts["logo_url"])
+        else:  # no logo of the company: Odoo's "Your Logo" picture does not stay
+            _remove(node)
     _sub_text(root, SAMPLE_NAME, name)
 
 

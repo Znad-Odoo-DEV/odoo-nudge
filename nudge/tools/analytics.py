@@ -79,11 +79,22 @@ def grouped(env, model, domain, groups, measures, limit=None, order=None, second
         raise TooBig("This is too big to count in a moment: add conditions, or open the list.") from None
 
 
+def _operator_words(env):
+    """:return: the operators as words, in the language of the person (numeric comparisons stay symbols)"""
+    return {
+        "=": _("is"), "!=": _("is not"), "contains": _("contains"),
+        "does not contain": _("does not contain"), "in": _("is"), "not in": _("is not"),
+        "is set": _("is set"), "is not set": _("is not set"),
+    }
+
+
 def describe_filter(env, model, conditions, match="all"):
-    """NP-02: the filter a figure was worked out on, in words the person reads: ``Invoice: Status is posted``.
-    The model's name and the labels of its fields, in the language of the person; the conditions as asked,
-    so that a figure is never read as wider or narrower than it is."""
+    """NP-02: the filter a figure was worked out on, in words the person reads: ``Invoice: Status is Posted``.
+    The model's name, the labels of its fields, the operators and the labels of a selection, in the language
+    of the person; the conditions as asked, so that a figure is never read as wider or narrower than it is."""
     parts = []
+    words = _operator_words(env)
+    or_ = " %s " % _(" or ").strip()
     for condition in conditions or []:
         try:
             label = get_fields(model, [condition["field"].split(".")[0]])[condition["field"].split(".")[0]]
@@ -99,9 +110,19 @@ def describe_filter(env, model, conditions, match="all"):
                 value = f" {record.display_name}" if record else value
             except AccessError:
                 pass
-        parts.append(f"{label} {condition['operator']}{value}")
-    glue = _(" or ") if match == "any" else ", "
-    return "%s: %s" % (model._description or model._name, glue.join(parts) if parts else _("all records"))
+        elif target is not None and target.type == "selection" and value:
+            # The labels of the choices, one or several ("draft,sent" is "Quotation or Quotation Sent")
+            labels = dict(target._description_selection(env))
+            names = [labels.get(item.strip(), item.strip()) for item in condition["value"].split(",") if item.strip()]
+            value = " " + or_.join(cut(name, 60) for name in names)
+        parts.append(f"{label} {words.get(condition['operator'], condition['operator'])}{value}")
+    glue = or_ if match == "any" else ", "
+    name = model._description or model._name
+    try:
+        name = env["ir.model"].sudo()._get(model._name).name or name
+    except Exception:  # noqa: BLE001 - the name of the model in English is enough
+        pass
+    return "%s: %s" % (name, glue.join(parts) if parts else _("all records"))
 
 
 def list_action(model, domain, title):

@@ -171,11 +171,16 @@ registry.category("web_tour.tours").add("nudge_screen", {
         {
             content: "Type in the form without saving",
             trigger: ".o_form_view .o_field_widget[name=email] input",
-            run: "text changed@nudge.example",
+            run: "text changed@nudge.example && press Tab",
         },
         {
             trigger: "body",
-            async run() { await formHas("email", "changed@nudge.example"); },
+            async run() { await formHas("email", "changed@nudge.example && press Tab"); },
+        },
+        {
+            isCheck: true,
+            content: "The form holds the typed address before the question is sent",
+            trigger: ".o_form_view .o_field_widget[name=email] input:propValue('changed@nudge.example')",
         },
         {
             trigger: ".o_nudge_input",

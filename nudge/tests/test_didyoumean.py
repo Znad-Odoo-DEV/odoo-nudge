@@ -6,6 +6,7 @@ from odoo import fields
 from odoo.exceptions import AccessError, UserError
 from odoo.tests import TransactionCase, new_test_user, tagged
 
+from odoo.addons.nudge.llm import loop
 from odoo.addons.nudge.tools import noai_commands
 from odoo.addons.nudge.tools.noai_commands import bridge
 
@@ -289,3 +290,69 @@ class TestBridge(NudgeCase, TransactionCase):
     def test_an_english_question_is_searched_as_before(self):
         found = self.env["nudge.doc.passage"].with_user(self.user_a)._search_text("zxqtax", app="didyoumean_app")
         self.assertIn(self.passage, found)
+
+
+@tagged("post_install", "-at_install")
+class TestDidYouMeanArabic(NudgeCase, TransactionCase):
+    """Filming Release 3: Arabic slips are offered back like English ones, and a real question is the AI's."""
+
+    SCREEN = {"model": "res.partner", "view_type": "list"}
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.raghad = new_test_user(
+            cls.env, login="nudge_dym_ar", groups="nudge.group_nudge_agent,base.group_partner_manager")
+
+    def setUp(self):
+        super().setUp()
+        self.env["ir.config_parameter"].sudo().set_param("nudge.noai_first", "1")
+
+    def events_of(self, text):
+        conversation = self.env["nudge.conversation"].with_user(self.raghad)._chat_open()
+        job = conversation._chat_prepare(text, snapshot=self.SCREEN)
+        return list(loop.run(job, conversation._chat_record))
+
+    def chips_of(self, events):
+        return [command for event in events if event["type"] == "found" for command in event.get("commands") or []]
+
+    def test_arabic_slips_are_offered_back_like_english_ones(self):
+        provider = self.provider
+        provider.active = False
+        noai = self.env["nudge.noai"].with_user(self.raghad)
+        for slip in ("sales ordrs", "اوامر البيغ", "اوامر لبيع", "اواامر البيع", "عروض الاسعر", "فواتر"):
+            with self.subTest(slip=slip):
+                self.assertTrue(noai.slip_offered(slip), slip)
+        # A phrase written right is not a slip
+        for text in ("اوامر البيع", "شكرا", "هل أؤكد هذا الأمر؟"):
+            with self.subTest(text=text):
+                self.assertFalse(noai.slip_offered(text), text)
+
+    def test_an_arabic_slip_of_a_phrase_is_a_chip_before_the_ai(self):
+        adapter = self.use_adapter(reply="An answer by AI.")
+        for slip in ("sales ordrs", "اوامر البيغ", "اوامر لبيع"):
+            with self.subTest(slip=slip):
+                events = self.events_of(slip)
+                chips = self.chips_of(events)
+                self.assertEqual(len(chips), 1, events)
+                self.assertEqual(chips[0]["kind"], "did_you_mean")
+        self.assertEqual(adapter.calls, [], "The AI was not called for a slip")
+
+    def test_a_question_the_rules_do_not_own_goes_to_the_ai_not_to_a_chip(self):
+        adapter = self.use_adapter(reply="An answer by AI.")
+        for text in ("كيف أقفل السنة المالية؟", "How do I close the fiscal year in Odoo?",
+                     "كيف أقفل السنة المالية في أودو؟"):
+            with self.subTest(text=text):
+                adapter.calls.clear()
+                events = self.events_of(text)
+                self.assertFalse(self.chips_of(events), events)
+                self.assertEqual(len(adapter.calls), 1, "The AI answers")
+
+    def test_with_an_ai_only_a_sentence_made_of_known_words_is_stopped_for_a_slip(self):
+        parsed = noai_commands.parse("كيف أقفل السنة المالية؟", self.SCREEN)
+        self.assertTrue(parsed.candidates and parsed.candidates[0]["corrections"], "There is a candidate...")
+        noai = self.env["nudge.noai"]
+        self.assertEqual(noai._slips_of(parsed.candidates, False), parsed.candidates)
+        self.assertEqual(noai._slips_of(parsed.candidates, True), [], "...which the AI's question outranks")
+        slip = noai_commands.parse("sales ordrs", self.SCREEN)
+        self.assertEqual(noai._slips_of(slip.candidates, True), slip.candidates)

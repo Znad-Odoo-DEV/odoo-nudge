@@ -361,3 +361,31 @@ class TestAnswerCache(NudgeCase, TransactionCase):
         # What comes next in the conversation is read as the history of a talk, a message of the assistant
         turns = conversation.sudo()._chat_build_turns()
         self.assertEqual([turn["role"] for turn in turns], ["user", "assistant"])
+
+    def test_an_arabic_question_is_served_however_it_is_spelt(self):
+        # Filming Release 3: the Arabic ask of the same explanation was not served from the cache
+        question = "كيف تعمل دورة عرض السعر؟"
+        steps = "افتح المبيعات ثم اضغط جديد، واختر العميل وأضف المنتجات ثم أرسل العرض."
+        adapter = self.use_adapter(reply=steps)
+        self.ask_as(self.user_a, question)
+        entry = self.Cache.search([])
+        self.assertEqual((entry.answer, entry.language), (steps, "ar"))
+        for variant in (
+            "كَيْفَ تَعْمَلُ دَوْرَةُ عَرْضِ السِّعْرِ ؟",   # the marks
+            "كيف تعمل دوره عرض السعر",                     # ta marbuta written as ha, no question mark
+            "كيف  تعمل ، دورة عرض السعر!!",                # punctuation and spaces
+            "كيف تعمل دورة عرض السعـــر؟",                 # stretched
+            "كيف تعمل دورات عرض السعر",                    # the plural of the cycle
+        ):
+            with self.subTest(variant=variant):
+                self.Cache.search([]).filtered(lambda other: other.id != entry.id).unlink()
+                conversation, last, answer = self.ask_as(self.user_b, variant)
+                self.assertEqual((len(adapter.calls), last["type"], answer.content), (1, "done", steps), variant)
+        self.assertTrue(entry.hits)
+
+    def test_an_answer_with_the_name_of_the_asker_is_not_kept_in_any_spelling(self):
+        asker = new_test_user(self.env, login="nudge_ar_name", groups="nudge.group_nudge_user", name="رَغْد")
+        adapter = self.use_adapter(reply="أهلاً رغد، افتح المبيعات ثم اضغط جديد.")
+        self.ask_as(asker, "كيف أنشئ عرض سعر في المبيعات؟")
+        self.assertEqual(len(adapter.calls), 1)
+        self.assertFalse(self.Cache.search([]), "The greeting is another person's name for the next asker")

@@ -43,7 +43,14 @@ SELF_QUESTION = re.compile(
     r"|(?:is|would)\s+it\s+(?:ok|okay|fine|alright|all\s+right)\s+(?:to|if)\b"
     r"|(?:لازم|لزم|هل\s+(?:لازم|يجب|ينفع|يصح))\s+[أا]"
     r"|هل\s+(?:[أا]قدر|[أا]ستطيع|[أا]مكن|يمكنني|يجوز\s+لي|ينفع\s+[أا])"
-    r"|(?:ممكن|ينفع|يجوز)\s+[أا]أ)",
+    r"|(?:ممكن|ينفع|يجوز)\s+[أا]أ"
+    # Any "هل" question about a first person verb ("هل أؤكد ...", "هل نلغي ..."), or about what is due, allowed or
+    # right ("هل يجب", "هل يصح"); "هل تستطيع ..." / "هل يمكنك ..." are addressed to Nudge and stay commands
+    r"|هل\s+(?:[أإ]|ن(?=[ء-ي]{3}))"
+    r"|هل\s+(?:يجب|يلزم|ينبغي|يصح|ينفع|يجوز|لازم|يمكن(?!ك))"
+    r"|(?:ممكن|ينفع|يجوز|لازم|يجب)\s+[أإ]"
+    # A first person verb ("أؤكد", "أأكد": an imperative does not double its hamza) asked about at the end
+    r"|(?:أؤ|أأ)[ء-ي]+[^؟?]*[؟?]\s*$)",
     re.IGNORECASE)
 # The words of a change the lexicon has no verb for, and of a look: "can I cancel ..." is a question about a change,
 # "can I see ..." is a polite request to show
@@ -99,6 +106,8 @@ class Parse:
         # have meant when this one is not sure enough to be acted on (see ``parse``)
         self.corrections = []
         self.candidates = []
+        # The words of the sentence the lexicon says nothing of: a sentence the rules own has none (or a name)
+        self.free = 0
 
     def __repr__(self):
         return f"Parse({self.intent!r}, {self.confidence:.2f}, kind={self.kind!r}, {self.slots!r})"
@@ -369,6 +378,7 @@ def _interpret(text, spans, screen):
     result = Parse(text)
     if not spans:
         return result
+    result.free = len([span for span in spans if not span.cats])
     cats = set().union(*(span.cats for span in spans))
     kinds = [span for span in spans if span.cats & set(KINDS)]
     primary = next((span for span in kinds if not span.cats & {"contact"}), kinds[0] if kinds else None)
@@ -568,7 +578,8 @@ def _summary(parsed, fixes=()):
     """:return: ``parsed`` as a plain dict, for the panel to offer it"""
     slots = {key: value for key, value in parsed.slots.items() if key != "value_spans"}
     return {"intent": parsed.intent, "kind": parsed.kind, "confidence": parsed.confidence, "slots": slots,
-            "states": list(parsed.states), "text": fuzzy.corrected_text(parsed.text, fixes) if fixes else parsed.text,
+            "free": parsed.free, "states": list(parsed.states),
+            "text": fuzzy.corrected_text(parsed.text, fixes) if fixes else parsed.text,
             "corrections": [fix.record() for fix in fixes]}
 
 

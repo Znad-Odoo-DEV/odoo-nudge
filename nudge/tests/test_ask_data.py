@@ -235,3 +235,34 @@ class TestAskData(NudgeCase, TransactionCase):
         job = conversation._chat_prepare("Hello again")
         self.assertTrue(job["system"][-1].startswith(prompt.TALK_MODE))
         self.assertNotIn("read, count, chart and open", job["system"][-1])
+
+    # -- the filter in the words of the person -------------------------------
+    def describe(self, conditions, match="all", lang=None):
+        env = self.env(user=self.user_contacts)
+        if lang:
+            env = env(context=dict(env.context, lang=lang))
+        return tools.analytics.describe_filter(env, env["res.partner"], conditions, match)
+
+    def test_the_filter_reads_as_words_in_english(self):
+        said = self.describe([{"field": "type", "operator": "in", "value": "contact,invoice"}])
+        self.assertEqual(said, "Contact: Address Type is Contact or Invoice")
+        said = self.describe([
+            {"field": "name", "operator": "contains", "value": "Nudge"},
+            {"field": "type", "operator": "!=", "value": "delivery"}])
+        delivery = dict(self.env["res.partner"]._fields["type"]._description_selection(self.env))["delivery"]
+        self.assertEqual(said, "Contact: Name contains Nudge, Address Type is not " + delivery)
+        said = self.describe([{"field": "email", "operator": "is set", "value": ""}], "any")
+        self.assertEqual(said, "Contact: Email is set")
+        self.assertEqual(self.describe([]), "Contact: all records")
+
+    def test_the_filter_reads_in_the_language_of_the_person(self):
+        # Filming Release 3: "Sales Order: الحالة in draft,sent" in the middle of an Arabic answer
+        self.env["res.lang"]._activate_lang("ar_001")
+        self.env["ir.module.module"].search([("name", "=", "base")])._update_translations(["ar_001"])
+        said = self.describe([{"field": "type", "operator": "in", "value": "contact,invoice"}], lang="ar_001")
+        self.assertRegex(said, r"[\u0600-\u06ff]", said)
+        for english in ("Contact", "Address Type", "Invoice Address", "draft", ",invoice"):
+            self.assertNotIn(english, said)
+        self.assertNotIn(" in ", said)
+        # The same words, in two languages, say the same thing
+        self.assertNotEqual(said, self.describe([{"field": "type", "operator": "in", "value": "contact,invoice"}]))
