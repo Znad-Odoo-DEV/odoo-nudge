@@ -1,5 +1,9 @@
 # Changelog
 
+## 19.0.1.2.3
+
+- The home product lists of a shop show the price and currency the website shows (its pricelist), no longer the product's own currency.
+
 ## 19.0.1.2.2
 
 - The shop build uses the products the person chose: they get the lowest website_sequence (first on /shop), and the shop plan (categories, descriptions, filters) works on them when the site has any, else on every product on sale. Tests: `/nudge_builder:TestShop`.

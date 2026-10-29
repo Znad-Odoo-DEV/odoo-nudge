@@ -49,7 +49,8 @@ MINOR = frozenset(("on", "up", "off", "out", "down"))
 # (and "lot", a word of everyday speech as much as of the stock: "thanks a lot" asks for no skill)
 GENERIC_WORDS = ("customer client invoice order payment product record contact employee company sale purchase "
                  "vendor supplier account document item amount price number user person team lot "
-                 "عميل فاتوره طلب دفع منتج موظف شركه سعر")
+                 "عميل فاتوره طلب دفع منتج موظف شركه سعر "
+                 "امر اوامر بيع مبيعات شراء مشتريات مورد عملاء طلبات فواتير منتجات موظفين شركات سجل")
 W_GENERIC = 0.35
 F_TEXT_MAX = 1.5
 K1 = 1.2
@@ -80,7 +81,8 @@ if then than too very also as not no yes about into over under again any some al
 same s t get got let like want need would tell show give make let ok okay hi hello thanks thank
 هل ما ماذا لماذا ليش شو ايش وش متى اين وين من الى على عن في مع هذا هذه هذي هاي هادا ذلك التي الذي اللي انا نحن
 انت انتي هو هي هم لي لنا لك له لها بدي ابغى ابي اريد ممكن لو اذا يا كان كانت يكون حتى لكن او ثم قد لا شي شيء
-عند عندنا عندي لما فيه فيها هاد هاذا بس كمان مرة انو انه انها اللي""".split())
+عند عندنا عندي لما فيه فيها هاد هاذا بس كمان مرة انو انه انها اللي
+خاص خاصه خاصتي الخاص الخاصه خاصتنا""".split())
 
 # The same small words as people type them in Latin letters (Arabizi): the, to, of, from, on, all, what, how,
 # I want, we have, only, but; they say nothing of the work

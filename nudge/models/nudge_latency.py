@@ -23,6 +23,11 @@ USAGE_BY_MESSAGE = (
 USAGE_OF_MESSAGE = (
     "SELECT MIN(provider_id) AS provider_id, MIN(tier) AS tier, SUM(cost_saved) AS cost_saved "
     "FROM nudge_usage WHERE message_id = m.id")
+# The mode of an answer: its own, or, for the ones written before answers carried it, that of the question
+# before it in the conversation
+MODE_OF_MESSAGE = (
+    "COALESCE(m.mode, (SELECT q.mode FROM nudge_message q WHERE q.conversation_id = m.conversation_id "
+    "AND q.role = 'user' AND q.id < m.id AND q.mode IS NOT NULL ORDER BY q.id DESC LIMIT 1))")
 
 
 class NudgeLatencyReport(models.Model):
@@ -98,7 +103,7 @@ class NudgeLatencyReport(models.Model):
                 SELECT
                     MIN(m.id) AS id,
                     (m.create_date AT TIME ZONE 'UTC')::date AS date,
-                    m.mode AS mode,
+                    {MODE_OF_MESSAGE} AS mode,
                     u.provider_id AS provider_id,
                     c.user_id AS user_id,
                     c.company_id AS company_id,
@@ -184,7 +189,7 @@ class NudgeLatencyReport(models.Model):
             return [dict(zip(keys, row)) for row in self.env.cr.fetchall()]
 
         return {
-            "by_mode": group("COALESCE(m.mode, '')"),
+            "by_mode": group(f"COALESCE({MODE_OF_MESSAGE}, '')"),
             "by_provider": group(f"COALESCE({provider_name}, '')", "LEFT JOIN nudge_provider p ON p.id = u.provider_id"),
             "by_user": group(
                 "COALESCE(pa.name, '')",

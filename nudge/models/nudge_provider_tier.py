@@ -193,7 +193,9 @@ class NudgeConversation(models.Model):
             self.env["nudge.usage"]._add(
                 "chat", usage, answering._compute_cost(usage, model), conversation.user_id,
                 conversation.company_id, conversation_id=self.id, provider_id=answering.id,
-                model_name=model, tier=tier.ECONOMY)
+                model_name=model, tier=tier.ECONOMY,
+                # No tokens because the call failed or gave nothing, said on the line and not left to read as 0
+                intent=("failed: %s" % outcome["error"]["code"]) if outcome.get("error") else "gave %s" % reason)
         _logger.info("Nudge: the economy model %s of conversation %s gave %s: %s answers instead",
                      model, self.id, reason, main.model_name)
         main._ensure_capabilities()

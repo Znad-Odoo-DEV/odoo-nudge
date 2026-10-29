@@ -215,6 +215,12 @@ class NudgeNoai(models.AbstractModel):
             parsed = noai_commands.parse(text, screen)
         if has_ai and self._not_read_whole(text, parsed):
             return None
+        if (has_ai and parsed.intent and parsed.intent not in READ_INTENTS
+                and noai_commands.question.asks(text)):
+            # R3-50: a question about a change ("is it a good idea to confirm this order?", "تأكيد الطلب؟") is
+            # explained by the AI, with the change offered (nudge.conversation._chat_hold): never a card here, nor a
+            # name looked for in its words ("I found nothing called “should I”")
+            return None
         plan = None
         if not (parsed.intent and parsed.confidence >= noai_commands.THRESHOLD):
             # NP-11: the day of the person is counted, and a sentence nearly understood is offered back

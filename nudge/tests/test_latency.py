@@ -209,3 +209,38 @@ class TestUsageRetention(NudgeCase, TransactionCase):
         usage = self.add(self.today)
         with self.assertRaises(AccessError):
             usage.sudo().unlink()
+
+
+@tagged("post_install", "-at_install")
+class TestLatencyMode(NudgeCase, TransactionCase):
+    """R3-37: every answer has a mode in the panel, and the panel opens in the Nudge app."""
+
+    def test_an_answer_without_a_mode_takes_that_of_its_question(self):
+        conversation = self.env["nudge.conversation"].sudo().create({"user_id": self.user_a.id, "name": "Raghad"})
+        Message = self.env["nudge.message"].sudo()
+        Message.create({"conversation_id": conversation.id, "role": "user", "content": "hi", "mode": "talk"})
+        Message.create({"conversation_id": conversation.id, "role": "assistant", "state": "complete"})
+        self.env.flush_all()
+        rows = self.env["nudge.latency.report"].with_user(self.manager).search([("user_id", "=", self.user_a.id)])
+        self.assertEqual(rows.mode, "talk")
+        self.assertEqual(
+            self.env["nudge.latency.report"].with_user(self.manager).panel(
+                fields.Date.today() - relativedelta(days=1), fields.Date.today() + relativedelta(days=1))
+            ["by_mode"][0]["name"], "talk")
+
+    def test_a_fixed_answer_records_its_mode(self):
+        conversation = self.env["nudge.conversation"].sudo().create({"user_id": self.user_a.id, "name": "Raghad"})
+        conversation._agent_fixed_answer("go", "agent", "over budget", "budget")
+        answer = conversation.message_ids.filtered(lambda message: message.role == "assistant")
+        self.assertEqual(answer.mode, "agent")
+
+    def test_what_was_spent_opens_inside_the_nudge_app(self):
+        action = self.env["res.config.settings"].action_nudge_open_usage()
+        self.assertEqual(action["params"]["menu_id"], self.env.ref("nudge.nudge_menu_root").id)
+        self.assertEqual(action["params"]["action_id"], self.env.ref("nudge.nudge_usage_action").id)
+
+    def test_the_panel_opens_inside_the_nudge_app(self):
+        action = self.env["res.config.settings"].action_nudge_open_latency()
+        self.assertEqual(action["tag"], "reload")
+        self.assertEqual(action["params"]["menu_id"], self.env.ref("nudge.nudge_menu_root").id)
+        self.assertEqual(action["params"]["action_id"], self.env.ref("nudge.nudge_latency_action").id)

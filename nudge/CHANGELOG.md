@@ -2,6 +2,17 @@
 
 Current version: nudge 17.0.1.59.8, nudge_mcp 17.0.1.1.2, nudge_connect 17.0.1.0.4, nudge_messaging 17.0.1.0.6, nudge_ai 17.0.1.0.11, nudge_studio 17.0.1.0.12, nudge_documents 17.0.1.0.8, nudge_spreadsheet 17.0.1.0.11, nudge_builder 17.0.1.0.9, nudge_mail 17.0.1.0.15, nudge_discuss 17.0.1.0.9, nudge_website 17.0.1.0.5.
 
+## 19.0.1.60.2
+
+- Questions are not orders, even when the AI asks for a change: "should I confirm this order?", "هل أؤكد هذا الأمر؟" get an explanation and the change only as a chip; "can you confirm it?", "ممكن تأكده" still get the card (`tools/noai_commands/question.py`).
+- Approval flows from an Arabic sentence reach the Developer mode chip with or without "ال" on each word ("أوامر الشراء ... مدير المشتريات").
+- Recurring requests: the calls the AI writes differently for one sentence (search or aggregate, "=" or "contains") count as one request, and the proposal takes the way used most.
+- The Arabic Talk request is back under its limit: "خاص..." no longer brings the setup skill, and generic sales words no longer bring a second skill. Request Size and Try Search by Meaning have titles of their own.
+- The answer cache keeps an answer that greets the asker by name and serves the next person with their own name; a name elsewhere in the answer still keeps it out of the cache.
+- The latency panel records the mode of every answer (Talk, Agent, Developer, cached, without AI); it and What Was Spent open inside the Nudge app.
+- Usage: Gemini's usageMetadata is read, a later chunk of zeros no longer wipes the count, and a failed call says so on its ledger line instead of reading 0 tokens. gemini-2.5-flash-lite, closed by Google to new users, is moved to gemini-3.1-flash-lite (migration).
+- Compliance Packs: the last check of the feed shows "Signature verified" and the number of countries the signed packs cover.
+
 ## 19.0.1.59.11 (unreleased)
 
 - Menus: a manager sees five entries instead of twenty: Home, Activity (was What Nudge Did, with Conversations, the three kinds of Approvals, Questions of Auditors and the Website Builder), Knowledge (was What Nudge Knows; Answers opens the answer memory, with Find recurring questions and Try search by meaning as buttons), Reports (Token Dashboard, My Reports, Spreadsheets, Health & Compliance, Website Assistant) and Configuration (Settings, AI Providers, Tours, Plugins, Recipes, Connectors, Linked Phones, External Assistants, the mail menus). Export, Import and Publish are buttons of the Recipes list, Add an Auditor is in Settings, the Setup Wizard is the first block of Settings, New site and Site Check are buttons of the Website Builder list. Nothing was removed: the rarely used menus (Database Profile, Recurring Questions and Requests, Cached Answers, Prompts, Training, Usage, Latency and Cost, Connector Calls and Configuration > Advanced) appear with the new setting Show advanced menus (group nudge.group_nudge_advanced_menus, held by managers only). Also behind it: Changes (the Steps tab of each Request shows them), Made by Nudge, Questions of Auditors, Missed Sentences (a button on Answers), Feedback, Credential Expiry, the Reports, Compliance Pack Updates and upgrade menus of Health & Compliance (now under Configuration > Advanced), Website Usage, Site Check Reports, Linked Phones, External Assistants, Emails with Review and Mail Agent Rules (each has a button in its block of Nudge Settings). The Website Assistant folder is one entry, Website Questions.

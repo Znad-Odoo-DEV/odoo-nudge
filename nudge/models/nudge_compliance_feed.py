@@ -25,6 +25,7 @@ _logger = logging.getLogger(__name__)
 
 FEED_URL_PARAM = "nudge.compliance_feed_url"
 FEED_KEY_PARAM = "nudge.compliance_feed_key"
+FEED_STATUS_PARAM = "nudge.compliance_feed_status"
 THRESHOLDS = (90, 30, 7)
 CREDENTIAL_THRESHOLDS = (60, 30, 7, 0)  # NP-17: 0 is the day of the expiry itself, and after it
 CREDENTIAL_PACK = "credential"
@@ -262,7 +263,32 @@ class NudgeComplianceUpdate(models.Model):
         except compliance_feed.FeedError as error:
             _logger.warning("Nudge compliance feed refused: %s", error)
             raise UserError(_("The feed is refused: %s", str(error))) from None
-        return self._store(issued, packs)
+        made = self._store(issued, packs)
+        self._remember_check(packs, len(made))
+        return made
+
+    @api.model
+    def _remember_check(self, packs, changed):
+        """Keep what the last read of a feed whose signature was verified found, to show it: how many countries
+        the feed covers (read from its packs) and how many packs would change. A refused feed is told to the
+        person by the error itself and keeps the last good result."""
+        countries = {str(code).upper() for pack in packs for code in (pack.get("countries") or ())}
+        status = {"countries": len(countries), "changed": changed,
+                  "at": fields.Datetime.to_string(fields.Datetime.now())}
+        self.env["ir.config_parameter"].sudo().set_param(FEED_STATUS_PARAM, json.dumps(status))
+
+    @api.model
+    def _status_text(self):
+        """:return: the result of the last read of the feed, in words ("" when it was never read)"""
+        try:
+            status = json.loads(self.env["ir.config_parameter"].sudo().get_param(FEED_STATUS_PARAM) or "")
+        except ValueError:
+            return ""
+        if not isinstance(status, dict):
+            return ""
+        return _("Signature verified: %(countries)s countries, %(changed)s packs would change (%(at)s)",
+                          countries=status.get("countries", 0), changed=status.get("changed", 0),
+                          at=status.get("at", ""))
 
     @api.model
     def _store(self, issued, packs):
@@ -343,4 +369,6 @@ class NudgeComplianceUpdate(models.Model):
         """The button of the settings: read the feed now. :return: the list of updates"""
         self._check_admin()
         self._fetch()
-        return self.env["ir.actions.actions"]._for_xml_id("nudge.nudge_compliance_update_action")
+        action = self.env["ir.actions.actions"]._for_xml_id("nudge.nudge_compliance_update_action")
+        action["name"] = self._status_text() or action["name"]  # the title of the list says what the check found
+        return action

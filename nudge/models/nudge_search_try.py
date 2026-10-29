@@ -16,6 +16,11 @@ class NudgeSearchTry(models.TransientModel):
     _name = "nudge.search.try"
     _description = "Try Search by Meaning"
 
+    @api.depends()
+    def _compute_display_name(self):
+        for record in self:
+            record.display_name = _("Try Search by Meaning")
+
     query = fields.Char(string="Look for")
     status = fields.Char(compute="_compute_status")
     howto = fields.Text(string="How to start it", compute="_compute_status")

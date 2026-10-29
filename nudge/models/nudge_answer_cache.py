@@ -43,6 +43,13 @@ SKILL_KEYS = frozenset((
     "state", "version", "active", "summary", "instructions", "trigger_words", "model_names", "tool_names",
     "modes", "group_ids", "company_id", "key"))
 NOTE_KEYS = frozenset(("name", "body", "state", "active", "group_ids", "company_id", "kind"))
+# A word of an answer, with the Arabic marks that \w leaves out
+WORD = re.compile(r"[\wً-ٰٟـ]+")
+# The greeting of an answer: its first line, at most this long, up to the first end of a sentence
+GREETING_MAX = 80
+GREETING_END = re.compile(r"[.!?؟،,:\n]")
+# Where the name of the asker stood in a kept answer: the part of the name, by its place
+NAME_SLOT = re.compile(r"( ?)\{\{nudge_name_(\d)\}\}")
 # Today's date as an answer may write it, besides the digits: the name of the month next to the day
 MONTHS = (
     ("january", "يناير"), ("february", "فبراير"), ("march", "مارس"), ("april", "ابريل"), ("may", "مايو"),
@@ -236,11 +243,11 @@ class NudgeAnswerCache(models.Model):
         record = conversation.sudo()
         if not record.name:
             record.name = text[:60].strip()
-        content = entry.answer
+        content = self._with_name(entry.answer, self.env.user)
         if offered:
             content = _(
                 "An earlier answer to a very close question (%(question)s). Press Ask the AI instead "
-                "to ask again.", question=entry.question) + "\n\n" + entry.answer
+                "to ask again.", question=entry.question) + "\n\n" + content
         Message = self.env["nudge.message"].sudo()
         question = Message.create({
             "conversation_id": conversation.id, "role": "user", "content": text, "mode": MODE_TALK})
@@ -305,6 +312,7 @@ class NudgeAnswerCache(models.Model):
             return
         conversation.cache_pending = False
         answer = (message.content or "").strip()
+        asked_by = conversation.user_id
         # What a round before the last did on the screen (a screen opened) is not done again by a cached reply,
         # and an answer of the stand-in model (NP-10) would be served for days after the main one is back
         events = [event for other in later | message for event in other.screen_events or []]
@@ -316,7 +324,11 @@ class NudgeAnswerCache(models.Model):
                     or "<nudge_found>" in (question.context_text or ""))
                 or memory_match.language(answer) != key["language"]
                 or redact.Redactor().redact(answer) != answer or SECRET.search(answer)
-                or self._personal(answer, conversation.user_id)):
+                or self._personal(answer, asked_by)):
+            return
+        # The name of the asker (a greeting) is kept as a place to fill: the next person is served their own
+        answer = self._without_name(answer, asked_by)
+        if answer is None:
             return
         assistants = later.filtered(lambda other: other.role == "assistant")
         tokens = sum(
@@ -332,13 +344,43 @@ class NudgeAnswerCache(models.Model):
         else:
             self.create(values)
 
+    @api.model
+    def _name_parts(self, user):
+        return [(part, memory_match.fold(part)) for part in (user.name or "").split()]
+
+    @api.model
+    def _without_name(self, answer, user):
+        """:return: ``answer`` with each word of its greeting (the first line, 80 characters at most, up to the first
+        end of a sentence) that is a part of the name of ``user``, in any spelling, replaced by the place of that
+        part, for ``_with_name`` to fill with the name of whoever is served; None when a part of the name is
+        still in the rest of the answer: it is personal, and a word such as "admin" there is no greeting"""
+        parts = [folded for _part, folded in self._name_parts(user)]
+        end = GREETING_END.search(answer[:GREETING_MAX])
+        cut = end.start() if end else min(len(answer), GREETING_MAX)
+        head, rest = answer[:cut], answer[cut:]
+
+        def place(match):
+            folded = memory_match.fold(match.group())
+            return "{{nudge_name_%d}}" % parts.index(folded) if len(folded) >= 3 and folded in parts else match.group()
+
+        folded_rest = memory_match.fold(rest)
+        if any(len(part) >= 3 and re.search(rf"(?<!\w){re.escape(part)}(?!\w)", folded_rest) for part in parts):
+            return None
+        return WORD.sub(place, head) + rest
+
+    @api.model
+    def _with_name(self, answer, user):
+        """:return: ``answer`` with the places of the name filled with the name of ``user``, or with nothing
+        where they have no such part"""
+        parts = [part for part, _folded in self._name_parts(user)]
+        # A place past the parts of this name (a surname they have not) goes, with the space before it
+        return NAME_SLOT.sub(
+            lambda match: match.group(1) + parts[int(match.group(2))] if int(match.group(2)) < len(parts) else "", answer)
+
     def _personal(self, answer, user):
-        """:return: whether ``answer`` repeats what the model was told of the asker alone, their name or
-        today's date: another person would be served someone else's name, or a day gone by"""
+        """:return: whether ``answer`` repeats what the model was told of the asker alone, today's date: another
+        person would be served a day gone by (the name is kept apart, see ``_without_name``)"""
         folded = memory_match.fold(answer)
-        for part in memory_match.fold(user.name or "").split():
-            if len(part) >= 3 and re.search(rf"(?<!\w){re.escape(part)}(?!\w)", folded):
-                return True
         today = fields.Date.context_today(self.with_user(user))
         if any(today.strftime(form) in folded for form in ("%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y", "%d-%m-%Y", "%d.%m.%Y")):
             return True

@@ -295,7 +295,7 @@
                                 <field name="nudge_budget_company_cost" class="col-lg-6"/>
                             </div>
                             <div class="mt8">
-                                <button name="%(nudge_usage_action)d" type="action"
+                                <button name="action_nudge_open_usage" type="object"
                                         string="What Was Spent" icon="oi-arrow-right" class="btn-link"/>
                             </div>
                         </setting>
@@ -308,7 +308,7 @@
                         <setting help="Calls to the AI provider older than this many whole months are removed from the usage list every day, a batch at a time. The current month is always kept, so budgets read the same totals. 0 keeps everything.">
                             <field name="nudge_usage_retention_months"/>
                             <div class="mt8">
-                                <button name="%(nudge_latency_action)d" type="action"
+                                <button name="action_nudge_open_latency" type="object"
                                         string="Latency and Cost" icon="oi-arrow-right" class="btn-link"/>
                             </div>
                         </setting>
@@ -358,6 +358,7 @@
                         <setting help="Country checklists can be updated from a feed signed by its publisher. It is off while the address or the key is empty. Nudge then fetches one small file a day from that address only, checks its signature with the key below, and shows what would change: nothing is replaced until a system administrator approves it. The checklists that come with Nudge stay the fallback.">
                             <field name="nudge_compliance_feed_url" placeholder="https://"/>
                             <div class="mt8"><label for="nudge_compliance_feed_key" class="o_light_label"/> <field name="nudge_compliance_feed_key"/></div>
+                            <div class="mt8" invisible="not nudge_compliance_feed_status"><label for="nudge_compliance_feed_status" class="o_light_label"/> <field name="nudge_compliance_feed_status" readonly="1"/></div>
                             <div class="mt8">
                                 <button name="action_nudge_compliance_feed_use_nudge" type="object"
                                         string="Use the Nudge Feed" icon="oi-arrow-right" class="btn-link"

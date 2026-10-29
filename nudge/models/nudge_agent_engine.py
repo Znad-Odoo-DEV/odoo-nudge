@@ -942,7 +942,7 @@ class NudgeConversation(models.Model):
         question = Message.create(
             {"conversation_id": self.id, "role": "user", "content": text, "mode": mode}) if text else Message
         answer = Message.create({"conversation_id": self.id, "role": "assistant", "content": notice,
-                                 "state": "complete"})
+                                 "state": "complete", "mode": mode})
         self.env["nudge.usage"]._add(
             "noai", llm.normalize_usage(None), 0.0, self.env.user, self.env.company, intent=source,
             conversation_id=self.id, message_id=answer.id)
