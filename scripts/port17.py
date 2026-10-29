@@ -251,6 +251,9 @@ for name in files("nudge/static/**/*.js"):
 TOURS = "nudge/static/tests/tours/nudge_tours.js"
 if os.path.exists(ROOT + TOURS):
     sub(TOURS, r'url: "/odoo"', 'url: "/web"')
+    # The run of 17 takes one action, no "&&": its "text" fires the change
+    # itself, so the Tab that commits the field on 18 and 19 is dropped
+    sub(TOURS, r'(run: "edit [^"]*?) && press Tab"', r'\1"')
     sub(TOURS, r'run: "edit ', 'run: "text ')
     # The selector engine of 17 is Sizzle: an input's value is matched by
     # :propValue("..."), not by :value(...)

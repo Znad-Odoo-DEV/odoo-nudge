@@ -4,6 +4,7 @@ filler sentence of the text-and-picture block."""
 import base64
 import io
 
+from lxml import etree
 from PIL import Image
 
 from odoo.tests import TransactionCase, new_test_user, tagged
@@ -209,6 +210,17 @@ class TestFooterOfTheCompany(NudgeCase, TransactionCase):
             out = footer.personalise(view.arch_db, self.facts())
             for sample in SAMPLE_ABOUT:
                 self.assertNotIn(sample, out, view.key)
+
+    def test_every_header_keeps_the_nodes_other_modules_hang_on(self):
+        """website_sale puts its cart before the search box (default) or the social links (stretch) of the header:
+        a header written without those t-call nodes broke the update and the footer went back to Odoo's"""
+        for name in ("default", "stretch", "search"):
+            view = self.env.ref(f"website.template_header_{name}", raise_if_not_found=False)
+            if not view:
+                continue
+            calls = set(etree.fromstring(view.arch_db.encode()).xpath("//@t-call"))
+            out = footer.personalise(view.arch_db, self.facts())
+            self.assertEqual(set(etree.fromstring(out.encode()).xpath("//@t-call")), calls, view.key)
 
     def test_the_company_is_where_the_sample_was(self):
         view = self.env.ref("website.template_footer_descriptive", raise_if_not_found=False)
