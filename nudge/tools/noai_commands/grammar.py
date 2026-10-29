@@ -596,9 +596,16 @@ def _fixes_of(text, tokens, spans):
         if before and "to" in before[-1].cats and any(prev.cats & set(FIELDS) for prev in before):
             continue  # "set the phone to ...": a value, as typed
         fix = fuzzy.suggest(tokens[span.i], first=span.i == 0)
-        if fix:
+        if fix and not _repeats_a_neighbour(tokens, span.i, fix):
             fixes.append((span.i, fix))
     return fixes
+
+
+def _repeats_a_neighbour(tokens, index, fix):
+    """:return: whether ``fix`` reads the word as the word next to it: "آخر أمر" read "آخر اخر" offered a Did you mean
+    of the same word twice; a word typed next to the one it would be a slip of is another word"""
+    word = normalise.Token(fix.option.word).norm
+    return any(0 <= other < len(tokens) and tokens[other].norm == word for other in (index - 1, index + 1))
 
 
 def _rescan(tokens, fixes):

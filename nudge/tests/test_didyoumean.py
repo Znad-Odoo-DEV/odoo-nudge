@@ -276,6 +276,44 @@ class TestBridge(NudgeCase, TransactionCase):
         words = bridge.terms("ريّحلي الحسبة", [("الحسبة", "invoice")])
         self.assertIn("invoice", words)
 
+    PO = [
+        'msgid ""\n', 'msgstr ""\n', '"Project-Id-Version: Odoo Server\\n"\n', "\n",
+        "#. module: account\n", 'msgid "Payment Terms"\n', 'msgstr "شروط الدفع"\n', "\n",
+        'msgid ""\n', '"Bill"\n', 'msgstr ""\n', '"فاتورة"\n', "\n",
+        'msgid "Invoice"\n', 'msgstr "الفاتورة"\n', "\n",
+        'msgid "On"\n', 'msgstr "في"\n', "\n",
+        "#, fuzzy\n", 'msgid "Journal"\n', 'msgstr "شروط الدفع"\n', "\n",
+        'msgid "%s days"\n', 'msgstr "%s أيام"\n', "\n",
+        'msgid "Set the payment terms of every invoice"\n', 'msgstr "حدد شروط الدفع لكل فاتورة"\n', "\n",
+        'msgid "Credit Note"\n', 'msgid_plural "Credit Notes"\n', 'msgstr[0] "إشعار دائن"\n', "\n",
+        'msgctxt "button"\n', 'msgid "Lock \\"Dates\\""\n', 'msgstr "قفل"\n', "\n",
+        'msgid "Untranslated"\n', 'msgstr ""\n',
+    ]
+
+    def test_the_terms_of_the_screens_come_from_the_ar_po_files(self):
+        found = bridge.screen_terms([self.PO])
+        key = noai_commands.normalise.phrase_key
+        self.assertEqual(found[key("شروط الدفع")], "payment terms")
+        self.assertEqual(found[key("فاتورة")], "bill invoice", "With or without the article, one Arabic term")
+        self.assertEqual(found[key("أؤكد")], "confirm", "The verb of a how-to question")
+        self.assertNotIn(key("في"), found, "A term of stop words says nothing about a page")
+        self.assertNotIn(key("قفل"), found, 'Lock "Dates" is not a term of letters only')
+        self.assertFalse({key("حدد شروط الدفع لكل فاتورة"), key("إشعار دائن"), key("أيام")} & set(found),
+                         "No long sentence, no plural form, no placeholder")
+        self.assertNotIn("journal", " ".join(found.values()), "A fuzzy translation is not Odoo's")
+        other = ['msgid "Payment Term"\n', 'msgstr "شُروط الدفع"\n']
+        self.assertEqual(bridge.screen_terms([self.PO, self.PO, other])[key("شروط الدفع")],
+                         "payment terms payment term", "Used half as often: kept, after the one used most")
+        self.assertEqual(bridge.screen_terms([self.PO, self.PO, self.PO, other])[key("شروط الدفع")],
+                         "payment terms", "Used less: left out")
+
+    def test_a_whole_term_of_the_screens_is_carried_before_its_words(self):
+        known = bridge.screen_terms([self.PO])
+        question = "كيف أحدد شروط الدفع في الفاتورة"
+        self.assertEqual(bridge.terms(question), ["payment", "invoice"], "Without the screens, as before")
+        self.assertEqual(bridge.terms(question, known=known), ["set", "payment", "terms", "invoice"],
+                         "The glossary and the lexicon still name the invoice; the screens add what they miss")
+
     def test_an_arabic_question_finds_an_english_page(self):
         Passage = self.env["nudge.doc.passage"].with_user(self.user_a)
         found = Passage._search_text("كيف اضبط الضريبة", app="didyoumean_app")

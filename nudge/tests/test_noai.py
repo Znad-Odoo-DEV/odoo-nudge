@@ -484,6 +484,55 @@ class TestNoaiRun(NudgeCase, TransactionCase):
                 self.assertFalse(job.get("answered"), "Not answered by the rules: %s" % job)
                 conversation.sudo().stream_started_at = False
 
+    def test_the_records_of_a_customer_are_filtered_on_the_list(self):
+        # C07, found filming Release 1: "فلترلي العروض تبع Raghad Demo Co بس" answered "I found nothing called
+        # “Raghad Demo Co”" (no quotation is called so) and the list was not filtered
+        if not self.has_sales:
+            self.skipTest("Sales is not installed")
+        customer = self.env["res.partner"].create({"name": "Raghad Demo Co", "is_company": True})
+        self.env["sale.order"].create({"partner_id": customer.id, "user_id": self.worker.id})
+        snapshot = {"v": 1, "model": "sale.order", "view_type": "list"}
+        for text in ("فلترلي العروض تبع Raghad Demo Co بس", "اعرض عروض الأسعار تبع Raghad Demo Co",
+                     "Show only the quotations of Raghad Demo Co", "show only the orders of Raghad Demo Co"):
+            with self.subTest(text=text):
+                _conversation, events = self.order(self.worker, text, snapshot=snapshot)
+                filters = [event for event in events if event["type"] == "filter"]
+                self.assertEqual(len(filters), 1, events)
+                self.assertEqual(filters[0]["model"], "sale.order")
+                self.assertIn(("partner_id", str(customer.id)), [(part[0], str(part[2])) for part in filters[0]["domain"]
+                                                             if isinstance(part, list) and len(part) == 3], filters[0])
+                self.assertIn("Raghad Demo Co", filters[0]["text"])
+                self.assertNotIn("nothing called", self.last_text(events))
+        # Nobody called so: said without AI, left to the AI when there is one
+        _conversation, events = self.order(self.worker, "فلترلي العروض تبع Nobody Zzqx Co بس", snapshot=snapshot)
+        self.assertIn("nothing called", self.last_text(events))
+        self.assertFalse([event for event in events if event["type"] == "filter"])
+        self.provider.active = True
+        self.use_adapter(reply="From the AI")
+        conversation = self.env["nudge.conversation"].with_user(self.worker)._chat_open(None)
+        job = conversation._chat_prepare("فلترلي العروض تبع Nobody Zzqx Co بس", snapshot=snapshot, mode="agent")
+        self.assertFalse(job.get("answered"), "Not answered by the rules: %s" % job)
+
+    def test_the_status_of_the_last_order_is_never_a_garbled_did_you_mean(self):
+        # Found live (nudge_trial59): "ما حالة آخر أمر؟" offered "هل تقصد: فتح: حالة آخر اخر" ("أمر" read as the
+        # "آخر" next to it); the long form went to the AI
+        texts = ("ما حالة آخر أمر؟", "ما هي حالة آخر أمر بيع لدي؟", "what's the status of my last order?", "حالة آخر أمر")
+        for text in texts:
+            with self.subTest(text=text):
+                parsed = noai_commands.parse(text, {"model": "sale.order", "view_type": "list"})
+                self.assertFalse(parsed.candidates, parsed.candidates)
+                self.assertFalse(parsed.intent and parsed.confidence >= noai_commands.THRESHOLD, parsed)
+        self.provider.active = True
+        self.use_adapter(reply="From the AI")
+        for text in texts:
+            with self.subTest(text=text):
+                conversation = self.env["nudge.conversation"].with_user(self.worker)._chat_open(None)
+                job = conversation._chat_prepare(text, mode="agent")
+                self.assertFalse(job.get("answered"), "Not answered by the rules: %s" % job)
+                conversation.sudo().stream_started_at = False
+        # A slip of a bare name is still offered back
+        self.assertEqual([c["text"] for c in noai_commands.parse("sales ordrs", None).candidates], ["show sales order"])
+
     def test_a_question_the_rules_read_as_a_press_goes_to_the_ai(self):
         # R3-50: "تأكيد الطلب؟" (confirm the order?) was a press by the rules, with a card and no AI: the AI explains
         if not self.has_sales:

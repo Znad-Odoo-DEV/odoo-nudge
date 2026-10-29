@@ -1,15 +1,33 @@
+import collections
 from unittest import mock
 
 from odoo.exceptions import AccessError
 from odoo.tests import TransactionCase, new_test_user, tagged
 
+from odoo.addons.nudge.llm import summary
 from odoo.addons.nudge.models import nudge_embedding
 from odoo.addons.nudge.models.nudge_conversation import DEVELOPER_PARAM
-from odoo.addons.nudge.models.nudge_request_size import FALLBACK_LIMITS
+from odoo.addons.nudge.models.nudge_request_size import FALLBACK_LIMITS, SAMPLE_QUESTION
+from odoo.addons.nudge.tools import skill_router
 
 from .common import NudgeCase
 from .scenarios.spec import DEFAULT_BUDGET
 from .test_embedding import FakeEmbedder, with_fake
+
+
+class AlikeEngine:
+    """The local search model as it reads the skills of a business: every skill about as near to any question
+    (multilingual-e5-small read "Show me my open sales orders." 0.4 of the way to vendor bills, reordering rules and
+    customer invoices alike). It keeps the texts of the skills it is given to read."""
+    floor, ceiling = 0.5, 0.9
+
+    def __init__(self):
+        self.passages = []
+
+    def embed(self, texts, kind="passage"):
+        if kind == "passage":
+            self.passages.extend(texts)
+        return [[0.6, 0.8] for _text in texts]
 
 
 @tagged("post_install", "-at_install")
@@ -46,22 +64,57 @@ class TestRequestSize(NudgeCase, TransactionCase):
         after = {name: self.env[name].sudo().search_count([]) for name in before}
         self.assertEqual(after, before, "Nothing is kept of the conversation built to measure")
 
+    def talk_line(self, lang, question=None):
+        """:return: the Talk line of the screen opened by the boss in ``lang``, for ``question`` or the screen's own"""
+        self.boss.lang = lang
+        wizard = self.env["nudge.request.size"].with_user(self.boss).with_context(lang=lang).create(
+            {"question": question} if question else {})
+        wizard.action_measure()
+        line = {line.mode: line for line in wizard.line_ids}["talk"]
+        self.assertEqual(line.state, "ok", f"{lang}, {wizard.question}: {line.total} tokens, limit {line.limit} ("
+                         f"{line.system_tokens} instructions, {line.tools_tokens} tools, {line.turns_tokens} conversation)")
+        return wizard.question, line
+
     def test_the_arabic_talk_request_is_within_the_limit_too(self):
-        """R3-38: the sample question in Arabic costs about what the English one does, never over the limit: a
-        question about sales orders in Arabic brought the stock skills, as the generic words of Arabic were few."""
+        """R3-38, as on the capture database: every skill of Nudge with its Arabic title, and the local search model
+        switched on. The Talk request of the sentence the screen measures (its own, in English) took 16,424 tokens
+        on an Arabic screen against 16,280 on an English one, over the limit of 16,300: the router read the titles of
+        the skills in the person's language, and the Arabic ones brought three more skills to the index; and the
+        search model, which reads a business question as near every skill, brought vendor bills and reordering
+        rules to a question about sales orders. A question in Arabic costs about what the English one does too."""
         self.use_adapter()
-        sizes = {}
-        for lang, question in (("en_US", "Show me my open sales orders."), ("ar_001", "أرني أوامر البيع المفتوحة الخاصة بي.")):
-            self.env["res.lang"]._activate_lang(lang)
-            self.boss.lang = lang
-            wizard = self.env["nudge.request.size"].with_user(self.boss).create({"question": question})
-            wizard.action_measure()
-            line = {line.mode: line for line in wizard.line_ids}["talk"]
-            sizes[lang] = line.total
-            self.assertEqual(line.state, "ok", f"{lang}: {line.total} tokens, limit {line.limit} ({line.system_tokens}"
-                             f" instructions, {line.tools_tokens} tools, {line.turns_tokens} conversation)")
-        self.assertEqual(set(sizes), {"en_US", "ar_001"})
-        self.assertLess(sizes["ar_001"], sizes["en_US"] * 1.1, sizes)
+        self.env["res.lang"]._activate_lang("ar_001")
+        self.env["ir.module.module"]._load_module_terms(["nudge"], ["ar_001"])
+        Skill = self.env["nudge.skill"].with_user(self.boss)
+        self.assertGreater(len(Skill._visible("talk")), skill_router.INDEX_MAX, "The index is cut to the question")
+        replenishment = Skill.search([("key", "=", "inventory-replenishment")])
+        self.assertNotEqual(replenishment.with_context(lang="ar_001").name, replenishment.name, "Titles in Arabic")
+        engine = AlikeEngine()
+        lines, read = {}, {}
+        # A cache of the router of its own: the skills are read anew, by this model
+        with mock.patch.object(self.env.registry, "_nudge_skill_router", collections.OrderedDict(), create=True), \
+                mock.patch.object(type(Skill), "_search_engine", lambda self_: engine):
+            for lang in ("en_US", "ar_001"):
+                start = len(engine.passages)
+                question, lines[lang] = self.talk_line(lang)
+                self.assertEqual(question, SAMPLE_QUESTION)
+                read[lang] = engine.passages[start:]
+            _question, arabic = self.talk_line("ar_001", "أرني أوامر البيع المفتوحة الخاصة بي.")
+        with mock.patch.object(type(Skill), "_search_engine", lambda self_: None):
+            _question, without = self.talk_line("en_US")
+        english, translated = lines["en_US"], lines["ar_001"]
+        # The skills are read in English whoever asks: an Arabic screen gives the search model no text of its own
+        self.assertTrue(read["en_US"])
+        self.assertFalse(set(read["ar_001"]) - set(read["en_US"]), "The router read the titles in Arabic")
+        # A model that finds every skill as near says nothing of the work: it brings no skill
+        self.assertLessEqual(english.total, without.total)
+        # What the Arabic request carries more is the names of the kinds of records in Arabic, and nothing else
+        work = {lang: summary.estimate_tokens(self.env["nudge.conversation"].with_user(self.boss).with_context(
+            lang=lang)._chat_open()._chat_where_the_work_is()) for lang in lines}
+        self.assertEqual(translated.tools_tokens, english.tools_tokens)
+        # a few tokens of margin: the Arabic names of each version's own menus differ by a token or two (18, 17)
+        self.assertLessEqual(translated.total, english.total + max(0, work["ar_001"] - work["en_US"]) + 16)
+        self.assertLess(arabic.total, english.total * 1.1)
 
     def test_the_screens_have_a_title_of_their_own(self):
         for name in ("nudge.request.size", "nudge.search.try"):

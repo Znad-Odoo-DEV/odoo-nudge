@@ -83,9 +83,12 @@ class NudgeSearchTry(models.TransientModel):
         """:return: ``[(score, record)]`` best first, among the passages this person may read, or
         None when the model is off. By meaning alone: no provider is called."""
         Embedding = self.env["nudge.embedding"]
+        # An Arabic question is near its English words too, as the answers search it (NP-12)
+        english = self.env["nudge.doc.passage"]._english_words(query)
+        also = [" ".join(english)] if english else []
         scored = []
         for res_model in SEARCHED:
-            scores = Embedding._semantic(res_model, query)
+            scores = Embedding._semantic(res_model, query, also=also)
             if scores is None:
                 return None
             # As the person: the rules of the company files apply

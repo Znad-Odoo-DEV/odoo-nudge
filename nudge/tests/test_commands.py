@@ -132,6 +132,30 @@ class TestDirectCommands(NudgeCase, TransactionCase):
         self.assertEqual(answer["records"], [])
         self.assertTrue(answer["content"])
 
+    def test_a_document_by_its_number_alone(self):
+        # C05, found filming Release 1: "/سجل S00004" (a quotation) said "no record": ranked by use, quotations came
+        # 43rd, after countries, accounts and taxes, past the kinds looked in. The numbered documents come first
+        if "sale.order" not in self.env:
+            self.skipTest("Sales is not installed")
+        from odoo.addons.nudge.models import nudge_quick
+        from odoo.addons.nudge.tools import finding
+        self.patch(finding, "MAX_MODELS", 1)
+        self.patch(nudge_quick, "MAX_REFERENCE_MODELS", 0)
+        seller = new_test_user(self.env, login="nudge_cmd_seller",
+                               groups="nudge.group_nudge_agent,sales_team.group_sale_salesman_all_leads")
+        order = self.env["sale.order"].create({"partner_id": self.partner.id})
+        for text in (f"/سجل {order.name}", f"/find {order.name}", f"/find {order.name.lower()}"):
+            with self.subTest(text=text):
+                answer = self.run_command(seller, text)
+                self.assertIn(("sale.order", order.id), [(r["model"], r["id"]) for r in answer["records"]], answer)
+        # Someone who may not read quotations is told no record they may read is called so, in plain words
+        answer = self.run_command(self.agent, f"/find {order.name}")
+        self.assertEqual(answer.get("records") or [], [])
+        self.assertIn("you may read", answer["content"])
+        self.assertTrue(finding.is_reference("S00004") and finding.is_reference("INV/2026/0042"))
+        self.assertFalse(finding.is_reference("Raghad Demo") or finding.is_reference("zzqx")
+                         or finding.is_reference("0500000001"))
+
     def test_company_files_with_their_page(self):
         self.assertNotIn("file", self.names(self.user_a), "No file, no command")
         source = self.env["nudge.source"].create({

@@ -74,3 +74,4 @@ from . import nudge_agent  # Agents: persona, audience, companies, tools (60.0)
 from . import nudge_agent_preview
 from . import nudge_agent_ui
 from . import nudge_agent_engine  # Agents: one turn with an agent, every hook narrows (60.0); last
+from . import ir_actions_server

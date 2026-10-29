@@ -26,6 +26,19 @@ class IrModuleModule(models.Model):
                 folders.append(folder)
         return folders
 
+    @api.model
+    @tools.ormcache()
+    def _nudge_arabic_po_files(self):
+        """:return: the ar.po files of the installed modules, in which Odoo says its own terms in Arabic,
+        looked for once for the registry"""
+        files = []
+        for module in sorted(self.sudo().search([("state", "=", "installed")]).mapped("name")):
+            path = get_module_path(module)
+            po = os.path.join(path, "i18n", "ar.po") if path else None
+            if po and os.path.isfile(po):
+                files.append(po)
+        return tuple(files)
+
     def _button_immediate_function(self, function):
         """Installing, upgrading or removing a module changes what the
         database is: its profile is read again."""

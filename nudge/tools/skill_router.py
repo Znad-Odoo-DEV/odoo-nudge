@@ -21,6 +21,7 @@ import collections
 import logging
 import math
 import re
+import statistics
 import threading
 import time
 
@@ -62,6 +63,14 @@ SCREEN_PUSH = 0.6
 # What the search model adds: its score (0..1) times this, in the units of the lexical score
 EMBED_WEIGHT = 6.0
 EMBED_MIN = 0.35
+# The search model reads any business question as somewhat near every skill of a business: with
+# multilingual-e5-small, "Show me my open sales orders." came 0.4 of the way to vendor bills, reordering rules,
+# customer invoices and the guided tours alike, and brought the first two (R3-38). What is as near as the usual
+# skill says nothing of the work: a skill counts for how far it stands above the median nearness of all of them,
+# once there are this many to tell the usual from. Measured with that model on the 45 skills of the capture
+# database: top-2 hits 111/116 on CASES, 38/40 on FRESH and 31/40 on FRESH2, 3 of the 12 NOTHING sentences
+# bringing a skill (as read before: 110, 38, 31 and 4; without the model: 111, 38, 30 and 3)
+EMBED_USUAL_MIN = 5
 # A choice this sure of itself never asks the search model
 CONFIDENT = 9.0
 MAX_RANKED = 24
@@ -530,7 +539,8 @@ def offered(choice, keep, limit=INDEX_MAX):
 
 def _similar(index, engine, text):
     """:return: ``{skill index: score 0..1}`` of the reading of the search model, the vectors of the skills
-    kept in the index. A model that fails is no signal."""
+    kept in the index: how far each skill stands above the usual nearness of all of them (``EMBED_USUAL_MIN``).
+    A model that fails is no signal."""
     from ..llm import embedder  # noqa: PLC0415
     try:
         if index.vectors is None:
@@ -546,6 +556,9 @@ def _similar(index, engine, text):
         score = embedder.scale(cosine, floor, ceiling)
         if score > 0:
             out[position] = score
+    if len(index.vectors) >= EMBED_USUAL_MIN:
+        usual = statistics.median(out.get(position, 0.0) for position in range(len(index.vectors)))
+        out = {position: score - usual for position, score in out.items() if score > usual}
     return out
 
 

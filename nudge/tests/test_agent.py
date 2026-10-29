@@ -1434,14 +1434,39 @@ class TestQuestionsAreNotOrders(AgentCase, TransactionCase):
                 self.assertFalse(self.carol.parent_id, "Nothing is done before the yes")
                 self.decide(conversation, "decline")
 
-    def test_choosing_the_suggestion_asks_for_the_change_and_gets_the_card(self):
-        _adapter, conversation, events = self.turn(
-            self.agent, "should I create the company of Nudge Carol?", self.press(self.carol, "create_company"))
-        chip = next(event for event in events if event["type"] == "found")["commands"][0]
-        self.assertFalse(noai_commands.question.asks_whether(chip["words"][0]), "Sent as it is: an order")
-        self.use_adapter(script=[asking(self.press(self.carol, "create_company")), saying("Done.")])
-        _conversation, events = self.order(self.agent, chip["words"][0], conversation_id=conversation.id)
-        self.assertCard(events)
+    def choose(self, user, conversation, chip, snapshot=None):
+        """Send the words of the chip, as the panel does when it is chosen: no AI is asked
+        :return: the events"""
+        adapter = self.use_adapter(reply="The AI should not be asked")
+        _conversation, events = self.order(user, chip["words"][0], conversation_id=conversation.id, snapshot=snapshot)
+        self.assertFalse(adapter.calls, "Prepared from the chip, not read again")
+        return events
+
+    def test_choosing_the_suggestion_gets_the_card_whatever_the_rules(self):
+        # Found live (nudge_trial59): the chip "Press “Confirm”: Sales Order (S00109)" was read by the rules as a
+        # record named "Press S00109" ("I found nothing called"), also in Arabic ("ضغط S00109")
+        for rules in ("0", "1"):
+            with self.subTest(rules=rules):
+                self.env["ir.config_parameter"].sudo().set_param("nudge.noai_first", rules)
+                _adapter, conversation, events = self.turn(
+                    self.agent, "should I create the company of Nudge Carol?", self.press(self.carol, "create_company"))
+                chip = next(event for event in events if event["type"] == "found")["commands"][0]
+                self.assertEqual((chip["tool"], chip["arguments"]["method"]), ("call_method", "create_company"))
+                events = self.choose(self.agent, conversation, chip)
+                cards = [event for event in events if event["type"] == "confirm"]
+                self.assertEqual([card["kind"] for card in cards], ["method"], events)
+                self.assertNotIn("found nothing", "".join(e.get("text", "") for e in events if e["type"] == "delta"))
+                self.assertFalse(self.carol.parent_id, "Nothing is done before the yes")
+                if rules == "1":
+                    self.decide(conversation, "confirm")
+                    self.assertEqual(self.carol.parent_id.name, "Nudge Carol Trading")
+                else:
+                    self.decide(conversation, "decline")
+        # The words of a chip of an earlier answer are read as usual
+        self.env["ir.config_parameter"].sudo().set_param("nudge.noai_first", "0")
+        adapter = self.use_adapter(reply="Read by the AI")
+        self.order(self.agent, chip["words"][0], conversation_id=conversation.id)
+        self.assertTrue(adapter.calls)
 
     def test_several_changes_asked_about_make_no_plan(self):
         made = [call("prepare_create", {"model": "res.partner", "values": values(name=name)}, f"call_{index}")
@@ -1477,6 +1502,14 @@ class TestQuestionsAreNotOrders(AgentCase, TransactionCase):
                 self.assertIn("Confirm", chips[0]["words"][0])
                 self.assertIn(order.name, chips[0]["words"][0])
                 self.assertEqual(order.state, "draft")
+                # Chosen, with the rules on: the card of Confirm, not "I found nothing called Press S000.."
+                self.env["ir.config_parameter"].sudo().set_param("nudge.noai_first", "1")
+                events = self.choose(seller, conversation, chips[0], snapshot=snapshot)
+                cards = [event for event in events if event["type"] == "confirm"]
+                self.assertEqual([card["kind"] for card in cards], ["method"], events)
+                self.assertEqual(order.state, "draft", "Nothing is done before the yes")
+                self.decide(conversation, "decline")
+                self.env["ir.config_parameter"].sudo().set_param("nudge.noai_first", "0")
         for text in ("can you confirm this order?", "ممكن تأكده"):
             with self.subTest(text=text):
                 _adapter, conversation, events = self.turn(

@@ -28290,3 +28290,9 @@ msgstr "نتيجة آخر قراءة للتغذية: هل تم التحقق من
 #: code:addons/nudge/models/nudge_agent_plan.py:0
 msgid "Prepared on a card: nothing is done before your yes"
 msgstr "تُجهَّز على بطاقة: لا يُنفَّذ شيء قبل موافقتك"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/approval_flow.py:0
+msgid "Old buttons replaced"
+msgstr "تم استبدال الأزرار القديمة"

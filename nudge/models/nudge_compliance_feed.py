@@ -370,5 +370,9 @@ class NudgeComplianceUpdate(models.Model):
         self._check_admin()
         self._fetch()
         action = self.env["ir.actions.actions"]._for_xml_id("nudge.nudge_compliance_update_action")
-        action["name"] = self._status_text() or action["name"]  # the title of the list says what the check found
+        status = self._status_text()
+        if status:
+            # The title of the list says what the check found. The web client (17, 18 and 19) titles an action with
+            # its display_name before its name, and _for_xml_id reads both: both say it
+            action["name"] = action["display_name"] = status
         return action

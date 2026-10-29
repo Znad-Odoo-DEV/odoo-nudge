@@ -8,8 +8,9 @@ from odoo.tests import TransactionCase, tagged
 
 from odoo.addons.nudge import tools
 from odoo.addons.nudge.llm import embedder, memory_match
-from odoo.addons.nudge.models import nudge_embedding
+from odoo.addons.nudge.models import nudge_doc, nudge_embedding
 from odoo.addons.nudge.models.nudge_embedding import PATH_PARAM
+from odoo.addons.nudge.tools.noai_commands import bridge
 
 from .common import NudgeCase
 
@@ -99,7 +100,8 @@ class TestWithoutTheModel(NudgeCase, TransactionCase):
         self.assertTrue(arabic, "The Arabic question is mapped to English keywords")
         self.assertTrue(all("reorder" in passage.body.lower() or "replenish" in passage.body.lower()
                             for passage in arabic))
-        self.assertFalse(self.env["nudge.doc.passage"]._search_text("زنجبيل بنفسجي"),
+        # ("بنفسجي" is no longer unknown: the screens of Odoo call a colour "Purple" in Arabic)
+        self.assertFalse(self.env["nudge.doc.passage"]._search_text("زنجبيل مقرمش"),
                          "No known word, no keyword in common: nothing is found without the model")
 
     def test_the_settings_say_what_to_install(self):
@@ -244,6 +246,78 @@ class TestSearchByMeaning(NudgeCase, TransactionCase):
             self.assertEqual(same, memory)
             other, _score = Memory.with_user(self.user_a)._find("weather in Paris today")
             self.assertIsNone(other)
+
+
+@tagged("post_install", "-at_install")
+class TestArabicSearch(NudgeCase, TransactionCase):
+    """An Arabic question finds the pages of its English equivalent: the terms of the screens, as Odoo
+    translates them in the ar.po file of each installed module, carry it to English words, for the
+    keywords and for the meaning."""
+
+    PO = 'msgid "Payment Terms"\nmsgstr "شروط الدفع"\n\nmsgid "Invoice"\nmsgstr "الفاتورة"\n'
+    QUESTION = "كيف أحدد شروط الدفع في الفاتورة"
+
+    def setUp(self):
+        super().setUp()
+        self.Passage = self.env["nudge.doc.passage"]
+        self.Embedding = self.env["nudge.embedding"]
+        for cache in (nudge_doc._screen_terms_cache, nudge_embedding._cache):
+            cache.clear()
+            self.addCleanup(cache.clear)
+        folder = tempfile.TemporaryDirectory()
+        self.addCleanup(folder.cleanup)
+        self.po = os.path.join(folder.name, "ar.po")
+        with open(self.po, "w", encoding="utf-8") as po:
+            po.write(self.PO)
+
+    def files(self, *paths):
+        """The installed modules ship these ar.po files"""
+        return mock.patch.object(
+            type(self.env["ir.module.module"]), "_nudge_arabic_po_files", lambda self: paths)
+
+    def test_the_terms_are_read_once_for_a_set_of_modules(self):
+        with mock.patch.object(bridge, "screen_terms", wraps=bridge.screen_terms) as read:
+            with self.files(self.po):
+                terms = self.Passage._arabic_terms()
+                self.assertIs(self.Passage._arabic_terms(), terms)
+                self.assertEqual(read.call_count, 1)
+                self.assertEqual(self.Passage._english_words(self.QUESTION), ["set", "payment", "terms", "invoice"])
+                self.assertEqual(self.Passage._english_words("payment terms"), [], "An English question is left as is")
+            with self.files(self.po, self.po + ".missing"):
+                self.Passage._arabic_terms()
+                self.assertEqual(read.call_count, 2, "A module installed or removed: the files are read again")
+
+    def test_an_arabic_question_finds_the_english_page_without_the_model(self):
+        with self.files(self.po), mock.patch.object(type(self.Embedding), "_embedder", lambda self: None):
+            found = self.Passage._search_text(self.QUESTION)
+        self.assertTrue(found)
+        self.assertIn("payment terms", f"{found[0].title} {found[0].heading or ''}".lower())
+
+    def test_the_meaning_is_that_of_the_english_words_too(self):
+        self.env.cr.execute("SELECT id FROM nudge_doc_passage WHERE body ILIKE '%invoice%' ORDER BY id LIMIT 5")
+        invoices = [row[0] for row in self.env.cr.fetchall()]
+        with with_fake(self):
+            self.Embedding._index_ids("nudge.doc.passage", invoices)
+            self.assertFalse(self.Embedding._semantic("nudge.doc.passage", "شروط الدفع", ids=invoices),
+                             "The fake model, as the small one, does not see the English in the Arabic")
+            near = self.Embedding._semantic(
+                "nudge.doc.passage", "شروط الدفع", ids=invoices, also=["payment terms invoice"])
+            self.assertEqual(set(near), set(invoices))
+            wizard = self.env["nudge.search.try"].with_user(self.manager).create({"query": self.QUESTION})
+            with self.files(self.po):
+                wizard.action_search()
+        self.assertTrue(set(invoices) & set(wizard.line_ids.mapped("res_id")),
+                        "Try Search by Meaning searches as the answers do")
+
+    def test_odoo_says_its_own_terms_in_arabic(self):
+        if not self.env["ir.module.module"].search_count([("name", "=", "account"), ("state", "=", "installed")]):
+            raise SkipTest("Invoicing is not installed: its ar.po is not there to be read")
+        files = self.env["ir.module.module"]._nudge_arabic_po_files()
+        self.assertTrue(any(path.replace("\\", "/").endswith("/account/i18n/ar.po") for path in files))
+        # 18 and 17 also translate the singular "Payment Term": the English words hold at least these two
+        words = self.Passage._english_words("شروط الدفع")
+        self.assertEqual(words[:2], ["payment", "terms"])
+        self.assertLessEqual(set(words), {"payment", "terms", "term"})
 
 
 @tagged("post_install", "-at_install")
