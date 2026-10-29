@@ -603,6 +603,22 @@ class TestAgentModel(NudgeCase, TransactionCase):
                        {"days": "monday-funday"}):
             self.assertRefused(lambda values=values: binding.write(values))
 
+    def test_the_closed_now_sentence_shows_the_days_in_the_language_of_the_answer(self):
+        self.env["res.lang"]._activate_lang("ar_001")
+        agent = self.made()
+        binding = self.binding(agent, hours="08:00-18:00", days="sun-thu")
+        arabic = binding.with_context(lang="ar_001")._hours_text()
+        self.assertNotIn("sun-thu", arabic)
+        self.assertIn("الأحد", arabic, "Sunday in Arabic")
+        self.assertIn("الخميس", arabic, "Thursday in Arabic")
+        english = binding.with_context(lang="en_US")._hours_text()
+        self.assertIn("Sunday", english)
+        self.assertIn("Thursday", english)
+        self.assertNotIn("sun-thu", english)
+        listed = self.binding(agent, hours="08:00-18:00", days="mon,wed")
+        self.assertIn("Monday", listed.with_context(lang="en_US")._hours_text())
+        self.assertIn("every day", self.binding(agent, hours="08:00-18:00")._hours_text())
+
     def test_off_limits_topics_are_found_by_their_words(self):
         agent = self.made(off_limits="salaries\nالرواتب\ncompetitor prices")
         self.assertTrue(agent._off_limits_hit("What is the salary of Ahmad?"))

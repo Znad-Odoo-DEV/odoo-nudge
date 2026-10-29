@@ -1,5 +1,11 @@
 # Changelog
 
+## 19.0.1.2.4
+
+- Show the records on the site keeps the home product lists of a shop and draws them again from the chosen products (it removed them as empty).
+- The home product lists of a shop price in the website's currency also when the website has no pricelist of its own.
+- An Arabic request to change a page's SEO title or description writes the Arabic; the English stays as it was.
+
 ## 19.0.1.2.3
 
 - The home product lists of a shop show the price and currency the website shows (its pricelist), no longer the product's own currency.
