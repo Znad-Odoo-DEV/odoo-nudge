@@ -818,7 +818,7 @@ class NudgeBuilderSite(models.Model):
                 "socials": [(social.network, social.url) for social in self.social_ids]
                 if "social_ids" in self._fields else []}
 
-    def _content_block(self, block, spec, index=0, uid=None):
+    def _content_block(self, block, spec, index=0, section_id=None):
         """The sections of a block that shows the site's records (``{"kind": "project", "layout": "grid"}``).
 
         :return: ``{lang code: lxml section}``, or None when the site has nothing for it: a kind with no records
@@ -834,7 +834,8 @@ class NudgeBuilderSite(models.Model):
                                  kind=kind, block=index + 1, page=(spec.get("name") or {}).get("en") or spec["key"]))
             return None
         result = {}
-        uid = uid or compat.unique_id()
+        # not called uid: _() of Odoo 17 reads a local named uid as the id of the user
+        section_id = section_id or compat.unique_id()
         for lang in self._langs():
             short = compat.lang_code(lang.code)
             words = copy.get(short) or copy.get("en") or {}
@@ -845,12 +846,12 @@ class NudgeBuilderSite(models.Model):
                 render = plugin["render"] or (
                     lambda *args: content_sections.render_kind(kind, plugin["layouts"], *args))
                 section = render(items, block.get("layout"), self.direction or "a", words.get("title", ""),
-                                 words.get("text", ""), self._plugin_ctx(kind, lang), uid)
+                                 words.get("text", ""), self._plugin_ctx(kind, lang), section_id)
             elif kind in content_sections.LAYOUTS:
                 items = [self._record_item(kind, record, lang) for record in records]
                 section = content_sections.render(
                     kind, items, block.get("layout"), self.direction or "a", words.get("title", ""),
-                    words.get("text", ""), ctx, uid)
+                    words.get("text", ""), ctx, section_id)
             elif kind == "contact":
                 section = content_sections.render_contact(
                     site._contact_data(), words.get("title", ""), words.get("text", ""), ctx)
@@ -933,7 +934,7 @@ class NudgeBuilderSite(models.Model):
                         copy[compat.lang_code(code)] = self._section_words(peer)
                     block = {"kind": kind, "layout": node.get("data-nb-layout"), "copy": copy}
                 renders.append(self._content_block(
-                    block, template_page or {"key": page.key}, index or 0, uid=f"r{position}"))
+                    block, template_page or {"key": page.key}, index or 0, section_id=f"r{position}"))
             for code in codes:
                 for position, node in enumerate(nodes_of(code)):
                     fresh = renders[min(position, len(renders) - 1)] if renders else None
@@ -950,7 +951,7 @@ class NudgeBuilderSite(models.Model):
                     new.tail = node.tail
                     parent.replace(node, new)
         elif template_block and has_records:
-            sections = self._content_block(template_block, template_page, index, uid="r0")
+            sections = self._content_block(template_block, template_page, index, section_id="r0")
             if not sections:
                 return False
             for code in codes:
@@ -1082,7 +1083,7 @@ class NudgeBuilderSite(models.Model):
                 record_blocks += self._is_record_kind(block["kind"])
                 # the ids of a carousel or accordion are the ones "Show the records" draws again (r0, r1 ...)
                 seen = kinds_seen[block["kind"]] = kinds_seen.get(block["kind"], -1) + 1
-                sections = self._content_block(block, spec, index, uid=f"r{seen}")
+                sections = self._content_block(block, spec, index, section_id=f"r{seen}")
                 if not sections:
                     continue  # no records of this kind: the block is not placed
                 record_placed += self._is_record_kind(block["kind"])
