@@ -796,7 +796,7 @@ msgid ""
 "Settings, Nudge, Allowed Destinations."
 msgstr ""
 "%(host)s ليس في قائمة الوجهات المسموحة لشركتك، لذلك لم يُرسل إليه شيء "
-"(%(purpose)s). يمكن للمسؤول السماح به من الإعدادات، نودج، الوجهات المسموحة."
+"(%(purpose)s). يمكن للمسؤول السماح به من الإعدادات، Nudge، الوجهات المسموحة."
 
 #. module: nudge
 #. odoo-python
@@ -1881,7 +1881,7 @@ msgstr "التقرير المحفوظ يُؤرشف ولا يُحذف أبداً.
 #. odoo-python
 #: code:addons/nudge/models/nudge_egress.py:0
 msgid "A screen with a password field was shared with Nudge"
-msgstr "تمت مشاركة شاشة فيها حقل كلمة مرور مع نودج"
+msgstr "تمت مشاركة شاشة فيها حقل كلمة مرور مع Nudge"
 
 #. module: nudge
 #. odoo-python
@@ -2366,7 +2366,7 @@ msgid ""
 "Add the words your people use for what Nudge already does, in any dialect, "
 "and it understands them without any AI."
 msgstr ""
-"أضف الكلمات التي يستعملها فريقك لما ينجزه نودج أصلاً، بأي لهجة، ويفهمها دون "
+"أضف الكلمات التي يستعملها فريقك لما ينجزه Nudge أصلاً، بأي لهجة، ويفهمها دون "
 "أي ذكاء اصطناعي."
 
 #. module: nudge
@@ -4467,7 +4467,7 @@ msgstr "العمود"
 #: code:addons/nudge/models/nudge_recipe_sign.py:35
 #: code:addons/nudge/models/nudge_recipe_catalogue.py:36
 msgid "Comes with Nudge"
-msgstr "يأتي مع نودج"
+msgstr "يأتي مع Nudge"
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_message__command
@@ -7350,7 +7350,7 @@ msgstr "ودّي"
 #. odoo-python
 #: code:addons/nudge/models/nudge_recipe_wizard.py:0
 msgid "From %(company)s, made with Nudge %(version)s on Odoo %(series)s."
-msgstr "من %(company)s، صُنعت بنودج %(version)s على أودو %(series)s."
+msgstr "من %(company)s، صُنعت بـ Nudge %(version)s على أودو %(series)s."
 
 #. module: nudge
 #. odoo-python
@@ -7809,7 +7809,7 @@ msgid ""
 "               answers cost: the median (p50) and the slowest 5 in 100 (p95), in milliseconds.\n"
 "               Only numbers are read here, never the text of a message."
 msgstr ""
-"المدة التي يستغرقها نودج في الإجابة في كل وضع وعند كل مزوّد، وتكلفة "
+"المدة التي يستغرقها Nudge في الإجابة في كل وضع وعند كل مزوّد، وتكلفة "
 "الإجابات: الوسيط (p50) وأبطأ 5 من كل 100 (p95)، بالمللي ثانية. تُقرأ هنا "
 "الأرقام فقط، ولا يُقرأ نص أي رسالة."
 
@@ -8015,7 +8015,7 @@ msgstr "لم أجد شيئًا لأعدّه."
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_built_switch__understood
 msgid "I know it was changed since Nudge made it"
-msgstr "أعلم أنه تغيّر منذ أن صنعه نودج"
+msgstr "أعلم أنه تغيّر منذ أن صنعه Nudge"
 
 #. module: nudge
 #. odoo-python
@@ -8266,7 +8266,7 @@ msgid ""
 msgstr ""
 "في الوضع الخاص، اسمح باستعمال التعرف على الكلام وأصوات المتصفح عندما لا "
 "يستمع أي مزوّد ذكاء اصطناعي على خادمك. قد يرسل Chrome وEdge الصوت إلى الشركة"
-" المصنّعة، ولا يستطيع نودج منع ذلك."
+" المصنّعة، ولا يستطيع Nudge منع ذلك."
 
 #. module: nudge
 #: model:ir.model.fields,field_description:nudge.field_nudge_run__is_background
@@ -8599,7 +8599,7 @@ msgstr "يعمل كله على كرت الشاشة."
 #: code:addons/nudge/models/nudge_built.py:0
 msgid ""
 "It was changed since Nudge made it: tick the box to switch it off anyway."
-msgstr "تغيّر منذ أن صنعه نودج: ضع علامة في المربع لإيقافه رغم ذلك."
+msgstr "تغيّر منذ أن صنعه Nudge: ضع علامة في المربع لإيقافه رغم ذلك."
 
 #. module: nudge
 #. odoo-python
@@ -8683,7 +8683,7 @@ msgstr "حفظ إجابة"
 #. odoo-python
 #: code:addons/nudge/models/nudge_question.py:0
 msgid "Keep an answer, record a tour or ignore it: Nudge, Knowledge, Recurring Questions (with Show advanced menus on)."
-msgstr "احفظ إجابة أو سجّل جولة أو تجاهله: نودج، المعرفة، الأسئلة المتكررة (مع تفعيل «إظهار القوائم المتقدمة»)."
+msgstr "احفظ إجابة أو سجّل جولة أو تجاهله: Nudge، المعرفة، الأسئلة المتكررة (مع تفعيل «إظهار القوائم المتقدمة»)."
 
 #. module: nudge
 #. odoo-python
@@ -9673,7 +9673,7 @@ msgstr "ما تم إنشاؤه"
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_built_view_list
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_built_view_search
 msgid "Made by Nudge"
-msgstr "ما صنعه نودج"
+msgstr "ما صنعه Nudge"
 
 #. module: nudge
 #: model:ir.model,name:nudge.model_nudge_built_log
@@ -10458,7 +10458,7 @@ msgstr "لا يوجد مزود ذكاء اصطناعي مهيأ لتحويل ا�
 #. odoo-python
 #: code:addons/nudge/models/nudge_translation.py:0
 msgid "No AI provider is set up yet (Settings, Nudge)."
-msgstr "لم يُعدّ أي مزود ذكاء اصطناعي بعد (الإعدادات، نودج)."
+msgstr "لم يُعدّ أي مزود ذكاء اصطناعي بعد (الإعدادات، Nudge)."
 
 #. module: nudge
 #. odoo-python
@@ -11106,7 +11106,7 @@ msgstr "لا شيء للإبلاغ عنه: الفحوصات لم تجد أي خ�
 #. module: nudge
 #: model_terms:ir.actions.act_window,help:nudge.nudge_built_action
 msgid "Nothing was built by Nudge yet"
-msgstr "لم يبنِ نودج شيئًا بعد"
+msgstr "لم يبنِ Nudge شيئًا بعد"
 
 #. module: nudge
 #. odoo-python
@@ -11182,7 +11182,7 @@ msgstr "نموذج مزود الذكاء الاصطناعي في Nudge"
 #. module: nudge
 #: model:ir.model,name:nudge.model_nudge_bulk
 msgid "Nudge AI over a List"
-msgstr "ذكاء نودج الاصطناعي على قائمة"
+msgstr "ذكاء Nudge الاصطناعي على قائمة"
 
 #. module: nudge
 #: model:ir.model,name:nudge.model_nudge_run
@@ -11308,7 +11308,7 @@ msgstr "نص كبير في Nudge"
 #. module: nudge
 #: model:ir.model,name:nudge.model_nudge_latency_report
 msgid "Nudge Latency and Cost"
-msgstr "سرعة نودج وتكلفته"
+msgstr "سرعة Nudge وتكلفته"
 
 #. module: nudge
 #: model:ir.model,name:nudge.model_nudge_log
@@ -11333,12 +11333,12 @@ msgstr "وضع Nudge"
 #. module: nudge
 #: model:ir.model,name:nudge.model_nudge_translation
 msgid "Nudge Module Translation"
-msgstr "ترجمة وحدة بواسطة نودج"
+msgstr "ترجمة وحدة بواسطة Nudge"
 
 #. module: nudge
 #: model:ir.model,name:nudge.model_nudge_translation_line
 msgid "Nudge Module Translation Term"
-msgstr "مصطلح في ترجمة وحدة بواسطة نودج"
+msgstr "مصطلح في ترجمة وحدة بواسطة Nudge"
 
 #. module: nudge
 #: model:ir.model,name:nudge.model_nudge_egress
@@ -11378,7 +11378,7 @@ msgstr "وصفات Nudge"
 #. module: nudge
 #: model:ir.model,name:nudge.model_nudge_history
 msgid "Nudge Record Summary"
-msgstr "ملخص سجل نودج"
+msgstr "ملخص سجل Nudge"
 
 #. module: nudge
 #: model:ir.model,name:nudge.model_nudge_tour
@@ -11393,7 +11393,7 @@ msgstr "خطوة جولة مسجّلة في Nudge"
 #. module: nudge
 #: model:ir.model,name:nudge.model_nudge_question
 msgid "Nudge Recurring Question"
-msgstr "سؤال متكرر في نودج"
+msgstr "سؤال متكرر في Nudge"
 
 #. module: nudge
 #: model:ir.model,name:nudge.model_nudge_memory
@@ -11403,7 +11403,7 @@ msgstr "إجابة Nudge محفوظة"
 #. module: nudge
 #: model:ir.model,name:nudge.model_nudge_reply
 msgid "Nudge Reply Draft"
-msgstr "مسودة رد نودج"
+msgstr "مسودة رد Nudge"
 
 #. module: nudge
 #: model:ir.model,name:nudge.model_nudge_task
@@ -11413,7 +11413,7 @@ msgstr "مهمة Nudge المجدولة"
 #. module: nudge
 #: model:ir.model,name:nudge.model_nudge_embedding
 msgid "Nudge Search Vector"
-msgstr "متجه بحث نودج"
+msgstr "متجه بحث Nudge"
 
 #. module: nudge
 #: model:ir.model,name:nudge.model_nudge_quick
@@ -11426,7 +11426,7 @@ msgstr "بحث Nudge بدون ذكاء اصطناعي"
 #: model:ir.actions.act_window,name:nudge.nudge_setup_wizard_action
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_setup_wizard_view_form
 msgid "Nudge Setup"
-msgstr "إعداد نودج"
+msgstr "إعداد Nudge"
 
 #. module: nudge
 #: model:ir.model,name:nudge.model_nudge_setup_wizard
@@ -11482,10 +11482,10 @@ msgid ""
 "undone. The fiscal localisation module is named on its card. The outgoing "
 "mail server is never configured by Nudge."
 msgstr ""
-"يسأل نودج عن الشركة وبلدها وعملتها ولغاتها والتطبيقات والمستودعات "
+"يسأل Nudge عن الشركة وبلدها وعملتها ولغاتها والتطبيقات والمستودعات "
 "والمستخدمين، شيئاً بعد شيء، ويعرض بطاقة بالتغييرات بدقة قبل كل خطوة. لا يتم "
 "شيء قبل موافقتك ومعظم الخطوات يمكن التراجع عنها. تُذكر وحدة التوطين المالي "
-"على بطاقتها. خادم البريد الصادر لا يضبطه نودج أبداً."
+"على بطاقتها. خادم البريد الصادر لا يضبطه Nudge أبداً."
 
 #. module: nudge
 #. odoo-javascript
@@ -11549,7 +11549,7 @@ msgid ""
 "keeping who asked, and proposes to the managers the ones that have no "
 "remembered answer and no tour. No AI provider is called."
 msgstr ""
-"يعدّ نودج كم مرة يتكرر السؤال نفسه، بأي لهجة، دون حفظ من سأل، ويقترح على "
+"يعدّ Nudge كم مرة يتكرر السؤال نفسه، بأي لهجة، دون حفظ من سأل، ويقترح على "
 "المديرين الأسئلة التي ليس لها إجابة محفوظة ولا جولة. لا يُستدعى أي مزود ذكاء"
 " اصطناعي."
 
@@ -11572,7 +11572,7 @@ msgid ""
 "Nudge first tries five records and shows you what it proposes and what the "
 "rest costs. Nothing is written before your yes."
 msgstr ""
-"يجرّب نودج أولاً خمسة سجلات ويريك ما يقترحه وتكلفة الباقي. لا يُكتب شيء قبل "
+"يجرّب Nudge أولاً خمسة سجلات ويريك ما يقترحه وتكلفة الباقي. لا يُكتب شيء قبل "
 "موافقتك."
 
 #. module: nudge
@@ -11595,7 +11595,7 @@ msgstr "Nudge للمطوّرين"
 #. odoo-python
 #: code:addons/nudge/models/nudge_history.py:0
 msgid "Nudge had no answer."
-msgstr "لم يكن لدى نودج جواب."
+msgstr "لم يكن لدى Nudge جواب."
 
 #. module: nudge
 #. odoo-python
@@ -11698,13 +11698,13 @@ msgstr "لم يتم إعداد Nudge بعد. اطلب من مسؤول النظا
 #: code:addons/nudge/tools/document_record.py:0
 msgid ""
 "Nudge is not set up yet: an administrator has to configure an AI provider."
-msgstr "لم يُعدّ نودج بعد: على المدير إعداد مزوّد ذكاء اصطناعي."
+msgstr "لم يُعدّ Nudge بعد: على المدير إعداد مزوّد ذكاء اصطناعي."
 
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/models/nudge_setup_wizard.py:0
 msgid "Nudge is set up. Reload the page to see it."
-msgstr "تم إعداد نودج. أعد تحميل الصفحة لرؤيته."
+msgstr "تم إعداد Nudge. أعد تحميل الصفحة لرؤيته."
 
 #. module: nudge
 #. odoo-python
@@ -11766,7 +11766,7 @@ msgstr "Nudge يحتاج إلى إجابتك"
 #. odoo-python
 #: code:addons/nudge/tools/setup.py:0
 msgid "Nudge never uninstalls an app: that is done in Apps."
-msgstr "لا يلغي نودج تثبيت أي تطبيق أبداً: يتم ذلك من التطبيقات."
+msgstr "لا يلغي Nudge تثبيت أي تطبيق أبداً: يتم ذلك من التطبيقات."
 
 #. module: nudge
 #. odoo-python
@@ -11860,7 +11860,7 @@ msgstr "Nudge: حذف المحادثات القديمة"
 #. module: nudge
 #: model:ir.actions.server,name:nudge.cron_embedding_ir_actions_server
 msgid "Nudge: download and index the local search model"
-msgstr "نودج: تنزيل نموذج البحث المحلي وفهرسة المحتوى"
+msgstr "Nudge: تنزيل نموذج البحث المحلي وفهرسة المحتوى"
 
 #. module: nudge
 #: model:ir.actions.server,name:nudge.cron_end_auditors_ir_actions_server
@@ -11875,7 +11875,7 @@ msgstr "Nudge: البحث عن الأسئلة المتكررة"
 #. module: nudge
 #: model:ir.actions.server,name:nudge.cron_usage_retention_ir_actions_server
 msgid "Nudge: forget old calls of the usage list"
-msgstr "نودج: نسيان الاستدعاءات القديمة في قائمة الاستخدام"
+msgstr "Nudge: نسيان الاستدعاءات القديمة في قائمة الاستخدام"
 
 #. module: nudge
 #: model:ir.actions.server,name:nudge.cron_forget_meeting_audio_ir_actions_server
@@ -12289,7 +12289,7 @@ msgstr "مدراء Nudge وحدهم يعدّلون المهارات."
 #. odoo-python
 #: code:addons/nudge/models/nudge_question.py:0
 msgid "Only Nudge managers decide on recurring questions."
-msgstr "مديرو نودج وحدهم يقررون في الأسئلة المتكررة."
+msgstr "مديرو Nudge وحدهم يقررون في الأسئلة المتكررة."
 
 #. module: nudge
 #. odoo-python
@@ -12319,7 +12319,7 @@ msgstr "لا يشارك الطلبات مع الآخرين إلا مديرو ن�
 #. odoo-python
 #: code:addons/nudge/models/nudge_recipe.py:0
 msgid "Only Nudge managers share recipes."
-msgstr "مديرو نودج وحدهم يشاركون الوصفات."
+msgstr "مديرو Nudge وحدهم يشاركون الوصفات."
 
 #. module: nudge
 #. odoo-python
@@ -12355,7 +12355,7 @@ msgstr "مدير Nudge فقط يمكنه تشغيل فحص سلامة قاعدة
 #. odoo-python
 #: code:addons/nudge/models/nudge_built.py:0
 msgid "Only a Nudge manager or an administrator can switch this off."
-msgstr "فقط مدير نودج أو مسؤول النظام يستطيع إيقاف هذا."
+msgstr "فقط مدير Nudge أو مسؤول النظام يستطيع إيقاف هذا."
 
 #. module: nudge
 #. odoo-python
@@ -12979,7 +12979,7 @@ msgid ""
 "Outgoing email is not set up. Nudge never configures it: open Settings > "
 "Technical > Outgoing Mail Servers, or ask me to show you where."
 msgstr ""
-"البريد الصادر غير مُعدّ. لا يضبطه نودج أبداً: افتح الإعدادات > التقنية > "
+"البريد الصادر غير مُعدّ. لا يضبطه Nudge أبداً: افتح الإعدادات > التقنية > "
 "خوادم البريد الصادر، أو اطلب مني أن أريك مكانها."
 
 #. module: nudge
@@ -15219,7 +15219,7 @@ msgstr "تقرير محفوظ"
 #. odoo-python
 #: code:addons/nudge/models/nudge_setup_wizard.py:0
 msgid "Say how many people use Nudge and how many messages each sends a day."
-msgstr "حدد عدد من يستخدمون نودج وعدد الرسائل التي يرسلها كل شخص في اليوم."
+msgstr "حدد عدد من يستخدمون Nudge وعدد الرسائل التي يرسلها كل شخص في اليوم."
 
 #. module: nudge
 #. odoo-python
@@ -16014,7 +16014,7 @@ msgid ""
 "key field. The value was hidden before anything was sent. If it should not "
 "have been shown there, tell the person and review who may open that screen."
 msgstr ""
-"شارك أحدهم شاشة %(model)s مع نودج وكانت تحتوي حقل كلمة مرور أو مفتاح. أُخفيت"
+"شارك أحدهم شاشة %(model)s مع Nudge وكانت تحتوي حقل كلمة مرور أو مفتاح. أُخفيت"
 " القيمة قبل إرسال أي شيء. إن لم يكن ينبغي عرضها هناك، نبّه الشخص وراجع من "
 "يحق له فتح هذه الشاشة."
 
@@ -16456,7 +16456,7 @@ msgstr "الأحد"
 #: model:ir.model,name:nudge.model_nudge_built_switch
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_built_switch_view_form
 msgid "Switch Off What Nudge Built"
-msgstr "إيقاف ما بناه نودج"
+msgstr "إيقاف ما بناه Nudge"
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_built_switch_view_form
@@ -16799,7 +16799,7 @@ msgstr "المصطلحات"
 msgid ""
 "Terms that module translations by Nudge must leave as they are, one per "
 "line."
-msgstr "مصطلحات يجب أن تتركها ترجمات نودج للوحدات كما هي، واحد في كل سطر."
+msgstr "مصطلحات يجب أن تتركها ترجمات Nudge للوحدات كما هي، واحد في كل سطر."
 
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_translation__glossary
@@ -16902,7 +16902,7 @@ msgid ""
 "That is more than your budget allows today: Nudge translates what the budget"
 " leaves and stops."
 msgstr ""
-"هذا أكثر مما تسمح به ميزانيتك اليوم: يترجم نودج ما تتيحه الميزانية ثم يتوقف."
+"هذا أكثر مما تسمح به ميزانيتك اليوم: يترجم Nudge ما تتيحه الميزانية ثم يتوقف."
 
 #. module: nudge
 #. odoo-python
@@ -17160,7 +17160,7 @@ msgid ""
 "               each one off; nothing is deleted."
 msgstr ""
 "هنا قائمة بالأتمتة والحقول والواجهات والأزرار والتقارير والرسائل والإجراءات "
-"المجدولة التي يبنيها نودج في وضع المطوّر، مع من طلبها ومتى. يمكنك إيقاف كلٍّ"
+"المجدولة التي يبنيها Nudge في وضع المطوّر، مع من طلبها ومتى. يمكنك إيقاف كلٍّ"
 " منها؛ لا يُحذف شيء."
 
 #. module: nudge
@@ -17723,7 +17723,7 @@ msgstr "آخر رسالة يغطيها الملخص."
 #. odoo-python
 #: code:addons/nudge/models/nudge_latency.py:0
 msgid "The latency and cost of Nudge are for its managers."
-msgstr "سرعة نودج وتكلفته لمديريه فقط."
+msgstr "سرعة Nudge وتكلفته لمديريه فقط."
 
 #. module: nudge
 #. odoo-python
@@ -17735,7 +17735,7 @@ msgstr "بنود الطلب المؤكَّد لا يغيّرها نادج أبد
 #. odoo-python
 #: code:addons/nudge/models/nudge_built.py:0
 msgid "The list of what Nudge built is kept: switch off what you do not want."
-msgstr "قائمة ما بناه نودج محفوظة: أوقف ما لا تريده."
+msgstr "قائمة ما بناه Nudge محفوظة: أوقف ما لا تريده."
 
 #. module: nudge
 #. odoo-python
@@ -17816,7 +17816,7 @@ msgstr "الوضع الذي يُرسل به هذا الطلب."
 msgid ""
 "The model %s is not one Nudge downloads: put its model.onnx and "
 "tokenizer.json in %s."
-msgstr "النموذج %s ليس مما ينزّله نودج: ضع model.onnx و tokenizer.json في %s."
+msgstr "النموذج %s ليس مما ينزّله Nudge: ضع model.onnx و tokenizer.json في %s."
 
 #. module: nudge
 #. odoo-python
@@ -17851,7 +17851,7 @@ msgstr "نموذج الشاشة التي تقع عليها الخطوة."
 #: model:ir.model.fields,help:nudge.field_res_config_settings__nudge_embedding_model
 msgid ""
 "The model to use. Empty: multilingual-e5-small, the one Nudge downloads."
-msgstr "النموذج المستخدم. فارغ: multilingual-e5-small وهو ما ينزّله نودج."
+msgstr "النموذج المستخدم. فارغ: multilingual-e5-small وهو ما ينزّله Nudge."
 
 #. module: nudge
 #. odoo-python
@@ -17964,7 +17964,7 @@ msgid ""
 "line, for example api.anthropic.com, localhost:11434 or *.example.com. "
 "Empty: no restriction. Any other host is refused before the request."
 msgstr ""
-"المضيفون الوحيدون الذين يجوز لنودج الإرسال إليهم: مزودو الذكاء الاصطناعي "
+"المضيفون الوحيدون الذين يجوز لـ Nudge الإرسال إليهم: مزودو الذكاء الاصطناعي "
 "والموصّلات وسوق الوصفات وتنزيل نموذج البحث ومصدر الامتثال. واحد في كل سطر، "
 "مثل api.anthropic.com أو localhost:11434 أو *.example.com. فارغ: بلا قيود. "
 "أي مضيف آخر يُرفض قبل الطلب."
@@ -18464,7 +18464,7 @@ msgstr "فحص السلامة الأسبوعي."
 #: model:ir.model.fields,help:nudge.field_nudge_coverage__intent
 #: model:ir.model.fields,help:nudge.field_nudge_lexicon_entry__intent
 msgid "The word of Nudge's own list this one means the same as."
-msgstr "كلمة من قائمة نودج نفسها تعني هذه الكلمة ما تعنيه."
+msgstr "كلمة من قائمة Nudge نفسها تعني هذه الكلمة ما تعنيه."
 
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_coverage__phrase
@@ -18626,7 +18626,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge/models/nudge_recipe.py:0
 msgid "This Nudge does not know the meaning “%s”."
-msgstr "نودج هذا لا يعرف المعنى «%s»."
+msgstr "Nudge هذا لا يعرف المعنى «%s»."
 
 #. module: nudge
 #. odoo-python
@@ -18762,7 +18762,7 @@ msgstr "تعذّرت قراءة هذا الملف كصورة: أرسل صورة 
 #: code:addons/nudge/models/nudge_recipe.py:0
 #: code:addons/nudge/models/nudge_recipe_wizard.py:0
 msgid "This file is not a Nudge recipe."
-msgstr "هذا الملف ليس وصفة نودج."
+msgstr "هذا الملف ليس وصفة Nudge."
 
 #. module: nudge
 #. odoo-python
@@ -18898,7 +18898,7 @@ msgstr "هذه الوصفة لأودو %(versions)s، وهذه القاعدة ت
 #: code:addons/nudge/models/nudge_recipe.py:0
 msgid ""
 "This recipe was made by a newer Nudge (format %s): update Nudge to read it."
-msgstr "صُنعت هذه الوصفة بنسخة أحدث من نودج (الصيغة %s): حدّث نودج لقراءتها."
+msgstr "صُنعت هذه الوصفة بنسخة أحدث من Nudge (الصيغة %s): حدّث Nudge لقراءتها."
 
 #. module: nudge
 #. odoo-python
@@ -20693,7 +20693,7 @@ msgstr "ما قد يكتبه الناس للعثور على هذه الجولة�
 msgid ""
 "What people of your company say, in any dialect: Nudge understands it like "
 "the words it knows."
-msgstr "ما يقوله أهل شركتك بأي لهجة: يفهمه نودج مثل الكلمات التي يعرفها."
+msgstr "ما يقوله أهل شركتك بأي لهجة: يفهمه Nudge مثل الكلمات التي يعرفها."
 
 #. module: nudge
 #. odoo-python
@@ -24069,7 +24069,7 @@ msgstr "لا يمكن استخدام هذا المرشح على حالة الم�
 msgid ""
 "This skill uses tools this Nudge does not have (%s): install their module "
 "first."
-msgstr "تستخدم هذه المهارة أدوات ليست في نودج هذا (%s): ثبّت وحدتها أولا."
+msgstr "تستخدم هذه المهارة أدوات ليست في Nudge هذا (%s): ثبّت وحدتها أولا."
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_market_view_list
@@ -24116,12 +24116,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_skill_market_view_form
 msgid ""
 "This skill uses tools this Nudge does not have. Install their module first:"
-msgstr "تستخدم هذه المهارة أدوات ليست في نودج هذا. ثبّت وحدتها أولا:"
+msgstr "تستخدم هذه المهارة أدوات ليست في Nudge هذا. ثبّت وحدتها أولا:"
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_export_view_form
 msgid "No signing key is set: the recipe is exported unsigned. A system administrator uploads one in Nudge / Configuration / Advanced / Signing Key."
-msgstr "لم يُضبط مفتاح توقيع: تُصدَّر الوصفة غير موقّعة. يرفع مدير النظام مفتاحا من نودج / الإعدادات / متقدم / مفتاح التوقيع."
+msgstr "لم يُضبط مفتاح توقيع: تُصدَّر الوصفة غير موقّعة. يرفع مدير النظام مفتاحا من Nudge / الإعدادات / متقدم / مفتاح التوقيع."
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_recipe_import_view_form
@@ -26268,12 +26268,12 @@ msgstr "لوحة الرموز"
 #. module: nudge
 #: model:ir.model,name:nudge.model_nudge_token_dashboard
 msgid "Nudge Token Dashboard"
-msgstr "لوحة رموز نودج"
+msgstr "لوحة رموز Nudge"
 
 #. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_token_dashboard__role__user
 msgid "Nudge User"
-msgstr "مستخدم نودج"
+msgstr "مستخدم Nudge"
 
 #. module: nudge
 #: model:ir.model.fields.selection,name:nudge.selection__nudge_token_dashboard__role__admin
@@ -26324,7 +26324,7 @@ msgstr "كتابة في الذاكرة المؤقتة"
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_token_dashboard_view_search
 msgid "Nudge Users"
-msgstr "مستخدمو نودج"
+msgstr "مستخدمو Nudge"
 
 #. module: nudge
 #: model_terms:ir.ui.view,arch_db:nudge.nudge_token_dashboard_view_search
@@ -26349,7 +26349,7 @@ msgstr "الأسبوع"
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_token_dashboard__role
 msgid "The highest Nudge role the person holds."
-msgstr "أعلى دور في نودج يشغله الشخص."
+msgstr "أعلى دور في Nudge يشغله الشخص."
 
 #. module: nudge
 #: model:ir.model.fields,help:nudge.field_nudge_token_dashboard__answers
@@ -26375,7 +26375,7 @@ msgid ""
 "needed no AI are what saves money. Only numbers are read here, never the "
 "text of a message."
 msgstr ""
-"الرموز التي استخدمها نودج، بحسب الوضع والدور والمزوّد ومصدر الإجابة (طلب "
+"الرموز التي استخدمها Nudge، بحسب الوضع والدور والمزوّد ومصدر الإجابة (طلب "
 "إلى الذكاء الاصطناعي أو إجابة محفوظة أو الذاكرة المؤقتة للإجابات أو مفهومة "
 "دون ذكاء اصطناعي). الرموز المقروءة من ذاكرة المزوّد المؤقتة والإجابات التي "
 "لم تحتج إلى ذكاء اصطناعي هي ما يوفّر المال. تُقرأ هنا الأرقام فقط، لا نص "
