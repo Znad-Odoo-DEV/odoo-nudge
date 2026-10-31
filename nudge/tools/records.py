@@ -82,6 +82,13 @@ FALSE_WORDS = ("false", "no", "0", "")
 ME = "me"
 
 
+# The same words for everybody, said only when a read finds nothing or sums to zero: what a person may read is not a
+# fact about the company, and nothing here tells whether more exists
+SEES_NONE = (
+    "This is only what this person may read: say they can see none, never that there are none, and do not quote "
+    "record ids.")
+
+
 class Refused(Exception):
     """What is asked cannot be done; the message is written for the model."""
 
@@ -598,6 +605,8 @@ class SearchRecords(base.Tool):
             result["note"] = (
                 "Nothing matches. To fill a field that holds text, such as a city, write the "
                 "words themselves: describe_model gives the type of each field.")
+        if not total:
+            result["visibility"] = SEES_NONE
         return base.ToolResult(
             base.dump(result), records=(model._name, records.ids, records.mapped("display_name")))
 

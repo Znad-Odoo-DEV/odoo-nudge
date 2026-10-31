@@ -15,6 +15,7 @@ import logging
 from odoo import api, fields, models
 from odoo.tools import file_path, sql
 
+from ..knowledge.rst import strip_markers
 from ..tools import noai_commands
 
 _logger = logging.getLogger(__name__)
@@ -345,6 +346,12 @@ class NudgeDocPassage(models.Model):
         self.env["nudge.embedding"]._bump()
         return super().unlink()
 
+    def _clean_body(self):
+        """The text of the passage as a person reads it: data built before the field markers of Sphinx
+        (":nosearch:") were left out still carries them"""
+        self.ensure_one()
+        return strip_markers(self.body).strip()
+
     def _embedding_text(self):
         self.ensure_one()
         return f"{self.title or ''}. {self.heading or ''}. {self.body or ''}"[:1500]
@@ -361,12 +368,13 @@ class NudgeDocPassage(models.Model):
             heading = passage.title + (f" ▸ {passage.heading}" if passage.heading else "")
             head = f"## {heading}\n"
             tail = f"\nSource: {passage._source()}"
-            text = head + passage.body + tail
+            body = passage._clean_body()
+            text = head + body + tail
             if size + len(text) > max_chars:
                 if not parts:
                     # The first passage at least, cut short, with its source
                     room = max(0, max_chars - len(head) - len(tail))
-                    parts.append(head + passage.body[:room].rstrip() + tail)
+                    parts.append(head + body[:room].rstrip() + tail)
                 break
             parts.append(text)
             size += len(text)

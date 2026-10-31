@@ -237,7 +237,7 @@
                             t-on-click="openProviders">
                         Set up a provider
                     </button>
-                    <div t-if="promptChips.length" class="o_nudge_suggestions o_nudge_noai_prompts">
+                    <div t-if="promptChips.length and !quickHasOutput" class="o_nudge_suggestions o_nudge_noai_prompts">
                         <p class="o_nudge_empty_text">Try one of these. Nudge understands them without any AI:</p>
                         <button t-foreach="promptChips" t-as="chip" t-key="chip.id"
                                 type="button" class="o_nudge_suggestion o_nudge_prompt_chip" dir="auto"
@@ -245,7 +245,7 @@
                             <span t-esc="chip.name"/>
                         </button>
                     </div>
-                    <form class="o_nudge_quick" t-on-submit.prevent="quickSearch">
+                    <form class="o_nudge_quick" t-ref="quickForm" t-on-submit.prevent="quickSearch">
                         <p class="o_nudge_empty_text">Meanwhile, search the screens, the settings and the Odoo documentation:</p>
                         <div class="input-group">
                             <input type="search" class="form-control o_nudge_quick_input" maxlength="2000"

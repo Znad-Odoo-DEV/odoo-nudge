@@ -127,3 +127,21 @@ test("without a provider, a remembered answer is offered above the search", asyn
     expect(".o_nudge_remembered_ask").toHaveCount(0, { message: "There is no AI to ask" });
     expect(".o_nudge_quick_menu").toHaveCount(1, { message: "The usual search is still there" });
 });
+
+test("without a provider, the examples give way once the search has results, so they are in view", async () => {
+    onRpc("nudge.prompt", "chips", () => [
+        { id: 12, name: "What is next here?", description: "", mode: "talk", body: "What is next here?",
+          variables: [], preview: false, text: "What is next here?" },
+    ]);
+    onRpc("nudge.quick", "find", () => FOUND);
+    await start();
+    await animationFrame();
+    expect(".o_nudge_noai_prompts").toHaveCount(1, { message: "The examples show before a search" });
+    await click(".o_nudge_quick_input");
+    await edit("routes");
+    await animationFrame();
+    await click(".o_nudge_quick_go");
+    await animationFrame();
+    expect(".o_nudge_quick_results").toHaveCount(1);
+    expect(".o_nudge_noai_prompts").toHaveCount(0, { message: "The results are not left below the list of examples" });
+});

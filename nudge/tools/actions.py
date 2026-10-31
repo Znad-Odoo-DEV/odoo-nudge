@@ -119,6 +119,15 @@ LINES_SCHEMA = {
 # What the model wrote, read as the fields expect it
 # ----------------------------------------------------------------------
 
+BY_LABEL = "Name the field to the person by its label, never by its technical name."
+
+
+def field_label(model, field, name):
+    """:return: the label of ``field`` as the person reads it, in their language (the technical name when it has
+    none)"""
+    return (field.get_description(model.env, ["string"]).get("string") or field.string or name) if field else name
+
+
 def writable_field(model, name, trial=False):
     """:param trial: for a trial that is discarded: a stored field Odoo fills
         (state) may be set, to fire what it fires"""
@@ -129,17 +138,19 @@ def writable_field(model, name, trial=False):
         raise Refused(
             f"{model._name} has no field {name!r} that this person can change.{hint} "
             "describe_model lists the fields.")
+    # The person reads the label of a field, never its technical name: the refusal names it by the label
+    label = field_label(model, field, name)
     if name in KEPT_FIELDS or holds_secret(model, field):
-        raise Refused(f"The field {name!r} is not one Nudge writes in.")
+        raise Refused(f"The field {label!r} is not one Nudge writes in. {BY_LABEL}")
     if field.type not in WRITABLE_TYPES:
         raise Refused(
-            f"{name!r} is a {field.type} field: Nudge does not write in it. "
-            "Show the person where it is instead.")
+            f"{label!r} is a {field.type} field: Nudge does not write in it. "
+            f"Show the person where it is instead. {BY_LABEL}")
     if (field.readonly and not (trial and field.store)) or (field.compute and not field.inverse and not field.store):
         # SEC-01: a button is refused only once pressed (an approval rule runs then): what is not known is not offered
         raise Refused(
-            f"{name!r} is filled by Odoo: it cannot be written in. Say so and stop: do not offer a button or another way "
-            "to the same result, which may be refused for this person too.")
+            f"{label!r} is filled by Odoo: it cannot be written in. Say so and stop: do not offer a button or another way "
+            f"to the same result, which may be refused for this person too. {BY_LABEL}")
     return field
 
 

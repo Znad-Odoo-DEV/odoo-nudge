@@ -10,8 +10,9 @@ from odoo.sql_db import db_connect
 from odoo.tests import TransactionCase, new_test_user, tagged
 
 from odoo.addons.nudge.models.nudge_slot import NudgeBusy
+from odoo.addons.nudge.tools import pinned_http
 
-from ..models import nudge_messaging
+from ..models import nudge_messaging, nudge_messaging_api
 
 from .test_messaging import MessagingCase, OTHER_PHONE, RAGHAD_PHONE
 
@@ -224,3 +225,70 @@ class TestAgentsOnPhones(MessagingCase, TransactionCase):
         self.assertEqual(scoped.context["nudge_agent_tools"], ("search_records",))
         self.assertTrue(scoped.context["nudge_messaging"])
         self.assertEqual(scoped.uid, self.raghad.id, "Still the person, never another user")
+
+    def plain_wire(self, answer, channel, linked):
+        """:return: the texts of the HTTP calls made while ``answer`` came back from the agent"""
+        calls = []
+
+        class Done:
+            status_code = 200
+
+        def post(url, **kwargs):
+            body = kwargs["json"]
+            calls.append(body.get("text") if channel == "telegram" else body["text"]["body"])
+            return Done()
+
+        api_class = type(self.env["nudge.messaging.api"])
+        self.patch(api_class, "_send_text", nudge_messaging_api.NudgeMessagingApi.__dict__["_send_text"])
+        self.patch(pinned_http, "post", post)
+        agent_class = type(self.env["nudge.agent"])
+        result = {"text": answer, "source": "ai", "tool_calls": [], "conversation_id": False, "error": False}
+        self.patch(agent_class, "_answer", lambda *args, **kwargs: dict(result))
+        patcher = patch.object(agent_class, "_answer_public", lambda *args, **kwargs: dict(result), create=True)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        wired = self.__dict__.setdefault("wired", set())
+        if (channel, linked) not in wired:
+            wired.add((channel, linked))
+            agent = self.agent("Front door %s %s" % (channel, linked), [self.raghad])
+            if linked:
+                self.link(self.raghad, channel=channel, sender="555")
+                self.bind(agent, channel=channel)
+            else:
+                self.bind(agent, channel=channel, service=True)
+        self.number += 1
+        self.env["nudge.messaging"]._receive(
+            channel, {"id": "plain-%s" % self.number, "sender": "555" if linked else STRANGER, "kind": "text",
+                      "text": "when are you open", "media": {}})
+        self.env["nudge.messaging"]._cron_answer()
+        return calls
+
+    def test_markdown_never_reaches_the_phone_on_either_channel_for_linked_or_public(self):
+        english = "We're open **Sunday to Thursday, 08:00 to 18:00**"
+        arabic = "نحن نعمل **من الأحد إلى الخميس، من 08:00 إلى 18:00** و*مساء*"
+        for channel in ("telegram", "whatsapp"):
+            for linked in (True, False):
+                for answer, plain in ((english, "We're open Sunday to Thursday, 08:00 to 18:00"),
+                                      (arabic, "نحن نعمل من الأحد إلى الخميس، من 08:00 إلى 18:00 ومساء")):
+                    with self.subTest(channel=channel, linked=linked, answer=answer[:12]):
+                        self.sent.clear()
+                        calls = self.plain_wire(answer, channel, linked)
+                        self.assertEqual(calls[-1:], [plain])
+
+    def test_plain_text_keeps_words_products_and_lone_asterisks(self):
+        plain = nudge_messaging_api.plain_text
+        for text in ("2*3 = 6", "2*3*4", "a * b", "price*", "snake_case_name", "**unclosed", "5 * 3 * 2",
+                     "Total: 1,200 AED (VAT 5%)", "نص عادي بدون علامات", "10:30 - 12:00"):
+            with self.subTest(text=text):
+                self.assertEqual(plain(text), text)
+
+    def test_plain_text_drops_the_marks_of_markdown(self):
+        plain = nudge_messaging_api.plain_text
+        for text, expected in (
+                ("# Hours\n* Sunday\n- Monday\n+ Tuesday", "Hours\n- Sunday\n- Monday\n- Tuesday"),
+                ("*italic* and __bold__ and _soft_", "italic and bold and soft"),
+                ("See [the page](https://x.io/a) or [https://y.io](https://y.io)", "See the page (https://x.io/a) or https://y.io"),
+                ("`code` and ```py\nx = 1\n```", "code and x = 1"),
+                ("**أهلاً** بك في *الشركة*", "أهلاً بك في الشركة")):
+            with self.subTest(text=text):
+                self.assertEqual(plain(text), expected)
