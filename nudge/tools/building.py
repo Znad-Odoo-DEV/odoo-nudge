@@ -23,6 +23,12 @@ from .records import (
     MODEL_PATTERN, Refused, cut, field_label, get_model, get_records, model_label, refusing,
 )
 
+def card_labels(env):
+    """:return: the words of the lines of a card that other modules of Nudge share (Model, Button, Only for), read
+    here so that they are in the person's language: a module translates the strings of its own files only"""
+    return {"model": env._("Model"), "button": env._("Button"), "only_for": env._("Only for")}
+
+
 # Where what Nudge makes is registered, so that it is found again and exported
 CUSTOM_MODULE = "nudge_custom"
 CUSTOM_MODULES = (CUSTOM_MODULE, "studio_customization", "__export__")

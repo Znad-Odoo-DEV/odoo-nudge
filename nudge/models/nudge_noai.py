@@ -532,6 +532,11 @@ class NudgeNoai(models.AbstractModel):
 
     def _plan(self, parsed, screen, mode):
         """:return: the :class:`Plan` for ``parsed``, or None when it cannot be done here"""
+        model_name = self._model_of(parsed.kind)
+        if model_name and not self.env[model_name].has_access("read"):
+            # SEC-04: in their language and their words, never the words a tool has for the model
+            return Plan(self.env._("You do not have access to %(what)s.", what=self._plural_of(parsed.kind, model_name)),
+                        parsed=parsed)
         method = getattr(self, f"_plan_{parsed.intent}", None)
         plan = method(parsed, screen, mode) if method else None
         if plan:
@@ -875,7 +880,10 @@ class NudgeNoai(models.AbstractModel):
         label = self._plural_of(kind, model_name)
         said = self._what_is_said(parsed)
         suffix = f" ({said})" if said else ""
-        if measure == "count":
+        if not value:
+            # SEC-05: counted over what this person may read: it says nothing of what there is
+            text = self.env._("You can see no %(what)s%(said)s.", what=label, said=suffix)
+        elif measure == "count":
             text = self.env._("%(count)s %(what)s%(said)s.", count=self._number(value), what=label, said=suffix)
         elif measure == "sum":
             text = self.env._("The total of %(what)s%(said)s: %(value)s.", what=label, said=suffix,
@@ -1309,7 +1317,9 @@ class NudgeNoai(models.AbstractModel):
             # Refused by the tool, in words: said as it is, not as a success
             failed = record.run_id.step_ids.filtered(lambda s: s.state == "failed")[-1:]
             if failed and failed.error:
-                told = plan.text = failed.error.split(" Nothing was")[0][:600]
+                told = plan.text = (
+                    self.env._("You do not have access to this kind of record.") if base.NO_ACCESS in failed.error
+                    else failed.error.split(" Nothing was")[0][:600])
                 message.content = told
         events = [{"type": "delta", "text": told}] if told else []
         events.extend(plan.events)

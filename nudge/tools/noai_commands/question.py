@@ -218,9 +218,18 @@ BUTTON_VERBS = (
         r"\bsend(?:s|ing)?\b|" + _AR_WORD + r"(?:[ان]?رسل|ارسال|[ان]بع[تث])")),
 )
 METHODS_OF = {verb: methods for verb, methods, _words in BUTTON_VERBS}
-# The reference of a record written in a question ("S00049", "INV/2026/00012"): a word of letters and digits. A
-# question that writes one is about that record, not always about the one on the screen
-REFERENCE = re.compile(r"(?<![\w/.-])(?=[\w/.-]*\d)(?=[\w/.-]*[a-z])[a-z0-9][\w/.-]*[a-z0-9]")
+# The reference of a record written in a sentence ("S00049", "INV/2026/00012"): a word of Latin letters and digits, an
+# Arabic letter may stand next to it. A sentence that writes one is about that record, not always about the one on the
+# screen. Not an address, nor a word read by references_in as an amount or a period
+REFERENCE = re.compile(
+    r"(?<![a-z0-9_/.-])(?=[a-z0-9_/.-]*\d)(?=[a-z0-9_/.-]*[a-z])[a-z0-9][a-z0-9_/.-]*[a-z0-9](?![a-z0-9_.-]*@)")
+# "100kg", "5.5kg": a quantity with its unit
+_QUANTITY = re.compile(r"\d[\d.,]*[a-z]+")
+# "report123.pdf", "site123.com"
+_FILE = re.compile(r".*\.[a-z]{2,5}")
+_YEAR = re.compile(r"(?:19|20)\d\d")
+# Of a request, what is looked at for references: a whole request, not a question of a few words
+MAX_REQUEST_CHARS = 4000
 
 
 def buttons_named(text):
@@ -232,8 +241,29 @@ def buttons_named(text):
     return [verb for _start, verb in sorted(found)]
 
 
+def _is_reference(word):
+    """:return: whether ``word``, letters and digits, is numbered as records are: a run of three digits that is not a
+    year ("S00129", "INV/2026/00012") or two numbers of its own ("INV/2026/12"); never "Q4", "A4", "FY2026", "Q4-2026",
+    "100kg" or a file"""
+    if _QUANTITY.fullmatch(word) or _FILE.fullmatch(word):
+        return False
+    if any(len(run) >= 3 and not _YEAR.fullmatch(run) for run in re.findall(r"\d+", word)):
+        return True
+    return sum(part.isdigit() for part in re.split(r"[/-]", word)) >= 2
+
+
+def references_in(text):
+    """:return: the references of records ``text`` writes, folded, in the order they are written"""
+    folded = arabic.fold(str(text or "")[:MAX_REQUEST_CHARS])
+    return list(dict.fromkeys(word for word in REFERENCE.findall(folded) if _is_reference(word)))
+
+
+def holds_reference(name, reference):
+    """:return: whether ``name`` holds ``reference``, folded, as a whole: S00129 is not in S001290"""
+    return bool(re.search(r"(?<![a-z0-9])%s(?![a-z0-9])" % re.escape(reference), arabic.fold(str(name or ""))))
+
+
 def other_references(text, name):
     """:return: the references of records ``text`` writes ("S00049") that ``name``, the name of a record, does not
     hold, folded"""
-    name = _folded(name)
-    return [reference for reference in REFERENCE.findall(_folded(text)) if reference not in name]
+    return [reference for reference in references_in(text) if not holds_reference(name, reference)]

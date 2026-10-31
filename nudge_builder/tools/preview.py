@@ -102,7 +102,7 @@ def card_html(direction, label, document):
     else:
         body = (
             '<div style="width:100%;overflow:hidden">'
-            f'<div style="zoom:.85;pointer-events:none">{_inline(document)}</div></div>')
+            f'<div style="pointer-events:none">{_inline(document)}</div></div>')
     return (
         f'<div class="o_nudge_builder_card" data-direction="{direction["key"]}" '
         f'style="flex:1;min-width:240px;border:1px solid #ccd;border-radius:6px;overflow:hidden;background:#fff">'
@@ -114,7 +114,11 @@ def _inline(document):
     start = document.index("<body")
     style = document[start:document.index(">", start) + 1]
     inner = document[document.index(">", start) + 1:document.rindex("</body>")]
-    return style.replace("<body", "<div") + inner + "</div>"
+    # the drawing takes the width of its card (a fixed width cut it off in a narrow card, on the right in RTL) and
+    # keeps the direction of its page, which the html wrapper carried
+    direction = "rtl" if document.startswith('<!doctype html><html dir="rtl"') else "ltr"
+    style = style.replace("width:360px", "width:100%;box-sizing:border-box")
+    return style.replace("<body", f'<div dir="{direction}"') + inner + "</div>"
 
 
 def cards_html(cards):

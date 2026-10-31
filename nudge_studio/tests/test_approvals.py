@@ -149,6 +149,27 @@ class TestApprovals(NudgeCase, TransactionCase):
             self.assertTrue(refused.is_error)
             self.assertIn("full name", refused.content)
 
+    def test_a_group_said_as_a_role_in_arabic_reaches_its_own_group(self):
+        """Filming: "مدير النظام" produced Sales / Manager. A role word and a sales word never mix; unsure asks."""
+        from odoo.addons.nudge_studio.tools.approvals import find_group
+        for text, xmlid in (("مدير النظام", "base.group_system"), ("مدير المبيعات", "sales_team.group_sale_manager"),
+                            ("المدير المالي", "account.group_account_manager")):
+            expected = self.env.ref(xmlid, raise_if_not_found=False)
+            if expected:
+                self.assertEqual(find_group(self.env, text), expected, text)
+        self.assertFalse(find_group(self.env, "المدير"), "Unsure: no group, so the person is asked")
+
+    def test_the_card_of_a_rule_speaks_the_language_of_the_person(self):
+        self.env["res.lang"]._activate_lang("ar_001")
+        self.env["ir.module.module"].search([("name", "in", ("nudge", "nudge_studio"))])._update_translations(["ar_001"])
+        self.admin.lang = "ar_001"
+        shown = self.run_tool("prepare_approval_rule", {
+            "model": "res.partner", "method": "create_company", "approvers": ["nudge_approver"],
+            "conditions": [{"field": "is_company", "operator": "=", "value": "false"}]})
+        self.assertFalse(shown.is_error, shown.content)
+        for line in shown.pending["preview"]["lines"]:
+            self.assertNotIn(line["label"], ("Model", "Button", "Only for", "Approvers", "Step"), line)
+
     def test_studio_steps_are_given_to_the_pointer(self):
         result = tools.base.call(self.env(user=self.user_a), "show_in_studio", {"steps": [
             {"target_type": "studio_menu", "target_name": "automations", "text": "Open Automations."},

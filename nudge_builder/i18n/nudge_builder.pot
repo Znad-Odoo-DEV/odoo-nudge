@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 12:44+0000\n"
-"PO-Revision-Date: 2026-10-29 12:44+0000\n"
+"POT-Creation-Date: 2026-10-31 07:00+0000\n"
+"PO-Revision-Date: 2026-10-31 07:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -2372,6 +2372,7 @@ msgstr ""
 #. module: nudge_builder
 #. odoo-python
 #: code:addons/nudge_builder/tools/site_edit.py:0
+#: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_page__name_shown
 #: model:ir.model.fields,field_description:nudge_builder.field_nudge_builder_revision__page_id
 msgid "Page"
 msgstr ""
@@ -3447,6 +3448,20 @@ msgstr ""
 
 #. module: nudge_builder
 #. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid ""
+"The Shop entry left the menu of this website, as the site has no shop. Add "
+"it back in the menu editor of the website when it has one."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "The Shop entry of this website stays: the website has orders."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
 #: code:addons/nudge_builder/tools/shop.py:0
 msgid ""
 "The Website Sale app (eCommerce) is not installed: there is no shop to "
@@ -3620,6 +3635,11 @@ msgid "The message a visitor starts the chat with."
 msgstr ""
 
 #. module: nudge_builder
+#: model:ir.model.fields,help:nudge_builder.field_nudge_builder_page__name_shown
+msgid "The name in the language of the reader."
+msgstr ""
+
+#. module: nudge_builder
 #: model:ir.model.fields,help:nudge_builder.field_nudge_builder_site__allow_projects
 msgid "The names of the projects are sent to the writer."
 msgstr ""
@@ -3628,6 +3648,14 @@ msgstr ""
 #. odoo-python
 #: code:addons/nudge_builder/models/nudge_builder_edit.py:0
 msgid "The network is one of: %s."
+msgstr ""
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid ""
+"The numbers block of the page %(page)s was left out: no real figures were "
+"given."
 msgstr ""
 
 #. module: nudge_builder

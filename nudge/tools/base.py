@@ -24,6 +24,10 @@ MODE_DEV = "dev"
 MODES = (MODE_TALK, MODE_AGENT, MODE_DEV)
 # What a refused action leaves: the model told "has been created" of a refusal
 NOTHING_MADE = "Nothing was made or changed: if you tell the person, say so."
+# SEC-04: what follows a model this person cannot reach: the same words whether it exists or not
+NO_ACCESS = (
+    "If you are sure of the name, this person has no access to that kind of record: tell them so in their language, "
+    "in plain words, never naming a technical model and never inventing a menu path.")
 
 
 class ToolResult:
@@ -664,6 +668,12 @@ def call(env, name, arguments, screen=None, mode=MODE_TALK):
             result = ToolResult(refused, is_error=True)
         else:
             result = public_checked(env, name, guarded(env, name, lambda: tool.run(env, arguments, screen)))
+    if result.pending and not result.is_error and isinstance(tool, Action):
+        # Imported here: it reads the records, built on this module. A card never changes another record than the one
+        # the person named; whatever goes wrong in the check stops the card too
+        from .named_record import refusal  # noqa: PLC0415
+        pending = result.pending
+        result = guarded(env, name, lambda: refusal(env, name, arguments, pending)) or result
     if result.is_error and isinstance(tool, Action):
         result.content = f"{result.content} {NOTHING_MADE}"
     return result

@@ -120,7 +120,7 @@ def get_model(env, name, operation="read", to_change=False):
     model = env[name] if name in env and not closed else None
     if model is None or model._abstract or model._transient or not model.has_access(operation):
         verb = {"read": "read", "create": "create records of", "write": "change", "unlink": "delete records of"}[operation]
-        raise Refused(f"There is no model {name!r} that this person can {verb}.")
+        raise Refused(f"There is no model {name!r} that this person can {verb}. {base.NO_ACCESS}")
     return model
 
 

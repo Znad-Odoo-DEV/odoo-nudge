@@ -11,7 +11,7 @@ person asks how to do something there. Installed by itself when Nudge and
 Studio are both there.
 """,
     "category": "Productivity",
-    "version": "18.0.1.0.13",
+    "version": "18.0.1.0.14",
     "author": "Ibrahim Elzenad",
     "website": "https://znad-odoo-dev.github.io",
     "support": "id7sp22@gmail.com",

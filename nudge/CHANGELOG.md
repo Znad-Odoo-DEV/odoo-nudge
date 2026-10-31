@@ -1,6 +1,14 @@
 # Changelog
 
-Current version: nudge 18.0.1.60.6, nudge_mcp 18.0.1.1.2, nudge_connect 18.0.1.0.4, nudge_messaging 18.0.1.0.6, nudge_ai 18.0.1.0.11, nudge_studio 18.0.1.0.12, nudge_documents 18.0.1.0.8, nudge_spreadsheet 18.0.1.0.11, nudge_builder 18.0.1.0.9, nudge_mail 18.0.1.0.15, nudge_discuss 18.0.1.0.9, nudge_website 18.0.1.0.5.
+Current version: nudge 18.0.1.60.7, nudge_mcp 18.0.1.1.2, nudge_connect 18.0.1.0.4, nudge_messaging 18.0.1.0.6, nudge_ai 18.0.1.0.11, nudge_studio 18.0.1.0.12, nudge_documents 18.0.1.0.8, nudge_spreadsheet 18.0.1.0.11, nudge_builder 18.0.1.0.9, nudge_mail 18.0.1.0.15, nudge_discuss 18.0.1.0.9, nudge_website 18.0.1.0.5.
+
+## 19.0.1.60.7
+
+- A card never changes another record than the one the person named: when a request writes a reference (S00129) and a change is prepared on a record that does not hold it, no card appears, and the person reads that it is not among the records they can see, in the same words whether it exists or not.
+- Plain words where access stops: "You do not have access to sales orders" instead of a technical message, and a total over only what a person may read says "you can see no..." rather than "there are none".
+- nudge_ai 19.0.1.0.12: on a database with the AI app, every visitor of a public agent was refused, as its service user may not read the AI app's agents. They are now told nothing of those agents, and answered.
+- A remembered answer is no longer offered because one noun is shared: "شو في أشياء بتشتغل لحالها على عروض الأسعار؟" goes to the AI instead of the answer on how to confirm a quotation, while rewordings of one question still match, in English and Arabic.
+- Studio approval rules: a group said as a role reaches its own group ("مدير النظام", "مدير المبيعات", "المدير المالي"), a sentence naming two apps or none asks instead of picking, and the card reads Model, Button and Only for in the language of the person.
 
 ## 19.0.1.60.6
 

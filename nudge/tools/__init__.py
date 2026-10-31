@@ -13,6 +13,7 @@ from . import analytics
 from . import python
 from . import sql
 from . import actions
+from . import named_record
 from . import plans
 from . import bulk
 from . import tasks

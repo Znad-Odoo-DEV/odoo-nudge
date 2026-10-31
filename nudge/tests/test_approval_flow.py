@@ -188,6 +188,39 @@ class TestApprovalFlow(NudgeCase, TransactionCase):
             self.assertEqual(group, self.env.ref(xmlid), text)
             self.assertFalse(note, text)
 
+    def test_a_role_said_in_arabic_or_english_reaches_its_own_group_and_never_another(self):
+        """Studio filming: "مدير النظام" produced Sales / Manager. The reading is shared with the Studio card."""
+        for text, xmlid in (
+                ("مدير النظام", "base.group_system"), ("system administrator", "base.group_system"),
+                ("مسؤول النظام", "base.group_system"),
+                ("مدير المبيعات", "sales_team.group_sale_manager"), ("the sales manager", "sales_team.group_sale_manager"),
+                ("المدير المالي", "account.group_account_manager"), ("the finance manager", "account.group_account_manager"),
+                ("مدير المشتريات", "purchase.group_purchase_manager")):
+            expected = self.env.ref(xmlid, raise_if_not_found=False)
+            if not expected:
+                continue
+            self.assertEqual(approval_flow.role_group(self.env, text), expected, text)
+        # when unsure it finds nothing, so that the caller asks
+        for text in ("المدير", "manager", "مدير المبيعات والمشتريات", "Raghad Ebrahim Foundry manager", ""):
+            self.assertFalse(approval_flow.role_group(self.env, text), text)
+        # a role word and a sales word never mix
+        sales = self.env.ref("sales_team.group_sale_manager", raise_if_not_found=False)
+        if sales:
+            self.assertNotEqual(approval_flow.role_group(self.env, "مدير النظام"), sales)
+            self.assertNotEqual(approval_flow.role_group(self.env, "مدير المبيعات"), self.env.ref("base.group_system"))
+
+    def test_the_words_of_a_card_shared_by_the_modules_are_in_the_language_of_the_person(self):
+        """Studio filming: Model, Button and Only for stayed English on the approval rule card in Arabic."""
+        from odoo.addons.nudge.tools import building
+        self.env["res.lang"]._activate_lang("ar_001")
+        self.env["ir.module.module"].search([("name", "=", "nudge")])._update_translations(["ar_001"])
+        english = building.card_labels(self.env(context=dict(self.env.context, lang="en_US")))
+        arabic = building.card_labels(self.env(context=dict(self.env.context, lang="ar_001")))
+        self.assertEqual(english, {"model": "Model", "button": "Button", "only_for": "Only for"})
+        for key, word in arabic.items():
+            self.assertNotEqual(word, english[key], key)
+            self.assertRegex(word, "[؀-ۿ]", key)
+
     def test_a_role_of_an_unknown_app_is_reported_and_not_replaced_silently(self):
         group, note = approval_flow.find_group(self.env, "Raghad Ebrahim Foundry manager")
         self.assertIn("Raghad Ebrahim Foundry manager", note)
