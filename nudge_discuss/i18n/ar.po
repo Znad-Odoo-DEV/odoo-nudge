@@ -158,12 +158,12 @@ msgid ""
 "To edit it and send it, open Nudge on this record and press Draft a reply. "
 "It is sent only when you press Send."
 msgstr ""
-"لتعديله وإرساله، افتح نودج على هذا السجل واضغط اكتب مسودة رد. لا يُرسل إلا "
+"لتعديله وإرساله، افتح Nudge على هذا السجل واضغط اكتب مسودة رد. لا يُرسل إلا "
 "عندما تضغط إرسال."
 
 #. module: nudge_discuss
 msgid "Copy it into your reply: Nudge never sends it."
-msgstr "انسخه إلى ردك: نودج لا يرسله أبداً."
+msgstr "انسخه إلى ردك: Nudge لا يرسله أبداً."
 
 #. module: nudge_discuss
 msgid "**Draft of a reply, not sent**"
