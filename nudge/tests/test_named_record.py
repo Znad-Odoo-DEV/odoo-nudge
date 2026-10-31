@@ -330,6 +330,29 @@ class TestAccessWording(AgentCase, TransactionCase):
         for persona in (prompt.SYSTEM_PERSONA, prompt.SYSTEM_PERSONA_COMPACT):
             self.assertIn('is "you can see none", never "there are none"', persona)
 
+    def told_for(self, user, tool, arguments):
+        adapter = self.use_adapter(script=[asking(call(tool, arguments)), saying(SAID)])
+        conversation = self.env["nudge.conversation"].with_user(user)._chat_open(None)
+        job = conversation._chat_prepare("How many are there?", mode="agent")
+        list(loop.run(job, conversation._chat_record))
+        return adapter.calls[-1]["turns"][-1]["results"][0]["content"]
+
+    def test_a_read_that_finds_nothing_says_it_is_only_what_the_person_may_read(self):
+        from odoo.addons.nudge.tools.records import SEES_NONE
+        nothing = {"model": "res.partner", "conditions": [{"field": "name", "operator": "contains", "value": "zz-none-zz"}]}
+        some = {"model": "res.partner", "conditions": [{"field": "name", "operator": "contains", "value": "Nudge Carol"}]}
+        zero_sum = {"model": "res.partner", "conditions": nothing["conditions"], "measures": ["count"]}
+        admin = new_test_user(self.env, login="nudge_sees_all", groups="nudge.group_nudge_agent,base.group_system")
+        for user in (self.agent, admin):
+            with self.subTest(user=user.login):
+                self.assertIn(SEES_NONE, self.told_for(user, "search_records", nothing))
+                self.assertIn(SEES_NONE, self.told_for(user, "aggregate_records", zero_sum))
+                self.assertNotIn(SEES_NONE, self.told_for(user, "search_records", some))
+                self.assertNotIn(SEES_NONE, self.told_for(
+                    user, "aggregate_records", {"model": "res.partner", "conditions": some["conditions"]}))
+        self.assertIn("never that there are none", SEES_NONE)
+        self.assertIn("do not quote record ids", SEES_NONE)
+
     def test_sec01_what_odoo_fills_offers_no_other_way(self):
         adapter = self.use_adapter(script=[asking(call("prepare_write", {
             "model": "res.partner", "ids": self.carol.ids, "values": values(contact_address="x")})), saying(SAID)])
@@ -339,3 +362,7 @@ class TestAccessWording(AgentCase, TransactionCase):
         told = adapter.calls[-1]["turns"][-1]["results"][0]["content"]
         self.assertIn("is filled by Odoo", told)
         self.assertIn("do not offer a button or another way", told)
+        self.assertNotIn("contact_address", told.replace("Name the field", ""), "The field is named by its label")
+        label = self.env["res.partner"]._fields["contact_address"].get_description(self.env, ["string"])["string"]
+        self.assertIn(repr(label), told)
+        self.assertIn("never by its technical name", told)

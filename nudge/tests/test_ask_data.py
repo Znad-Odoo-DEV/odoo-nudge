@@ -148,7 +148,19 @@ class TestAskData(NudgeCase, TransactionCase):
         self.assertTrue(data["showing"].endswith("2 rows"), data["showing"])
         listing = result.event["lists"][0]
         self.assertEqual(listing["action"]["res_model"], "res.partner")
-        self.assertIn("Showing", base.TOOLS["aggregate_records"].description)
+        self.assertIn("closing_line", base.TOOLS["aggregate_records"].description)
+        self.assertNotIn('"Showing', base.TOOLS["aggregate_records"].description,
+                         "The model is not handed the English word to copy into an Arabic answer")
+        self.assertEqual(data["closing_line"], "Showing: " + data["showing"])
+
+    def test_the_closing_line_is_already_in_the_language_of_the_person(self):
+        self.env["res.lang"]._activate_lang("ar_001")
+        self.env["ir.module.module"].search([("name", "=", "nudge")])._update_translations(["ar_001"])
+        arabic = self.env(user=self.user_a, context=dict(self.env.context, lang="ar_001"))
+        data = json.loads(base.call(arabic, "aggregate_records", {"model": "res.partner", "conditions": [
+            {"field": "name", "operator": "contains", "value": "Nudge Ask"}]}, mode="talk").content)
+        self.assertNotIn("Showing", data["closing_line"], data["closing_line"])
+        self.assertTrue(data["closing_line"].endswith(data["showing"]))
 
     # -- the rules, with no provider -----------------------------------------
     def test_the_rules_count_for_a_plain_user(self):

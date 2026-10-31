@@ -28,6 +28,11 @@ EMPHASIS = re.compile(r"(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])")
 SUBSTITUTION = re.compile(r"\|([^|\s][^|]*)\|")
 LIST_ITEM = re.compile(r"^(\s*)([-*•]|\d+[.)]|#\.)\s+")
 SPACES = re.compile(r"[ \t]+")
+# File-level field markers of Sphinx (":nosearch:", ":orphan:", ":show-content:" ...): alone on a line, or one of
+# the known names at the start of a line. They steer the site, they are not words; a colon in a sentence stays
+FIELD_MARKER = re.compile(
+    r"^[ \t]*:(?:[a-z][a-z-]*:[ \t]*$|(?:nosearch|orphan|show-content|show-toc|hide-page-toc|code-column"
+    r"|custom-css|tocdepth|no-search|nofooter|show-link|nolist):[ \t]*\d*[ \t]*)", re.M)
 
 # What a directive becomes
 SKIPPED = {
@@ -93,6 +98,11 @@ def _inline(text):
     text = re.sub(r"`([^`]+?)`_{1,2}", r"\1", text)
     text = text.replace("\\*", "*").replace("\\_", "_")
     return SPACES.sub(" ", text).strip()
+
+
+def strip_markers(text):
+    """The text of a passage without the field markers of Sphinx; a colon inside a sentence stays."""
+    return FIELD_MARKER.sub("", text or "")
 
 
 def _slug(heading):
@@ -241,6 +251,11 @@ def _read(lines, page, base_indent=0, label=""):
 
         if COMMENT.match(line):
             position = _block_end(lines, position + 1, _indent(line))
+            continue
+
+        # A field marker of Sphinx at the top of a page (":nosearch:") is not text
+        if FIELD_MARKER.match(line):
+            position += 1
             continue
 
         # A heading: text on one line, a line of one character under it

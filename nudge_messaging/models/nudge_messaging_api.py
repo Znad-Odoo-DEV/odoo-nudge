@@ -5,6 +5,7 @@ the address, and never written in a log, an error or an answer: what is
 logged is the kind of failure only. Tests replace this model, so no test
 reaches a network."""
 import logging
+import re
 import time
 from urllib.parse import urlsplit
 
@@ -34,6 +35,35 @@ SECRET_KEYS = (
 WHATSAPP_MEDIA_HOSTS = ("lookaside.fbsbx.com",)
 WHATSAPP_MEDIA_DOMAINS = (".fbsbx.com", ".fbcdn.net")
 LABELS = {"whatsapp": "WhatsApp", "telegram": "Telegram"}
+
+
+_FENCE = re.compile(r"```[^\n`]*\n?(.*?)```", re.S)
+_CODE = re.compile(r"`([^`\n]+)`")
+_HEADER = re.compile(r"^[ \t]{0,3}#{1,6}[ \t]+", re.M)
+_BULLET = re.compile(r"^([ \t]*)[*+\-][ \t]+(?=\S)", re.M)
+_LINK = re.compile(r"\[([^\]\n]+)\]\((https?://[^\s)]+)\)")
+_BOLD = re.compile(r"(?<![0-9A-Za-z*_])(\*\*|__)(?=\S)(.+?)(?<=\S)\1(?![0-9A-Za-z*_])")
+_ITALIC_STAR = re.compile(r"(?<![0-9A-Za-z*])\*(?=[^\s*])([^*\n]*?[^\s*])\*(?![0-9A-Za-z*])")
+_ITALIC_UNDER = re.compile(r"(?<!\w)_(?=[^\s_])([^_\n]*?[^\s_])_(?!\w)")
+
+
+def _link_text(match):
+    label, url = match.group(1).strip(), match.group(2)
+    return url if label == url else "%s (%s)" % (label, url)
+
+
+def plain_text(text):
+    """The words of a Markdown answer without its marks: a phone shows them as typed. Bold, italics, headers,
+    bullets, links and backticks go; a word, ``2*3`` or a lone asterisk stays."""
+    text = str(text or "")
+    text = _FENCE.sub(lambda m: m.group(1).strip("\n"), text)
+    text = _CODE.sub(r"\1", text)
+    text = _LINK.sub(_link_text, text)
+    text = _HEADER.sub("", text)
+    text = _BULLET.sub(lambda m: m.group(1) + "- ", text)
+    text = _BOLD.sub(r"\2", text)
+    text = _ITALIC_STAR.sub(r"\1", text)
+    return _ITALIC_UNDER.sub(r"\1", text)
 
 
 class MessagingError(UserError):
@@ -96,7 +126,7 @@ class NudgeMessagingApi(models.AbstractModel):
     @api.model
     def _send_text(self, channel, to, text):
         """Send one message. :return: whether it left; never raises, never logs a key"""
-        text = str(text or "")[:MAX_TEXT]
+        text = plain_text(text)[:MAX_TEXT]
         try:
             if channel == "whatsapp":
                 phone_id, token = self._param("whatsapp.phone_id"), self._param("whatsapp.access_token")
