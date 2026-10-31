@@ -9,7 +9,8 @@ from lxml import etree
 
 from odoo import Command
 
-from odoo.addons.nudge.tools import base
+from odoo.addons.nudge.tools import approval_flow, base
+from odoo.addons.nudge.tools.building import card_labels
 from odoo.addons.nudge.tools.developer import DELETABLE, Building, check_developing, in_words, ir_model
 from odoo.addons.nudge.tools.records import (
     CONDITION_SCHEMA_ITEMS, MODEL_PATTERN, Refused, build_domain, cut, get_model, get_records, model_label,
@@ -63,16 +64,22 @@ def find_users(env, names):
 
 def find_group(env, text):
     """:return: the groups ``text`` names: by external id (sales_team.group_sale_manager), by full name
-    (Sales / Administrator), else by name; a short name a dozen apps share (Administrator) finds them all, and the
-    caller refuses it rather than guess"""
+    (Sales / Administrator, in the person's language or in English), by role said in words ("مدير المبيعات",
+    "the finance manager", "مدير النظام": the same reading as the approval flow of the Community build), else by
+    name; a short name a dozen apps share (Administrator) finds them all, and the caller refuses it rather than
+    guess"""
     Groups = env["res.groups"]
     if "." in text and " " not in text:
         group = env.ref(text, raise_if_not_found=False)
         if group and group._name == "res.groups":
             return group
-    return (Groups.search([("full_name", "=ilike", text)], limit=2)
-            or Groups.search([("name", "=ilike", text)], limit=2)
-            or Groups.search([("full_name", "ilike", text)], limit=2))
+    for lang in (None, "en_US"):
+        scoped = Groups.with_context(lang=lang) if lang else Groups
+        found = (scoped.search([("full_name", "=ilike", text)], limit=2)
+                 or scoped.search([("name", "=ilike", text)], limit=2))
+        if found:
+            return found
+    return approval_flow.role_group(env, text) or Groups.search([("full_name", "ilike", text)], limit=2)
 
 
 def button_of(rule):
@@ -234,9 +241,10 @@ class PrepareApprovalRule(Building):
             "message": (arguments.get("message") or "").strip() or False,
             "name": (arguments.get("message") or "").strip() or f"Approval: {button['label']}",
         }
+        words = card_labels(env)
         lines = [
-            {"label": env._("Model"), "value": model_label(model)},
-            {"label": env._("Button"), "value": button["label"]},
+            {"label": words["model"], "value": model_label(model)},
+            {"label": words["button"], "value": button["label"]},
             {"label": env._("Approvers"), "value": ", ".join(approvers.mapped("name")) or None},
             {"label": env._("Approval group"), "value": group.display_name if group else None},
             {"label": env._("Step"), "value": values["notification_order"]},
@@ -248,7 +256,7 @@ class PrepareApprovalRule(Building):
         if arguments.get("conditions"):
             domain = build_domain(model, arguments["conditions"], arguments.get("match", "all"))
             values.update(conditional=True, domain=str(list(domain)))
-            lines.append({"label": env._("Only for"), "value": in_words(model, arguments["conditions"], arguments.get("match", "all"))})
+            lines.append({"label": words["only_for"], "value": in_words(model, arguments["conditions"], arguments.get("match", "all"))})
         if values["message"]:
             lines.append({"label": env._("Shown on the button"), "value": values["message"]})
         return base.ToolResult(

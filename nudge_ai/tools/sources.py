@@ -58,7 +58,8 @@ class ListCompanyAgents(base.Tool):
     )
 
     def run(self, env, arguments, screen):
-        agents = env["ai.agent"].search([], limit=MAX_AGENTS)
+        Agent = env["ai.agent"]
+        agents = Agent.search([], limit=MAX_AGENTS) if Agent.has_access("read") else Agent
         if not agents:
             return base.ToolResult("No AI agent is set up in this company.")
         listed = [{
@@ -101,7 +102,8 @@ class SearchCompanySources(base.Tool):
         domain = [("sources_ids", "!=", False)]
         if arguments.get("agent"):
             domain.append(("name", "ilike", arguments["agent"]))
-        agents = env["ai.agent"].search(domain, limit=MAX_AGENTS)
+        Agent = env["ai.agent"]
+        agents = Agent.search(domain, limit=MAX_AGENTS) if Agent.has_access("read") else Agent
         searched = [(agent, readable_sources(agent)) for agent in agents]
         searched = [(agent, sources) for agent, sources in searched if sources]
         if not searched:

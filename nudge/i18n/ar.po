@@ -28302,3 +28302,27 @@ msgstr "تم استبدال الأزرار القديمة"
 #: code:addons/nudge/models/nudge_agent.py:0
 msgid "%(first)s to %(last)s"
 msgstr "من %(first)s إلى %(last)s"
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/named_record.py:0
+msgid "I cannot find %(reference)s among the records you can see, so I prepared nothing."
+msgstr "لا أجد %(reference)s بين السجلات التي يمكنك رؤيتها، لذلك لم أجهّز شيئًا."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_noai.py:0
+msgid "You do not have access to %(what)s."
+msgstr "ليست لديك صلاحية الوصول إلى %(what)s."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_noai.py:0
+msgid "You do not have access to this kind of record."
+msgstr "ليست لديك صلاحية الوصول إلى هذا النوع من السجلات."
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_noai.py:0
+msgid "You can see no %(what)s%(said)s."
+msgstr "لا يظهر لك أي من %(what)s%(said)s."

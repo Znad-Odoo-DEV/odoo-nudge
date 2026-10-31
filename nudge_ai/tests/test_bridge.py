@@ -1,7 +1,7 @@
 import json
 from types import SimpleNamespace
 
-from odoo.tests import TransactionCase, tagged
+from odoo.tests import TransactionCase, new_test_user, tagged
 
 from odoo.addons.nudge import tools
 from odoo.addons.nudge.llm import base as llm
@@ -26,6 +26,13 @@ class TestBridge(NudgeCase, TransactionCase):
         self.assertFalse(provider._has_credentials())
         provider.key_source = "own"
         self.assertFalse(provider._has_credentials(), "Nothing typed here either")
+
+    def test_a_person_who_may_not_read_the_agents_is_told_nothing_of_them(self):
+        # A public channel's service user is a portal user: every visitor of an agent was refused on an AccessError
+        self.env["ai.agent"].create({"name": "Returns helper", "system_prompt": "Only for the staff."})
+        portal = new_test_user(self.env, login="nudge_ai_portal", groups="base.group_portal,nudge.group_agent_service")
+        self.assertFalse(self.env["ai.agent"].with_user(portal).has_access("read"))
+        self.assertEqual(self.env["nudge.conversation"].with_user(portal)._ai_agents_text(), "")
 
     def test_what_the_agents_are_told_is_told_to_nudge(self):
         agent = self.env["ai.agent"].create({

@@ -23,8 +23,10 @@ class NudgeConversation(models.Model):
 
     def _ai_agents_text(self):
         """:return: the agents of the AI app, their instructions and topics,
-        as text for the model; "" when there is none"""
-        agents = self.env["ai.agent"].search([], limit=MAX_AGENTS)
+        as text for the model; "" when there is none or this person may not read them (a public channel's
+        service user: without this, every visitor of an agent was refused on a database with the AI app)"""
+        Agent = self.env["ai.agent"]
+        agents = Agent.search([], limit=MAX_AGENTS) if Agent.has_access("read") else Agent
         if not agents:
             return ""
         lines = [

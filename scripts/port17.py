@@ -81,7 +81,7 @@ sub("nudge/tools/report_explain.py", r"(?<![\w.])env\._\(", "_tr(env, ")
 sub("nudge/models/nudge_task.py", r"last_result=env\._\(", "last_result=_tr(env, ")
 # APPROVAL RULE (17): a flow is made in English with the other languages as its translations, each text in the language
 # of the env that says it (`e._(`, `local._(`, `arabic._(`): 17's _() reads the locals `context` and `cr`, _tr gives them
-for _name, _before in (("nudge/tools/approval_flow.py", "APPROVAL_TAG = "), ("nudge/tests/test_approval_flow.py", "SENTENCES = ")):
+for _name, _before in (("nudge/tools/approval_flow.py", "APPROVAL_TAG = "), ("nudge/tests/test_approval_flow.py", "SENTENCES = "), ("nudge/tools/building.py", "def card_labels(env):"), ("nudge/tools/named_record.py", "def _told(env, wanted, read):")):
     sub(_name, r"(?<![\w.])(env|e|local|english|arabic|other)\._\(", r"_tr(\1, ")
     _s = read(_name)
     _s = _s.replace("\n" + _before, (

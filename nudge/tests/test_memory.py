@@ -208,6 +208,35 @@ class TestAnswerMemory(NudgeCase, TransactionCase):
         self.ask(self.user_b, "Where is the weather report of Paris?")
         self.assertEqual(len(adapter.calls), 1)
 
+    def test_a_noun_in_common_is_not_a_match(self):
+        """Filming (R3): "what runs by itself on quotations?" was offered the answer of "How do I confirm a
+        quotation?" for the one noun they share, in Arabic through the term bridge, which keeps only the words
+        it knows. Asked through the real entry point: the AI answers, nothing is served or offered."""
+        self.remember(question="How do I confirm a quotation?", answer="Open it and press Confirm.")
+        for text in ("شو في أشياء بتشتغل لحالها على عروض الأسعار؟", "What runs by itself on quotations?"):
+            with self.subTest(text=text):
+                adapter = self.use_adapter(reply="From the AI")
+                _conversation, last = self.ask(self.user_b, text)
+                self.assertEqual(len(adapter.calls), 1, "The AI was asked: no memory answered or was offered")
+                self.assertFalse(last.get("memory"))
+
+    def test_the_same_question_in_other_words_still_matches(self):
+        """The narrowing keeps true paraphrases, English and Arabic, in both directions. An answer in the
+        other language is translated by the provider (one call), never searched again."""
+        for kept, answer, texts in (
+                ("How do I confirm a quotation?", "Open it and press Confirm.",
+                 ("كيف أؤكد عرض السعر؟", "how can I confirm quotations", "How do I confirm a quotation?")),
+                ("كيف أؤكد عرض السعر؟", "افتحه واضغط تأكيد.",
+                 ("How do I confirm a quotation?", "كيف أؤكد عروض الأسعار؟"))):
+            self.Memory.search([]).unlink()
+            memory = self.remember(question=kept, answer=answer)
+            for text in texts:
+                with self.subTest(kept=kept, text=text):
+                    adapter = self.use_adapter(reply="From the AI")
+                    _conversation, last = self.ask(self.user_b, text)
+                    self.assertEqual(last["memory"]["id"], memory.id)
+                    self.assertTrue(all("Translate to" in str(call["system"]) for call in adapter.calls), adapter.calls)
+
     def test_only_what_the_person_may_see(self):
         group = self.env.ref("base.group_system")
         self.remember(group_ids=[(6, 0, group.ids)])

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 06:22+0000\n"
-"PO-Revision-Date: 2026-10-31 06:22+0000\n"
+"POT-Creation-Date: 2026-10-31 08:07+0000\n"
+"PO-Revision-Date: 2026-10-31 08:07+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -5937,6 +5937,7 @@ msgstr ""
 #: model:nudge.tour.step,label:nudge.tour_register_payment_3
 msgid "Create Payment"
 msgstr ""
+
 #. module: nudge
 #. odoo-python
 #: code:addons/nudge/tools/document_catalogue.py:0
@@ -9161,6 +9162,14 @@ msgstr ""
 msgid ""
 "I cannot answer this here. Please ask in other words, or ask to talk to a "
 "person."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/tools/named_record.py:0
+msgid ""
+"I cannot find %(reference)s among the records you can see, so I prepared "
+"nothing."
 msgstr ""
 
 #. module: nudge
@@ -14525,6 +14534,7 @@ msgstr ""
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/tools/building.py:0
 #: code:addons/nudge/tools/developer.py:0
 msgid "Only for"
 msgstr ""
@@ -25658,8 +25668,26 @@ msgstr ""
 
 #. module: nudge
 #. odoo-python
+#: code:addons/nudge/models/nudge_noai.py:0
+msgid "You can see no %(what)s%(said)s."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
 #: code:addons/nudge/models/nudge_setup_wizard.py:0
 msgid "You choose the model and check its prices and tool support."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_noai.py:0
+msgid "You do not have access to %(what)s."
+msgstr ""
+
+#. module: nudge
+#. odoo-python
+#: code:addons/nudge/models/nudge_noai.py:0
+msgid "You do not have access to this kind of record."
 msgstr ""
 
 #. module: nudge

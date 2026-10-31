@@ -223,6 +223,26 @@ def _fits(asked, theirs):
     return cover >= SERVE_COVER, cover >= OFFER_COVER
 
 
+# The share of the words of a question that its English form must keep to stand for it
+BRIDGE_KEEPS = 0.3
+
+
+def _content_words(text):
+    """:return: the meaningful words of ``text`` (stems): the ones that say what is asked, not the ones that only
+    make it a question"""
+    return [word for word in memory_match.words(text)
+            if word not in fingerprint.FILLERS and word not in ARABIZI_FILLERS]
+
+
+def bridge_stands_for(text, english):
+    """:return: whether ``english`` (``text`` carried to English by the term bridge, which keeps only the words it
+    knows) still says what ``text`` says: it keeps a fair share of its words (:data:`BRIDGE_KEEPS`). "شو في أشياء بتشتغل لحالها على
+    عروض الأسعار؟" carried over is "quotation" alone, and that must not stand for the whole question: a noun
+    in common is not the same question"""
+    mine = len(_content_words(text))
+    return not mine or len(_content_words(english)) >= BRIDGE_KEEPS * mine
+
+
 def english_words(text, extra_pairs=()):
     """:return: the words of ``text`` carried to English by the term bridge (NP-12), or "" when it
     holds no word the bridge knows"""
@@ -505,7 +525,8 @@ class NudgeMemory(models.Model):
             if corrected != text:
                 forms.append((corrected, penalty))
         english = english_words(corrected, self.env["nudge.lexicon.entry"]._pairs())
-        if english and memory_match.words(english) != memory_match.words(corrected):
+        if (english and memory_match.words(english) != memory_match.words(corrected)
+                and bridge_stands_for(corrected, english)):
             forms.append((english, penalty + BRIDGE_PENALTY))
         return forms
 
@@ -522,7 +543,7 @@ class NudgeMemory(models.Model):
             found.append(text)
             if bridge.has_arabic(text) or ARABIZI.search(text):
                 english = _cached(_bridged_cache, text, english_words)
-                if english:
+                if english and bridge_stands_for(text, english):
                     found.append(english)
         return found
 

@@ -171,6 +171,12 @@ def _fill_team(section, items):
 def _fill_numbers(section, items):
     containers = section.xpath(f".//div[.//span[{has_class('s_number')}]]")
     containers = [node for node in containers if not node.xpath(f".//div[.//span[{has_class('s_number')}]]")]
+    # a counter with no figure is never shown, and Odoo's sample figures are not left in its place
+    items = [item for item in items if _pair(item, "number", "title")]
+    if not items:
+        for node in containers:
+            node.getparent().remove(node)
+        return
     for node, item in zip(_resize(containers, len(items)), items):
         set_text(first(node, f".//span[{has_class('s_number')}]"), _pair(item, "number", "title"))
         set_text(first(node, f".//span[not({has_class('s_number')})]"), _pair(item, "label", "text"))
@@ -376,6 +382,14 @@ def fill(section, snippet, content, picture_url=None, facts=None, fresh=True):
             set_text(button, content["button"])
         button.set("href", content.get("button_url") or "/contactus")
         button.attrib.pop("t-att-href", None)
+        # the cover's own second button says "Contact us" and goes to the same place: one button, not two. On 18 it has
+        # no address of its own when rendered alone, as the website's call to action fills it: /contactus by default
+        for other in section.xpath(BUTTON) if content.get("button") else ():
+            if other is button:
+                continue
+            other.set("href", other.get("href") or "/contactus")
+            if other.get("href") == button.get("href"):
+                other.getparent().remove(other)
     items = [item for item in (content.get("items") or []) if isinstance(item, dict)]
     if items:
         if short in ITEM_FILLERS:

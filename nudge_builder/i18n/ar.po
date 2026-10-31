@@ -4252,3 +4252,26 @@ msgstr "قائمة المطعم"
 #: code:addons/nudge_builder/models/nudge_builder_site.py:0
 msgid "The block %(block)s (%(snippet)s) of the page %(page)s stays untranslated in %(lang)s: its text does not match the source."
 msgstr "يبقى القسم %(block)s (%(snippet)s) من الصفحة %(page)s بلا ترجمة إلى %(lang)s: نصّه لا يطابق المصدر."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "The numbers block of the page %(page)s was left out: no real figures were given."
+msgstr "تم حذف قسم الأرقام من الصفحة %(page)s: لم تُقدَّم أرقام حقيقية."
+
+#. module: nudge_builder
+#: model:ir.model.fields,help:nudge_builder.field_nudge_builder_page__name_shown
+msgid "The name in the language of the reader."
+msgstr "الاسم بلغة القارئ."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "The Shop entry of this website stays: the website has orders."
+msgstr "يبقى عنصر المتجر في قائمة هذا الموقع: للموقع طلبات."
+
+#. module: nudge_builder
+#. odoo-python
+#: code:addons/nudge_builder/models/nudge_builder_site.py:0
+msgid "The Shop entry left the menu of this website, as the site has no shop. Add it back in the menu editor of the website when it has one."
+msgstr "أُزيل عنصر المتجر من قائمة هذا الموقع لأن الموقع بلا متجر. أعده من محرر قائمة الموقع عندما يصبح له متجر."

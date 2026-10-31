@@ -463,6 +463,12 @@ class NudgeConversation(models.Model):
         if not isinstance(arguments, dict):
             raise Refused("The arguments could not be read as JSON.")
         references = agent_plan.find_references(env, arguments, entry["n"], makers)
+        if references:
+            # Against the record the person named: what the step says itself, not what stands in for the "@n" of it
+            stopped = tools.named_record.refusal(env, name, arguments, None)
+            if stopped:
+                raise Refused(stopped.content)
+            env = tools.named_record.checked(env)
         probe, exact = agent_plan.stand_in(env, arguments, references)
         if any(reference["path"][0] == "ids" for reference in references):
             # Done on a record an earlier step makes: its exact card comes with its turn
@@ -725,6 +731,9 @@ class NudgeConversation(models.Model):
         mode = self._chat_mode()
         try:
             env = plan._company_env(self._plan_env())
+            if entry.get("refs"):
+                # What an earlier step of this plan made: checked with the step when the plan was made
+                env = tools.named_record.checked(env)
             if shown and entry.get("exact") and not entry.get("refs"):
                 arguments, pending, covered = entry["input"], entry["pending"], True
             else:
