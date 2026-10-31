@@ -80,7 +80,7 @@ msgstr "مستند وفي العنوان فاتورة"
 #. odoo-python
 #: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
 msgid "A reply to %s, written by Nudge for you to read and send."
-msgstr "رد على %s، كتبه نودج لتقرأه وترسله."
+msgstr "رد على %s، كتبه Nudge لتقرأه وترسله."
 
 #. module: nudge_mail
 #: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_email_review_view_form
@@ -88,7 +88,7 @@ msgid ""
 "A reply written by Nudge from the thread. Read it, change it, then press "
 "Send: nothing goes before."
 msgstr ""
-"رد كتبه نودج من سلسلة الرسائل. اقرأه وعدّله ثم اضغط إرسال: لا يُرسل شيء قبل "
+"رد كتبه Nudge من سلسلة الرسائل. اقرأه وعدّله ثم اضغط إرسال: لا يُرسل شيء قبل "
 "ذلك."
 
 #. module: nudge_mail
@@ -669,27 +669,27 @@ msgstr "لا شيء: بدون شعار ولا اسم شركة"
 #. module: nudge_mail
 #: model:ir.model.fields,field_description:nudge_mail.field_res_company__nudge_mail_agent_alias_id
 msgid "Nudge Mail Agent Alias"
-msgstr "اسم مستعار لوكيل بريد نودج"
+msgstr "اسم مستعار لوكيل بريد Nudge"
 
 #. module: nudge_mail
 #: model:ir.model,name:nudge_mail.model_nudge_mail_proposal
 msgid "Nudge Mail Proposal"
-msgstr "اقتراح بريد من نودج"
+msgstr "اقتراح بريد من Nudge"
 
 #. module: nudge_mail
 #: model:ir.model,name:nudge_mail.model_nudge_mail_rule
 msgid "Nudge Mail Rule"
-msgstr "قاعدة بريد نودج"
+msgstr "قاعدة بريد Nudge"
 
 #. module: nudge_mail
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__kind
 msgid "Nudge Thinks It Is"
-msgstr "نودج يرى أنه"
+msgstr "Nudge يرى أنه"
 
 #. module: nudge_mail
 #: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_mail_proposal_view_form
 msgid "Nudge makes this as you, in draft. Nothing is sent or posted."
-msgstr "ينشئ نودج هذا باسمك كمسودة. لا يُرسل ولا يُرحَّل شيء."
+msgstr "ينشئ Nudge هذا باسمك كمسودة. لا يُرسل ولا يُرحَّل شيء."
 
 #. module: nudge_mail
 #. odoo-python
@@ -697,12 +697,12 @@ msgstr "ينشئ نودج هذا باسمك كمسودة. لا يُرسل ولا
 msgid ""
 "Nudge needs a choice before it can prepare this. Open the message in the "
 "Nudge panel."
-msgstr "يحتاج نودج إلى اختيارك قبل أن يجهّز هذا. افتح الرسالة في لوحة نودج."
+msgstr "يحتاج Nudge إلى اختيارك قبل أن يجهّز هذا. افتح الرسالة في لوحة Nudge."
 
 #. module: nudge_mail
 #: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_mail_proposal_view_form
 msgid "Nudge proposes; nothing is made and nothing is sent until you say yes."
-msgstr "يقترح نودج؛ لا يُنشأ شيء ولا يُرسل شيء حتى تقول نعم."
+msgstr "يقترح Nudge؛ لا يُنشأ شيء ولا يُرسل شيء حتى تقول نعم."
 
 #. module: nudge_mail
 #: model_terms:ir.ui.view,arch_db:nudge_mail.res_config_settings_view_form_mail_agent
@@ -712,8 +712,8 @@ msgid ""
 " Nudge, Mail Proposals. Nothing is made or sent by itself. Off by default; "
 "set for the company in use."
 msgstr ""
-"يقرأ نودج الرسائل الجديدة لصندوق بريد مشترك ويقترح ما يُصنع من كل واحدة: "
-"عميل محتمل أو تذكرة أو فاتورة مورّد أو رد. يقول المديرون نعم أو لا في نودج "
+"يقرأ Nudge الرسائل الجديدة لصندوق بريد مشترك ويقترح ما يُصنع من كل واحدة: "
+"عميل محتمل أو تذكرة أو فاتورة مورّد أو رد. يقول المديرون نعم أو لا في Nudge "
 "ثم اقتراحات البريد. لا يُنشأ شيء ولا يُرسل شيء من تلقاء نفسه. مغلق "
 "افتراضياً؛ يُضبط للشركة المستخدمة."
 
@@ -725,14 +725,14 @@ msgid ""
 "of each: a lead, a ticket, a vendor bill, a reply. Nothing is made or sent "
 "before a manager says yes."
 msgstr ""
-"يقرأ نودج الرسائل الجديدة لصندوق بريد مشترك ويقترح ما يُصنع من كل واحدة: "
+"يقرأ Nudge الرسائل الجديدة لصندوق بريد مشترك ويقترح ما يُصنع من كل واحدة: "
 "عميل محتمل أو تذكرة أو فاتورة مورّد أو رد. لا يُنشأ شيء ولا يُرسل شيء قبل أن"
 " يقول مدير نعم."
 
 #. module: nudge_mail
 #: model:ir.actions.server,name:nudge_mail.ir_cron_nudge_mail_classify_ir_actions_server
 msgid "Nudge: sort the mail that waited for the AI"
-msgstr "نودج: فرز البريد الذي انتظر الذكاء الاصطناعي"
+msgstr "Nudge: فرز البريد الذي انتظر الذكاء الاصطناعي"
 
 #. module: nudge_mail
 #: model:ir.model.fields,field_description:nudge_mail.field_nudge_mail_proposal__message_needaction_counter
@@ -763,7 +763,7 @@ msgstr "متوقف"
 #. odoo-python
 #: code:addons/nudge_mail/models/nudge_mail_proposal.py:0
 msgid "Only a Nudge manager decides on the mail."
-msgstr "مدير نودج وحده يبتّ في البريد."
+msgstr "مدير Nudge وحده يبتّ في البريد."
 
 #. module: nudge_mail
 #: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_mail_proposal_view_form
@@ -1090,7 +1090,7 @@ msgstr "ينتظر مديراً"
 #. module: nudge_mail
 #: model_terms:ir.ui.view,arch_db:nudge_mail.nudge_mail_proposal_view_form
 msgid "What Nudge Would Make"
-msgstr "ما كان نودج سينشئه"
+msgstr "ما كان Nudge سينشئه"
 
 #. module: nudge_mail
 #: model:ir.actions.act_window,name:nudge_mail.nudge_mail_rule_action
@@ -1103,8 +1103,8 @@ msgid ""
 "When the mail agent is on (Settings, Nudge), the new messages of the shared mailbox are sorted\n"
 "               here: Nudge says what each one is and what it would make, and you say yes or no."
 msgstr ""
-"عندما يكون وكيل البريد مفعّلاً (الإعدادات ثم نودج)، تُفرز هنا الرسائل "
-"الجديدة لصندوق البريد المشترك: يقول نودج ما هي وما كان سينشئه، وتقول أنت نعم"
+"عندما يكون وكيل البريد مفعّلاً (الإعدادات ثم Nudge)، تُفرز هنا الرسائل "
+"الجديدة لصندوق البريد المشترك: يقول Nudge ما هي وما كان سينشئه، وتقول أنت نعم"
 " أو لا."
 
 #. module: nudge_mail
@@ -1113,7 +1113,7 @@ msgid ""
 "When you reject, Nudge learns that this sender (or domain) is this kind, and"
 " never asks the AI again."
 msgstr ""
-"عندما ترفض، يتعلّم نودج أن هذا المرسِل (أو النطاق) من هذا النوع، ولا يسأل "
+"عندما ترفض، يتعلّم Nudge أن هذا المرسِل (أو النطاق) من هذا النوع، ولا يسأل "
 "الذكاء الاصطناعي بعد ذلك."
 
 #. module: nudge_mail

@@ -43,7 +43,7 @@ msgid ""
 "                for the person, writes wait for their yes."
 msgstr ""
 "الموصل نظام خارجي يتحدث MCP: أودو شركة شقيقة، أو تقويم، أو محادثة، أو مخزن "
-"مستندات. أضف عنوانه، واقرأ أدواته، واسمح بما يمكن لنودج استخدامه: القراءة "
+"مستندات. أضف عنوانه، واقرأ أدواته، واسمح بما يمكن لـ Nudge استخدامه: القراءة "
 "تعمل للشخص، والكتابة تنتظر موافقته."
 
 #. module: nudge_connect
@@ -195,7 +195,7 @@ msgstr "تهيئة الإعدادات"
 #. module: nudge_connect
 #: model_terms:ir.actions.act_window,help:nudge_connect.nudge_connector_action
 msgid "Connect Nudge to an outside system"
-msgstr "اربط نودج بنظام خارجي"
+msgstr "اربط Nudge بنظام خارجي"
 
 #. module: nudge_connect
 #. odoo-python
@@ -327,7 +327,7 @@ msgid ""
 "Every call Nudge makes to a connector is kept here: who asked, what was sent (secrets masked),\n"
 "                the size of the answer and the time it took."
 msgstr ""
-"يُحفظ هنا كل استدعاء يجريه نودج لموصل: من طلبه، وما أُرسل (مع إخفاء "
+"يُحفظ هنا كل استدعاء يجريه Nudge لموصل: من طلبه، وما أُرسل (مع إخفاء "
 "الأسرار)، وحجم الإجابة والوقت الذي استغرقه."
 
 #. module: nudge_connect
@@ -478,17 +478,17 @@ msgstr "لن يُرسل شيء آخر إلى هذا الموصل من الآن. 
 #. module: nudge_connect
 #: model:ir.model,name:nudge_connect.model_nudge_connector
 msgid "Nudge Connector"
-msgstr "موصل نودج"
+msgstr "موصل Nudge"
 
 #. module: nudge_connect
 #: model:ir.model,name:nudge_connect.model_nudge_connector_call
 msgid "Nudge Connector Call"
-msgstr "استدعاء موصل نودج"
+msgstr "استدعاء موصل Nudge"
 
 #. module: nudge_connect
 #: model:ir.model,name:nudge_connect.model_nudge_connector_tool
 msgid "Nudge Connector Tool"
-msgstr "أداة موصل نودج"
+msgstr "أداة موصل Nudge"
 
 #. module: nudge_connect
 #: model:ir.model,name:nudge_connect.model_nudge_conversation
@@ -519,7 +519,7 @@ msgid ""
 "reads at once, writes after the person's yes. Each tool is allowed one by "
 "one."
 msgstr ""
-"أنظمة خارجية تتحدث MCP، يمكن لنودج استخدام أدواتها لشخص: القراءة فوراً، "
+"أنظمة خارجية تتحدث MCP، يمكن لـ Nudge استخدام أدواتها لشخص: القراءة فوراً، "
 "والكتابة بعد موافقة الشخص. يُسمح بكل أداة على حدة."
 
 #. module: nudge_connect
@@ -740,7 +740,7 @@ msgstr "أطول إجابة بين 200 و %s حرفاً."
 #. odoo-python
 #: code:addons/nudge_connect/models/nudge_connector.py:0
 msgid "The outside tool asks for more input, which Nudge cannot give it."
-msgstr "تطلب الأداة الخارجية مدخلات إضافية لا يستطيع نودج تقديمها."
+msgstr "تطلب الأداة الخارجية مدخلات إضافية لا يستطيع Nudge تقديمها."
 
 #. module: nudge_connect
 #. odoo-python

@@ -1,6 +1,10 @@
 # Changelog
 
-Current version: nudge 18.0.1.60.8, nudge_mcp 18.0.1.1.2, nudge_connect 18.0.1.0.4, nudge_messaging 18.0.1.0.6, nudge_ai 18.0.1.0.11, nudge_studio 18.0.1.0.12, nudge_documents 18.0.1.0.8, nudge_spreadsheet 18.0.1.0.11, nudge_builder 18.0.1.0.9, nudge_mail 18.0.1.0.15, nudge_discuss 18.0.1.0.9, nudge_website 18.0.1.0.5.
+Current version: nudge 18.0.1.60.9, nudge_mcp 18.0.1.1.2, nudge_connect 18.0.1.0.4, nudge_messaging 18.0.1.0.6, nudge_ai 18.0.1.0.11, nudge_studio 18.0.1.0.12, nudge_documents 18.0.1.0.8, nudge_spreadsheet 18.0.1.0.11, nudge_builder 18.0.1.0.9, nudge_mail 18.0.1.0.15, nudge_discuss 18.0.1.0.9, nudge_website 18.0.1.0.5.
+
+## 19.0.1.60.9
+
+- The Arabic of every module writes the product's name as Nudge.
 
 ## 19.0.1.60.8
 

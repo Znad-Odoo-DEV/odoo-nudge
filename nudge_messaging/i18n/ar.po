@@ -67,8 +67,8 @@ msgid ""
 "                        phone within 10 minutes. Nudge answers your questions there; a change it prepares\n"
 "                        waits for your yes in Odoo."
 msgstr ""
-"اسأل نودج من واتساب أو تيليجرام. اضغط الزر ثم أرسل الرمز من هاتفك خلال 10 "
-"دقائق. يجيب نودج عن أسئلتك هناك، وأي تغيير يجهّزه ينتظر موافقتك في أودو."
+"اسأل Nudge من واتساب أو تيليجرام. اضغط الزر ثم أرسل الرمز من هاتفك خلال 10 "
+"دقائق. يجيب Nudge عن أسئلتك هناك، وأي تغيير يجهّزه ينتظر موافقتك في أودو."
 
 #. module: nudge_messaging
 #: model:ir.actions.act_window,name:nudge_messaging.nudge_step_action_messaging_approvals
@@ -222,7 +222,7 @@ msgid ""
 "I read the file but I need your choice before I can prepare it. Please send "
 "it in the Nudge panel in Odoo."
 msgstr ""
-"قرأت الملف لكني أحتاج إلى اختيارك قبل أن أجهّزه. أرسله من لوحة نودج في أودو "
+"قرأت الملف لكني أحتاج إلى اختيارك قبل أن أجهّزه. أرسله من لوحة Nudge في أودو "
 "من فضلك."
 
 #. module: nudge_messaging
@@ -302,7 +302,7 @@ msgstr "مساعدو المراسلة"
 #. odoo-python
 #: code:addons/nudge_messaging/models/res_users.py:0
 msgid "Messaging is closed. An administrator turns it on in Settings, Nudge."
-msgstr "المراسلة مغلقة. يفتحها المسؤول من الإعدادات ثم نودج."
+msgstr "المراسلة مغلقة. يفتحها المسؤول من الإعدادات ثم Nudge."
 
 #. module: nudge_messaging
 #: model_terms:ir.ui.view,arch_db:nudge_messaging.nudge_step_view_form_messaging
@@ -323,39 +323,39 @@ msgstr "لا شيء ينتظرك"
 #. module: nudge_messaging
 #: model:ir.model,name:nudge_messaging.model_nudge_step
 msgid "Nudge Agent Step"
-msgstr "خطوة وكيل نودج"
+msgstr "خطوة وكيل Nudge"
 
 #. module: nudge_messaging
 #: model:ir.model,name:nudge_messaging.model_nudge_messaging_link
 msgid "Nudge Linked Phone"
-msgstr "هاتف مرتبط بنودج"
+msgstr "هاتف مرتبط بـ Nudge"
 
 #. module: nudge_messaging
 #: model:ir.model,name:nudge_messaging.model_nudge_messaging_code
 msgid "Nudge Linking Code"
-msgstr "رمز ربط نودج"
+msgstr "رمز ربط Nudge"
 
 #. module: nudge_messaging
 #. odoo-python
 #: code:addons/nudge_messaging/models/res_users.py:0
 #: model_terms:ir.ui.view,arch_db:nudge_messaging.view_users_form_simple_modif_nudge_messaging
 msgid "Nudge Messaging"
-msgstr "مراسلة نودج"
+msgstr "مراسلة Nudge"
 
 #. module: nudge_messaging
 #: model:ir.model,name:nudge_messaging.model_nudge_messaging
 msgid "Nudge Messaging Assistant"
-msgstr "مساعد مراسلة نودج"
+msgstr "مساعد مراسلة Nudge"
 
 #. module: nudge_messaging
 #: model:ir.model,name:nudge_messaging.model_nudge_messaging_api
 msgid "Nudge Messaging Channels"
-msgstr "قنوات مراسلة نودج"
+msgstr "قنوات مراسلة Nudge"
 
 #. module: nudge_messaging
 #: model:ir.model,name:nudge_messaging.model_nudge_messaging_message
 msgid "Nudge Messaging Log"
-msgstr "سجل مراسلة نودج"
+msgstr "سجل مراسلة Nudge"
 
 #. module: nudge_messaging
 #: model:ir.model.fields,field_description:nudge_messaging.field_res_config_settings__nudge_msg_telegram_keys_set
@@ -381,8 +381,8 @@ msgid ""
 "a link and the person says yes in Odoo. Each person links their own phone "
 "with a code from their Preferences."
 msgstr ""
-"من ربط هاتفه يستطيع أن يسأل نودج على واتساب أو تيليجرام. يُجاب السؤال في "
-"المحادثة، ولا يُجرى أي تغيير هناك: يرسل نودج رابطاً ويقول الشخص نعم داخل "
+"من ربط هاتفه يستطيع أن يسأل Nudge على واتساب أو تيليجرام. يُجاب السؤال في "
+"المحادثة، ولا يُجرى أي تغيير هناك: يرسل Nudge رابطاً ويقول الشخص نعم داخل "
 "أودو. يربط كل شخص هاتفه برمز من تفضيلاته."
 
 #. module: nudge_messaging
@@ -392,8 +392,8 @@ msgid ""
 " are never made from the chat: Nudge answers with a link and the person says"
 " yes in Odoo."
 msgstr ""
-"من ربط هاتفه يستطيع أن يسأل نودج على واتساب أو تيليجرام. لا تُجرى التغييرات "
-"من المحادثة: يجيب نودج برابط ويقول الشخص نعم في أودو."
+"من ربط هاتفه يستطيع أن يسأل Nudge على واتساب أو تيليجرام. لا تُجرى التغييرات "
+"من المحادثة: يجيب Nudge برابط ويقول الشخص نعم في أودو."
 
 #. module: nudge_messaging
 #: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_link__user_id
@@ -427,7 +427,7 @@ msgid ""
 "Prepared. Nothing was changed: it waits for the person's yes in Odoo, and "
 "Nudge sends them the link. Tell them what you prepared, in one sentence."
 msgstr ""
-"جُهّز. لم يتغير شيء: إنه ينتظر موافقة الشخص في أودو، وسيرسل نودج له الرابط. "
+"جُهّز. لم يتغير شيء: إنه ينتظر موافقة الشخص في أودو، وسيرسل Nudge له الرابط. "
 "أخبره بما جهّزته في جملة واحدة."
 
 #. module: nudge_messaging
@@ -542,7 +542,7 @@ msgstr "سيرسل تيليجرام الرسائل إلى هنا."
 #. odoo-python
 #: code:addons/nudge_messaging/models/nudge_messaging.py:0
 msgid "That is a bigger change: do it in the Nudge panel in Odoo."
-msgstr "هذا تغيير أكبر: نفّذه من لوحة نودج في أودو."
+msgstr "هذا تغيير أكبر: نفّذه من لوحة Nudge في أودو."
 
 #. module: nudge_messaging
 #: model:ir.model.fields,help:nudge_messaging.field_res_config_settings__nudge_msg_telegram_url
@@ -663,7 +663,7 @@ msgstr "إلغاء ربط هذا الهاتف؟"
 #. module: nudge_messaging
 #: model_terms:ir.ui.view,arch_db:nudge_messaging.view_users_form_simple_modif_nudge_messaging
 msgid "Unlink this phone? Nudge will stop answering it."
-msgstr "إلغاء ربط هذا الهاتف؟ سيتوقف نودج عن الرد عليه."
+msgstr "إلغاء ربط هذا الهاتف؟ سيتوقف Nudge عن الرد عليه."
 
 #. module: nudge_messaging
 #: model:ir.model.fields,field_description:nudge_messaging.field_nudge_messaging_code__used
@@ -727,7 +727,7 @@ msgid ""
 "When you ask Nudge for a change on WhatsApp or Telegram, it waits here until"
 " you say yes."
 msgstr ""
-"عندما تطلب من نودج تغييراً على واتساب أو تيليجرام، ينتظر هنا حتى تقول نعم."
+"عندما تطلب من Nudge تغييراً على واتساب أو تيليجرام، ينتظر هنا حتى تقول نعم."
 
 #. module: nudge_messaging
 #. odoo-python
@@ -754,7 +754,7 @@ msgstr "كتبتَ كثيرًا في وقت قصير. انتظر بضع دقائ
 #. odoo-python
 #: code:addons/nudge_messaging/models/nudge_messaging.py:0
 msgid "Your account cannot use Nudge. Ask your administrator."
-msgstr "لا يستطيع حسابك استخدام نودج. اسأل المسؤول."
+msgstr "لا يستطيع حسابك استخدام Nudge. اسأل المسؤول."
 
 #. module: nudge_messaging
 #. odoo-python
@@ -763,8 +763,8 @@ msgid ""
 "Your code: %(code)s. Send it as a message from your phone to the Nudge "
 "number on WhatsApp or to the Nudge bot on Telegram within 10 minutes."
 msgstr ""
-"رمزك: %(code)s. أرسله كرسالة من هاتفك إلى رقم نودج على واتساب أو إلى بوت "
-"نودج على تيليجرام خلال 10 دقائق."
+"رمزك: %(code)s. أرسله كرسالة من هاتفك إلى رقم Nudge على واتساب أو إلى بوت "
+"Nudge على تيليجرام خلال 10 دقائق."
 
 #. module: nudge_messaging
 #: model:ir.model.fields,field_description:nudge_messaging.field_res_config_settings__nudge_msg_allow_private
