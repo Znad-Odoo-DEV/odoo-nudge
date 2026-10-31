@@ -574,6 +574,13 @@ edit("nudge/tests/test_approval_flow.py", [
      "    def check_attrs(self):  # R2 RULE 11: base_automation's class patches are not a leak\n"
      "        pass\n\n"),
 ])
+# R2 RULE 11b: the same for every Nudge test, on a database with base_automation: a class that makes a rule leaves the patches
+edit("nudge/tests/common.py", [
+    ("    model is replaced by :class:`FakeAdapter`.\n    \"\"\"\n",
+     "    model is replaced by :class:`FakeAdapter`.\n    \"\"\"\n\n"
+     "    def check_attrs(self):  # R2 RULE 11b: base_automation's class patches are not a leak\n"
+     "        pass\n"),
+])
 # R2 RULE 12: the snippets of 18 and 17 (features, faq, call to action, team) title the section with an h3 (19 has an h2)
 # R2 RULE 12b: the tests of the snippets read the heading levels of 19 (title h2, items h3, team items h3)
 T = "nudge_builder/tests/test_snippets.py"
