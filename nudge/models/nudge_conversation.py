@@ -1125,6 +1125,12 @@ class NudgeConversation(models.Model):
             return None
         return {"type": "found", "menus": [{"id": screen["menu_id"], "path": screen["path"]} for screen in screens]}
 
+    def _chat_offer_unasked(self, screen_events):
+        """:param screen_events: the events of the answer so far
+        :return: an event offered under the last words of an answer, though the model called no tool for it
+            (R3-50, ``nudge_agent_plan``: the button a question of whether names); None here"""
+        return None
+
     def _chat_screen_of_question(self):
         """:return: the screen shared with the question being answered"""
         question = self.env["nudge.message"].sudo().search([
@@ -1510,6 +1516,11 @@ class NudgeConversation(models.Model):
             screens = self._chat_screens_to_open(screen_events)
             if screens:
                 screen_events = [*screen_events, screens]
+        if state == "complete" and text and not calls and not again:
+            # The last words of an answer: what they are offered with, though the model asked for nothing
+            offer = self._chat_offer_unasked(screen_events)
+            if offer:
+                screen_events = [*screen_events, offer]
         # In the background, what the time of a piece did not let finish is
         # taken up by the next piece
         later = bool(

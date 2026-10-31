@@ -79,6 +79,17 @@ sub("nudge/tools/report_explain.py", r"(?<![\w.])env\._\(", "_tr(env, ")
 # REVIEW RULE 2 (17): the task cron writes in the owner's language through a local `env` of that language
 # (the _tr helper is added by REVIEW RULE 1 below)
 sub("nudge/models/nudge_task.py", r"last_result=env\._\(", "last_result=_tr(env, ")
+# APPROVAL RULE (17): a flow is made in English with the other languages as its translations, each text in the language
+# of the env that says it (`e._(`, `local._(`, `arabic._(`): 17's _() reads the locals `context` and `cr`, _tr gives them
+for _name, _before in (("nudge/tools/approval_flow.py", "APPROVAL_TAG = "), ("nudge/tests/test_approval_flow.py", "SENTENCES = ")):
+    sub(_name, r"(?<![\w.])(env|e|local|english|arabic|other)\._\(", r"_tr(\1, ")
+    _s = read(_name)
+    _s = _s.replace("\n" + _before, (
+        "\nfrom odoo import _\n\n\ndef _tr(env, source, *args, **kwargs):  # APPROVAL RULE: 17's _() reads these two locals\n"
+        "    context = env.context  # noqa: F841\n"
+        "    cr = env.cr  # noqa: F841\n"
+        "    return _(source, *args, **kwargs)\n\n\n" + _before), 1)
+    write(_name, _s)
 for name in files("nudge/**/*.py", "nudge_mail/**/*.py", "nudge_discuss/**/*.py", "nudge_mcp/**/*.py", "nudge_website/**/*.py", "nudge_builder*/**/*.py", "nudge_messaging/**/*.py", "nudge_connect/**/*.py"):  # R2 RULE
     s = read(name)
     # self.env._( / env._( / record.env._( / self.env["x"].env._( → _(

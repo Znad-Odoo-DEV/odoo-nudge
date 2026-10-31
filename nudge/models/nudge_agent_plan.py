@@ -56,6 +56,10 @@ QUESTION_HELD = (
     "shown under your answer: tell them they can choose it, or say yes, to have it prepared for their yes. Call no "
     "tool that changes data in this answer.")
 MAX_HELD_SUGGESTIONS = 3
+# The kinds of record that, named in a question, say which record it is about ("should I cancel the invoice?" on an
+# order). Not the words of any order ("order", "طلب": a purchase order is "this order" too), nor who or what a record
+# is for ("the customer", "the product")
+DOCUMENT_KINDS = frozenset(("purchase_order", "invoice", "bill", "task", "lead", "ticket", "timeoff"))
 
 
 def _now():
@@ -335,16 +339,105 @@ class NudgeConversation(models.Model):
             results.append(dict(entry, content=QUESTION_HELD, is_error=False))
             title = self._chat_held_title(result.pending or {})
             if title and len(offered) < MAX_HELD_SUGGESTIONS and title not in {chip["words"][0] for chip in offered}:
-                # The change itself goes with the suggestion: chosen, it is prepared as it was checked here, never
-                # read again from its words (nudge.noai._serve_held)
-                offered.append({
-                    "name": f"held_{call['id']}", "words": [title], "at_once": True, "example": "",
-                    "hint": self.env._("Prepared on a card: nothing is done before your yes"),
-                    "kind": noai_commands.question.HELD_KIND, "tool": call["name"], "arguments": call["input"]})
+                offered.append(self._chat_held_chip(f"held_{call['id']}", call["name"], call["input"], title))
         if offered:
             events = [*events, {"type": "found", "commands": offered}]
         by_id = {entry["id"]: entry for entry in results}
         return [by_id[call["id"]] for call in calls if call["id"] in by_id], events, True, waiting
+
+    def _chat_held_chip(self, name, tool, arguments, title):
+        """:return: the suggestion of a held change: the change itself goes with it, so that chosen it is prepared
+        as it was checked, never read again from its words (``nudge.noai._serve_held``)"""
+        return {
+            "name": name, "words": [title], "at_once": True, "example": "",
+            "hint": self.env._("Prepared on a card: nothing is done before your yes"),
+            "kind": noai_commands.question.HELD_KIND, "tool": tool, "arguments": arguments}
+
+    def _chat_offer_unasked(self, screen_events):
+        """R3-50: a question of whether names a button of the record on the screen ("should I confirm this order?",
+        "هل نلغي الفاتورة؟") and the model answered in words only ("Shall I confirm it?"): the button is offered
+        under the explanation all the same, as :meth:`_chat_hold` offers it when the model prepared it. Checked as
+        its card would be; a suggestion, never a card, and once: not when it was offered since the question, nor
+        when a card was shown. The question must be about that record: not when it writes the reference of another
+        ("S00049") or names another kind of record ("the invoice" on an order)."""
+        offer = super()._chat_offer_unasked(screen_events)
+        if offer:
+            return offer
+        if self.sudo().run_id.is_background or self._agent_rehearsing():
+            return None
+        Message = self.env["nudge.message"].sudo()
+        asked = Message.search([("conversation_id", "=", self.id), ("role", "=", "user")], order="id desc", limit=1)
+        question = noai_commands.question
+        if not asked or not question.asks_whether(asked.content):
+            return None
+        verbs = question.buttons_named(asked.content)
+        snapshot = asked.snapshot or None
+        screen = self.env["nudge.noai"]._screen_of(snapshot)
+        if not verbs or not screen["model"] or not screen["record_id"] or screen["model"] not in self.env:
+            return None
+        events = [event for message in Message.search([("conversation_id", "=", self.id), ("id", ">", asked.id)])
+                  for event in message.screen_events or []] + list(screen_events)
+        events = [event for event in events if isinstance(event, dict)]
+        if any(event.get("type") in ("confirm", "waiting") for event in events):
+            return None
+        offered = [chip for event in events if event.get("type") == "found" for chip in event.get("commands") or []
+                   if isinstance(chip, dict) and chip.get("kind") == question.HELD_KIND]
+        env = self._plan_env()
+        if not self._chat_about_screen_record(env, asked.content, screen):
+            return None
+        pressed = {self._chat_press_key(chip.get("arguments")) for chip in offered if chip.get("tool") == "call_method"}
+        titles = {str((chip.get("words") or [""])[0]) for chip in offered}
+        mode = self._chat_mode()
+        chips = []
+        for verb in verbs:
+            if len(offered) + len(chips) >= MAX_HELD_SUGGESTIONS:
+                break
+            button = self._chat_button_named(verb, screen["buttons"])
+            arguments = button and {"model": screen["model"], "ids": [screen["record_id"]], "method": button["name"]}
+            if not arguments or self._chat_press_key(arguments) in pressed:
+                continue
+            result = tools.base.call(env, "call_method", arguments, snapshot, mode)
+            title = not result.is_error and result.pending and self._chat_held_title(result.pending)
+            if not title or title in titles:
+                continue
+            chips.append(self._chat_held_chip(f"held_{button['name']}", "call_method", arguments, title))
+            pressed.add(self._chat_press_key(arguments))
+            titles.add(title)
+        return {"type": "found", "commands": chips} if chips else None
+
+    @staticmethod
+    def _chat_press_key(arguments):
+        """:return: what tells one press of a button from another: the model, the records and the method"""
+        arguments = arguments if isinstance(arguments, dict) else {}
+        return arguments.get("model"), tuple(arguments.get("ids") or ()), arguments.get("method")
+
+    def _chat_button_named(self, verb, buttons):
+        """:return: the button of the screen ``verb`` presses, found as the rules find the buttons they press: by
+        its method, else by the words of its label ("Confirm", "تأكيد"); one button, or None. Two buttons of one
+        method are one press ("Send by Email" and "Send PRO-FORMA Invoice")"""
+        buttons = [button for button in buttons if button.get("name") and button.get("kind", "object") == "object"
+                   and not button.get("smart")]
+        methods = noai_commands.question.METHODS_OF.get(verb) or ()
+        found = [button for button in buttons if button["name"] in methods]
+        if not found:
+            found = [button for button in buttons
+                     if verb in noai_commands.question.buttons_named(button.get("label") or "")]
+        return found[0] if len({button["name"] for button in found}) == 1 else None
+
+    def _chat_about_screen_record(self, env, text, screen):
+        """:return: whether a question of whether may be about the record on the screen: it writes no reference
+        but the record's own, and names no other kind of document (:data:`DOCUMENT_KINDS`)"""
+        try:
+            name = env[screen["model"]].browse(screen["record_id"]).exists().display_name
+        except AccessError:
+            return False
+        if not name or noai_commands.question.other_references(text, name):
+            return False
+        spans = noai_commands.grammar.scan(noai_commands.normalise.tokenize(text))
+        kinds = {cat for span in spans for cat in span.cats if cat in DOCUMENT_KINDS}
+        Noai = self.env["nudge.noai"]
+        models_named = {Noai._model_of(kind) for kind in kinds} - {None}
+        return not models_named or screen["model"] in models_named
 
     @staticmethod
     def _chat_held_title(pending):
