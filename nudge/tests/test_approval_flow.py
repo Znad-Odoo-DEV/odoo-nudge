@@ -402,7 +402,7 @@ class TestApprovalFlow(NudgeCase, TransactionCase):
     def _two_languages(self):
         self.env["res.lang"]._activate_lang("ar_001")
         self.env["ir.module.module"].search([("name", "=", "nudge")])._update_translations(["ar_001"])
-        english, arabic = self.env.with_context(lang="en_US"), self.env.with_context(lang="ar_001")
+        english, arabic = self.env(context=dict(self.env.context, lang="en_US")), self.env(context=dict(self.env.context, lang="ar_001"))
         self.assertNotEqual(arabic._("Request approval"), "Request approval", "the Arabic of the button is needed")
         return english, arabic
 
@@ -410,7 +410,7 @@ class TestApprovalFlow(NudgeCase, TransactionCase):
         english, arabic = self._two_languages()
         group = self.env.ref("account.group_account_manager")
         group.update_field_translations("name", {"ar_001": "مدير الحسابات لهذا الفحص"})
-        self.dev = self.dev.with_context(lang=builder_lang)
+        self.dev = self.dev(context=dict(self.dev.context, lang=builder_lang))
         self.make({"sentence": sentence})
         Order = self.env["purchase.order"].with_user(self.admin)
         for lang, env in (("en_US", english), ("ar_001", arabic)):

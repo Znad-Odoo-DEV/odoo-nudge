@@ -187,7 +187,13 @@ def find_group(env, text, role_xmlid=None):
 def _levels_literal(levels):
     """The levels, for the code of a generated action: each group named in the language of whoever runs it"""
     def named(group):
-        return _t(group.env, lambda e: group.with_env(e).display_name)
+        # Odoo keeps a group's full name once, whatever the language it was read in: read again for each
+        def in_lang(e):
+            group.invalidate_recordset(["full_name", "display_name"])
+            return group.with_env(e).display_name
+        expression = _t(group.env, in_lang)
+        group.invalidate_recordset(["full_name", "display_name"])
+        return expression
     return "[" + ", ".join(
         f"[{float(level['amount'])!r}, {level['group'].id}, {named(level['group'])}]" for level in levels) + "]"
 
@@ -217,6 +223,11 @@ def _system_skip():
     return "    if env.uid == 1 or env.user.share:\n        continue\n"
 
 
+def _in_lang(env, code):
+    """``env`` in the language ``code``"""
+    return env(context=dict(env.context, lang=code))
+
+
 def other_langs(env):
     """The codes of the installed languages besides English, which is the source of every string."""
     codes = env["res.lang"].sudo().search([("active", "=", True)]).mapped("code")
@@ -228,8 +239,8 @@ def _t(env, make):
     it: English is the source and every other installed language is its translation (``env.lang`` picks).
 
     :param make: ``make(e)`` returns the message with the environment ``e`` (``lambda e: e._("...")``)"""
-    english = make(env.with_context(lang="en_US"))
-    found = {code: make(env.with_context(lang=code)) for code in other_langs(env)}
+    english = make(_in_lang(env, "en_US"))
+    found = {code: make(_in_lang(env, code)) for code in other_langs(env)}
     found = {code: value for code, value in found.items() if value != english}
     if not found:
         return repr(english)
@@ -238,8 +249,8 @@ def _t(env, make):
 
 def translations(env, make):
     """:return: ``{code: text}`` of ``make`` in every installed language besides English that translates it"""
-    english = make(env.with_context(lang="en_US"))
-    found = {code: make(env.with_context(lang=code)) for code in other_langs(env)}
+    english = make(_in_lang(env, "en_US"))
+    found = {code: make(_in_lang(env, code)) for code in other_langs(env)}
     return {code: value for code, value in found.items() if value != english}
 
 
@@ -489,7 +500,7 @@ def studio_here(env):
 def _field_builds(env, model, profile):
     """The fields that hold the approval, labelled in English (the source): the other languages are
     translations, put on by ``put_translations`` from ``translate`` of the build."""
-    env = env.with_context(lang="en_US")
+    env = _in_lang(env, "en_US")
     fields_ = [
         (STATE_FIELD, {"model": model._name, "label": env._("Approval"), "type": "selection", "name": STATE_FIELD,
                        "selection": [{"value": "pending", "label": env._("Waiting")},
@@ -601,7 +612,7 @@ class PrepareApprovalFlow(Building):
             return builds
         # Every name, label and message is made in English, the source, with the other installed languages as
         # translations: whoever sees them reads them in their own language, whatever language the sentence was in
-        local, env = env, env.with_context(lang="en_US")
+        local, env = env, _in_lang(env, "en_US")
         builds = [{"tool": "prepare_field", "arguments": arguments, "what": _field_what(local, arguments),
                    "translate": _field_translations(env, arguments)}
                   for _name, arguments in _field_builds(env, model, profile)]
@@ -778,7 +789,7 @@ class PrepareApprovalFlow(Building):
         replaced = [] if studio_here(env) else switch_off_buttons(env, model._name)
         builds = self._plan(env, model, kind, profile, levels, values.get("token") or secrets.token_hex(12))
         # made in English, the source: the other languages come after as translations (put_translations)
-        local, env = env, env.with_context(lang="en_US")
+        local, env = env, _in_lang(env, "en_US")
         run = getattr(step, "run_id", None)
         made = {}
         main = None
