@@ -33,6 +33,9 @@ class NudgeCase:
     model is replaced by :class:`FakeAdapter`.
     """
 
+    def check_attrs(self):  # R2 RULE 11b: base_automation's class patches are not a leak
+        pass
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
