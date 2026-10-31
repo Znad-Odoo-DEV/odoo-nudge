@@ -1,4 +1,5 @@
 """Knowing the database Nudge is installed on."""
+import re
 from datetime import timedelta
 
 from psycopg2 import errors
@@ -45,12 +46,62 @@ class SearchDatabaseProfile(base.Tool):
     def run(self, env, arguments, screen):
         profile = env["nudge.profile"]._ensure_current()
         pieces = retrieval.search(env, profile, arguments["query"], arguments.get("kind"))
-        if not pieces:
+        running = running_on(env, arguments["query"]) if arguments.get("kind") in (None, "automation") else ""
+        if not pieces and not running:
             return base.ToolResult(
                 "Nothing in the profile of this database matches, among what this person may "
                 "know. It may be standard Odoo, which the profile does not repeat. Try other "
                 "words, or describe_model for the fields of a model.")
-        return base.ToolResult(retrieval.render(pieces))
+        return base.ToolResult("\n\n".join(part for part in (running, retrieval.render(pieces)) if part))
+
+
+# D14: what runs on a kind of record the search names by its technical name, read now. The profile is a reading of
+# another day, and its automation counts the rules of the whole database: in Talk, where read_automations is not
+# offered, "what runs by itself on quotations?" was answered "no server actions, the rules are on purchase orders
+# only" from it, while sale.order had 8 server actions
+TECHNICAL_NAME = re.compile(r"(?<![\w.])[a-z][a-z0-9_]*(?:\.[a-z0-9_]+)+(?![\w.])")
+MAX_RUNNING_NAMES = 12
+
+
+def running_on(env, query):
+    """:return: what runs on the kind of record ``query`` names by its technical name ("sale.order"), for a person
+    who may read it, as text for the model: the automation rules and the scheduled actions (they run by themselves),
+    the server actions (picked in the Actions menu or pressed as a button) and the email templates, counted; named
+    for the managers of Nudge, as the automation of the profile is (``collectors.collect_automation``). Names and
+    counts only, never code: Developer mode reads that (read_automations). Empty when nothing is named"""
+    model_name = next((name for name in TECHNICAL_NAME.findall((query or "").lower()) if name in env), None)
+    if not model_name or not env[model_name]._nudge_has_access("read"):
+        return ""
+    Action = env["ir.actions.server"].sudo()
+    actions = [("usage", "=", "ir_actions_server"), ("model_name", "=", model_name)]
+    if "base_automation_id" in Action._fields:
+        # The actions of a rule are counted with the rule
+        actions.append(("base_automation_id", "=", False))
+    parts = []
+    if "base.automation" in env:
+        parts.append(("Automation rules (they run by themselves, on an event)", env["base.automation"].sudo(),
+                      [("model_name", "=", model_name)], "name"))
+    parts += [
+        ("Scheduled actions (they run by themselves, at their time)", env["ir.cron"].sudo(),
+         [("model_id.model", "=", model_name)], "cron_name"),
+        ("Server actions (they run when someone picks them in the Actions menu or presses their button)", Action,
+         actions, "name"),
+    ]
+    if "mail.template" in env:
+        parts.append(("Email templates", env["mail.template"].sudo(), [("model", "=", model_name)], "name"))
+    manager = env.user.has_group("nudge.group_nudge_manager")
+    lines = [f"## What runs on {model_name}, read now [running:{model_name}]"]
+    for label, records, domain, field in parts:
+        count = records.search_count(domain)
+        line = f"{label}: {count}"
+        if count and manager:
+            names = [str(name)[:base.SHORT_LABEL]
+                     for name in records.search(domain, limit=MAX_RUNNING_NAMES).mapped(field)]
+            line += ": " + ", ".join(names) + (", …" if count > len(names) else "")
+        lines.append(line + ".")
+    if env["nudge.conversation"]._can_develop():
+        lines.append(f"Developer mode lists each one with what it does: /rules {model_name}")
+    return "\n".join(lines)
 
 
 def _live(env, model, since):

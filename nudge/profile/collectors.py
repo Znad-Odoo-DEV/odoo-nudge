@@ -416,6 +416,14 @@ def collect_automation(env, custom):
     else:
         public.append("Automation rules are not installed.")
         lines.append(public[-1])
+    # D14: said, so that a model reading the rules of the whole database does not take them for all that runs; what
+    # runs on one model is read now by search_database_profile (tools.profile.running_on)
+    Action = env["ir.actions.server"].sudo()
+    actions = [("usage", "=", "ir_actions_server")]
+    if "base_automation_id" in Action._fields:
+        actions.append(("base_automation_id", "=", False))
+    public.append(f"{Action.search_count(actions)} server actions, run from an Actions menu or a button.")
+    lines.append(public[-1])
     if "mail.template" in env:
         Template = env["mail.template"].sudo()
         template_count = Template.search_count([])

@@ -9,7 +9,7 @@ from odoo.tests import HttpCase, TransactionCase, new_test_user, tagged
 from odoo.tools import mute_logger
 
 from odoo.addons.nudge import tools
-from odoo.addons.nudge.llm import base, prompt
+from odoo.addons.nudge.llm import base, loop, prompt
 from odoo.addons.nudge.models import nudge_conversation
 from odoo.addons.nudge.models.nudge_agent_plan import QUESTION_HELD
 from odoo.addons.nudge.tools import actions, noai_commands, records
@@ -1517,3 +1517,140 @@ class TestQuestionsAreNotOrders(AgentCase, TransactionCase):
                 self.assertCard(events)
                 self.assertEqual(order.state, "draft", "Nothing is done before the yes")
                 self.decide(conversation, "decline")
+
+
+# R3-50: the verbs of the buttons a question names, and the labels of buttons read the same way: words only
+NAMED_BUTTONS = (
+    ("should I confirm this order?", ["press_confirm"]), ("هل أؤكد هذا الأمر؟", ["press_confirm"]),
+    ("أأكد الطلب ولا لا؟", ["press_confirm"]), ("هل نلغي الفاتورة؟", ["press_cancel"]),
+    ("Is it a good idea to cancel S00049?", ["press_cancel"]), ("So, should we post this bill?", ["press_post"]),
+    ("طيب هل أرحل الفاتورة؟", ["press_post"]), ("should I send it by email?", ["press_send"]),
+    ("هل أرسل العرض للعميل؟", ["press_send"]), ("should I approve it?", ["press_approve"]),
+    ("هل أعتمد الطلب؟", ["press_approve"]), ("should I validate the delivery?", ["press_validate"]),
+    ("should I confirm it or cancel it?", ["press_confirm", "press_cancel"]),
+    ("Confirm", ["press_confirm"]), ("تأكيد", ["press_confirm"]), ("إلغاء", ["press_cancel"]),
+    ("Send by Email", ["press_send"]), ("إرسال عبر البريد الإلكتروني", ["press_send"]), ("ترحيل", ["press_post"]),
+    # "make sure", "check", "the un-", "a message", "post a note", "the posting date", "certain": no button
+    ("هل أتأكد من العنوان؟", []), ("هل أتحقق من الكمية؟", []), ("هل أدفع الفواتير الغير مدفوعة؟", []),
+    ("هل أرد على الرسالة؟", []), ("should I post a note on it?", []), ("should I change the posting date?", []),
+    ("هل السعر أكيد؟", []), ("Set to Quotation", []), ("should I add a discount?", []), ("", []), (None, []),
+)
+
+
+class TestButtonsNamed(TransactionCase):
+    """Which button a question of whether names, by its verb, in English and Arabic"""
+
+    def test_the_verb_of_a_button_is_read_and_nothing_else(self):
+        for text, verbs in NAMED_BUTTONS:
+            with self.subTest(text=text):
+                self.assertEqual(noai_commands.question.buttons_named(text), verbs)
+
+    def test_a_reference_of_another_record_is_told(self):
+        other = noai_commands.question.other_references
+        self.assertEqual(other("should I confirm S00049?", "S00012"), ["s00049"])
+        self.assertEqual(other("should I confirm S00012?", "S00012"), [])
+        self.assertEqual(other("هل أؤكد INV/2026/00007؟", "INV/2026/00007"), [])
+        self.assertEqual(other("should I confirm this order of 50,000?", "S00012"), [])
+
+
+@tagged("post_install", "-at_install")
+class TestQuestionsOfferTheButton(AgentCase, TransactionCase):
+    """R3-50, filmed with Gemini: "should I confirm this order?" was explained in words ("Shall I confirm it?") 4
+    times out of 4, with no call, so no chip. The button the question names is offered all the same, whatever the
+    model called; once, never as a card"""
+
+    SAID = "Confirming makes it a sales order and reserves the products. Shall I confirm it?"
+
+    def setUp(self):
+        super().setUp()
+        if "sale.order" not in self.env:
+            self.skipTest("Sales is not installed")
+        self.seller = new_test_user(self.env, login="nudge_r350_words",
+                                    groups="nudge.group_nudge_agent,sales_team.group_sale_salesman")
+        self.draft = self.env["sale.order"].create({"partner_id": self.acme.id, "user_id": self.seller.id})
+        self.snapshot = {"v": 1, "model": "sale.order", "view_type": "form",
+                         "record": {"id": self.draft.id, "name": self.draft.name}, "buttons": [
+                             {"name": "action_quotation_send", "label": "Send by Email", "kind": "object"},
+                             {"name": "action_quotation_send", "label": "Send PRO-FORMA Invoice", "kind": "object"},
+                             {"name": "action_confirm", "label": "Confirm", "kind": "object"},
+                             {"name": "action_preview_sale_order", "label": "Preview", "kind": "object"},
+                             {"name": "action_cancel", "label": "Cancel", "kind": "object"},
+                             {"name": "action_view_invoice", "label": "Invoices", "kind": "object", "smart": True}]}
+
+    def label(self, method):
+        # The label of a button may differ between versions: read from the view, as the card reads it
+        arch = self.env["sale.order"].get_view(view_type="form")["arch"]
+        node = re.search(r'<button\b[^>]*\bname="%s"[^>]*>' % method, arch).group()
+        return re.search(r'\bstring="([^"]+)"', node).group(1)
+
+    def answer(self, text, *calls, mode="agent"):
+        """The model answers in words only (after ``calls`` when given), on the screen of the draft order, through
+        the path of the controller
+        :return: adapter, conversation, events"""
+        adapter = self.use_adapter(script=[asking(*calls), saying(self.SAID)] if calls else [saying(self.SAID)])
+        conversation = self.env["nudge.conversation"].with_user(self.seller)._chat_open(None)
+        job = conversation._chat_prepare(text, snapshot=self.snapshot, mode=mode)
+        return adapter, conversation, list(loop.run(job, conversation._chat_record))
+
+    @staticmethod
+    def chips(events):
+        return [command for event in events if event["type"] == "found" for command in event.get("commands") or []]
+
+    def test_a_question_answered_in_words_offers_the_button_it_names(self):
+        for text, method in (("should I confirm this order?", "action_confirm"),
+                             ("هل أؤكد هذا الأمر؟", "action_confirm"),
+                             ("Is it a good idea to cancel this quotation?", "action_cancel"),
+                             ("هل نلغي هذا العرض؟", "action_cancel")):
+            with self.subTest(text=text):
+                adapter, conversation, events = self.answer(text)
+                self.assertEqual(len(adapter.calls), 1, "Asked once: the button is found without the model")
+                self.assertIn(self.SAID, "".join(e.get("text", "") for e in events if e["type"] == "delta"))
+                self.assertFalse([event for event in events if event["type"] == "confirm"], events)
+                chips = self.chips(events)
+                self.assertEqual(len(chips), 1, chips)
+                chip = chips[0]
+                self.assertEqual(chip["words"], [f"Press “{self.label(method)}”: Sales Order ({self.draft.name})"])
+                self.assertEqual((chip["kind"], chip["tool"], chip["at_once"]),
+                                 ("suggested_change", "call_method", True))
+                self.assertEqual(chip["arguments"], {"model": "sale.order", "ids": [self.draft.id], "method": method})
+                self.assertFalse(conversation.sudo().waiting_step_id)
+                self.assertEqual(self.draft.state, "draft")
+                # Chosen, with the rules on: its card, prepared without the AI
+                self.env["ir.config_parameter"].sudo().set_param("nudge.noai_first", "1")
+                ai = self.use_adapter(reply="The AI should not be asked")
+                _conversation, events = self.order(self.seller, chip["words"][0], conversation_id=conversation.id,
+                                                   snapshot=self.snapshot)
+                self.assertFalse(ai.calls)
+                cards = [event for event in events if event["type"] == "confirm"]
+                self.assertEqual([card["kind"] for card in cards], ["method"], events)
+                self.assertEqual(conversation.sudo().waiting_step_id.method, method)
+                self.assertEqual(self.draft.state, "draft", "Nothing is done before the yes")
+                self.decide(conversation, "decline")
+                self.env["ir.config_parameter"].sudo().set_param("nudge.noai_first", "0")
+
+    def test_two_buttons_of_one_method_are_one_chip(self):
+        _adapter, _conversation, events = self.answer("should I send this quotation to the customer?")
+        self.assertEqual([chip["arguments"]["method"] for chip in self.chips(events)], ["action_quotation_send"])
+
+    def test_a_button_the_model_prepared_is_offered_once(self):
+        press = call("call_method", {"model": "sale.order", "ids": [self.draft.id], "method": "action_confirm"})
+        for text in ("should I confirm this order?", "هل أؤكد هذا الأمر؟"):
+            with self.subTest(text=text):
+                _adapter, _conversation, events = self.answer(text, press)
+                self.assertEqual([chip["arguments"]["method"] for chip in self.chips(events)], ["action_confirm"])
+
+    def test_nothing_is_offered_unless_a_question_of_whether_names_a_button_of_this_record(self):
+        for text in (
+            # a request answered in words, a question of how, no button named, another record, another kind, a
+            # button the screen does not have
+            "can you confirm this order?", "ممكن تأكده", "how do I confirm this order?", "كيف أؤكد الطلب؟",
+            "should I add a discount?", "هل أتأكد من العنوان؟", "should I confirm S99999?",
+            "should I cancel the invoice of this customer?", "should I approve it?",
+        ):
+            with self.subTest(text=text):
+                _adapter, _conversation, events = self.answer(text)
+                self.assertFalse(self.chips(events), events)
+                self.assertFalse([event for event in events if event["type"] == "confirm"], events)
+        # Talk does not change data: nothing to offer
+        _adapter, _conversation, events = self.answer("should I confirm this order?", mode="talk")
+        self.assertFalse(self.chips(events), events)

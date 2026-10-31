@@ -1,6 +1,12 @@
 # Changelog
 
-Current version: nudge 17.0.1.59.8, nudge_mcp 17.0.1.1.2, nudge_connect 17.0.1.0.4, nudge_messaging 17.0.1.0.6, nudge_ai 17.0.1.0.11, nudge_studio 17.0.1.0.12, nudge_documents 17.0.1.0.8, nudge_spreadsheet 17.0.1.0.11, nudge_builder 17.0.1.0.9, nudge_mail 17.0.1.0.15, nudge_discuss 17.0.1.0.9, nudge_website 17.0.1.0.5.
+Current version: nudge 17.0.1.60.5, nudge_mcp 17.0.1.1.2, nudge_connect 17.0.1.0.4, nudge_messaging 17.0.1.0.6, nudge_ai 17.0.1.0.11, nudge_studio 17.0.1.0.12, nudge_documents 17.0.1.0.8, nudge_spreadsheet 17.0.1.0.11, nudge_builder 17.0.1.0.9, nudge_mail 17.0.1.0.15, nudge_discuss 17.0.1.0.9, nudge_website 17.0.1.0.5.
+
+## 19.0.1.60.5
+
+- A question of whether names a button of the record on the screen ("should I confirm this order?", "هل نلغي الفاتورة؟"): the button is offered as a chip under the explanation even when the AI answered in words only. It is checked as its card would be, and never offered for another record or kind of document, or in Talk.
+- "What runs by itself on quotations?" in Talk reads what runs on that model now: automation rules, scheduled actions, server actions and email templates, counted for whoever may read the model, named for the managers of Nudge. The profile says that server actions run too.
+- Approval flows read in the language of each user, whatever the language of the sentence: buttons, fields, action names and refusal messages are made in English with every installed language as a translation, and the approving group is named in the language of whoever reads it.
 
 ## 19.0.1.60.4
 

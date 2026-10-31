@@ -9,6 +9,15 @@ from odoo.addons.nudge.tools import approval_flow, approval_sentence
 
 from .common import NudgeCase, require_modules
 
+from odoo import _
+
+
+def _tr(env, source, *args, **kwargs):  # APPROVAL RULE: 17's _() reads these two locals
+    context = env.context  # noqa: F841
+    cr = env.cr  # noqa: F841
+    return _(source, *args, **kwargs)
+
+
 SENTENCES = [
     # English
     ("Confirming a sales order above 50,000 needs the sales manager",
@@ -397,6 +406,64 @@ class TestApprovalFlow(NudgeCase, TransactionCase):
         self.assertTrue(approve)
         self.assertIn("groups=", approve.arch_db)
         self.assertFalse(views and views.name == "")
+
+    # ------------------------------------------------------------ each user reads it in their own language
+    def _two_languages(self):
+        self.env["res.lang"]._activate_lang("ar_001")
+        self.env["ir.module.module"].search([("name", "=", "nudge")])._update_translations(["ar_001"])
+        english, arabic = self.env.with_context(lang="en_US"), self.env.with_context(lang="ar_001")
+        self.assertNotEqual(_tr(arabic, "Request approval"), "Request approval", "the Arabic of the button is needed")
+        return english, arabic
+
+    def _in_each_language(self, sentence, builder_lang):
+        english, arabic = self._two_languages()
+        group = self.env.ref("account.group_account_manager")
+        group.update_field_translations("name", {"ar_001": "مدير الحسابات لهذا الفحص"})
+        self.dev = self.dev.with_context(lang=builder_lang)
+        self.make({"sentence": sentence})
+        Order = self.env["purchase.order"].with_user(self.admin)
+        for lang, env in (("en_US", english), ("ar_001", arabic)):
+            other = arabic if lang == "en_US" else english
+            arch = Order.with_context(lang=lang).get_view(False, "form")["arch"]
+            for source in ("Request approval", "Approve", "Refuse"):
+                self.assertIn('string="%s"' % _tr(env, source), arch, (lang, source))
+                self.assertNotIn('string="%s"' % _tr(other, source), arch, (lang, source))
+            field = self.env["ir.model.fields"].sudo().with_context(lang=lang).search([
+                ("model", "=", "purchase.order"), ("name", "=", approval_flow.STATE_FIELD)])
+            self.assertEqual(field.field_description, _tr(env, "Approval"), lang)
+            selection = field.selection_ids.filtered(lambda choice: choice.value == "refused")
+            self.assertEqual(selection.name, _tr(env, "Refused"), lang)
+            action = self.env["ir.actions.server"].sudo().with_context(lang=lang).search([
+                ("model_name", "=", "purchase.order"), ("name", "=like", "Nudge approval: %approval of a%")
+                if lang == "en_US" else ("name", "ilike", _tr(env, "%(prefix)s: request approval of a %(doc)s",
+                                                                  prefix="Nudge approval", doc=_tr(env, "purchase order")))],
+                limit=1)
+            self.assertTrue(action, lang)
+            self.assertEqual(action.name, _tr(env, "%(prefix)s: request approval of a %(doc)s",
+                                                 prefix="Nudge approval", doc=_tr(env, "purchase order")), lang)
+        # the refusal of a confirmation is in the language of the person refused
+        big = self.order(60000)
+        for lang, env in (("en_US", english), ("ar_001", arabic)):
+            with self.assertRaises(UserError) as stopped:
+                big.with_user(self.buyer).with_context(lang=lang).button_confirm()
+            said = str(stopped.exception)
+            self.assertIn(_tr(env, "needs the approval of"), said, lang)
+            self.assertEqual("مدير الحسابات لهذا الفحص" in said, lang == "ar_001", said)
+            self.assertIn(_tr(env, "before it can be %(done)s. Press Request approval; they approve it from the form.",
+                                done=_tr(env, "confirmed")), said, lang)
+        # and what is written for the base source stays English for whoever has no translation
+        self.assertEqual(self.env["ir.actions.server"].sudo().with_context(lang="en_US").search([
+            ("model_name", "=", "purchase.order"), ("name", "=like", "Nudge approval: approve%")]).mapped("name"),
+            ["Nudge approval: approve a purchase order"])
+
+    def test_a_flow_from_an_arabic_sentence_is_read_in_the_language_of_each_user(self):
+        self._in_each_language("أي طلب شراء فوق 50 ألف بدو موافقة المدير المالي قبل التأكيد", "ar_001")
+
+    def test_a_flow_from_an_english_sentence_is_read_in_the_language_of_each_user(self):
+        self._in_each_language(SENTENCES[1][0], "en_US")
+
+    def test_a_flow_from_an_english_sentence_by_an_arabic_user_is_read_in_the_language_of_each_user(self):
+        self._in_each_language(SENTENCES[1][0], "ar_001")
 
     # ------------------------------------------------------------ undone as a set
     def test_the_whole_set_is_undone_in_one_go(self):

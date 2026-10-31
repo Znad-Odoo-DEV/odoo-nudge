@@ -3,7 +3,7 @@ from datetime import timedelta
 
 from odoo import fields
 from odoo.exceptions import AccessError
-from odoo.tests import TransactionCase, tagged
+from odoo.tests import TransactionCase, new_test_user, tagged
 
 from odoo.addons.nudge import tools
 from odoo.addons.nudge.llm import base, loop, prompt
@@ -445,3 +445,72 @@ class TestProfileTools(NudgeCase, TransactionCase):
                           "prepare_write", "prepare_create"} & set(offered), offered)
         # In one order, the list is part of the cached prompt: S8, those of every question first
         self.assertEqual(offered, [tool["name"] for tool in stable_first([{"name": name} for name in sorted(offered)], "talk")])
+
+    def made_to_run(self, model_name, name):
+        """:return: the domain of the server actions of ``model_name``, after one named ``name`` is made on it, in
+        its Actions menu: after the profile was read"""
+        model = self.env["ir.model"]._get(model_name)
+        # First of its list, whatever the modules installed put on that model
+        self.env["ir.actions.server"].create({"name": name, "model_id": model.id, "state": "code", "code": "pass",
+                                              "binding_model_id": model.id, "sequence": 0})
+        domain = [("usage", "=", "ir_actions_server"), ("model_name", "=", model_name)]
+        if "base_automation_id" in self.env["ir.actions.server"]._fields:
+            domain.append(("base_automation_id", "=", False))
+        return domain
+
+    def test_what_runs_on_a_model_is_read_now(self):
+        # D14, filmed in Talk: "what runs by itself on quotations?" searched the automation of the profile for
+        # sale.order and read 2 rules, on purchase.order: "no server actions", while sale.order had 8
+        domain = self.made_to_run("res.partner.category", "Raghad: tag checked")
+        count = self.env["ir.actions.server"].search_count(domain)
+        told = f"Server actions (they run when someone picks them in the Actions menu or presses their button): {count}"
+        for kind in ("automation", None):
+            with self.subTest(kind=kind):
+                arguments = {"query": "res.partner.category", **({"kind": kind} if kind else {})}
+                manager = self.run_tool("search_database_profile", arguments, user=self.manager).content
+                self.assertIn("## What runs on res.partner.category, read now", manager)
+                self.assertIn(told + ": ", manager)
+                self.assertIn("Raghad: tag checked", manager)
+                self.assertEqual("Automation rules" in manager, "base.automation" in self.env)
+                # The numbers for everybody, the names for the managers, as the automation of the profile
+                user = self.run_tool("search_database_profile", arguments, user=self.user_a).content
+                self.assertIn(told + ".", user)
+                self.assertNotIn("Raghad: tag checked", user)
+        # Not for the fields of a model, nor for words that name no model, nor for a model the person cannot read
+        self.assertNotIn("What runs on", self.run_tool(
+            "search_database_profile", {"query": "res.partner.category", "kind": "model"}, user=self.manager).content)
+        self.assertNotIn("What runs on", self.run_tool(
+            "search_database_profile", {"query": "tags of contacts"}, user=self.manager).content)
+        self.assertNotIn("What runs on", self.run_tool(
+            "search_database_profile", {"query": "ir.cron", "kind": "automation"}, user=self.user_a).content)
+        # The profile says that server actions run too, numbers for everybody
+        automation = collectors.collect_automation(self.env, set())[0]
+        self.assertIn("server actions, run from an Actions menu or a button.", automation["data"]["public"])
+
+    def test_what_runs_by_itself_on_quotations_in_talk(self):
+        if "sale.order" not in self.env:
+            self.skipTest("Sales is not installed")
+        domain = self.made_to_run("sale.order", "Raghad: send the quotation again")
+        count = self.env["ir.actions.server"].search_count(domain)
+        manager = new_test_user(self.env, login="nudge_d14",
+                                groups="nudge.group_nudge_manager,sales_team.group_sale_salesman")
+        searched = {"query": "sale.order", "kind": "automation"}
+        for question in ("What runs by itself on quotations?", "شو في أشياء بتشتغل لحالها على عروض الأسعار؟"):
+            with self.subTest(question=question):
+                adapter = self.use_adapter(script=[
+                    [base.tool_use_event("call_1", "search_database_profile", searched),
+                     base.stop_event(base.STOP_TOOL_USE)],
+                    [base.text_event("Server actions run on quotations."), base.stop_event(base.STOP_END)],
+                ])
+                conversation = self.env["nudge.conversation"].with_user(manager)._chat_open()
+                job = conversation._chat_prepare(question)
+                events = list(loop.run(job, conversation._chat_record))
+                self.assertEqual(events[-1]["state"], "complete")
+                asked = self.env["nudge.message"].search([("conversation_id", "=", conversation.id),
+                                                          ("role", "=", "user")])
+                self.assertEqual(asked.mode, "talk", "Read in Talk, where read_automations is not offered")
+                result = adapter.calls[1]["turns"][-1]["results"][0]
+                self.assertFalse(result["is_error"], result)
+                self.assertIn(f"Server actions (they run when someone picks them in the Actions menu or presses their "
+                              f"button): {count}: ", result["content"])
+                self.assertIn("Raghad: send the quotation again", result["content"])
