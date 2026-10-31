@@ -75,7 +75,24 @@ SAMPLE = textwrap.dedent("""\
     """)
 
 
+NL = chr(10)
+
+
 class TestReader(TransactionCase):
+
+    def test_field_markers_of_sphinx_are_not_text(self):
+        source = (':nosearch:' + NL + ':orphan:' + NL + NL + '=====' + NL + 'Title' + NL + '=====' + NL + NL
+                  + ':show-content:' + NL + NL + 'Note: a ratio of 1:2 and :orphan: inside stay.' + NL)
+        page = rst.read_page(source)
+        text = ' '.join(section['text'] for section in page['sections'])
+        self.assertNotIn(':nosearch:', text)
+        self.assertNotIn(':show-content:', text)
+        self.assertIn('Note: a ratio of 1:2', text)
+
+    def test_markers_in_data_built_earlier_are_cleaned_when_shown(self):
+        self.assertEqual(rst.strip_markers(':nosearch:' + NL + 'Warehouses and storage').strip(), 'Warehouses and storage')
+        same = 'A: b :nosearch: c, 10:30 and Time:'
+        self.assertEqual(rst.strip_markers(same), same)
 
     def test_page_is_read_as_sections(self):
         page = rst.read_page(SAMPLE)
@@ -198,6 +215,21 @@ class TestDocumentation(NudgeCase, TransactionCase):
         short = found._render(max_chars=300)
         self.assertLessEqual(len(short), 300)
         self.assertEqual(short.count("Source: "), 1, "At least one passage, cut to the size")
+
+    def test_a_passage_shows_no_field_marker_in_the_snippet_or_the_text(self):
+        """Corpora built for 17/18/19 before the fix still hold ':nosearch:' in the body"""
+        page = self.env["nudge.doc.page"].sudo().create({
+            "path": "test/markers", "url": "https://example.invalid/markers", "category": "inventory_and_mrp",
+            "app": "inventory", "title": "Warehouses and storage",
+            "passage_ids": [(0, 0, {"sequence": 1, "title": "Warehouses and storage", "app": "inventory",
+                                    "body": ":nosearch:" + NL + NL + "Warehouses and storage hold the stock. Ratio 1:2 stays."})]})
+        passage = page.passage_ids
+        text = passage._render()
+        self.assertNotIn(":nosearch:", text)
+        self.assertIn("Ratio 1:2 stays.", text)
+        snippet = self.env["nudge.quick"]._find_pages("warehouses storage hold stock")
+        self.assertTrue(snippet)
+        self.assertFalse([entry for entry in snippet if ":nosearch:" in entry["snippet"]])
 
     def test_the_tool(self):
         env = self.env(user=self.user_a)

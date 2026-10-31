@@ -49,6 +49,7 @@ export class NudgePanel extends Component {
         this.inputRef = useRef("input");
         this.fileRef = useRef("file");
         this.importFileRef = useRef("importFile");
+        this.quickFormRef = useRef("quickForm");
         this.photoRef = useRef("photo");
         // Where a finger went down on the header of the sheet
         this.swipe = null;
@@ -123,6 +124,15 @@ export class NudgePanel extends Component {
         useEffect(
             () => this.inputRef.el?.focus(),
             () => [this.state.focusRequest, this.state.view]
+        );
+        // The search without AI: its answer comes into view, on a phone it is not left below a long list
+        useEffect(
+            () => {
+                if (this.quickHasOutput) {
+                    this.quickFormRef.el?.scrollIntoView?.({ block: "start" });
+                }
+            },
+            () => [this.quick.results, this.quick.answer, this.quick.action, this.quick.memory]
         );
         // Keep the latest words in sight while the answer grows
         useEffect(
@@ -874,6 +884,11 @@ export class NudgePanel extends Component {
         } finally {
             this.quick.isSearching = false;
         }
+    }
+
+    /** Something came back from the search without AI: the examples above it give way */
+    get quickHasOutput() {
+        return Boolean(this.quick.results || this.quick.answer || this.quick.action || this.quick.memory);
     }
 
     get quickIsEmpty() {

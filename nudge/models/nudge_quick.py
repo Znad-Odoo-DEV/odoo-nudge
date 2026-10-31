@@ -794,7 +794,7 @@ class NudgeQuick(models.AbstractModel):
             pages.append({
                 "title": title,
                 "url": passage._source(),
-                "snippet": " ".join((passage.body or "").split())[:MAX_SNIPPET],
+                "snippet": " ".join(passage._clean_body().split())[:MAX_SNIPPET],
             })
             if len(pages) >= MAX_PAGES:
                 break
