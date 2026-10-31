@@ -236,7 +236,7 @@ class DescribeModel(base.Tool):
             # The same answer in both cases: the models a person cannot read
             # are not revealed by their name
             return base.ToolResult(
-                f"There is no model {name!r} that this person can read.", is_error=True)
+                f"There is no model {name!r} that this person can read. {base.NO_ACCESS}", is_error=True)
         model = env[name]
         profile = env["nudge.profile"]._ensure_current().sudo()
         piece = profile.slice_ids.filtered(lambda piece: piece.key == f"model:{name}")

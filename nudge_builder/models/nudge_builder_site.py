@@ -138,7 +138,10 @@ class NudgeBuilderSite(models.Model):
     @api.model
     def _template_selection(self):
         extra = self.env["nudge.builder.plugin"].plugin_template_paths()
-        names = {key: template["name"].get("en", key) for key, template in library.all_templates(extra).items()}
+        # called with the environment of the reader: the names are shown in the reader's language
+        short = compat.lang_code(self.env.lang or self.env.user.lang)
+        names = {key: template["name"].get(short) or template["name"].get("en", key)
+                 for key, template in library.all_templates(extra).items()}
         return [(key, names.get(key, key)) for key in library.keys(extra)]
 
     @api.model
@@ -246,6 +249,13 @@ class NudgeBuilderSite(models.Model):
             return library.load(self.template_key or library.FALLBACK, self.env["nudge.builder.plugin"].plugin_template_paths())
         except ValueError:
             return library.load(library.FALLBACK)
+
+    def _shown(self, names, fallback=""):
+        """:return: a name given as ``{"en": ..., "ar": ...}`` in the language of the person reading (the build log,
+        the steps), the English one when it has no name in that language"""
+        names = names or {}
+        short = compat.lang_code(self.env.lang or self.env.user.lang)
+        return names.get(short) or names.get("en") or fallback
 
     def _say(self, text):
         self.ensure_one()
@@ -834,7 +844,7 @@ class NudgeBuilderSite(models.Model):
         records = self._kind_records(kind) if is_records else None
         if is_records and not records:
             self._say(_("No %(kind)s records: the block %(block)s of the page %(page)s was left out.",
-                                 kind=kind, block=index + 1, page=(spec.get("name") or {}).get("en") or spec["key"]))
+                                 kind=kind, block=index + 1, page=self._shown(spec.get("name"), spec["key"])))
             return None
         result = {}
         # not called uid: _() of Odoo 17 reads a local named uid as the id of the user
@@ -1192,6 +1202,12 @@ class NudgeBuilderSite(models.Model):
                     for code, section in shop_sections.items():
                         columns[code].append(section)
                     continue
+            figures = block["snippet"].split(".")[-1] == "s_numbers"
+            if figures and not self._real_figures(block, langs):
+                # a site never shows invented or empty figures: the sample ones of a template are not the company's
+                self._say(_("The numbers block of the page %(page)s was left out: no real figures were given.",
+                                     page=self._shown(names, key_short)))
+                continue
             picture = self._spec_picture(spec, block)
             sample = block.get("copy") or {}
             per_lang_content = {}
@@ -1200,9 +1216,12 @@ class NudgeBuilderSite(models.Model):
                 written = (generated.get(short) or {}).get(index)
                 base = sample.get(short) or sample.get("en") or {}
                 per_lang_content[short] = {**base, **(written or {})} if written else base
+                if figures:
+                    # the writer never makes up figures: the person's own stay as they were given
+                    per_lang_content[short]["items"] = base.get("items")
             sections = self._sections(block["snippet"], per_lang_content, picture)
             if all(snippets.is_blank(section) for section in sections.values()):
-                self._say(_("A block of the page %(page)s had no text to show and was left out.", page=names.get("en") or key_short))
+                self._say(_("A block of the page %(page)s had no text to show and was left out.", page=self._shown(names, key_short)))
                 continue
             placed.append(block["snippet"].split(".")[-1])
             for code, section in sections.items():
@@ -1211,7 +1230,7 @@ class NudgeBuilderSite(models.Model):
         if record_blocks and not record_placed and not others:
             # a page made to show records, and there are none: no page of titles
             self._say(_("The page %(page)s has no records to show and was not built.",
-                                 page=names.get("en") or key_short))
+                                 page=self._shown(names, key_short)))
             return self.env["nudge.builder.page"]
         if self._wants_whatsapp_float() and not spec.get("legal"):
             for lang in langs:
@@ -1235,7 +1254,8 @@ class NudgeBuilderSite(models.Model):
                     self._say(_(
                         "The block %(block)s (%(snippet)s) of the page %(page)s stays untranslated in %(lang)s: its "
                         "text does not match the source.", block=position + 1,
-                        snippet=placed[position] if position < len(placed) else "whatsapp", page=name_en, lang=code))
+                        snippet=placed[position] if position < len(placed) else "whatsapp",
+                        page=self._shown(names, key_short), lang=code))
         url = self._unique_url(spec.get("url") or f"/{compat.slug(self.env, name_en)}")
         page = self.env["website.page"].create({
             "url": url, "view_id": view.id, "website_id": self.website_id.id,
@@ -1251,6 +1271,22 @@ class NudgeBuilderSite(models.Model):
         if spec.get("menu"):
             self._add_menu(record, names)
         return record
+
+    @api.model
+    def _real_figures(self, block, langs):
+        """:return: whether a ``s_numbers`` block carries the company's own figures: the block says so with
+        ``"figures": "given"`` and every language of the site has, for each counter, both a number and a label.
+        The sample figures of the template library never do."""
+        if block.get("figures") != "given":
+            return False
+        sample = block.get("copy") or {}
+        for lang in langs:
+            short = compat.lang_code(lang.code)
+            items = (sample.get(short) or sample.get("en") or {}).get("items") or []
+            if not items or any(not str(item.get("number") or "").strip() or not str(item.get("label") or "").strip()
+                                for item in items if isinstance(item, dict)):
+                return False
+        return True
 
     def _derived_seo(self, spec, names):
         """:return: a title (the page name and the company) and a description (the first words of the page) for a
@@ -1399,10 +1435,10 @@ class NudgeBuilderSite(models.Model):
                 continue
             if page["kind"] == "blog" and blog:
                 continue
-            steps.append({"kind": "page", "key": page["key"], "text": _("Page: %s", page["name"].get("en"))})
+            steps.append({"kind": "page", "key": page["key"], "text": _("Page: %s", self._shown(page["name"], page["key"]))})
         if "legal" in kinds:
             for spec in legal_specs({"company": "x", "address": "x", "email": "x"}):
-                steps.append({"kind": "legal", "key": spec["key"], "text": _("Page: %s", spec["name"]["en"])})
+                steps.append({"kind": "legal", "key": spec["key"], "text": _("Page: %s", self._shown(spec["name"], spec["key"]))})
         steps.append({"kind": "menu", "text": _("Menu")})
         if self.shop_plan and self.shop and self.shop_available and hasattr(self, "_build_shop"):
             steps.append({"kind": "shop", "text": _("Shop")})
@@ -1480,6 +1516,9 @@ class NudgeBuilderSite(models.Model):
         # The website's own Home entry ("/") opens the home of the website, which the home built becomes on
         # publish: the home takes that entry instead of a second "Home" (the entry itself is not changed)
         home_entry = website.menu_id.child_id.filtered(lambda menu: menu.url == "/")[:1]
+        # likewise the website's own contact entry: the contact page takes it instead of a second contact entry
+        contact_entry = website.menu_id.child_id.filtered(lambda menu: menu.url == "/contactus")[:1]
+        self._leave_out_shop()
         for index, key in enumerate(order):
             if key == "blog" and "blog" not in built and self._module_installed("website_blog"):
                 self.env["website.menu"].create({
@@ -1491,6 +1530,9 @@ class NudgeBuilderSite(models.Model):
                 record.sequence = 10 * (index + 1)
                 if key == "home" and home_entry:
                     record.menu_id = home_entry
+                elif key == "contact" and contact_entry and not record.is_legal:
+                    contact_entry.write({"url": record.url, "page_id": record.page_id.id, "sequence": record.sequence + 100})
+                    record.menu_id = contact_entry
                 else:
                     self._add_menu(record, names.get(key, {}))
         for record in self.page_ids.filtered("is_legal"):
@@ -1498,6 +1540,32 @@ class NudgeBuilderSite(models.Model):
                 self._add_menu(record, self._legal_spec(record.key)["name"] if record.key.startswith("legal_")
                                else {"en": record.name})
                 record.menu_id.sequence = 900
+
+    def _leave_out_shop(self):
+        """A site that has no shop shows none: the website's own Shop entry goes from the menu of this website,
+        and the cart icon of its header shows only when the cart holds something (Odoo's own option, written on
+        the website's own copy of the view, so no other website changes). A site with a shop keeps both.
+        :return: whether anything was changed"""
+        self.ensure_one()
+        if self.shop or not self._module_installed("website_sale"):
+            return False
+        website = self.website_id
+        entries = website.menu_id.child_id.filtered(lambda menu: menu.url == "/shop")
+        if entries and self.env["sale.order"].sudo().search_count([("website_id", "=", website.id)], limit=1):
+            # A website that has taken orders runs a real shop: its entry is not the builder's to take away
+            self._say(_("The Shop entry of this website stays: the website has orders."))
+            return False
+        if entries:
+            self._say(_("The Shop entry left the menu of this website, as the site has no shop. Add it "
+                                 "back in the menu editor of the website when it has one."))
+        entries.unlink()
+        option = self.env.ref("website_sale.header_hide_empty_cart_link", raise_if_not_found=False)
+        if option:
+            View = self.env["ir.ui.view"].with_context(website_id=website.id, active_test=False)
+            specific = View.search([("key", "=", option.key), ("website_id", "=", website.id)], limit=1)
+            if not (specific or option).active:
+                View.browse(option.id).write({"active": True})
+        return bool(entries or option)
 
     def _apply_template(self, template, kinds=None):
         """Build the whole site from a template, without the pause between steps.

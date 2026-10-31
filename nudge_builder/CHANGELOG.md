@@ -1,5 +1,13 @@
 # Changelog
 
+## 19.0.1.2.5
+
+- A built site never shows invented or empty figures: the numbers section stays out unless real figures were given.
+- A site with no shop has no Shop entry and its cart shows only when it holds something, on that website alone. A website that has taken orders keeps its entry, and the build log says what happened.
+- One contact entry in the menu, the website's own, and no second cover button going to the same place.
+- Page names, steps, the build log and the closest template read in the language of the person.
+- The direction previews fit their card in right-to-left.
+
 ## 19.0.1.2.4
 
 - Show the records on the site keeps the home product lists of a shop and draws them again from the chosen products (it removed them as empty).

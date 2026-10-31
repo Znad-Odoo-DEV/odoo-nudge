@@ -77,7 +77,7 @@
                     <group invisible="state not in ('built', 'published')" string="Pages built">
                         <field name="page_ids" nolabel="1" colspan="2">
                             <tree create="0" delete="0">
-                                <field name="name"/>
+                                <field name="name_shown"/>
                                 <field name="url"/>
                                 <field name="snippet_keys"/>
                                 <field name="seo_title" optional="show"/>

@@ -136,7 +136,10 @@ def writable_field(model, name, trial=False):
             f"{name!r} is a {field.type} field: Nudge does not write in it. "
             "Show the person where it is instead.")
     if (field.readonly and not (trial and field.store)) or (field.compute and not field.inverse and not field.store):
-        raise Refused(f"{name!r} is filled by Odoo: it cannot be written in.")
+        # SEC-01: a button is refused only once pressed (an approval rule runs then): what is not known is not offered
+        raise Refused(
+            f"{name!r} is filled by Odoo: it cannot be written in. Say so and stop: do not offer a button or another way "
+            "to the same result, which may be refused for this person too.")
     return field
 
 

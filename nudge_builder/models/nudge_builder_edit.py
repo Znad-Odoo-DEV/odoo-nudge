@@ -36,12 +36,12 @@ class NudgeBuilderSiteEdit(models.Model):
         if page.site_id != self:
             raise UserError(_("That page does not belong to this site."))
         if not page.view_id or not page.page_id:
-            raise UserError(_("The page %s no longer exists on the website.", page.name))
+            raise UserError(_("The page %s no longer exists on the website.", page.name_shown))
         try:
             compat.check_write(page.view_id)
             compat.check_write(page.page_id)
         except AccessError:
-            raise AccessError(_("You may not edit the page %s.", page.name)) from None
+            raise AccessError(_("You may not edit the page %s.", page.name_shown)) from None
 
     def _page_archs(self, page):
         """:return: ``{lang code: arch}`` of the page in the source language and every language of the site"""
@@ -86,7 +86,7 @@ class NudgeBuilderSiteEdit(models.Model):
             raise UserError(_("Say which section: its number on the page, from 1."))
         elif not (1 <= position <= (count + 1 if op == "add" else count)):
             raise UserError(_("The page %(page)s has %(count)s sections; there is no number %(position)s.",
-                                       page=page.name, count=count, position=position))
+                                       page=page.name_shown, count=count, position=position))
         if op == "move_up" and position == 1:
             raise UserError(_("That section is already the first."))
         if op == "move_down" and position == count:
@@ -171,16 +171,16 @@ class NudgeBuilderSiteEdit(models.Model):
     def _section_summary(self, page, op, position, snippet, keys):
         name = keys[position - 1] if isinstance(position, int) and 0 < position <= len(keys) else ""
         if op == "add":
-            return _("Add %(snippet)s to the page %(page)s", snippet=snippet, page=page.name)
+            return _("Add %(snippet)s to the page %(page)s", snippet=snippet, page=page.name_shown)
         if op == "replace":
             return _("Replace section %(n)s (%(name)s) of %(page)s with %(snippet)s",
-                              n=position, name=name, snippet=snippet, page=page.name)
+                              n=position, name=name, snippet=snippet, page=page.name_shown)
         if op == "edit":
             return _("Change the texts or picture of section %(n)s (%(name)s) of %(page)s",
-                              n=position, name=name, page=page.name)
+                              n=position, name=name, page=page.name_shown)
         if op == "remove":
-            return _("Remove section %(n)s (%(name)s) from %(page)s", n=position, name=name, page=page.name)
-        return _("Move section %(n)s (%(name)s) of %(page)s %(way)s", n=position, name=name, page=page.name,
+            return _("Remove section %(n)s (%(name)s) from %(page)s", n=position, name=name, page=page.name_shown)
+        return _("Move section %(n)s (%(name)s) of %(page)s %(way)s", n=position, name=name, page=page.name_shown,
                           way=_("up") if op == "move_up" else _("down"))
 
     def _section_apply(self, page, op, position=None, snippet=None, content=None, image=None, expect_hash=None):
@@ -193,7 +193,7 @@ class NudgeBuilderSiteEdit(models.Model):
         view = page.view_id
         current = view.with_context(lang="en_US").arch_db
         if expect_hash and sections.digest(current) != expect_hash:
-            raise UserError(_("The page %s changed since you were shown this card; ask again.", page.name))
+            raise UserError(_("The page %s changed since you were shown this card; ask again.", page.name_shown))
         _tree, wrap = compat.wrap_body(current)
         summary = self._section_summary(page, op, position, snippet, sections.keys_of(wrap))
         transform = self._section_edit(page, op, position, snippet, content, image)
@@ -289,7 +289,7 @@ class NudgeBuilderSiteEdit(models.Model):
         view = page.view_id
         before = self._seo_read(view, list(values))
         if expect_hash and sections.digest(repr(sorted(before.items()))) != expect_hash:
-            raise UserError(_("The SEO of %s changed since you were shown this card; ask again.", page.name))
+            raise UserError(_("The SEO of %s changed since you were shown this card; ask again.", page.name_shown))
         write = {}
         for name, text in values.items():
             write[name] = {code: text}
@@ -300,7 +300,7 @@ class NudgeBuilderSiteEdit(models.Model):
         return self.env["nudge.builder.revision"].create({
             "site_id": self.id, "kind": "seo", "page_id": page.id, "before": before, "after": after,
             "name": _("Change the %(what)s of the page %(page)s",
-                               what=", ".join(self._seo_label(name) for name in values), page=page.name),
+                               what=", ".join(self._seo_label(name) for name in values), page=page.name_shown),
         })
 
 

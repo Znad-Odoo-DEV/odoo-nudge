@@ -155,6 +155,56 @@ def find_group_by_role(env, text):
     return found if len(found) == 1 else Groups
 
 
+# The administrators of the system, said as a role: never the manager of an app
+SYSTEM_ROLE_PHRASES = (
+    "system administrator", "system administrators", "system admin", "administrator of the system",
+    "مدير النظام", "مديرة النظام", "مدير النظم", "مسؤول النظام", "مسوول النظام", "مسئول النظام", "مسؤول النظم",
+    "مدير الانظمه")
+
+
+APP_WORDS_EN = {
+    "sales": "sales", "sale": "sales", "purchase": "purchase", "purchases": "purchase", "purchasing": "purchase",
+    "procurement": "purchase", "accounting": "accounting", "accounts": "accounting", "finance": "accounting",
+    "financial": "accounting", "invoicing": "accounting", "inventory": "inventory", "warehouse": "inventory",
+    "project": "project", "projects": "project", "manufacturing": "manufacturing", "maintenance": "maintenance",
+}
+
+
+def _apps_named(text):
+    """:return: the apps a role said in words names ("sales and purchase manager" names two)"""
+    apps = set()
+    for word in _words(text):
+        for bare in (word, word[1:] if word.startswith("و") else word):
+            bare = bare[2:] if bare.startswith("ال") and len(bare) > 4 else bare
+            if bare in APP_WORDS_AR or bare in APP_WORDS_EN:
+                apps.add(APP_WORDS_AR.get(bare) or APP_WORDS_EN[bare])
+                break
+    return apps
+
+
+def role_group(env, text):
+    """:return: the one group a role said in words names (system administrator, sales manager, the finance
+    manager, in English or Arabic), or an empty recordset when the words name none or more than one: the caller
+    asks then, it never guesses. A role of one app never stands for the role of another."""
+    Groups = env["res.groups"]
+    folded = approval_sentence._fold(text or "")
+    if not folded.strip():
+        return Groups
+    if any(approval_sentence._phrase(folded, phrase) >= 0 for phrase in SYSTEM_ROLE_PHRASES):
+        return env.ref("base.group_system", raise_if_not_found=False) or Groups
+    if len(_apps_named(text)) > 1:
+        return Groups
+    group = find_group_by_role(env, text)
+    if group:
+        return group
+    named = {xmlid for _position, _role, xmlid in approval_sentence._roles(folded) if xmlid}
+    if len(named) == 1:
+        group = env.ref(named.pop(), raise_if_not_found=False)
+        if group and group._name == "res.groups":
+            return group
+    return Groups
+
+
 def find_group(env, text, role_xmlid=None):
     """:return: ``(group, note)``: the group a level names, by external id, by role or by name;
     ``note`` is what the person is told when the group had to be chosen"""

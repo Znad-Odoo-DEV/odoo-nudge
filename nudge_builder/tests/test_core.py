@@ -158,9 +158,10 @@ class TestBuilder(NudgeCase, TransactionCase):
             self.assertEqual(page.view_id, page.page_id.view_id)
         home = pages.filtered(lambda page: page.key == "home")
         arch = home.view_id.arch_db
-        for snippet in ("s_cover", "s_numbers", "s_call_to_action"):  # the services grid is records: none, none placed
+        for snippet in ("s_cover", "s_call_to_action"):  # the services grid is records: none; the sample figures are left out
             self.assertIn(snippet, arch)
-        self.assertEqual(home.snippet_keys, "s_cover,s_numbers,s_call_to_action")
+        self.assertNotIn("s_numbers", arch)
+        self.assertEqual(home.snippet_keys, "s_cover,s_call_to_action")
         self.assertIn("A company you can rely on", arch)
 
     def test_each_language_is_a_translation_of_the_same_page(self):
@@ -211,6 +212,8 @@ class TestBuilder(NudgeCase, TransactionCase):
             expected = ["Home", "About us", "Contact"]
         names = [menu.name for menu in (menus - home.menu_id | home.menu_id.filtered(lambda menu: menu.url != "/"))
                  .sorted("sequence") if not menu.page_id.is_published and "privacy" not in menu.url]
+        # the website's own "Contact us" entry is the contact page's entry: reused, with its own name
+        names = ["Contact" if name == "Contact us" else name for name in names]
         self.assertEqual(names[:len(expected)], expected)  # no service records: no services page
 
     def test_existing_pages_are_never_edited_and_the_new_url_is_next_free(self):

@@ -13,7 +13,7 @@ import re
 
 from lxml import etree
 
-from odoo import Command, _
+from odoo import Command
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.safe_eval import safe_eval
 
@@ -22,6 +22,21 @@ from .developer import Building, check_developing, ir_model
 from .records import (
     MODEL_PATTERN, Refused, cut, field_label, get_model, get_records, model_label, refusing,
 )
+
+from odoo import _
+
+
+def _tr(env, source, *args, **kwargs):  # APPROVAL RULE: 17's _() reads these two locals
+    context = env.context  # noqa: F841
+    cr = env.cr  # noqa: F841
+    return _(source, *args, **kwargs)
+
+
+def card_labels(env):
+    """:return: the words of the lines of a card that other modules of Nudge share (Model, Button, Only for), read
+    here so that they are in the person's language: a module translates the strings of its own files only"""
+    return {"model": _tr(env, "Model"), "button": _tr(env, "Button"), "only_for": _tr(env, "Only for")}
+
 
 # Where what Nudge makes is registered, so that it is found again and exported
 CUSTOM_MODULE = "nudge_custom"
@@ -300,21 +315,21 @@ class PrepareViewChange(Building):
         check_developing(env)
         model = get_model(env, arguments["model"])
         root, arch_before, view_type = view_of(env, model, arguments)
-        name = (arguments.get("name") or "").strip() or _("Change by Nudge: %s", model_label(model))
+        name = (arguments.get("name") or "").strip() or _tr(env, "Change by Nudge: %s", model_label(model))
         values, diff = preview_change(
             env, model, root, view_type, arch_before, name,
             arguments["xpath"].strip(), arguments["position"], arguments["change"].strip())
         lines = [
-            {"label": _("Model"), "value": model_label(model)},
-            {"label": _("View"), "value": f"{root.name} ({view_type})"},
-            {"label": _("Where"), "value": f"{arguments['xpath'].strip()} · {arguments['position']}"},
-            {"label": _("Change"), "value": arguments["change"].strip(), "code": True},
-            {"label": _("Result"), "value": "\n".join(diff) or _("No visible difference"), "code": True},
+            {"label": _tr(env, "Model"), "value": model_label(model)},
+            {"label": _tr(env, "View"), "value": f"{root.name} ({view_type})"},
+            {"label": _tr(env, "Where"), "value": f"{arguments['xpath'].strip()} · {arguments['position']}"},
+            {"label": _tr(env, "Change"), "value": arguments["change"].strip(), "code": True},
+            {"label": _tr(env, "Result"), "value": "\n".join(diff) or _tr(env, "No visible difference"), "code": True},
         ]
         return base.ToolResult(
             "The person is being shown the change and the difference it makes.",
             pending={
-                "summary": _("Change the screen: %s", name),
+                "summary": _tr(env, "Change the screen: %s", name),
                 "res_model": "ir.ui.view",
                 "res_ids": [],
                 "record_names": name,
@@ -402,31 +417,31 @@ class PrepareButton(Building):
             xpath, position, snippet = "//sheet", "before", f"<header>{button}</header>"
         else:
             xpath, position, snippet = "//form/*[1]", "before", f"<header>{button}</header>"
-        name = _("Button %(label)s on %(model)s", label=label, model=model_label(model))
+        name = _tr(env, "Button %(label)s on %(model)s", label=label, model=model_label(model))
         values, diff = preview_change(env, model, root, "form", arch_before, name, xpath, position, snippet)
         condition = (arguments.get("invisible") or "").strip()
         counted = hidden_on(model, condition) if condition else None
-        shown = _("unless %s", condition) if condition else _("always")
+        shown = _tr(env, "unless %s", condition) if condition else _tr(env, "always")
         told = "The person is being shown the button and the difference it makes to the form."
         if counted:
             hidden, looked = counted
-            shown = _("%(shown)s: on %(on)s of the %(looked)s records looked at",
+            shown = _tr(env, "%(shown)s: on %(on)s of the %(looked)s records looked at",
                           shown=shown, on=looked - hidden, looked=looked)
             if hidden == looked:
                 told += (f" It would be hidden on every one of the {looked} records looked at: tell the "
                          "person, and check the condition (it is when the button is HIDDEN).")
         lines = [
-            {"label": _("Model"), "value": model_label(model)},
-            {"label": _("Button"), "value": label},
-            {"label": _("Runs"), "value": f"{action.name} (#{action.id}, {action.state})"},
-            {"label": _("Shown"), "value": shown},
-        ] + ([{"label": _("Shown to"), "value": ", ".join(seen_by)}] if seen_by else []) + [
-            {"label": _("Result"), "value": "\n".join(diff) or _("No visible difference"), "code": True},
+            {"label": _tr(env, "Model"), "value": model_label(model)},
+            {"label": _tr(env, "Button"), "value": label},
+            {"label": _tr(env, "Runs"), "value": f"{action.name} (#{action.id}, {action.state})"},
+            {"label": _tr(env, "Shown"), "value": shown},
+        ] + ([{"label": _tr(env, "Shown to"), "value": ", ".join(seen_by)}] if seen_by else []) + [
+            {"label": _tr(env, "Result"), "value": "\n".join(diff) or _tr(env, "No visible difference"), "code": True},
         ]
         return base.ToolResult(
             told,
             pending={
-                "summary": _("Add the button “%s”", label),
+                "summary": _tr(env, "Add the button “%s”", label),
                 "res_model": "ir.ui.view",
                 "res_ids": [],
                 "record_names": name,
@@ -467,11 +482,11 @@ def hidden_on(model, condition, looked=HIDDEN_LOOKED):
 def type_label(env, kind):
     """:return: the type of a field in words: Odoo labels its types by their keys"""
     return {
-        "char": _("Text"), "text": _("Long text"), "html": _("Formatted text"),
-        "integer": _("Whole number"), "float": _("Decimal number"), "monetary": _("Amount"),
-        "boolean": _("Checkbox"), "date": _("Date"), "datetime": _("Date and time"),
-        "selection": _("Choice"), "many2one": _("Link to a record"),
-        "many2many": _("Links to records"),
+        "char": _tr(env, "Text"), "text": _tr(env, "Long text"), "html": _tr(env, "Formatted text"),
+        "integer": _tr(env, "Whole number"), "float": _tr(env, "Decimal number"), "monetary": _tr(env, "Amount"),
+        "boolean": _tr(env, "Checkbox"), "date": _tr(env, "Date"), "datetime": _tr(env, "Date and time"),
+        "selection": _tr(env, "Choice"), "many2one": _tr(env, "Link to a record"),
+        "many2many": _tr(env, "Links to records"),
     }.get(kind, kind)
 
 
@@ -653,10 +668,10 @@ class PrepareField(Building):
             "copied": bool(arguments.get("copy", True)),
         }
         lines = [
-            {"label": _("Model"), "value": model_label(model)},
-            {"label": _("Field"), "value": label},
-            {"label": _("Technical name"), "value": name},
-            {"label": _("Type"), "value": type_label(env, kind)},
+            {"label": _tr(env, "Model"), "value": model_label(model)},
+            {"label": _tr(env, "Field"), "value": label},
+            {"label": _tr(env, "Technical name"), "value": name},
+            {"label": _tr(env, "Type"), "value": type_label(env, kind)},
         ]
         if kind in ("many2one", "many2many"):
             if not arguments.get("relation"):
@@ -669,7 +684,7 @@ class PrepareField(Building):
             values["relation"] = related._name
             if kind == "many2one":
                 values["on_delete"] = "set null"
-            lines.append({"label": _("Points to"), "value": model_label(related)})
+            lines.append({"label": _tr(env, "Points to"), "value": model_label(related)})
         elif arguments.get("relation"):
             raise Refused("relation goes with many2one and many2many only.")
         if kind == "selection":
@@ -684,15 +699,15 @@ class PrepareField(Building):
             values["selection_ids"] = [
                 Command.create({"value": choice["value"], "name": choice["label"], "sequence": index})
                 for index, choice in enumerate(choices)]
-            lines.append({"label": _("Values"), "value": ", ".join(f"{c['label']} ({c['value']})" for c in choices)})
+            lines.append({"label": _tr(env, "Values"), "value": ", ".join(f"{c['label']} ({c['value']})" for c in choices)})
         elif arguments.get("selection"):
             raise Refused("selection goes with a selection field only.")
         if kind == "monetary" and not any(f in model._fields for f in ("currency_id", "x_currency_id")):
             raise Refused(f"{model._name} has no currency field: use float, or add x_currency_id first.")
         if values["required"]:
-            lines.append({"label": _("Required"), "value": True})
+            lines.append({"label": _tr(env, "Required"), "value": True})
         if values["help"]:
-            lines.append({"label": _("Help"), "value": values["help"]})
+            lines.append({"label": _tr(env, "Help"), "value": values["help"]})
         on_form = arguments.get("on_form", True)
         view = None
         if on_form:
@@ -715,21 +730,21 @@ class PrepareField(Building):
             snippet = f'<field name="{name}"/>'
             if after:
                 shown = field_label(model._fields[after], env) if after in model._fields else after
-                xpath, position, where = f"//field[@name='{after}']", "after", _("after %s", shown)
+                xpath, position, where = f"//field[@name='{after}']", "after", _tr(env, "after %s", shown)
                 block = title_block(tree, after)
                 if block is not None:
                     # Beside a title the field has no label: it goes in a group below
                     xpath, position, snippet = after_title(tree, block, name)
-                    where = _("below %s, in a group", shown)
+                    where = _tr(env, "below %s, in a group", shown)
             elif tree.find(".//sheet//group") is not None:
-                xpath, position, where = "//sheet//group[1]", "inside", _("in the first group of the form")
+                xpath, position, where = "//sheet//group[1]", "inside", _tr(env, "in the first group of the form")
             elif tree.find(".//sheet") is not None:
-                xpath, position, where = "//sheet", "inside", _("at the end of the form")
+                xpath, position, where = "//sheet", "inside", _tr(env, "at the end of the form")
             else:
-                xpath, position, where = "/form", "inside", _("at the end of the form")
+                xpath, position, where = "/form", "inside", _tr(env, "at the end of the form")
             # The field is not there yet: the form is checked once it is, when made
             view = {
-                "name": _("Field %(field)s on %(model)s", field=label, model=model_label(model)),
+                "name": _tr(env, "Field %(field)s on %(model)s", field=label, model=model_label(model)),
                 "model": model._name,
                 "type": "form",
                 "inherit_id": root.id,
@@ -737,13 +752,13 @@ class PrepareField(Building):
                 "priority": 99,
                 "arch_db": inheritance_arch(xpath, position, snippet),
             }
-            lines.append({"label": _("On the form"), "value": f"{where} ({root.name})"})
+            lines.append({"label": _tr(env, "On the form"), "value": f"{where} ({root.name})"})
         else:
-            lines.append({"label": _("On the form"), "value": _("not added")})
+            lines.append({"label": _tr(env, "On the form"), "value": _tr(env, "not added")})
         return base.ToolResult(
             "The person is being shown the field and where it goes.",
             pending={
-                "summary": _("Add the field “%s”", label),
+                "summary": _tr(env, "Add the field “%s”", label),
                 "res_model": "ir.model.fields",
                 "res_ids": [],
                 "record_names": f"{label} ({name})",
