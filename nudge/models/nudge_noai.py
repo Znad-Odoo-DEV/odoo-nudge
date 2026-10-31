@@ -68,13 +68,9 @@ FIELD_NAMES = {
     "city": ("city",),
     "street": ("street",),
 }
-# The buttons a verb presses: by method, and by what their label says
-BUTTONS = {
-    "press_confirm": ("action_confirm", "button_confirm"),
-    "press_validate": ("button_validate", "action_validate", "action_done"),
-    "press_post": ("action_post",),
-    "press_approve": ("action_approve", "button_approve", "approve", "action_validate"),
-}
+# The buttons a verb presses: by method, and by what their label says. The methods are those a question of whether
+# names too (R3-50, ``noai_commands.question.BUTTON_VERBS``); the rules press the verbs of the grammar only
+BUTTONS = {verb: noai_commands.question.METHODS_OF[verb] for verb in grammar.PRESS}
 
 
 class Plan:

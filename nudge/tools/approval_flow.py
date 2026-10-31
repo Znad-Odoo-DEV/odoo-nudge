@@ -185,8 +185,11 @@ def find_group(env, text, role_xmlid=None):
 
 # ------------------------------------------------------------------ the code that is made
 def _levels_literal(levels):
+    """The levels, for the code of a generated action: each group named in the language of whoever runs it"""
+    def named(group):
+        return _t(group.env, lambda e: group.with_env(e).display_name)
     return "[" + ", ".join(
-        f"[{float(level['amount'])!r}, {level['group'].id}, {level['group'].display_name!r}]" for level in levels) + "]"
+        f"[{float(level['amount'])!r}, {level['group'].id}, {named(level['group'])}]" for level in levels) + "]"
 
 
 def _amount_lines(profile):
@@ -214,15 +217,41 @@ def _system_skip():
     return "    if env.uid == 1 or env.user.share:\n        continue\n"
 
 
+def other_langs(env):
+    """The codes of the installed languages besides English, which is the source of every string."""
+    codes = env["res.lang"].sudo().search([("active", "=", True)]).mapped("code")
+    return [code for code in codes if code != "en_US"]
+
+
+def _t(env, make):
+    """The python expression, for the code of a generated action, of a message in the language of whoever runs
+    it: English is the source and every other installed language is its translation (``env.lang`` picks).
+
+    :param make: ``make(e)`` returns the message with the environment ``e`` (``lambda e: e._("...")``)"""
+    english = make(env.with_context(lang="en_US"))
+    found = {code: make(env.with_context(lang=code)) for code in other_langs(env)}
+    found = {code: value for code, value in found.items() if value != english}
+    if not found:
+        return repr(english)
+    return f"{found!r}.get(env.lang, {english!r})"
+
+
+def translations(env, make):
+    """:return: ``{code: text}`` of ``make`` in every installed language besides English that translates it"""
+    english = make(env.with_context(lang="en_US"))
+    found = {code: make(env.with_context(lang=code)) for code in other_langs(env)}
+    return {code: value for code, value in found.items() if value != english}
+
+
 def block_code(env, profile, levels, kind):
     words = {
-        "refused": env._("was refused. Change it, then press Request approval again."),
-        "needs": env._("needs the approval of"),
-        "above": env._("(above"),
-        "go_on": env._("before it can be %(done)s. Press Request approval; they approve it from the form.",
-                       done=verb_label(env, kind)),
-        "changed": env._("changed after it was approved: the approval was for a smaller amount. "
-                         "Press Request approval again."),
+        "refused": _t(env, lambda e: e._("was refused. Change it, then press Request approval again.")),
+        "needs": _t(env, lambda e: e._("needs the approval of")),
+        "above": _t(env, lambda e: e._("(above")),
+        "go_on": _t(env, lambda e: e._("before it can be %(done)s. Press Request approval; they approve it from the form.",
+                       done=verb_label(e, kind))),
+        "changed": _t(env, lambda e: e._("changed after it was approved: the approval was for a smaller amount. "
+                         "Press Request approval again.")),
     }
     return (
         f"LEVELS = {_levels_literal(levels)}\n"
@@ -232,23 +261,23 @@ def block_code(env, profile, levels, kind):
         + f"    needed = {_needed()}\n"
         f"    done = record.{LEVEL_FIELD} or 0\n"
         f"    if needed and done >= needed and amount > (record.{AMOUNT_FIELD} or 0) + 0.005:\n"
-        f"        raise UserError(record.display_name + ' ' + {words['changed']!r})\n"
+        f"        raise UserError(record.display_name + ' ' + {words['changed']})\n"
         "    if needed and done < needed:\n"
         f"        if record.{STATE_FIELD} == 'refused':\n"
-        f"            raise UserError(record.display_name + ' ' + {words['refused']!r})\n"
-        f"        raise UserError(record.display_name + ' ' + {words['needs']!r} + ' ' + LEVELS[done][2] + ' ' "
-        f"+ {words['above']!r} + ' ' + '{{:,.2f}}'.format(LEVELS[done][0]) + ' ' + cur + ') ' + {words['go_on']!r})\n")
+        f"            raise UserError(record.display_name + ' ' + {words['refused']})\n"
+        f"        raise UserError(record.display_name + ' ' + {words['needs']} + ' ' + LEVELS[done][2] + ' ' "
+        f"+ {words['above']} + ' ' + '{{:,.2f}}'.format(LEVELS[done][0]) + ' ' + cur + ') ' + {words['go_on']})\n")
 
 
 def guard_code(env, token):
     """Who wrote the approval is the buttons' business alone: a write of the three fields that does not carry
     the secret of the flow (kept in the code of the actions, which only an administrator reads) is refused."""
-    refusal = env._("is approved with the buttons Request approval and Approve, not by writing the fields.")
+    refusal = _t(env, lambda e: e._("is approved with the buttons Request approval and Approve, not by writing the fields."))
     return (
         "for record in records:\n"
         f"    if env.context.get('nudge_approval_step') != {token!r} and (\n"
         f"            record.{STATE_FIELD} or record.{LEVEL_FIELD} or record.{APPROVER_FIELD} or record.{AMOUNT_FIELD}):\n"
-        f"        raise UserError(record.display_name + ' ' + {refusal!r})\n")
+        f"        raise UserError(record.display_name + ' ' + {refusal})\n")
 
 
 def _schedule(env, who, profile, indent="    "):
@@ -275,19 +304,19 @@ def _lock():
 
 def request_code(env, profile, levels, token=""):
     words = {
-        "summary": env._("needs your approval:"),
-        "note": env._("Approval asked by"),
-        "not_needed": env._("does not need an approval."),
-        "already": env._("is approved already."),
-        "waiting": env._("is waiting for an approval already."),
-        "nobody": env._("has nobody in the group that approves it."),
-        "posted": env._("Approval asked of"),
+        "summary": _t(env, lambda e: e._("needs your approval:")),
+        "note": _t(env, lambda e: e._("Approval asked by")),
+        "not_needed": _t(env, lambda e: e._("does not need an approval.")),
+        "already": _t(env, lambda e: e._("is approved already.")),
+        "waiting": _t(env, lambda e: e._("is waiting for an approval already.")),
+        "nobody": _t(env, lambda e: e._("has nobody in the group that approves it.")),
+        "posted": _t(env, lambda e: e._("Approval asked of")),
     }
     users = users_field(env)
     return (
         f"LEVELS = {_levels_literal(levels)}\n"
-        f"SUMMARY = {words['summary']!r}\n"
-        f"NOTE = {words['note']!r}\n"
+        f"SUMMARY = {words['summary']}\n"
+        f"NOTE = {words['note']}\n"
         "for record in records:\n"
         + _lock()
         + _amount_lines(profile)
@@ -298,47 +327,47 @@ def request_code(env, profile, levels, token=""):
         f"            '{LEVEL_FIELD}': 0, '{APPROVER_FIELD}': False, '{STATE_FIELD}': False, '{AMOUNT_FIELD}': 0}})\n"
         "        done = 0\n"
         "    if not needed:\n"
-        f"        raise UserError(record.display_name + ' ' + {words['not_needed']!r})\n"
+        f"        raise UserError(record.display_name + ' ' + {words['not_needed']})\n"
         "    if done >= needed:\n"
-        f"        raise UserError(record.display_name + ' ' + {words['already']!r})\n"
+        f"        raise UserError(record.display_name + ' ' + {words['already']})\n"
         f"    if record.{STATE_FIELD} == 'pending':\n"
-        f"        raise UserError(record.display_name + ' ' + {words['waiting']!r})\n"
+        f"        raise UserError(record.display_name + ' ' + {words['waiting']})\n"
         f"    if not env['res.groups'].browse(LEVELS[done][1])['{users}']:\n"
-        f"        raise UserError(record.display_name + ' ' + {words['nobody']!r})\n"
+        f"        raise UserError(record.display_name + ' ' + {words['nobody']})\n"
         + _schedule(env, "done", profile)
         + f"    record.with_context(nudge_approval_step={token!r}).write({{'{STATE_FIELD}': 'pending'}})\n"
-        f"    record.message_post(body={words['posted']!r} + ' ' + LEVELS[done][2] + ' (' "
+        f"    record.message_post(body={words['posted']} + ' ' + LEVELS[done][2] + ' (' "
         "+ '{:,.2f}'.format(amount) + ' ' + cur + ')')\n")
 
 
 def approve_code(env, profile, levels, token=""):
     words = {
-        "summary": env._("needs your approval:"),
-        "note": env._("Approval asked by"),
-        "none": env._("was not sent for approval. Press Request approval first."),
-        "only": env._("Only the group %s approves this step."),
-        "self": env._("You made this document: another member of the group %s has to approve it."),
-        "approved": env._("Approved by"),
-        "done": env._("Approved"),
-        "feedback": env._("Approved"),
+        "summary": _t(env, lambda e: e._("needs your approval:")),
+        "note": _t(env, lambda e: e._("Approval asked by")),
+        "none": _t(env, lambda e: e._("was not sent for approval. Press Request approval first.")),
+        "only": _t(env, lambda e: e._("Only the group %s approves this step.")),
+        "self": _t(env, lambda e: e._("You made this document: another member of the group %s has to approve it.")),
+        "approved": _t(env, lambda e: e._("Approved by")),
+        "done": _t(env, lambda e: e._("Approved")),
+        "feedback": _t(env, lambda e: e._("Approved")),
     }
     groups = groups_field(env)
     users = users_field(env)
     return (
         f"LEVELS = {_levels_literal(levels)}\n"
-        f"SUMMARY = {words['summary']!r}\n"
-        f"NOTE = {words['note']!r}\n"
+        f"SUMMARY = {words['summary']}\n"
+        f"NOTE = {words['note']}\n"
         "for record in records:\n"
         + _lock()
         + _amount_lines(profile)
         + f"    needed = {_needed()}\n"
         f"    done = record.{LEVEL_FIELD} or 0\n"
         f"    if record.{STATE_FIELD} != 'pending' or done >= needed:\n"
-        f"        raise UserError(record.display_name + ' ' + {words['none']!r})\n"
+        f"        raise UserError(record.display_name + ' ' + {words['none']})\n"
         f"    if LEVELS[done][1] not in env.user['{groups}'].ids:\n"
-        f"        raise UserError({words['only']!r} % LEVELS[done][2])\n"
+        f"        raise UserError(({words['only']}) % LEVELS[done][2])\n"
         f"    if record.create_uid == env.user and env['res.groups'].browse(LEVELS[done][1])['{users}'] - env.user:\n"
-        f"        raise UserError({words['self']!r} % LEVELS[done][2])\n"
+        f"        raise UserError(({words['self']}) % LEVELS[done][2])\n"
         "    done += 1\n"
         "    last = done >= needed\n"
         f"    record.with_context(nudge_approval_step={token!r}).write({{\n"
@@ -347,18 +376,18 @@ def approve_code(env, profile, levels, token=""):
         "    mine = env['mail.activity'].search([\n"
         "        ('res_model', '=', record._name), ('res_id', '=', record.id), ('user_id', '=', env.user.id),\n"
         f"        ('summary', '=like', {APPROVAL_TAG + '%'!r})])\n"
-        f"    mine.action_feedback(feedback={words['feedback']!r})\n"
-        f"    record.message_post(body={words['approved']!r} + ' ' + env.user.name + ' (' + LEVELS[done - 1][2] + ')')\n"
+        f"    mine.action_feedback(feedback={words['feedback']})\n"
+        f"    record.message_post(body={words['approved']} + ' ' + env.user.name + ' (' + LEVELS[done - 1][2] + ')')\n"
         "    if not last:\n"
         + _schedule(env, "done", profile, indent="        "))
 
 
 def refuse_code(env, profile, levels, token=""):
     words = {
-        "none": env._("was not sent for approval."),
-        "only": env._("Only the group %s approves this step."),
-        "refused": env._("Refused by"),
-        "feedback": env._("Refused"),
+        "none": _t(env, lambda e: e._("was not sent for approval.")),
+        "only": _t(env, lambda e: e._("Only the group %s approves this step.")),
+        "refused": _t(env, lambda e: e._("Refused by")),
+        "feedback": _t(env, lambda e: e._("Refused")),
     }
     groups = groups_field(env)
     return (
@@ -367,16 +396,16 @@ def refuse_code(env, profile, levels, token=""):
         + _lock()
         + f"    done = record.{LEVEL_FIELD} or 0\n"
         f"    if record.{STATE_FIELD} != 'pending' or done >= len(LEVELS):\n"
-        f"        raise UserError(record.display_name + ' ' + {words['none']!r})\n"
+        f"        raise UserError(record.display_name + ' ' + {words['none']})\n"
         f"    if LEVELS[done][1] not in env.user['{groups}'].ids:\n"
-        f"        raise UserError({words['only']!r} % LEVELS[done][2])\n"
+        f"        raise UserError(({words['only']}) % LEVELS[done][2])\n"
         f"    record.with_context(nudge_approval_step={token!r}).write({{\n"
         f"        '{LEVEL_FIELD}': 0, '{APPROVER_FIELD}': env.user.id, '{STATE_FIELD}': 'refused', '{AMOUNT_FIELD}': 0}})\n"
         "    asked = env['mail.activity'].search([\n"
         "        ('res_model', '=', record._name), ('res_id', '=', record.id), ('user_id', '=', env.user.id),\n"
         f"        ('summary', '=like', {APPROVAL_TAG + '%'!r})])\n"
-        f"    asked.action_feedback(feedback={words['feedback']!r})\n"
-        f"    record.message_post(body={words['refused']!r} + ' ' + env.user.name + ' (' + LEVELS[done][2] + ')')\n")
+        f"    asked.action_feedback(feedback={words['feedback']})\n"
+        f"    record.message_post(body={words['refused']} + ' ' + env.user.name + ' (' + LEVELS[done][2] + ')')\n")
 
 
 # ------------------------------------------------------------------ reading what is asked
@@ -458,6 +487,9 @@ def studio_here(env):
 
 
 def _field_builds(env, model, profile):
+    """The fields that hold the approval, labelled in English (the source): the other languages are
+    translations, put on by ``put_translations`` from ``translate`` of the build."""
+    env = env.with_context(lang="en_US")
     fields_ = [
         (STATE_FIELD, {"model": model._name, "label": env._("Approval"), "type": "selection", "name": STATE_FIELD,
                        "selection": [{"value": "pending", "label": env._("Waiting")},
@@ -472,6 +504,39 @@ def _field_builds(env, model, profile):
                         "readonly": True, "copy": False}),
     ]
     return [(name, arguments) for name, arguments in fields_ if name not in model._fields]
+
+
+def _field_what(env, arguments):
+    """:return: how the card calls a field built from ``arguments``, in the language of ``env``"""
+    label = arguments["label"]  # a literal of _field_builds, extracted there
+    return env._("Field “%s”", env._(label))
+
+
+def _field_translations(env, arguments):
+    """:return: what to translate of a field built from ``arguments``: its label and its selection labels"""
+    def one(text):
+        return translations(env, lambda e: e._(text))  # the labels are literals of _field_builds, extracted there
+    return {"field_description": one(arguments["label"]),
+            "selection": {choice["label"]: one(choice["label"]) for choice in arguments.get("selection") or []}}
+
+
+def put_translations(env, model_name, ids, translate):
+    """Put on the records just made the translations of their English source: ``translate`` is
+    ``{field: {code: text}}``, ``{"arch": {term: {code: text}}}`` for the terms of a view, and for a field
+    ``{"selection": {label: {code: text}}}`` too. Nothing is written for a field that is not translatable."""
+    records = env[model_name].sudo().browse(ids)
+    for field, wanted in (translate or {}).items():
+        if field == "selection":
+            for choice in records.mapped("selection_ids") if "selection_ids" in records._fields else ():
+                for code, text in (wanted.get(choice.name) or {}).items():
+                    choice.update_field_translations("name", {code: text})
+        elif field == "arch" and model_name == "ir.ui.view":
+            for term, by_code in wanted.items():
+                for code, text in by_code.items():
+                    records.update_field_translations("arch_db", {code: {term: text}})
+        elif field in records._fields and records._fields[field].translate:
+            for code, text in wanted.items():
+                records.update_field_translations(field, {code: text})
 
 
 # ------------------------------------------------------------------ the tool
@@ -534,24 +599,33 @@ class PrepareApprovalFlow(Building):
                     "what": env._("Studio approval rule, step %(step)s: %(group)s above %(amount)s",
                                   step=step, group=level["group"].display_name, amount=money(level["amount"]))})
             return builds
-        builds = [{"tool": "prepare_field", "arguments": arguments, "what": env._("Field “%s”", arguments["label"])}
+        # Every name, label and message is made in English, the source, with the other installed languages as
+        # translations: whoever sees them reads them in their own language, whatever language the sentence was in
+        local, env = env, env.with_context(lang="en_US")
+        builds = [{"tool": "prepare_field", "arguments": arguments, "what": _field_what(local, arguments),
+                   "translate": _field_translations(env, arguments)}
                   for _name, arguments in _field_builds(env, model, profile)]
-        label = doc_label(env, kind)
         actions = (
-            ("request", env._("%(prefix)s: request approval of a %(doc)s", prefix=NAME_PREFIX, doc=label),
+            ("request", lambda e: e._("%(prefix)s: request approval of a %(doc)s", prefix=NAME_PREFIX, doc=doc_label(e, kind)),
              request_code(env, profile, levels, token)),
-            ("approve", env._("%(prefix)s: approve a %(doc)s", prefix=NAME_PREFIX, doc=label),
+            ("approve", lambda e: e._("%(prefix)s: approve a %(doc)s", prefix=NAME_PREFIX, doc=doc_label(e, kind)),
              approve_code(env, profile, levels, token)),
-            ("refuse", env._("%(prefix)s: refuse a %(doc)s", prefix=NAME_PREFIX, doc=label),
+            ("refuse", lambda e: e._("%(prefix)s: refuse a %(doc)s", prefix=NAME_PREFIX, doc=doc_label(e, kind)),
              refuse_code(env, profile, levels, token)),
         )
-        for key, name, code in actions:
+        for key, make, code in actions:
+            name = make(env)
             builds.append({
                 "tool": "prepare_server_action", "key": key,
                 "arguments": {"name": name, "model": model._name, "action": {"kind": "code", "name": name, "code": code}},
-                "what": name})
-        rule_name = env._("%(prefix)s: no %(doc)s above %(amount)s is %(done)s before it is approved",
-                          prefix=NAME_PREFIX, doc=label, amount=money(levels[0]["amount"]), done=verb_label(env, kind))
+                "what": make(local), "translate": {"name": translations(env, make)}})
+
+        def make_rule(e):
+            return e._("%(prefix)s: no %(doc)s above %(amount)s is %(done)s before it is approved",
+                       prefix=NAME_PREFIX, doc=doc_label(e, kind), amount=money(levels[0]["amount"]),
+                       done=verb_label(e, kind))
+
+        rule_name = make_rule(env)
         builds.append({
             "tool": "prepare_automation",
             "arguments": {
@@ -561,8 +635,12 @@ class PrepareApprovalFlow(Building):
                     {"field": "state", "operator": "in", "value": ",".join(profile["states"])}],
                 "match": "all",
                 "actions": [{"kind": "code", "name": rule_name, "code": block_code(env, profile, levels, kind)}]},
-            "what": rule_name, "key": "rule"})
-        guard_name = env._("%(prefix)s: the approval is written by the buttons only", prefix=NAME_PREFIX)
+            "what": make_rule(local), "key": "rule", "translate": {"name": translations(env, make_rule)}})
+
+        def make_guard(e):
+            return e._("%(prefix)s: the approval is written by the buttons only", prefix=NAME_PREFIX)
+
+        guard_name = make_guard(env)
         builds.append({
             "tool": "prepare_automation",
             "arguments": {
@@ -570,21 +648,23 @@ class PrepareApprovalFlow(Building):
                 "fields": [STATE_FIELD, LEVEL_FIELD, APPROVER_FIELD, AMOUNT_FIELD],
                 "match": "all",
                 "actions": [{"kind": "code", "name": guard_name, "code": guard_code(env, token)}]},
-            "what": guard_name, "key": "guard"})
+            "what": make_guard(local), "key": "guard", "translate": {"name": translations(env, make_guard)}})
         groups = [self._xmlid(level["group"]) for level in levels]
         restricted = [xmlid for xmlid in groups if xmlid]
         only_approvers = {"groups": sorted(set(restricted))} if restricted and len(restricted) == len(groups) else {}
         targets = ",".join(repr(state) for state in profile["states"])
-        for key, text, invisible, extra in (
-            ("request", env._("Request approval"), f"{STATE_FIELD} == 'pending' or state in ({targets})", {}),
-            ("approve", env._("Approve"), f"{STATE_FIELD} != 'pending'", only_approvers),
-            ("refuse", env._("Refuse"), f"{STATE_FIELD} != 'pending'", only_approvers),
+        for key, make, invisible, extra in (
+            ("request", lambda e: e._("Request approval"), f"{STATE_FIELD} == 'pending' or state in ({targets})", {}),
+            ("approve", lambda e: e._("Approve"), f"{STATE_FIELD} != 'pending'", only_approvers),
+            ("refuse", lambda e: e._("Refuse"), f"{STATE_FIELD} != 'pending'", only_approvers),
         ):
+            text = make(env)
             builds.append({
                 "tool": "prepare_button", "key": f"button_{key}",
                 "arguments": dict({"model": model._name, "label": text, "invisible": invisible, "action_id": 0},
                                   primary=(key == "approve"), **extra),
-                "what": env._("Button “%s”", text), "action": key})
+                "what": local._("Button “%s”", make(local)), "action": key,
+                "translate": {"arch": {text: translations(env, make)}}})
         return builds
 
     @staticmethod
@@ -697,6 +777,8 @@ class PrepareApprovalFlow(Building):
         # Buttons an earlier flow left behind (its actions or rules deleted by hand): replaced, never shown twice
         replaced = [] if studio_here(env) else switch_off_buttons(env, model._name)
         builds = self._plan(env, model, kind, profile, levels, values.get("token") or secrets.token_hex(12))
+        # made in English, the source: the other languages come after as translations (put_translations)
+        local, env = env, env.with_context(lang="en_US")
         run = getattr(step, "run_id", None)
         made = {}
         main = None
@@ -715,6 +797,7 @@ class PrepareApprovalFlow(Building):
             record_model, ids, names = done.records
             if build.get("key") in ("request", "approve", "refuse"):
                 made[build["key"]] = ids[0]
+            put_translations(env, record_model, ids, build.get("translate"))
             if build.get("key") == "rule":
                 main = (record_model, ids, names)
             elif run:
@@ -724,13 +807,13 @@ class PrepareApprovalFlow(Building):
                     "record_names": ", ".join(map(str, names))[:500], "call_id": f"{step.call_id or 'flow'}_{number}"
                     if getattr(step, "call_id", None) else f"flow_{number}"})
         told = [f"Made the approval flow for {model._name}: " + "; ".join(build["what"] for build in builds) + "."]
-        lines = [{"label": env._("Made"), "value": ", ".join(build["what"] for build in builds)}]
+        lines = [{"label": local._("Made"), "value": ", ".join(build["what"] for build in builds)}]
         if replaced:
-            lines.append({"label": env._("Old buttons replaced"), "value": ", ".join(replaced)})
+            lines.append({"label": local._("Old buttons replaced"), "value": ", ".join(replaced)})
         if main:
-            tried = self._try(env, profile, main[1][0], levels, model)
+            tried = self._try(local, profile, main[1][0], levels, model)
             told.append(tried)
-            lines.append({"label": env._("Tried on a dummy record"), "value": tried[:300]})
+            lines.append({"label": local._("Tried on a dummy record"), "value": tried[:300]})
         return base.ToolResult(
             " ".join(told),
             event={"type": "changed", "model": model._name, "ids": [], "action": {"type": "ir.actions.client", "tag": "reload"}},

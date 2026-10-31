@@ -191,3 +191,49 @@ def asks_whether(text):
         return False
     clauses = [clause.strip() for clause in CLAUSES.findall(_folded(text)) if clause.strip()]
     return any(WHETHER.search(clause) and not WH_OPENER.match(clause) for clause in clauses)
+
+
+# R3-50: the buttons a question of whether names by its verb ("should I confirm this order?", "هل نلغي الفاتورة؟",
+# "أأكد الطلب؟"), so that the button is offered whether or not the AI prepared it (``nudge.conversation.
+# _chat_offer_unasked``). Each verb with the methods of its button in Odoo, found as the rules find the buttons they
+# press (``nudge.noai._button_for``: by method, then by the words of the label, "Confirm", "تأكيد"). The words are
+# read folded ("أؤكد" is "اوكد", "إلغاء" is "الغاء"): a verb of the person (أ, ن) or its noun; never "تأكد" (make
+# sure), "تحقق" (check), "الغير" (the un-) or "رسالة" (a message)
+_AR_WORD = r"(?<![\wء-ي])[وف]?"
+BUTTON_VERBS = (
+    ("press_confirm", ("action_confirm", "button_confirm"), re.compile(
+        r"\bconfirm(?:s|ed|ing)?\b(?!\s+(?:if|whether|that)\b)"
+        r"|" + _AR_WORD + r"(?:[ان]?(?:اكد|وكد)|تاكيد|[ان]?ثبت|تثبيت)")),
+    ("press_validate", ("button_validate", "action_validate", "action_done"), re.compile(
+        r"\bvalidat(?:e|es|ed|ing)\b|" + _AR_WORD + r"(?:[ان]?صادق|تصديق)")),
+    ("press_post", ("action_post",), re.compile(
+        r"\bpost(?:ed)?\b(?!\s+(?:(?:a|an|the|my|this|that|it)\s+)?(?:message|note|comment|reply|log)s?\b)"
+        r"|" + _AR_WORD + r"(?:[ان]?رحل|ترحيل)")),
+    ("press_approve", ("action_approve", "button_approve", "approve", "action_validate"), re.compile(
+        r"\bapprov(?:e|es|ed|ing)\b|" + _AR_WORD + r"(?:[ان]?وافق|موافق|[ان]?عتمد|اعتماد)")),
+    ("press_cancel", ("action_cancel", "button_cancel"), re.compile(
+        r"\bcancel(?:s|l?ed|l?ing)?\b|" + _AR_WORD + r"(?:[ان]?لغي(?!ر)|الغاء)")),
+    ("press_send", ("action_quotation_send", "action_rfq_send", "action_invoice_sent", "action_send_and_print",
+                    "action_send"), re.compile(
+        r"\bsend(?:s|ing)?\b|" + _AR_WORD + r"(?:[ان]?رسل|ارسال|[ان]بع[تث])")),
+)
+METHODS_OF = {verb: methods for verb, methods, _words in BUTTON_VERBS}
+# The reference of a record written in a question ("S00049", "INV/2026/00012"): a word of letters and digits. A
+# question that writes one is about that record, not always about the one on the screen
+REFERENCE = re.compile(r"(?<![\w/.-])(?=[\w/.-]*\d)(?=[\w/.-]*[a-z])[a-z0-9][\w/.-]*[a-z0-9]")
+
+
+def buttons_named(text):
+    """:return: the verbs of :data:`BUTTON_VERBS` the words of ``text`` say ("should I cancel it?": press_cancel),
+    in the order they are said; for a question and for the label of a button alike"""
+    folded = _folded(text)
+    found = [(match.start(), verb) for verb, _methods, words in BUTTON_VERBS for match in [words.search(folded)]
+             if match]
+    return [verb for _start, verb in sorted(found)]
+
+
+def other_references(text, name):
+    """:return: the references of records ``text`` writes ("S00049") that ``name``, the name of a record, does not
+    hold, folded"""
+    name = _folded(name)
+    return [reference for reference in REFERENCE.findall(_folded(text)) if reference not in name]
